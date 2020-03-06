@@ -1,11 +1,11 @@
 Package: SimplyAgree
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Agreement Calculations and Sample Size Requirements
+Version: 0.0.1
+Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
+                  role = c("aut", "cre"))
+Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
+Description: This package calculate absolute agreemetn between two continuous variables and the sample size requirements. It principally implements the exact interval calculations propsosed by Shieh, G. (2018). The appropriateness of Bland-Altman’s approximate confidence intervals for limits of agreement. BMC medical research methodology, 18(1), 45. <https://doi.org/10.1186/s12874-018-0505-y>
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
