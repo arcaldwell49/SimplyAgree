@@ -10,3 +10,11 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
+Imports: 
+    ggplot2,
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat,
+VignetteBuilder:
+    knitr
