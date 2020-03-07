@@ -25,7 +25,9 @@ agree_test(
 
 \item{rep.measure}{logical value; if TRUE then x & y are repeated measures across subjects}
 
-\item{alpha}{Optional vector to specifying factor and condition names (recommended, if not used factors and levels are indicated by letters and numbers}
+\item{alpha}{Set the desired Type I error rate; default is .05}
+
+\item{verbose}{Option to print a summary of results to the console.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -52,6 +54,6 @@ Gwowen Shieh (2019): Assessing Agreement Between Two Methods of Quantitative Mea
 }
 
 \examples{
-to be added
+#to be added
 
 }
