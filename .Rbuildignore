@@ -1,3 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^.travis.yml$
+^\.RData$
+^\.Rhistory$
+^cran-comments\.md$
+^CRAN-RELEASE$
+^NEWS\.Rmd$
