@@ -4,7 +4,9 @@
 #' @param LoA Limit of Agreement between 0 and 1; .95 = 95\% limit of agreement.
 #' @param delta Equivalence Bound for Agreement.
 #' @param rep.measure logical value; if TRUE then x & y are repeated measures across subjects
-#' @param alpha Optional vector to specifying factor and condition names (recommended, if not used factors and levels are indicated by letters and numbers
+#' @param alpha Set the desired Type I error rate; default is .05
+#' @param verbose Option to print a summary of results to the console.
+#'
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -20,22 +22,29 @@
 #'
 #' }
 
-#' @examples to be added
+#' @examples #to be added
 #'
 #' @section References:
 #' Gwowen Shieh (2019): Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation, Statistics in Biopharmaceutical Research, <https://doi.org/10.1080/19466315.2019.1677495>
-#' @importFrom stats pnorm pt qnorm qt lm
+#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var
 #' @import ggplot2
 #' @export
 #'
 
 
-agree_test <- function (x,y,LoA=0.8,delta=.1,
-                        rep.measure=FALSE,
-                        alpha=0.05,
-                        verbose = FALSE) {
-  if(LoA >=1 || LoA <=0){
+agree_test <- function(x,y,LoA=0.8,
+                       delta=.1,
+                       rep.measure=FALSE,
+                       alpha=0.05,
+                       verbose = FALSE) {
+  if (LoA >= 1 || LoA <= 0) {
+
     stop("Limit of Agreement (LoA) must be a value between 0 and 1")
+  }
+
+  if (alpha >= 1 || alpha <= 0) {
+
+    stop("alpha must be a value between 0 and 1")
   }
   #USER SPECIFICATIONS PORTION
   #alpha<-0.05 #DESIGNATED ALPHA

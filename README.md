@@ -1,6 +1,9 @@
 README
 ================
 
+[![Build
+Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https://travis-ci.com/arcaldwell49/SimplyAgree)
+
 This is a R package for calculating absolute agreement and estimating
 the required sample size for a study attempting to estimate absolute
 agreement.
