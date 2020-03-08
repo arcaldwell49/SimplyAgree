@@ -5,7 +5,7 @@ Version: 0.0.1
 Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
                   role = c("aut", "cre"))
 Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
-Description: This package calculate absolute agreemetn between two continuous variables and the sample size requirements. It principally implements the exact interval calculations propsosed by Shieh, G. (2018). The appropriateness of Bland-Altman’s approximate confidence intervals for limits of agreement. BMC medical research methodology, 18(1), 45. <https://doi.org/10.1186/s12874-018-0505-y>
+Description: This package calculate absolute agreemetn between two continuous variables and the sample size requirements. It principally implements the exact interval calculations propsosed by Shieh, G. (2018). The appropriateness of Bland-Altman’s approximate confidence intervals for limits of agreement. BMC medical research methodology, 18(1), 45. <https://doi.org/10.1186/s12874-018-0505-y>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

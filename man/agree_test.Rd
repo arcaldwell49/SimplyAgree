@@ -4,26 +4,16 @@
 \alias{agree_test}
 \title{Tests for Absolute Agreement}
 \usage{
-agree_test(
-  x,
-  y,
-  LoA = 0.8,
-  delta = 0.1,
-  rep.measure = FALSE,
-  alpha = 0.05,
-  verbose = FALSE
-)
+agree_test(x, y, prop0 = 0.8, delta = 0.1, alpha = 0.05, verbose = FALSE)
 }
 \arguments{
 \item{x}{Criterion measurement, or first measurement if repeated measures}
 
 \item{y}{Other measurement, or second measurement if repeated measures}
 
-\item{LoA}{Limit of Agreement between 0 and 1; .95 = 95\% limit of agreement.}
+\item{prop0}{Null central proportion: the propotion of data that should lie between the tresholds, for 95\% limits of agreement this should be 0.95.}
 
-\item{delta}{Equivalence Bound for Agreement.}
-
-\item{rep.measure}{logical value; if TRUE then x & y are repeated measures across subjects}
+\item{delta}{The treshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
 
 \item{alpha}{Set the desired Type I error rate; default is .05}
 
@@ -39,7 +29,7 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"l.shift"}}{Location shift from x to y.}
   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
   \item{\code{"df_diff"}}{a data frame with 4 columns: x = data column x from arguments, y = data column y from agruments, mean = the mean of each pair of measurements, delta = vector y minus vector x.}
-  \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements. If rep.measure == TRUE the confidence interval of the difference is adjusted to account for repeated observations across individual subjects.}
+  \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 

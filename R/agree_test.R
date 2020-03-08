@@ -1,9 +1,8 @@
 #' Tests for Absolute Agreement
 #' @param x Criterion measurement, or first measurement if repeated measures
 #' @param y Other measurement, or second measurement if repeated measures
-#' @param LoA Limit of Agreement between 0 and 1; .95 = 95\% limit of agreement.
-#' @param delta Equivalence Bound for Agreement.
-#' @param rep.measure logical value; if TRUE then x & y are repeated measures across subjects
+#' @param prop0 Null central proportion: the propotion of data that should lie between the tresholds, for 95\% limits of agreement this should be 0.95.
+#' @param delta The treshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param alpha Set the desired Type I error rate; default is .05
 #' @param verbose Option to print a summary of results to the console.
 #'
@@ -16,7 +15,7 @@
 #'   \item{\code{"l.shift"}}{Location shift from x to y.}
 #'   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
 #'   \item{\code{"df_diff"}}{a data frame with 4 columns: x = data column x from arguments, y = data column y from agruments, mean = the mean of each pair of measurements, delta = vector y minus vector x.}
-#'   \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements. If rep.measure == TRUE the confidence interval of the difference is adjusted to account for repeated observations across individual subjects.}
+#'   \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
 #'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 #'
@@ -32,14 +31,16 @@
 #'
 
 
-agree_test <- function(x,y,LoA=0.8,
+agree_test <- function(x,
+                       y,
+                       prop0=0.8,
                        delta=.1,
-                       rep.measure=FALSE,
                        alpha=0.05,
                        verbose = FALSE) {
-  if (LoA >= 1 || LoA <= 0) {
+  est <- lower.ci <- upper.ci <- NULL
+  if (prop0 >= 1 || prop0 <= 0) {
 
-    stop("Limit of Agreement (LoA) must be a value between 0 and 1")
+    stop("Null central proportion must be a value between 0 and 1")
   }
 
   if (alpha >= 1 || alpha <= 0) {
@@ -54,49 +55,52 @@ agree_test <- function(x,y,LoA=0.8,
   #xbar<-0.011 #SAMPLE MEAN
   #s<-0.044 #SAMPLE STANDARD DEVIATION
   #END OF SPECIFICATION
-  prop0 = LoA
-  conf.level=(1-alpha)
-  ccc_res = ccc.xy(x,y,rep.measure=rep.measure, conf.level=(1-alpha))
+  prop0 = prop0
+  conf.level = (1 - alpha)
+  ccc_res = ccc.xy(x, y, conf.level = conf.level)
   #pull values from ccc function output
   xbar = ccc_res$delta$est #mean delta
   s = ccc_res$delta$delta.sd #sd of delta
   n = nrow(ccc_res$df_diff)
 
-  pct<-1-(1-prop0)/2
-  zp<-qnorm(pct)
-  df<-n-1
-  stdh<-s/sqrt(n)
-  numint<-1000
-  coevec<-c(1,rep(c(4,2),numint/2-1),4,1)
-  cl<-1e-6
-  cu<-qchisq(1-cl,df)
-  int<-cu-cl
-  intl<-int/numint
-  cvec<-cl+intl*(0:numint)
-  wcpdf<-(intl/3)*coevec*dchisq(cvec,df)
-  gaml<-0
-  gamu<-100
-  loop<-0
-  dalpha<-1
-  while(abs(dalpha)>1e-8 | dalpha<0){
-    gam<-(gaml+gamu)/2
-    h<-zp*sqrt(n)-gam*sqrt(cvec/df)
-    ht<-h*(cvec<n*df*(zp/gam)^2)
-    alphat<-sum(wcpdf*(2*pnorm(ht)-1))
-    if (alphat>alpha) gaml<-gam else gamu<-gam
-    loop<-loop+1
-    dalpha<-alphat-alpha
+  pct <- 1 - (1 - prop0) / 2
+  zp <- qnorm(pct)
+  df <- n - 1
+  stdh <- s / sqrt(n)
+  numint <- 1000
+  coevec <- c(1, rep(c(4, 2), numint / 2 - 1), 4, 1)
+  cl <- 1e-6
+  cu <- qchisq(1 - cl, df)
+  int <- cu - cl
+  intl <- int / numint
+  cvec <- cl + intl * (0:numint)
+  wcpdf <- (intl / 3) * coevec * dchisq(cvec, df)
+  gaml <- 0
+  gamu <- 100
+  loop <- 0
+  dalpha <- 1
+  while (abs(dalpha) > 1e-8 | dalpha < 0) {
+    gam <- (gaml + gamu) / 2
+    h <- zp * sqrt(n) - gam * sqrt(cvec / df)
+    ht <- h * (cvec < n * df * (zp / gam) ^ 2)
+    alphat <- sum(wcpdf * (2 * pnorm(ht) - 1))
+    if (alphat > alpha)
+      gaml <- gam
+    else
+      gamu <- gam
+    loop <- loop + 1
+    dalpha <- alphat - alpha
   }
-  el<-xbar-gam*stdh
-  eu<-xbar+gam*stdh
-  rej<-(-delta<el)*(eu<delta)
+  el <- xbar - gam * stdh
+  eu <- xbar + gam * stdh
+  rej <- (-delta < el) * (eu < delta)
   rej_text = "don't reject h0"
-  if(rej==1){
+  if (rej == 1) {
     rej_text = "reject h0"
   }
 
   shieh_test = data.frame(prop0,el,eu,rej_text,gam)
-  names(shieh_test) = c("LoA","lower.ci","upper.ci", "h0_test","test_statistic")
+  names(shieh_test) = c("prop0","lower.ci","upper.ci", "h0_test","test_statistic")
 
   #######################
   # Plot Results ----
@@ -149,19 +153,19 @@ agree_test <- function(x,y,LoA=0.8,
   if (verbose == TRUE) {
     # The section below should be blocked out when in Shiny
 
-    cat(100*LoA,"% Limits of Agreement |"," Null Central Proportion = ", LoA,  sep = "")
+    cat("Null Central Proportion = ", prop0,  sep = "")
     cat("\n")
-    cat("alpha =", alpha, "|", (1-alpha)*100,"% Confidence Interval")
+    cat("alpha =", alpha, "|", (1 - alpha)*100,"% Confidence Interval")
     cat("\n")
     cat("### TOST Results ###")
     cat("\n")
-    cat("Exact C.I.:"," [",round(el,4),", ",round(eu,4),"]",sep="")
+    cat("Exact C.I.:"," [",round(el,4),", ",round(eu, 4), "]", sep = "")
     cat("\n")
-    cat("test: ",rej_text,sep="")
+    cat("test: ",rej_text, sep = "")
     cat("\n")
     cat("### Concordance Correlation Coefficient (CCC) ###")
     cat("\n")
-    cat("CCC: ",round(ccc_res$rho.c$est.ccc,4),", ",100*conf.level,"% C.I. ","[",round(ccc_res$rho.c$lower.ci,4),", ",round(ccc_res$rho.c$upper.ci,4),"]",sep="")
+    cat("CCC: ",round(ccc_res$rho.c$est.ccc,4),", ",100*conf.level,"% C.I. ","[",round(ccc_res$rho.c$lower.ci,4),", ",round(ccc_res$rho.c$upper.ci,4),"]",sep = "")
 
   }
 

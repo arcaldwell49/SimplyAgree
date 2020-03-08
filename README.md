@@ -1,8 +1,11 @@
-README
+SimplyAgree R Package
 ================
 
 [![Build
 Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https://travis-ci.com/arcaldwell49/SimplyAgree)
+
+**This Package is still in development and unit tests have not been
+created yet. USE WITH CAUTION**
 
 This is a R package for calculating absolute agreement and estimating
 the required sample size for a study attempting to estimate absolute
