@@ -2,7 +2,7 @@
 #' @param x Criterion measurement, or first measurement if repeated measures
 #' @param y Other measurement, or second measurement if repeated measures
 #' @param prop0 Null central proportion: the propotion of data that should lie between the tresholds, for 95\% limits of agreement this should be 0.95.
-#' @param delta The treshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param alpha Set the desired Type I error rate; default is .05
 #' @param verbose Option to print a summary of results to the console.
 #'
@@ -109,7 +109,7 @@ agree_test <- function(x,
   z <- lm(y ~ x)
   the_int <- summary(z)$coefficients[1,1]
   the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(alpha, beta)
+  tmp.lm <- data.frame(the_int, the_slope)
 
   identity.plot = ggplot(ccc_res$df_diff, aes(x = x, y = y)) +
     geom_point(na.rm = TRUE) +

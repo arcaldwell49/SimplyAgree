@@ -13,7 +13,7 @@ agree_test(x, y, prop0 = 0.8, delta = 0.1, alpha = 0.05, verbose = FALSE)
 
 \item{prop0}{Null central proportion: the propotion of data that should lie between the tresholds, for 95\% limits of agreement this should be 0.95.}
 
-\item{delta}{The treshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
+\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
 
 \item{alpha}{Set the desired Type I error rate; default is .05}
 
