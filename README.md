@@ -134,9 +134,10 @@ agreed = agree_test(
     ## CCC: 0.9313, 95% C.I. [0.8628, 0.9662]
 
 Overall, the results indicate that we have very good agreement between
-x1 & y1.
+x1 & y1, but not enough to reject the null hypothesis that there is
+adequate agreement (i.e., within our prespecified threshold delta).
 
-We can also see visualizations produced by agree\_test
+We can also see visualizations produced by agree\_test.
 
 First, an “line-of-identity” plot.
 
