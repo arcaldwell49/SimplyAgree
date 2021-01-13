@@ -28,8 +28,6 @@
 #' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var
 #' @import ggplot2
 #' @export
-#'
-
 
 agree_test <- function(x,
                        y,
