@@ -50,12 +50,12 @@ loa_mixed = function(diff,
     upper_loa = 6
   )
   boot_res = boot(
-    data = data,
     statistic = loa_bs,
     R = replicates,
     diff = diff,
     condition = condition,
     id = id,
+    data = data,
     conf.level = conf.level,
     agree.level = agree.level
   )

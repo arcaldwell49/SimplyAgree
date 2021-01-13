@@ -91,6 +91,7 @@ loa_bs = function(diff,
 
   mean = as.data.frame(emmeans::emmeans(res3, ~1))$emmean
   se = as.data.frame(emmeans::emmeans(res3, ~1))$SE
+  vartab = as.data.frame(VarCorr(res3))
   withinsd = vartab$sdcor[2]
   betweensd <- vartab$sdcor[1]
   totalsd <- sqrt(vartab$vcov[1] + vartab$vcov[2])
@@ -156,12 +157,12 @@ loa_bstab = function(bsls,
     "Total SD"
   ),
   Estimate = c(
-    boot_bias$t0,
-    boot_within_sd$t0,
-    boot_between_sd$t0,
-    boot_total_sd$t0,
-    boot_low_loa$t0,
-    boot_upper_loa$t0
+    bsls$boot_bias$t0,
+    bsls$boot_within_sd$t0,
+    bsls$boot_between_sd$t0,
+    bsls$boot_total_sd$t0,
+    bsls$boot_low_loa$t0,
+    bsls$boot_upper_loa$t0
   ),
   lower.ci = c(
     conf_bias[1],
