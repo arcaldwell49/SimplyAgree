@@ -8,3 +8,5 @@
 ^CRAN-RELEASE$
 ^NEWS\.Rmd$
 ^data-raw$
+^README_files$
+^README.html$

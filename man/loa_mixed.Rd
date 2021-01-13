@@ -21,12 +21,22 @@ loa_mixed(
 \item{condition}{column name indicating different conditions subjects were tested under.}
 
 \item{id}{column name indicating the subject/participant identifier}
+
+\item{data}{A data frame containing the variables within the model.}
+
+\item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{agree.level}{the agreement level required. Default is 95\%.}
+
+\item{replicates}{the number of bootstrap replicates. Passed on to the boot function. Default is 500.}
+
+\item{type}{A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", "bca", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"shieh_test"}}{The TOST hypothesis test as described by Shieh.}
+  \item{\code{"vartab"}}{Table of variance components}
 
 }
 }
@@ -39,6 +49,12 @@ Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., 
 }
 
 \examples{
-#to be added
-
+\dontrun{
+df_rec.pre = temps \%>\%
+mutate(id_spec = paste0(id,"_",trial_condition)) \%>\%
+select(id,id_spec,trec_pre,tod,trial_condition) \%>\%
+pivot_wider(id_cols = c(id,id_spec,trial_condition),
+names_from = tod,alues_from = trec_pre) \%>\%
+mutate(diff = PM - AM)
+}
 }
