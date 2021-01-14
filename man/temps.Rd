@@ -3,6 +3,7 @@
 \docType{data}
 \name{temps}
 \alias{temps}
+\alias{recpre_long}
 \title{temps}
 \format{
 A data frame with 60 rows and 10 variables:
@@ -19,12 +20,16 @@ A data frame with 60 rows and 10 variables:
   \item{teso_delta}{Change in esophageal temperature}
 
 }
+
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 30 rows and 6 columns.
 }
 \source{
 \url{https://doi.org/10.1249/MSS.0000000000002575}
 }
 \usage{
 temps
+
+recpre_long
 }
 \description{
 A dataset from a study on the reliability of human body temperature at diferents times of day before and after exercise.
