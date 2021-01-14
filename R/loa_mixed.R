@@ -47,8 +47,7 @@ loa_mixed = function(diff,
     upper_loa = 3,
     within_sd = 4,
     between_sd = 5,
-    total_sd = 6,
-
+    total_sd = 6
   )
   boot_res = boot(
     statistic = loa_bs,
