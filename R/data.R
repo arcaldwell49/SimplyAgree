@@ -17,4 +17,6 @@
 #' @source \url{https://doi.org/10.1249/MSS.0000000000002575}
 "temps"
 
+#' @rdname economics
+"recpre_long"
 

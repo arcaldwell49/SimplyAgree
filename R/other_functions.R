@@ -156,7 +156,7 @@ loa_bstab = function(bsls,
     "Between SD",
     "Total SD"
   ),
-  Estimate = c(
+  estimate = c(
     bsls$boot_bias$t0,
     bsls$boot_within_sd$t0,
     bsls$boot_between_sd$t0,

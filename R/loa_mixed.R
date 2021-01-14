@@ -23,7 +23,7 @@
 #' mutate(diff = PM - AM)
 #' }
 #' @section References:
-#' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients. Plos one, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
+#' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 #' @importFrom stats qnorm as.formula na.omit
 #' @import lme4
 #' @import ggplot2
@@ -43,11 +43,12 @@ loa_mixed = function(diff,
 
   boot_index = list(
     bias = 1,
-    within_sd = 2,
-    between_sd = 3,
-    total_sd = 4,
-    low_loa = 5,
-    upper_loa = 6
+    low_loa = 2,
+    upper_loa = 3,
+    within_sd = 4,
+    between_sd = 5,
+    total_sd = 6,
+
   )
   boot_res = boot(
     statistic = loa_bs,
