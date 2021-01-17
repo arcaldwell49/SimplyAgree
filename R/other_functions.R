@@ -101,11 +101,11 @@ loa_bs = function(diff,
   upper <- mean + agree.lim * totalsd
   # cat(cl*100,"% LoA are from",low,"to",upper,"\n")
   c(bias = mean,
+    low_loa = low,
+    upper_loa = upper,
     within_sd = withinsd,
     between_sd = betweensd,
-    total_sd = totalsd,
-    low_loa = low,
-    upper_loa = upper)
+    total_sd = totalsd)
 }
 
 loa_bstab = function(bsls,
@@ -158,27 +158,27 @@ loa_bstab = function(bsls,
   ),
   estimate = c(
     bsls$boot_bias$t0,
+    bsls$boot_low_loa$t0,
+    bsls$boot_upper_loa$t0,
     bsls$boot_within_sd$t0,
     bsls$boot_between_sd$t0,
-    bsls$boot_total_sd$t0,
-    bsls$boot_low_loa$t0,
-    bsls$boot_upper_loa$t0
+    bsls$boot_total_sd$t0
   ),
   lower.ci = c(
     conf_bias[1],
+    conf_low_loa[1],
+    conf_upper_loa[1],
     conf_within_sd[1],
     conf_between_sd[1],
-    conf_total_sd[1],
-    conf_low_loa[1],
-    conf_upper_loa[1]
+    conf_total_sd[1]
   ),
   upper.ci = c(
     conf_bias[2],
+    conf_low_loa[2],
+    conf_upper_loa[2],
     conf_within_sd[2],
     conf_between_sd[2],
-    conf_total_sd[2],
-    conf_low_loa[2],
-    conf_upper_loa[2]
+    conf_total_sd[2]
   ))
 }
 

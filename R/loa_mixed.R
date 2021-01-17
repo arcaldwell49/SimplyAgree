@@ -38,8 +38,15 @@ loa_mixed = function(diff,
                      data,
                      conf.level = .95,
                      agree.level = .95,
-                     replicates = 500,
+                     replicates = 1999,
                      type = "bca"){
+  if (conf.level >= 1 || conf.level <= 0) {
+    stop("conf.level must be a value between 0 and 1")
+  }
+
+  if (agree.level >= 1 || agree.level <= 0) {
+    stop("agree.level must be a value between 0 and 1")
+  }
 
   boot_index = list(
     bias = 1,
@@ -84,11 +91,11 @@ loa_mixed = function(diff,
                            conf = conf.level,
                            type = c("norm", "basic", "perc", "bca"))
   bsls = list(boot_bias = boot_bias,
+              boot_low_loa = boot_low_loa,
+              boot_upper_loa = boot_upper_loa,
               boot_within_sd = boot_within_sd,
               boot_between_sd = boot_between_sd,
-              boot_total_sd = boot_total_sd,
-              boot_low_loa = boot_low_loa,
-              boot_upper_loa = boot_upper_loa)
+              boot_total_sd = boot_total_sd)
   res_tab = loa_bstab(bsls = bsls,
                       type = type,
                       conf.level = conf.level)
