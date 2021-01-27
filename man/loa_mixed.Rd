@@ -11,7 +11,7 @@ loa_mixed(
   data,
   conf.level = 0.95,
   agree.level = 0.95,
-  replicates = 500,
+  replicates = 1999,
   type = "bca"
 )
 }

@@ -43,6 +43,9 @@ loa_mixed = function(diff,
   if (conf.level >= 1 || conf.level <= 0) {
     stop("conf.level must be a value between 0 and 1")
   }
+  if(is.null(condition) || missing(condition)){
+    condition = 1
+  }
 
   if (agree.level >= 1 || agree.level <= 0) {
     stop("agree.level must be a value between 0 and 1")

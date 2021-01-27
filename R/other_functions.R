@@ -78,6 +78,7 @@ loa_bs = function(diff,
 
   limits = qnorm(1 - (1 - conf.level) / 2)
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
+
   formula = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
 
   datboot <- data[indices,] # allows boot to select sample

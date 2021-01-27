@@ -1,7 +1,7 @@
 #' Tests for Absolute Agreement
 #' @param x Criterion measurement, or first measurement if repeated measures
 #' @param y Other measurement, or second measurement if repeated measures
-#' @param prop0 Null central proportion: the propotion of data that should lie between the tresholds, for 95\% limits of agreement this should be 0.95.
+#' @param prop0 Null central proportion: the proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param alpha Set the desired Type I error rate; default is .05
 #' @param verbose Option to print a summary of results to the console.
