@@ -10,3 +10,4 @@
 ^data-raw$
 ^README_files$
 ^README.html$
+^vignettes/reanalysis_supp\.R$
