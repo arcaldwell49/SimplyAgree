@@ -1,5 +1,5 @@
 # for agree_test
-ccc.xy <- function(x, y, conf.level) {
+ccc.xy <- function(x, y, conf.level,agree.level) {
   N. <- 1 - ((1 - conf.level) / 2)
   zv <- qnorm(N., mean = 0, sd = 1)
   dat <- data.frame(x, y)
@@ -41,10 +41,25 @@ ccc.xy <- function(x, y, conf.level) {
   llt = (exp(2 * llt) - 1) / (exp(2 * llt) + 1)
   ult = (exp(2 * ult) - 1) / (exp(2 * ult) + 1)
   delta.sd <- sqrt(var(delta, na.rm = TRUE))
+  var.d = (delta.sd)^2/k
+  var.dlim = (1/k+zv/(2*(k-1)))*var.d
 
   ba.p <- mean(delta)
-
-  sblalt <- data.frame(est = ba.p, delta.sd = delta.sd)
+  pct <- 1 - (1 - agree.level) / 2
+  agreelim = qnorm(pct)
+  l.loa = ba.p - agreelim*delta.sd
+  u.loa = ba.p + agreelim*delta.sd
+  # Calculate Bland Altman Limits
+  sblalt <- data.frame(d = ba.p,
+                       d.lci = (ba.p - qt(N.,k-1)*sqrt(var.d)),
+                       d.uci = (ba.p + qt(N.,k-1)*sqrt(var.d)),
+                       d.sd = delta.sd,
+                       var.d = var.d,
+                       var.loa = var.dlim,
+                       lower.lci = (l.loa - qt(N.,k-1)*sqrt(var.dlim)),
+                       lower.uci = (l.loa + qt(N.,k-1)*sqrt(var.dlim)),
+                       upper.lci = (u.loa - qt(N.,k-1)*sqrt(var.dlim)),
+                       upper.uci = (u.loa + qt(N.,k-1)*sqrt(var.dlim)))
 
   rho.c <- data.frame(p, llt, ult)
   names(rho.c) <- c("est.ccc", "lower.ci", "upper.ci")
@@ -62,7 +77,7 @@ ccc.xy <- function(x, y, conf.level) {
   #l.shift = change in mean
   #bias = bias correction (1 = perfect)
   #mean.dlt = mean and delta pairs data frame
-  #sblalt =
+
 
 }
 

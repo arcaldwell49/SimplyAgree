@@ -9,6 +9,7 @@ loa_mixed(
   condition,
   id,
   data,
+  plot.xaxis = NULL,
   conf.level = 0.95,
   agree.level = 0.95,
   replicates = 1999,
@@ -23,6 +24,8 @@ loa_mixed(
 \item{id}{column name indicating the subject/participant identifier}
 
 \item{data}{A data frame containing the variables within the model.}
+
+\item{plot.xaxis}{column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
 

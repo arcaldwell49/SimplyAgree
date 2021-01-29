@@ -1,12 +1,13 @@
 ---
 title: "reanalysis"
 output: rmarkdown::html_vignette
+bibliography: ref.bib
 vignette: >
   %\VignetteIndexEntry{reanalysis}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r, include = FALSE}
@@ -27,9 +28,11 @@ df_temps = temps
 
 # Re-analysis of a Previous Study of Agreement
 
-In the study by Jay and Ravanelli (CITE), they attempted to estimate the effect of varying the time of day (AM or PM) on the measurement of thermoregulatory variables (e.g., rectal and esophageal temperature). In total, participants completed 6 separate trials wherein these variables were measured. While this is a robust study of these variables the analyses focused on ANOVAs and t-tests to determine whether or not the time-of-day (AM or PM). This poses a problem because 1) they were trying to test for equivalence and 2) this is a study of *agreement* not *differences*. Due to the latter point, the use of t-test or ANOVAs (F-tests) is rather inappropriate since they provide an answer to different, albeit related, question.
+In the study by @ravanelli2020change, they attempted to estimate the effect of varying the time of day (AM or PM) on the measurement of thermoregulatory variables (e.g., rectal and esophageal temperature). In total, participants completed 6 separate trials wherein these variables were measured. While this is a robust study of these variables the analyses focused on ANOVAs and t-tests to determine whether or not the time-of-day (AM or PM). This poses a problem because 1) they were trying to test for equivalence and 2) this is a study of *agreement* not *differences* (See @Lin1989). Due to the latter point, the use of t-test or ANOVAs (F-tests) is rather inappropriate since they provide an answer to different, albeit related, question.
 
-Instead, the authors could test their hypotheses by using tools that  estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in `SimplyAgree` and `cccrm` I believe we can get closer to the right answer.
+Instead, the authors could test their hypotheses by using tools that  estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in `SimplyAgree` and `cccrm` [@cccrm] I believe we can get closer to the right answer.
+
+In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the `cccrm` package please see the work by @carrasco2003, @carrasco2009, and @carrasco2013. The `loa_mixed` function was inspired by the work of @Parker2016 which documented how to implement multi-level models and bootstrapping to estimate the limits of agreement. 
 
 # Concordance
 
@@ -66,24 +69,24 @@ ccc_rec.delta
 
 Finally, we can visualize the concordance between the two different types of measurements and the respective time-of-day and conditions. From the plot we can see there is clear bias in the raw post exercise values (higher in the PM), but even when "correcting for baseline differences" by calculating the differences scores we can see a higher degree of disagreement between the two conditions. 
 
-```{r pltsrec,fig.cap="Concordance Plots of Rectal Temperature",echo=FALSE,fig.width=7,fig.height=5}
+```{r pltsrec,fig.cap="Concordance Plots of Rectal Temperature",echo=FALSE,fig.width=8.5,fig.height=5}
 df_rec.delta = df_temps %>%
-  #select(id,tod,trial_condition,trec_delta) %>%
   mutate(id_spec = paste0(id,"_",trial_condition)) %>%
   select(id,id_spec,trec_delta,tod,trial_condition) %>%
   pivot_wider(id_cols = c(id,id_spec,trial_condition),
               names_from = tod,
               values_from = trec_delta) %>%
-  mutate(diff = PM - AM)
+  mutate(diff = PM - AM,
+         Average = (AM + PM)/2)
 
 df_rec.post = df_temps %>%
-  #select(id,tod,trial_condition,trec_post) %>%
   mutate(id_spec = paste0(id,"_",trial_condition)) %>%
   select(id,id_spec,trec_post,tod,trial_condition) %>%
   pivot_wider(id_cols = c(id,id_spec,trial_condition),
               names_from = tod,
               values_from = trec_post) %>%
-  mutate(diff = PM - AM)
+  mutate(diff = PM - AM,
+         Average = (AM + PM)/2)
 
 p_rec.delta <- ggplot(df_rec.delta, aes(x=AM, y=PM)) +
   stat_smooth(aes(color=trial_condition), 
@@ -146,24 +149,24 @@ ccc_eso.delta = cccrm::cccUst(dataset = df_temps,
 ccc_eso.delta
 ```
 
-```{r pltseso,fig.cap="Concordance Plots of Esophageal Temperature",echo=FALSE,fig.width=7,fig.height=5}
+```{r pltseso,fig.cap="Concordance Plots of Esophageal Temperature",echo=FALSE,fig.width=8.5,fig.height=5}
 df_eso.delta = df_temps %>%
-  #select(id,tod,trial_condition,teso_delta) %>%
   mutate(id_spec = paste0(id,"_",trial_condition)) %>%
   select(id,id_spec,teso_delta,tod,trial_condition) %>%
   pivot_wider(id_cols = c(id,id_spec,trial_condition),
               names_from = tod,
               values_from = teso_delta) %>%
-  mutate(diff = PM - AM)
+  mutate(diff = PM - AM,
+         Average = (AM + PM)/2)
 
 df_eso.post = df_temps %>%
-  #select(id,tod,trial_condition,teso_post) %>%
   mutate(id_spec = paste0(id,"_",trial_condition)) %>%
   select(id,id_spec,teso_post,tod,trial_condition) %>%
   pivot_wider(id_cols = c(id,id_spec,trial_condition),
               names_from = tod,
               values_from = teso_post) %>%
-  mutate(diff = PM - AM)
+  mutate(diff = PM - AM,
+         Average = (AM + PM)/2)
 
 p_eso.delta <- ggplot(df_eso.delta, aes(x=AM, y=PM)) +
   stat_smooth(aes(color=trial_condition), 
@@ -241,35 +244,7 @@ knitr::kable(rec.post_loa$bs_tab,
 Furthermore, we can visualize the results with a typical Bland-Altman plot of the LoA.
 
 ```{r, fig.cap="Limits of Agreement for Trec Post Exercise",fig.width=7,fig.height=5}
-df_rec.post %>%
-  mutate(Average = (AM+PM)/2) %>%
-  ggplot(aes(x=Average,y=diff,color=trial_condition)) +
-  # Mean Bias
-  geom_hline(yintercept=rec.post_loa$bs_tab$estimate[1], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.post_loa$bs_tab$lower.ci[1],
-           ymax = rec.post_loa$bs_tab$upper.ci[1],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=rec.post_loa$bs_tab$estimate[2], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.post_loa$bs_tab$lower.ci[2],
-           ymax = rec.post_loa$bs_tab$upper.ci[2],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=rec.post_loa$bs_tab$estimate[3], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.post_loa$bs_tab$lower.ci[3],
-           ymax = rec.post_loa$bs_tab$upper.ci[3],
-           alpha = .5,
-           fill = "gray") +
-  geom_point() +
-  labs(x = "Average between Trec Post",
-       y = "Difference between AM & PM",
-       color = "Conditions")
+plot(rec.post_loa)
 ```
 
 Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.
@@ -279,35 +254,7 @@ knitr::kable(rec.delta_loa$bs_tab,
 ```
 
 ```{r, fig.cap="Limits of Agreement for Delta Trec",fig.width=7,fig.height=5}
-df_rec.delta %>%
-  mutate(Average = (AM+PM)/2) %>%
-  ggplot(aes(x=Average,y=diff,color=trial_condition)) +
-  # Mean Bias
-  geom_hline(yintercept=rec.delta_loa$bs_tab$estimate[1], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.delta_loa$bs_tab$lower.ci[1],
-           ymax = rec.delta_loa$bs_tab$upper.ci[1],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=rec.delta_loa$bs_tab$estimate[2], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.delta_loa$bs_tab$lower.ci[2],
-           ymax = rec.delta_loa$bs_tab$upper.ci[2],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=rec.delta_loa$bs_tab$estimate[3], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = rec.delta_loa$bs_tab$lower.ci[3],
-           ymax = rec.delta_loa$bs_tab$upper.ci[3],
-           alpha = .5,
-           fill = "gray") +
-  geom_point() +
-  labs(x = "Average between Trec delta",
-       y = "Difference between AM & PM",
-       color = "Conditions")
+plot(rec.delta_loa)
 ```
 
 ## Esophageal Temperature
@@ -325,8 +272,6 @@ eso.post_loa = SimplyAgree::loa_mixed(diff = "diff",
                                      type = "bca")
 ```
 
-When we create a table of the results we can see that CCC and limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).
-
 ```{r}
 knitr::kable(eso.post_loa$bs_tab,
              caption = "LoA: Teso Post Exercise")
@@ -334,35 +279,7 @@ knitr::kable(eso.post_loa$bs_tab,
 
 
 ```{r, fig.cap="Limits of Agreement for Teso Post Exercise",fig.width=7,fig.height=5}
-df_eso.post %>%
-  mutate(Average = (AM+PM)/2) %>%
-  ggplot(aes(x=Average,y=diff,color=trial_condition)) +
-  # Mean Bias
-  geom_hline(yintercept=eso.post_loa$bs_tab$estimate[1], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.post_loa$bs_tab$lower.ci[1],
-           ymax = eso.post_loa$bs_tab$upper.ci[1],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=eso.post_loa$bs_tab$estimate[2], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.post_loa$bs_tab$lower.ci[2],
-           ymax = eso.post_loa$bs_tab$upper.ci[2],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=eso.post_loa$bs_tab$estimate[3], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.post_loa$bs_tab$lower.ci[3],
-           ymax = eso.post_loa$bs_tab$upper.ci[3],
-           alpha = .5,
-           fill = "gray") +
-  geom_point() +
-  labs(x = "Average between Teso Post",
-       y = "Difference between AM & PM",
-       color = "Conditions")
+plot(eso.post_loa)
 ```
 
 
@@ -372,37 +289,9 @@ knitr::kable(eso.delta_loa$bs_tab,
 ```
 
 ```{r, fig.cap="Limits of Agreement for Delta Teso",fig.width=7,fig.height=5}
-df_eso.delta %>%
-  mutate(Average = (AM+PM)/2) %>%
-  ggplot(aes(x=Average,y=diff,color=trial_condition)) +
-  # Mean Bias
-  geom_hline(yintercept=eso.delta_loa$bs_tab$estimate[1], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.delta_loa$bs_tab$lower.ci[1],
-           ymax = eso.delta_loa$bs_tab$upper.ci[1],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=eso.delta_loa$bs_tab$estimate[2], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.delta_loa$bs_tab$lower.ci[2],
-           ymax = eso.delta_loa$bs_tab$upper.ci[2],
-           alpha = .5,
-           fill = "gray") +
-  geom_hline(yintercept=eso.delta_loa$bs_tab$estimate[3], alpha=.75) +
-  annotate("rect",
-           xmin = -Inf, xmax = Inf,
-           ymin = eso.delta_loa$bs_tab$lower.ci[3],
-           ymax = eso.delta_loa$bs_tab$upper.ci[3],
-           alpha = .5,
-           fill = "gray") +
-  geom_point() +
-  labs(x = "Average between Teso delta",
-       y = "Difference between AM & PM",
-       color = "Conditions")
+plot(eso.delta_loa)
 ```
 
 
-
+# References
 

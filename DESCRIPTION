@@ -15,7 +15,10 @@ Imports:
     emmeans,
     lme4,
     boot,
-    stats
+    stats,
+    dplyr,
+    magrittr,
+    tidyselect,
 Suggests: 
     knitr,
     rmarkdown,

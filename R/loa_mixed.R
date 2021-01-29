@@ -3,6 +3,7 @@
 #' @param diff column name of the data frame that includes the continuous measurement of interest.
 #' @param condition column name indicating different conditions subjects were tested under.
 #' @param id column name indicating the subject/participant identifier
+#' @param plot.xaxis column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%.
 #' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 500.
@@ -25,6 +26,9 @@
 #' @section References:
 #' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 #' @importFrom stats qnorm as.formula na.omit
+#' @importFrom magrittr %>%
+#' @importFrom dplyr select rename
+#' @importFrom tidyselect all_of
 #' @import lme4
 #' @import ggplot2
 #' @import boot
@@ -36,6 +40,7 @@ loa_mixed = function(diff,
                      condition,
                      id,
                      data,
+                     plot.xaxis = NULL,
                      conf.level = .95,
                      agree.level = .95,
                      replicates = 1999,
@@ -102,8 +107,83 @@ loa_mixed = function(diff,
   res_tab = loa_bstab(bsls = bsls,
                       type = type,
                       conf.level = conf.level)
+
+  if(!missing(plot.xaxis) || !is.null(plot.xaxis)){
+    if (condition != 1) {
+      df_plt = data %>%
+        select(all_of(diff),
+               all_of(id),
+               all_of(condition),
+               all_of(plot.xaxis)) %>%
+        rename(
+          diff = all_of(diff),
+          id = all_of(id),
+          Condition = all_of(condition),
+          X = all_of(plot.xaxis)
+        )
+    } else{
+      df_plt = data %>%
+        select(all_of(diff),
+               all_of(id),
+               all_of(plot.xaxis)) %>%
+        rename(
+          diff = all_of(diff),
+          id = all_of(id),
+          X = all_of(plot.xaxis)
+        )
+    }
+
+    p = ggplot(data=df_plt,
+               aes(x=X,
+                   y=diff)) + # color = Condition
+      # Mean Bias
+      geom_hline(yintercept=res_tab$estimate[1], alpha=.75) +
+      annotate("rect",
+               xmin = -Inf, xmax = Inf,
+               ymin = res_tab$lower.ci[1],
+               ymax = res_tab$upper.ci[1],
+               alpha = .5,
+               fill = "gray") +
+      # lower limit
+      geom_hline(yintercept=res_tab$estimate[2],
+                 alpha=.75,
+                 linetype="dotdash") +
+      annotate("rect",
+               xmin = -Inf, xmax = Inf,
+               ymin = res_tab$lower.ci[2],
+               ymax = res_tab$upper.ci[2],
+               alpha = .5,
+               fill = "#D55E00") +
+      # upper limit
+      geom_hline(yintercept=res_tab$estimate[3],
+                 alpha=.75,
+                 linetype="dotdash") +
+      annotate("rect",
+               xmin = -Inf, xmax = Inf,
+               ymin = res_tab$lower.ci[3],
+               ymax = res_tab$upper.ci[3],
+               alpha = .5,
+               fill = "#D55E00") +
+      labs(x = "",
+           y = "Difference between Measurements",
+           color = "Conditions") +
+      theme_bw()
+
+      if(condition == 1){
+        p = p + geom_point()
+      } else{
+        p = p +
+          geom_point(aes(color=Condition)) +
+          scale_color_viridis_d()
+      }
+
+  } else {
+    p = NULL
+  }
   # need to create method for print and plot
   structure(list(bs_tab = res_tab,
+                 plot = p,
+                 agree.level = agree.level,
                  conf.level = conf.level,
                  type = type),
             class = "loa_mixed_bs")

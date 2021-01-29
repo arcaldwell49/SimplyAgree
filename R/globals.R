@@ -6,4 +6,5 @@ utils::globalVariables(c("boot_bias",
                          "boot_total_sd",
                          "boot_low_loa",
                          "boot_upper_loa",
-                         "vartab"))
+                         "vartab",
+                         "Condition","X","d"))

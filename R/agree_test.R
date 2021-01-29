@@ -1,9 +1,9 @@
 #' Tests for Absolute Agreement
 #' @param x Criterion measurement, or first measurement if repeated measures
-#' @param y Other measurement, or second measurement if repeated measures
-#' @param prop0 Null central proportion: the proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
+#' @param y Other measurement, or second measurement if repeated measures#'
+#' @param conf.level the confidence level required. Default is 95\%.
+#' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
-#' @param alpha Set the desired Type I error rate; default is .05
 #' @param verbose Option to print a summary of results to the console.
 #'
 #' @return Returns single list with the results of the agreement analysis.
@@ -14,7 +14,6 @@
 #'   \item{\code{"s.shift"}}{Scale shift from x to y.}
 #'   \item{\code{"l.shift"}}{Location shift from x to y.}
 #'   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
-#'   \item{\code{"df_diff"}}{a data frame with 4 columns: x = data column x from arguments, y = data column y from agruments, mean = the mean of each pair of measurements, delta = vector y minus vector x.}
 #'   \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
 #'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
@@ -31,19 +30,19 @@
 
 agree_test <- function(x,
                        y,
-                       prop0=0.8,
                        delta=.1,
-                       alpha=0.05,
+                       conf.level = .95,
+                       agree.level = .95,
                        verbose = FALSE) {
   est <- lower.ci <- upper.ci <- NULL
-  if (prop0 >= 1 || prop0 <= 0) {
+  if (agree.level >= 1 || agree.level <= 0) {
 
-    stop("Null central proportion must be a value between 0 and 1")
+    stop("agree.level (Limit of Agreement) must be a value between 0 and 1")
   }
 
-  if (alpha >= 1 || alpha <= 0) {
+  if (conf.level >= 1 || conf.level <= 0) {
 
-    stop("alpha must be a value between 0 and 1")
+    stop("conf.level must be a value between 0 and 1")
   }
   #USER SPECIFICATIONS PORTION
   #alpha<-0.05 #DESIGNATED ALPHA
@@ -53,12 +52,14 @@ agree_test <- function(x,
   #xbar<-0.011 #SAMPLE MEAN
   #s<-0.044 #SAMPLE STANDARD DEVIATION
   #END OF SPECIFICATION
-  prop0 = prop0
-  conf.level = (1 - alpha)
-  ccc_res = ccc.xy(x, y, conf.level = conf.level)
+  prop0 = agree.level
+  alpha = 1 - conf.level
+  ccc_res = ccc.xy(x, y,
+                   conf.level = conf.level,
+                   agree.level = agree.level)
   #pull values from ccc function output
-  xbar = ccc_res$delta$est #mean delta
-  s = ccc_res$delta$delta.sd #sd of delta
+  xbar = ccc_res$delta$d #mean delta
+  s = ccc_res$delta$d.sd #sd of delta
   n = nrow(ccc_res$df_diff)
 
   pct <- 1 - (1 - prop0) / 2
@@ -108,8 +109,11 @@ agree_test <- function(x,
   the_int <- summary(z)$coefficients[1,1]
   the_slope <-  summary(z)$coefficients[2,1]
   tmp.lm <- data.frame(the_int, the_slope)
+  scalemin = min(c(min(x),min(y)))
+  scalemax = max(c(max(x),max(y)))
 
-  identity.plot = ggplot(ccc_res$df_diff, aes(x = x, y = y)) +
+  identity.plot = ggplot(ccc_res$df_diff,
+                         aes(x = x, y = y)) +
     geom_point(na.rm = TRUE) +
     geom_abline(intercept = 0, slope = 1) +
     geom_abline(
@@ -119,25 +123,47 @@ agree_test <- function(x,
       color = "red"
     ) +
     xlab("Method: x") +
+    xlim(scalemin,scalemax) +
+    ylim(scalemin,scalemax) +
     ylab("Method: y") +
     coord_fixed(ratio = 1 / 1) +
     theme_bw()
 
   bor = delta
   neg.bor = -1*bor
-  bland_alt.plot =  ggplot(ccc_res$df_diff, aes(x = mean, y = delta)) +
+  bland_alt.plot =  ggplot(ccc_res$df_diff,
+                           aes(x = mean, y = delta)) +
     geom_point(na.rm = TRUE) +
-    geom_ribbon(aes(ymin = neg.bor, ymax = bor),
-                alpha = .1) +
-    geom_hline(data = shieh_test,
-               aes(yintercept = lower.ci, color = "red"),
-               linetype = 2) +
-    geom_hline(data = shieh_test,
-               aes(yintercept = upper.ci, color = "red"),
-               linetype = 2) +
+    #geom_ribbon(aes(ymin = neg.bor,
+    #                ymax = bor),
+    #            alpha = .1) +
+    #geom_hline(data = shieh_test,
+    #           aes(yintercept = lower.ci), # Removing Shieh line for time being
+    #           linetype = 2) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = ccc_res$delta$lower.lci,
+             ymax = ccc_res$delta$lower.uci,
+             alpha = .5,
+             fill = "#D55E00") +
+    #geom_hline(data = shieh_test,
+    #           aes(yintercept = upper.ci),
+    #           linetype = 2) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = ccc_res$delta$upper.lci,
+             ymax = ccc_res$delta$upper.uci,
+             alpha = .5,
+             fill = "#D55E00") +
     geom_hline(data = ccc_res$delta,
-               aes(yintercept = est),
+               aes(yintercept = d),
                linetype = 1) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = ccc_res$delta$d.lci,
+             ymax = ccc_res$delta$d.uci,
+             alpha = .5,
+             fill = "gray") +
     xlab("Average of Method x and Method y") +
     ylab("Difference between Methods x & y") +
     theme_bw() +
@@ -151,15 +177,23 @@ agree_test <- function(x,
   if (verbose == TRUE) {
     # The section below should be blocked out when in Shiny
 
-    cat("Null Central Proportion = ", prop0,  sep = "")
+    cat("Limit of Agreement = ", prop0*100, "%",  sep = "")
     cat("\n")
     cat("alpha =", alpha, "|", (1 - alpha)*100,"% Confidence Interval")
     cat("\n")
-    cat("### TOST Results ###")
+    cat("### Shieh TOST Results ###")
     cat("\n")
     cat("Exact C.I.:"," [",round(el,4),", ",round(eu, 4), "]", sep = "")
     cat("\n")
     cat("test: ",rej_text, sep = "")
+    cat("\n")
+    cat("### Bland-Altman Limits of Agreement (LoA) ###")
+    cat("\n")
+    cat("Mean Bias:",ccc_res$delta$d,"[",ccc_res$delta$d.lci,", ",ccc_res$delta$d.uci,"]")
+    cat("\n")
+    cat("Lower LoA:",ccc_res$delta$l.loa,"[",ccc_res$delta$lower.lci,", ",ccc_res$delta$lower.uci,"]")
+    cat("\n")
+    cat("Upper LoA:",ccc_res$delta$u.loa,"[",ccc_res$delta$upper.lci,", ",ccc_res$delta$upper.uci,"]")
     cat("\n")
     cat("### Concordance Correlation Coefficient (CCC) ###")
     cat("\n")
@@ -172,7 +206,6 @@ agree_test <- function(x,
                    s.shift = ccc_res$s.shift,
                    l.shift = ccc_res$l.shift,
                    bias = ccc_res$bias,
-                   df_diff = ccc_res$df_diff,
                    delta = ccc_res$delta,
                    bland_alt.plot = bland_alt.plot,
                    identity.plot = identity.plot)
