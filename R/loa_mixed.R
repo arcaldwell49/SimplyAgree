@@ -180,7 +180,7 @@ loa_mixed = function(diff,
   } else {
     p = NULL
   }
-  # need to create method for print and plot
+
   structure(list(bs_tab = res_tab,
                  plot = p,
                  agree.level = agree.level,

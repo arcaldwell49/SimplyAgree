@@ -20,3 +20,16 @@
 #' @rdname temps
 "recpre_long"
 
+#' @title reps
+#' @description A fake data set of a agreement study where X is measured in duplicate and Y is measured in triplicate
+#' @format A data frame with 11 rows and 5 columns:
+#' \describe{
+#'   \item{X1}{X first measurement}
+#'   \item{X2}{X second measurment}
+#'   \item{Y1}{Y first measurement}
+#'   \item{Y2}{Y second measurement}
+#'   \item{Y3}{Y third measurement}
+#'
+#'
+#' }
+"reps"

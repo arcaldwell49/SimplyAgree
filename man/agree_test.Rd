@@ -4,14 +4,7 @@
 \alias{agree_test}
 \title{Tests for Absolute Agreement}
 \usage{
-agree_test(
-  x,
-  y,
-  delta = 0.1,
-  conf.level = 0.95,
-  agree.level = 0.95,
-  verbose = FALSE
-)
+agree_test(x, y, delta = 0.1, conf.level = 0.95, agree.level = 0.95)
 }
 \arguments{
 \item{x}{Criterion measurement, or first measurement if repeated measures}
@@ -23,8 +16,6 @@ agree_test(
 \item{conf.level}{the confidence level required. Default is 95\%.}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
-
-\item{verbose}{Option to print a summary of results to the console.}
 }
 \value{
 Returns single list with the results of the agreement analysis.

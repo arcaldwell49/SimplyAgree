@@ -4,7 +4,6 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
-#' @param verbose Option to print a summary of results to the console.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -32,8 +31,7 @@ agree_test <- function(x,
                        y,
                        delta=.1,
                        conf.level = .95,
-                       agree.level = .95,
-                       verbose = FALSE) {
+                       agree.level = .95) {
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 
@@ -129,26 +127,15 @@ agree_test <- function(x,
     coord_fixed(ratio = 1 / 1) +
     theme_bw()
 
-  bor = delta
-  neg.bor = -1*bor
   bland_alt.plot =  ggplot(ccc_res$df_diff,
                            aes(x = mean, y = delta)) +
     geom_point(na.rm = TRUE) +
-    #geom_ribbon(aes(ymin = neg.bor,
-    #                ymax = bor),
-    #            alpha = .1) +
-    #geom_hline(data = shieh_test,
-    #           aes(yintercept = lower.ci), # Removing Shieh line for time being
-    #           linetype = 2) +
     annotate("rect",
              xmin = -Inf, xmax = Inf,
              ymin = ccc_res$delta$lower.lci,
              ymax = ccc_res$delta$lower.uci,
              alpha = .5,
              fill = "#D55E00") +
-    #geom_hline(data = shieh_test,
-    #           aes(yintercept = upper.ci),
-    #           linetype = 2) +
     annotate("rect",
              xmin = -Inf, xmax = Inf,
              ymin = ccc_res$delta$upper.lci,
@@ -174,41 +161,15 @@ agree_test <- function(x,
   # Return Results ----
   #######################
 
-  if (verbose == TRUE) {
-    # The section below should be blocked out when in Shiny
-
-    cat("Limit of Agreement = ", prop0*100, "%",  sep = "")
-    cat("\n")
-    cat("alpha =", alpha, "|", (1 - alpha)*100,"% Confidence Interval")
-    cat("\n")
-    cat("### Shieh TOST Results ###")
-    cat("\n")
-    cat("Exact C.I.:"," [",round(el,4),", ",round(eu, 4), "]", sep = "")
-    cat("\n")
-    cat("test: ",rej_text, sep = "")
-    cat("\n")
-    cat("### Bland-Altman Limits of Agreement (LoA) ###")
-    cat("\n")
-    cat("Mean Bias:",ccc_res$delta$d,"[",ccc_res$delta$d.lci,", ",ccc_res$delta$d.uci,"]")
-    cat("\n")
-    cat("Lower LoA:",ccc_res$delta$l.loa,"[",ccc_res$delta$lower.lci,", ",ccc_res$delta$lower.uci,"]")
-    cat("\n")
-    cat("Upper LoA:",ccc_res$delta$u.loa,"[",ccc_res$delta$upper.lci,", ",ccc_res$delta$upper.uci,"]")
-    cat("\n")
-    cat("### Concordance Correlation Coefficient (CCC) ###")
-    cat("\n")
-    cat("CCC: ",round(ccc_res$rho.c$est.ccc,4),", ",100*conf.level,"% C.I. ","[",round(ccc_res$rho.c$lower.ci,4),", ",round(ccc_res$rho.c$upper.ci,4),"]",sep = "")
-
-  }
-
-  res_list <- list(shieh_test = shieh_test,
-                   ccc.xy = ccc_res$rho.c,
-                   s.shift = ccc_res$s.shift,
-                   l.shift = ccc_res$l.shift,
-                   bias = ccc_res$bias,
-                   delta = ccc_res$delta,
-                   bland_alt.plot = bland_alt.plot,
-                   identity.plot = identity.plot)
+  structure(list(shieh_test = shieh_test,
+                 ccc.xy = ccc_res$rho.c,
+                 s.shift = ccc_res$s.shift,
+                 l.shift = ccc_res$l.shift,
+                 bias = ccc_res$bias,
+                 delta = ccc_res$delta,
+                 bland_alt.plot = bland_alt.plot,
+                 identity.plot = identity.plot),
+            class = "simple_agree")
 
 
 
