@@ -21,15 +21,15 @@
 "recpre_long"
 
 #' @title reps
-#' @description A fake data set of a agreement study where X is measured in duplicate and Y is measured in triplicate
-#' @format A data frame with 11 rows and 5 columns:
+#' @description A fake data set of a agreement study where both measures have replicates.
+#' @format A data frame with 20 rows with 3 variables
 #' \describe{
-#'   \item{X1}{X first measurement}
-#'   \item{X2}{X second measurment}
-#'   \item{Y1}{Y first measurement}
-#'   \item{Y2}{Y second measurement}
-#'   \item{Y3}{Y third measurement}
+#'   \item{id}{Subject identifier}
+#'   \item{X}{X measurment}
+#'   \item{Y}{Y  measurement}
+
 #'
 #'
 #' }
+#' @rdname temps
 "reps"

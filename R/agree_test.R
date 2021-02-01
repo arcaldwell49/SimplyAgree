@@ -1,6 +1,6 @@
-#' Tests for Absolute Agreement
-#' @param x Criterion measurement, or first measurement if repeated measures
-#' @param y Other measurement, or second measurement if repeated measures#'
+#' Tests for Absolute Agreement with Replicates
+#' @param x Vector with first measurement
+#' @param y Vector with second measurement
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
@@ -166,9 +166,12 @@ agree_test <- function(x,
                  s.shift = ccc_res$s.shift,
                  l.shift = ccc_res$l.shift,
                  bias = ccc_res$bias,
-                 delta = ccc_res$delta,
+                 loa = ccc_res$delta,
+                 conf.level = conf.level,
+                 agree.level = agree.level,
                  bland_alt.plot = bland_alt.plot,
-                 identity.plot = identity.plot),
+                 identity.plot = identity.plot,
+                 class = "simple"),
             class = "simple_agree")
 
 

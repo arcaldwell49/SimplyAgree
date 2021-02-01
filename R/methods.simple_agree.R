@@ -3,9 +3,10 @@
 #' Methods defined for objects returned from the loa_mixed functions.
 #'
 #' @param x object of class \code{simple_agree} as returned from \code{loa_mixed}
+#' @param type Type of plot to output. Default (1) is Bland-Altman plot while type=2 will produce a line-of-identity plot.
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{loa_mixed}}.
+#'   \code{\link{agree_test}}.
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
@@ -22,29 +23,50 @@
 #' @export
 
 print.simple_agree <- function(x,...){
-
-  cat("Limit of Agreement = ", prop0*100, "%",  sep = "")
+  if(x$class == "simple") {
+  cat("Limit of Agreement = ", x$shieh_test$prop0*100, "%",  sep = "")
   cat("\n")
-  cat("alpha =", alpha, "|", (1 - alpha)*100,"% Confidence Interval")
+  cat("alpha =", (1-x$conf.level), "|", x$conf.level*100,"% Confidence Interval")
   cat("\n")
-  cat("### Shieh TOST Results ###")
   cat("\n")
-  cat("Exact C.I.:"," [",round(el,4),", ",round(eu, 4), "]", sep = "")
+  cat("###- Shieh TOST Results -###")
   cat("\n")
-  cat("test: ",rej_text, sep = "")
+  cat("Exact C.I.:"," [",round(x$shieh_test$lower.ci,4),", ",round(x$shieh_test$upper.ci, 4), "]", sep = "")
   cat("\n")
-  cat("### Bland-Altman Limits of Agreement (LoA) ###")
+  cat("Hypothesis Test: ",x$shieh_test$h0_test, sep = "")
   cat("\n")
-  cat("Mean Bias:",ccc_res$delta$d,"[",ccc_res$delta$d.lci,", ",ccc_res$delta$d.uci,"]")
   cat("\n")
-  cat("Lower LoA:",ccc_res$delta$l.loa,"[",ccc_res$delta$lower.lci,", ",ccc_res$delta$lower.uci,"]")
+  cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
-  cat("Upper LoA:",ccc_res$delta$u.loa,"[",ccc_res$delta$upper.lci,", ",ccc_res$delta$upper.uci,"]")
+  cat("Mean Bias: ",x$loa$d," [",x$loa$d.lci,", ",x$loa$d.uci,"]", sep="")
   cat("\n")
-  cat("### Concordance Correlation Coefficient (CCC) ###")
+  cat("Lower LoA: ",x$loa$d-x$loa$d.sd*qnorm(1-(1-x$agree.level)/2)," [",x$loa$lower.lci,", ",x$loa$lower.uci,"]", sep = "")
   cat("\n")
-  cat("CCC: ",round(ccc_res$rho.c$est.ccc,4),", ",100*conf.level,"% C.I. ","[",round(ccc_res$rho.c$lower.ci,4),", ",round(ccc_res$rho.c$upper.ci,4),"]",sep = "")
+  cat("Upper LoA: ",x$loa$d+x$loa$d.sd*qnorm(1-(1-x$agree.level)/2)," [",x$loa$upper.lci,", ",x$loa$upper.uci,"]", sep = "")
   cat("\n")
+  cat("\n")
+  cat("###- Concordance Correlation Coefficient (CCC) -###")
+  cat("\n")
+  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+  cat("\n")
+  } else if(x$class == "replicates"){
+    cat("Limit of Agreement = ", x$agree.level*100, "%",  sep = "")
+    cat("\n")
+    cat("alpha =", (1-x$conf.level), "|", x$conf.level*100,"% Confidence Interval")
+    cat("\n")
+    cat("\n")
+    cat("Hypothesis Test: ",x$h0_test, sep = "")
+    cat("\n")
+    cat("\n")
+    cat("###- Bland-Altman Limits of Agreement (LoA) -###")
+    cat("\n")
+    cat("Mean Bias: ",x$loa$estimate[1]," [",x$loa$lower.ci[1],", ",x$loa$lower.ci[1],"]", sep = "")
+    cat("\n")
+    cat("Lower LoA: ",x$loa$estimate[2]," [",x$loa$lower.ci[2],", ",x$loa$lower.ci[2],"]", sep = "")
+    cat("\n")
+    cat("Upper LoA: ",x$loa$estimate[3]," [",x$loa$lower.ci[3],", ",x$loa$lower.ci[3],"]", sep = "")
+    cat("\n")
+  }
 
 }
 
@@ -53,7 +75,8 @@ print.simple_agree <- function(x,...){
 #' @import ggplot2
 #' @export
 
-plot.simple_agree <- function(x,type=1){
+plot.simple_agree <- function(x, type = 1, ...){
+
   if(type == 1){
     return(x$bland_alt.plot)
   } else if (type == 2){

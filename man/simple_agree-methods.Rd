@@ -8,14 +8,16 @@
 \usage{
 \method{print}{simple_agree}(x, ...)
 
-\method{plot}{simple_agree}(x, type = 1)
+\method{plot}{simple_agree}(x, type = 1, ...)
 }
 \arguments{
 \item{x}{object of class \code{simple_agree} as returned from \code{loa_mixed}}
 
 \item{...}{further arguments passed through, see description of return value
 for details.
-\code{\link{loa_mixed}}.}
+\code{\link{agree_test}}.}
+
+\item{type}{Type of plot to output. Default (1) is Bland-Altman plot while type=2 will produce a line-of-identity plot.}
 }
 \value{
 \describe{

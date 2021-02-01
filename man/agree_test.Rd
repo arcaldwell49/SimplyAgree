@@ -2,14 +2,14 @@
 % Please edit documentation in R/agree_test.R
 \name{agree_test}
 \alias{agree_test}
-\title{Tests for Absolute Agreement}
+\title{Tests for Absolute Agreement with Replicates}
 \usage{
 agree_test(x, y, delta = 0.1, conf.level = 0.95, agree.level = 0.95)
 }
 \arguments{
-\item{x}{Criterion measurement, or first measurement if repeated measures}
+\item{x}{Vector with first measurement}
 
-\item{y}{Other measurement, or second measurement if repeated measures#'}
+\item{y}{Vector with second measurement}
 
 \item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
 
@@ -33,7 +33,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-Tests for Absolute Agreement
+Tests for Absolute Agreement with Replicates
 }
 \section{References}{
 
