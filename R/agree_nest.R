@@ -99,10 +99,13 @@ agree_nest <- function(x,
     upper.ci = c(d_hi, loa_l.u, loa_u.u),
     row.names = c("Difference","Lower LoA","Upper LoA")
   )
+  if (!is.missing(delta)) {
   rej <- (-delta < loa_l.l) * (loa_u.l < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {
     rej_text = "reject h0"
+  }} else {
+    rej_text = "No Hypothesis Test"
   }
 
   ### Plots ----

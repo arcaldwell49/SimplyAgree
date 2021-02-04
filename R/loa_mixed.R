@@ -41,6 +41,7 @@ loa_mixed = function(diff,
                      id,
                      data,
                      plot.xaxis = NULL,
+                     delta,
                      conf.level = .95,
                      agree.level = .95,
                      replicates = 1999,
@@ -133,6 +134,16 @@ loa_mixed = function(diff,
         )
     }
 
+    if (!is.missing(delta)) {
+      rej <- (-delta < res_tab$lower.ci[2]) * (res_tab$upper.ci[3] < delta)
+      rej_text = "don't reject h0"
+      if (rej == 1) {
+        rej_text = "reject h0"
+      }
+    } else {
+      rej_text = "No Hypothesis Test"
+    }
+
     p = ggplot(data=df_plt,
                aes(x=X,
                    y=diff)) + # color = Condition
@@ -182,6 +193,7 @@ loa_mixed = function(diff,
   }
 
   structure(list(bs_tab = res_tab,
+                 h0_test = rej_text,
                  plot = p,
                  agree.level = agree.level,
                  conf.level = conf.level,

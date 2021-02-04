@@ -1,4 +1,4 @@
-#' Tests for Absolute Agreement with Replicates
+#' Tests for Absolute Agreement
 #' @param x Vector with first measurement
 #' @param y Vector with second measurement
 #' @param conf.level the confidence level required. Default is 95\%.
@@ -29,7 +29,7 @@
 
 agree_test <- function(x,
                        y,
-                       delta=.1,
+                       delta,
                        conf.level = .95,
                        agree.level = .95) {
   est <- lower.ci <- upper.ci <- NULL
@@ -90,10 +90,13 @@ agree_test <- function(x,
   }
   el <- xbar - gam * stdh
   eu <- xbar + gam * stdh
+  if (!is.missing(delta)){
   rej <- (-delta < el) * (eu < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {
     rej_text = "reject h0"
+  } } else {
+    rej_text = "No Hypothesis Test"
   }
 
   shieh_test = data.frame(prop0,el,eu,rej_text,gam)

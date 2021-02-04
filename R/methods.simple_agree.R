@@ -1,6 +1,6 @@
 #' Methods for simple_agree objects
 #'
-#' Methods defined for objects returned from the loa_mixed functions.
+#' Methods defined for objects returned from the agree functions.
 #'
 #' @param x object of class \code{simple_agree} as returned from \code{loa_mixed}
 #' @param type Type of plot to output. Default (1) is Bland-Altman plot while type=2 will produce a line-of-identity plot.
@@ -16,7 +16,7 @@
 #' @name simple_agree-methods
 
 
-### methods for simple_agree (created by loa_mixed)
+### methods for simple_agree objects
 
 #' @rdname simple_agree-methods
 #' @method print simple_agree
