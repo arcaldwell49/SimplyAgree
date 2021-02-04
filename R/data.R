@@ -26,7 +26,7 @@
 #' \describe{
 #'   \item{id}{Subject identifier}
 #'   \item{X}{X measurment}
-#'   \item{Y}{Y  measurement}
+#'   \item{Y}{Y measurement}
 
 #'
 #'

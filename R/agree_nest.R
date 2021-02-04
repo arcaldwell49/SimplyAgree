@@ -1,4 +1,4 @@
-#' Tests for Absolute Agreement with Replicates
+#' Tests for Absolute Agreement with Nested Data
 #' @param x Name of column with first measurement
 #' @param y Name of other column with first measurement
 #' @param id Column with subject identifier
@@ -23,17 +23,16 @@
 #'
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
-#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var mean
+#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var mean
 #' @importFrom tidyselect all_of
 #' @import dplyr
 #' @import ggplot2
 #' @export
 
-agree_reps <- function(x,
+agree_nest <- function(x,
                        y,
                        id,
                        data,
-                       delta,
                        agree.level = .95,
                        conf.level = .95){
 
@@ -49,51 +48,44 @@ agree_reps <- function(x,
     rename(id = all_of(id),
            x = all_of(x),
            y = all_of(y)) %>%
-    select(id,x,y)
+    select(id,x,y) %>%
+    drop_na()
 
   df2 = df %>%
     group_by(id) %>%
-    summarize(mxi = sum(!is.na(x)),
-              myi = sum(!is.na(y)),
+    summarize(m = n(),
               x_bar = mean(x, na.rm=TRUE),
               x_var = var(x, na.rm=TRUE),
               y_bar = mean(y, na.rm=TRUE),
               y_var = var(y, na.rm=TRUE),
+              d = mean(x-y),
+              d_var = var(x-y),
               .groups = "drop") %>%
-    mutate(d = x_bar-y_bar,
-           both_avg = (x_bar+y_bar)/2)
+    mutate(both_avg = (x_bar+y_bar)/2)
 
-  Nx = sum(df2$mxi)
-  Ny = sum(df2$myi)
-  mxh = nrow(df2)/sum(1/df2$mxi)
-  myh = nrow(df2)/sum(1/df2$myi)
-
-
-  sxw2 = sum((df2$mxi-1)/(Nx-nrow(df2))*df2$x_var)
-  syw2 = sum((df2$myi-1)/(Ny-nrow(df2))*df2$y_var)
-  d_bar = mean(df2$d, na.rm = TRUE)
-  d_var = var(df2$d, na.rm = TRUE)
+  d_bar = mean(df2$d)
+  d_var = var(df2$d)
+  sdw2 = sum((df2$m-1)/(nrow(df)-nrow(df2))*df2$d_var)
+  mh = nrow(df2)/sum(1/df2$m)
   d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
   d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
 
-  tot_var = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
-
-  loa_l = d_bar - agreeq*sqrt(tot_var)
-
-  loa_u = d_bar + agreeq*sqrt(tot_var)
+  var_tot = d_var + (1-1/mh) * sdw2
+  loa_l = d_bar - agreeq*sqrt(var_tot)
+  loa_u = d_bar + agreeq*sqrt(var_tot)
 
   move.l.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
-  move.l.2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha.l,Nx-nrow(df2)))))^2
-  move.l.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.l,Ny-nrow(df2)))))^2
-  move.l = tot_var - sqrt(move.l.1+move.l.2+move.l.3)
+  move.l.2 = ((1-1/mh)*sdw2*(1-(nrow(df)-nrow(df2))/(qchisq(alpha.l,nrow(df)-nrow(df2)))))^2
 
-  move.u.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))))^2
-  move.u.2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha.u,Nx-nrow(df2)))))^2
-  move.u.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.u,Ny-nrow(df2)))))^2
-  move.u = tot_var + sqrt(move.u.1+move.u.2+move.u.3)
+  move.l = var_tot - sqrt(move.l.1+move.l.2)
 
-  LME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
-  RME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
+  move.u.1 = (d_var*((nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))-1))^2
+  move.u.2 = ((1-1/mh)*sdw2*((nrow(df)-nrow(df2))/(qchisq(alpha.u,nrow(df)-nrow(df2)))-1))^2
+
+  move.u = var_tot + sqrt(move.u.1+move.u.2)
+
+  LME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(var_tot))^2)
+  RME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move.l))^2)
 
   loa_l.l = loa_l - LME
   loa_l.u = loa_l + RME
@@ -107,7 +99,6 @@ agree_reps <- function(x,
     upper.ci = c(d_hi, loa_l.u, loa_u.u),
     row.names = c("Difference","Lower LoA","Upper LoA")
   )
-
   rej <- (-delta < loa_l.l) * (loa_u.l < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {
@@ -120,12 +111,12 @@ agree_reps <- function(x,
   the_int <- summary(z)$coefficients[1,1]
   the_slope <-  summary(z)$coefficients[2,1]
   tmp.lm <- data.frame(the_int, the_slope)
-  scalemin = min(c(min(df2$x_bar),min(df2$y_bar)))
-  scalemax = max(c(max(df2$x_bar),max(df2$y_bar)))
-
-  identity.plot = ggplot(df2,
-                         aes(x = x_bar,
-                             y = y_bar)) +
+  scalemin = min(c(min(df$x),min(df$y)))
+  scalemax = max(c(max(df$x),max(df$y)))
+  df = df %>%
+    mutate(id = as.factor(id))
+  identity.plot = ggplot(df,
+                         aes(x = x, y = y,color=id)) +
     geom_point() +
     geom_abline(intercept = 0, slope = 1) +
     geom_abline(
@@ -134,15 +125,18 @@ agree_reps <- function(x,
       linetype = "dashed",
       color = "red"
     ) +
-    xlab("Method: Average of x") +
+    xlab("Method: x") +
     xlim(scalemin,scalemax) +
     ylim(scalemin,scalemax) +
-    ylab("Method: Average of y") +
+    ylab("Method: y") +
     coord_fixed(ratio = 1 / 1) +
-    theme_bw()
-
-  bland_alt.plot =  ggplot(df2,
-                           aes(x = both_avg, y = d)) +
+    theme_bw() +
+    scale_color_viridis_d()
+  df = df %>%
+    mutate(d = x-y,
+           avg_both = (x+y)/2)
+  bland_alt.plot =  ggplot(df,
+                           aes(x = avg_both, y = d)) +
     geom_point(na.rm = TRUE) +
     annotate("rect",
              xmin = -Inf, xmax = Inf,
@@ -168,8 +162,6 @@ agree_reps <- function(x,
     ylab("Average Difference between Methods") +
     theme_bw() +
     theme(legend.position = "none")
-
-
   #######################
   # Return Results ----
   #######################
@@ -180,8 +172,7 @@ agree_reps <- function(x,
                  identity.plot = identity.plot,
                  conf.level = conf.level,
                  agree.level = agree.level,
-                 class = "replicates"),
+                 class = "nested"),
             class = "simple_agree")
-
 
 }
