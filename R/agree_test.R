@@ -90,7 +90,7 @@ agree_test <- function(x,
   }
   el <- xbar - gam * stdh
   eu <- xbar + gam * stdh
-  if (!is.missing(delta)){
+  if (!missing(delta)){
   rej <- (-delta < el) * (eu < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {

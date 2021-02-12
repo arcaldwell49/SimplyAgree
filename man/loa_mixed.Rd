@@ -10,6 +10,7 @@ loa_mixed(
   id,
   data,
   plot.xaxis = NULL,
+  delta,
   conf.level = 0.95,
   agree.level = 0.95,
   replicates = 1999,
@@ -26,6 +27,8 @@ loa_mixed(
 \item{data}{A data frame containing the variables within the model.}
 
 \item{plot.xaxis}{column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.}
+
+\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
 

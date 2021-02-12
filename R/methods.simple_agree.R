@@ -2,7 +2,7 @@
 #'
 #' Methods defined for objects returned from the agree functions.
 #'
-#' @param x object of class \code{simple_agree} as returned from \code{loa_mixed}
+#' @param x object of class \code{simple_agree} as returned from a fucntion starting with 'agree'
 #' @param type Type of plot to output. Default (1) is Bland-Altman plot while type=2 will produce a line-of-identity plot.
 #' @param ... further arguments passed through, see description of return value
 #'   for details.

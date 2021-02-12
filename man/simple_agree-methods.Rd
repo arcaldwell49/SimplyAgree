@@ -11,7 +11,7 @@
 \method{plot}{simple_agree}(x, type = 1, ...)
 }
 \arguments{
-\item{x}{object of class \code{simple_agree} as returned from \code{loa_mixed}}
+\item{x}{object of class \code{simple_agree} as returned from a fucntion starting with 'agree'}
 
 \item{...}{further arguments passed through, see description of return value
 for details.
@@ -26,5 +26,5 @@ for details.
 }
 }
 \description{
-Methods defined for objects returned from the loa_mixed functions.
+Methods defined for objects returned from the agree functions.
 }

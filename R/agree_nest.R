@@ -13,7 +13,7 @@
 #'   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.
+#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 #'   \item{\code{"conf.level"}}{Returned as input.}
 #'   \item{\code{"agree.level"}}{Returned as input.}
 #'
@@ -23,7 +23,7 @@
 #'
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
-#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var mean
+#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @import dplyr
 #' @import ggplot2
@@ -33,6 +33,7 @@ agree_nest <- function(x,
                        y,
                        id,
                        data,
+                       delta,
                        agree.level = .95,
                        conf.level = .95){
 
@@ -99,7 +100,7 @@ agree_nest <- function(x,
     upper.ci = c(d_hi, loa_l.u, loa_u.u),
     row.names = c("Difference","Lower LoA","Upper LoA")
   )
-  if (!is.missing(delta)) {
+  if (!missing(delta)) {
   rej <- (-delta < loa_l.l) * (loa_u.l < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {

@@ -4,6 +4,7 @@
 #' @param condition column name indicating different conditions subjects were tested under.
 #' @param id column name indicating the subject/participant identifier
 #' @param plot.xaxis column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.
+#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%.
 #' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 500.
@@ -134,15 +135,10 @@ loa_mixed = function(diff,
         )
     }
 
-    if (!is.missing(delta)) {
-      rej <- (-delta < res_tab$lower.ci[2]) * (res_tab$upper.ci[3] < delta)
-      rej_text = "don't reject h0"
-      if (rej == 1) {
-        rej_text = "reject h0"
-      }
-    } else {
-      rej_text = "No Hypothesis Test"
-    }
+
+
+
+
 
     p = ggplot(data=df_plt,
                aes(x=X,
@@ -190,6 +186,16 @@ loa_mixed = function(diff,
 
   } else {
     p = NULL
+  }
+
+  rej_text = "No Hypothesis Test"
+
+  if (!missing(delta)) {
+    rej <- (-delta < res_tab$lower.ci[2]) * (res_tab$upper.ci[3] < delta)
+    rej_text = "don't reject h0"
+    if (rej == 1) {
+      rej_text = "reject h0"
+    }
   }
 
   structure(list(bs_tab = res_tab,

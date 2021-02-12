@@ -2,9 +2,9 @@
 % Please edit documentation in R/agree_test.R
 \name{agree_test}
 \alias{agree_test}
-\title{Tests for Absolute Agreement with Replicates}
+\title{Tests for Absolute Agreement}
 \usage{
-agree_test(x, y, delta = 0.1, conf.level = 0.95, agree.level = 0.95)
+agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
 }
 \arguments{
 \item{x}{Vector with first measurement}
@@ -33,7 +33,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-Tests for Absolute Agreement with Replicates
+Tests for Absolute Agreement
 }
 \section{References}{
 

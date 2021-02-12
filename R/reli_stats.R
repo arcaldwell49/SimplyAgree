@@ -1,5 +1,5 @@
-#' TReliability Statistics
-#' @param x Name of column containing the measurement of interest
+#' Reliability Statistics
+#' @param measure Name of column containing the measurement of interest
 #' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
 #' @param id Column with subject identifier
 #' @param data Data frame with all data
@@ -13,7 +13,7 @@
 #'   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.
+#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 #'   \item{\code{"conf.level"}}{Returned as input.}
 #'
 #' }
@@ -22,10 +22,12 @@
 #'
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
-#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var mean
+#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
+#' @importFrom sjstats cv
 #' @import dplyr
 #' @import ggplot2
+#' @import lme4
 #' @export
 
 
@@ -61,7 +63,7 @@ reli_stats = function(measure,
   mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
                    data = x.df,
                    na.action = na.omit)
-  vc <- lme4::VarCorr(mod.lmer) # Get Variance Components
+  vc <- VarCorr(mod.lmer) # Get Variance Components
   MS_id <- vc$id[1, 1] # var by id
   MS_items <- vc$items[1, 1] # var by item
   MSE <- error <- MS_resid <- (attributes(vc)$sc)^2
@@ -154,7 +156,7 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
-  cv = sjstats::cv(mod.lmer)
+  cv_out = cv(mod.lmer)
   SEM = sqrt(MSE)
   SEP = sqrt(MSE)*sqrt(1-ICC32^2)
 
@@ -181,7 +183,7 @@ reli_stats = function(measure,
                  var_comp = MS.df,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
-                 cv = cv,
+                 cv = cv_out,
                  SEM = SEM,
                  SEP = SEP,
                  plot.reliability)

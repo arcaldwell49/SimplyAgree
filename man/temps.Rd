@@ -28,7 +28,7 @@ A data frame with 20 rows with 3 variables
 \describe{
   \item{id}{Subject identifier}
   \item{X}{X measurment}
-  \item{Y}{Y  measurement}
+  \item{Y}{Y measurement}
 
 
 }

@@ -19,6 +19,9 @@ Imports:
     dplyr,
     magrittr,
     tidyselect,
+    tidyr,
+    sjstats,
+    stringr
 Suggests: 
     knitr,
     rmarkdown,

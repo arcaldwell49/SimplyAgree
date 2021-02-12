@@ -105,8 +105,8 @@ loa_bs = function(diff,
               offset = NULL,
               na.action = na.omit)
 
-  mean = as.data.frame(emmeans::emmeans(res3, ~1))$emmean
-  se = as.data.frame(emmeans::emmeans(res3, ~1))$SE
+  mean = as.data.frame(emmeans(res3, ~1))$emmean
+  se = as.data.frame(emmeans(res3, ~1))$SE
   vartab = as.data.frame(VarCorr(res3))
   withinsd = vartab$sdcor[2]
   betweensd <- vartab$sdcor[1]

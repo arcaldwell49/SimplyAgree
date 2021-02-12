@@ -8,4 +8,10 @@ utils::globalVariables(c("boot_bias",
                          "boot_upper_loa",
                          "vartab",
                          "Condition","X","d",
-                         "both_avg", "x_bar", "y_bar"))
+                         "both_avg", "x_bar", "y_bar",
+                         "drop_na", "delta", "is.missing",
+                         "CI.n", "power.power", "value",
+                         "feature", "name", "stack",
+                         "sf", "qf", "items", "values",
+                         "avg_both", "stats.final"
+                         ))
