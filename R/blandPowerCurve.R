@@ -31,7 +31,7 @@ blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
                             conf.level = .95,
                             agree.level = .95){
   if(length(mu) > 1) {
-    stop("Length of mu cannot be greater than 1")
+    stop("aLength of mu cannot be greater than 1")
   }
   if(length(SD) > 1) {
     stop("Length of SD cannot be greater than 1")
