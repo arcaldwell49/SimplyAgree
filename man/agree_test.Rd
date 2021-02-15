@@ -26,7 +26,8 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"s.shift"}}{Scale shift from x to y.}
   \item{\code{"l.shift"}}{Location shift from x to y.}
   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
-  \item{\code{"delta"}}{a data frame listing the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
+  \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
+  \item{\code{"h0_test"}}{Decision from hypothesis test.}
   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 

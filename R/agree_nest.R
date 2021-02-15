@@ -25,6 +25,7 @@
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
+#' @importFrom tidyr drop_na
 #' @import dplyr
 #' @import ggplot2
 #' @export

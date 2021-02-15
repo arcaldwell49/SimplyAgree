@@ -2,7 +2,7 @@
 % Please edit documentation in R/blandPowerCurve.R
 \name{blandPowerCurve}
 \alias{blandPowerCurve}
-\title{Estimate power curve for Bland-Altman limits of agreement test}
+\title{Estimate power curve for Bland-Altman limits of agreement}
 \usage{
 blandPowerCurve(
   samplesizes = seq(10, 100, 1),
@@ -14,24 +14,29 @@ blandPowerCurve(
 )
 }
 \arguments{
-\item{samplesizes}{vector of samples sizes to}
+\item{samplesizes}{vector of samples sizes at which to estimate power.}
 
 \item{mu}{mean of differences}
 
 \item{SD}{standard deviation of differences}
 
-\item{delta}{pre-determined clinical agreement interval}
+\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement. More than one delta can be provided.}
 
-\item{conf.level}{the confidence level required. Default is 95\%.}
+\item{conf.level}{the confidence level(s) required. Default is 95\%. More than one confidence level can be provided.}
 
-\item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
+\item{agree.level}{the agreement level(s) required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95. More than one confidence level can be provided.}
 }
 \value{
-a dataframe containing the power analysis results
+a dataframe containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
-Estimate power curve for Bland-Altman limits of agreement test
+Estimate power curve for Bland-Altman limits of agreement
 }
+\section{references}{
+
+Lu, M. J., Zhong, W. H., Liu, Y. X., Miao, H. Z., Li, Y. C., & Ji, M. H. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
+}
+
 \examples{
 \dontrun{
 powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),

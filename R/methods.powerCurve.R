@@ -25,18 +25,15 @@
 
 find_n <- function(x, power = 0.8){
   if(!"powerCurve" %in% class(x)) warning("input is not a powerCurve object")
+  powtest = power
 
   test = x %>%
     as.data.frame() %>%
     group_by(delta,conf.level,agree.level) %>%
-    summarise(power = nth(power, which.min(abs(power-.8))),
+    summarise(power = nth(power, which.min(abs(power-powtest))),
               .groups = 'drop')
   test$N = NA
-  val = x[which(
-    x$delta == test$delta[1] &
-      x$agree.level == test$agree.level[1] &
-      x$conf.level == test$conf.level[1]  & x$power == test$power[1]
-  ), ]$N
+
 
   for(i in 1:nrow(test)){
     val = unlist(x[which(

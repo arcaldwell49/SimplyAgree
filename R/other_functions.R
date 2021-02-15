@@ -56,8 +56,10 @@ ccc.xy <- function(x, y, conf.level,agree.level) {
                        d.sd = delta.sd,
                        var.d = var.d,
                        var.loa = var.dlim,
+                       lower.loa = l.loa,
                        lower.lci = (l.loa - qt(N.,k-1)*sqrt(var.dlim)),
                        lower.uci = (l.loa + qt(N.,k-1)*sqrt(var.dlim)),
+                       upper.loa = u.loa,
                        upper.lci = (u.loa - qt(N.,k-1)*sqrt(var.dlim)),
                        upper.uci = (u.loa + qt(N.,k-1)*sqrt(var.dlim)))
 
