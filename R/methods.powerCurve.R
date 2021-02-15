@@ -4,8 +4,6 @@
 #'
 #' @param x object of class \code{powerCurve}
 #' @param power Level of power (value between 0 and 1) for find_n to find the sample size.
-#' @param tolerance Degree of tolerance for find_n to find the nearest observed power to the desired power.
-#' @param type Type of plot to output. Default (1) is power curve plot while type=2 will produce a confidence interval width plot.
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{blandPowerCurve}}.
@@ -22,14 +20,35 @@
 
 #' @rdname powerCurve-methods
 #' @importFrom stringr str_split
+#' @importFrom magrittr "%>%"
 #' @export
 
-find_n <- function(x, power = 0.8, tolerance = 0.01){
+find_n <- function(x, power = 0.8){
   if(!"powerCurve" %in% class(x)) warning("input is not a powerCurve object")
-  if (min(abs(x$power.power - power)) > tolerance)
-    warning("Achieved power not found -- try more levels in samplesize or a wider samplesize range")
-  n <- x$CI.n[which.min(abs(x$power.power - power))]
-  ceiling(n)
+
+  test = x %>%
+    as.data.frame() %>%
+    group_by(delta,conf.level,agree.level) %>%
+    summarise(power = nth(power, which.min(abs(power-.8))),
+              .groups = 'drop')
+  test$N = NA
+  val = x[which(
+    x$delta == test$delta[1] &
+      x$agree.level == test$agree.level[1] &
+      x$conf.level == test$conf.level[1]  & x$power == test$power[1]
+  ), ]$N
+
+  for(i in 1:nrow(test)){
+    val = unlist(x[which(
+      x$delta == test$delta[i] &
+        x$agree.level == test$agree.level[i] &
+        x$conf.level == test$conf.level[i]  & x$power == test$power[i]
+    ), ]$N)
+
+    test$N[i] = val
+  }
+
+  return(test)
 }
 
 
@@ -41,51 +60,19 @@ find_n <- function(x, power = 0.8, tolerance = 0.01){
 #' @importFrom dplyr mutate select
 #' @export
 
-plot.powerCurve <- function(x, type = 1, ...){
-
-  if(type ==1 ){
+plot.powerCurve <- function(x, ...){
     plotdf = x
     plot_out = ggplot(plotdf) +
-      aes(x = CI.n, y = power.power) +
+      aes(x = N,
+          y = power,
+          color = as.factor(delta)) +
       geom_line() +
       xlab("Sample Size (N pairs)") +
       ylab(expression("Power (1-"~beta~")")) +
-      theme_bw()
+      theme_bw() +
+      facet_grid(agree.level~conf.level,
+                 labeller = label_both) +
+      labs(color = "Delta")
     return(plot_out)
-  }
-  if(type == 2){
-    features <- c("LOA.mu",
-                  "LOA.upperLOA",
-                  "LOA.lowerLOA",
-                  "CI.lowerLOA_upperCI",
-                  "CI.lowerLOA_lowerCI",
-                  "CI.upperLOA_lowerCI",
-                  "CI.upperLOA_upperCI")
-
-    class(x) <- "data.frame"
-    plotdf <- x %>%
-      select(c("CI.n", "beta.delta", features)) %>%
-      pivot_longer(cols = features)
-
-    plotdf <- plotdf %>%
-      mutate(feature = sapply(stringr::str_split(plotdf$name, "[.]"), function(x) x[1]))
-
-    plot_out = plotdf %>%
-      ggplot() +
-      aes(x = CI.n,
-          y = value,
-          color = feature,
-          group = name) +
-      geom_line() +
-      #geom_hline(yintercept = c(-beta.delta,beta.delta), lty = 2) +
-      xlab("Sample Size (N pairs)") +
-      ylab("Difference between Methods") +
-      labs(color = "") +
-      ggtitle("Confidence Intervals") +
-      theme_bw()
-    return(plot_out)
-  }
-
-
 
 }

@@ -22,6 +22,7 @@
 #' find_n(powerCurve, power = .8)
 #' }
 #' @importFrom magrittr "%>%"
+#' @import dplyr
 #' @export
 blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
                             mu = 0,
@@ -29,21 +30,45 @@ blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
                             delta,
                             conf.level = .95,
                             agree.level = .95){
+  if(length(mu) > 1) {
+    stop("Length of mu cannot be greater than 1")
+  }
+  if(length(SD) > 1) {
+    stop("Length of SD cannot be greater than 1")
+  }
   alpha = 1-conf.level
   gamma = 1-agree.level
-  LOA <- estimateLimitsOfAgreement(mu = mu, SD = SD, agree.level = agree.level)
+  final_dat = data.frame()
+  dat_grid = expand.grid(conf.level,agree.level,delta)
+  colnames(dat_grid) = c("conf.level","agree.level","delta")
+  for(i in 1:nrow(dat_grid)){
+  LOA <- estimateLimitsOfAgreement(mu = mu,
+                                   SD = SD,
+                                   agree.level = dat_grid$agree.level[i])
 
   df <- lapply(samplesizes, function(this_n) {
     LOA %>%
-      estimateConfidenceIntervals(n = this_n, conf.level = conf.level) %>%
-      estimateTypeIIerror(delta = delta) %>%
+      estimateConfidenceIntervals(n = this_n,
+                                  conf.level = dat_grid$conf.level[i]) %>%
+      estimateTypeIIerror(delta = dat_grid$delta[i]) %>%
       estimatePowerFromBeta() %>%
       unlist(recursive = FALSE) %>%
       as.data.frame()
   })
-
-
-  result <- do.call(rbind, df)
-  class(result) <- list("powerCurve","data.frame")
-  return(result)
+  result <- do.call(rbind, df) %>%
+    select(CI.n,LOA.mu,LOA.SD,beta.delta,
+           power.power) %>%
+    rename(mu = LOA.mu,
+           SD = LOA.SD,
+           N = CI.n,
+           delta = beta.delta,
+           power = power.power) %>%
+    mutate(agree.level = dat_grid$agree.level[i],
+           conf.level = dat_grid$conf.level[i])
+  final_dat = rbind(final_dat,result)
+  }
+  final_dat = final_dat %>%
+    mutate(power = ifelse(power < 0, 0,power))
+  class(final_dat) <- list("powerCurve","data.frame")
+  return(final_dat)
 }

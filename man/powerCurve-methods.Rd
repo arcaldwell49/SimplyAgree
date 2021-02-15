@@ -6,18 +6,14 @@
 \alias{plot.powerCurve}
 \title{Methods for powerCurve objects}
 \usage{
-find_n(x, power = 0.8, tolerance = 0.01)
+find_n(x, power = 0.8)
 
-\method{plot}{powerCurve}(x, type = 1, ...)
+\method{plot}{powerCurve}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{powerCurve}}
 
 \item{power}{Level of power (value between 0 and 1) for find_n to find the sample size.}
-
-\item{tolerance}{Degree of tolerance for find_n to find the nearest observed power to the desired power.}
-
-\item{type}{Type of plot to output. Default (1) is power curve plot while type=2 will produce a confidence interval width plot.}
 
 \item{...}{further arguments passed through, see description of return value
 for details.

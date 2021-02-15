@@ -128,6 +128,6 @@ estimatePowerFromBeta <- function(beta){
   class(result) <- "power"
 
   joined <- list(LOA = beta$LOA, CI = beta$CI, beta = beta$beta, power = result)
-  class(joined) <- list("LOA", "CI", "beta", "power")
+  class(joined) <- list("beta", "power")
   return(joined)
 }
