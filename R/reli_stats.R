@@ -10,18 +10,24 @@
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
-#'   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
-#'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-#'   \item{\code{"conf.level"}}{Returned as input.}
+#'   \item{\code{"icc"}}{Table of ICC results}
+#'   \item{\code{"lmer"}}{Linear mixed model from lme4}
+#'   \item{\code{"anova"}}{Analysis of Variance table}
+#'   \item{\code{"var_comp"}}{Table of Variance Components}
+#'   \item{\code{"n.id"}}{Number of subjects/participants}
+#'   \item{\code{"n.items"}}{Number of items/time points}
+#'   \item{\code{"cv"}}{Coefficient of Variation}
+#'   \item{\code{"SEM"}}{Standard Error of the Measurement}
+#'   \item{\code{"SEP"}}{Standard Error of Predicitions}
+#'   \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
+#'
 #'
 #' }
 
 #' @examples #to be added
 #'
 #' @section References:
-#' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
+#' Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @importFrom sjstats cv
@@ -177,9 +183,9 @@ reli_stats = function(measure,
     scale_color_viridis_d()+
     theme_bw()
 
-  result <- list(results = results,
+  result <- list(icc = results,
                  lmer = mod.lmer,
-                 anova = stats.final,
+                 anova = stats,
                  var_comp = MS.df,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
@@ -189,5 +195,5 @@ reli_stats = function(measure,
                  plot.reliability)
 
   structure(result,
-            class = "simple_agree")
+            class = "simple_reli")
 }

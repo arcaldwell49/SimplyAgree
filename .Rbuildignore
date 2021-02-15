@@ -12,3 +12,4 @@
 ^README.html$
 ^vignettes/reanalysis_supp\.R$
 ^pwr_agree$
+^codecov\.yml$

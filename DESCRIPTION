@@ -29,7 +29,8 @@ Suggests:
     cccrm,
     tidyverse,
     readr,
-    ggpubr
+    ggpubr,
+    covr
 VignetteBuilder:
     knitr
 Depends: 
