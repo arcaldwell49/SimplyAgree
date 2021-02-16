@@ -8,12 +8,16 @@ testthat::test_that("basic runs", {
                 0.1675079,
                 0.1492624,
                 0.2243616)
-  #skip('skip')
+
+  #skip_on_cran()
+  set.seed(117)
   test_bca = loa_mixed(
     diff = "diff",
     condition = "trial_condition",
     id = "id",
     data = recpre_long,
+    delta = 2,
+    plot.xaxis = "AM",
     conf.level = .95,
     agree.level = .95,
     replicates = 99,
@@ -22,6 +26,8 @@ testthat::test_that("basic runs", {
   testthat::expect_equivalent(test_bca$bs_tab$estimate,
                               estimates,
                               tolerance = 0.001)
+  pr_test = print(test_bca)
+  p = plot(test_bca)
   test_perc = loa_mixed(
     diff = "diff",
     condition = "trial_condition",

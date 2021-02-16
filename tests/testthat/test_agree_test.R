@@ -6,7 +6,7 @@ testthat::test_that("Simple Use Run Through", {
   agree1 = agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5)
-  print(agree1)
+  pr_test = print(agree1)
 
   p = plot(agree1,type=1)
   p = plot(agree1,type=2)

@@ -40,7 +40,8 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"n.id"}}{Number of subjects/participants}
   \item{\code{"n.items"}}{Number of items/time points}
   \item{\code{"cv"}}{Coefficient of Variation}
-  \item{\code{"SEM"}}{Standard Error of the Measurement}
+  \item{\code{"SEM"}}{Standard Error of Measurement}
+  \item{\code{"SEE"}}{Standard Error of the Estimate}
   \item{\code{"SEP"}}{Standard Error of Predicitions}
   \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
 

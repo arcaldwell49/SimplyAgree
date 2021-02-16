@@ -17,7 +17,8 @@
 #'   \item{\code{"n.id"}}{Number of subjects/participants}
 #'   \item{\code{"n.items"}}{Number of items/time points}
 #'   \item{\code{"cv"}}{Coefficient of Variation}
-#'   \item{\code{"SEM"}}{Standard Error of the Measurement}
+#'   \item{\code{"SEM"}}{Standard Error of Measurement}
+#'   \item{\code{"SEE"}}{Standard Error of the Estimate}
 #'   \item{\code{"SEP"}}{Standard Error of Predicitions}
 #'   \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
 #'
@@ -53,7 +54,7 @@ reli_stats = function(measure,
     x = x[,col.names]
     n.obs <- dim(x)[1]
     nj <- dim(x)[2]
-    x.s <- stack(as.data.frame(sf))
+    x.s <- stack(as.data.frame(x))
     x.df <- data.frame(x.s, subs = rep(paste("S", 1:n.obs, sep = ""),
                                        nj))
   } else {
@@ -69,6 +70,9 @@ reli_stats = function(measure,
   mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
                    data = x.df,
                    na.action = na.omit)
+  num_lvls = ngrps(mod.lmer)
+  nj = num_lvls["items"]
+  n.obs = num_lvls["id"]
   vc <- VarCorr(mod.lmer) # Get Variance Components
   MS_id <- vc$id[1, 1] # var by id
   MS_items <- vc$items[1, 1] # var by item
@@ -164,7 +168,9 @@ reli_stats = function(measure,
 
   cv_out = cv(mod.lmer)
   SEM = sqrt(MSE)
-  SEP = sqrt(MSE)*sqrt(1-ICC32^2)
+  sd_tots = sqrt(sum(stats[2,])/(n.obs-1))
+  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+  SEP = sd_tots*sqrt(1-ICC3^2)
 
   plot.reliability = ggplot(x.df,
                             aes(
@@ -191,8 +197,9 @@ reli_stats = function(measure,
                  n.item = nrow(ranef(mod.lmer)$item),
                  cv = cv_out,
                  SEM = SEM,
+                 SEE = SEE,
                  SEP = SEP,
-                 plot.reliability)
+                 plot.reliability = plot.reliability)
 
   structure(result,
             class = "simple_reli")

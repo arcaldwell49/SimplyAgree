@@ -1,11 +1,11 @@
 Package: SimplyAgree
 Type: Package
-Title: Agreement Calculations and Sample Size Requirements
+Title: Agreement, Consistency, and Reliability Calculations
 Version: 0.0.1
 Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
                   role = c("aut", "cre"))
 Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
-Description: This package calculate absolute agreement between two continuous variables and the sample size requirements. It principally implements the exact interval calculations propsosed by Shieh, G. (2018). The appropriateness of Bland-Altman’s approximate confidence intervals for limits of agreement. BMC medical research methodology, 18(1), 45. <https://doi.org/10.1186/s12874-018-0505-y>.
+Description: This package calculate absolute agreement between two continuous variables (agree_test), those with replicates (agree_reps), and with nested data (agree_reps and loa_mixed). Power calculations for Bland-Altman agreement limits can be calculated with the blandPowerCurve function. In addition, test-restest reliability can also be estimated (reli_stats).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

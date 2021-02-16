@@ -22,7 +22,20 @@
 #' @export
 
 print.simple_reli <- function(x,...){
+  cat("\n")
+  cat("Coefficient of Variation (%): ",round(x$cv*100,2))
+  cat("\n")
+  cat("Standard Error of Measurement (SEM): ",round(x$SEM,4))
+  cat("\n")
+  cat("Standard Error of the Estimate (SEE): ",round(x$SEE,4))
+  cat("\n")
+  cat("Standard Error of Prediction (SEP): ",round(x$SEP,4))
+  cat("\n")
+  cat("\n")
+  cat("Intraclass Correlation Coefficients")
+  cat("\n")
   print(x$icc)
+  cat("\n")
 }
 
 #' @rdname simple_reli-methods
