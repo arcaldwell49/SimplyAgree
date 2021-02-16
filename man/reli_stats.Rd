@@ -33,11 +33,17 @@ reli_stats(
 Returns single list with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
-  \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-  \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-  \item{\code{"conf.level"}}{Returned as input.}
+  \item{\code{"icc"}}{Table of ICC results}
+  \item{\code{"lmer"}}{Linear mixed model from lme4}
+  \item{\code{"anova"}}{Analysis of Variance table}
+  \item{\code{"var_comp"}}{Table of Variance Components}
+  \item{\code{"n.id"}}{Number of subjects/participants}
+  \item{\code{"n.items"}}{Number of items/time points}
+  \item{\code{"cv"}}{Coefficient of Variation}
+  \item{\code{"SEM"}}{Standard Error of the Measurement}
+  \item{\code{"SEP"}}{Standard Error of Predicitions}
+  \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
+
 
 }
 }
