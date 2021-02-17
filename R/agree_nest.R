@@ -14,6 +14,7 @@
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
 #'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
+#'   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.}
 #'   \item{\code{"conf.level"}}{Returned as input.}
 #'   \item{\code{"agree.level"}}{Returned as input.}
 #'
@@ -23,9 +24,13 @@
 #'
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
+#' King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. Statistics in Medicine, 20, 2131:2147.
+#' King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.
+#' Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
-#' @importFrom tidyr drop_na
+#' @importFrom tidyr drop_na pivot_longer
+#' @importFrom cccrm cccUst
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -52,6 +57,21 @@ agree_nest <- function(x,
            y = all_of(y)) %>%
     select(id,x,y) %>%
     drop_na()
+
+  df_long = df %>%
+    pivot_longer(!id,
+                 names_to = "method",
+                 values_to = "measure")
+
+  ccc_nest = cccUst(dataset = df_long,
+                    ry = "measure",
+                    rmet = "method",
+                    cl = conf.level)
+
+  ccc.xy = data.frame(est.ccc = ccc_nest[1],
+                      lower.ci = ccc_nest[2],
+                      upper.ci = ccc_nest[3],
+                      SE = ccc_nest[4])
 
   df2 = df %>%
     group_by(id) %>%
@@ -177,6 +197,7 @@ agree_nest <- function(x,
                  identity.plot = identity.plot,
                  conf.level = conf.level,
                  agree.level = agree.level,
+                 ccc.xy = ccc.xy,
                  class = "nested"),
             class = "simple_agree")
 

@@ -69,7 +69,8 @@ plot.powerCurve <- function(x, ...){
       theme_bw() +
       facet_grid(agree.level~conf.level,
                  labeller = label_both) +
-      labs(color = "Delta")
+      labs(color = "Delta") +
+      scale_color_viridis_d()
     return(plot_out)
 
 }

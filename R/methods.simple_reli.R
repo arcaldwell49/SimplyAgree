@@ -34,7 +34,7 @@ print.simple_reli <- function(x,...){
   cat("\n")
   cat("Intraclass Correlation Coefficients")
   cat("\n")
-  print(x$icc)
+  print(x$icc,digits=4)
   cat("\n")
 }
 

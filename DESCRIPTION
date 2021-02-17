@@ -21,12 +21,12 @@ Imports:
     tidyselect,
     tidyr,
     sjstats,
-    stringr
+    stringr,
+    cccrm
 Suggests: 
     knitr,
     rmarkdown,
     testthat,
-    cccrm,
     tidyverse,
     readr,
     ggpubr,

@@ -42,8 +42,12 @@ loa_mixed(
 Returns single list with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"vartab"}}{Table of variance components}
-
+  \item{\code{"var_comp"}}{Table of variance components}
+  \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
+  \item{\code{"h0_test"}}{Decision from hypothesis test.}
+  \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
+  \item{\code{"conf.level"}}{Returned as input.}
+  \item{\code{"agree.level"}}{Returned as input.}
 }
 }
 \description{

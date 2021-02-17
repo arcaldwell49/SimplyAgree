@@ -42,7 +42,7 @@ ccc.xy <- function(x, y, conf.level,agree.level) {
   ult = (exp(2 * ult) - 1) / (exp(2 * ult) + 1)
   delta.sd <- sqrt(var(delta, na.rm = TRUE))
   var.d = (delta.sd)^2/k
-  var.dlim = (1/k+zv/(2*(k-1)))*var.d
+  var.dlim = (1/k+zv/(2*(k-1)))*(delta.sd)^2
 
   ba.p <- mean(delta)
   pct <- 1 - (1 - agree.level) / 2

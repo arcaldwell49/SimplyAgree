@@ -21,10 +21,10 @@ testthat::test_that("Simple Use Run Through", {
                               c(0.4383333, -1.9470156, 2.8236823),
                               tolerance = 0.001)
   testthat::expect_equivalent(agree1$loa$lower.ci[2:3],
-                              c(-2.150644, 2.620054),
+                              c(-2.810938, 1.959760),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$upper.ci[2:3],
-                              c(-1.743387, 3.027311),
+                              c(-1.083094, 3.687604),
                               tolerance = 0.01)
 
   agree2 = agree_test(x = reps$x,

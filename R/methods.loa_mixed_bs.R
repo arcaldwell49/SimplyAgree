@@ -26,7 +26,7 @@ print.loa_mixed_bs <- function(x,...){
   conf = paste0(x$conf.level*100)
   title = paste0(agree,"% Limits of Agreement with Boostrap ",conf, "% Confidence Intervals \n")
   cat(title)
-  print(x$bs_tab)
+  print(x$loa)
 }
 
 #' @rdname loa_mixed_bs-methods
@@ -35,10 +35,10 @@ print.loa_mixed_bs <- function(x,...){
 #' @export
 
 plot.loa_mixed_bs <- function(x,...){
-  if(is.null(x$plot)){
+  if(is.null(x$bland_alt.plot)){
     stop("No plot provided from this object. Be sure to set the plot.xaxis argument")
   }
 
-  return(x$plot)
+  return(x$bland_alt.plot)
 
 }
