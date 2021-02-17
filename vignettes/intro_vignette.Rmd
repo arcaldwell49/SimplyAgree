@@ -20,10 +20,39 @@ The `SimplyAgree` R package was created to make the process of quantifiying meas
 
 In this vignette I will shortly demonstrate the implementation of each function and *most* of the underlying calculations within each function
 
+```{r}
+library(SimplyAgree)
+```
+
 
 # Simple Agreement
 
-In the simpliest scenario, 
+## `agree_test`
+
+In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). In this scenario each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant. In most cases we have a degree of agreement that we would deem adequate. This may constitute a hypothesis wherein you may believe the agreement between two measurements is within a certain limit (limits of agreement). If this is the goal then the `agree_test` function is what you need to use in this package.
+
+The data for the two measurements are put into the `x` and `y` arguments. If there is a hypothesized limit of agreement then this can be set with the `delta` argument (this is optional). Next, the limit of agreement can be set with the `agree.level` and the confidence level ($1-\alpha$). Once those are set the analysis can be run. Please note, this package has pre-loaded data from the Zou 2013 paper. While data does not conform the assumptions of the test it can be used to test out many of the functions in this package. Since there isn't an *a priori* hypothesis I will not declare a `delta` argument, but I will estimate the 95% confidence intervals for 80% limits of agreement.
+
+```{r}
+a1 = agree_test(x = reps$x,
+                y = reps$y,
+                agree.level = .8)
+```
+
+We can then print the general results. These results include the general parameters of the analysis up top, then the results of the Shieh exact test for agreement (no conclusion is included due to the lack of a `delta` argument being set). Then the limits of agreement, with confidence limits, are incluced. Lastly, Lin's Concordance Correlation Coefficient, another measure of agreement, is also included.
+
+```{r}
+print(a1)
+```
+
+Next, we can use the generic `plot` function to produce visualizations of agreement. This includes the Bland-Altman plot (`type = 1`) and a line-of-identity plot (`type = 2`).
+
+```{r}
+plot(a1, type = 1)
+
+plot(a1, type = 2)
+```
+
 
 # Repeated Measures Agreement
 
