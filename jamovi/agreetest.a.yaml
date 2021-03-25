@@ -1,0 +1,60 @@
+---
+name:  agreetest
+title: Simple Test of Agreement
+menuGroup: SimplyAgree
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: method1
+      title: Method 1
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: method2
+      title: Method 2
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: .50
+      max: .999
+      default: .95
+      description:
+          ui: >
+            the confidence interval width.
+          R: >
+            a number between .50 and .999 (default: .95), the width of confidence
+            intervals
+
+    - name: agreeWidth
+      title: Agreement level
+      type: Number
+      min: .50
+      max: .999
+      default: .95
+      description:
+          ui: >
+            The agreement level
+          R: >
+            a number between .50 and .999 (default: .95), the width of agreement limits
+
+    - name: testValue
+      title: Test Value
+      type: Number
+      default: 2
+      description:
+          ui: Value that would define adequate absolute agreement.
+          R: a number specifying the
+...

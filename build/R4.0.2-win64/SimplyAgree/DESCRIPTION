@@ -1,0 +1,19 @@
+Package: SimplyAgree
+Type: Package
+Title: Agreement, Consistency, and Reliability Calculations
+Version: 0.0.1
+Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
+                  role = c("aut", "cre"))
+Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
+Description: This package calculate absolute agreement between two continuous variables (agree_test), those with replicates (agree_reps), and with nested data (agree_reps and loa_mixed). Power calculations for Bland-Altman agreement limits can be calculated with the blandPowerCurve function. In addition, test-restest reliability can also be estimated (reli_stats).
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: ggplot2, emmeans, lme4, boot, stats, dplyr, magrittr,
+        tidyselect, tidyr, sjstats, stringr, cccrm
+Suggests: knitr, rmarkdown, testthat, tidyverse, readr, ggpubr, covr
+VignetteBuilder: knitr
+Depends: R (>= 3.5)
+Author: Aaron Caldwell [aut, cre]
+Built: R 4.0.2; ; 2021-03-25 17:01:18 UTC; windows

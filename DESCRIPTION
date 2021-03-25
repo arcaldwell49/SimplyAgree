@@ -22,7 +22,8 @@ Imports:
     tidyr,
     sjstats,
     stringr,
-    cccrm
+    cccrm,
+    jmvcore
 Suggests: 
     knitr,
     rmarkdown,

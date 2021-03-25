@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="feature-reduction-pca-cmds-ica">Feature Reduction (PCA, cMDS, ICA…)</h1>
+<ul>
+<li><a href="#quick-and-exploratory-method">Quick and Exploratory Method</a></li>
+<li><a href="#principal-component-analysis-pca">Principal Component Analysis (PCA)</a>
+<ul>
+<li><a href="#using-the-psych-package-for-pca">Using the <code>psych</code> package for PCA</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul>
+<p>Also known as <a href="https://en.wikipedia.org/wiki/Feature_extraction"><strong>feature extraction</strong> or <strong>dimension reduction</strong></a> in machine learning, the goal of variable reduction is to <strong>reduce the number of predictors</strong> by derivating, from a set of measured data, new variables intended to be informative and non-redundant. This method can be used to <strong>simplify models</strong>, which can benefit model interpretation, shorten fitting time, and improve generalization (by reducing overfitting).</p>
+<h2 id="quick-and-exploratory-method">Quick and Exploratory Method</h2>
+<p>Let’s start by fitting a multiple regression with the <code>attitude</code> dataset, available is base R, to predict the overall <strong>rating</strong> by employees of their organization with the remaining variables (handling of employee <strong>complaints</strong>, special <strong>privileges</strong>, opportunity of <strong>learning</strong>, <strong>raises</strong>, a feedback considered too <strong>critical</strong> and opportunity of <strong>advancement</strong>).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">model &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">parameters</span>(model)</a></code></pre></div>
+<pre><code>#&gt; Parameter   | Coefficient |    SE |          95% CI |     t | df |      p
+#&gt; -------------------------------------------------------------------------
+#&gt; (Intercept) |       10.79 | 11.59 | [-13.19, 34.76] |  0.93 | 23 | 0.362 
+#&gt; complaints  |        0.61 |  0.16 | [  0.28,  0.95] |  3.81 | 23 | &lt; .001
+#&gt; privileges  |       -0.07 |  0.14 | [ -0.35,  0.21] | -0.54 | 23 | 0.596 
+#&gt; learning    |        0.32 |  0.17 | [ -0.03,  0.67] |  1.90 | 23 | 0.070 
+#&gt; raises      |        0.08 |  0.22 | [ -0.38,  0.54] |  0.37 | 23 | 0.715 
+#&gt; critical    |        0.04 |  0.15 | [ -0.27,  0.34] |  0.26 | 23 | 0.796 
+#&gt; advance     |       -0.22 |  0.18 | [ -0.59,  0.15] | -1.22 | 23 | 0.236
+</code></pre>
+<p>We can explore a reduction of the number of parameters with the <code>reduce_parameters()</code> function.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">newmodel &lt;-<span class="st"> </span><span class="kw">reduce_parameters</span>(model)</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">parameters</span>(newmodel)</a></code></pre></div>
+<pre><code>#&gt; Parameter                                                              | Coefficient |   SE |         95% CI |     t | df |      p
+#&gt; ----------------------------------------------------------------------------------------------------------------------------------
+#&gt; (Intercept)                                                            |       64.63 | 1.57 | [61.41, 67.85] | 41.19 | 27 | &lt; .001
+#&gt; raises_0.88/learning_0.82/complaints_0.78/privileges_0.70/advance_0.68 |        4.62 | 0.90 | [ 2.78,  6.46] |  5.16 | 27 | &lt; .001
+#&gt; critical_0.80                                                          |       -3.41 | 1.59 | [-6.67, -0.14] | -2.14 | 27 | 0.041
+</code></pre>
+<p>This quickly <em>hints</em> toward the fact that the model could be represented via <strong>two “latent” dimensions</strong>, one correlated with all the positive things that a company has to offer, and the other one related to the amount of negative critiques received by the employees. These two dimensions have a positive and negative relationship with the company rating, respectively.</p>
+<blockquote>
+<p>What does <code>reduce_parameters()</code> exactly do?</p>
+</blockquote>
+<p>This function performs a reduction in the parameters space (the number of variables). It starts by creating a new set of variables, based on a given method (the default method is “<strong>PCA</strong>”, but other are available via the <code>method</code> argument, such as “<strong>cMDS</strong>”, “<strong>DRR</strong>” or “<strong>ICA</strong>”). Then, it names this new dimensions using the original variables that <em>correlate</em> the most with it. For instance, a variable named ‘V1_0.97/V4_-0.88’ means that the V1 and the V4 variables correlate maximally (with respective coefficients of .97 and -.88) with this dimension.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">reduce_parameters</span>(model, <span class="dt">method =</span> <span class="st">&quot;cMDS&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="st">  </span><span class="kw">parameters</span>()</a></code></pre></div>
+<pre><code>#&gt; Parameter                                                 | Coefficient |   SE |         95% CI |     t | df |      p
+#&gt; ---------------------------------------------------------------------------------------------------------------------
+#&gt; (Intercept)                                               |       64.63 | 1.41 | [61.73, 67.53] | 45.80 | 26 | &lt; .001
+#&gt; raises_0.85/complaints_0.84/learning_0.83/privileges_0.74 |        0.43 | 0.07 | [ 0.28,  0.57] |  6.14 | 26 | &lt; .001
+#&gt; advance_-0.60                                             |        0.32 | 0.13 | [ 0.04,  0.59] |  2.36 | 26 | 0.026 
+#&gt; critical_-0.65                                            |       -0.24 | 0.15 | [-0.56,  0.07] | -1.61 | 26 | 0.120
+</code></pre>
+<p>A different method (<strong>Classical Multidimensional Scaling - cMDS</strong>) suggests that negative critiques do not have a significant impact on the rating, and that the lack of opportunities of career advancement is a separate dimension with an importance on its own.</p>
+<p>Although this function can be useful in exploratory data analysis, it’s best to perform the dimension reduction step in a <strong>separate and dedicated stage</strong>, as this is a very important process in the data analysis workflow.</p>
+<h2 id="principal-component-analysis-pca">Principal Component Analysis (PCA)</h2>
+<p>PCA is a widely used procedure that lies in-between dimension reduction and structural modelling. Indeed, one of the way of reducing the number of predictors is to extract a new set of uncorrelated variables that will <em>represent</em> variance of your initial dataset. But how the original variables relate between themselves can also be a question on its own.</p>
+<p>We can apply the <code>principal_components()</code> function to do the the predictors of the model:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">pca &lt;-<span class="st"> </span><span class="kw">principal_components</span>(insight<span class="op">::</span><span class="kw">get_predictors</span>(model), <span class="dt">n =</span> <span class="st">&quot;auto&quot;</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">pca</a></code></pre></div>
+<pre><code>#&gt; # Loadings from Principal Component Analysis (no rotation)
+#&gt; 
+#&gt; Variable   |  PC1 | Complexity
+#&gt; ------------------------------
+#&gt; complaints | 0.78 |       1.00
+#&gt; privileges | 0.70 |       1.00
+#&gt; learning   | 0.82 |       1.00
+#&gt; raises     | 0.88 |       1.00
+#&gt; critical   | 0.40 |       1.00
+#&gt; advance    | 0.68 |       1.00
+#&gt; 
+#&gt; The unique principal component accounted for 52.82% of the total variance of the original data.
+</code></pre>
+<p>The <code>principal_component()</code> function automatically selected one component (if the number of components is not specified, this function uses <a href="https://easystats.github.io/parameters/reference/n_factors.html"><code>n_factors()</code></a> to estimate the optimal number to keep) and returned the <strong>loadings</strong>, i.e., the relationship with all of the original variables.</p>
+<p>As we can see here, it seems that our new component captured the essence (more than half of the total variance present in the original dataset) of all our other variables together. We can <strong>extract</strong> the values of this component for each of our observation using the <code>predict()</code> method and add in the response variable of our initial dataset.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">newdata &lt;-<span class="st"> </span><span class="kw">predict</span>(pca)</a>
+<a class="sourceLine" id="cb9-2" title="2">newdata<span class="op">$</span>rating &lt;-<span class="st"> </span>attitude<span class="op">$</span>rating</a></code></pre></div>
+<p>We can know update the model with this new component:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">update</span>(model, rating <span class="op">~</span><span class="st"> </span>PC1, <span class="dt">data =</span> newdata) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="st">  </span><span class="kw">parameters</span>()</a></code></pre></div>
+<pre><code>#&gt; Parameter   | Coefficient |   SE |         95% CI |     t | df |      p
+#&gt; -----------------------------------------------------------------------
+#&gt; (Intercept) |       64.63 | 1.67 | [61.22, 68.05] | 38.78 | 28 | &lt; .001
+#&gt; PC1         |        4.62 | 0.95 | [ 2.67,  6.57] |  4.86 | 28 | &lt; .001
+</code></pre>
+<h3 id="using-the-psych-package-for-pca">Using the <code>psych</code> package for PCA</h3>
+<p>You can also use different packages for models, such as <a href="https://cran.r-project.org/package=psych"><code>psych</code></a> (Revelle 2018) or <a href="http://factominer.free.fr/"><code>FactoMineR</code></a> for PCA or Exploratory Factor Analysis (EFA), as it allows for more flexibility, control and details when running such procedures. Thus, the functions from this package are <strong>fully supported</strong> by <code>parameters</code> through the <code>model_parameters()</code> function.</p>
+<p>As such, the above analysis can be fully reproduced as follows:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">library</span>(psych)</a>
+<a class="sourceLine" id="cb12-2" title="2"></a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co"># Fit the PCA</span></a>
+<a class="sourceLine" id="cb12-4" title="4">pca &lt;-<span class="st"> </span>psych<span class="op">::</span><span class="kw">principal</span>(attitude, <span class="dt">nfactors =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="st">  </span><span class="kw">model_parameters</span>()</a>
+<a class="sourceLine" id="cb12-6" title="6">pca</a></code></pre></div>
+<pre><code>#&gt; # Rotated loadings from Principal Component Analysis (varimax-rotation)
+#&gt; 
+#&gt; Variable   |  PC1 | Complexity | Uniqueness
+#&gt; -------------------------------------------
+#&gt; rating     | 0.80 |       1.00 |       0.37
+#&gt; complaints | 0.85 |       1.00 |       0.28
+#&gt; privileges | 0.68 |       1.00 |       0.53
+#&gt; learning   | 0.83 |       1.00 |       0.32
+#&gt; raises     | 0.86 |       1.00 |       0.26
+#&gt; critical   | 0.36 |       1.00 |       0.87
+#&gt; advance    | 0.58 |       1.00 |       0.66
+#&gt; 
+#&gt; The unique principal component (varimax rotation) accounted for 53.09% of the total variance of the original data.
+</code></pre>
+<p><em>Note:</em> By default, <code>psych::principal()</code> uses a <strong>varimax</strong> rotation to extract rotated components, possibly leading to discrepancies in the results.</p>
+<p>Finally, refit the model:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">df &lt;-<span class="st"> </span><span class="kw">cbind</span>(attitude, <span class="kw">predict</span>(pca))</a>
+<a class="sourceLine" id="cb14-2" title="2"></a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="kw">update</span>(model, rating <span class="op">~</span><span class="st"> </span>PC1, <span class="dt">data =</span> df) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="st">  </span><span class="kw">model_parameters</span>()</a></code></pre></div>
+<pre><code>#&gt; Parameter   | Coefficient |   SE |         95% CI |     t | df |      p
+#&gt; -----------------------------------------------------------------------
+#&gt; (Intercept) |       64.63 | 1.37 | [61.83, 67.44] | 47.23 | 28 | &lt; .001
+#&gt; PC1         |        9.69 | 1.39 | [ 6.84, 12.54] |  6.96 | 28 | &lt; .001
+</code></pre>
+<h1 id="references">References</h1>
+<div id="refs" class="references">
+
+<div id="ref-revelle2018">
+
+<p>Revelle, William. 2018. <em>Psych: Procedures for Psychological, Psychometric, and Personality Research</em>. Evanston, Illinois: Northwestern University. <a href="https://CRAN.R-project.org/package=psych">https://CRAN.R-project.org/package=psych</a>.</p>
+</div>
+
+</div>
+
+</body>
+</html>

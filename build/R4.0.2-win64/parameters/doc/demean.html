@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="analysing-longitudinal-or-panel-data">Analysing Longitudinal or Panel Data</h1>
+<ul>
+<li><a href="#sample-data-used-in-this-vignette">Sample data used in this vignette</a></li>
+<li><a href="#heterogeneity-bias">Heterogeneity bias</a></li>
+<li><a href="#adressing-heterogeneity-bias-the-fixed-effects-regression-fe-approach">Adressing heterogeneity bias: the Fixed Effects Regression (FE) approach</a>
+<ul>
+<li><a href="#computing-the-de-meaned-and-group-meaned-variables">Computing the de-meaned and group-meaned variables</a></li>
+</ul></li>
+<li><a href="#adressing-heterogeneity-bias-the-mixed-model-approach">Adressing heterogeneity bias: the Mixed Model approach</a></li>
+<li><a href="#conclusion-complex-random-effects-within-between-models">Conclusion: Complex Random Effects Within-Between Models</a></li>
+<li><a href="#a-visual-example">A visual example</a>
+<ul>
+<li><a href="#model-1-linear-relationship-between-typing-errors-and-typing-speed">Model 1: Linear relationship between typing errors and typing speed</a></li>
+<li><a href="#model-2-within-subject-effect-of-typing-speed">Model 2: Within-subject effect of typing speed</a></li>
+<li><a href="#model-3-between-subject-effect-of-typing-speed">Model 3: Between-subject effect of typing speed</a></li>
+<li><a href="#model-4-mixed-model-with-within--and-between-subjects">Model 4: Mixed model with within- and between-subjects</a></li>
+<li><a href="#model-5-complex-random-effects-within-between-model">Model 5: Complex Random-Effects Within-Between Model</a></li>
+</ul></li>
+<li><a href="#balanced-versus-imbalanced-groups">Balanced versus imbalanced groups</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<p>This vignette explains the rational behind the <a href="https://easystats.github.io/parameters/reference/demean.html"><code>demean()</code></a> function. We give recommendations how to analyze multilevel or hierarchical data structures, when macro-indicators (or level-2 predictors, or higher-level units, or more general: <em>group-level predictors</em>) are used as covariates and the model suffers from <strong>heterogeneity bias</strong> (Bell and Jones 2015).</p>
+<h1 id="sample-data-used-in-this-vignette">Sample data used in this vignette</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(parameters)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">data</span>(<span class="st">&quot;qol_cancer&quot;</span>)</a></code></pre></div>
+<ul>
+<li>Variables:
+<ul>
+<li><code>QoL</code> : Response (quality of life of patient)</li>
+<li><code>phq4</code> : Patient Health Questionnaire, <strong>time-varying</strong> variable</li>
+<li><code>hospital</code> : Location of treatment, <strong>time-invariant</strong> variable, co-variate</li>
+<li><code>education</code>: Educational level, <strong>time-invariant</strong> variable, co-variate</li>
+<li><code>ID</code> : patient ID</li>
+<li><code>time</code> : time-point of measurement</li>
+</ul></li>
+</ul>
+<h1 id="heterogeneity-bias">Heterogeneity bias</h1>
+<p>Heterogeneity bias occurs when group-level predictors vary within and across groups, and hence fixed effects may correlate with group (or random) effects. This is a typical situation when analyzing longitudinal or panel data: Due to the repeated measurements of persons, the “person” (or subject-ID) is now a level-2 variable. Predictors at level-1 (“fixed effects”), e.g. self-rated health or income, now have an effect at level-1 (“within”-effect) and at higher-level units (level-2, the subject-level, which is the “between”-effect) (see also <a href="https://shouldbewriting.netlify.com/posts/2019-10-21-accounting-for-within-and-between-subject-effect/">this posting</a>). This inevitably leads to correlating fixed effects and error terms - which, in turn, results in biased estimates, because both the within- <em>and</em> between-effect are captured in <em>one</em> estimate.</p>
+<p>You can check if your model may suffer from heterogeneity bias using the <code>check_heterogeneity()</code> function:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">check_heterogeneity</span>(qol_cancer, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&quot;phq4&quot;</span>, <span class="st">&quot;education&quot;</span>), <span class="dt">group =</span> <span class="st">&quot;ID&quot;</span>)</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="co">#&gt; Possible heterogeneity bias due to following predictors: phq4</span></a></code></pre></div>
+<h1 id="adressing-heterogeneity-bias-the-fixed-effects-regression-fe-approach">Adressing heterogeneity bias: the Fixed Effects Regression (FE) approach</h1>
+<p>Fixed effects regression models (FE) are a popular approach for panel data analysis in particular in econometrics and considered as gold standard. To avoid the problem of heterogeneity bias, in FE all higher-level variance (and thus, any between-effects), “are controlled out using the higher-level entities themselves, included in the model as dummy variables” (Bell and Jones 2015). As a consequence, FE models are only able estimate <em>within-effects</em>.</p>
+<p>To remove between-effects and only model within-effects, the data needs some preparation: <em>de-meaning</em>. De-meaning, or <em>person-mean centering</em>, or <em>centering within clusters</em>, takes away the higher-level mean from the regression equation, and as such, FE avoids estimating a parameter for each higher-level unit.</p>
+<h2 id="computing-the-de-meaned-and-group-meaned-variables">Computing the de-meaned and group-meaned variables</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">qol_cancer &lt;-<span class="st"> </span><span class="kw">cbind</span>(</a>
+<a class="sourceLine" id="cb3-2" title="2">  qol_cancer,</a>
+<a class="sourceLine" id="cb3-3" title="3">  <span class="kw">demean</span>(qol_cancer, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&quot;phq4&quot;</span>, <span class="st">&quot;QoL&quot;</span>), <span class="dt">group =</span> <span class="st">&quot;ID&quot;</span>)</a>
+<a class="sourceLine" id="cb3-4" title="4">)</a></code></pre></div>
+<p>Now we have:</p>
+<ul>
+<li><code>phq4_between</code>: time-varying variable with the mean of <code>phq4</code> across all time-points, for each patient (ID).</li>
+<li><code>phq4_within</code>: the de-meaned time-varying variable <code>phq4</code>.</li>
+</ul>
+<p>A FE model is a classical linear model, where</p>
+<ul>
+<li>Intercept is removed</li>
+<li>time-invariant predictors are not allowed to be included</li>
+<li>the group-level factor is included as predictor</li>
+<li>time-varying predictors are de-meaned (“person-mean centered”, indicating the “within-subject” effect)</li>
+</ul>
+<!-- end list -->
+
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">fe_model1 &lt;-<span class="st"> </span><span class="kw">lm</span>(</a>
+<a class="sourceLine" id="cb4-2" title="2">  QoL <span class="op">~</span><span class="st"> </span><span class="dv">0</span> <span class="op">+</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">+</span><span class="st"> </span>ID,</a>
+<a class="sourceLine" id="cb4-3" title="3">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb4-4" title="4">)</a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co"># we use only the first two rows, because the remaining rows are</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co"># the estimates for &quot;ID&quot;, which is not of interest here...</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="kw">model_parameters</span>(fe_model1)[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, ]</a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; time        |        1.09 | 0.64 | [-0.17,  2.34] |  1.70 | 374 | 0.089 </span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; phq4_within |       -3.66 | 0.41 | [-4.46, -2.86] | -8.95 | 374 | &lt; .001</span></a>
+<a class="sourceLine" id="cb4-12" title="12"></a>
+<a class="sourceLine" id="cb4-13" title="13"></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co"># instead of removing the intercept, we could also use the </span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co"># de-meaned response...</span></a>
+<a class="sourceLine" id="cb4-16" title="16">fe_model2 &lt;-<span class="st"> </span><span class="kw">lm</span>(</a>
+<a class="sourceLine" id="cb4-17" title="17">  QoL_within <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">+</span><span class="st"> </span>ID,</a>
+<a class="sourceLine" id="cb4-18" title="18">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb4-19" title="19">)</a>
+<a class="sourceLine" id="cb4-20" title="20"><span class="kw">model_parameters</span>(fe_model2)[<span class="dv">2</span><span class="op">:</span><span class="dv">3</span>, ]</a>
+<a class="sourceLine" id="cb4-21" title="21"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb4-22" title="22"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb4-23" title="23"><span class="co">#&gt; time        |        1.09 | 0.64 | [-0.17,  2.34] |  1.70 | 374 | 0.089 </span></a>
+<a class="sourceLine" id="cb4-24" title="24"><span class="co">#&gt; phq4_within |       -3.66 | 0.41 | [-4.46, -2.86] | -8.95 | 374 | &lt; .001</span></a>
+<a class="sourceLine" id="cb4-25" title="25"></a>
+<a class="sourceLine" id="cb4-26" title="26"></a>
+<a class="sourceLine" id="cb4-27" title="27"><span class="co"># we compare the results with those from the &quot;lfe&quot;-package for panel data</span></a>
+<a class="sourceLine" id="cb4-28" title="28"><span class="kw">library</span>(lfe)</a>
+<a class="sourceLine" id="cb4-29" title="29">fe_model3 &lt;-<span class="st"> </span><span class="kw">felm</span>(</a>
+<a class="sourceLine" id="cb4-30" title="30">  QoL <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4 <span class="op">|</span><span class="st"> </span>ID,</a>
+<a class="sourceLine" id="cb4-31" title="31">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb4-32" title="32">)</a>
+<a class="sourceLine" id="cb4-33" title="33"><span class="kw">model_parameters</span>(fe_model3)</a>
+<a class="sourceLine" id="cb4-34" title="34"><span class="co">#&gt; Parameter | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb4-35" title="35"><span class="co">#&gt; ----------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb4-36" title="36"><span class="co">#&gt; time      |        1.09 | 0.64 | [-0.16,  2.34] |  1.70 | 374 | 0.089 </span></a>
+<a class="sourceLine" id="cb4-37" title="37"><span class="co">#&gt; phq4      |       -3.66 | 0.41 | [-4.46, -2.86] | -8.95 | 374 | &lt; .001</span></a></code></pre></div>
+<p>As we can see, the <em>within-effect</em> of PHQ-4 is <code>-3.66</code>, hence the mean of the change for an average individual case in our sample (or, the “net” effect), is <code>-3.66</code>.</p>
+<p>But what about the between-effect? How do people with higher PHQ-4 score differ from people with lower PHQ-4 score? Or what about educational inequalities? Do higher educated people have a higher PHQ-4 score than lower educated people?</p>
+<p>This question cannot be answered with FE regression. But: “Can one fit a multilevel model with varying intercepts (or coefficients) when the units and predictors correlate? The answer is yes. And the solution is simple.” (Bafumi and Gelman 2006)</p>
+<h1 id="adressing-heterogeneity-bias-the-mixed-model-approach">Adressing heterogeneity bias: the Mixed Model approach</h1>
+<p>Mixed models include different levels of sources of variability (i.e. error terms at each level). Predictors used at level-1 that are varying across higher-level units will thus have residual errors at both level-1 and higher-level units. “Such covariates contain two parts: one that is specific to the higher-level entity that does not vary between occasions, and one that represents the difference between occasions, within higher-level entities” (Bell and Jones 2015). Hence, the error terms will be correlated with the covariate, which violates one of the assumptions of mixed models (iid, independent and identically distributed error terms) - also known and described above as <em>heterogeneity bias</em>.</p>
+<p>But how can this issue be addressed outside the FE framework?</p>
+<p>There are several ways how to address this using a mixed models approach:</p>
+<ul>
+<li>Correlated group factors and predictors are no problem anyway, because <a href="https://www.tjmahr.com/plotting-partial-pooling-in-mixed-effects-models/">partial pooling</a> allows estimates of units o borrow strength from the whole sample and shrink toward a common mean (Shor et al. (2007)).</li>
+<li>If predictor and group factors correlate, one can remove this correlation by group-meaning (or “mean within clusters”, Bafumi and Gelman 2006; Gelman and Hill 2007, Chap. 12.6.).</li>
+<li>When time-varying predictors are “decomposed” into their time-varying and time-invariant components (demeaning), then mixed models can model <strong>both</strong> within- and between-subject effects (Bell, Fairbrother, and Jones 2019) - this approach is essentially a further development of a long-known recommendation by Mundlak (Mundlak 1978).</li>
+</ul>
+<p>For now, we will follow the last recommendation and use the within- and between-version of <code>phq4</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">library</span>(lme4)</a>
+<a class="sourceLine" id="cb5-2" title="2">mixed_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="kw">lmer</span>(</a>
+<a class="sourceLine" id="cb5-3" title="3">  QoL <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">+</span><span class="st"> </span>phq4_between <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>ID),</a>
+<a class="sourceLine" id="cb5-4" title="4">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb5-5" title="5">)</a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="kw">model_parameters</span>(mixed_<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt; (Intercept) |       71.53 | 1.56 | [68.48, 74.58] | 45.98 | 558 | &lt; .001</span></a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt; time        |        1.09 | 0.64 | [-0.16,  2.34] |  1.70 | 558 | 0.088 </span></a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt; # Within-Effects </span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb5-16" title="16"><span class="co">#&gt; phq4_within |       -3.66 | 0.41 | [-4.46, -2.86] | -8.95 | 558 | &lt; .001</span></a>
+<a class="sourceLine" id="cb5-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="co">#&gt; # Between-Effects </span></a>
+<a class="sourceLine" id="cb5-19" title="19"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="co">#&gt; Parameter    | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="co">#&gt; --------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb5-22" title="22"><span class="co">#&gt; phq4_between |       -6.28 | 0.50 | [-7.27, -5.30] | -12.53 | 558 | &lt; .001</span></a>
+<a class="sourceLine" id="cb5-23" title="23"></a>
+<a class="sourceLine" id="cb5-24" title="24"><span class="co"># compare to FE-model</span></a>
+<a class="sourceLine" id="cb5-25" title="25"><span class="kw">model_parameters</span>(fe_model1)[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, ]</a>
+<a class="sourceLine" id="cb5-26" title="26"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb5-27" title="27"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb5-28" title="28"><span class="co">#&gt; time        |        1.09 | 0.64 | [-0.17,  2.34] |  1.70 | 374 | 0.089 </span></a>
+<a class="sourceLine" id="cb5-29" title="29"><span class="co">#&gt; phq4_within |       -3.66 | 0.41 | [-4.46, -2.86] | -8.95 | 374 | &lt; .001</span></a></code></pre></div>
+<p>As we can see, the estimates and standard errors are identical. The argument <em>against</em> the use of mixed models, i.e. that using mixed models for panel data will yield biased estimates and standard errors, is based on an incorrect model specification (Mundlak 1978). As such, when the (mixed) model is properly specified, the estimator of the mixed model is identical to the ‘within’ (i.e. FE) estimator.</p>
+<p>As a consequence, we cannot only use the above specified mixed model for panel data, we can even specify more complex models including within-effects, between-effects or random effects variation. A mixed models approach can model the causes of endogeneity explicitly by including the (separated) within- and between-effects of time-varying fixed effects and including time-constant fixed effects.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">mixed_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="kw">lmer</span>(</a>
+<a class="sourceLine" id="cb6-2" title="2">  QoL <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">+</span><span class="st"> </span>phq4_between <span class="op">+</span><span class="st"> </span>education <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>time <span class="op">|</span><span class="st"> </span>ID),</a>
+<a class="sourceLine" id="cb6-3" title="3">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb6-4" title="4">)</a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">model_parameters</span>(mixed_<span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; Parameter        | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; -----------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; (Intercept)      |       67.36 | 2.48 | [62.49, 72.22] | 27.15 | 554 | &lt; .001</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; time             |        1.09 | 0.66 | [-0.20,  2.38] |  1.65 | 554 | 0.098 </span></a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="co">#&gt; education [mid]  |        5.01 | 2.35 | [ 0.41,  9.61] |  2.14 | 554 | 0.033 </span></a>
+<a class="sourceLine" id="cb6-11" title="11"><span class="co">#&gt; education [high] |        5.52 | 2.75 | [ 0.12, 10.91] |  2.00 | 554 | 0.045 </span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt; # Within-Effects </span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; phq4_within |       -3.72 | 0.41 | [-4.52, -2.92] | -9.10 | 554 | &lt; .001</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; # Between-Effects </span></a>
+<a class="sourceLine" id="cb6-20" title="20"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&gt; Parameter    | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&gt; --------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&gt; phq4_between |       -6.13 | 0.52 | [-7.14, -5.11] | -11.84 | 554 | &lt; .001</span></a></code></pre></div>
+<p>For more complex models, within-effects will naturally change slightly and are no longer identical to simpler FE models. This is no “bias”, but rather the result of building more complex models: FE models lack information of variation in the group-effects or between-subject effects. Furthermore, FE models cannot include random slopes, which means that fixed effects regressions are neglecting “cross-cluster differences in the effects of lower-level controls (which) reduces the precision of estimated context effects, resulting in (…) low statistical power” (Heisig, Schaeffer, and Giesecke 2017).</p>
+<h1 id="conclusion-complex-random-effects-within-between-models">Conclusion: Complex Random Effects Within-Between Models</h1>
+<p>Depending on the structure of the data, the best approach to analyzing panel data would be a so called “complex random effects within-between” model (Bell, Fairbrother, and Jones 2019):</p>
+<p>y<sub>it</sub> = β<sub>0</sub> + β<sub>1W</sub> (x<sub>it</sub> - ͞x<sub>i</sub>) + β<sub>2B</sub> ͞x<sub>i</sub> + β<sub>3</sub> z<sub>i</sub> + υ<sub>i0</sub> + υ<sub>i1</sub> (x<sub>it</sub> - ͞x<sub>i</sub>) + ε<sub>it</sub></p>
+<ul>
+
+<li>
+
+<p>x<sub>it</sub> - ͞x<sub>i</sub> is the de-meaned predictor, <em>phq4_within</em></p>
+</li>
+
+<li>
+
+<p>͞x<sub>i</sub> is the group-meaned predictor, <em>phq4_between</em></p>
+</li>
+
+<li>
+
+<p>β<sub>1W</sub> is the coefficient for phq4_within (within-subject)</p>
+</li>
+
+<li>
+
+<p>β<sub>2B</sub> is the coefficient for phq4_between (bewteen-subject)</p>
+</li>
+
+<li>
+
+<p>β<sub>3</sub> is the coefficient for time-constant predictors, such as <code>hospital</code> or <code>education</code> (bewteen-subject)</p>
+</li>
+
+</ul>
+
+<p>In R-code, the model is written down like this:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">rewb &lt;-<span class="st"> </span><span class="kw">lmer</span>(</a>
+<a class="sourceLine" id="cb7-2" title="2">  QoL <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">+</span><span class="st"> </span>phq4_between <span class="op">+</span><span class="st"> </span>education <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="st">    </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>time <span class="op">|</span><span class="st"> </span>ID) <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>phq4_within <span class="op">|</span><span class="st"> </span>ID),</a>
+<a class="sourceLine" id="cb7-4" title="4">   <span class="dt">data =</span> qol_cancer</a>
+<a class="sourceLine" id="cb7-5" title="5">)</a></code></pre></div>
+<p><strong>What about time-constant predictors?</strong></p>
+<p>After demeaning time-varying predictors, “at the higher level, the mean term is no longer constrained by Level 1 effects, so it is free to account for all the higher-level variance associated with that variable” (Bell and Jones 2015).</p>
+<p>Thus, <em>time-constant <strong>categorical</strong></em> predictors, that only have a between-effect, can be simply included as fixed effects predictor (since they’re not constrained by level-1 effects). Time-constant <em>continuous</em> <strong>group-level predictors</strong> (for instance, GDP of countries) should be group-meaned, to have a proper “between”-effect (Gelman and Hill 2007, Chap. 12.6.).</p>
+<p>The benefit of this kind of model is that you have information on within-, between- and other time-constant (i.e. between) effects or group-level predictors…</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">model_parameters</span>(rewb)</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&gt; Parameter        | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt; -----------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt; (Intercept)      |       67.18 | 2.39 | [62.50, 71.86] | 28.13 | 551 | &lt; .001</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt; time             |        1.18 | 0.60 | [ 0.00,  2.37] |  1.95 | 551 | 0.051 </span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt; education [mid]  |        4.95 | 2.35 | [ 0.35,  9.55] |  2.11 | 551 | 0.035 </span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; education [high] |        5.62 | 2.76 | [ 0.21, 11.02] |  2.04 | 551 | 0.042 </span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; # Within-Effects </span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="co">#&gt; phq4_within |       -4.50 | 0.58 | [-5.63, -3.37] | -7.78 | 551 | &lt; .001</span></a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-15" title="15"><span class="co">#&gt; # Between-Effects </span></a>
+<a class="sourceLine" id="cb8-16" title="16"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-17" title="17"><span class="co">#&gt; Parameter    | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb8-18" title="18"><span class="co">#&gt; --------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb8-19" title="19"><span class="co">#&gt; phq4_between |       -6.11 | 0.52 | [-7.13, -5.10] | -11.81 | 551 | &lt; .001</span></a></code></pre></div>
+<p>… but you can also model the variation of (group) effects across time (and probably space), and you can even include more higher-level units (e.g. nested design or cross-classified design with more than two levels):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">random_parameters</span>(rewb)</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="co">#&gt; # Random Effects</span></a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">#&gt; Within-Group Variance              119.47 (10.93)</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co">#&gt; Between-Group Variance</span></a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="co">#&gt;   Random Intercept (ID)             107.5 (10.37)</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt;   Random Intercept (ID.1)           25.76  (5.08)</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt;   Random Slope (ID.time)             0.49   (0.7)</span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt;   Random Slope (ID.1.phq4_within)   14.37  (3.79)</span></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; Correlations</span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co">#&gt;   ID.time                           -0.99</span></a>
+<a class="sourceLine" id="cb9-12" title="12"><span class="co">#&gt;   ID.phq4_within                     0.44</span></a>
+<a class="sourceLine" id="cb9-13" title="13"><span class="co">#&gt; N (groups per factor)</span></a>
+<a class="sourceLine" id="cb9-14" title="14"><span class="co">#&gt;   ID                                  188</span></a>
+<a class="sourceLine" id="cb9-15" title="15"><span class="co">#&gt; Observations                          564</span></a></code></pre></div>
+<p><strong>What about imbalanced groups, i.e. large differences in N per group?</strong></p>
+<p>See little example after this visual example…</p>
+<h1 id="a-visual-example">A visual example</h1>
+<p>First, we generate some fake data that implies a linear relationship between outcome and independent variable. The objective is that the amount of typing errors depends on how fast (typing speed) you can type, however, the more typing experience you have, the faster you can type. Thus, the outcome measure is “amount of typing errors”, while our predictor is “typing speed”. Furthermore, we have repeated measurements of people with different “typing experience levels”.</p>
+<p>The results show that we will have two sources of variation: Overall, more experienced typists make less mistakes (group-level pattern). When typing faster, typists make more mistakes (individual-level pattern).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="kw">library</span>(see)</a>
+<a class="sourceLine" id="cb10-4" title="4"></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb10-6" title="6">n &lt;-<span class="st"> </span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb10-7" title="7">b &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dt">length.out =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb10-8" title="8">x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">2</span>, <span class="dv">2</span> <span class="op">*</span><span class="st"> </span>n, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb10-9" title="9"></a>
+<a class="sourceLine" id="cb10-10" title="10">d &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, <span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span>n, <span class="cf">function</span>(i) {</a>
+<a class="sourceLine" id="cb10-11" title="11">  <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="kw">seq</span>(<span class="dv">1</span>, n, <span class="dt">by =</span> <span class="fl">.2</span>),</a>
+<a class="sourceLine" id="cb10-12" title="12">             <span class="dt">y =</span> <span class="dv">2</span> <span class="op">*</span><span class="st"> </span>x[i] <span class="op">+</span><span class="st"> </span>b[i] <span class="op">*</span><span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, n, <span class="dt">by =</span> <span class="fl">.2</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">21</span>),</a>
+<a class="sourceLine" id="cb10-13" title="13">             <span class="dt">grp =</span> <span class="kw">as.factor</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>i))</a>
+<a class="sourceLine" id="cb10-14" title="14">}))</a>
+<a class="sourceLine" id="cb10-15" title="15"></a>
+<a class="sourceLine" id="cb10-16" title="16">d &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-17" title="17"><span class="st">  </span><span class="kw">group_by</span>(grp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-18" title="18"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rev</span>(<span class="dv">15</span> <span class="op">-</span><span class="st"> </span>(x <span class="op">+</span><span class="st"> </span><span class="fl">1.5</span> <span class="op">*</span><span class="st"> </span><span class="kw">as.numeric</span>(grp)))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb10-19" title="19"><span class="st">  </span><span class="kw">ungroup</span>()</a>
+<a class="sourceLine" id="cb10-20" title="20"></a>
+<a class="sourceLine" id="cb10-21" title="21">labs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;very slow&quot;</span>, <span class="st">&quot;slow&quot;</span>, <span class="st">&quot;average&quot;</span>, <span class="st">&quot;fast&quot;</span>, <span class="st">&quot;very fast&quot;</span>)</a>
+<a class="sourceLine" id="cb10-22" title="22"><span class="kw">levels</span>(d<span class="op">$</span>grp) &lt;-<span class="st"> </span><span class="kw">rev</span>(labs)</a>
+<a class="sourceLine" id="cb10-23" title="23"></a>
+<a class="sourceLine" id="cb10-24" title="24">d &lt;-<span class="st"> </span><span class="kw">cbind</span>(d, <span class="kw">demean</span>(d, <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>), <span class="dt">group =</span> <span class="st">&quot;grp&quot;</span>))</a></code></pre></div>
+<p>Let’s look at the raw data…</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<h2 id="model-1-linear-relationship-between-typing-errors-and-typing-speed">Model 1: Linear relationship between typing errors and typing speed</h2>
+<p>We can now assume a (linear) relationship between typing errors and typing speed.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Looking at the coefficients, we have following model with a coefficient of <code>-1.92</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>x, <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="kw">model_parameters</span>(m1)</a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt; -------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="co">#&gt; (Intercept) |       30.20 | 1.42 | [27.39, 33.00] |  21.34 | 103 | &lt; .001</span></a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="co">#&gt; x           |       -1.92 | 0.18 | [-2.27, -1.56] | -10.69 | 103 | &lt; .001</span></a></code></pre></div>
+<p>However, we have ignored the clustered structure in our data, in this example due to repeated measurements.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<h2 id="model-2-within-subject-effect-of-typing-speed">Model 2: Within-subject effect of typing speed</h2>
+<p>A fixed effects regression (FE-regression) would now remove all between-effects and include only the within-effects as well as the group-level indicator.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>This returns the coefficient of the “within”-effect, which is <code>1.2</code>, with a standard error of <code>0.07</code>. Note that the FE-model does <em>not</em> take the variation <em>between</em> subjects into account, thus resulting in (possibly) biased estimates, and biased standard errors.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">m2 &lt;-<span class="st"> </span><span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span><span class="dv">0</span> <span class="op">+</span><span class="st"> </span>x_within <span class="op">+</span><span class="st"> </span>grp, <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">model_parameters</span>(m2)[<span class="dv">1</span>, ]</a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co">#&gt; Parameter | Coefficient |   SE |       95% CI |     t | df |      p</span></a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="co">#&gt; -------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; x_within  |        1.20 | 0.07 | [1.06, 1.35] | 16.08 | 99 | &lt; .001</span></a></code></pre></div>
+<h2 id="model-3-between-subject-effect-of-typing-speed">Model 3: Between-subject effect of typing speed</h2>
+<p>To understand, why the above model 1 (<code>m1</code>) returns a biased estimate, which is a “weighted average” of the within- and between-effects, let us look at the between-effect now.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>As we can see, the between-effect is <code>-2.93</code>, which is different from the <code>-1.92</code> estimated in the model <code>m1</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">m3 &lt;-<span class="st"> </span><span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>x_between, <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb13-2" title="2"><span class="kw">model_parameters</span>(m3)</a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="co">#&gt; -------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">#&gt; (Intercept) |       37.83 | 0.62 | [36.59, 39.06] |  60.79 | 103 | &lt; .001</span></a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="co">#&gt; x_between   |       -2.93 | 0.08 | [-3.09, -2.78] | -36.76 | 103 | &lt; .001</span></a></code></pre></div>
+<h2 id="model-4-mixed-model-with-within--and-between-subjects">Model 4: Mixed model with within- and between-subjects</h2>
+<p>Since FE-models can only model within-effects, we now use a mixed model with within- and between-effects.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>We see, the estimate for the within-effects is <em>not</em> biased. Furthermore, we get the correct between-effect as well (standard errors differ, because the variance in the grouping structure is more accurately taken into account).</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">m4 &lt;-<span class="st"> </span><span class="kw">lmer</span>(y <span class="op">~</span><span class="st"> </span>x_between <span class="op">+</span><span class="st"> </span>x_within <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>grp), <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="kw">model_parameters</span>(m4)</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co">#&gt; -------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="co">#&gt; (Intercept) |       37.83 | 0.33 | [37.18, 38.48] | 114.46 | 100 | &lt; .001</span></a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="co">#&gt; # Between-Effects </span></a>
+<a class="sourceLine" id="cb14-8" title="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb14-9" title="9"><span class="co">#&gt; Parameter | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb14-10" title="10"><span class="co">#&gt; -----------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb14-11" title="11"><span class="co">#&gt; x_between |       -2.93 | 0.04 | [-3.02, -2.85] | -69.22 | 100 | &lt; .001</span></a>
+<a class="sourceLine" id="cb14-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb14-13" title="13"><span class="co">#&gt; # Within-Effects </span></a>
+<a class="sourceLine" id="cb14-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb14-15" title="15"><span class="co">#&gt; Parameter | Coefficient |   SE |       95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb14-16" title="16"><span class="co">#&gt; --------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb14-17" title="17"><span class="co">#&gt; x_within  |        1.20 | 0.07 | [1.06, 1.35] | 16.22 | 100 | &lt; .001</span></a></code></pre></div>
+<h2 id="model-5-complex-random-effects-within-between-model">Model 5: Complex Random-Effects Within-Between Model</h2>
+<p>Finally, we can also take the variation between subjects into account by adding a random slope. This model can be called a complex “REWB” (random-effects within-between) model. Due to the variation between subjects, we get larger standard errors for the within-effect.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">m5 &lt;-<span class="st"> </span><span class="kw">lmer</span>(y <span class="op">~</span><span class="st"> </span>x_between <span class="op">+</span><span class="st"> </span>x_within <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>x_within <span class="op">|</span><span class="st"> </span>grp), <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="kw">model_parameters</span>(m5)</a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |      t | df |      p</span></a>
+<a class="sourceLine" id="cb15-4" title="4"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb15-5" title="5"><span class="co">#&gt; (Intercept) |       37.95 | 0.34 | [37.29, 38.62] | 111.15 | 98 | &lt; .001</span></a>
+<a class="sourceLine" id="cb15-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb15-7" title="7"><span class="co">#&gt; # Between-Effects </span></a>
+<a class="sourceLine" id="cb15-8" title="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb15-9" title="9"><span class="co">#&gt; Parameter | Coefficient |   SE |         95% CI |      t | df |      p</span></a>
+<a class="sourceLine" id="cb15-10" title="10"><span class="co">#&gt; ----------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb15-11" title="11"><span class="co">#&gt; x_between |       -2.95 | 0.04 | [-3.04, -2.87] | -67.57 | 98 | &lt; .001</span></a>
+<a class="sourceLine" id="cb15-12" title="12"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb15-13" title="13"><span class="co">#&gt; # Within-Effects </span></a>
+<a class="sourceLine" id="cb15-14" title="14"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb15-15" title="15"><span class="co">#&gt; Parameter | Coefficient |   SE |       95% CI |     t | df |      p</span></a>
+<a class="sourceLine" id="cb15-16" title="16"><span class="co">#&gt; -------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb15-17" title="17"><span class="co">#&gt; x_within  |        1.20 | 0.10 | [1.01, 1.40] | 12.16 | 98 | &lt; .001</span></a></code></pre></div>
+<h1 id="balanced-versus-imbalanced-groups">Balanced versus imbalanced groups</h1>
+<p>The “simple” linear slope of the between-effect (and also from the within-effect) is (almost) identical in “classical” linear regression compared to linear mixed models when the groups are balanced, i.e. when the number of observation per group is similar or the same.</p>
+<p>Whenever group size is imbalanced, the “simple” linear slope will be adjusted. This leads to different estimates for between-effects between classical and mixed models regressions due to shrinkage - i.e. for larger variation of group sizes we find stronger regularization of estimates.</p>
+<p>Hence, for mixed models with larger differences in number of observation per random effects group, the between-effect will differ from the between-effect calculated by “classical” regression models. However, this shrinkage is a desired property of mixed models and usually improves the estimates.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
+<a class="sourceLine" id="cb16-2" title="2">n &lt;-<span class="st"> </span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb16-3" title="3">b &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dt">length.out =</span> <span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb16-4" title="4">x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">2</span>, <span class="dv">2</span> <span class="op">*</span><span class="st"> </span>n, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb16-5" title="5"></a>
+<a class="sourceLine" id="cb16-6" title="6">d &lt;-<span class="st"> </span><span class="kw">do.call</span>(rbind, <span class="kw">lapply</span>(<span class="dv">1</span><span class="op">:</span>n, <span class="cf">function</span>(i) {</a>
+<a class="sourceLine" id="cb16-7" title="7">  <span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="kw">seq</span>(<span class="dv">1</span>, n, <span class="dt">by =</span> <span class="fl">.2</span>),</a>
+<a class="sourceLine" id="cb16-8" title="8">             <span class="dt">y =</span> <span class="dv">2</span> <span class="op">*</span><span class="st"> </span>x[i] <span class="op">+</span><span class="st"> </span>b[i] <span class="op">*</span><span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, n, <span class="dt">by =</span> <span class="fl">.2</span>) <span class="op">+</span><span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">21</span>),</a>
+<a class="sourceLine" id="cb16-9" title="9">             <span class="dt">grp =</span> <span class="kw">as.factor</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>i))</a>
+<a class="sourceLine" id="cb16-10" title="10">}))</a>
+<a class="sourceLine" id="cb16-11" title="11"></a>
+<a class="sourceLine" id="cb16-12" title="12"><span class="co"># create imbalanced groups</span></a>
+<a class="sourceLine" id="cb16-13" title="13">d<span class="op">$</span>grp[<span class="kw">sample</span>(<span class="kw">which</span>(d<span class="op">$</span>grp <span class="op">==</span><span class="st"> </span><span class="dv">8</span>), <span class="dv">10</span>)] &lt;-<span class="st"> </span><span class="dv">6</span></a>
+<a class="sourceLine" id="cb16-14" title="14">d<span class="op">$</span>grp[<span class="kw">sample</span>(<span class="kw">which</span>(d<span class="op">$</span>grp <span class="op">==</span><span class="st"> </span><span class="dv">4</span>), <span class="dv">8</span>)] &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb16-15" title="15">d<span class="op">$</span>grp[<span class="kw">sample</span>(<span class="kw">which</span>(d<span class="op">$</span>grp <span class="op">==</span><span class="st"> </span><span class="dv">10</span>), <span class="dv">9</span>)] &lt;-<span class="st"> </span><span class="dv">6</span></a>
+<a class="sourceLine" id="cb16-16" title="16"></a>
+<a class="sourceLine" id="cb16-17" title="17">d &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-18" title="18"><span class="st">  </span><span class="kw">group_by</span>(grp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-19" title="19"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">x =</span> <span class="kw">rev</span>(<span class="dv">15</span> <span class="op">-</span><span class="st"> </span>(x <span class="op">+</span><span class="st"> </span><span class="fl">1.5</span> <span class="op">*</span><span class="st"> </span><span class="kw">as.numeric</span>(grp)))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-20" title="20"><span class="st">  </span><span class="kw">ungroup</span>()</a>
+<a class="sourceLine" id="cb16-21" title="21"></a>
+<a class="sourceLine" id="cb16-22" title="22">labs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;very slow&quot;</span>, <span class="st">&quot;slow&quot;</span>, <span class="st">&quot;average&quot;</span>, <span class="st">&quot;fast&quot;</span>, <span class="st">&quot;very fast&quot;</span>)</a>
+<a class="sourceLine" id="cb16-23" title="23"><span class="kw">levels</span>(d<span class="op">$</span>grp) &lt;-<span class="st"> </span><span class="kw">rev</span>(labs)</a>
+<a class="sourceLine" id="cb16-24" title="24"></a>
+<a class="sourceLine" id="cb16-25" title="25">d &lt;-<span class="st"> </span><span class="kw">cbind</span>(d, <span class="kw">demean</span>(d, <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>), <span class="dt">group =</span> <span class="st">&quot;grp&quot;</span>))</a>
+<a class="sourceLine" id="cb16-26" title="26"></a>
+<a class="sourceLine" id="cb16-27" title="27"><span class="co"># Between-subject effect of typing speed</span></a>
+<a class="sourceLine" id="cb16-28" title="28">m1 &lt;-<span class="st"> </span><span class="kw">lm</span>(y <span class="op">~</span><span class="st"> </span>x_between, <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb16-29" title="29"><span class="kw">model_parameters</span>(m1)</a>
+<a class="sourceLine" id="cb16-30" title="30"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |      t |  df |      p</span></a>
+<a class="sourceLine" id="cb16-31" title="31"><span class="co">#&gt; -------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb16-32" title="32"><span class="co">#&gt; (Intercept) |       38.32 | 1.33 | [35.69, 40.95] |  28.87 | 103 | &lt; .001</span></a>
+<a class="sourceLine" id="cb16-33" title="33"><span class="co">#&gt; x_between   |       -2.81 | 0.16 | [-3.13, -2.49] | -17.47 | 103 | &lt; .001</span></a>
+<a class="sourceLine" id="cb16-34" title="34"></a>
+<a class="sourceLine" id="cb16-35" title="35"><span class="co"># Between-subject effect of typing speed, accounting for goup structure</span></a>
+<a class="sourceLine" id="cb16-36" title="36">m2 &lt;-<span class="st"> </span><span class="kw">lmer</span>(y <span class="op">~</span><span class="st"> </span>x_between <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>grp), <span class="dt">data =</span> d)</a>
+<a class="sourceLine" id="cb16-37" title="37"><span class="kw">model_parameters</span>(m2)</a>
+<a class="sourceLine" id="cb16-38" title="38"><span class="co">#&gt; Parameter   | Coefficient |   SE |         95% CI |     t |  df |      p</span></a>
+<a class="sourceLine" id="cb16-39" title="39"><span class="co">#&gt; ------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb16-40" title="40"><span class="co">#&gt; (Intercept) |       37.02 | 2.73 | [31.66, 42.38] | 13.54 | 101 | &lt; .001</span></a>
+<a class="sourceLine" id="cb16-41" title="41"><span class="co">#&gt; x_between   |       -2.71 | 0.35 | [-3.39, -2.03] | -7.81 | 101 | &lt; .001</span></a></code></pre></div>
+<h1 id="references">References</h1>
+<div id="refs" class="references">
+
+<div id="ref-bafumi_fitting_2006">
+
+<p>Bafumi, Joseph, and Andrew Gelman. 2006. “Fitting Multilevel Models When Predictors and Group Effects Correlate.” In. Philadelphia, PA.</p>
+</div>
+
+<div id="ref-bell_fixed_2019">
+
+<p>Bell, Andrew, Malcolm Fairbrother, and Kelvyn Jones. 2019. “Fixed and Random Effects Models: Making an Informed Choice.” <em>Quality &amp; Quantity</em> 53: 1051–74. <a href="https://doi.org/10.1007/s11135-018-0802-x">https://doi.org/10.1007/s11135-018-0802-x</a>.</p>
+</div>
+
+<div id="ref-bell_explaining_2015">
+
+<p>Bell, Andrew, and Kelvyn Jones. 2015. “Explaining Fixed Effects: Random Effects Modeling of Time-Series Cross-Sectional and Panel Data.” <em>Political Science Research and Methods</em> 3 (1): 133–53. <a href="https://doi.org/10.1017/psrm.2014.7">https://doi.org/10.1017/psrm.2014.7</a>.</p>
+</div>
+
+<div id="ref-gelman_data_2007">
+
+<p>Gelman, Andrew, and Jennifer Hill. 2007. <em>Data Analysis Using Regression and Multilevel/Hierarchical Models</em>. Analytical Methods for Social Research. Cambridge; New York: Cambridge University Press.</p>
+</div>
+
+<div id="ref-heisig_costs_2017">
+
+<p>Heisig, Jan Paul, Merlin Schaeffer, and Johannes Giesecke. 2017. “The Costs of Simplicity: Why Multilevel Models May Benefit from Accounting for Cross-Cluster Differences in the Effects of Controls.” <em>American Sociological Review</em> 82 (4): 796–827. <a href="https://doi.org/10.1177/0003122417717901">https://doi.org/10.1177/0003122417717901</a>.</p>
+</div>
+
+<div id="ref-mundlak_pooling_1978">
+
+<p>Mundlak, Yair. 1978. “On the Pooling of Time Series and Cross Section Data.” <em>Econometrica</em> 46 (1): 69.</p>
+</div>
+
+<div id="ref-shor_bayesian_2007">
+
+<p>Shor, Boris, Joseph Bafumi, Luke Keele, and David Park. 2007. “A Bayesian Multilevel Modeling Approach to Time-Series Cross-Sectional Data.” <em>Political Analysis</em> 15 (2): 165–81. <a href="https://doi.org/10.1093/pan/mpm006">https://doi.org/10.1093/pan/mpm006</a>.</p>
+</div>
+
+</div>
+
+</body>
+</html>

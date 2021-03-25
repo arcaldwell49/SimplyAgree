@@ -1,0 +1,21 @@
+---
+title: Flexible and Robust Agreement and Reliability Analyses
+name: SimplyAgree
+version: 0.0.0
+jms: '1.0'
+authors:
+  - Aaron R. Caldwell
+maintainer: Aaron R. Caldwell <arcaldwell49@gmail.com>
+date: '`r Sys.Date()`'
+type: R
+description: Agreement and Reliability Analysis
+analyses:
+  - title: Simple Test of Agreement
+    name: agreetest
+    ns: SimplyAgree
+    menuGroup: SimplyAgree
+    menuTitle: Simple Test of Agreement
+usesNative: true
+minApp: 1.0.8
+
+...

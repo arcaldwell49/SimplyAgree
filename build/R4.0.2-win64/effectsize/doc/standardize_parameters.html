@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="parameters-standardization">Parameters Standardization</h1>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#how-to-interpret-standardized-coefficients">How to interpret standardized coefficients?</a>
+<ul>
+<li><a href="#measure-of-association-correlation-r">Measure of association (correlation <em>r</em>)</a></li>
+<li><a href="#standardized-differences">Standardized differences</a></li>
+</ul></li>
+<li><a href="#standardization-methods">Standardization methods</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<h1 id="introduction">Introduction</h1>
+<p>Standardizing parameters (<em>i.e.</em>, coefficients) can allow for their comparison within and between models, variables and studies. Moreover, as it returns coefficients expressed in terms of <strong>change of variance</strong> (for instance, coefficients expressed in terms of SD of the response variable), it can allow for the usage of <a href="https://easystats.github.io/effectsize/articles/interpret.html">effect size interpretation guidelines</a>, such as the famous Cohen’s (1988) rules of thumb.</p>
+<p>However, standardizing the model’s parameters should <em>not</em> be automatically and mindlessly done: for some research fields, particular variables or types of studies (<em>e.g.</em>, replications), it sometimes makes more sense to keep, use and interpret the original parameters, especially if they are well known or easily understood.</p>
+<p>Critically, <strong>parameters standardization is not a trivial process</strong>. Different techniques exist, that can lead to drastically different results. Thus, it is critical that the standardization method is explicitly documented and detailed.</p>
+<p><strong><code>parameters</code> include different techniques of parameters standardization</strong>, described below (Bring 1994; Menard 2004, 2011; Gelman 2008; Schielzeth 2010).</p>
+<h1 id="how-to-interpret-standardized-coefficients">How to interpret standardized coefficients?</h1>
+<h2 id="measure-of-association-correlation-r">Measure of association (correlation <em>r</em>)</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(effectsize)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="kw">lm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Petal.Length, <span class="dt">data =</span> iris) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="st">  </span><span class="kw">standardize_parameters</span>()</span></code></pre></div>
+<pre><code>&gt; Parameter    | Coefficient (std.) |        95% CI
+&gt; -------------------------------------------------
+&gt; (Intercept)  |          -5.03e-16 | [-0.08, 0.08]
+&gt; Petal.Length |               0.87 | [ 0.79, 0.95]
+</code></pre>
+<p>Standardizing the coefficient of this simple linear regression gives a value of <code>0.87</code>, but did you know that for a simple regression this is actually the <strong>same as a correlation</strong>? Thus, you can eventually apply some (<em>in</em>)famous interpretation guidelines (e.g., Cohen’s rules of thumb).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(parameters)</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">cor.test</span>(iris<span class="op">$</span>Sepal.Length, iris<span class="op">$</span>Petal.Length) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="st">  </span><span class="kw">model_parameters</span>()</span></code></pre></div>
+<pre><code>&gt; Parameter1        |        Parameter2 |    r |     t |  df |      p |       95% CI |  Method
+&gt; --------------------------------------------------------------------------------------------
+&gt; iris$Sepal.Length | iris$Petal.Length | 0.87 | 21.65 | 148 | &lt; .001 | [0.83, 0.91] | Pearson
+</code></pre>
+<p>What happens in the case of <strong>multiple continuous variables</strong>? As in each effect in a regression model is “adjusted” for the other ones, we might expect coefficients to be somewhat alike to <strong>partial correlations</strong>. Let’s first start by computing the partial correlation between <strong>Sepal.Length</strong> and 3 other remaining variables.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>df &lt;-<span class="st"> </span>iris[, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]  <span class="co"># Remove the Species factor</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>correlation<span class="op">::</span><span class="kw">correlation</span>(df, <span class="dt">partial =</span> <span class="ot">TRUE</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>] <span class="co"># Select the rows of interest</span></span></code></pre></div>
+<pre><code>&gt; Parameter1   |   Parameter2 |     r
+&gt; -----------------------------------
+&gt; Sepal.Length |  Sepal.Width |  0.63
+&gt; Sepal.Length | Petal.Length |  0.72
+&gt; Sepal.Length |  Petal.Width | -0.34
+</code></pre>
+<p>Now, let’s apply another method to obtain effect sizes for frequentist regressions, based on the statistic values. We will convert the <em>t</em>-value (and its degrees of freedom, <em>df</em>) into a partial correlation coefficient <em>r</em>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>model &lt;-<span class="st"> </span><span class="kw">lm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> df)</span>
+<span id="cb7-2"><a href="#cb7-2"></a>params &lt;-<span class="st"> </span><span class="kw">model_parameters</span>(model)</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="kw">t_to_r</span>(params<span class="op">$</span>t[<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>], params<span class="op">$</span>df_error[<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>])</span></code></pre></div>
+<pre><code>&gt;     r |         95% CI
+&gt; ----------------------
+&gt;  0.63 | [ 0.53,  0.70]
+&gt;  0.72 | [ 0.64,  0.78]
+&gt; -0.34 | [-0.47, -0.19]
+</code></pre>
+<p>Wow, the retrieved correlations coefficients from the regression model are <strong>exactly</strong> the same as the partial correlations!</p>
+<p>However, note that in multiple regression standardizing the parameters in not quite the same as computing the (partial) correlation, due to… math :([1]</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>model <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="st">  </span><span class="kw">standardize_parameters</span>() </span></code></pre></div>
+<pre><code>&gt; Parameter    | Coefficient (std.) |         95% CI
+&gt; --------------------------------------------------
+&gt; (Intercept)  |          -7.12e-17 | [-0.06,  0.06]
+&gt; Sepal.Width  |               0.34 | [ 0.27,  0.41]
+&gt; Petal.Length |               1.51 | [ 1.27,  1.75]
+&gt; Petal.Width  |              -0.51 | [-0.74, -0.28]
+</code></pre>
+<h2 id="standardized-differences">Standardized differences</h2>
+<p>How does it work in the case of differences, when <strong>factors</strong> are entered and differences between a given level and a reference level (the intercept)? You might have heard that it is similar to a <strong>Cohen’s <em>d</em></strong>. Well, let’s see.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Select portion of data containing the two levels of interest</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>data &lt;-<span class="st"> </span>iris[iris<span class="op">$</span>Species <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>), ]</span>
+<span id="cb11-3"><a href="#cb11-3"></a></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="kw">lm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Species, <span class="dt">data =</span> data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="st">  </span><span class="kw">standardize_parameters</span>()</span></code></pre></div>
+<pre><code>&gt; Parameter         | Coefficient (std.) |         95% CI
+&gt; -------------------------------------------------------
+&gt; (Intercept)       |              -0.72 | [-0.92, -0.53]
+&gt; Speciesversicolor |               1.45 | [ 1.18,  1.72]
+</code></pre>
+<p>This linear model suggests that the <em>standardized</em> difference between the <em>versicolor</em> level of Species and the <em>setosa</em> level (the reference level - the intercept) is of 1.12 standard deviation of <code>Sepal.Length</code> (because the response variable was standardized, right?). Let’s compute the <strong>Cohen’s <em>d</em></strong> between these two levels:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">cohens_d</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Species, <span class="dt">data =</span> data) </span></code></pre></div>
+<pre><code>&gt; Cohen&#39;s d |         95% CI
+&gt; --------------------------
+&gt;     -2.10 | [-2.59, -1.61]
+</code></pre>
+<p><em><strong>It is very different!</strong></em> Why? How? Both differences should be expressed in units of SD! But which SDs? Different SDs!</p>
+<p>When looking at the difference between groups as a <strong>slope</strong>, the standardized parameter is the difference between the means in (SD_{Sepal.Length}). That is, the <em>slope</em> between <code>setosa</code> and <code>versicolor</code> is a change of 1.45 (SD_{Sepal.Length}).</p>
+<p>However, when looking a the difference as a distance between two populations, Cohen’s d is the distance between the means in units of <a href="https://easystats.github.io/effectsize/reference/sd_pooled.html"><strong>pooled SDs</strong></a>. That is, the <em>distance</em> between <code>setosa</code> and <code>versicolor</code> is of 2.1 SDs of each of the groups (here assumed to be equal).</p>
+<p>Note that you can get a proximity of Cohen’s d with by converting the (t) statistic from the regression model via <code>t_to_d()</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>(parameters &lt;-<span class="st"> </span><span class="kw">lm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Species, <span class="dt">data =</span> data) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="st">  </span><span class="kw">model_parameters</span>())</span></code></pre></div>
+<pre><code>&gt; Parameter            | Coefficient |   SE |       95% CI |     t | df |      p
+&gt; ------------------------------------------------------------------------------
+&gt; (Intercept)          |        5.01 | 0.06 | [4.88, 5.13] | 80.09 | 98 | &lt; .001
+&gt; Species [versicolor] |        0.93 | 0.09 | [0.75, 1.11] | 10.52 | 98 | &lt; .001
+</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">t_to_d</span>(<span class="fl">10.52</span>, <span class="dt">df_error =</span> <span class="dv">98</span>)</span></code></pre></div>
+<pre><code>&gt;    d |       95% CI
+&gt; -------------------
+&gt; 2.13 | [1.63, 2.62]
+</code></pre>
+<p>It is also interesting to note that using the <em>smart</em> method when standardizing parameters will give you indices equivalent to <strong>Glass’ delta</strong>, which difference is expressed in terms of SD of the intercept (the “reference” factor levels).</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">lm</span>(Sepal.Length <span class="op">~</span><span class="st"> </span>Species, <span class="dt">data =</span> data) <span class="op">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="st">  </span><span class="kw">standardize_parameters</span>(<span class="dt">method =</span> <span class="st">&quot;smart&quot;</span>)</span></code></pre></div>
+<pre><code>&gt; Parameter         | Coefficient (std.) |       95% CI
+&gt; -----------------------------------------------------
+&gt; (Intercept)       |               0.00 | [0.00, 0.00]
+&gt; Speciesversicolor |               2.64 | [2.15, 3.13]
+</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw">glass_delta</span>(data<span class="op">$</span>Sepal.Length[data<span class="op">$</span>Species<span class="op">==</span><span class="st">&quot;versicolor&quot;</span>],</span>
+<span id="cb21-2"><a href="#cb21-2"></a>            data<span class="op">$</span>Sepal.Length[data<span class="op">$</span>Species<span class="op">==</span><span class="st">&quot;setosa&quot;</span>])</span></code></pre></div>
+<pre><code>&gt; Glass&#39; delta |       95% CI
+&gt; ---------------------------
+&gt;         2.64 | [2.10, 3.17]
+</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># glass_delta takes SD from second group</span></span></code></pre></div>
+<p><em><strong>… So note that some standardized differences are difference than others! :)</strong></em></p>
+<h1 id="standardization-methods">Standardization methods</h1>
+<p><sub>To be added…</sub></p>
+<!-- ### **"refit"**: Re-fitting the model with standardized data -->
+
+<!-- **This method is based on a complete model re-fit with a standardized version of data**. Hence, this method is equal to standardizing the variables before fitting the model. It is the "purest" and the most accurate (Neter et al., 1989), but it is also the most computationally costly and long (especially for heavy models such as, for instance, for Bayesian models). This method is particularly recommended for complex models that include interactions or transformations (e.g., polynomial or spline terms). -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(effectsize) -->
+
+<!-- data <- iris -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- standardize_parameters(model, method="refit") -->
+
+<!-- ``` -->
+
+<!-- The `robust` (default to `FALSE`) argument enables a **robust standardization of data**, *i.e.*, based on the **median** and **MAD** instead of the **mean** and **SD**. -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+
+<!-- standardize_parameters(model, method="refit", robust=TRUE) -->
+
+<!-- ``` -->
+
+<!-- This method is very flexible as it can be applied to all types of models (linear, logistic...). -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+
+<!-- data$binary <- ifelse(data$Sepal.Width > 3, 1, 0) -->
+
+<!-- model <- glm(binary ~ Species + Sepal.Length, data = data, family="binomial") -->
+
+<!-- standardize_parameters(model, method="refit") -->
+
+<!-- ``` -->
+
+<!-- ### **"posthoc"**: Refit without refitting -->
+
+<!-- Post-hoc standardization of the parameters, aiming at emulating the results obtained by "refit" without refitting the model. The coefficients are divided by the standard deviation (or MAD if `robust`) of the outcome (which becomes their expression 'unit'). Then, the coefficients related to numeric variables are additionally multiplied by the standard deviation (or MAD if `robust`) of the related terms, so that they correspond to changes of 1 SD of the predictor (e.g., "A change in 1 SD of *x* is related to a change of 0.24 of the SD of *y*). This does not apply to binary variables or factors, so the coefficients are still related to changes in levels. This method is not accurate and tend to give aberrant results when interactions are specified. -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- standardize_parameters(model, method="posthoc") -->
+
+<!-- ``` -->
+
+<!-- ### **"smart"**: Standardization of Model's parameters with Adjustment, Reconnaissance and Transformation -->
+
+<!-- Similar to `method = "posthoc"` in that it does not involve model refitting. The difference is that the SD of the response is computed on the relevant section of the data. For instance, if a factor with 3 levels A (the intercept), B and C is entered as a predictor, the effect corresponding to B vs. A will be scaled by the variance of the response at the intercept only. As a results, the coefficients for effects of factors are similar to a Glass' *delta*. -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- standardize_parameters(model, method="smart") -->
+
+<!-- ``` -->
+
+<!-- ### **"basic"**: Raw scaling of the model frame -->
+
+<!-- This method is similar to `method = "posthoc"`, but treats all variables as continuous: it also scales the coefficient by the standard deviation of model's matrix' parameter of factors levels (transformed to integers) or binary predictors. Although being inappropriate for these cases, this method is the one implemented by default in other software packages, such as `lm.beta::lm.beta()`. -->
+
+<!-- ## Methods Comparison -->
+
+<!-- We will use the "refit" method as the baseline. We will then compute the differences between these standardized parameters and the ones provided by the other functions. The **bigger the (absolute) number, the worse it is**. -->
+
+<!-- > **SPOILER ALERT: the standardization implemented in `effectsize` is the most accurate and the most flexible.** -->
+
+<!-- ### Convenience function -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(effectsize) -->
+
+<!-- library(lm.beta) -->
+
+<!-- library(MuMIn) -->
+
+<!-- comparison <- function(model, robust=FALSE){ -->
+
+<!--   out <- standardize_parameters(model, method="refit", robust=robust)[1:2] -->
+
+<!--   out$posthoc <- tryCatch({ -->
+
+<!--     out[, 2] - standardize_parameters(model, method="posthoc", robust=robust)[, 2] -->
+
+<!-- }, error = function(error_condition) { -->
+
+<!--     "Error" -->
+
+<!-- }) -->
+
+<!--   out$basic <- tryCatch({ -->
+
+<!--     out[, 2] - standardize_parameters(model, method="basic", robust=robust)[, 2] -->
+
+<!-- }, error = function(error_condition) { -->
+
+<!--     "Error" -->
+
+<!-- }) -->
+
+<!--   out$lm.beta <- tryCatch({ -->
+
+<!--     out[, 2] - lm.beta::lm.beta(model)$standardized.coefficients -->
+
+<!-- }, error = function(error_condition) { -->
+
+<!--     "Error" -->
+
+<!-- }, warning = function(warning_condition) { -->
+
+<!--   "Error" -->
+
+<!-- }) -->
+
+<!--   out$MuMIn <- tryCatch({ -->
+
+<!--     out[, 2] - MuMIn::std.coef(model, partial.sd=FALSE)[, 1] -->
+
+<!-- }, error = function(error_condition) { -->
+
+<!--     "Error" -->
+
+<!-- }) -->
+
+<!--   out[, 2] <- NULL -->
+
+<!--   out -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+<!-- ### Data -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- data <- iris -->
+
+<!-- data$Group_Sepal.Width <- as.factor(ifelse(data$Sepal.Width > 3, "High", "Low")) -->
+
+<!-- data$Binary_Sepal.Width <- as.factor(ifelse(data$Sepal.Width > 3, 1, 0)) -->
+
+<!-- summary(data) -->
+
+<!-- ``` -->
+
+<!-- ### Models with only numeric predictors -->
+
+<!-- #### Linear Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Logistic Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- glm(Binary_Sepal.Width ~ Petal.Width + Sepal.Length, data=data, family="binomial") -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Linear Mixed Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(lme4) -->
+
+<!-- model <- lme4::lmer(Sepal.Length ~ Petal.Width + Sepal.Width + (1|Species), -->
+
+<!--                     data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Bayesian Models -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(rstanarm) -->
+
+<!-- model <- stan_glm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- For these simple models, **all methods return results equal to the "refit" method** (although the other packages fail). -->
+
+<!-- #### Transformation -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ poly(Petal.Width, 2) + poly(Sepal.Width, 2), data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- When transformation are involved (e.g., polynomial transformations), **the basic method becomes very unreliable**. -->
+
+<!-- ### Models with factors -->
+
+<!-- #### Linear Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Group_Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Logistic Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- glm(Binary_Sepal.Width ~ Petal.Width + Species, data=data, family="binomial") -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Linear Mixed Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(lme4) -->
+
+<!-- model <- lme4::lmer(Sepal.Length ~ Petal.Length + Group_Sepal.Width + (1|Species), data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Bayesian Models -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- library(rstanarm) -->
+
+<!-- model <- stan_lmer(Sepal.Length ~ Petal.Width + Group_Sepal.Width + (1|Species), -->
+
+<!--                    data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- When factors are involved, the basic method (that standardizes the numeric transformation of factors) give again different results. -->
+
+<!-- ### Models with interactions -->
+
+<!-- Long story short, coeffcient obtained via **posthoc** standardization (without refitting the model) go berserk when interactions are involved. However, **this is "normal"**: a regression model estimates coefficient between two variables when the other predictors are at 0 (are *fixed* at 0, that people interpret as *"adjusted for"*). When a standardized data is passed (in the *refit* method), the effects and interactions are estimated at the **means** of the other predictors (because 0 is the mean for a standardized variable). Whereas in posthoc standardization, this coefficient correspond to something different (because the 0 corresponds to something different in standardzed and non-standardized data). In other words, when it comes to interaction, passing standardized data results in a different model, which coefficient have an intrinsically different meaning from unstandardized data. And as [for now](https://github.com/easystats/effectsize/issues/6), we are unable to retrieve one from another. -->
+
+<!-- #### Between continuous -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width * Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Between factors -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Species * Group_Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- #### Between factors and continuous -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Petal.Width * Group_Sepal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+
+<!-- model <- lm(Sepal.Length ~ Group_Sepal.Width * Petal.Width, data=data) -->
+
+<!-- comparison(model) -->
+
+<!-- ``` -->
+
+<!-- ## Conclusion -->
+
+<!-- Use `refit` if possible, but if no interactions, can use `posthoc` or `smart`. -->
+
+<h1 id="references">References</h1>
+<div id="refs" class="references">
+
+<div id="ref-bring1994standardize">
+
+<p>Bring, Johan. 1994. “How to Standardize Regression Coefficients.” <em>The American Statistician</em> 48 (3): 209–13.</p>
+</div>
+
+<div id="ref-gelman2008scaling">
+
+<p>Gelman, Andrew. 2008. “Scaling Regression Inputs by Dividing by Two Standard Deviations.” <em>Statistics in Medicine</em> 27 (15): 2865–73.</p>
+</div>
+
+<div id="ref-menard2004six">
+
+<p>Menard, Scott. 2004. “Six Approaches to Calculating Standardized Logistic Regression Coefficients.” <em>The American Statistician</em> 58 (3): 218–23.</p>
+</div>
+
+<div id="ref-menard2011standards">
+
+<p>———. 2011. “Standards for Standardized Logistic Regression Coefficients.” <em>Social Forces</em> 89 (4): 1409–28.</p>
+</div>
+
+<div id="ref-schielzeth2010simple">
+
+<p>Schielzeth, Holger. 2010. “Simple Means to Improve the Interpretability of Regression Coefficients.” <em>Methods in Ecology and Evolution</em> 1 (2): 103–13.</p>
+</div>
+
+</div>
+
+<ol>
+<li>in fact, they are more closely related to the semi-partial correlations.</li>
+</ol>
+
+</body>
+</html>

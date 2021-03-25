@@ -1,0 +1,11 @@
+---
+name:  agreetest
+title: Simple Test of Agreement
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Simple Test of Agreement
+      type:  Preformatted
+
+...

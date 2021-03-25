@@ -1,0 +1,19 @@
+Package: cccrm
+Title: Concordance Correlation Coefficient for Repeated (and
+        Non-Repeated) Measures
+Version: 2.0.1
+Date: 2020-06-10
+Author: Josep Lluis Carrasco <jlcarrasco@ub.edu>, Josep Puig Martinez
+        <j.puig04@gmail.com>
+Maintainer: Josep Lluis Carrasco <jlcarrasco@ub.edu>
+Depends: R (>= 4.0.0)
+Imports: nlme, dplyr, Deriv, tidyselect
+Description: Estimates the Concordance Correlation Coefficient to assess agreement. The scenarios considered are non-repeated measures, non-longitudinal repeated measures (replicates) and longitudinal repeated measures. The estimation approaches implemented are variance components and U-statistics approaches.
+License: GPL (>= 2)
+RoxygenNote: 7.1.0
+Encoding: UTF-8
+NeedsCompilation: no
+Packaged: 2020-06-10 11:38:31 UTC; hexac
+Repository: CRAN
+Date/Publication: 2020-06-10 12:00:09 UTC
+Built: R 4.0.2; ; 2020-08-19 20:54:25 UTC; windows
