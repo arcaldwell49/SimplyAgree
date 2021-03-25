@@ -7,8 +7,8 @@ Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https
 [![Codecov test
 coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
 
-**This Package is still in development and unit tests have not been
-created yet. USE WITH CAUTION**
+**This Package is still in development and has only recently implemented
+basic unit tests. USE WITH CAUTION**
 
 This is a R package for calculating absolute agreement and estimating
 the required sample size for a study attempting to estimate absolute
