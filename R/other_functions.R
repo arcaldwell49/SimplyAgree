@@ -1,5 +1,5 @@
 # for agree_test
-ccc.xy <- function(x, y, conf.level) {
+ccc.xy <- function(x, y, conf.level,agree.level) {
   N. <- 1 - ((1 - conf.level) / 2)
   zv <- qnorm(N., mean = 0, sd = 1)
   dat <- data.frame(x, y)
@@ -41,10 +41,27 @@ ccc.xy <- function(x, y, conf.level) {
   llt = (exp(2 * llt) - 1) / (exp(2 * llt) + 1)
   ult = (exp(2 * ult) - 1) / (exp(2 * ult) + 1)
   delta.sd <- sqrt(var(delta, na.rm = TRUE))
+  var.d = (delta.sd)^2/k
+  var.dlim = (1/k+zv/(2*(k-1)))*(delta.sd)^2
 
   ba.p <- mean(delta)
-
-  sblalt <- data.frame(est = ba.p, delta.sd = delta.sd)
+  pct <- 1 - (1 - agree.level) / 2
+  agreelim = qnorm(pct)
+  l.loa = ba.p - agreelim*delta.sd
+  u.loa = ba.p + agreelim*delta.sd
+  # Calculate Bland Altman Limits
+  sblalt <- data.frame(d = ba.p,
+                       d.lci = (ba.p - qt(N.,k-1)*sqrt(var.d)),
+                       d.uci = (ba.p + qt(N.,k-1)*sqrt(var.d)),
+                       d.sd = delta.sd,
+                       var.d = var.d,
+                       var.loa = var.dlim,
+                       lower.loa = l.loa,
+                       lower.lci = (l.loa - qt(N.,k-1)*sqrt(var.dlim)),
+                       lower.uci = (l.loa + qt(N.,k-1)*sqrt(var.dlim)),
+                       upper.loa = u.loa,
+                       upper.lci = (u.loa - qt(N.,k-1)*sqrt(var.dlim)),
+                       upper.uci = (u.loa + qt(N.,k-1)*sqrt(var.dlim)))
 
   rho.c <- data.frame(p, llt, ult)
   names(rho.c) <- c("est.ccc", "lower.ci", "upper.ci")
@@ -62,7 +79,7 @@ ccc.xy <- function(x, y, conf.level) {
   #l.shift = change in mean
   #bias = bias correction (1 = perfect)
   #mean.dlt = mean and delta pairs data frame
-  #sblalt =
+
 
 }
 
@@ -78,6 +95,7 @@ loa_bs = function(diff,
 
   limits = qnorm(1 - (1 - conf.level) / 2)
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
+
   formula = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
 
   datboot <- data[indices,] # allows boot to select sample
@@ -89,8 +107,9 @@ loa_bs = function(diff,
               offset = NULL,
               na.action = na.omit)
 
-  mean = as.data.frame(emmeans::emmeans(res3, ~1))$emmean
-  se = as.data.frame(emmeans::emmeans(res3, ~1))$SE
+  mean = as.data.frame(emmeans(res3, ~1))$emmean
+  se = as.data.frame(emmeans(res3, ~1))$SE
+  vartab = as.data.frame(VarCorr(res3))
   withinsd = vartab$sdcor[2]
   betweensd <- vartab$sdcor[1]
   totalsd <- sqrt(vartab$vcov[1] + vartab$vcov[2])
@@ -100,11 +119,11 @@ loa_bs = function(diff,
   upper <- mean + agree.lim * totalsd
   # cat(cl*100,"% LoA are from",low,"to",upper,"\n")
   c(bias = mean,
+    low_loa = low,
+    upper_loa = upper,
     within_sd = withinsd,
     between_sd = betweensd,
-    total_sd = totalsd,
-    low_loa = low,
-    upper_loa = upper)
+    total_sd = totalsd)
 }
 
 loa_bstab = function(bsls,
@@ -155,29 +174,29 @@ loa_bstab = function(bsls,
     "Between SD",
     "Total SD"
   ),
-  Estimate = c(
-    boot_bias$t0,
-    boot_within_sd$t0,
-    boot_between_sd$t0,
-    boot_total_sd$t0,
-    boot_low_loa$t0,
-    boot_upper_loa$t0
+  estimate = c(
+    bsls$boot_bias$t0,
+    bsls$boot_low_loa$t0,
+    bsls$boot_upper_loa$t0,
+    bsls$boot_within_sd$t0,
+    bsls$boot_between_sd$t0,
+    bsls$boot_total_sd$t0
   ),
   lower.ci = c(
     conf_bias[1],
+    conf_low_loa[1],
+    conf_upper_loa[1],
     conf_within_sd[1],
     conf_between_sd[1],
-    conf_total_sd[1],
-    conf_low_loa[1],
-    conf_upper_loa[1]
+    conf_total_sd[1]
   ),
   upper.ci = c(
     conf_bias[2],
+    conf_low_loa[2],
+    conf_upper_loa[2],
     conf_within_sd[2],
     conf_between_sd[2],
-    conf_total_sd[2],
-    conf_low_loa[2],
-    conf_upper_loa[2]
+    conf_total_sd[2]
   ))
 }
 
