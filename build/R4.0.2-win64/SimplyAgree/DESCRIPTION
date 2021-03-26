@@ -11,9 +11,9 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports: ggplot2, emmeans, lme4, boot, stats, dplyr, magrittr,
-        tidyselect, tidyr, sjstats, stringr, cccrm
+        tidyselect, tidyr, sjstats, stringr, cccrm, jmvcore
 Suggests: knitr, rmarkdown, testthat, tidyverse, readr, ggpubr, covr
 VignetteBuilder: knitr
 Depends: R (>= 3.5)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.0.2; ; 2021-03-25 17:01:18 UTC; windows
+Built: R 4.0.2; ; 2021-03-26 20:52:42 UTC; windows

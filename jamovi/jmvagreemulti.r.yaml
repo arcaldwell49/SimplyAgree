@@ -1,0 +1,11 @@
+---
+name:  jmvagreemulti
+title: jamovi Agreement Analysis for Nested or Replicate Data
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: jamovi Agreement Analysis for Nested or Replicate Data
+      type:  Preformatted
+
+...

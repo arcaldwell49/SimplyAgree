@@ -2,7 +2,7 @@
 % Please edit documentation in R/agreetest.h.R
 \name{agreetest}
 \alias{agreetest}
-\title{Simple Test of Agreement}
+\title{Simple Test of Agreement in jamovi}
 \usage{
 agreetest(
   data,
@@ -26,7 +26,7 @@ confidence intervals}
 \item{agreeWidth}{a number between .50 and .999 (default: .95), the width
 of agreement limits}
 
-\item{testValue}{a number specifying the}
+\item{testValue}{a number specifying the limit of agreement}
 }
 \value{
 A results object containing:
@@ -35,5 +35,5 @@ A results object containing:
 }
 }
 \description{
-Simple Test of Agreement
+Simple Test of Agreement in jamovi
 }

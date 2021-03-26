@@ -56,5 +56,5 @@ options:
       default: 2
       description:
           ui: Value that would define adequate absolute agreement.
-          R: a number specifying the
+          R: a number specifying the limit of agreement
 ...

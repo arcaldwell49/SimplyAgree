@@ -73,18 +73,64 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreetestResults",
     inherit = jmvcore::Group,
     active = list(
-        text = function() private$.items[["text"]]),
+        text = function() private$.items[["text"]],
+        blandtab = function() private$.items[["blandtab"]],
+        ccctab = function() private$.items[["ccctab"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Simple Test of Agreement")
+                title="Simple Test of Agreement in jamovi")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Simple Test of Agreement"))}))
+                title="Simple Test of Agreement"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="blandtab",
+                title="Bland-Altman Limits of Agreement",
+                rows=3,
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="lowerci", 
+                        `title`="Lower C.I.", 
+                        `type`="number"),
+                    list(
+                        `name`="upperci", 
+                        `title`="Upper C.I", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="ccctab",
+                title="Concordance Correlation Coefficient",
+                rows=1,
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="lowerci", 
+                        `title`="Lower C.I.", 
+                        `type`="number"),
+                    list(
+                        `name`="upperci", 
+                        `title`="Upper C.I", 
+                        `type`="number"))))}))
 
 agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreetestBase",
@@ -106,7 +152,7 @@ agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Simple Test of Agreement
+#' Simple Test of Agreement in jamovi
 #'
 #' 
 #' @param data .
@@ -116,11 +162,19 @@ agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   confidence intervals
 #' @param agreeWidth a number between .50 and .999 (default: .95), the width
 #'   of agreement limits
-#' @param testValue a number specifying the
+#' @param testValue a number specifying the limit of agreement
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$blandtab$asDF}
+#'
+#' \code{as.data.frame(results$blandtab)}
 #'
 #' @export
 agreetest <- function(
