@@ -8,4 +8,40 @@ items:
       title: jamovi Agreement Analysis for Nested or Replicate Data
       type:  Preformatted
 
+    - name:  blandtab
+      title: Zou's MOVER Limits of Agreement
+      type: Table
+      rows:  3
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name:  ccctab
+      title: Concordance Correlation Coefficient
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
 ...
