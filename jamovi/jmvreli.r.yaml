@@ -1,0 +1,34 @@
+---
+name:  jmvreli
+title: Reliability Analysis
+jrs:   '1.1'
+
+items:
+    - name:  text
+      title: Reliability Analysis
+      type:  Preformatted
+
+    - name:  icctab
+      title: Intraclass Correlation Coefficients
+      type: Table
+      rows:  6
+      columns:
+        - name: model
+          title: model
+          type: text
+        - name: measures
+          title: measures
+        - name: type
+          title: type
+          type: text
+        - name: icc
+          title: ICC
+          type: number
+        - name: lower.ci
+          title: lower.ci
+          type: number
+        - name: upper.ci
+          title: upper.ci
+          type: number
+
+...

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Simple Test of Agreement in jamovi — agreetest • SimplyAgree</title>
+<title>Agreement Analysis for Nested or Replicate Data — jmvagreemulti • SimplyAgree</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Simple Test of Agreement in jamovi — agreetest" />
-<meta property="og:description" content="Simple Test of Agreement in jamovi" />
+<meta property="og:title" content="Agreement Analysis for Nested or Replicate Data — jmvagreemulti" />
+<meta property="og:description" content="Agreement Analysis for Nested or Replicate Data" />
 
 
 
@@ -118,22 +118,24 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Simple Test of Agreement in jamovi</h1>
+    <h1>Agreement Analysis for Nested or Replicate Data</h1>
     
-    <div class="hidden name"><code>agreetest.Rd</code></div>
+    <div class="hidden name"><code>jmvagreemulti.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Simple Test of Agreement in jamovi</p>
+    <p>Agreement Analysis for Nested or Replicate Data</p>
     </div>
 
-    <pre class="usage"><span class='fu'>agreetest</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>jmvagreemulti</span><span class='op'>(</span>
   <span class='va'>data</span>,
   <span class='va'>method1</span>,
   <span class='va'>method2</span>,
+  <span class='va'>id</span>,
   ciWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
   agreeWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
-  testValue <span class='op'>=</span> <span class='fl'>2</span>
+  testValue <span class='op'>=</span> <span class='fl'>2</span>,
+  valEq <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -152,6 +154,10 @@
       <td><p>.</p></td>
     </tr>
     <tr>
+      <th>id</th>
+      <td><p>.</p></td>
+    </tr>
+    <tr>
       <th>ciWidth</th>
       <td><p>a number between .50 and .999 (default: .95), the width of
 confidence intervals</p></td>
@@ -164,6 +170,10 @@ of agreement limits</p></td>
     <tr>
       <th>testValue</th>
       <td><p>a number specifying the limit of agreement</p></td>
+    </tr>
+    <tr>
+      <th>valEq</th>
+      <td><p>.</p></td>
     </tr>
     </table>
 

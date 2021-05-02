@@ -1,0 +1,41 @@
+---
+name:  jmvreli
+title: Reliability Analysis
+menuGroup: SimplyAgree
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: vars
+      title: Measurements
+      type: Variables
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          ui: >
+            Columns with the measured outcome.
+          R: >
+             a list of the column names containing the measurements for reliability analysis.
+
+
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: .50
+      max: .999
+      default: .95
+      description:
+          ui: >
+            the confidence interval width.
+          R: >
+            a number between .50 and .999 (default: .95), the width of confidence
+            intervals
+...

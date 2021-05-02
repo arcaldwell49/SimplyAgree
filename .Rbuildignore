@@ -21,3 +21,6 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^paper\.md$
+^paper\.bib$
+^paper$

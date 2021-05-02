@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>reanalysis • SimplyAgree</title>
+<title>Re-analysis of an Agreement Study • SimplyAgree</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="reanalysis">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Re-analysis of an Agreement Study">
 <meta property="og:description" content="SimplyAgree">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -57,7 +57,7 @@
       <a href="../articles/intro_vignette.html">Introduction to SimplyAgree</a>
     </li>
     <li>
-      <a href="../articles/reanalysis.html">reanalysis</a>
+      <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
     </li>
   </ul>
 </li>
@@ -75,7 +75,7 @@
       </header><script src="reanalysis_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>reanalysis</h1>
+      <h1 data-toc-skip>Re-analysis of an Agreement Study</h1>
             
       
       
@@ -193,12 +193,37 @@ Concordance Plots of Esophageal Temperature
                                      type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></code></pre></div>
 <p>When we create a table of the results we can see that CCC and limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">bs_tab</span>,
-             caption <span class="op">=</span> <span class="st">"LoA: Trec Post Exercise"</span><span class="op">)</span>
-<span class="co">#&gt; Warning in kable_pipe(x = structure(character(0), .Dim = c(0L, 0L), .Dimnames =</span>
-<span class="co">#&gt; list(: The table should have a header (column names)</span></code></pre></div>
-<p>Table: LoA: Trec Post Exercise</p>
-<p>|| || || ||</p>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">loa</span>,
+             caption <span class="op">=</span> <span class="st">"LoA: Trec Post Exercise"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<caption>LoA: Trec Post Exercise</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">estimate</th>
+<th align="right">lower.ci</th>
+<th align="right">upper.ci</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mean Bias</td>
+<td align="right">0.2300000</td>
+<td align="right">0.1727896</td>
+<td align="right">0.3391757</td>
+</tr>
+<tr class="even">
+<td align="left">Lower LoA</td>
+<td align="right">-0.1958766</td>
+<td align="right">-0.2948109</td>
+<td align="right">-0.1089945</td>
+</tr>
+<tr class="odd">
+<td align="left">Upper LoA</td>
+<td align="right">0.6558766</td>
+<td align="right">0.5243691</td>
+<td align="right">0.8450319</td>
+</tr>
+</tbody>
+</table>
 <p>Furthermore, we can visualize the results with a typical Bland-Altman plot of the LoA.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">)</span></code></pre></div>
@@ -209,12 +234,37 @@ Limits of Agreement for Trec Post Exercise
 </div>
 <p>Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">bs_tab</span>,
-             caption <span class="op">=</span> <span class="st">"LoA: Delta Trec"</span><span class="op">)</span>
-<span class="co">#&gt; Warning in kable_pipe(x = structure(character(0), .Dim = c(0L, 0L), .Dimnames =</span>
-<span class="co">#&gt; list(: The table should have a header (column names)</span></code></pre></div>
-<p>Table: LoA: Delta Trec</p>
-<p>|| || || ||</p>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
+             caption <span class="op">=</span> <span class="st">"LoA: Delta Trec"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<caption>LoA: Delta Trec</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">estimate</th>
+<th align="right">lower.ci</th>
+<th align="right">upper.ci</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mean Bias</td>
+<td align="right">-0.0210000</td>
+<td align="right">-0.0571838</td>
+<td align="right">0.0243662</td>
+</tr>
+<tr class="even">
+<td align="left">Lower LoA</td>
+<td align="right">-0.2552956</td>
+<td align="right">-0.3613519</td>
+<td align="right">-0.1805686</td>
+</tr>
+<tr class="odd">
+<td align="left">Upper LoA</td>
+<td align="right">0.2132956</td>
+<td align="right">0.1670232</td>
+<td align="right">0.2932911</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
@@ -237,12 +287,37 @@ Limits of Agreement for Delta Trec
                                      replicates <span class="op">=</span> <span class="fl">199</span>,
                                      type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">bs_tab</span>,
-             caption <span class="op">=</span> <span class="st">"LoA: Teso Post Exercise"</span><span class="op">)</span>
-<span class="co">#&gt; Warning in kable_pipe(x = structure(character(0), .Dim = c(0L, 0L), .Dimnames =</span>
-<span class="co">#&gt; list(: The table should have a header (column names)</span></code></pre></div>
-<p>Table: LoA: Teso Post Exercise</p>
-<p>|| || || ||</p>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">loa</span>,
+             caption <span class="op">=</span> <span class="st">"LoA: Teso Post Exercise"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<caption>LoA: Teso Post Exercise</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">estimate</th>
+<th align="right">lower.ci</th>
+<th align="right">upper.ci</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mean Bias</td>
+<td align="right">0.1793333</td>
+<td align="right">0.1341438</td>
+<td align="right">0.2243988</td>
+</tr>
+<tr class="even">
+<td align="left">Lower LoA</td>
+<td align="right">-0.0795336</td>
+<td align="right">-0.1441305</td>
+<td align="right">0.0308588</td>
+</tr>
+<tr class="odd">
+<td align="left">Upper LoA</td>
+<td align="right">0.4382003</td>
+<td align="right">0.3465289</td>
+<td align="right">0.5292906</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
@@ -251,12 +326,37 @@ Limits of Agreement for Teso Post Exercise
 </p>
 </div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">bs_tab</span>,
-             caption <span class="op">=</span> <span class="st">"LoA: Delta Teso"</span><span class="op">)</span>
-<span class="co">#&gt; Warning in kable_pipe(x = structure(character(0), .Dim = c(0L, 0L), .Dimnames =</span>
-<span class="co">#&gt; list(: The table should have a header (column names)</span></code></pre></div>
-<p>Table: LoA: Delta Teso</p>
-<p>|| || || ||</p>
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
+             caption <span class="op">=</span> <span class="st">"LoA: Delta Teso"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<caption>LoA: Delta Teso</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">estimate</th>
+<th align="right">lower.ci</th>
+<th align="right">upper.ci</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mean Bias</td>
+<td align="right">0.0026667</td>
+<td align="right">-0.0324062</td>
+<td align="right">0.0370979</td>
+</tr>
+<tr class="even">
+<td align="left">Lower LoA</td>
+<td align="right">-0.2165808</td>
+<td align="right">-0.3011728</td>
+<td align="right">-0.1585443</td>
+</tr>
+<tr class="odd">
+<td align="left">Upper LoA</td>
+<td align="right">0.2219141</td>
+<td align="right">0.1515147</td>
+<td align="right">0.3399762</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">

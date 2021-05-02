@@ -1,9 +1,9 @@
 ---
-title: "reanalysis"
+title: "Re-analysis of an Agreement Study"
 output: rmarkdown::html_vignette
 bibliography: ref.bib
 vignette: >
-  %\VignetteIndexEntry{reanalysis}
+  %\VignetteIndexEntry{Re-analysis of an Agreement Study}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -237,7 +237,7 @@ rec.post_loa = SimplyAgree::loa_mixed(diff = "diff",
 When we create a table of the results we can see that CCC and limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).
 
 ```{r}
-knitr::kable(rec.post_loa$bs_tab,
+knitr::kable(rec.post_loa$loa,
              caption = "LoA: Trec Post Exercise")
 ```
 
@@ -249,7 +249,7 @@ plot(rec.post_loa)
 
 Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.
 ```{r}
-knitr::kable(rec.delta_loa$bs_tab,
+knitr::kable(rec.delta_loa$loa,
              caption = "LoA: Delta Trec")
 ```
 
@@ -273,7 +273,7 @@ eso.post_loa = SimplyAgree::loa_mixed(diff = "diff",
 ```
 
 ```{r}
-knitr::kable(eso.post_loa$bs_tab,
+knitr::kable(eso.post_loa$loa,
              caption = "LoA: Teso Post Exercise")
 ```
 
@@ -284,7 +284,7 @@ plot(eso.post_loa)
 
 
 ```{r}
-knitr::kable(eso.delta_loa$bs_tab,
+knitr::kable(eso.delta_loa$loa,
              caption = "LoA: Delta Teso")
 ```
 

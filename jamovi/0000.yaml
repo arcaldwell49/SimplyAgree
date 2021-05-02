@@ -8,7 +8,7 @@ authors:
 maintainer: Aaron R. Caldwell <arcaldwell49@gmail.com>
 date: '`r Sys.Date()`'
 type: R
-description: Agreement and Reliability Analysis
+description: Agreement and Reliability Analyses for nested designs.
 analyses:
   - title: Simple Test of Agreement in jamovi
     name: agreetest
@@ -20,6 +20,11 @@ analyses:
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Agreement Analysis for Nested or Replicate Data
+  - title: Reliability Analysis
+    name: jmvreli
+    ns: SimplyAgree
+    menuGroup: SimplyAgree
+    menuTitle: Reliability Analysis
 usesNative: true
 minApp: 1.0.8
 

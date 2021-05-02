@@ -55,3 +55,6 @@ export(agreetestOptions)
 
 export(jmvagreemultiClass)
 export(jmvagreemultiOptions)
+
+export(jmvreliClass)
+export(jmvreliOptions)
