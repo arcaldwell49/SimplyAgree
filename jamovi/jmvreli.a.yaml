@@ -27,7 +27,7 @@ options:
 
 
     - name: ciWidth
-      title: Confidence level
+      title: Confidence Level
       type: Number
       min: .50
       max: .999
@@ -38,4 +38,20 @@ options:
           R: >
             a number between .50 and .999 (default: .95), the width of confidence
             intervals
+
+    - name: desc
+      title: Variance Components
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide table of variance components
+
+    - name: plots
+      title: Plot Data
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), plot data
 ...

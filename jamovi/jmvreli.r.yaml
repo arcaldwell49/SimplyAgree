@@ -1,11 +1,10 @@
 ---
 name:  jmvreli
-title: Reliability Analysis
+title: "Reliability"
 jrs:   '1.1'
 
 items:
     - name:  text
-      title: Reliability Analysis
       type:  Preformatted
 
     - name:  icctab
@@ -30,5 +29,32 @@ items:
         - name: upper.ci
           title: upper.ci
           type: number
+
+    - name:  vartab
+      title: Variance Components
+      type: Table
+      visible: (desc)
+      rows:  4
+      columns:
+        - name: comp
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+        - name: percent
+          title: Percent
+          type: number
+
+    - name: plots
+      type: Image
+      title: Plot Reliability Data
+      visible: (plots)
+      renderFun: .plot
+      width: 450
+      height: 400
+
+    - name:  cites
+      title: Citations
+      type:  Preformatted
 
 ...

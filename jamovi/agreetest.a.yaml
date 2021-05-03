@@ -26,7 +26,7 @@ options:
         - numeric
 
     - name: ciWidth
-      title: Confidence level
+      title: Confidence Level
       type: Number
       min: .50
       max: .999
@@ -39,7 +39,7 @@ options:
             intervals
 
     - name: agreeWidth
-      title: Agreement level
+      title: Agreement Level
       type: Number
       min: .50
       max: .999
@@ -51,10 +51,25 @@ options:
             a number between .50 and .999 (default: .95), the width of agreement limits
 
     - name: testValue
-      title: Test Value
+      title: Agreement Bound (+/-)
       type: Number
       default: 2
       description:
           ui: Value that would define adequate absolute agreement.
           R: a number specifying the limit of agreement
+
+    - name: CCC
+      title: Concordance Correlation Coefficient (CCC)
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce CCC table
+    - name: plotbland
+      title: Bland-Altman Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), for Bland-Altman plot
 ...

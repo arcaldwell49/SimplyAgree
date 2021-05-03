@@ -29,6 +29,7 @@ items:
     - name:  ccctab
       title: Concordance Correlation Coefficient
       type: Table
+      visible: (CCC)
       rows:  1
       columns:
         - name: var
@@ -44,4 +45,7 @@ items:
           title: 'Upper C.I'
           type: number
 
+    - name:  cites
+      title: Citations
+      type:  Preformatted
 ...

@@ -75,5 +75,11 @@ agreetestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 ))
             }
 
+            citethis = paste0(
+                "Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation,
+                Statistics in Biopharmaceutical Research,
+                <https://doi.org/10.1080/19466315.2019.1677495>"
+            )
+            self$results$cites$setContent(citethis)
         })
 )

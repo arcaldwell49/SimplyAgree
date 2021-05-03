@@ -20,3 +20,10 @@ children:
       - type: TextBox
         name: ciWidth
         format: number
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: desc
+      - type: CheckBox
+        name: plots

@@ -10,7 +10,8 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             method2 = NULL,
             ciWidth = 0.95,
             agreeWidth = 0.95,
-            testValue = 2, ...) {
+            testValue = 2,
+            CCC = TRUE, ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -48,25 +49,32 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "testValue",
                 testValue,
                 default=2)
+            private$..CCC <- jmvcore::OptionBool$new(
+                "CCC",
+                CCC,
+                default=TRUE)
 
             self$.addOption(private$..method1)
             self$.addOption(private$..method2)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..agreeWidth)
             self$.addOption(private$..testValue)
+            self$.addOption(private$..CCC)
         }),
     active = list(
         method1 = function() private$..method1$value,
         method2 = function() private$..method2$value,
         ciWidth = function() private$..ciWidth$value,
         agreeWidth = function() private$..agreeWidth$value,
-        testValue = function() private$..testValue$value),
+        testValue = function() private$..testValue$value,
+        CCC = function() private$..CCC$value),
     private = list(
         ..method1 = NA,
         ..method2 = NA,
         ..ciWidth = NA,
         ..agreeWidth = NA,
-        ..testValue = NA)
+        ..testValue = NA,
+        ..CCC = NA)
 )
 
 agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -75,7 +83,8 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     active = list(
         text = function() private$.items[["text"]],
         blandtab = function() private$.items[["blandtab"]],
-        ccctab = function() private$.items[["ccctab"]]),
+        ccctab = function() private$.items[["ccctab"]],
+        cites = function() private$.items[["cites"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -113,6 +122,7 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="ccctab",
                 title="Concordance Correlation Coefficient",
+                visible="(CCC)",
                 rows=1,
                 columns=list(
                     list(
@@ -130,7 +140,11 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="upperci", 
                         `title`="Upper C.I", 
-                        `type`="number"))))}))
+                        `type`="number"))))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cites",
+                title="Citations"))}))
 
 agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreetestBase",
@@ -163,11 +177,13 @@ agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param agreeWidth a number between .50 and .999 (default: .95), the width
 #'   of agreement limits
 #' @param testValue a number specifying the limit of agreement
+#' @param CCC \code{TRUE} or \code{FALSE} (default), produce CCC table
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cites} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -183,7 +199,8 @@ agreetest <- function(
     method2,
     ciWidth = 0.95,
     agreeWidth = 0.95,
-    testValue = 2) {
+    testValue = 2,
+    CCC = TRUE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreetest requires jmvcore to be installed (restart may be required)")
@@ -202,7 +219,8 @@ agreetest <- function(
         method2 = method2,
         ciWidth = ciWidth,
         agreeWidth = agreeWidth,
-        testValue = testValue)
+        testValue = testValue,
+        CCC = CCC)
 
     analysis <- agreetestClass$new(
         options = options,

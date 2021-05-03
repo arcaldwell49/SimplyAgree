@@ -7,7 +7,9 @@ jmvreliOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
-            ciWidth = 0.95, ...) {
+            ciWidth = 0.95,
+            desc = FALSE,
+            plots = FALSE, ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -29,16 +31,30 @@ jmvreliOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 min=0.5,
                 max=0.999,
                 default=0.95)
+            private$..desc <- jmvcore::OptionBool$new(
+                "desc",
+                desc,
+                default=FALSE)
+            private$..plots <- jmvcore::OptionBool$new(
+                "plots",
+                plots,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..ciWidth)
+            self$.addOption(private$..desc)
+            self$.addOption(private$..plots)
         }),
     active = list(
         vars = function() private$..vars$value,
-        ciWidth = function() private$..ciWidth$value),
+        ciWidth = function() private$..ciWidth$value,
+        desc = function() private$..desc$value,
+        plots = function() private$..plots$value),
     private = list(
         ..vars = NA,
-        ..ciWidth = NA)
+        ..ciWidth = NA,
+        ..desc = NA,
+        ..plots = NA)
 )
 
 jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -46,18 +62,20 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         text = function() private$.items[["text"]],
-        icctab = function() private$.items[["icctab"]]),
+        icctab = function() private$.items[["icctab"]],
+        vartab = function() private$.items[["vartab"]],
+        plots = function() private$.items[["plots"]],
+        cites = function() private$.items[["cites"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Reliability Analysis")
+                title="Reliability")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text",
-                title="Reliability Analysis"))
+                name="text"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="icctab",
@@ -86,7 +104,37 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="upper.ci", 
                         `title`="upper.ci", 
-                        `type`="number"))))}))
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="vartab",
+                title="Variance Components",
+                visible="(desc)",
+                rows=4,
+                columns=list(
+                    list(
+                        `name`="comp", 
+                        `title`="Component", 
+                        `type`="text"),
+                    list(
+                        `name`="variance", 
+                        `title`="Variance"),
+                    list(
+                        `name`="percent", 
+                        `title`="Percent", 
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plots",
+                title="Plot Reliability Data",
+                visible="(plots)",
+                renderFun=".plot",
+                width=450,
+                height=400))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cites",
+                title="Citations"))}))
 
 jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvreliBase",
@@ -116,10 +164,16 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   reliability analysis.
 #' @param ciWidth a number between .50 and .999 (default: .95), the width of
 #'   confidence intervals
+#' @param desc \code{TRUE} or \code{FALSE} (default), provide table of
+#'   variance components
+#' @param plots \code{TRUE} or \code{FALSE} (default), plot data
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$icctab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$vartab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plots} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cites} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -132,7 +186,9 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jmvreli <- function(
     data,
     vars,
-    ciWidth = 0.95) {
+    ciWidth = 0.95,
+    desc = FALSE,
+    plots = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jmvreli requires jmvcore to be installed (restart may be required)")
@@ -146,7 +202,9 @@ jmvreli <- function(
 
     options <- jmvreliOptions$new(
         vars = vars,
-        ciWidth = ciWidth)
+        ciWidth = ciWidth,
+        desc = desc,
+        plots = plots)
 
     analysis <- jmvreliClass$new(
         options = options,
