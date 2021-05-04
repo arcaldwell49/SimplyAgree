@@ -75,7 +75,9 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Reliability")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text"))
+                name="text",
+                refs=list(
+                    "SimplyAgree")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="icctab",
@@ -134,7 +136,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="cites",
-                title="Citations"))}))
+                title="Methods"))}))
 
 jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvreliBase",

@@ -11,7 +11,9 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ciWidth = 0.95,
             agreeWidth = 0.95,
             testValue = 2,
-            CCC = TRUE, ...) {
+            CCC = TRUE,
+            plotbland = FALSE,
+            plotcon = FALSE, ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -53,6 +55,14 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "CCC",
                 CCC,
                 default=TRUE)
+            private$..plotbland <- jmvcore::OptionBool$new(
+                "plotbland",
+                plotbland,
+                default=FALSE)
+            private$..plotcon <- jmvcore::OptionBool$new(
+                "plotcon",
+                plotcon,
+                default=FALSE)
 
             self$.addOption(private$..method1)
             self$.addOption(private$..method2)
@@ -60,6 +70,8 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..agreeWidth)
             self$.addOption(private$..testValue)
             self$.addOption(private$..CCC)
+            self$.addOption(private$..plotbland)
+            self$.addOption(private$..plotcon)
         }),
     active = list(
         method1 = function() private$..method1$value,
@@ -67,14 +79,18 @@ agreetestOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ciWidth = function() private$..ciWidth$value,
         agreeWidth = function() private$..agreeWidth$value,
         testValue = function() private$..testValue$value,
-        CCC = function() private$..CCC$value),
+        CCC = function() private$..CCC$value,
+        plotbland = function() private$..plotbland$value,
+        plotcon = function() private$..plotcon$value),
     private = list(
         ..method1 = NA,
         ..method2 = NA,
         ..ciWidth = NA,
         ..agreeWidth = NA,
         ..testValue = NA,
-        ..CCC = NA)
+        ..CCC = NA,
+        ..plotbland = NA,
+        ..plotcon = NA)
 )
 
 agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -84,7 +100,8 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         blandtab = function() private$.items[["blandtab"]],
         ccctab = function() private$.items[["ccctab"]],
-        cites = function() private$.items[["cites"]]),
+        plotba = function() private$.items[["plotba"]],
+        plotcon = function() private$.items[["plotcon"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -95,7 +112,8 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Simple Test of Agreement"))
+                refs=list(
+                    "SimplyAgree")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="blandtab",
@@ -141,10 +159,22 @@ agreetestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="upperci", 
                         `title`="Upper C.I", 
                         `type`="number"))))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Image$new(
                 options=options,
-                name="cites",
-                title="Citations"))}))
+                name="plotba",
+                title="Bland-Altman Plot",
+                visible="(plotbland)",
+                renderFun=".plotba",
+                width=450,
+                height=400))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotcon",
+                title="Line-of-Identity Plot",
+                visible="(plotcon)",
+                renderFun=".plotcon",
+                width=450,
+                height=400))}))
 
 agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "agreetestBase",
@@ -178,12 +208,16 @@ agreetestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   of agreement limits
 #' @param testValue a number specifying the limit of agreement
 #' @param CCC \code{TRUE} or \code{FALSE} (default), produce CCC table
+#' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
+#'   plot
+#' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$cites} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -200,7 +234,9 @@ agreetest <- function(
     ciWidth = 0.95,
     agreeWidth = 0.95,
     testValue = 2,
-    CCC = TRUE) {
+    CCC = TRUE,
+    plotbland = FALSE,
+    plotcon = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreetest requires jmvcore to be installed (restart may be required)")
@@ -220,7 +256,9 @@ agreetest <- function(
         ciWidth = ciWidth,
         agreeWidth = agreeWidth,
         testValue = testValue,
-        CCC = CCC)
+        CCC = CCC,
+        plotbland = plotbland,
+        plotcon = plotcon)
 
     analysis <- agreetestClass$new(
         options = options,

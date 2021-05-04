@@ -5,8 +5,8 @@ jrs:   '1.1'
 
 items:
     - name:  text
-      title: Simple Test of Agreement
       type:  Preformatted
+      refs: [SimplyAgree]
 
     - name:  blandtab
       title: Bland-Altman Limits of Agreement
@@ -45,7 +45,22 @@ items:
           title: 'Upper C.I'
           type: number
 
-    - name:  cites
-      title: Citations
-      type:  Preformatted
+    - name: plotba
+      type: Image
+      title: Bland-Altman Plot
+      visible: (plotbland)
+      renderFun: .plotba
+      width: 450
+      height: 400
+
+    - name: plotcon
+      type: Image
+      title: Line-of-Identity Plot
+      visible: (plotcon)
+      renderFun: .plotcon
+      width: 450
+      height: 400
+    #- name:  cites
+    #  title: Methods
+    #  type:  Preformatted
 ...

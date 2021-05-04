@@ -45,3 +45,7 @@ children:
     children:
       - type: CheckBox
         name: CCC
+      - type: CheckBox
+        name: plotbland
+      - type: CheckBox
+        name: plotcon

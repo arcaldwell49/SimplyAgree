@@ -16,6 +16,9 @@ agreetestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 method1 <- self$options$method1
                 method2 <- self$options$method2
 
+                plotba <- self$results$plotba
+                plotcon <- self$results$plotcon
+
                 # get the data
                 data <- self$data
 
@@ -73,13 +76,44 @@ agreetestClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     lowerci=res$ccc.xy$lower.ci[1],
                     upperci=res$ccc.xy$upper.ci[1]
                 ))
+
+                plotba$setState(res)
+                plotcon$setState(res)
             }
 
-            citethis = paste0(
-                "Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation,
-                Statistics in Biopharmaceutical Research,
-                <https://doi.org/10.1080/19466315.2019.1677495>"
-            )
-            self$results$cites$setContent(citethis)
+
+
+            #citethis = paste0(
+            #    "Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation,
+            #    Statistics in Biopharmaceutical Research,
+            #    <https://doi.org/10.1080/19466315.2019.1677495>"
+            #)
+            #self$results$cites$setContent(citethis)
+        },
+        .plotba = function(image,...){
+
+            if (is.null(image$state))
+                return(FALSE)
+
+            plotpr = plot(image$state)
+
+
+            print(plotpr)
+
+            return(TRUE)
+
+        },
+        .plotcon = function(image,...){
+
+            if (is.null(image$state))
+                return(FALSE)
+
+            plotpr = image$state
+
+
+            print(plotpr$identity.plot)
+
+            return(TRUE)
+
         })
 )

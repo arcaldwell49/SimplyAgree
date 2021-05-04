@@ -1,6 +1,6 @@
 Package: SimplyAgree
 Type: Package
-Title: Agreement, Consistency, and Reliability Calculations
+Title: Flexible and Robust Agreement and Reliability Analyses
 Version: 0.0.1
 Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
                   role = c("aut", "cre"))
@@ -16,4 +16,4 @@ Suggests: knitr, rmarkdown, testthat, tidyverse, readr, ggpubr, covr
 VignetteBuilder: knitr
 Depends: R (>= 3.5)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.0.2; ; 2021-05-03 22:12:56 UTC; windows
+Built: R 4.0.2; ; 2021-05-04 17:37:17 UTC; windows

@@ -1,0 +1,22 @@
+---
+refs:
+
+    R:
+        type: 'software'
+        author: R Core Team
+        year: 2018
+        title: 'A Language and Envionment for Statistical Computing'
+        publisher: '[Computer software]. Retrieved from https://cran.r-project.org/'
+        url: https://cran.r-project.org/
+
+    SimplyAgree:
+        type: 'software'
+        author: Caldwell, A.R.
+        year: 2021
+        title: "SimplyAgree: Flexible and Robust Agreement and Reliability Analyses"
+        publisher: '[R package]. Retrieved from https://github.com/arcaldwell49/SimplyAgree'
+        url: https://github.com/arcaldwell49/SimplyAgree
+
+
+
+...

@@ -6,6 +6,7 @@ jrs:   '1.1'
 items:
     - name:  text
       type:  Preformatted
+      refs: [SimplyAgree]
 
     - name:  icctab
       title: Intraclass Correlation Coefficients
@@ -54,7 +55,7 @@ items:
       height: 400
 
     - name:  cites
-      title: Citations
+      title: Methods
       type:  Preformatted
 
 ...

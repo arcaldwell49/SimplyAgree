@@ -12,7 +12,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ciWidth = 0.95,
             agreeWidth = 0.95,
             testValue = 2,
-            valEq = FALSE, ...) {
+            CCC = TRUE,
+            valEq = FALSE,
+            plotbland = FALSE,
+            plotcon = FALSE, ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -53,9 +56,21 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "testValue",
                 testValue,
                 default=2)
+            private$..CCC <- jmvcore::OptionBool$new(
+                "CCC",
+                CCC,
+                default=TRUE)
             private$..valEq <- jmvcore::OptionBool$new(
                 "valEq",
                 valEq,
+                default=FALSE)
+            private$..plotbland <- jmvcore::OptionBool$new(
+                "plotbland",
+                plotbland,
+                default=FALSE)
+            private$..plotcon <- jmvcore::OptionBool$new(
+                "plotcon",
+                plotcon,
                 default=FALSE)
 
             self$.addOption(private$..method1)
@@ -64,7 +79,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..agreeWidth)
             self$.addOption(private$..testValue)
+            self$.addOption(private$..CCC)
             self$.addOption(private$..valEq)
+            self$.addOption(private$..plotbland)
+            self$.addOption(private$..plotcon)
         }),
     active = list(
         method1 = function() private$..method1$value,
@@ -73,7 +91,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ciWidth = function() private$..ciWidth$value,
         agreeWidth = function() private$..agreeWidth$value,
         testValue = function() private$..testValue$value,
-        valEq = function() private$..valEq$value),
+        CCC = function() private$..CCC$value,
+        valEq = function() private$..valEq$value,
+        plotbland = function() private$..plotbland$value,
+        plotcon = function() private$..plotcon$value),
     private = list(
         ..method1 = NA,
         ..method2 = NA,
@@ -81,7 +102,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ciWidth = NA,
         ..agreeWidth = NA,
         ..testValue = NA,
-        ..valEq = NA)
+        ..CCC = NA,
+        ..valEq = NA,
+        ..plotbland = NA,
+        ..plotcon = NA)
 )
 
 jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -90,7 +114,9 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     active = list(
         text = function() private$.items[["text"]],
         blandtab = function() private$.items[["blandtab"]],
-        ccctab = function() private$.items[["ccctab"]]),
+        ccctab = function() private$.items[["ccctab"]],
+        plotba = function() private$.items[["plotba"]],
+        plotcon = function() private$.items[["plotcon"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -101,7 +127,8 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="jamovi Agreement Analysis for Nested or Replicate Data"))
+                refs=list(
+                    "SimplyAgree")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="blandtab",
@@ -128,6 +155,7 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="ccctab",
                 title="Concordance Correlation Coefficient",
+                visible="(CCC)",
                 rows=1,
                 columns=list(
                     list(
@@ -145,7 +173,23 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     list(
                         `name`="upperci", 
                         `title`="Upper C.I", 
-                        `type`="number"))))}))
+                        `type`="number"))))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotba",
+                title="Bland-Altman Plot",
+                visible="(plotbland)",
+                renderFun=".plotba",
+                width=450,
+                height=400))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotcon",
+                title="Line-of-Identity Plot",
+                visible="(plotcon)",
+                renderFun=".plotcon",
+                width=450,
+                height=400))}))
 
 jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvagreemultiBase",
@@ -179,12 +223,18 @@ jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param agreeWidth a number between .50 and .999 (default: .95), the width
 #'   of agreement limits
 #' @param testValue a number specifying the limit of agreement
+#' @param CCC \code{TRUE} or \code{FALSE} (default), produce CCC table
 #' @param valEq .
+#' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
+#'   plot
+#' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -202,7 +252,10 @@ jmvagreemulti <- function(
     ciWidth = 0.95,
     agreeWidth = 0.95,
     testValue = 2,
-    valEq = FALSE) {
+    CCC = TRUE,
+    valEq = FALSE,
+    plotbland = FALSE,
+    plotcon = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jmvagreemulti requires jmvcore to be installed (restart may be required)")
@@ -225,7 +278,10 @@ jmvagreemulti <- function(
         ciWidth = ciWidth,
         agreeWidth = agreeWidth,
         testValue = testValue,
-        valEq = valEq)
+        CCC = CCC,
+        valEq = valEq,
+        plotbland = plotbland,
+        plotcon = plotcon)
 
     analysis <- jmvagreemultiClass$new(
         options = options,

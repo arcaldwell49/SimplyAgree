@@ -20,7 +20,9 @@
 #'
 #' }
 
-#' @examples #to be added
+#' @examples
+#' data('reps')
+#' agree_test(x=reps$x, y=reps$y, delta = 2)
 #'
 #' @section References:
 #' Gwowen Shieh (2019): Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation, Statistics in Biopharmaceutical Research, <https://doi.org/10.1080/19466315.2019.1677495>
@@ -111,8 +113,8 @@ agree_test <- function(x,
   the_int <- summary(z)$coefficients[1,1]
   the_slope <-  summary(z)$coefficients[2,1]
   tmp.lm <- data.frame(the_int, the_slope)
-  scalemin = min(c(min(x),min(y)))
-  scalemax = max(c(max(x),max(y)))
+  scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
+  scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
 
   identity.plot = ggplot(ccc_res$df_diff,
                          aes(x = x, y = y)) +
