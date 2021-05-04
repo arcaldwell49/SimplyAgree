@@ -38,7 +38,15 @@ of agreement limits}
 A results object containing:
 \tabular{llllll}{
   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
+  \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$blandtab$asDF}
+
+\code{as.data.frame(results$blandtab)}
 }
 \description{
 Agreement Analysis for Nested or Replicate Data

@@ -129,6 +129,17 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
                 }
 
+                citethis = paste0(
+                    "Zou (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual,
+                Statistical methods in medical research,
+                <https://doi.org/10.1177/0962280211402548>",
+                "\n",
+                "Carrasco et al (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R,
+                Computer Methods and Programs in Biomedicine,
+                <https://doi.org/10.1016/j.cmpb.2012.09.002>"
+                )
+                self$results$cites$setContent(citethis)
+
                 self$results$text$setContent(pr_res)
             }
 

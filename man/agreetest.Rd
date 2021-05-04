@@ -10,7 +10,8 @@ agreetest(
   method2,
   ciWidth = 0.95,
   agreeWidth = 0.95,
-  testValue = 2
+  testValue = 2,
+  CCC = TRUE
 )
 }
 \arguments{
@@ -27,12 +28,23 @@ confidence intervals}
 of agreement limits}
 
 \item{testValue}{a number specifying the limit of agreement}
+
+\item{CCC}{\code{TRUE} or \code{FALSE} (default), produce CCC table}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
+  \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
+  \code{results$cites} \tab \tab \tab \tab \tab a preformatted \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$blandtab$asDF}
+
+\code{as.data.frame(results$blandtab)}
 }
 \description{
 Simple Test of Agreement in jamovi

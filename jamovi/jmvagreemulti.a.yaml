@@ -56,12 +56,20 @@ options:
             a number between .50 and .999 (default: .95), the width of agreement limits
 
     - name: testValue
-      title: Test Value
+      title: Agreement Bound (+/-)
       type: Number
       default: 2
       description:
           ui: Value that would define adequate absolute agreement.
           R: a number specifying the limit of agreement
+
+    - name: CCC
+      title: Concordance Correlation Coefficient (CCC)
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce CCC table
 
     - name: valEq
       title: Assume underlying value does not vary?
