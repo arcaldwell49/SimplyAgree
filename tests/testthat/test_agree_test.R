@@ -12,6 +12,8 @@ testthat::test_that("Simple Use Run Through", {
                        CCC = TRUE,
                        plotbland = TRUE,
                        plotcon = TRUE)
+  jmvp = jmvagree1$plotba
+  jmvp = jmvagree1$plotcon
   pr_test = print(agree1)
 
   p = plot(agree1,type=1)
