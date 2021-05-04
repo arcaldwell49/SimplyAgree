@@ -20,8 +20,9 @@
 #'
 #' }
 
-#' @examples #to be added
-#'
+#' @examples
+#' data('reps')
+#' agree_nest(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
 #'

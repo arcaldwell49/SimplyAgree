@@ -11,7 +11,7 @@
 \method{plot}{simple_agree}(x, type = 1, ...)
 }
 \arguments{
-\item{x}{object of class \code{simple_agree} as returned from a fucntion starting with 'agree'}
+\item{x}{object of class \code{simple_agree} as returned from a function starting with 'agree'}
 
 \item{...}{further arguments passed through, see description of return value
 for details.

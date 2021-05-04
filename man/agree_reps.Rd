@@ -50,6 +50,6 @@ Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). 
 }
 
 \examples{
-#to be added
-
+#' data('reps')
+agree_reps(x = "x", y = "y", id = "id", data = reps, delta = 2)
 }

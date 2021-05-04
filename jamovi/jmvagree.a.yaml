@@ -1,6 +1,6 @@
 ---
 name:  jmvagree
-title: Simple Test of Agreement in jamovi
+title: Simple Agreement Analysis in jamovi
 menuGroup: SimplyAgree
 version: '1.0.0'
 jas: '1.2'

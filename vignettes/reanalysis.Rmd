@@ -46,7 +46,7 @@ In the following sections, let us see how well esophageal and rectal temperature
 
 ## Rectal Temperature
 
-Now, based on the typical thresholds (0.8 can be considered a "good" CCC), neither Trec as a raw value or a change score (Trec delta) is within acceptable degrees of agreement. As I will address later, this may not be an accurate and there are sometimes where there is a low CCC but the expected differences between conditions is acceptable (limits of agreemnt).
+Now, based on the typical thresholds (0.8 can be considered a "good" CCC), neither Trec as a raw value or a change score (Trec delta) is within acceptable degrees of agreement. As I will address later, this may not be an accurate and there are sometimes where there is a low CCC but the expected differences between conditions is acceptable (limits of agreement).
 
 ```{r}
 ccc_rec.post = cccrm::cccUst(dataset = df_temps,

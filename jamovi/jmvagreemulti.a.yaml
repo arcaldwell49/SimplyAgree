@@ -1,6 +1,6 @@
 ---
 name:  jmvagreemulti
-title: Agreement Analysis for Nested or Replicate Data
+title: Nested/Replicate Data Agreement Analysis in jamovi
 menuGroup: SimplyAgree
 version: '1.0.0'
 jas: '1.2'

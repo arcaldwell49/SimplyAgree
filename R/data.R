@@ -1,5 +1,5 @@
 #' @title temps
-#' @description A dataset from a study on the reliability of human body temperature at diferents times of day before and after exercise.
+#' @description A dataset from a study on the reliability of human body temperature at different times of day before and after exercise.
 #' @format A data frame with 60 rows and 10 variables:
 #' \describe{
 #'   \item{id}{Subject identifier}
@@ -14,7 +14,7 @@
 #'   \item{teso_delta}{Change in esophageal temperature}
 #'
 #' }
-#' @source \url{https://doi.org/10.1249/MSS.0000000000002575}
+#' @source Ravanelli N, Jay O. The Change in Core Temperature and Sweating Response during Exercise Are Unaffected by Time of Day within the Wake Period. Med Sci Sports Exerc. 2020 Dec 1. doi: 10.1249/MSS.0000000000002575. Epub ahead of print. PMID: 33273272.
 "temps"
 
 #' @rdname temps
@@ -25,7 +25,7 @@
 #' @format A data frame with 20 rows with 3 variables
 #' \describe{
 #'   \item{id}{Subject identifier}
-#'   \item{X}{X measurment}
+#'   \item{X}{X measurement}
 #'   \item{Y}{Y measurement}
 
 #'

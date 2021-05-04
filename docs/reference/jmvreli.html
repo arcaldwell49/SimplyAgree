@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tests for Absolute Agreement with Replicates — agree_reps • SimplyAgree</title>
+<title>Reliability Analysis — jmvreli • SimplyAgree</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Tests for Absolute Agreement with Replicates — agree_reps" />
-<meta property="og:description" content="Tests for Absolute Agreement with Replicates" />
+<meta property="og:title" content="Reliability Analysis — jmvreli" />
+<meta property="og:description" content="Reliability Analysis" />
 
 
 
@@ -118,78 +118,60 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Tests for Absolute Agreement with Replicates</h1>
+    <h1>Reliability Analysis</h1>
     
-    <div class="hidden name"><code>agree_reps.Rd</code></div>
+    <div class="hidden name"><code>jmvreli.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Tests for Absolute Agreement with Replicates</p>
+    <p>Reliability Analysis</p>
     </div>
 
-    <pre class="usage"><span class='fu'>agree_reps</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>id</span>, <span class='va'>data</span>, <span class='va'>delta</span>, agree.level <span class='op'>=</span> <span class='fl'>0.95</span>, conf.level <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>jmvreli</span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>vars</span>, ciWidth <span class='op'>=</span> <span class='fl'>0.95</span>, desc <span class='op'>=</span> <span class='cn'>FALSE</span>, plots <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>Name of column with first measurement</p></td>
-    </tr>
-    <tr>
-      <th>y</th>
-      <td><p>Name of other column with first measurement</p></td>
-    </tr>
-    <tr>
-      <th>id</th>
-      <td><p>Column with subject identifier</p></td>
-    </tr>
-    <tr>
       <th>data</th>
-      <td><p>Data frame with all data</p></td>
+      <td><p>the data as a data frame</p></td>
     </tr>
     <tr>
-      <th>delta</th>
-      <td><p>The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.</p></td>
+      <th>vars</th>
+      <td><p>a list of the column names containing the measurements for
+reliability analysis.</p></td>
     </tr>
     <tr>
-      <th>agree.level</th>
-      <td><p>the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.</p></td>
+      <th>ciWidth</th>
+      <td><p>a number between .50 and .999 (default: .95), the width of
+confidence intervals</p></td>
     </tr>
     <tr>
-      <th>conf.level</th>
-      <td><p>the confidence level required. Default is 95%.</p></td>
+      <th>desc</th>
+      <td><p><code>TRUE</code> or <code>FALSE</code> (default), provide table of
+variance components</p></td>
+    </tr>
+    <tr>
+      <th>plots</th>
+      <td><p><code>TRUE</code> or <code>FALSE</code> (default), plot data</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns single list with the results of the agreement analysis.</p>
-<dl>
-  <dt><code>"loa"</code></dt><dd><p>a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></dd>
-  <dt><code>"h0_test"</code></dt><dd><p>Decision from hypothesis test.</p></dd>
-  <dt><code>"identity.plot"</code></dt><dd><p>Plot of x and y with a line of identity with a linear regression line</p></dd>
-  <dt><code>"bland_alt.plot"</code></dt><dd><p>Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x &amp; y.</p></dd>
-  <dt><code>"ccc.xy"</code></dt><dd><p>Lin's concordance correlation coefficient and confidence intervals using U-statistics.</p></dd>
-  <dt><code>"conf.level"</code></dt><dd><p>Returned as input.</p></dd>
-  <dt><code>"agree.level"</code></dt><dd><p>Returned as input.</p></dd>
+    <p>A results object containing:</p><table class='table'>
+<tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$icctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$vartab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$plots</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$cites</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+</table>
 
 
-</dl>
+<p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
+<p><code>results$icctab$asDF</code></p>
+<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$icctab)</a></code></p>
 
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    
-
-<p>Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.</p>
-<p>King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. Statistics in Medicine, 20, 2131:2147.</p>
-<p>King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.</p>
-<p>Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#to be added</span>
-
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

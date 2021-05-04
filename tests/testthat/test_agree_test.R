@@ -40,4 +40,6 @@ testthat::test_that("Simple Use Run Through", {
   testthat::expect_equal(agree3$h0_test,
                         "No Hypothesis Test")
 
+
+
 })

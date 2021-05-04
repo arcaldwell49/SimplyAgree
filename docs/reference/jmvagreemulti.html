@@ -135,7 +135,10 @@
   ciWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
   agreeWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
   testValue <span class='op'>=</span> <span class='fl'>2</span>,
-  valEq <span class='op'>=</span> <span class='cn'>FALSE</span>
+  CCC <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  valEq <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  plotbland <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  plotcon <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -143,19 +146,19 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>data</th>
-      <td><p>.</p></td>
+      <td><p>Data</p></td>
     </tr>
     <tr>
       <th>method1</th>
-      <td><p>.</p></td>
+      <td><p>Name of column containing 1st Vector of data</p></td>
     </tr>
     <tr>
       <th>method2</th>
-      <td><p>.</p></td>
+      <td><p>Name of column containing Vector of data</p></td>
     </tr>
     <tr>
       <th>id</th>
-      <td><p>.</p></td>
+      <td><p>Name of column containing subject identifier</p></td>
     </tr>
     <tr>
       <th>ciWidth</th>
@@ -172,8 +175,22 @@ of agreement limits</p></td>
       <td><p>a number specifying the limit of agreement</p></td>
     </tr>
     <tr>
+      <th>CCC</th>
+      <td><p><code>TRUE</code> or <code>FALSE</code> (default), produce CCC table</p></td>
+    </tr>
+    <tr>
       <th>valEq</th>
       <td><p>.</p></td>
+    </tr>
+    <tr>
+      <th>plotbland</th>
+      <td><p><code>TRUE</code> or <code>FALSE</code> (default), for Bland-Altman
+plot</p></td>
+    </tr>
+    <tr>
+      <th>plotcon</th>
+      <td><p><code>TRUE</code> or <code>FALSE</code> (default), for Line of identity
+plot</p></td>
     </tr>
     </table>
 
@@ -181,9 +198,16 @@ of agreement limits</p></td>
 
     <p>A results object containing:</p><table class='table'>
 <tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr>
+<tr><td><code>results$blandtab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$ccctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr>
+<tr><td><code>results$plotba</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
+<tr><td><code>results$plotcon</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr>
 </table>
 
 
+<p>Tables can be converted to data frames with <code>asDF</code> or <code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></code>. For example:</p>
+<p><code>results$blandtab$asDF</code></p>
+<p><code><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame(results$blandtab)</a></code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
