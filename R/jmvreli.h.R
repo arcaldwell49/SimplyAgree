@@ -72,7 +72,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Reliability")
+                title="Reliability Analysis in jamovi")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -158,7 +158,7 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Reliability Analysis
+#' Reliability Analysis in jamovi
 #'
 #' 
 #' @param data the data as a data frame

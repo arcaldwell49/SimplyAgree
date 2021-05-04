@@ -21,7 +21,7 @@ const view = function() {
 
 view.layout = ui.extend({
 
-    label: "Agreement Analysis for Nested or Replicate Data",
+    label: "Nested/Replicate Data Agreement Analysis in jamovi",
     jus: "3.0",
     type: "root",
     stage: 0, //0 - release, 1 - development, 2 - proposed

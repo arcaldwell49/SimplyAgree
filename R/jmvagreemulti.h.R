@@ -211,7 +211,7 @@ jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Agreement Analysis for Nested or Replicate Data
+#' Nested/Replicate Data Agreement Analysis in jamovi
 #'
 #' 
 #' @param data Data

@@ -10,21 +10,21 @@ date: '`r Sys.Date()`'
 type: R
 description: Agreement and Reliability Analyses for nested designs.
 analyses:
-  - title: Simple Test of Agreement in jamovi
+  - title: Simple Agreement Analysis in jamovi
     name: jmvagree
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Simple Test of Agreement in jamovi
-  - title: Agreement Analysis for Nested or Replicate Data
+    menuTitle: Simple Agreement Analysis in jamovi
+  - title: Nested/Replicate Data Agreement Analysis in jamovi
     name: jmvagreemulti
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Agreement Analysis for Nested or Replicate Data
-  - title: Reliability Analysis
+    menuTitle: Nested/Replicate Data Agreement Analysis in jamovi
+  - title: Reliability Analysis in jamovi
     name: jmvreli
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Reliability Analysis
+    menuTitle: Reliability Analysis in jamovi
 usesNative: true
 minApp: 1.0.8
 

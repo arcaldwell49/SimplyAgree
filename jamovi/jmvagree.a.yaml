@@ -8,6 +8,11 @@ jas: '1.2'
 options:
     - name: data
       type: Data
+      description:
+          ui: >
+            Data
+          R: >
+            Data
 
     - name: method1
       title: Method 1
@@ -16,6 +21,11 @@ options:
         - continuous
       permitted:
         - numeric
+      description:
+          ui: >
+            1st method of measurement
+          R: >
+            Name of column containing 1st Vector of data
 
     - name: method2
       title: Method 2
@@ -24,6 +34,11 @@ options:
         - continuous
       permitted:
         - numeric
+      description:
+          ui: >
+            2nd method of measurement
+          R: >
+            Name of column containing Vector of data
 
     - name: ciWidth
       title: Confidence Level

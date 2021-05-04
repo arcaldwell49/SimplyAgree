@@ -2,7 +2,7 @@
 % Please edit documentation in R/jmvreli.h.R
 \name{jmvreli}
 \alias{jmvreli}
-\title{Reliability Analysis}
+\title{Reliability Analysis in jamovi}
 \usage{
 jmvreli(data, vars, ciWidth = 0.95, desc = FALSE, plots = FALSE)
 }
@@ -37,5 +37,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$icctab)}
 }
 \description{
-Reliability Analysis
+Reliability Analysis in jamovi
 }

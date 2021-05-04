@@ -5,7 +5,7 @@ Version: 0.0.1
 Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
                   role = c("aut", "cre"))
 Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
-Description: This package calculate absolute agreement between two continuous variables (agree_test), those with replicates (agree_reps), and with nested data (agree_reps and loa_mixed). Power calculations for Bland-Altman agreement limits can be calculated with the blandPowerCurve function. In addition, test-restest reliability can also be estimated (reli_stats).
+Description: Reliability and agreement analyses often have limited software support. Therefore, this package, and jamovi module, was created to make agreement and reliability analyses easier for the average researcher. The functions within this package include simple tests of agreement, agreement analysis for nested and replicate data, and provide robust analyses of reliability. In addition, this package contains a set of functions to help when planning studies looking to assess measurement agreement. For robust analyses of agreement, boostrapped limits of agreement can also be calculated.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -16,4 +16,4 @@ Suggests: knitr, rmarkdown, testthat, tidyverse, readr, ggpubr, covr
 VignetteBuilder: knitr
 Depends: R (>= 3.5)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.0.2; ; 2021-05-04 17:58:46 UTC; windows
+Built: R 4.0.2; ; 2021-05-04 22:06:53 UTC; windows

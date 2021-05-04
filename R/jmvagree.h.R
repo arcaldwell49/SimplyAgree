@@ -108,7 +108,7 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Simple Test of Agreement in jamovi")
+                title="Simple Agreement Analysis in jamovi")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -196,12 +196,12 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Simple Test of Agreement in jamovi
+#' Simple Agreement Analysis in jamovi
 #'
 #' 
-#' @param data .
-#' @param method1 .
-#' @param method2 .
+#' @param data Data
+#' @param method1 Name of column containing 1st Vector of data
+#' @param method2 Name of column containing Vector of data
 #' @param ciWidth a number between .50 and .999 (default: .95), the width of
 #'   confidence intervals
 #' @param agreeWidth a number between .50 and .999 (default: .95), the width

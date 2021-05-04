@@ -2,7 +2,7 @@
 % Please edit documentation in R/jmvagreemulti.h.R
 \name{jmvagreemulti}
 \alias{jmvagreemulti}
-\title{Agreement Analysis for Nested or Replicate Data}
+\title{Nested/Replicate Data Agreement Analysis in jamovi}
 \usage{
 jmvagreemulti(
   data,
@@ -62,5 +62,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$blandtab)}
 }
 \description{
-Agreement Analysis for Nested or Replicate Data
+Nested/Replicate Data Agreement Analysis in jamovi
 }
