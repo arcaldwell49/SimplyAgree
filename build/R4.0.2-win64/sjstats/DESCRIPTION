@@ -1,0 +1,34 @@
+Package: sjstats
+Type: Package
+Encoding: UTF-8
+Title: Collection of Convenient Functions for Common Statistical
+        Computations
+Version: 0.18.0
+Authors@R: person("Daniel", "Lüdecke", role = c("aut", "cre"), email = "d.luedecke@uke.de", comment = c(ORCID = "0000-0002-8895-3206"))
+Maintainer: Daniel Lüdecke <d.luedecke@uke.de>
+Description: Collection of convenient functions for common statistical computations,
+             which are not directly provided by R's base or stats packages.
+             This package aims at providing, first, shortcuts for statistical measures, 
+             which otherwise could only be calculated with additional effort 
+             (like Cramer's V, Phi, or effect size statistics like Eta or Omega squared), 
+             or for which currently no functions available. Second, another focus 
+             lies on weighted variants of common statistical measures and tests 
+             like weighted standard error, mean, t-test, correlation, and more.
+License: GPL-3
+Depends: R (>= 3.2), utils
+Imports: bayestestR (>= 0.4.0), broom, dplyr (>= 0.8.1), effectsize,
+        emmeans, insight (>= 0.8.0), lme4, magrittr, MASS, modelr,
+        parameters (>= 0.4.0), performance (>= 0.4.0), purrr, rlang,
+        sjlabelled (>= 1.1.1), sjmisc (>= 2.8.2), stats, tidyr
+Suggests: brms, car, coin, ggplot2, graphics, nlme, pscl, pwr, sjPlot,
+        survey, rstan, rstanarm, testthat
+URL: https://github.com/strengejacke/sjstats,
+        https://strengejacke.github.io/sjstats
+BugReports: https://github.com/strengejacke/sjstats/issues
+RoxygenNote: 7.1.0
+NeedsCompilation: no
+Packaged: 2020-05-06 07:12:08 UTC; Daniel
+Author: Daniel Lüdecke [aut, cre] (<https://orcid.org/0000-0002-8895-3206>)
+Repository: CRAN
+Date/Publication: 2020-05-06 07:50:02 UTC
+Built: R 4.0.2; ; 2020-08-19 21:33:48 UTC; windows

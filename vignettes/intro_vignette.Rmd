@@ -144,7 +144,7 @@ plot(a3, type = 1)
 
 plot(a3, type = 2)
 ```
-### Calcuations for `agree_reps` & `agree_nest`
+### Calculations for `agree_reps` & `agree_nest`
 
 All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
 

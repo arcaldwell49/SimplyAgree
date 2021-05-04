@@ -22,6 +22,17 @@ testthat::test_that("Simple Use Run Through", {
   test1 = reli_stats(data = dat,
                      wide = TRUE,
                      col.names = c("J1", "J2", "J3", "J4"))
+  jmvtest2 = jmvreli(data = dat,
+                     vars =c("J1", "J2", "J3", "J4"),
+                     desc = TRUE,
+                     plots = TRUE)
+
+  testthat::expect_equivalent(jmvtest2$icctab$asDF$icc,
+                              test1$icc$icc)
+  testthat::expect_equivalent(jmvtest2$icctab$asDF$lower.ci,
+                              test1$icc$lower.ci)
+  testthat::expect_equivalent(jmvtest2$icctab$asDF$upper.ci,
+                              test1$icc$upper.ci)
   pr_test = print(test1)
   p = plot(test1)
 
@@ -48,6 +59,8 @@ testthat::test_that("Simple Use Run Through", {
                      measure = "va",
                      item = "it",
                      id = "id")
+
+
   pr_test = print(test2)
   p = plot(test2)
 

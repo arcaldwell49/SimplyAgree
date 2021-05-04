@@ -1,0 +1,74 @@
+%nin%                   Value matching
+add_columns             Add or replace data frame columns
+add_rows                Merge labelled data frames
+add_variables           Add variables or cases to data frames
+all_na                  Check if vector only has NA values
+big_mark                Format numbers
+count_na                Frequency table of tagged NA values
+de_mean                 Compute group-meaned and de-meaned variables
+descr                   Basic descriptive statistics
+dicho                   Dichotomize variables
+efc                     Sample dataset from the EUROFAMCARE project
+empty_cols              Return or remove variables or observations that
+                        are completely missing
+find_var                Find variable by name or label
+flat_table              Flat (proportional) tables
+frq                     Frequency table of labelled variables
+group_str               Group near elements of string vectors
+group_var               Recode numeric variables into equal-ranged
+                        groups
+has_na                  Check if variables or cases have missing /
+                        infinite values
+is_crossed              Check whether two factors are crossed or nested
+is_empty                Check whether string, list or vector is empty
+is_even                 Check whether value is even or odd
+is_float                Check if a variable is of (non-integer) double
+                        type or a whole number
+is_num_fac              Check whether a factor has numeric levels only
+merge_imputations       Merges multiple imputed data frames into a
+                        single data frame
+move_columns            Move columns to other positions in a data frame
+numeric_to_factor       Convert numeric vectors into factors associated
+                        value labels
+rec                     Recode variables
+rec_pattern             Create recode pattern for 'rec' function
+recode_to               Recode variable categories into new values
+ref_lvl                 Change reference level of (numeric) factors
+remove_var              Remove variables from a data frame
+replace_na              Replace NA with specific values
+reshape_longer          Reshape data into long format
+rotate_df               Rotate a data frame
+round_num               Round numeric variables in a data frame
+row_count               Count row or column indices
+row_sums                Row sums and means for data frames
+seq_col                 Sequence generation for column or row counts of
+                        data frames
+set_na_if               Replace specific values in vector with NA
+shorten_string          Shorten character strings
+sjmisc-package          Data and Variable Transformation Functions
+split_var               Split numeric variables into smaller groups
+spread_coef             Spread model coefficients of list-variables
+                        into columns
+std                     Standardize and center variables
+str_contains            Check if string contains pattern
+str_find                Find partial matching and close distance
+                        elements in strings
+str_start               Find start and end index of pattern in string
+tidy_values             Clean values of character vectors.
+to_character            Convert variable into character vector and
+                        replace values with associated value labels
+to_dummy                Split (categorical) vectors into dummy
+                        variables
+to_factor               Convert variable into factor and keep value
+                        labels
+to_label                Convert variable into factor with associated
+                        value labels
+to_long                 Convert wide data to long format
+to_value                Convert factors to numeric variables
+trim                    Trim leading and trailing whitespaces from
+                        strings
+typical_value           Return the typical value of a vector
+var_rename              Rename variables
+var_type                Determine variable type
+word_wrap               Insert line breaks in long labels
+zap_inf                 Convert infiite or NaN values into regular NA

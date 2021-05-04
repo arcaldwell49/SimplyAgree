@@ -1,0 +1,61 @@
+---
+name:  jmvreli
+title: Reliability Analysis in jamovi
+jrs:   '1.1'
+
+items:
+    - name:  text
+      type:  Preformatted
+      refs: [SimplyAgree]
+
+    - name:  icctab
+      title: Intraclass Correlation Coefficients
+      type: Table
+      rows:  6
+      columns:
+        - name: model
+          title: model
+          type: text
+        - name: measures
+          title: measures
+        - name: type
+          title: type
+          type: text
+        - name: icc
+          title: ICC
+          type: number
+        - name: lower.ci
+          title: lower.ci
+          type: number
+        - name: upper.ci
+          title: upper.ci
+          type: number
+
+    - name:  vartab
+      title: Variance Components
+      type: Table
+      visible: (desc)
+      rows:  4
+      columns:
+        - name: comp
+          title: Component
+          type: text
+        - name: variance
+          title: Variance
+        - name: percent
+          title: Percent
+          type: number
+
+    - name: plots
+      type: Image
+      title: Plot Reliability Data
+      visible: (plots)
+      renderFun: .plot
+      width: 450
+      height: 400
+
+    - name:  cites
+      title: Methods
+      type:  Preformatted
+
+...

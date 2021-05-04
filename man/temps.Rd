@@ -27,14 +27,14 @@ An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) w
 A data frame with 20 rows with 3 variables
 \describe{
   \item{id}{Subject identifier}
-  \item{X}{X measurment}
+  \item{X}{X measurement}
   \item{Y}{Y measurement}
 
 
 }
 }
 \source{
-\url{https://doi.org/10.1249/MSS.0000000000002575}
+Ravanelli N, Jay O. The Change in Core Temperature and Sweating Response during Exercise Are Unaffected by Time of Day within the Wake Period. Med Sci Sports Exerc. 2020 Dec 1. doi: 10.1249/MSS.0000000000002575. Epub ahead of print. PMID: 33273272.
 }
 \usage{
 temps
@@ -44,7 +44,7 @@ recpre_long
 reps
 }
 \description{
-A dataset from a study on the reliability of human body temperature at diferents times of day before and after exercise.
+A dataset from a study on the reliability of human body temperature at different times of day before and after exercise.
 
 A fake data set of a agreement study where both measures have replicates.
 }

@@ -13,3 +13,14 @@
 ^vignettes/reanalysis_supp\.R$
 ^pwr_agree$
 ^codecov\.yml$
+^.*\.jmo$
+^build/js$
+^build/R$
+^build/R.*$
+^jamovi$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^paper\.md$
+^paper\.bib$
+^paper$

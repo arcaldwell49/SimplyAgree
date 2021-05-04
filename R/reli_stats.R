@@ -82,7 +82,7 @@ reli_stats = function(measure,
                                    NA))
   rownames(MS.df) <- c("ID", "Items", "Residual", "Total")
   MS.df["Total", ] <- sum(MS.df[1:3, 1], na.rm = TRUE)
-  MS.df["Percent"] <- MS.df/MS.df["Total", 1]
+  MS.df["percent"] <- MS.df/MS.df["Total", 1]
   lmer.MS <- MS.df
   MSB <- nj * MS_id + error
   MSJ <- n.obs * MS_items + error

@@ -42,6 +42,7 @@ Gwowen Shieh (2019): Assessing Agreement Between Two Methods of Quantitative Mea
 }
 
 \examples{
-#to be added
+data('reps')
+agree_test(x=reps$x, y=reps$y, delta = 2)
 
 }

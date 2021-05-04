@@ -1,0 +1,69 @@
+---
+name:  jmvagreemulti
+title: Nested/Replicate Data Agreement Analysis in jamovi
+jrs:   '1.1'
+
+items:
+    - name:  text
+      type:  Preformatted
+      refs: [SimplyAgree]
+
+    - name:  blandtab
+      title: Zou's MOVER Limits of Agreement
+      type: Table
+      rows:  3
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name:  ccctab
+      title: Concordance Correlation Coefficient
+      visible: (CCC)
+      type: Table
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name: plotba
+      type: Image
+      title: Bland-Altman Plot
+      visible: (plotbland)
+      renderFun: .plotba
+      width: 450
+      height: 400
+
+    - name: plotcon
+      type: Image
+      title: Line-of-Identity Plot
+      visible: (plotcon)
+      renderFun: .plotcon
+      width: 450
+      height: 400
+
+    #- name:  cites
+    #  title: Methods
+    #  type:  Preformatted
+
+
+...

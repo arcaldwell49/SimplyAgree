@@ -1,0 +1,42 @@
+anova_stats             Effect size statistics for anova
+auto_prior              Create default priors for brms-models
+boot_ci                 Standard error and confidence intervals for
+                        bootstrapped estimates
+bootstrap               Generate nonparametric bootstrap replications
+chisq_gof               Compute model quality
+cramer                  Measures of association for contingency tables
+cv                      Compute model quality
+cv_error                Test and training error from model
+                        cross-validation
+design_effect           Design effects for two-level mixed models
+efc                     Sample dataset from the EUROFAMCARE project
+find_beta               Determining distribution parameters
+fish                    Sample dataset
+gmd                     Gini's Mean Difference
+inequ_trend             Compute trends in status inequalities
+is_prime                Find prime numbers
+mean_n                  Row means with min amount of valid values
+means_by_group          Summary of mean values by group
+mediation               Summary of Bayesian multivariate-response
+                        mediation-models
+mwu                     Mann-Whitney-U-Test
+nhanes_sample           Sample dataset from the National Health and
+                        Nutrition Examination Survey
+odds_to_rr              Get relative risks estimates from logistic
+                        regressions or odds ratio values
+prop                    Proportions of values in a vector
+r2                      Deprecated functions
+samplesize_mixed        Sample size for linear mixed models
+scale_weights           Rescale design weights for multilevel analysis
+se_ybar                 Standard error of sample mean for mixed models
+sjstats-package         Collection of Convenient Functions for Common
+                        Statistical Computations
+survey_median           Weighted statistics for tests and variables
+svyglm.nb               Survey-weighted negative binomial generalised
+                        linear model
+svyglm.zip              Survey-weighted zero-inflated Poisson model
+table_values            Expected and relative table values
+tidy_stan               Tidy summary output for stan models
+var_pop                 Calculate population variance and standard
+                        deviation
+weight                  Weight a variable

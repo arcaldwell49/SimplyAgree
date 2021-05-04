@@ -1,0 +1,398 @@
+---
+title: "Parameters Standardization"
+output: 
+  github_document:
+    toc: true
+    fig_width: 10.08
+    fig_height: 6
+  rmarkdown::html_vignette:
+    toc: true
+    fig_width: 10.08
+    fig_height: 6
+tags: [r, effect size, standardization, effect size, cohen d, standardized coefficients]
+vignette: >
+  %\VignetteIndexEntry{Parameters standardization}
+  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+bibliography: bibliography.bib
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(comment = ">")
+options(digits = 2)
+options(knitr.kable.NA = '')
+
+pkgs <- c("effectsize", "dplyr", "parameters", "correlation")
+if (!all(sapply(pkgs, requireNamespace))) {
+  knitr::opts_chunk$set(eval = FALSE)
+}
+
+set.seed(333)
+```
+
+# Introduction
+
+Standardizing parameters (*i.e.*, coefficients) can allow for their comparison within and between models, variables and studies. Moreover, as it returns coefficients expressed in terms of **change of variance** (for instance, coefficients expressed in terms of SD of the response variable), it can allow for the usage of [effect size interpretation guidelines](https://easystats.github.io/effectsize/articles/interpret.html), such as the famous Cohen's (1988) rules of thumb.
+
+However, standardizing the model's parameters should *not* be automatically and mindlessly done: for some research fields, particular variables or types of studies (*e.g.*, replications), it sometimes makes more sense to keep, use and interpret the original parameters, especially if they are well known or easily understood.
+
+Critically, **parameters standardization is not a trivial process**. Different techniques exist, that can lead to drastically different results. Thus, it is critical that the standardization method is explicitly documented and detailed.
+
+**`parameters` include different techniques of parameters standardization**, described below [@bring1994standardize;@menard2004six;@gelman2008scaling;@schielzeth2010simple;@menard2011standards].
+
+# How to interpret standardized coefficients?
+
+
+## Measure of association (correlation *r*)
+
+```{r, warning=FALSE, message=FALSE}
+library(effectsize)
+library(dplyr)
+
+lm(Sepal.Length ~ Petal.Length, data = iris) %>% 
+  standardize_parameters()
+```
+
+Standardizing the coefficient of this simple linear regression gives a value of `0.87`, but did you know that for a simple regression this is actually the **same as a correlation**? Thus, you can eventually apply some (*in*)famous interpretation guidelines (e.g., Cohen's rules of thumb).
+
+```{r, warning=FALSE, message=FALSE}
+library(parameters)
+
+cor.test(iris$Sepal.Length, iris$Petal.Length) %>% 
+  model_parameters()
+```
+
+
+What happens in the case of **multiple continuous variables**? As in each effect in a regression model is "adjusted" for the other ones, we might expect coefficients to be somewhat alike to **partial correlations**. Let's first start by computing the partial correlation between **Sepal.Length** and 3 other remaining variables.
+
+
+```{r, warning=FALSE, message=FALSE}
+df <- iris[, 1:4]  # Remove the Species factor
+correlation::correlation(df, partial = TRUE)[1:3, 1:3] # Select the rows of interest
+```
+
+
+Now, let's apply another method to obtain effect sizes for frequentist regressions, based on the statistic values. We will convert the *t*-value (and its degrees of freedom, *df*) into a partial correlation coefficient *r*.
+
+
+```{r, warning=FALSE, message=FALSE}
+model <- lm(Sepal.Length ~ ., data = df)
+params <- model_parameters(model)
+
+t_to_r(params$t[2:4], params$df_error[2:4])
+```
+
+Wow, the retrieved correlations coefficients from the regression model are **exactly** the same as the partial correlations!
+
+However, note that in multiple regression standardizing the parameters in not quite the same as computing the (partial) correlation, due to... math :(^[in fact, they are more closely related to the semi-partial correlations.]
+
+```{r, warning=FALSE, message=FALSE}
+model %>% 
+  standardize_parameters() 
+```
+
+## Standardized differences
+
+How does it work in the case of differences, when **factors** are entered and differences between a given level and a reference level (the intercept)? You might have heard that it is similar to a **Cohen's *d***. Well, let's see.
+
+```{r, warning=FALSE, message=FALSE}
+# Select portion of data containing the two levels of interest
+data <- iris[iris$Species %in% c("setosa", "versicolor"), ]
+
+lm(Sepal.Length ~ Species, data = data) %>% 
+  standardize_parameters()
+```
+
+This linear model suggests that the *standardized* difference between the *versicolor* level of Species and the *setosa* level (the reference level - the intercept) is of 1.12 standard deviation of `Sepal.Length` (because the response variable was standardized, right?). Let's compute the **Cohen's *d*** between these two levels:
+
+```{r, warning=FALSE, message=FALSE}
+cohens_d(Sepal.Length ~ Species, data = data) 
+```
+
+***It is very different!*** Why? How? Both differences should be expressed in units of SD! But which SDs? Different SDs!
+
+When looking at the difference between groups as a **slope**, the standardized parameter is the difference between the means in $SD_{Sepal.Length}$. That is, the *slope* between `setosa` and `versicolor` is a change of 1.45 $SD_{Sepal.Length}$.
+
+However, when looking a the difference as a distance between two populations, Cohen's d is the distance between the means in units of [**pooled SDs**](https://easystats.github.io/effectsize/reference/sd_pooled.html). That is, the *distance* between `setosa` and `versicolor` is of 2.1 SDs of each of the groups (here assumed to be equal).
+
+Note that you can get a proximity of Cohen's d with by converting the $t$ statistic from the regression model via `t_to_d()`:
+```{r}
+(parameters <- lm(Sepal.Length ~ Species, data = data) %>% 
+  model_parameters())
+t_to_d(10.52, df_error = 98)
+```
+
+
+It is also interesting to note that using the *smart* method when standardizing parameters will give you indices equivalent to **Glass' delta**, which difference is expressed in terms of SD of the intercept (the "reference" factor levels).
+
+```{r, warning=FALSE, message=FALSE}
+lm(Sepal.Length ~ Species, data = data) %>%
+  standardize_parameters(method = "smart")
+```
+
+```{r, warning=FALSE, message=FALSE}
+glass_delta(data$Sepal.Length[data$Species=="versicolor"],
+            data$Sepal.Length[data$Species=="setosa"])
+# glass_delta takes SD from second group
+```
+
+***... So note that some standardized differences are difference than others! :)***
+
+# Standardization methods
+
+<sub>To be added...</sub>
+
+
+
+<!-- ### **"refit"**: Re-fitting the model with standardized data -->
+
+<!-- **This method is based on a complete model re-fit with a standardized version of data**. Hence, this method is equal to standardizing the variables before fitting the model. It is the "purest" and the most accurate (Neter et al., 1989), but it is also the most computationally costly and long (especially for heavy models such as, for instance, for Bayesian models). This method is particularly recommended for complex models that include interactions or transformations (e.g., polynomial or spline terms). -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(effectsize) -->
+
+<!-- data <- iris -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+
+<!-- standardize_parameters(model, method="refit") -->
+<!-- ``` -->
+
+<!-- The `robust` (default to `FALSE`) argument enables a **robust standardization of data**, *i.e.*, based on the **median** and **MAD** instead of the **mean** and **SD**. -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- standardize_parameters(model, method="refit", robust=TRUE) -->
+<!-- ``` -->
+
+
+<!-- This method is very flexible as it can be applied to all types of models (linear, logistic...). -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- data$binary <- ifelse(data$Sepal.Width > 3, 1, 0) -->
+<!-- model <- glm(binary ~ Species + Sepal.Length, data = data, family="binomial") -->
+<!-- standardize_parameters(model, method="refit") -->
+<!-- ``` -->
+
+<!-- ### **"posthoc"**: Refit without refitting -->
+
+<!-- Post-hoc standardization of the parameters, aiming at emulating the results obtained by "refit" without refitting the model. The coefficients are divided by the standard deviation (or MAD if `robust`) of the outcome (which becomes their expression 'unit'). Then, the coefficients related to numeric variables are additionally multiplied by the standard deviation (or MAD if `robust`) of the related terms, so that they correspond to changes of 1 SD of the predictor (e.g., "A change in 1 SD of *x* is related to a change of 0.24 of the SD of *y*). This does not apply to binary variables or factors, so the coefficients are still related to changes in levels. This method is not accurate and tend to give aberrant results when interactions are specified. -->
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+<!-- standardize_parameters(model, method="posthoc") -->
+<!-- ``` -->
+
+<!-- ### **"smart"**: Standardization of Model's parameters with Adjustment, Reconnaissance and Transformation -->
+
+<!-- Similar to `method = "posthoc"` in that it does not involve model refitting. The difference is that the SD of the response is computed on the relevant section of the data. For instance, if a factor with 3 levels A (the intercept), B and C is entered as a predictor, the effect corresponding to B vs. A will be scaled by the variance of the response at the intercept only. As a results, the coefficients for effects of factors are similar to a Glass' *delta*. -->
+
+
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+<!-- standardize_parameters(model, method="smart") -->
+<!-- ``` -->
+
+<!-- ### **"basic"**: Raw scaling of the model frame -->
+
+<!-- This method is similar to `method = "posthoc"`, but treats all variables as continuous: it also scales the coefficient by the standard deviation of model's matrix' parameter of factors levels (transformed to integers) or binary predictors. Although being inappropriate for these cases, this method is the one implemented by default in other software packages, such as `lm.beta::lm.beta()`. -->
+
+<!-- ## Methods Comparison -->
+
+<!-- We will use the "refit" method as the baseline. We will then compute the differences between these standardized parameters and the ones provided by the other functions. The **bigger the (absolute) number, the worse it is**. -->
+
+<!-- > **SPOILER ALERT: the standardization implemented in `effectsize` is the most accurate and the most flexible.** -->
+
+<!-- ### Convenience function -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(effectsize) -->
+<!-- library(lm.beta) -->
+<!-- library(MuMIn) -->
+
+<!-- comparison <- function(model, robust=FALSE){ -->
+<!--   out <- standardize_parameters(model, method="refit", robust=robust)[1:2] -->
+
+<!--   out$posthoc <- tryCatch({ -->
+<!--     out[, 2] - standardize_parameters(model, method="posthoc", robust=robust)[, 2] -->
+<!-- }, error = function(error_condition) { -->
+<!--     "Error" -->
+<!-- }) -->
+<!--   out$basic <- tryCatch({ -->
+<!--     out[, 2] - standardize_parameters(model, method="basic", robust=robust)[, 2] -->
+<!-- }, error = function(error_condition) { -->
+<!--     "Error" -->
+<!-- }) -->
+
+<!--   out$lm.beta <- tryCatch({ -->
+<!--     out[, 2] - lm.beta::lm.beta(model)$standardized.coefficients -->
+<!-- }, error = function(error_condition) { -->
+<!--     "Error" -->
+<!-- }, warning = function(warning_condition) { -->
+<!--   "Error" -->
+<!-- }) -->
+
+<!--   out$MuMIn <- tryCatch({ -->
+<!--     out[, 2] - MuMIn::std.coef(model, partial.sd=FALSE)[, 1] -->
+<!-- }, error = function(error_condition) { -->
+<!--     "Error" -->
+<!-- }) -->
+
+<!--   out[, 2] <- NULL -->
+<!--   out -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ### Data -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- data <- iris -->
+<!-- data$Group_Sepal.Width <- as.factor(ifelse(data$Sepal.Width > 3, "High", "Low")) -->
+<!-- data$Binary_Sepal.Width <- as.factor(ifelse(data$Sepal.Width > 3, 1, 0)) -->
+
+<!-- summary(data) -->
+<!-- ``` -->
+
+<!-- ### Models with only numeric predictors -->
+
+
+<!-- #### Linear Model -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- #### Logistic Model -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- glm(Binary_Sepal.Width ~ Petal.Width + Sepal.Length, data=data, family="binomial") -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- #### Linear Mixed Model -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(lme4) -->
+
+<!-- model <- lme4::lmer(Sepal.Length ~ Petal.Width + Sepal.Width + (1|Species), -->
+<!--                     data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- #### Bayesian Models -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(rstanarm) -->
+
+<!-- model <- stan_glm(Sepal.Length ~ Petal.Width + Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- For these simple models, **all methods return results equal to the "refit" method** (although the other packages fail). -->
+
+
+<!-- #### Transformation -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ poly(Petal.Width, 2) + poly(Sepal.Width, 2), data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- When transformation are involved (e.g., polynomial transformations), **the basic method becomes very unreliable**. -->
+
+
+
+<!-- ### Models with factors -->
+
+<!-- #### Linear Model -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width + Group_Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+
+
+<!-- #### Logistic Model -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- glm(Binary_Sepal.Width ~ Petal.Width + Species, data=data, family="binomial") -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- #### Linear Mixed Model -->
+
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(lme4) -->
+
+<!-- model <- lme4::lmer(Sepal.Length ~ Petal.Length + Group_Sepal.Width + (1|Species), data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- #### Bayesian Models -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- library(rstanarm) -->
+
+<!-- model <- stan_lmer(Sepal.Length ~ Petal.Width + Group_Sepal.Width + (1|Species), -->
+<!--                    data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- When factors are involved, the basic method (that standardizes the numeric transformation of factors) give again different results. -->
+
+
+
+<!-- ### Models with interactions -->
+
+<!-- Long story short, coeffcient obtained via **posthoc** standardization (without refitting the model) go berserk when interactions are involved. However, **this is "normal"**: a regression model estimates coefficient between two variables when the other predictors are at 0 (are *fixed* at 0, that people interpret as *"adjusted for"*). When a standardized data is passed (in the *refit* method), the effects and interactions are estimated at the **means** of the other predictors (because 0 is the mean for a standardized variable). Whereas in posthoc standardization, this coefficient correspond to something different (because the 0 corresponds to something different in standardzed and non-standardized data). In other words, when it comes to interaction, passing standardized data results in a different model, which coefficient have an intrinsically different meaning from unstandardized data. And as [for now](https://github.com/easystats/effectsize/issues/6), we are unable to retrieve one from another. -->
+
+
+<!-- #### Between continuous -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width * Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- #### Between factors -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Species * Group_Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- #### Between factors and continuous -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Petal.Width * Group_Sepal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- model <- lm(Sepal.Length ~ Group_Sepal.Width * Petal.Width, data=data) -->
+<!-- comparison(model) -->
+<!-- ``` -->
+
+
+<!-- ## Conclusion -->
+
+<!-- Use `refit` if possible, but if no interactions, can use `posthoc` or `smart`. -->
+
+
+# References
+

@@ -27,7 +27,7 @@ blandPowerCurve(
 \item{agree.level}{the agreement level(s) required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95. More than one confidence level can be provided.}
 }
 \value{
-a dataframe containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
+A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
 Estimate power curve for Bland-Altman limits of agreement
@@ -50,4 +50,6 @@ plot(powerCurve, type = 1)
 # Find at what N power of .8 is achieved
 find_n(powerCurve, power = .8)
 }
+# If the desired power is not found then
+## Sample size range must be expanded
 }

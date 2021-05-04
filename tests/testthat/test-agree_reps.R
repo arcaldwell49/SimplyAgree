@@ -17,12 +17,71 @@ testthat::test_that("examples from Zou", {
   testthat::expect_equivalent(reps_test$loa$upper.ci[2:3],
                               c(-.48,11.20),
                               tolerance = 0.01)
-  reps_test = agree_reps(x="x",y="y",
-                         delta = 2.5,
-                         id = "id",
-                         data = reps)
+  reps_test2 = agree_reps(
+    x = "x",
+    y = "y",
+    delta = 2.5,
+    id = "id",
+    data = reps
+  )
+
+  reps_test3 = agree_reps(
+    x = "x",
+    y = "y",
+    delta = 2.5,
+    id = "id",
+    data = reps,
+    agree.level = .8,
+    conf.level = .75
+  )
+
+  reps_test4 = agree_reps(
+    x = "x",
+    y = "y",
+    delta = 2.5,
+    id = "id",
+    data = reps,
+    agree.level = .75,
+    conf.level = .8
+  )
 
   pr_test = print(reps_test)
   p = plot(reps_test, type = 1)
   p = plot(reps_test, type = 2)
+
+  pr_test = print(reps_test2)
+  p = plot(reps_test2, type = 1)
+  p = plot(reps_test2, type = 2)
+
+  pr_test = print(reps_test3)
+  p = plot(reps_test3, type = 1)
+  p = plot(reps_test3, type = 2)
+
+  pr_test = print(reps_test3)
+  p = plot(reps_test3, type = 1)
+  p = plot(reps_test3, type = 2)
+
+  reps_test = agree_reps(x="x",y="y",
+                         id = "id",
+                         data = reps)
+
+  test_jmv = jmvagreemulti(
+    data = reps,
+    method1 = "x",
+    method2 = "y",
+    id = "id",
+    valEq = TRUE
+  )
+
+  #test_jmv$blandtab$asDF
+  #nest_test$loa
+
+  testthat::expect_equivalent(test_jmv$blandtab$asDF$estimate,
+                              reps_test$loa$estimate)
+
+  testthat::expect_equivalent(test_jmv$blandtab$asDF$lowerci,
+                              reps_test$loa$lower.ci)
+
+  testthat::expect_equivalent(test_jmv$blandtab$asDF$upperci,
+                              reps_test$loa$upper.ci)
 })
