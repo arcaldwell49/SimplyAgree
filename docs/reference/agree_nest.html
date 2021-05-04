@@ -187,9 +187,22 @@
 <p>Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#to be added</span>
-
-</div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>'reps'</span><span class='op'>)</span>
+<span class='fu'>agree_nest</span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"x"</span>, y <span class='op'>=</span> <span class='st'>"y"</span>, id <span class='op'>=</span> <span class='st'>"id"</span>, data <span class='op'>=</span> <span class='va'>reps</span>, delta <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Limit of Agreement = 95%
+#&gt; alpha = 0.05 | 95 % Confidence Interval
+#&gt; Nested Data Points (true value may vary)
+#&gt; 
+#&gt; Hypothesis Test: don't reject h0
+#&gt; 
+#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###
+#&gt; Mean Bias: 0.7100833 [-0.6824145, 2.102581]
+#&gt; Lower LoA: -2.153994 [-9.822981, -0.3468361]
+#&gt; Upper LoA: 3.574161 [1.767003, 11.24315]
+#&gt; 
+#&gt; ###- Concordance Correlation Coefficient (CCC) -###
+#&gt; CCC: 0.4791, 95% C.I. [0.2429, 0.6616]
+#&gt; *Estimated via U-statistics; may be biased</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
