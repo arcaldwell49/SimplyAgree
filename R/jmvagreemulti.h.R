@@ -123,7 +123,7 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="jamovi Agreement Analysis for Nested or Replicate Data")
+                title="Nested/Replicate Data Agreement Analysis in jamovi")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
@@ -214,10 +214,10 @@ jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Agreement Analysis for Nested or Replicate Data
 #'
 #' 
-#' @param data .
-#' @param method1 .
-#' @param method2 .
-#' @param id .
+#' @param data Data
+#' @param method1 Name of column containing 1st Vector of data
+#' @param method2 Name of column containing Vector of data
+#' @param id Name of column containing subject identifier
 #' @param ciWidth a number between .50 and .999 (default: .95), the width of
 #'   confidence intervals
 #' @param agreeWidth a number between .50 and .999 (default: .95), the width
@@ -227,7 +227,8 @@ jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param valEq .
 #' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
 #'   plot
-#' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
+#' @param plotcon \code{TRUE} or \code{FALSE} (default), for Line of identity
+#'   plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr

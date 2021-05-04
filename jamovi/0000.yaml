@@ -11,7 +11,7 @@ type: R
 description: Agreement and Reliability Analyses for nested designs.
 analyses:
   - title: Simple Test of Agreement in jamovi
-    name: agreetest
+    name: jmvagree
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Simple Test of Agreement in jamovi

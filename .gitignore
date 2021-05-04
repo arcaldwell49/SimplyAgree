@@ -4,3 +4,4 @@
 .Ruserdata
 inst/doc
 *.jmo
+^cran-comments\.md$

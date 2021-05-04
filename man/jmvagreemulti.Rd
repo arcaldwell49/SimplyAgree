@@ -12,17 +12,20 @@ jmvagreemulti(
   ciWidth = 0.95,
   agreeWidth = 0.95,
   testValue = 2,
-  valEq = FALSE
+  CCC = TRUE,
+  valEq = FALSE,
+  plotbland = FALSE,
+  plotcon = FALSE
 )
 }
 \arguments{
-\item{data}{.}
+\item{data}{Data}
 
-\item{method1}{.}
+\item{method1}{Name of column containing 1st Vector of data}
 
-\item{method2}{.}
+\item{method2}{Name of column containing Vector of data}
 
-\item{id}{.}
+\item{id}{Name of column containing subject identifier}
 
 \item{ciWidth}{a number between .50 and .999 (default: .95), the width of
 confidence intervals}
@@ -32,7 +35,15 @@ of agreement limits}
 
 \item{testValue}{a number specifying the limit of agreement}
 
+\item{CCC}{\code{TRUE} or \code{FALSE} (default), produce CCC table}
+
 \item{valEq}{.}
+
+\item{plotbland}{\code{TRUE} or \code{FALSE} (default), for Bland-Altman
+plot}
+
+\item{plotcon}{\code{TRUE} or \code{FALSE} (default), for Line of identity
+plot}
 }
 \value{
 A results object containing:
@@ -40,6 +51,8 @@ A results object containing:
   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
