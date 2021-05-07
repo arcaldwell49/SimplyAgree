@@ -4,8 +4,7 @@
 \name{temps}
 \alias{temps}
 \alias{recpre_long}
-\alias{reps}
-\title{temps}
+\title{Data}
 \format{
 A data frame with 60 rows and 10 variables:
 \describe{
@@ -23,15 +22,6 @@ A data frame with 60 rows and 10 variables:
 }
 
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 30 rows and 6 columns.
-
-A data frame with 20 rows with 3 variables
-\describe{
-  \item{id}{Subject identifier}
-  \item{X}{X measurement}
-  \item{Y}{Y measurement}
-
-
-}
 }
 \source{
 Ravanelli N, Jay O. The Change in Core Temperature and Sweating Response during Exercise Are Unaffected by Time of Day within the Wake Period. Med Sci Sports Exerc. 2020 Dec 1. doi: 10.1249/MSS.0000000000002575. Epub ahead of print. PMID: 33273272.
@@ -40,12 +30,8 @@ Ravanelli N, Jay O. The Change in Core Temperature and Sweating Response during 
 temps
 
 recpre_long
-
-reps
 }
 \description{
 A dataset from a study on the reliability of human body temperature at different times of day before and after exercise.
-
-A fake data set of a agreement study where both measures have replicates.
 }
 \keyword{datasets}

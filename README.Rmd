@@ -35,7 +35,7 @@ Parker, R. A., et al (2016). Application of mixed effects limits of agreement in
 
 Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. *Statistical methods in medical research*, 22(6), 630-642. <https://doi.org/10.1177/0962280211402548>
 
-Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. *The Journal of Strength & Conditioning Research*, 19(1), 231-240.<https://doi.org/10.1519/15184.1>
+Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. *The Journal of Strength & Conditioning Research*, 19(1), 231-240.
 
 Lu, Meng-Jie, et al (2016). "Sample Size for Assessing Agreement between Two Methods of Measurement by Bland−Altman Method" *The International Journal of Biostatistics*, 12(2),  <https://doi.org/10.1515/ijb-2015-0039>
 
