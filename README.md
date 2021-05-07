@@ -50,8 +50,7 @@ limits of agreement with multiple observations per individual.
 
 Weir, J. P. (2005). Quantifying test-retest reliability using the
 intraclass correlation coefficient and the SEM. *The Journal of Strength
-& Conditioning Research*, 19(1),
-231-240.<https://doi.org/10.1519/15184.1>
+& Conditioning Research*, 19(1), 231-240.
 
 Lu, Meng-Jie, et al (2016). “Sample Size for Assessing Agreement between
 Two Methods of Measurement by Bland−Altman Method” *The International

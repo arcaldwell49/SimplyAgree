@@ -1,4 +1,4 @@
-#' @title temps
+#' @title Data
 #' @description A dataset from a study on the reliability of human body temperature at different times of day before and after exercise.
 #' @format A data frame with 60 rows and 10 variables:
 #' \describe{
@@ -25,11 +25,11 @@
 #' @format A data frame with 20 rows with 3 variables
 #' \describe{
 #'   \item{id}{Subject identifier}
-#'   \item{X}{X measurement}
-#'   \item{Y}{Y measurement}
+#'   \item{x}{X measurement}
+#'   \item{y}{Y measurement}
 
 #'
 #'
 #' }
-#' @rdname temps
+#' @rdname Data
 "reps"
