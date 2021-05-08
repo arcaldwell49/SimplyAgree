@@ -15,4 +15,4 @@
         `year`=2021, 
         `title`="SimplyAgree: Flexible and Robust Agreement and Reliability Analyses", 
         `publisher`="doi: 10.5281/zenodo.4743814", 
-        `url`="Retrieved from https://github.com/arcaldwell49/SimplyAgree"))
+        `url`="https://aaroncaldwell.us/SimplyAgree"))

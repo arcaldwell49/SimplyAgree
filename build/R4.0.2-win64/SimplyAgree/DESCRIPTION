@@ -17,4 +17,4 @@ Suggests: knitr, rmarkdown, testthat, tidyverse, readr, ggpubr, covr
 VignetteBuilder: knitr
 Depends: R (>= 3.5)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.0.2; ; 2021-05-08 17:08:47 UTC; windows
+Built: R 4.0.2; ; 2021-05-08 17:13:42 UTC; windows
