@@ -1,6 +1,6 @@
 ---
 name:  jmvreli
-title: Reliability Analysis in jamovi
+title: Reliability Analysis
 menuGroup: SimplyAgree
 version: '1.0.0'
 jas: '1.2'
@@ -27,16 +27,16 @@ options:
 
 
     - name: ciWidth
-      title: Confidence Level
+      title: Confidence level
       type: Number
-      min: .50
-      max: .999
-      default: .95
+      min: 50
+      max: 99.9
+      default: 95
       description:
           ui: >
             the confidence interval width.
           R: >
-            a number between .50 and .999 (default: .95), the width of confidence
+            a number between 50 and 99.9 (default: 95), the width of confidence
             intervals
 
     - name: desc

@@ -1,8 +1,8 @@
-title: Nested/Replicate Data Agreement Analysis in jamovi
+title: Nested/Replicate Data Agreement Analysis
 name: jmvagreemulti
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -31,30 +31,34 @@ children:
             isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - type: TextBox
-        name: ciWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: agreeWidth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: testValue
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: CCC
-      - type: CheckBox
-        name: valEq
-      - type: CheckBox
-        name: plotbland
-      - type: CheckBox
-        name: plotcon
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: TextBox
+            name: ciWidth
+            format: number
+          - type: TextBox
+            name: agreeWidth
+            format: number
+          - type: TextBox
+            name: testValue
+            format: number
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: CCC
+          - type: CheckBox
+            name: valEq
+          - type: CheckBox
+            name: plotbland
+          - type: CheckBox
+            name: plotcon

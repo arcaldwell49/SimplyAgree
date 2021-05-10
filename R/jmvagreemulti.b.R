@@ -30,8 +30,8 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 #data[[method2]] <- jmvcore::toNumeric(data[[method2]])
                 #data[[id]] <- data[[id]]
 
-                ciWidth = self$options$ciWidth
-                agreeWidth = self$options$agreeWidth
+                ciWidth = self$options$ciWidth/100
+                agreeWidth = self$options$agreeWidth/100
                 delta_val = jmvcore::toNumeric(self$options$testValue)
                 if(self$options$valEq){
 
@@ -157,7 +157,14 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = plot(image$state)
+            plotpr = plot(image$state) +
+                # set transparency
+                theme(
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    panel.background = element_rect(fill = "transparent",colour = NA),
+                    plot.background = element_rect(fill = "transparent",colour = NA)
+                )
 
 
             print(plotpr)
@@ -170,10 +177,17 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = image$state
+            plotpr = image$state$identity.plot+
+                # set transparency
+                theme(
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    panel.background = element_rect(fill = "transparent",colour = NA),
+                    plot.background = element_rect(fill = "transparent",colour = NA)
+                )
 
 
-            print(plotpr$identity.plot)
+            print(plotpr)
 
             return(TRUE)
 

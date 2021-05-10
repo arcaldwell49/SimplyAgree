@@ -1,6 +1,6 @@
 ---
 name:  jmvagreemulti
-title: Nested/Replicate Data Agreement Analysis in jamovi
+title: Nested/Replicate Data Agreement Analysis
 menuGroup: SimplyAgree
 version: '1.0.0'
 jas: '1.2'
@@ -21,6 +21,7 @@ options:
         - continuous
       permitted:
         - numeric
+      rejectInf: false
       description:
           ui: >
             1st method of measurement
@@ -34,6 +35,7 @@ options:
         - continuous
       permitted:
         - numeric
+      rejectInf: false
       description:
           ui: >
             2nd method of measurement
@@ -53,30 +55,30 @@ options:
     - name: ciWidth
       title: Confidence level
       type: Number
-      min: .50
-      max: .999
-      default: .95
+      min: 50
+      max: 99.9
+      default: 95
       description:
           ui: >
             the confidence interval width.
           R: >
-            a number between .50 and .999 (default: .95), the width of confidence
+            a number between 50 and 99.9 (default: 95), the width of confidence
             intervals
 
     - name: agreeWidth
       title: Agreement level
       type: Number
-      min: .50
-      max: .999
-      default: .95
+      min: 50
+      max: 99.9
+      default: 95
       description:
           ui: >
             The agreement level
           R: >
-            a number between .50 and .999 (default: .95), the width of agreement limits
+            a number between 50 and 99.9 (default: 95), the width of agreement limits
 
     - name: testValue
-      title: Agreement Bound (+/-)
+      title: Agreement bound (±)
       type: Number
       default: 2
       description:
@@ -97,7 +99,7 @@ options:
       default: false
 
     - name: plotbland
-      title: Bland-Altman Plot
+      title: Bland-Altman plot
       type: Bool
       default: false
       description:
@@ -105,7 +107,7 @@ options:
             `TRUE` or `FALSE` (default), for Bland-Altman plot
 
     - name: plotcon
-      title: Line-of-Identity Plot
+      title: Line-of-Identity plot
       type: Bool
       default: false
       description:

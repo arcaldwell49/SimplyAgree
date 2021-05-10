@@ -11,7 +11,7 @@
 #' @section references:
 #' Lu, M. J., Zhong, W. H., Liu, Y. X., Miao, H. Z., Li, Y. C., & Ji, M. H. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
 #' mu = 0,
 #' SD = 3.3,

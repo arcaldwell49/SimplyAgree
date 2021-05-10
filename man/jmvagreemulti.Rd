@@ -2,15 +2,15 @@
 % Please edit documentation in R/jmvagreemulti.h.R
 \name{jmvagreemulti}
 \alias{jmvagreemulti}
-\title{Nested/Replicate Data Agreement Analysis in jamovi}
+\title{Nested/Replicate Data Agreement Analysis}
 \usage{
 jmvagreemulti(
   data,
   method1,
   method2,
   id,
-  ciWidth = 0.95,
-  agreeWidth = 0.95,
+  ciWidth = 95,
+  agreeWidth = 95,
   testValue = 2,
   CCC = TRUE,
   valEq = FALSE,
@@ -27,11 +27,11 @@ jmvagreemulti(
 
 \item{id}{Name of column containing subject identifier}
 
-\item{ciWidth}{a number between .50 and .999 (default: .95), the width of
+\item{ciWidth}{a number between 50 and 99.9 (default: 95), the width of
 confidence intervals}
 
-\item{agreeWidth}{a number between .50 and .999 (default: .95), the width
-of agreement limits}
+\item{agreeWidth}{a number between 50 and 99.9 (default: 95), the width of
+agreement limits}
 
 \item{testValue}{a number specifying the limit of agreement}
 
@@ -62,5 +62,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$blandtab)}
 }
 \description{
-Nested/Replicate Data Agreement Analysis in jamovi
+Nested/Replicate Data Agreement Analysis
 }

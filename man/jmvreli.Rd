@@ -2,9 +2,9 @@
 % Please edit documentation in R/jmvreli.h.R
 \name{jmvreli}
 \alias{jmvreli}
-\title{Reliability Analysis in jamovi}
+\title{Reliability Analysis}
 \usage{
-jmvreli(data, vars, ciWidth = 0.95, desc = FALSE, plots = FALSE)
+jmvreli(data, vars, ciWidth = 95, desc = FALSE, plots = FALSE)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -12,7 +12,7 @@ jmvreli(data, vars, ciWidth = 0.95, desc = FALSE, plots = FALSE)
 \item{vars}{a list of the column names containing the measurements for
 reliability analysis.}
 
-\item{ciWidth}{a number between .50 and .999 (default: .95), the width of
+\item{ciWidth}{a number between 50 and 99.9 (default: 95), the width of
 confidence intervals}
 
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide table of
@@ -37,5 +37,5 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$icctab)}
 }
 \description{
-Reliability Analysis in jamovi
+Reliability Analysis
 }
