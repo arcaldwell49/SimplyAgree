@@ -58,13 +58,3 @@ Mixed Effects Limits of Agreement
 Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 }
 
-\examples{
-\dontrun{
-df_rec.pre = temps \%>\%
-mutate(id_spec = paste0(id,"_",trial_condition)) \%>\%
-select(id,id_spec,trec_pre,tod,trial_condition) \%>\%
-pivot_wider(id_cols = c(id,id_spec,trial_condition),
-names_from = tod,alues_from = trec_pre) \%>\%
-mutate(diff = PM - AM)
-}
-}

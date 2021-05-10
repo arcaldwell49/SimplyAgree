@@ -8,8 +8,8 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             method1 = NULL,
             method2 = NULL,
-            ciWidth = 0.95,
-            agreeWidth = 0.95,
+            ciWidth = 95,
+            agreeWidth = 95,
             testValue = 2,
             CCC = TRUE,
             plotbland = FALSE,
@@ -38,15 +38,15 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
-                min=0.5,
-                max=0.999,
-                default=0.95)
+                min=50,
+                max=99.9,
+                default=95)
             private$..agreeWidth <- jmvcore::OptionNumber$new(
                 "agreeWidth",
                 agreeWidth,
-                min=0.5,
-                max=0.999,
-                default=0.95)
+                min=50,
+                max=99.9,
+                default=95)
             private$..testValue <- jmvcore::OptionNumber$new(
                 "testValue",
                 testValue,
@@ -196,16 +196,16 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Simple Agreement Analysis in jamovi
+#' Simple Agreement Analysis
 #'
 #' 
 #' @param data Data
 #' @param method1 Name of column containing 1st Vector of data
 #' @param method2 Name of column containing Vector of data
-#' @param ciWidth a number between .50 and .999 (default: .95), the width of
+#' @param ciWidth a number between 50 and 99.9 (default: 95), the width of
 #'   confidence intervals
-#' @param agreeWidth a number between .50 and .999 (default: .95), the width
-#'   of agreement limits
+#' @param agreeWidth a number between 50 and 99.9 (default: 95), the width of
+#'   agreement limits
 #' @param testValue a number specifying the limit of agreement
 #' @param CCC \code{TRUE} or \code{FALSE} (default), produce CCC table
 #' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
@@ -231,8 +231,8 @@ jmvagree <- function(
     data,
     method1,
     method2,
-    ciWidth = 0.95,
-    agreeWidth = 0.95,
+    ciWidth = 95,
+    agreeWidth = 95,
     testValue = 2,
     CCC = TRUE,
     plotbland = FALSE,

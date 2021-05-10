@@ -14,7 +14,7 @@ jmvreliClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             icctab <- self$results$icctab
             vartab <- self$results$vartab
             plot <- self$results$plots
-            cl <- self$options$get("ciWidth")
+            cl <- self$options$get("ciWidth")/100
 
             res = reli_stats(data = dataset,
                              wide = TRUE,

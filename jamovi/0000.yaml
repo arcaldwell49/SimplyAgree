@@ -1,7 +1,7 @@
 ---
 title: Flexible and Robust Agreement and Reliability Analyses
 name: SimplyAgree
-version: 0.0.1
+version: 0.0.2
 jms: '1.0'
 authors:
   - Aaron R. Caldwell
@@ -10,21 +10,21 @@ date: '`r Sys.Date()`'
 type: R
 description: Agreement and Reliability Analyses for nested designs.
 analyses:
-  - title: Simple Agreement Analysis in jamovi
+  - title: Simple Agreement Analysis
     name: jmvagree
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Simple Agreement Analysis in jamovi
-  - title: Nested/Replicate Data Agreement Analysis in jamovi
+    menuTitle: Simple Agreement Analysis
+  - title: Nested/Replicate Data Agreement Analysis
     name: jmvagreemulti
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Nested/Replicate Data Agreement Analysis in jamovi
-  - title: Reliability Analysis in jamovi
+    menuTitle: Nested/Replicate Data Agreement Analysis
+  - title: Reliability Analysis
     name: jmvreli
     ns: SimplyAgree
     menuGroup: SimplyAgree
-    menuTitle: Reliability Analysis in jamovi
+    menuTitle: Reliability Analysis
 usesNative: true
 minApp: 1.0.8
 

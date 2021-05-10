@@ -7,7 +7,7 @@ jmvreliOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
-            ciWidth = 0.95,
+            ciWidth = 95,
             desc = FALSE,
             plots = FALSE, ...) {
 
@@ -28,9 +28,9 @@ jmvreliOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
-                min=0.5,
-                max=0.999,
-                default=0.95)
+                min=50,
+                max=99.9,
+                default=95)
             private$..desc <- jmvcore::OptionBool$new(
                 "desc",
                 desc,
@@ -158,13 +158,13 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE)
         }))
 
-#' Reliability Analysis in jamovi
+#' Reliability Analysis
 #'
 #' 
 #' @param data the data as a data frame
 #' @param vars a list of the column names containing the measurements for
 #'   reliability analysis.
-#' @param ciWidth a number between .50 and .999 (default: .95), the width of
+#' @param ciWidth a number between 50 and 99.9 (default: 95), the width of
 #'   confidence intervals
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide table of
 #'   variance components
@@ -188,7 +188,7 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 jmvreli <- function(
     data,
     vars,
-    ciWidth = 0.95,
+    ciWidth = 95,
     desc = FALSE,
     plots = FALSE) {
 

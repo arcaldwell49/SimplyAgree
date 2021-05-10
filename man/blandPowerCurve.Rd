@@ -38,7 +38,7 @@ Lu, M. J., Zhong, W. H., Liu, Y. X., Miao, H. Z., Li, Y. C., & Ji, M. H. (2016).
 }
 
 \examples{
-\dontrun{
+\donttest{
 powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
 mu = 0,
 SD = 3.3,
