@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
       </span>
     </div>
 
@@ -61,6 +61,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
 </div>
@@ -78,7 +81,7 @@
       <h1 data-toc-skip>Introduction to SimplyAgree</h1>
                         <h4 class="author">Aaron R. Caldwell</h4>
             
-            <h4 class="date">Last Updated: 2021-05-07</h4>
+            <h4 class="date">Last Updated: 2021-05-10</h4>
       
       
       <div class="hidden name"><code>intro_vignette.Rmd</code></div>
@@ -90,7 +93,7 @@
 <p>The <code>SimplyAgree</code> R package was created to make the process of quantifying measurement agreement, consistency, and reliability. This package expands upon the capabilities of currently available R packages (such as <code>psych</code> and <code>blandr</code>) by 1) providing support for agreement studies that involve multiple observations (<code>agree_test</code> and <code>agree_reps</code> functions) 2) provide robust tests of agreement even in simple studies (<code>shieh_test</code> output from the <code>agree_test</code> function) and 3) a robust set of reliability statistics (<code>reli_stats</code> function).</p>
 <p>In this vignette I will shortly demonstrate the implementation of each function and <em>most</em> of the underlying calculations within each function</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">SimplyAgree</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span>
 <span class="co">#&gt; Registered S3 methods overwritten by 'tibble':</span>
 <span class="co">#&gt;   method     from  </span>
 <span class="co">#&gt;   format.tbl pillar</span>
@@ -359,7 +362,7 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 <a href="#references" class="anchor"></a>References</h1>
 <div id="refs" class="references">
 <div id="ref-bland1986">
-<p>Bland, J. Martin, and DouglasG. Altman. 1986. “STATISTICAL METHODS FOR ASSESSING AGREEMENT BETWEEN TWO METHODS OF CLINICAL MEASUREMENT.” <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.</p>
+<p>Bland, J. Martin, and DouglasG. Altman. 1986. “Statistical Methods for Assessing Agreement Between Two Methods of Clinical Measurement.” <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.</p>
 </div>
 <div id="ref-bland1999">
 <p>Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in Method Comparison Studies.” <em>Statistical Methods in Medical Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204">https://doi.org/10.1177/096228029900800204</a>.</p>
@@ -380,7 +383,7 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 <p>Shieh, Gwowen. 2019. “Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation.” <em>Statistics in Biopharmaceutical Research</em> 12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495">https://doi.org/10.1080/19466315.2019.1677495</a>.</p>
 </div>
 <div id="ref-weir2005">
-<p>Weir, Joseph P. 2005. “Quantifying Test-Retest Reliability Using the Intraclass Correlation Coefficient and the SEM.” <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231. <a href="https://doi.org/10.1519/15184.1">https://doi.org/10.1519/15184.1</a>.</p>
+<p>Weir, Joseph P. 2005. “Quantifying Test-Retest Reliability Using the Intraclass Correlation Coefficient and the SEM.” <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231. <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.</p>
 </div>
 <div id="ref-zou2011">
 <p>Zou, GY. 2011. “Confidence Interval Estimation for the BlandAltman Limits of Agreement with Multiple Observations Per Individual.” <em>Statistical Methods in Medical Research</em> 22 (6): 630–42. <a href="https://doi.org/10.1177/0962280211402548">https://doi.org/10.1177/0962280211402548</a>.</p>

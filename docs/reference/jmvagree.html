@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Simple Agreement Analysis in jamovi — jmvagree • SimplyAgree</title>
+<title>Simple Agreement Analysis — jmvagree • SimplyAgree</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Simple Agreement Analysis in jamovi — jmvagree" />
-<meta property="og:description" content="Simple Agreement Analysis in jamovi" />
+<meta property="og:title" content="Simple Agreement Analysis — jmvagree" />
+<meta property="og:description" content="Simple Agreement Analysis" />
 
 
 
@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
       </span>
     </div>
 
@@ -102,6 +102,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -118,21 +121,21 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Simple Agreement Analysis in jamovi</h1>
+    <h1>Simple Agreement Analysis</h1>
     
     <div class="hidden name"><code>jmvagree.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Simple Agreement Analysis in jamovi</p>
+    <p>Simple Agreement Analysis</p>
     </div>
 
     <pre class="usage"><span class='fu'>jmvagree</span><span class='op'>(</span>
   <span class='va'>data</span>,
   <span class='va'>method1</span>,
   <span class='va'>method2</span>,
-  ciWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
-  agreeWidth <span class='op'>=</span> <span class='fl'>0.95</span>,
+  ciWidth <span class='op'>=</span> <span class='fl'>95</span>,
+  agreeWidth <span class='op'>=</span> <span class='fl'>95</span>,
   testValue <span class='op'>=</span> <span class='fl'>2</span>,
   CCC <span class='op'>=</span> <span class='cn'>TRUE</span>,
   plotbland <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -156,13 +159,13 @@
     </tr>
     <tr>
       <th>ciWidth</th>
-      <td><p>a number between .50 and .999 (default: .95), the width of
+      <td><p>a number between 50 and 99.9 (default: 95), the width of
 confidence intervals</p></td>
     </tr>
     <tr>
       <th>agreeWidth</th>
-      <td><p>a number between .50 and .999 (default: .95), the width
-of agreement limits</p></td>
+      <td><p>a number between 50 and 99.9 (default: 95), the width of
+agreement limits</p></td>
     </tr>
     <tr>
       <th>testValue</th>

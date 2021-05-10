@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Mixed Effects Limits of Agreement — loa_mixed • SimplyAgree</title>
+<title>Changelog • SimplyAgree</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,7 @@
 
 
 
-<meta property="og:title" content="Mixed Effects Limits of Agreement — loa_mixed" />
-<meta property="og:description" content="Mixed Effects Limits of Agreement" />
+<meta property="og:title" content="Changelog" />
 
 
 
@@ -59,7 +58,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-news">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -121,98 +120,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Mixed Effects Limits of Agreement</h1>
-    
-    <div class="hidden name"><code>loa_mixed.Rd</code></div>
+      <h1 data-toc-skip>Changelog <small></small></h1>
+      
     </div>
-
-    <div class="ref-description">
-    <p>Mixed Effects Limits of Agreement</p>
-    </div>
-
-    <pre class="usage"><span class='fu'>loa_mixed</span><span class='op'>(</span>
-  <span class='va'>diff</span>,
-  <span class='va'>condition</span>,
-  <span class='va'>id</span>,
-  <span class='va'>data</span>,
-  plot.xaxis <span class='op'>=</span> <span class='cn'>NULL</span>,
-  <span class='va'>delta</span>,
-  conf.level <span class='op'>=</span> <span class='fl'>0.95</span>,
-  agree.level <span class='op'>=</span> <span class='fl'>0.95</span>,
-  replicates <span class='op'>=</span> <span class='fl'>1999</span>,
-  type <span class='op'>=</span> <span class='st'>"bca"</span>
-<span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>diff</th>
-      <td><p>column name of the data frame that includes the continuous measurement of interest.</p></td>
-    </tr>
-    <tr>
-      <th>condition</th>
-      <td><p>column name indicating different conditions subjects were tested under.</p></td>
-    </tr>
-    <tr>
-      <th>id</th>
-      <td><p>column name indicating the subject/participant identifier</p></td>
-    </tr>
-    <tr>
-      <th>data</th>
-      <td><p>A data frame containing the variables within the model.</p></td>
-    </tr>
-    <tr>
-      <th>plot.xaxis</th>
-      <td><p>column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.</p></td>
-    </tr>
-    <tr>
-      <th>delta</th>
-      <td><p>The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.</p></td>
-    </tr>
-    <tr>
-      <th>conf.level</th>
-      <td><p>the confidence level required. Default is 95%.</p></td>
-    </tr>
-    <tr>
-      <th>agree.level</th>
-      <td><p>the agreement level required. Default is 95%.</p></td>
-    </tr>
-    <tr>
-      <th>replicates</th>
-      <td><p>the number of bootstrap replicates. Passed on to the boot function. Default is 500.</p></td>
-    </tr>
-    <tr>
-      <th>type</th>
-      <td><p>A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", "bca", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>Returns single list with the results of the agreement analysis.</p>
-<dl>
-  <dt><code>"var_comp"</code></dt><dd><p>Table of variance components</p></dd>
-  <dt><code>"loa"</code></dt><dd><p>a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></dd>
-  <dt><code>"h0_test"</code></dt><dd><p>Decision from hypothesis test.</p></dd>
-  <dt><code>"bland_alt.plot"</code></dt><dd><p>Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x &amp; y.</p></dd>
-  <dt><code>"conf.level"</code></dt><dd><p>Returned as input.</p></dd>
-  <dt><code>"agree.level"</code></dt><dd><p>Returned as input.</p></dd>
-
-</dl>
-
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    
-
-<p>Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &amp; McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. &lt;https://doi.org/10.1371/journal.pone.0168321&gt;</p>
 
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
+
 </div>
 
 
