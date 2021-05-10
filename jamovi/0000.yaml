@@ -25,6 +25,13 @@ analyses:
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Reliability Analysis
+datasets:
+  - name: reps
+    path: reps.csv
+    description: Fake data of an agreement study with replicates
+    tags:
+      - agreement
+      - nested
 usesNative: true
 minApp: 1.0.8
 

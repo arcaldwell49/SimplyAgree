@@ -27,14 +27,16 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                rejectInf=FALSE)
             private$..method2 <- jmvcore::OptionVariable$new(
                 "method2",
                 method2,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                rejectInf=FALSE)
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
@@ -108,7 +110,7 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Simple Agreement Analysis in jamovi")
+                title="Simple Agreement Analysis")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

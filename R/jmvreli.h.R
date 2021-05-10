@@ -72,7 +72,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 options=options,
                 name="",
-                title="Reliability Analysis in jamovi")
+                title="Reliability Analysis")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",

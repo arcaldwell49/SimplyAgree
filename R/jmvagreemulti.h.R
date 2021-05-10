@@ -123,7 +123,7 @@ jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 options=options,
                 name="",
-                title="Nested/Replicate Data Agreement Analysis in jamovi")
+                title="Nested/Replicate Data Agreement Analysis")
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
