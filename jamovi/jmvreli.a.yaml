@@ -27,7 +27,7 @@ options:
 
 
     - name: ciWidth
-      title: Confidence level
+      title: Confidence level (%)
       type: Number
       min: 50
       max: 99.9

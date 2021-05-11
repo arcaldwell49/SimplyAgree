@@ -16,8 +16,8 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                  !is.null(self$options$method2) &&
                  !is.null(self$options$id) ) {
                 # read the option values into shorter variable names
-                method1 <- self$options$method1
-                method2 <- self$options$method2
+                method1 <- jmvcore::toNumeric(self$options$method1)
+                method2 <- jmvcore::toNumeric(self$options$method2)
                 id <- self$options$id
                 plotba <- self$results$plotba
                 plotcon <- self$results$plotcon

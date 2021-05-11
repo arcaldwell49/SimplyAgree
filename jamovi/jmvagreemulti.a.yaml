@@ -53,7 +53,7 @@ options:
 
 
     - name: ciWidth
-      title: Confidence level
+      title: Confidence level (%)
       type: Number
       min: 50
       max: 99.9
@@ -66,7 +66,7 @@ options:
             intervals
 
     - name: agreeWidth
-      title: Agreement level
+      title: Agreement level (%)
       type: Number
       min: 50
       max: 99.9

@@ -29,14 +29,16 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                rejectInf=FALSE)
             private$..method2 <- jmvcore::OptionVariable$new(
                 "method2",
                 method2,
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                rejectInf=FALSE)
             private$..id <- jmvcore::OptionVariable$new(
                 "id",
                 id)
