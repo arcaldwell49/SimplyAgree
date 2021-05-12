@@ -49,7 +49,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-Reliability Statistics
+`reli_stats` produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
 }
 \section{References}{
 
@@ -57,6 +57,7 @@ Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass cor
 }
 
 \examples{
-#to be added
+data('reps')
+reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 
 }

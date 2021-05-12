@@ -1,4 +1,5 @@
 #' Reliability Statistics
+#' @description `reli_stats` produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
 #' @param measure Name of column containing the measurement of interest
 #' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
 #' @param id Column with subject identifier
@@ -25,7 +26,9 @@
 #'
 #' }
 
-#' @examples #to be added
+#' @examples
+#' data('reps')
+#' reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 #'
 #' @section References:
 #' Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
