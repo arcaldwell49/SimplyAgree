@@ -16,8 +16,8 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                  !is.null(self$options$method2) &&
                  !is.null(self$options$id) ) {
                 # read the option values into shorter variable names
-                method1 <- jmvcore::toNumeric(self$options$method1)
-                method2 <- jmvcore::toNumeric(self$options$method2)
+                method1 <- self$options$method1
+                method2 <- self$options$method2
                 id <- self$options$id
                 plotba <- self$results$plotba
                 plotcon <- self$results$plotcon
@@ -26,9 +26,9 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 data <- self$data
 
                 # convert to appropriate type
-                #data[[method1]] <- jmvcore::toNumeric(data[[method1]])
-                #data[[method2]] <- jmvcore::toNumeric(data[[method2]])
-                #data[[id]] <- data[[id]]
+                data[[method1]] <- jmvcore::toNumeric(data[[method1]])
+                data[[method2]] <- jmvcore::toNumeric(data[[method2]])
+                data[[id]] <- as.factor(data[[id]])
 
                 ciWidth = self$options$ciWidth/100
                 agreeWidth = self$options$agreeWidth/100
