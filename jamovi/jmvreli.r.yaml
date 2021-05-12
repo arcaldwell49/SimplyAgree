@@ -54,8 +54,8 @@ items:
       width: 450
       height: 400
 
-    - name:  cites
-      title: Methods
-      type:  Preformatted
+    #- name:  cites
+    #  title: Methods
+    #  type:  Preformatted
 
 ...

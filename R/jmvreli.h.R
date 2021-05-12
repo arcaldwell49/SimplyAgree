@@ -64,8 +64,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         text = function() private$.items[["text"]],
         icctab = function() private$.items[["icctab"]],
         vartab = function() private$.items[["vartab"]],
-        plots = function() private$.items[["plots"]],
-        cites = function() private$.items[["cites"]]),
+        plots = function() private$.items[["plots"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -132,11 +131,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(plots)",
                 renderFun=".plot",
                 width=450,
-                height=400))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="cites",
-                title="Methods"))}))
+                height=400))}))
 
 jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvreliBase",
@@ -175,7 +170,6 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$icctab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$vartab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$cites} \tab \tab \tab \tab \tab a preformatted \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
