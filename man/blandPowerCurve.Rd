@@ -30,11 +30,11 @@ blandPowerCurve(
 A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
-Estimate power curve for Bland-Altman limits of agreement
+This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
 }
 \section{references}{
 
-Lu, M. J., Zhong, W. H., Liu, Y. X., Miao, H. Z., Li, Y. C., & Ji, M. H. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
+Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
 }
 
 \examples{

@@ -49,7 +49,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-`reli_stats` produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
+reli_stats produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
 }
 \section{References}{
 

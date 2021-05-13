@@ -1,4 +1,5 @@
 #' Tests for Absolute Agreement with Replicates
+#' @description agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean does not vary within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
 #' @param x Name of column with first measurement
 #' @param y Name of other column with first measurement
 #' @param id Column with subject identifier
@@ -21,7 +22,7 @@
 #' }
 
 #' @examples
-#' #' data('reps')
+#' data('reps')
 #' agree_reps(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #' @section References:
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.

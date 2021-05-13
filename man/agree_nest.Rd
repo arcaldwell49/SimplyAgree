@@ -36,7 +36,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-Tests for Absolute Agreement with Nested Data
+agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
 }
 \section{References}{
 

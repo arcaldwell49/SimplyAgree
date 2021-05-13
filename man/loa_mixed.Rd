@@ -51,7 +51,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-Mixed Effects Limits of Agreement
+This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
 }
 \section{References}{
 

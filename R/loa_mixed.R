@@ -1,4 +1,5 @@
 #' Mixed Effects Limits of Agreement
+#' @description This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
 #' @param data A data frame containing the variables within the model.
 #' @param diff column name of the data frame that includes the continuous measurement of interest.
 #' @param condition column name indicating different conditions subjects were tested under.

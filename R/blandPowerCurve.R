@@ -1,5 +1,5 @@
 #' Estimate power curve for Bland-Altman limits of agreement
-#'
+#' @description This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
 #' @param samplesizes vector of samples sizes at which to estimate power.
 #' @param mu mean of differences
 #' @param SD standard deviation of differences
@@ -9,7 +9,7 @@
 
 #' @return A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 #' @section references:
-#' Lu, M. J., Zhong, W. H., Liu, Y. X., Miao, H. Z., Li, Y. C., & Ji, M. H. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
+#' Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
 #' @examples
 #' \donttest{
 #' powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),

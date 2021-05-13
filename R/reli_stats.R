@@ -1,5 +1,5 @@
 #' Reliability Statistics
-#' @description `reli_stats` produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
+#' @description reli_stats produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
 #' @param measure Name of column containing the measurement of interest
 #' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
 #' @param id Column with subject identifier

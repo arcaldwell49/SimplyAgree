@@ -1,4 +1,5 @@
 #' Tests for Absolute Agreement with Nested Data
+#' @description agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
 #' @param x Name of column with first measurement
 #' @param y Name of other column with first measurement
 #' @param id Column with subject identifier
