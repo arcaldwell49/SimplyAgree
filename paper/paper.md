@@ -77,12 +77,12 @@ The three analysis options essentially enable jamovi users to complete some of t
 
 ![**Figure 3**: Sample Output from the Simple Agreement Analysis.](simple_agreement.PNG)
 
-2. The nested/replicate agreement analysis uses the `agree_nest` and `agree_reps` function to perform the analyses. The `agree_reps` function is used if "Assume underlying value does not vary?" is selected.
+2. The nested/replicate agreement analysis uses the `agree_nest` and `agree_reps` function to perform the analyses. The `agree_reps` function is used if "Assume underlying value does not vary?" is selected; otherwise `agree_nest` is used.
 
 ![**Figure 4**:Sample Output from the Nested/Replicate Agreement Analysis.](nested_agreement.PNG)
 
 
-3.
+3. The reliability analysis utilizes `reli_stats` to calculate reliability statistics.
 
 ![**Figure 5**: Sample Output from the Reliability Analsyis.](reliability.PNG)
 
