@@ -8,9 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(SimplyAgree)
 ```
 
+<!-- badges: start -->
 [![Build Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https://travis-ci.com/arcaldwell49/SimplyAgree)
 [![Codecov test coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
-
+[![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
+<!-- badges: start -->
 
 `SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/) module, created to make agreement and reliability analyses easier for the average researcher. The functions within this package include simple tests of agreement (`agree_test`), agreement analysis for nested (`agree_nest`) and replicate data (`agree_reps`), and provide robust analyses of reliability (`reli_stats`). In addition, this package contains a set of functions to help when planning studies looking to assess measurement agreement (`blandPowerCurve`).
 

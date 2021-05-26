@@ -1,10 +1,14 @@
 SimplyAgree R Package
 ================
 
+<!-- badges: start -->
+
 [![Build
 Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https://travis-ci.com/arcaldwell49/SimplyAgree)
 [![Codecov test
 coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
+[![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
+<!-- badges: start -->
 
 `SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/)
 module, created to make agreement and reliability analyses easier for

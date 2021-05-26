@@ -24,3 +24,4 @@
 ^paper\.md$
 ^paper\.bib$
 ^paper$
+^\.github$
