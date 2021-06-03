@@ -1,6 +1,10 @@
 SimplyAgree R Package
 ================
 
+![Sticker](https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.PNG)
+
+*Artwork courtesy of Chelsea Parlett Pelleriti*
+
 <!-- badges: start -->
 
 [![Build

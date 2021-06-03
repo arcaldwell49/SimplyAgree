@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Tests for Absolute Agreement with Replicates — agree_reps" />
-<meta property="og:description" content="Tests for Absolute Agreement with Replicates" />
+<meta property="og:description" content="agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean does not vary within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics." />
 
 
 
@@ -127,7 +127,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Tests for Absolute Agreement with Replicates</p>
+    <p>agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean does not vary within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.</p>
     </div>
 
     <pre class="usage"><span class='fu'>agree_reps</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>id</span>, <span class='va'>data</span>, <span class='va'>delta</span>, agree.level <span class='op'>=</span> <span class='fl'>0.95</span>, conf.level <span class='op'>=</span> <span class='fl'>0.95</span><span class='op'>)</span></pre>
@@ -190,7 +190,7 @@
 <p>Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#' data('reps')</span>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>'reps'</span><span class='op'>)</span>
 <span class='fu'>agree_reps</span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"x"</span>, y <span class='op'>=</span> <span class='st'>"y"</span>, id <span class='op'>=</span> <span class='st'>"id"</span>, data <span class='op'>=</span> <span class='va'>reps</span>, delta <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Limit of Agreement = 95%
 #&gt; alpha = 0.05 | 95 % Confidence Interval

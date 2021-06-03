@@ -75,13 +75,13 @@
 
       
 
-      </header><script src="intro_vignette_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="intro_vignette_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Introduction to SimplyAgree</h1>
                         <h4 class="author">Aaron R. Caldwell</h4>
             
-            <h4 class="date">Last Updated: 2021-05-10</h4>
+            <h4 class="date">Last Updated: 2021-06-03</h4>
       
       
       <div class="hidden name"><code>intro_vignette.Rmd</code></div>
@@ -93,11 +93,7 @@
 <p>The <code>SimplyAgree</code> R package was created to make the process of quantifying measurement agreement, consistency, and reliability. This package expands upon the capabilities of currently available R packages (such as <code>psych</code> and <code>blandr</code>) by 1) providing support for agreement studies that involve multiple observations (<code>agree_test</code> and <code>agree_reps</code> functions) 2) provide robust tests of agreement even in simple studies (<code>shieh_test</code> output from the <code>agree_test</code> function) and 3) a robust set of reliability statistics (<code>reli_stats</code> function).</p>
 <p>In this vignette I will shortly demonstrate the implementation of each function and <em>most</em> of the underlying calculations within each function</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span>
-<span class="co">#&gt; Registered S3 methods overwritten by 'tibble':</span>
-<span class="co">#&gt;   method     from  </span>
-<span class="co">#&gt;   format.tbl pillar</span>
-<span class="co">#&gt;   print.tbl  pillar</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span></code></pre></div>
 <div id="simple-agreement" class="section level1">
 <h1 class="hasAnchor">
 <a href="#simple-agreement" class="anchor"></a>Simple Agreement</h1>
@@ -152,7 +148,7 @@
 <div id="limits-of-agreement" class="section level3">
 <h3 class="hasAnchor">
 <a href="#limits-of-agreement" class="anchor"></a>Limits of Agreement</h3>
-<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (1986)</span> and <span class="citation">Bland and Altman (1999)</span>.</p>
+<p>The reported limits of agreement are derived from the work of <span class="citation">J. Martin Bland and Altman (1986)</span> and <span class="citation">J. Martin Bland and Altman (1999)</span>.</p>
 <p><span class="math display">\[
 LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
 \]</span> wherein, <span class="math inline">\(t\)</span> is the critical t-value at the given sample size and confidence level, <span class="math inline">\(z\)</span> is the value of the normal distribution at the given alpha level, and <span class="math inline">\(S^2\)</span> is the variance of the difference scores.</p>
@@ -360,33 +356,33 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 <div id="references" class="section level1 unnumbered">
 <h1 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h1>
-<div id="refs" class="references">
-<div id="ref-bland1986">
-<p>Bland, J. Martin, and DouglasG. Altman. 1986. “Statistical Methods for Assessing Agreement Between Two Methods of Clinical Measurement.” <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-bland1999" class="csl-entry">
+Bland, J Martin, and Douglas G Altman. 1999. <span>“Measuring Agreement in Method Comparison Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204">https://doi.org/10.1177/096228029900800204</a>.
 </div>
-<div id="ref-bland1999">
-<p>Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in Method Comparison Studies.” <em>Statistical Methods in Medical Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204">https://doi.org/10.1177/096228029900800204</a>.</p>
+<div id="ref-bland1986" class="csl-entry">
+Bland, J. Martin, and DouglasG. Altman. 1986. <span>“Statistical Methods for Assessing Agreement Between Two Methods of Clinical Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.
 </div>
-<div id="ref-carrasco2009">
-<p>Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. “The Concordance Correlation Coefficient for Repeated Measures Estimated by Variance Components.” <em>Journal of Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890">https://doi.org/10.1080/10543400802527890</a>.</p>
+<div id="ref-carrasco2009" class="csl-entry">
+Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. <span>“The Concordance Correlation Coefficient for Repeated Measures Estimated by Variance Components.”</span> <em>Journal of Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890">https://doi.org/10.1080/10543400802527890</a>.
 </div>
-<div id="ref-king2007">
-<p>King, Tonya S., Vernon M. Chinchilli, and Josep L. Carrasco. 2007. “A Repeated Measures Concordance Correlation Coefficient.” <em>Statistics in Medicine</em> 26 (16): 3095–3113. <a href="https://doi.org/10.1002/sim.2778">https://doi.org/10.1002/sim.2778</a>.</p>
+<div id="ref-king2007" class="csl-entry">
+King, Tonya S., Vernon M. Chinchilli, and Josep L. Carrasco. 2007. <span>“A Repeated Measures Concordance Correlation Coefficient.”</span> <em>Statistics in Medicine</em> 26 (16): 3095–3113. <a href="https://doi.org/10.1002/sim.2778">https://doi.org/10.1002/sim.2778</a>.
 </div>
-<div id="ref-lin1989">
-<p>Lin, Lawrence I-Kuei. 1989. “A Concordance Correlation Coefficient to Evaluate Reproducibility.” <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051">https://doi.org/10.2307/2532051</a>.</p>
+<div id="ref-lin1989" class="csl-entry">
+Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051">https://doi.org/10.2307/2532051</a>.
 </div>
-<div id="ref-lu2016">
-<p>Lu, Meng-Jie, Wei-Hua Zhong, Yu-Xiu Liu, Hua-Zhang Miao, Yong-Chang Li, and Mu-Huo Ji. 2016. “Sample Size for Assessing Agreement Between Two Methods of Measurement by Bland-Altman Method.” <em>The International Journal of Biostatistics</em> 12 (2). <a href="https://doi.org/10.1515/ijb-2015-0039">https://doi.org/10.1515/ijb-2015-0039</a>.</p>
+<div id="ref-lu2016" class="csl-entry">
+Lu, Meng-Jie, Wei-Hua Zhong, Yu-Xiu Liu, Hua-Zhang Miao, Yong-Chang Li, and Mu-Huo Ji. 2016. <span>“Sample Size for Assessing Agreement Between Two Methods of Measurement by Bland-Altman Method.”</span> <em>The International Journal of Biostatistics</em> 12 (2). <a href="https://doi.org/10.1515/ijb-2015-0039">https://doi.org/10.1515/ijb-2015-0039</a>.
 </div>
-<div id="ref-shieh2019">
-<p>Shieh, Gwowen. 2019. “Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation.” <em>Statistics in Biopharmaceutical Research</em> 12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495">https://doi.org/10.1080/19466315.2019.1677495</a>.</p>
+<div id="ref-shieh2019" class="csl-entry">
+Shieh, Gwowen. 2019. <span>“Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation.”</span> <em>Statistics in Biopharmaceutical Research</em> 12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495">https://doi.org/10.1080/19466315.2019.1677495</a>.
 </div>
-<div id="ref-weir2005">
-<p>Weir, Joseph P. 2005. “Quantifying Test-Retest Reliability Using the Intraclass Correlation Coefficient and the SEM.” <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231. <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.</p>
+<div id="ref-weir2005" class="csl-entry">
+Weir, Joseph P. 2005. <span>“Quantifying Test-Retest Reliability Using the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span> <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231. <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.
 </div>
-<div id="ref-zou2011">
-<p>Zou, GY. 2011. “Confidence Interval Estimation for the BlandAltman Limits of Agreement with Multiple Observations Per Individual.” <em>Statistical Methods in Medical Research</em> 22 (6): 630–42. <a href="https://doi.org/10.1177/0962280211402548">https://doi.org/10.1177/0962280211402548</a>.</p>
+<div id="ref-zou2011" class="csl-entry">
+Zou, GY. 2011. <span>“Confidence Interval Estimation for the Bland<span><span></span></span>altman Limits of Agreement with Multiple Observations Per Individual.”</span> <em>Statistical Methods in Medical Research</em> 22 (6): 630–42. <a href="https://doi.org/10.1177/0962280211402548">https://doi.org/10.1177/0962280211402548</a>.
 </div>
 </div>
 </div>

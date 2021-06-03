@@ -7,6 +7,9 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 library(SimplyAgree)
 ```
+![Sticker](https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.PNG)
+
+*Artwork courtesy of Chelsea Parlett Pelleriti*
 
 <!-- badges: start -->
 [![Build Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https://travis-ci.com/arcaldwell49/SimplyAgree)
