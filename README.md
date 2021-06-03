@@ -1,7 +1,7 @@
 SimplyAgree R Package
 ================
 
-![Sticker](https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.PNG)
+<img src="https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png" width="150" height="150" />
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
