@@ -25,3 +25,4 @@
 ^paper\.bib$
 ^paper$
 ^\.github$
+^images
