@@ -21,11 +21,18 @@ year: 2021
 bibliography: paper.bib
 csl: apa.csl
 journal: JOSS
+output: 
+  pdf_document:
+    fig_caption: no
 ---
+Aaron R. Caldwell^1,2^
+
+1. United States Army Research Institute of Environmental Medicine, Natick, MA.
+2. Oak Ridge Institute of Science and Education, Oak Ridge, TN.
 
 # Summary
 
-Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts, researchers highly value methods to quantify the accuracy and reliability of the measurement tools [@bland1986; @weir2005]. This article introduces the `SimplyAgree` R package and jamovi module as user-friendly solutions for estimating agreement and reliability [@R-base; @jamovi]. Updates and additional details on `SimplyAgree` can be found on the package's [website](https://aaroncaldwell.us/SimplyAgree).
+Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts, researchers highly value methods to quantify the accuracy and reliability of the measurement tools [@bland1986; @weir2005]. This article introduces the `SimplyAgree` R package and jamovi module as user-friendly solutions for estimating agreement and reliability [@R-base; @jamovi]. 
 
 # Statement of Need
 
@@ -60,6 +67,7 @@ There are 2 vignettes that document the major functions within the package that 
 
 6. `reli_stats`: Reliability Statistics. This function calculates and provides as output the statistics outlined by @weir2005. This includes an array of intraclass correlation coefficients, the coefficient of variation, and the standard error of measurement.
 
+\newpage
 
 # Current jamovi Capabilities
 
@@ -86,6 +94,7 @@ The three analysis options essentially enable jamovi users to complete some of t
 
 ![**Figure 5**: Sample Output from the Reliability Analsyis.](reliability.PNG)
 
+\newpage
 
 # Acknowledgements
 
