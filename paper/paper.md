@@ -64,26 +64,26 @@ There are 2 vignettes that document the major functions within the package that 
 
 The jamovi module can be added to the jamovi directly from the "add module" tab in the GUI.
 
-![**Figure 1**: How to add a module in jamovi.](module_button.PNG)
+![How to add a module in jamovi.](module_button.PNG)
 
 The `SimplyAgree` module is then available on the main menu, and within it there are three analysis options.
 
-![**Figure 2**: SimplyAgree in jamovi.](simplyagree_button.PNG)
+![SimplyAgree in jamovi.](simplyagree_button.PNG)
 
 The three analysis options essentially enable jamovi users to complete some of the same analyses available in the R package.
 
 1. The simple agreement analysis incorporates the `agree_test` function. Users have the option of including the concordance correlation coefficient, and plots of the data.
 
-![**Figure 3**: Sample Output from the Simple Agreement Analysis.](simple_agreement.PNG)
+![Sample Output from the Simple Agreement Analysis.](simple_agreement.PNG)
 
 2. The nested/replicate agreement analysis uses the `agree_nest` and `agree_reps` function to perform the analyses. The `agree_reps` function is used if "Assume underlying value does not vary?" is selected; otherwise `agree_nest` is used.
 
-![**Figure 4**:Sample Output from the Nested/Replicate Agreement Analysis.](nested_agreement.PNG)
+![Sample Output from the Nested/Replicate Agreement Analysis.](nested_agreement.PNG)
 
 
 3. The reliability analysis utilizes `reli_stats` to calculate reliability statistics.
 
-![**Figure 5**: Sample Output from the Reliability Analsyis.](reliability.PNG)
+![Sample Output from the Reliability Analsyis.](reliability.PNG)
 
 
 # Acknowledgements
