@@ -1,5 +1,4 @@
 ---
-# Example from https://joss.readthedocs.io/en/latest/submitting.html
 title: 'SimplyAgree: An R package and jamovi Module for Simplifying Agreement and Reliability Analyses'
 tags:
   - R
