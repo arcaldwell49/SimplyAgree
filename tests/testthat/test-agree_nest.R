@@ -95,3 +95,79 @@ testthat::test_that("examples from Zou", {
 
 
 })
+
+
+testthat::test_that("example from error message",{
+  set.seed(637234)
+  data2 = data.frame(IDNum = c(1,1,1,
+                               2,2,
+                               3,3,3,
+                               4,4,4,
+                               5,5,5,5,
+                               6,6,
+                               7,7,
+                               8,8,
+                               9,9,
+                               10,10,10),
+                    ACT_Sleep_Time = c(rnorm(3),
+                                       2,NA,
+                                       rnorm(3),
+                                       rnorm(3),
+                                       rnorm(4),
+                                       rnorm(2),
+                                       rnorm(2),
+                                       rnorm(2),
+                                       rnorm(2),
+                                       rnorm(3)),
+                    E_TST1_minutes = c(rnorm(3),
+                                       rnorm(2),
+                                       rnorm(3),
+                                       rnorm(3),
+                                       rnorm(4),
+                                       rnorm(2),
+                                       rnorm(2),
+                                       rnorm(2),
+                                       -1,NA,
+                                       rnorm(3))
+                    )
+
+  TSTnest = agree_nest(x = "ACT_Sleep_Time",
+                       y = "E_TST1_minutes",
+                       id = "IDNum",
+                       #delta = 100,
+                       data = data2,
+                       agree.level = .8)
+
+  testthat::expect_equivalent(TSTnest$loa$estimate,
+                              c(.597,-.568,1.761),
+                              tolerance = 0.001)
+  testthat::expect_equivalent(TSTnest$loa$upper.ci,
+                              c(1.0301,-0.0741,2.5673),
+                              tolerance = 0.001)
+  testthat::expect_equivalent(TSTnest$loa$lower.ci,
+                              c(.164,-1.373,1.268),
+                              tolerance = 0.001)
+
+  TSTrep = agree_reps(x = "ACT_Sleep_Time",
+                       y = "E_TST1_minutes",
+                       id = "IDNum",
+                       #delta = 100,
+                       data = data2,
+                       agree.level = .8)
+
+  testthat::expect_equivalent(TSTrep$loa$estimate,
+                              c(.717,-.665,2.099),
+                              tolerance = 0.001)
+  testthat::expect_equivalent(TSTrep$loa$upper.ci,
+                              c(1.185,-.142,2.936),
+                              tolerance = 0.001)
+  testthat::expect_equivalent(TSTrep$loa$lower.ci,
+                              c(.249,-1.502,1.576),
+                              tolerance = 0.001)
+
+
+
+})
+
+
+

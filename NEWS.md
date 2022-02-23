@@ -1,5 +1,8 @@
 # NEWS
 
+## v0.0.3
+- Fixed error in `agree_nest` and `agree_reps`; now properly handles missing values
+
 ## v0.0.2
 - Fixes typos in jamovi/jmv functions
 - Adds more descriptive errors to jamovi output
