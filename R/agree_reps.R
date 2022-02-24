@@ -90,14 +90,17 @@ agree_reps <- function(x,
     mutate(d = x_bar-y_bar,
            both_avg = (x_bar+y_bar)/2)
 
+  df3 = df2 %>%
+    drop_na()
+
   Nx = sum(df2$mxi)
   Ny = sum(df2$myi)
   mxh = nrow(df2)/sum(1/df2$mxi)
   myh = nrow(df2)/sum(1/df2$myi)
 
 
-  sxw2 = sum((df2$mxi-1)/(Nx-nrow(df2))*df2$x_var)
-  syw2 = sum((df2$myi-1)/(Ny-nrow(df2))*df2$y_var)
+  sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
+  syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
   d_bar = mean(df2$d, na.rm = TRUE)
   d_var = var(df2$d, na.rm = TRUE)
   d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))

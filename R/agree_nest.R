@@ -90,9 +90,12 @@ agree_nest <- function(x,
               .groups = "drop") %>%
     mutate(both_avg = (x_bar+y_bar)/2)
 
+  df3 = df2 %>%
+    drop_na()
+
   d_bar = mean(df2$d)
   d_var = var(df2$d)
-  sdw2 = sum((df2$m-1)/(nrow(df)-nrow(df2))*df2$d_var)
+  sdw2 = sum((df3$m-1)/(nrow(df)-nrow(df3))*df3$d_var)
   mh = nrow(df2)/sum(1/df2$m)
   d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
   d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))

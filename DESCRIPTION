@@ -1,7 +1,7 @@
 Package: SimplyAgree
 Type: Package
 Title: Flexible and Robust Agreement and Reliability Analyses
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: person("Aaron", "Caldwell", email = "arcaldwell49@gmail.com",
                   role = c("aut", "cre"))
 Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
@@ -10,7 +10,7 @@ URL: https://aaroncaldwell.us/SimplyAgree/
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     ggplot2,
     emmeans,
