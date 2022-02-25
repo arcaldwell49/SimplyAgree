@@ -1,8 +1,8 @@
 pandoc: 2.11.4
-pkgdown: 1.6.1
+pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   intro_vignette: intro_vignette.html
   reanalysis: reanalysis.html
-last_built: 2021-06-03T19:23Z
+last_built: 2022-02-25T18:42Z
 
