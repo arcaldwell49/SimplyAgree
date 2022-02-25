@@ -12,7 +12,14 @@ Status](https://travis-ci.com/arcaldwell49/SimplyAgree.svg?branch=master)](https
 [![Codecov test
 coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
 [![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
-<!-- badges: start -->
+[![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
+<!-- badges: end -->
+
+Please see the package’s
+[website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes,
+and other details about the package.
+
+# Background
 
 `SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/)
 module, created to make agreement and reliability analyses easier for
