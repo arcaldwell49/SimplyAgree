@@ -6,3 +6,5 @@ inst/doc
 *.jmo
 ^cran-comments\.md$
 CRAN-RELEASE
+.DS_Store
+.DS_Store?
