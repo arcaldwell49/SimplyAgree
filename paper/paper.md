@@ -24,7 +24,7 @@ journal: JOSS
 
 # Summary
 
-Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts, researchers highly value methods to quantify the accuracy and reliability of the measurement tools [@bland1986; @weir2005]. This article introduces the `SimplyAgree` R package and jamovi module as user-friendly solutions for estimating agreement and reliability [@R-base; @jamovi]. Updates and additional details on `SimplyAgree` can be found on the package's [website](https://aaroncaldwell.us/SimplyAgree).
+Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts of @bland1986 and @weir2005 alone^[@bland1986 and @weir2005 have greater than 50000 and 4000 citations, respectively, at the time of writing this manuscript. Many of these publications are original research investigations.], researchers appear to highly value methods to quantify the accuracy and reliability of the measurement tools. This article introduces the `SimplyAgree` R package and jamovi module as user-friendly solutions for estimating agreement and reliability [@R-base; @jamovi]. Updates and additional details on `SimplyAgree` can be found on the package's [website](https://aaroncaldwell.us/SimplyAgree).
 
 # Statement of Need
 
