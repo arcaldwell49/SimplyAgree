@@ -192,11 +192,11 @@ pre code {
 
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts of <span class="citation">J. Martin Bland &amp; Altman (1986)</span> and <span class="citation">Weir (2005)</span> alone<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, researchers appear to highly value methods to quantify the accuracy and reliability of the measurement tools. This article introduces the <code>SimplyAgree</code> R package and jamovi module as user-friendly solutions for estimating agreement and reliability <span class="citation">(R Core Team, 2020; The jamovi project, 2021)</span>. Updates and additional details on <code>SimplyAgree</code> can be found on the package’s <a href="https://aaroncaldwell.us/SimplyAgree">website</a>.</p>
+<p>Accurate and reliable measurements are critical to quantitative research efforts. Based on citation counts of <span class="citation">Bland &amp; Altman (1986)</span> and <span class="citation">Weir (2005)</span> alone<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, researchers appear to highly value methods to quantify the accuracy and reliability of the measurement tools. This article introduces the <code>SimplyAgree</code> R package and jamovi module as user-friendly solutions for estimating agreement and reliability <span class="citation">(R Core Team, 2020; The jamovi project, 2021)</span>. Updates and additional details on <code>SimplyAgree</code> can be found on the package’s <a href="https://aaroncaldwell.us/SimplyAgree">website</a>.</p>
 </div>
 <div id="statement-of-need" class="section level1">
 <h1>Statement of Need</h1>
-<p>A number of new methods have been developed in the past three decades to improve the calculation of the limits of agreement <span class="citation">(Lin, 1989; Shieh, 2019; Zou, 2011)</span> and other measures of measurement reliability <span class="citation">(Carrasco, Phillips, Puig-Martinez, King, &amp; Chinchilli, 2013; Weir, 2005)</span>. However, to author’s best knowledge, statistical software — particularly open source software — to implement these statistical analyses are lacking. While some software may provide the limits of agreement analysis outlined by Bland &amp; Altman <span class="citation">(1999; 1986)</span>, few, if any, account for multiple observations within the same research subject <span class="citation">(Zou, 2011)</span> or include hypothesis tests of agreement <span class="citation">(Shieh, 2019)</span>. Many researchers may not have the skills necessary to write the code, from scratch, in order to implement many of the newest techniques. <span class="citation">The jamovi project (2021)</span> is a open source statistical platform that provides a graphical user interface (GUI), and therefore is an accessible source for researchers without coding experience. Therefore, a jamovi module of <code>SimplyAgree</code> was also created in order to reach those researchers who may not have the coding expertise required to effectively use the R package.</p>
+<p>A number of new methods have been developed in the past three decades to improve the calculation of the limits of agreement <span class="citation">(Lin, 1989; Shieh, 2019; Zou, 2011)</span> and other measures of measurement reliability <span class="citation">(Carrasco, Phillips, Puig-Martinez, King, &amp; Chinchilli, 2013; Weir, 2005)</span>. However, to author’s best knowledge, statistical software — particularly open source software — to implement these statistical analyses are lacking<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. While some software may provide the limits of agreement analysis outlined by Bland &amp; Altman <span class="citation">(1999; 1986)</span>, few, if any, account for multiple observations within the same research subject <span class="citation">(Zou, 2011)</span> or include hypothesis tests of agreement <span class="citation">(Shieh, 2019)</span>. Many researchers may not have the skills necessary to write the code, from scratch, in order to implement many of the newest techniques. <span class="citation">The jamovi project (2021)</span> is a open source statistical platform that provides a graphical user interface (GUI), and therefore is an accessible source for researchers without coding experience. Therefore, a jamovi module of <code>SimplyAgree</code> was also created in order to reach those researchers who may not have the coding expertise required to effectively use the R package.</p>
 </div>
 <div id="current-r-capabilities" class="section level1">
 <h1>Current R Capabilities</h1>
@@ -211,7 +211,7 @@ pre code {
 <li><p><code>agree_reps</code>: Test of Agreement for Replicate Data. This function provides the limits of agreement described by <span class="citation">Zou (2011)</span> for data where the mean, per subject, does not vary. In addition, the concordance correlation coefficient, calculated by U-statistics, is also provided in the output <span class="citation">(Carrasco, Phillips, Puig-Martinez, King, &amp; Chinchilli, 2013)</span>.</p></li>
 <li><p><code>agree_nest</code>: Test of Agreement for Nested Data. This function provides the limits of agreement described by <span class="citation">Zou (2011)</span> for data where the mean, per subject, <em>does</em> vary. Similar to the replicate data function, the concordance correlation coefficient, calculated by U-statistics, is provided in the output <span class="citation">(Carrasco, Phillips, Puig-Martinez, King, &amp; Chinchilli, 2013)</span>.</p></li>
 <li><p><code>loa_mixed</code>: Bootstrapped Limits of Agreement for Nested Data. This function calculates limits of agreement using a non-parametric bootstrap method, and can allow the underlying mean to vary (replicate data) or not (nested data).</p></li>
-<li><p><code>blandPowerCurve</code>: Power Analysis for Bland-Altman Limits of Agreement. This function implements the formula outlined by <span class="citation">Lu et al. (2016)</span>. This allows for power calculations for the <span class="citation">J. Martin Bland &amp; Altman (1999)</span> limits of agreement. The function <code>find_n</code> can then be used to find the sample size at which adequate power (defined by the user) is achieved.</p></li>
+<li><p><code>blandPowerCurve</code>: Power Analysis for Bland-Altman Limits of Agreement. This function implements the formula outlined by <span class="citation">Lu et al. (2016)</span>. This allows for power calculations for the <span class="citation">Bland &amp; Altman (1999)</span> limits of agreement. The function <code>find_n</code> can then be used to find the sample size at which adequate power (defined by the user) is achieved.</p></li>
 <li><p><code>reli_stats</code>: Reliability Statistics. This function calculates and provides as output the statistics outlined by <span class="citation">Weir (2005)</span>. This includes an array of intraclass correlation coefficients, the coefficient of variation, and the standard error of measurement.</p></li>
 </ol>
 </div>
@@ -259,13 +259,16 @@ pre code {
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent" line-spacing="2">
 <div id="ref-bland1999" class="csl-entry">
-Bland, J. Martin, &amp; Altman, D. G. (1999). Measuring agreement in method comparison studies. <em>Statistical Methods in Medical Research</em>, <em>8</em>(2), 135–160. doi:<a href="https://doi.org/10.1177/096228029900800204">10.1177/096228029900800204</a>
+Bland, J. M., &amp; Altman, D. G. (1999). Measuring agreement in method comparison studies. <em>Statistical Methods in Medical Research</em>, <em>8</em>(2), 135–160. doi:<a href="https://doi.org/10.1177/096228029900800204">10.1177/096228029900800204</a>
 </div>
 <div id="ref-bland1986" class="csl-entry">
-Bland, J. Martin, &amp; Altman, DouglasG. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. <em>The Lancet</em>, <em>327</em>(8476), 307–310. doi:<a href="https://doi.org/10.1016/s0140-6736(86)90837-8">10.1016/s0140-6736(86)90837-8</a>
+Bland, J. M., &amp; Altman, DouglasG. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. <em>The Lancet</em>, <em>327</em>(8476), 307–310. doi:<a href="https://doi.org/10.1016/s0140-6736(86)90837-8">10.1016/s0140-6736(86)90837-8</a>
 </div>
 <div id="ref-carrasco2013" class="csl-entry">
 Carrasco, J. L., Phillips, B. R., Puig-Martinez, J., King, T. S., &amp; Chinchilli, V. M. (2013). Estimation of the concordance correlation coefficient for repeated measures using <span>SAS</span> and r. <em>Computer Methods and Programs in Biomedicine</em>, <em>109</em>(3), 293–304. doi:<a href="https://doi.org/10.1016/j.cmpb.2012.09.002">10.1016/j.cmpb.2012.09.002</a>
+</div>
+<div id="ref-MethComp" class="csl-entry">
+Carstensen, B., Gurrin, L., Ekstrøm, C. T., &amp; Figurski, M. (2020). <em>MethComp: Analysis of agreement in method comparison studies</em>. Retrieved from <a href="https://CRAN.R-project.org/package=MethComp">https://CRAN.R-project.org/package=MethComp</a>
 </div>
 <div id="ref-lin1989" class="csl-entry">
 Lin, L. I.-K. (1989). A concordance correlation coefficient to evaluate reproducibility. <em>Biometrics</em>, <em>45</em>(1), 255. doi:<a href="https://doi.org/10.2307/2532051">10.2307/2532051</a>
@@ -276,6 +279,9 @@ Lu, M.-J., Zhong, W.-H., Liu, Y.-X., Miao, H.-Z., Li, Y.-C., &amp; Ji, M.-H. (20
 <div id="ref-R-base" class="csl-entry">
 R Core Team. (2020). <em>R: A language and environment for statistical computing</em>. Vienna, Austria: R Foundation for Statistical Computing. Retrieved from <a href="https://www.R-project.org/">https://www.R-project.org/</a>
 </div>
+<div id="ref-psych" class="csl-entry">
+Revelle, W. (2020). <em>Psych: Procedures for psychological, psychometric, and personality research</em>. Evanston, Illinois: Northwestern University. Retrieved from <a href="https://CRAN.R-project.org/package=psych">https://CRAN.R-project.org/package=psych</a>
+</div>
 <div id="ref-shieh2019" class="csl-entry">
 Shieh, G. (2019). Assessing agreement between two methods of quantitative measurements: Exact test procedure and sample size calculation. <em>Statistics in Biopharmaceutical Research</em>, <em>12</em>(3), 352–359. doi:<a href="https://doi.org/10.1080/19466315.2019.1677495">10.1080/19466315.2019.1677495</a>
 </div>
@@ -285,6 +291,9 @@ The jamovi project. (2021). <em>Jamovi</em>. Retrieved from <a href="https://www
 <div id="ref-weir2005" class="csl-entry">
 Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the <span>SEM</span>. <em>The Journal of Strength and Conditioning Research</em>, <em>19</em>(1), 231. Retrieved from <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>
 </div>
+<div id="ref-ICC" class="csl-entry">
+Wolak, M. E., Fairbairn, D. J., &amp; Paulsen, Y. R. (2012). Guidelines for estimating repeatability. <em>Methods in Ecology and Evolution 3(1):129-137</em>.
+</div>
 <div id="ref-zou2011" class="csl-entry">
 Zou, G. (2011). Confidence interval estimation for the bland<span><span></span></span>altman limits of agreement with multiple observations per individual. <em>Statistical Methods in Medical Research</em>, <em>22</em>(6), 630–642. doi:<a href="https://doi.org/10.1177/0962280211402548">10.1177/0962280211402548</a>
 </div>
@@ -293,7 +302,8 @@ Zou, G. (2011). Confidence interval estimation for the bland<span><span></span><
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p><span class="citation">J. Martin Bland &amp; Altman (1986)</span> and <span class="citation">Weir (2005)</span> have greater than 50000 and 4000 citations, respectively, at the time of writing this manuscript. Many of these publications are original research investigations.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p><span class="citation">Bland &amp; Altman (1986)</span> and <span class="citation">Weir (2005)</span> have greater than 50000 and 4000 citations, respectively, at the time of writing this manuscript. Many of these publications are original research investigations.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>There are some R packages that allow for these analyses. <code>blandr</code> and <code>BlandAltmanLeh</code> exist to aid the creation of Bland-Altman type plots, but do not offer the tests detailed by <span class="citation">Shieh (2019)</span> or <span class="citation">Zou (2011)</span>. <code>MethComp</code> <span class="citation">(Carstensen, Gurrin, Ekstrøm, &amp; Figurski, 2020)</span> is the most comprehensive with regards to limits of agreement but is rather difficult to use and, again, does offer the tests outlined by <span class="citation">Shieh (2019)</span>. <code>psych</code> <span class="citation">(Revelle, 2020)</span> and <code>ICC</code> <span class="citation">(Wolak, Fairbairn, &amp; Paulsen, 2012)</span> provide some measures of reliability but lack the ability to calculate standard error of the measurement. Moreover, only <code>blandr</code> has a jamovi module but the capabilities are limited to just the traditional Bland-Altman limits.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 
