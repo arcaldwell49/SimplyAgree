@@ -32,9 +32,8 @@
 #'
 #' @section References:
 #' Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
-#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
+#' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals
 #' @importFrom tidyselect all_of
-#' @importFrom sjstats cv
 #' @import dplyr
 #' @import ggplot2
 #' @import lme4
@@ -169,7 +168,12 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
-  cv_out = cv(mod.lmer)
+  #cv_out = cv(mod.lmer)
+
+  mw <- mean(x.df$values, na.rm = TRUE)
+  stddev <- sqrt(mean(residuals(mod.lmer)^2))
+  cv_out = stddev/mw
+
   SEM = sqrt(MSE)
   sd_tots = sqrt(sum(stats[2,])/(n.obs-1))
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))

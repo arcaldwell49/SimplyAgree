@@ -35,7 +35,6 @@
 #' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
-#' @importFrom cccrm cccUst
 #' @import dplyr
 #' @import ggplot2
 #' @export

@@ -21,9 +21,7 @@ Imports:
     magrittr,
     tidyselect,
     tidyr,
-    sjstats,
     stringr,
-    cccrm,
     jmvcore
 Suggests: 
     knitr,
@@ -32,7 +30,8 @@ Suggests:
     tidyverse,
     readr,
     ggpubr,
-    covr
+    covr,
+    cccrm
 VignetteBuilder:
     knitr
 Depends: 
