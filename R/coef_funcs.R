@@ -90,7 +90,8 @@ pa_coef = function(ratings.mat,
   df_pa <- data.frame(coef_name = "Percent Agreement",
                        pa,pe,
                        coef_val, coef_se,
-                       coef_lower = lcb, coef_upper = ucb,p.value)
+                       coef_lower = lcb, coef_upper = ucb,
+                      p.value)
   # calculating gwet's ac1 coeficient
 
   pa <- sum(sum.q[ri.vec>=2]/((ri.vec*(ri.vec-1))[ri.vec>=2]))/n2more
@@ -119,10 +120,15 @@ pa_coef = function(ratings.mat,
     ucb <- min(1,gwet.ac1 + stderr*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
   }
 
-  if (q==1) coef_name <- "AC1"
-  else{
-    if (sum(weights.mat)==q) coef_name <- "AC1"
-    else coef_name <- "AC2"
+  if (q == 1) {
+    coef_name <- "AC1"
+  } else{
+    if (sum(weights.mat) == q) {
+      coef_name <- "AC1"
+    }
+    else {
+      coef_name <- "AC2"
+    }
   }
   coef_val <- gwet.ac1.est
   coef_se <- stderr.est
@@ -130,7 +136,40 @@ pa_coef = function(ratings.mat,
   df_ac <- data.frame(coef_name = coef_name,
                       pa,pe,
                       coef_val, coef_se,
-                      coef_lower = lcb, coef_upper = ucb,p.value)
+                      coef_lower = lcb, coef_upper = ucb,
+                      p.value)
+
+  # Calculate Fleiss kappa
+  if (q>=2) {
+    pe <- sum(weights.mat * (pi.vec %*% t(pi.vec)))
+  } else{
+    pe=1e-15
+  }
+
+  fleiss.kappa <- (pa-pe)/(1-pe)
+  coef_name = "Fleiss' kappa"
+  pe.r2 <- pe*(ri.vec>=2)
+  kappa.ivec <- (n/n2more)*(pa.ivec-pe.r2)/(1-pe)
+  pi.vec.wk. <- weights.mat%*%pi.vec
+  pi.vec.w.k <- t(weights.mat)%*%pi.vec
+  pi.vec.w <- (pi.vec.wk. + pi.vec.w.k)/2
+  pe.ivec <- (agree.mat%*%pi.vec.w)/ri.vec
+  kappa.ivec.x <- kappa.ivec - 2*(1-fleiss.kappa) * (pe.ivec-pe)/(1-pe)
+
+  if (n>=2){
+    var.fleiss <- ((1-f)/(n*(n-1))) * sum((kappa.ivec.x - fleiss.kappa)^2)
+    stderr <- sqrt(var.fleiss)# kappa's standard error
+    stderr.est <- round(stderr,5)
+    p.value <- 1-pt(fleiss.kappa/stderr,n-1)
+    lcb <- fleiss.kappa - stderr*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
+    ucb <- min(1,fleiss.kappa + stderr*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
+  }
+
+  df_ac <- data.frame(coef_name = coef_name,
+                      pa,pe,
+                      coef_val, coef_se,
+                      coef_lower = lcb, coef_upper = ucb,
+                      p.value)
 
 
 }
