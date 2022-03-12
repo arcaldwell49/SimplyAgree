@@ -11,9 +11,9 @@ authors:
     orcid: 0000-0002-4541-6283
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
 affiliations:
- - name: United States Army Research Institute of Environmental Medicine
+ - name: United States Army Research Institute of Environmental Medicine, Natick, MA
    index: 1
- - name: Oak Ridge Institute of Science and Education
+ - name: Oak Ridge Institute of Science and Education, Oak Ridge, TN
    index: 2
 citation_author: Caldwell
 year: 2021
