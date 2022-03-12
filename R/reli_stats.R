@@ -7,6 +7,11 @@
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
 #' @param conf.level the confidence level required. Default is 95\%.
+#' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
+#'
+#' @details
+#'
+#' The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -46,6 +51,7 @@ reli_stats = function(measure,
                       data,
                       wide = FALSE,
                       col.names = NULL,
+                      cv_calc = "MSE",
                       conf.level = .95){
   alpha = 1-conf.level
   x = data
@@ -168,16 +174,24 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
-  #cv_out = cv(mod.lmer)
-
-  mw <- mean(x.df$values, na.rm = TRUE)
-  stddev <- sqrt(mean(residuals(mod.lmer)^2))
-  cv_out = stddev/mw
 
   SEM = sqrt(MSE)
   sd_tots = sqrt(sum(stats[2,])/(n.obs-1))
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))
   SEP = sd_tots*sqrt(1-ICC3^2)
+
+  mw <- mean(x.df$values, na.rm = TRUE)
+  if(cv_calc == "residuals"){
+    stddev <- sqrt(mean(residuals(mod.lmer)^2))
+  } else if(cv_calc == "MSE"){
+    stddev <- sqrt(MSE)
+  } else if(cv_calc == "SEM"){
+    stddev <- SEM
+  } else {
+    stop("cv_calc must be SEM, MSE, or residuals")
+  }
+
+  cv_out = stddev/mw
 
   plot.reliability = ggplot(x.df,
                             aes(
