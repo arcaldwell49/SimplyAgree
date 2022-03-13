@@ -80,7 +80,7 @@ The reported limits of agreement are derived from the work of @bland1986 and @bl
 $$
 LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
 $$
-wherein, $t$ is the critical t-value at the given sample size and confidence level, $z$ is the value of the normal distribution at the given alpha level, and $S^2$ is the variance of the difference scores.
+wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores.
 
 ### Concordance Correlation Coefficient
 

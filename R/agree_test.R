@@ -182,6 +182,8 @@ agree_test <- function(x,
                     inherit.aes = FALSE)+
     labs(x = paste0("Average of ", x_lab ," & ", y_lab),
          y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
+         caption = paste0("Agreement = ", agree.level * 100,"% \n",
+                          "Confidence Level = ", conf.level * 100, "%"),
          color = "") +
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
