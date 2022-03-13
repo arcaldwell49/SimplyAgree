@@ -7,6 +7,8 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param x_lab Label for x values (first measurement)
+#' @param y_lab Label for y values (second measurement)
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -45,7 +47,9 @@ agree_reps <- function(x,
                        data,
                        delta,
                        agree.level = .95,
-                       conf.level = .95){
+                       conf.level = .95,
+                       x_lab = "x",
+                       y_lab = "y"){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
@@ -193,8 +197,8 @@ agree_reps <- function(x,
                     #width = .03*(scalemax-scalemin),
                     position = pd2,
                     inherit.aes = FALSE)+
-    labs(x = "Average of Method x and Method y",
-         y = "Difference between Methods x & y",
+    labs(x = paste0("Average of ", x_lab ," & ", y_lab),
+         y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
          color = "") +
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +

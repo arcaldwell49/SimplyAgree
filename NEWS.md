@@ -1,6 +1,6 @@
 # NEWS
 
-## v0.0.4
+## v0.1.0
 
 - Updated CV calculations for `reli_stats` with the cv_calc argument
   - Options now included CV for the model residuals, mean-squared error (MSE), or for the standard error of measurement (SEM)

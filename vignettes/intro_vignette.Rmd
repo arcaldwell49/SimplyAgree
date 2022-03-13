@@ -42,7 +42,9 @@ The data for the two measurements are put into the `x` and `y` arguments. If the
 ```{r}
 a1 = agree_test(x = reps$x,
                 y = reps$y,
-                agree.level = .8)
+                agree.level = .8,
+                x_lab = "Test 1",
+                y_lab = "Test 2")
 ```
 
 We can then print the general results. These results include the general parameters of the analysis up top, then the results of the Shieh exact test for agreement (no conclusion is included due to the lack of a `delta` argument being set). Then the limits of agreement, with confidence limits, are included. Lastly, Lin's Concordance Correlation Coefficient, another measure of agreement, is also included.

@@ -4,7 +4,15 @@
 \alias{agree_test}
 \title{Tests for Absolute Agreement}
 \usage{
-agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
+agree_test(
+  x,
+  y,
+  delta,
+  conf.level = 0.95,
+  agree.level = 0.95,
+  x_lab = "x",
+  y_lab = "y"
+)
 }
 \arguments{
 \item{x}{Vector with first measurement}
@@ -16,6 +24,10 @@ agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
 \item{conf.level}{the confidence level required. Default is 95\%.}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
+
+\item{x_lab}{Label for x values (first measurement)}
+
+\item{y_lab}{Label for y values (second measurement)}
 }
 \value{
 Returns single list with the results of the agreement analysis.

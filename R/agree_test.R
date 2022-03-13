@@ -5,6 +5,8 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
+#' @param x_lab Label for x values (first measurement)
+#' @param y_lab Label for y values (second measurement)
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -42,7 +44,9 @@ agree_test <- function(x,
                        y,
                        delta,
                        conf.level = .95,
-                       agree.level = .95) {
+                       agree.level = .95,
+                       x_lab = "x",
+                       y_lab = "y") {
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 
@@ -156,10 +160,10 @@ agree_test <- function(x,
       linetype = "dashed",
       color = "red"
     ) +
-    xlab("Method: x") +
+    xlab(paste0("Method: ",x_lab)) +
     xlim(scalemin,scalemax) +
     ylim(scalemin,scalemax) +
-    ylab("Method: y") +
+    ylab(paste0("Method: ",y_lab)) +
     coord_fixed(ratio = 1 / 1) +
     theme_bw()
 
@@ -176,13 +180,12 @@ agree_test <- function(x,
                     #width = .03*(scalemax-scalemin),
                     position = pd2,
                     inherit.aes = FALSE)+
-    labs(x = "Average of Method x and Method y",
-         y = "Difference between Methods x & y",
+    labs(x = paste0("Average of ", x_lab ," & ", y_lab),
+         y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
          color = "") +
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
-    theme(legend.position = "left",
-          legend.spacing.y = unit(1.0, 'cm'))
+    theme(legend.position = "left")
   if (!missing(delta)){
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
