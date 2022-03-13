@@ -156,6 +156,12 @@ agree_reps <- function(x,
   scalemin = min(c(min(df2$x_bar),min(df2$y_bar)))
   scalemax = max(c(max(df2$x_bar),max(df2$y_bar)))
 
+  df_loa2 = df_loa
+  df_loa2$x = scalemin
+  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
+                        levels = c("Upper LoA", "Bias", "Lower LoA"))
+  pd2 = position_dodge2(.03*(scalemax-scalemin))
+
   identity.plot = ggplot(df2,
                          aes(x = x_bar,
                              y = y_bar)) +
@@ -176,31 +182,33 @@ agree_reps <- function(x,
 
   bland_alt.plot =  ggplot(df2,
                            aes(x = both_avg, y = d)) +
-    geom_point(na.rm = TRUE) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[2],
-             ymax = df_loa$upper.ci[2],
-             alpha = .5,
-             fill = "#D55E00") +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[3],
-             ymax = df_loa$upper.ci[3],
-             alpha = .5,
-             fill = "#D55E00") +
-    geom_hline(aes(yintercept = d_bar),
-               linetype = 1) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[1],
-             ymax = df_loa$upper.ci[1],
-             alpha = .5,
-             fill = "gray") +
-    xlab("Average of Method x and Method y") +
-    ylab("Average Difference between Methods") +
+  geom_point(na.rm = TRUE) +
+    geom_pointrange(data = df_loa2,
+                    aes(
+                      x = x,
+                      y = estimate,
+                      ymin = lower.ci,
+                      ymax = upper.ci,
+                      color = text),
+                    #width = .03*(scalemax-scalemin),
+                    position = pd2,
+                    inherit.aes = FALSE)+
+    labs(x = "Average of Method x and Method y",
+         y = "Difference between Methods x & y",
+         color = "") +
+    scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
-    theme(legend.position = "none")
+    theme(legend.position = "left")
+  if (!missing(delta)){
+    df_delta = data.frame(y1 = c(delta, -1*delta))
+    bland_alt.plot = bland_alt.plot +
+      geom_hline(data = df_delta,
+                 aes(yintercept = y1),
+                 linetype = 2) +
+      scale_y_continuous(sec.axis = dup_axis(
+        breaks = c(delta, -1*delta),
+        name = "Maximal Allowable Difference"))
+  }
 
 
   #######################

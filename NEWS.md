@@ -1,5 +1,12 @@
 # NEWS
 
+## v0.0.4
+
+- Updated CV calculations for `reli_stats` with the cv_calc argument
+  - Options now included CV for the model residuals, mean-squared error (MSE), or for the standard error of measurement (SEM)
+- Updated plots to include the `delta` argument on plot if specified, and estimate of LoA
+- Added agreement coefficient function (`agree_coef`).
+
 ## v0.0.3
 - Fixed error in `agree_nest` and `agree_reps`; now properly handles missing values
 - Remove dependencies on sjstats and cccrm packages

@@ -11,7 +11,7 @@ agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
 
 \item{y}{Vector with second measurement}
 
-\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
+\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
 

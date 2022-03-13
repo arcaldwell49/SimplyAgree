@@ -4,7 +4,7 @@
 #' @param y Vector with second measurement
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
-#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -34,6 +34,7 @@
 #'
 #' Lawrence, I., & Lin, K. (1989). A concordance correlation coefficient to evaluate reproducibility. Biometrics, 255-268.
 #' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var
+#' @importFrom graphics text
 #' @import ggplot2
 #' @export
 
@@ -112,16 +113,38 @@ agree_test <- function(x,
   shieh_test = data.frame(prop0,el,eu,rej_text,gam)
   names(shieh_test) = c("prop0","lower.ci","upper.ci", "h0_test","test_statistic")
 
+
+  ### Save limits of agreement
+
+  df_loa = data.frame(
+    estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
+    lower.ci = c(ccc_res$delta$d.lci, ccc_res$delta$lower.lci, ccc_res$delta$upper.lci),
+    upper.ci = c(ccc_res$delta$d.uci, ccc_res$delta$lower.uci, ccc_res$delta$upper.uci),
+    row.names = c("Difference","Lower LoA","Upper LoA")
+  )
+  # Should I add this to the output?
+  var_comp = data.frame(
+    delta.sd = ccc_res$delta$d.sd,
+    var.loa = ccc_res$delta$var.loa
+  )
+
   #######################
   # Plot Results ----
   #######################
+
+  scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
+  scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
+
+  df_loa2 = df_loa
+  df_loa2$x = scalemin
+  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
+                        levels = c("Upper LoA", "Bias", "Lower LoA"))
 
   z <- lm(y ~ x)
   the_int <- summary(z)$coefficients[1,1]
   the_slope <-  summary(z)$coefficients[2,1]
   tmp.lm <- data.frame(the_int, the_slope)
-  scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
-  scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
+  pd2 = position_dodge2(.03*(scalemax-scalemin))
 
   identity.plot = ggplot(ccc_res$df_diff,
                          aes(x = x, y = y)) +
@@ -143,45 +166,35 @@ agree_test <- function(x,
   bland_alt.plot =  ggplot(ccc_res$df_diff,
                            aes(x = mean, y = delta)) +
     geom_point(na.rm = TRUE) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$lower.lci,
-             ymax = ccc_res$delta$lower.uci,
-             alpha = .5,
-             fill = "#D55E00") +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$upper.lci,
-             ymax = ccc_res$delta$upper.uci,
-             alpha = .5,
-             fill = "#D55E00") +
-    geom_hline(data = ccc_res$delta,
-               aes(yintercept = d),
-               linetype = 1) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$d.lci,
-             ymax = ccc_res$delta$d.uci,
-             alpha = .5,
-             fill = "gray") +
-    xlab("Average of Method x and Method y") +
-    ylab("Difference between Methods x & y") +
+    geom_pointrange(data = df_loa2,
+                    aes(
+                      x = x,
+                      y = estimate,
+                      ymin = lower.ci,
+                      ymax = upper.ci,
+                      color = text),
+                    #width = .03*(scalemax-scalemin),
+                    position = pd2,
+                    inherit.aes = FALSE)+
+    labs(x = "Average of Method x and Method y",
+         y = "Difference between Methods x & y",
+         color = "") +
+    scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
-    theme(legend.position = "none")
+    theme(legend.position = "left",
+          legend.spacing.y = unit(1.0, 'cm'))
+  if (!missing(delta)){
+    df_delta = data.frame(y1 = c(delta, -1*delta))
+    bland_alt.plot = bland_alt.plot +
+      geom_hline(data = df_delta,
+                 aes(yintercept = y1),
+                 linetype = 2) +
+      scale_y_continuous(sec.axis = dup_axis(
+        breaks = c(delta, -1*delta),
+        name = "Maximal Allowable Difference"))
+  }
 
-  ### Save limits of agreement
 
-  df_loa = data.frame(
-    estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
-    lower.ci = c(ccc_res$delta$d.lci, ccc_res$delta$lower.lci, ccc_res$delta$upper.lci),
-    upper.ci = c(ccc_res$delta$d.uci, ccc_res$delta$lower.uci, ccc_res$delta$upper.uci),
-    row.names = c("Difference","Lower LoA","Upper LoA")
-  )
-  # Should I add this to the output?
-  var_comp = data.frame(
-    delta.sd = ccc_res$delta$d.sd,
-    var.loa = ccc_res$delta$var.loa
-  )
 
 
   #######################
