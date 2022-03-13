@@ -11,9 +11,9 @@ authors:
     orcid: 0000-0002-4541-6283
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
 affiliations:
- - name: United States Army Research Institute of Environmental Medicine, Natick, MA
+ - name: United States Army Research Institute of Environmental Medicine, Natick, MA, the United States of America
    index: 1
- - name: Oak Ridge Institute of Science and Education, Oak Ridge, TN
+ - name: Oak Ridge Institute of Science and Education, Oak Ridge, TN, the United States of America
    index: 2
 citation_author: Caldwell
 year: 2021
@@ -28,7 +28,7 @@ Accurate and reliable measurements are critical to quantitative research efforts
 
 # Statement of Need
 
-A number of new methods have been developed in the past three decades to improve the calculation of the limits of agreement [@shieh2019;  @lin1989; @zou2011] and other measures of measurement reliability [@weir2005; @carrasco2013]. However, to author's best knowledge, statistical software &mdash; particularly open source software &mdash; to implement these statistical analyses are lacking. While some software may provide the limits of agreement analysis outlined by Bland & Altman [-@bland1986; -@bland1999], few, if any, account for multiple observations within the same research subject [@zou2011] or include hypothesis tests of agreement [@shieh2019]. `blandr` [@blandr] and `BlandAltmanLeh` [@BlandAltmanLeh] exist to aid the creation of Bland-Altman type plots, but do not offer the tests detailed by @shieh2019 or @zou2011. `MethComp` [@MethComp] is the most comprehensive with regards to limits of agreement but also lacks the methods outlined by @shieh2019. The `cccrm` package [@carrasco2013] does already provide concordance correlation coefficients as output, and is the basis of the concordance calculations within `SimplyAgree`. Lastly, `psych` [@psych] and `ICC` [@ICC] provide some measures of reliability but lack the ability to calculate standard error of the measurement. Moreover, only `blandr` has a jamovi module but the capabilities are limited to just the traditional Bland-Altman limits. 
+A number of new methods have been developed in the past three decades to improve the calculation of the limits of agreement [@shieh2019;  @lin1989; @zou2011] and other measures of measurement reliability [@weir2005; @carrasco2013]. However, to the author's best knowledge, statistical software &mdash; particularly open source software &mdash; to implement these statistical analyses are lacking. While some software may provide the limits of agreement analysis outlined by Bland & Altman [-@bland1986; -@bland1999], few, if any, account for multiple observations within the same research subject [@zou2011] or include hypothesis tests of agreement [@shieh2019]. `blandr` [@blandr] and `BlandAltmanLeh` [@BlandAltmanLeh] exist to aid the creation of Bland-Altman type plots, but do not offer the tests detailed by @shieh2019 or @zou2011. `MethComp` [@MethComp] is the most comprehensive with regards to limits of agreement but also lacks the methods outlined by @shieh2019. The `cccrm` package [@carrasco2013] does already provide concordance correlation coefficients as output, and is the basis of the concordance calculations within `SimplyAgree`. Lastly, `psych` [@psych] and `ICC` [@ICC] provide some measures of reliability but lack the ability to calculate standard error of the measurement. Moreover, only `blandr` has a jamovi module but the capabilities are limited to just the traditional Bland-Altman limits. 
 
 `SimplyAgree` is also created to be easy to use for those with limited programming experience. The output from the functions is intentionally verbose and typically provides more than 1 measure of agreement or reliability. The hope is that researchers who use these functions will not limit their interpretations of the results to 1 numeric value, but instead look at the totality of the results (estimates and confidence intervals) for their interpretation. 
 
