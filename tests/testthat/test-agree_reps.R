@@ -48,6 +48,8 @@ testthat::test_that("examples from Zou", {
   pr_test = print(reps_test)
   p = plot(reps_test, type = 1)
   p = plot(reps_test, type = 2)
+  c1 = check_ba(reps_test)$p_norm
+  c2 = check_ba(reps_test)$p_het
 
   pr_test = print(reps_test2)
   p = plot(reps_test2, type = 1)

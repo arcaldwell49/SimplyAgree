@@ -18,6 +18,8 @@ testthat::test_that("Simple Use Run Through", {
 
   p = plot(agree1,type=1)
   p = plot(agree1,type=2)
+  c1 = check_ba(agree1)$p_norm
+  c2 = check_ba(agree1)$p_het
 
   testthat::expect_equal(agree1$ccc.xy$est.ccc,
                          .479,

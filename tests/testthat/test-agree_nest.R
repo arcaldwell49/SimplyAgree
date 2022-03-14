@@ -28,6 +28,8 @@ testthat::test_that("examples from Zou", {
   pr_test = print(nest_test)
   p = plot(nest_test, type = 1)
   p = plot(nest_test, type = 2)
+  expect_warning(check_ba(nest_test)$p_norm)
+  expect_warning(check_ba(nest_test)$p_het)
 
   nest = reps2
   nest_test2 = agree_nest(

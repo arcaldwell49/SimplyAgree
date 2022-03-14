@@ -308,3 +308,194 @@ loa_bstab = function(bsls,
   ))
 }
 
+
+# plot het function ------
+
+plot_het = function (x,
+                     size_point = 2,
+                     size_line = .8,
+                     alpha_level = 0.2,
+                     theme_style = theme_bw,
+                     colors = c("#3aaf85","#0077B5","#cd201f"),
+                     dot_alpha_level = 0.8)
+{
+  ggplot(x, aes(x = .data$x, .data$y)) +
+    geom_point(colour = colors[2], stroke = 0, shape = 16,
+                size = size_point,
+                alpha = dot_alpha_level) +
+    stat_smooth(
+      method = "loess",
+      se = TRUE,
+      alpha = alpha_level,
+      formula = y ~ x,
+      size = size_line,
+      colour = colors[1]
+    ) +
+    labs(
+      title = "Homogeneity of Variance",
+      subtitle = "Reference line should be flat and horizontal",
+      y = expression(sqrt("|Std. residuals|")),
+      x = "Mean of both methods"
+    )
+}
+
+# normality qq plot ----
+
+plot_qq = function (x,
+                    size_line = .8,
+                    size_point = 2,
+                    alpha_level = 0.2,
+                    detrend = FALSE,
+                    theme_style = theme_bw,
+                    colors = c("#3aaf85","#0077B5","#cd201f"),
+                    dot_alpha_level = 0.8)
+{
+
+  qq_stuff <- list(
+    geom_qq(
+      shape = 16,
+      stroke = 0,
+      size = size_point,
+      colour = colors[2]
+    ),
+    geom_qq_line(size = size_line,
+                          colour = colors[1])
+  )
+  y_lab <- "Sample Quantiles"
+
+  ggplot(x, aes(sample = .data$y)) + qq_stuff +
+    labs(
+      title = "Normality of Residuals",
+      subtitle = "Dots should fall along the line",
+      y = y_lab,
+      x = "Standard Normal Distribution Quantiles"
+    )
+}
+
+
+# Check agree_test -----
+
+check_simple = function(x){
+  # Simple agree test ------------
+  #################
+  dat = x$bland_alt.plot$data
+
+  ## Heteroskedasticity -------
+  mod_check = lm(data = dat,
+                 delta ~ 1)
+  stan_res = residuals(mod_check, type = "pearson")
+  df_het = df.residual(mod_check)
+  sum_het_res = sum(!is.na(stan_res))
+  sigma_het = sigma(mod_check)
+
+  s_sq = df_het * sigma_het^2 / sum_het_res
+
+  u_het = stan_res^2 / s_sq
+
+  mod <- lm(u_het ~ dat$mean)
+
+  SS <- anova(mod)$"Sum Sq"
+  RegSS <- sum(SS) - SS[length(SS)]
+  Chisq <- RegSS / 2
+  ### Breusch-Pagan Test
+  p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
+  ### plot het -------
+
+  rstan_het =  rstandard(mod_check)
+  dat_het <- data.frame(
+    x = dat$mean,
+    y = sqrt(abs(rstan_het))
+  )
+  p_het = plot_het(dat_het) +
+    labs(caption = paste0("Heteroskedasticity", " \n",
+                                   "Breusch-Pagan Test: p = ",
+                                   signif(p_val_het,4)))
+
+
+  ## Normality ------------
+
+  mod_res = residuals(mod_check)
+  if(length(mod_res) < 5000){
+    norm_test = shapiro.test(mod_res)
+    norm_text = "Shapiro-Wilk Test"
+  } else {
+    norm_test = ks.test(mod_res, y = "pnorm",
+                               alternative = "two.sided")
+    norm_text = "Kolmogorov-Smirnov Test"
+  }
+
+  rstan_norm = sort(rstudent(mod_check), na.last = NA)
+  dat_norm <- na.omit(data.frame(y = rstan_norm))
+  p_norm = plot_qq(
+    x = dat_norm
+  ) +
+    labs(caption = paste0("Normality", " \n",
+                                   norm_text, ": p = ",
+                                   signif(p_val_het,4)))
+
+  return(list(p_norm = p_norm,
+              p_het = p_het))
+}
+
+
+check_multi = function(x){
+  # Simple agree test ------------
+  #################
+  dat = x$bland_alt.plot$data
+
+  ## Heteroskedasticity -------
+  mod_check = lme4::lmer(data = dat,
+                         d ~ 1 + (1 | id))
+  stan_res = residuals(mod_check, type = "pearson")
+  df_het = df.residual(mod_check)
+  sum_het_res = sum(!is.na(stan_res))
+  sigma_het = sigma(mod_check)
+
+  s_sq = df_het * sigma_het^2 / sum_het_res
+
+  u_het = stan_res^2 / s_sq
+
+  mod <- lm(u_het ~ na.omit(dat$avg_both))
+
+  SS <- anova(mod)$"Sum Sq"
+  RegSS <- sum(SS) - SS[length(SS)]
+  Chisq <- RegSS / 2
+  ### Breusch-Pagan Test
+  p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
+  ### plot het -------
+
+  rstan_het =  residuals(mod_check, scaled = TRUE)
+  dat_het <- data.frame(
+    x = na.omit(dat$avg_both),
+    y = na.omit(sqrt(abs(rstan_het)))
+  )
+  p_het = plot_het(dat_het) +
+    labs(caption = paste0("Heteroskedasticity", " \n",
+                                   "Breusch-Pagan Test: p = ",
+                                   signif(p_val_het,4)))
+
+
+  ## Normality ------------
+
+  mod_res = residuals(mod_check)
+  if(length(mod_res) < 5000){
+    norm_test = shapiro.test(mod_res)
+    norm_text = "Shapiro-Wilk Test"
+  } else {
+    norm_test = ks.test(mod_res, y = "pnorm",
+                               alternative = "two.sided")
+    norm_text = "Kolmogorov-Smirnov Test"
+  }
+
+  rstan_norm = sort(rstudent(mod_check), na.last = NA)
+  dat_norm <- na.omit(data.frame(y = rstan_norm))
+  p_norm = plot_qq(
+    x = dat_norm
+  ) +
+    labs(caption = paste0("Normality", " \n",
+                                   norm_text, ": p = ",
+                                   signif(p_val_het,4)))
+
+  return(list(p_norm = p_norm,
+              p_het = p_het))
+}

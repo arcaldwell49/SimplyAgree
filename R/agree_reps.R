@@ -184,8 +184,12 @@ agree_reps <- function(x,
     coord_fixed(ratio = 1 / 1) +
     theme_bw()
 
-  bland_alt.plot =  ggplot(df2,
-                           aes(x = both_avg, y = d)) +
+  df = df %>%
+    mutate(d = x-y,
+           avg_both = (x+y)/2)
+
+  bland_alt.plot =  ggplot(df,
+                           aes(x = avg_both, y = d)) +
   geom_point(na.rm = TRUE) +
     geom_pointrange(data = df_loa2,
                     aes(
