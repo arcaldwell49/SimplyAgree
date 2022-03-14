@@ -8,7 +8,7 @@ SimplyAgree R Package
 <!-- badges: start -->
 
 [![Codecov test
-coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
+coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://app.codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
 [![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
 [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
 <!-- badges: end -->
