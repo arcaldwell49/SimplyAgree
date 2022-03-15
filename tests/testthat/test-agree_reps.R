@@ -8,6 +8,11 @@ testthat::test_that("examples from Zou", {
                          id = "id",
                          data = reps)
 
+  reps_test = agree_reps(x="x",y="y",
+                         id = "id",
+                         data = reps,
+                         smooth_method = "loess")
+
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),
                               tolerance = 0.001)

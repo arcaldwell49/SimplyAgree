@@ -315,7 +315,6 @@ plot_het = function (x,
                      size_point = 2,
                      size_line = .8,
                      alpha_level = 0.2,
-                     theme_style = theme_bw,
                      colors = c("#3aaf85","#0077B5","#cd201f"),
                      dot_alpha_level = 0.8)
 {
@@ -336,7 +335,8 @@ plot_het = function (x,
       subtitle = "Reference line should be flat and horizontal",
       y = expression(sqrt("|Std. residuals|")),
       x = "Mean of both methods"
-    )
+    ) +
+    theme_bw()
 }
 
 # normality qq plot ----
@@ -345,10 +345,7 @@ plot_qq = function (x,
                     size_line = .8,
                     size_point = 2,
                     alpha_level = 0.2,
-                    detrend = FALSE,
-                    theme_style = theme_bw,
-                    colors = c("#3aaf85","#0077B5","#cd201f"),
-                    dot_alpha_level = 0.8)
+                    colors = c("#3aaf85","#0077B5","#cd201f"))
 {
 
   qq_stuff <- list(
@@ -372,6 +369,33 @@ plot_qq = function (x,
     )
 }
 
+plot_bias = function(x,
+                     size_line = .8,
+                     size_point = 2,
+                     alpha_level = 0.2,
+                     colors = c("#3aaf85","#0077B5","#cd201f"),
+                     dot_alpha_level = .8){
+  ggplot(x, aes(x = mean,
+                y = resid)) +
+    geom_point(colour = colors[2], stroke = 0, shape = 16,
+               size = size_point,
+               alpha = dot_alpha_level) +
+    stat_smooth(
+      method = "loess",
+      se = TRUE,
+      alpha = alpha_level,
+      formula = y ~ x,
+      size = size_line,
+      colour = colors[1]
+    ) +
+    labs(
+      title = "Proportional Bias",
+      subtitle = "Reference line should be flat and horizontal",
+      y = "Residuals",
+      x = "Mean of both methods"
+    ) +
+    theme_bw()
+}
 
 # Check agree_test -----
 
@@ -433,8 +457,22 @@ check_simple = function(x){
                                    norm_text, ": p = ",
                                    signif(p_val_het,4)))
 
+  # Proportional Bias
+  mod2 = lm(delta ~ mean,
+            data = dat)
+  aov2 = as.data.frame(anova(mod_check, mod2))
+  colnames(aov2) = c("df1","RSS","df2","SS","f","p")
+  lin_pval = aov2$p[2]
+  dat2 = data.frame(resid = residuals(mod_check),
+                    mean = na.omit(dat$mean))
+  p_bias = plot_bias(dat2) +
+    labs(caption = paste0("Proportional Bias", " \n",
+                          "Test for Linear Bias", ": p = ",
+                          signif(lin_pval,4)))
+
   return(list(p_norm = p_norm,
-              p_het = p_het))
+              p_het = p_het,
+              p_bias = p_bias))
 }
 
 
@@ -496,6 +534,20 @@ check_multi = function(x){
                                    norm_text, ": p = ",
                                    signif(p_val_het,4)))
 
+  # Proportional Bias
+  mod2 = lmer(data = dat,
+              d ~ avg_both + (1 | id))
+  aov2 = suppressMessages(as.data.frame(anova(mod_check, mod2)))
+  colnames(aov2) = c("npar","AIC","BIC","log_lik","dev","chisq","df","p")
+  lin_pval = aov2$p[2]
+  dat2 = data.frame(resid = residuals(mod_check),
+                    mean = na.omit(dat$avg_both))
+  p_bias = plot_bias(dat2) +
+    labs(caption = paste0("Proportional Bias", " \n",
+                          "Test for Linear Bias", ": p = ",
+                          signif(lin_pval,4)))
+
   return(list(p_norm = p_norm,
-              p_het = p_het))
+              p_het = p_het,
+              p_bias = p_bias))
 }

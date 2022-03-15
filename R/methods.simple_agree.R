@@ -133,7 +133,7 @@ check_ba <- function(x) {
 
 #' @rdname simple_agree-methods
 #' @method check_ba simple_agree
-#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma
+#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
 check_ba.simple_agree <- function(x) {

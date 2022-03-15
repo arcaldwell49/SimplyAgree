@@ -11,7 +11,9 @@ agree_test(
   conf.level = 0.95,
   agree.level = 0.95,
   x_lab = "x",
-  y_lab = "y"
+  y_lab = "y",
+  smooth_method = NULL,
+  smooth_se = TRUE
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ agree_test(
 \item{x_lab}{Label for x values (first measurement)}
 
 \item{y_lab}{Label for y values (second measurement)}
+
+\item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
+
+\item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
 Returns single list with the results of the agreement analysis.

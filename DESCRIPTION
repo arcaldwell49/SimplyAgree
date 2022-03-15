@@ -31,7 +31,8 @@ Suggests:
     readr,
     ggpubr,
     covr,
-    cccrm
+    cccrm,
+    mgcv
 VignetteBuilder:
     knitr
 Depends: 

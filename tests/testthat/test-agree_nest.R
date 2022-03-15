@@ -12,6 +12,10 @@ testthat::test_that("examples from Zou", {
   nest_test = agree_nest(x="x",y="y",
                          id = "id",
                          data = reps2)
+  nest_test = agree_nest(x="x",y="y",
+                         id = "id",
+                         data = reps2,
+                         smooth_method = "loess")
   testthat::expect_equivalent(nest_test$loa$estimate,
                               c(.7255,-2.14,3.59),
                               tolerance = 0.001)

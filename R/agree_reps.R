@@ -9,6 +9,8 @@
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param x_lab Label for x values (first measurement)
 #' @param y_lab Label for y values (second measurement)
+#' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
+#' @param smooth_se Display confidence interval around smooth?
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -49,7 +51,9 @@ agree_reps <- function(x,
                        agree.level = .95,
                        conf.level = .95,
                        x_lab = "x",
-                       y_lab = "y"){
+                       y_lab = "y",
+                       smooth_method = NULL,
+                       smooth_se = TRUE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
@@ -219,7 +223,18 @@ agree_reps <- function(x,
         breaks = c(delta, -1*delta),
         name = "Maximal Allowable Difference"))
   }
-
+  if (!is.null(smooth_method)){
+    bland_alt.plot = bland_alt.plot +
+      stat_smooth(
+        method = smooth_method,
+        se = smooth_se,
+        level = conf.level,
+        alpha = 0.2,
+        formula = y ~ x,
+        size = 0.8,
+        colour = "#3aaf85"
+      )
+  }
 
   #######################
   # Return Results ----
