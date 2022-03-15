@@ -32,7 +32,8 @@ Suggests:
     ggpubr,
     covr,
     cccrm,
-    mgcv
+    mgcv,
+    ggeffects
 VignetteBuilder:
     knitr
 Depends: 

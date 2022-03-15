@@ -58,7 +58,7 @@ Next, we can use the generic `plot` function to produce visualizations of agreem
 ```{r, fig.width=6, fig.height=6}
 plot(a1, type = 1)
 
-plot(a1, type = 2)
+plot(a1, type = 2) 
 ```
 
 ## Calculations in `agree_test`
@@ -133,7 +133,7 @@ The function works almost identically to `agree_reps` but the underlying calcula
 a3 = agree_nest(x = "x",
                 y = "y",
                 id = "id",
-                data = reps2,
+                data = reps,
                 smooth_method = "gam",
                 agree.level = .8)
 ```

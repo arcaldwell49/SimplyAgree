@@ -36,7 +36,7 @@
 #' Bland, J. M., & Altman, D. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. The lancet, 327(8476), 307-310.
 #'
 #' Lawrence, I., & Lin, K. (1989). A concordance correlation coefficient to evaluate reproducibility. Biometrics, 255-268.
-#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var
+#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp
 #' @importFrom graphics text
 #' @import ggplot2
 #' @export
@@ -147,11 +147,17 @@ agree_test <- function(x,
   df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
                         levels = c("Upper LoA", "Bias", "Lower LoA"))
 
-  z <- lm(y ~ x)
-  the_int <- summary(z)$coefficients[1,1]
-  the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(the_int, the_slope)
+  #z <- lm(y ~ x)
+  #the_int <- summary(z)$coefficients[1,1]
+  #the_slope <-  summary(z)$coefficients[2,1]
+  #tmp.lm <- data.frame(the_int, the_slope)
   pd2 = position_dodge2(.03*(scalemax-scalemin))
+
+  # Deming Regression through PCA
+  pca <- prcomp(~x+y, ccc_res$df_diff)
+  slp <- with(pca, rotation[2,1] / rotation[1,1])
+  int <- with(pca, center[2] - slp*center[1])
+  tmp.lm <- data.frame(the_int = int, the_slope = slp)
 
   identity.plot = ggplot(ccc_res$df_diff,
                          aes(x = x, y = y)) +

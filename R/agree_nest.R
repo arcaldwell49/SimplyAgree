@@ -220,6 +220,7 @@ agree_nest <- function(x,
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
     }
     if(smooth_method != "gam"){
+
       bland_alt.plot = bland_alt.plot +
         stat_smooth(
           method = smooth_method,
@@ -230,19 +231,53 @@ agree_nest <- function(x,
           size = 0.8,
           colour = "#3aaf85"
         )
-    } else {
-      kmax = length(unique(df$x))/2
+    } else if(smooth_method == "gam") {
+      if (requireNamespace("mgcv", quietly = TRUE)) {
+        gam1 = mgcv::gam(data = df,
+                   d ~ s(avg_both, bs="tp") + s(id, bs="re"))
+        df2 = data.frame(avg_both = seq(min(df$avg_both, na.rm=TRUE),
+                                        max(df$avg_both, na.rm=TRUE),
+                                        length.out = 100))
+        preds = mgcv::predict.gam(gam1,
+                                  newdata = df2,
+                                  se.fit = TRUE, exclude = 's(id)',
+                                  newdata.guaranteed=TRUE)
+        df2$pred = preds$fit
+        df2$se = preds$se.fit
+        df2$lcl = df2$pred - confq*df2$se
+        df2$ucl = df2$pred + confq*df2$se
+
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(inherit.aes = FALSE,
+                      data = df2,
+                      alpha = .2,
+                      aes(x=avg_both, ymin=lcl,ymax=ucl)) +
+          geom_line(inherit.aes = FALSE,
+                    color = "#3aaf85",
+                    data = df2,
+                    aes(x=avg_both,y=pred))
+      } else {
+        message("For gam smooths, the mgcv package must be installed.")
+      }
+
+    } else if(smooth_method == "lm"){
+      if (requireNamespace("ggeffects", quietly = TRUE)) {
+      lmer1 = lme4::lmer(data = df,
+                       d ~ avg_both + (1|id))
+      df2 = as.data.frame(ggeffects::ggemmeans(lmer1, "avg_both"))
+
       bland_alt.plot = bland_alt.plot +
-        stat_smooth(
-          aes(group = id),
-          method = smooth_method,
-          se = smooth_se,
-          level = conf.level,
-          alpha = 0.2,
-          formula = y ~ s(x, bs = "tp", k = kmax) + s(group, bs="re"),
-          size = 0.8,
-          colour = "#3aaf85"
-        )
+        geom_ribbon(inherit.aes = FALSE,
+                    data = df2,
+                    alpha = .2,
+                    aes(x=x, ymin=conf.low,ymax=conf.high)) +
+        geom_line(inherit.aes = FALSE,
+                  color = "#3aaf85",
+                  data = df2,
+                  aes(x=x,y=predicted))
+      }else {
+        message("For lm smooths (for agree_nest and agree_reps), the ggeffects package must be installed")
+      }
     }
 
   }

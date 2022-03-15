@@ -309,7 +309,7 @@ loa_bstab = function(bsls,
 }
 
 
-# plot het function ------
+
 
 plot_het = function (x,
                      size_point = 2,
@@ -339,7 +339,6 @@ plot_het = function (x,
     theme_bw()
 }
 
-# normality qq plot ----
 
 plot_qq = function (x,
                     size_line = .8,
@@ -381,7 +380,7 @@ plot_bias = function(x,
                size = size_point,
                alpha = dot_alpha_level) +
     stat_smooth(
-      method = "loess",
+      method = "lm",
       se = TRUE,
       alpha = alpha_level,
       formula = y ~ x,
@@ -390,7 +389,7 @@ plot_bias = function(x,
     ) +
     labs(
       title = "Proportional Bias",
-      subtitle = "Reference line should be flat and horizontal",
+      subtitle = "Reference line should be horizontal",
       y = "Residuals",
       x = "Mean of both methods"
     ) +
@@ -401,7 +400,7 @@ plot_bias = function(x,
 
 check_simple = function(x){
   # Simple agree test ------------
-  #################
+
   dat = x$bland_alt.plot$data
 
   ## Heteroskedasticity -------
