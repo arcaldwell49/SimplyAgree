@@ -16,6 +16,14 @@ testthat::test_that("examples from Zou", {
                          id = "id",
                          data = reps2,
                          smooth_method = "loess")
+  nest_test = agree_nest(x="x",y="y",
+                         id = "id",
+                         data = reps2,
+                         smooth_method = "gam")
+  nest_test = agree_nest(x="x",y="y",
+                         id = "id",
+                         data = reps2,
+                         smooth_method = "lm")
   testthat::expect_equivalent(nest_test$loa$estimate,
                               c(.7255,-2.14,3.59),
                               tolerance = 0.001)
@@ -32,8 +40,8 @@ testthat::test_that("examples from Zou", {
   pr_test = print(nest_test)
   p = plot(nest_test, type = 1)
   p = plot(nest_test, type = 2)
-  expect_warning(check_ba(nest_test)$p_norm)
-  expect_warning(check_ba(nest_test)$p_het)
+  expect_warning(check(nest_test)$p_norm)
+  expect_warning(check(nest_test)$p_het)
 
   nest = reps2
   nest_test2 = agree_nest(

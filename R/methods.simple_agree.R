@@ -11,7 +11,7 @@
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-#'   \item{\code{check_ba}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+#'   \item{\code{check}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
 #' }
 #'
 #' @name simple_agree-methods
@@ -127,16 +127,16 @@ plot.simple_agree <- function(x, type = 1, ...){
 #' @rdname simple_agree-methods
 #' @export
 
-check_ba <- function(x) {
-  UseMethod("check_ba")
+check <- function(x) {
+  UseMethod("check")
 }
 
 #' @rdname simple_agree-methods
-#' @method check_ba simple_agree
+#' @method check simple_agree
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check_ba.simple_agree <- function(x) {
+check.simple_agree <- function(x) {
   if (x$class == "simple") {
     check_simple(x)
   } else if(x$class == "nested" || x$class == "replicates") {

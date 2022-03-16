@@ -312,6 +312,8 @@ loa_bstab = function(bsls,
 
 
 plot_het = function (x,
+                     x_lab = "Mean of both methods",
+                     y_lab = expression(sqrt("|Std. residuals|")),
                      size_point = 2,
                      size_line = .8,
                      alpha_level = 0.2,
@@ -333,8 +335,8 @@ plot_het = function (x,
     labs(
       title = "Homogeneity of Variance",
       subtitle = "Reference line should be flat and horizontal",
-      y = expression(sqrt("|Std. residuals|")),
-      x = "Mean of both methods"
+      y = y_lab,
+      x = x_lab
     ) +
     theme_bw()
 }
@@ -399,7 +401,6 @@ plot_bias = function(x,
 # Check agree_test -----
 
 check_simple = function(x){
-  # Simple agree test ------------
 
   dat = x$bland_alt.plot$data
 
@@ -422,7 +423,6 @@ check_simple = function(x){
   Chisq <- RegSS / 2
   ### Breusch-Pagan Test
   p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
-  ### plot het -------
 
   rstan_het =  rstandard(mod_check)
   dat_het <- data.frame(
@@ -456,7 +456,7 @@ check_simple = function(x){
                                    norm_text, ": p = ",
                                    signif(p_val_het,4)))
 
-  # Proportional Bias
+  # Proportional Bias ----
   mod2 = lm(delta ~ mean,
             data = dat)
   aov2 = as.data.frame(anova(mod_check, mod2))
@@ -476,8 +476,8 @@ check_simple = function(x){
 
 
 check_multi = function(x){
-  # Simple agree test ------------
-  #################
+
+
   dat = x$bland_alt.plot$data
 
   ## Heteroskedasticity -------
@@ -499,7 +499,6 @@ check_multi = function(x){
   Chisq <- RegSS / 2
   ### Breusch-Pagan Test
   p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
-  ### plot het -------
 
   rstan_het =  residuals(mod_check, scaled = TRUE)
   dat_het <- data.frame(
@@ -531,9 +530,9 @@ check_multi = function(x){
   ) +
     labs(caption = paste0("Normality", " \n",
                                    norm_text, ": p = ",
-                                   signif(p_val_het,4)))
+                                   signif(norm_test$p.value,4)))
 
-  # Proportional Bias
+  # Proportional Bias -----
   mod2 = lmer(data = dat,
               d ~ avg_both + (1 | id))
   aov2 = suppressMessages(as.data.frame(anova(mod_check, mod2)))
@@ -549,4 +548,67 @@ check_multi = function(x){
   return(list(p_norm = p_norm,
               p_het = p_het,
               p_bias = p_bias))
+}
+
+# Check reli_stats -----
+
+check_reli = function(x){
+
+  dat = x$plot.reliability$data
+
+  ## Heteroskedasticity -------
+  mod_check = x$lmer
+  stan_res = residuals(mod_check, type = "pearson")
+  df_het = df.residual(mod_check)
+  sum_het_res = sum(!is.na(stan_res))
+  sigma_het = sigma(mod_check)
+
+  s_sq = df_het * sigma_het^2 / sum_het_res
+
+  u_het = stan_res^2 / s_sq
+
+  mod <- lm(u_het ~ fitted(mod_check))
+
+  SS <- anova(mod)$"Sum Sq"
+  RegSS <- sum(SS) - SS[length(SS)]
+  Chisq <- RegSS / 2
+  ### Breusch-Pagan Test
+  p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
+
+  rstan_het =  residuals(mod_check, scaled = TRUE)
+  dat_het <- data.frame(
+    x = na.omit(fitted(mod_check)),
+    y = na.omit(sqrt(abs(rstan_het)))
+  )
+  p_het = plot_het(dat_het,
+                   x_lab = "Fitted values") +
+    labs(caption = paste0("Heteroskedasticity", " \n",
+                          "Breusch-Pagan Test: p = ",
+                          signif(p_val_het,4)))
+
+
+  ## Normality ------------
+
+  mod_res = residuals(mod_check)
+  if(length(mod_res) < 5000){
+    norm_test = shapiro.test(mod_res)
+    norm_text = "Shapiro-Wilk Test"
+  } else {
+    norm_test = ks.test(mod_res, y = "pnorm",
+                        alternative = "two.sided")
+    norm_text = "Kolmogorov-Smirnov Test"
+  }
+
+  rstan_norm = sort(rstudent(mod_check), na.last = NA)
+  dat_norm <- na.omit(data.frame(y = rstan_norm))
+  p_norm = plot_qq(
+    x = dat_norm
+  ) +
+    labs(caption = paste0("Normality", " \n",
+                          norm_text, ": p = ",
+                          signif(norm_test$p.value,4)))
+
+
+  return(list(p_norm = p_norm,
+              p_het = p_het))
 }

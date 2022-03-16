@@ -219,7 +219,7 @@ agree_nest <- function(x,
     if (!(smooth_method %in% c("loess", "lm", "gam"))){
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
     }
-    if(smooth_method != "gam"){
+    if(smooth_method == "loess"){
 
       bland_alt.plot = bland_alt.plot +
         stat_smooth(
@@ -247,11 +247,14 @@ agree_nest <- function(x,
         df2$lcl = df2$pred - confq*df2$se
         df2$ucl = df2$pred + confq*df2$se
 
+        if(smooth_se){
+          bland_alt.plot = bland_alt.plot +
+            geom_ribbon(inherit.aes = FALSE,
+                        data = df2,
+                        alpha = .2,
+                        aes(x=avg_both, ymin=lcl,ymax=ucl))
+        }
         bland_alt.plot = bland_alt.plot +
-          geom_ribbon(inherit.aes = FALSE,
-                      data = df2,
-                      alpha = .2,
-                      aes(x=avg_both, ymin=lcl,ymax=ucl)) +
           geom_line(inherit.aes = FALSE,
                     color = "#3aaf85",
                     data = df2,
@@ -265,12 +268,14 @@ agree_nest <- function(x,
       lmer1 = lme4::lmer(data = df,
                        d ~ avg_both + (1|id))
       df2 = as.data.frame(ggeffects::ggemmeans(lmer1, "avg_both"))
-
+      if(smooth_se){
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(inherit.aes = FALSE,
+                      data = df2,
+                      alpha = .2,
+                      aes(x=x, ymin=conf.low,ymax=conf.high))
+      }
       bland_alt.plot = bland_alt.plot +
-        geom_ribbon(inherit.aes = FALSE,
-                    data = df2,
-                    alpha = .2,
-                    aes(x=x, ymin=conf.low,ymax=conf.high)) +
         geom_line(inherit.aes = FALSE,
                   color = "#3aaf85",
                   data = df2,

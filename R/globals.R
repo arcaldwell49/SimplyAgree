@@ -16,4 +16,9 @@ utils::globalVariables(c("boot_bias",
                          "avg_both", "stats.final",
                          "LOA.SD", "LOA.mu", "N", "agree.level",
                          "beta.delta", "conf.level", "power",
-                         "y1", "upper.ci","lower.ci","estimate"))
+                         "y1", "upper.ci","lower.ci","estimate",
+                         "conf.high", "conf.low", "lcl", "pred",
+                         "predicted",
+                         "the_int",
+                         "the_slope",
+                         "ucl"))

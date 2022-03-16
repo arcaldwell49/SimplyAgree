@@ -211,16 +211,30 @@ agree_test <- function(x,
     if (!(smooth_method %in% c("loess", "lm", "gam"))){
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
     }
-    bland_alt.plot = bland_alt.plot +
-      stat_smooth(
-        method = smooth_method,
-        se = smooth_se,
-        level = conf.level,
-        alpha = 0.2,
-        formula = y ~ x,
-        size = 0.8,
-        colour = "#3aaf85"
-      )
+    if(smooth_method != "gam"){
+      bland_alt.plot = bland_alt.plot +
+        stat_smooth(
+          method = smooth_method,
+          se = smooth_se,
+          level = conf.level,
+          alpha = 0.2,
+          formula = y ~ x,
+          size = 0.8,
+          colour = "#3aaf85"
+        )
+    } else {
+      bland_alt.plot = bland_alt.plot +
+        stat_smooth(
+          method = smooth_method,
+          se = smooth_se,
+          level = conf.level,
+          alpha = 0.2,
+          formula = y ~ s(x, bs = "tp"),
+          size = 0.8,
+          colour = "#3aaf85"
+        )
+    }
+
   }
 
 

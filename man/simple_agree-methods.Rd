@@ -4,17 +4,17 @@
 \alias{simple_agree-methods}
 \alias{print.simple_agree}
 \alias{plot.simple_agree}
-\alias{check_ba}
-\alias{check_ba.simple_agree}
+\alias{check}
+\alias{check.simple_agree}
 \title{Methods for simple_agree objects}
 \usage{
 \method{print}{simple_agree}(x, ...)
 
 \method{plot}{simple_agree}(x, type = 1, ...)
 
-check_ba(x)
+check(x)
 
-\method{check_ba}{simple_agree}(x)
+\method{check}{simple_agree}(x)
 }
 \arguments{
 \item{x}{object of class \code{simple_agree} as returned from a function starting with 'agree'}
@@ -29,7 +29,7 @@ for details.
 \describe{
   \item{\code{print}}{Prints short summary of the Limits of Agreement}
   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-  \item{\code{check_ba}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+  \item{\code{check}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
 }
 }
 \description{
