@@ -75,10 +75,12 @@ agree_reps <- function(x,
                  values_to = "measure") %>%
     drop_na()
 
+  # Calculate CCC ----
   ccc_reps = cccUst(dataset = df_long,
                     ry = "measure",
                     rmet = "method",
                     cl = conf.level)
+
 
   ccc.xy = data.frame(est.ccc = ccc_reps[1],
                       lower.ci = ccc_reps[2],
@@ -138,6 +140,7 @@ agree_reps <- function(x,
   loa_u.l = loa_u - RME
   loa_u.u = loa_u + LME
 
+  ## Save LoA ----
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
     lower.ci = c(d_lo, loa_l.l, loa_u.l),
@@ -155,12 +158,12 @@ agree_reps <- function(x,
     rej_text = "No Hypothesis Test"
   }
 
-  ### Plots ----
+  # Plots ----
 
-  z <- lm(y_bar ~ x_bar, df2)
-  the_int <- summary(z)$coefficients[1,1]
-  the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(the_int, the_slope)
+  pca <- prcomp(~x_bar+y_bar, df2)
+  slp <- with(pca, rotation[2,1] / rotation[1,1])
+  int <- with(pca, center[2] - slp*center[1])
+  tmp.lm <- data.frame(the_int = int, the_slope = slp)
   scalemin = min(c(min(df2$x_bar),min(df2$y_bar)))
   scalemax = max(c(max(df2$x_bar),max(df2$y_bar)))
 
@@ -292,9 +295,9 @@ agree_reps <- function(x,
 
   }
 
-  #######################
+
   # Return Results ----
-  #######################
+
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,

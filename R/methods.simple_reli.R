@@ -52,7 +52,7 @@ plot.simple_reli <- function(x,  ...){
 
 #' @rdname simple_reli-methods
 #' @method check simple_reli
-#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
+#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid fitted
 #' @export
 
 check.simple_reli <- function(x) {

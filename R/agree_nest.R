@@ -145,12 +145,12 @@ agree_nest <- function(x,
     rej_text = "No Hypothesis Test"
   }
 
-  ### Plots ----
-
-  z <- lm(y_bar ~ x_bar, df2)
-  the_int <- summary(z)$coefficients[1,1]
-  the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(the_int, the_slope)
+  # Plots -------
+  # Deming Reg. PCA -----
+  pca <- prcomp(~x_bar+y_bar, df2)
+  slp <- with(pca, rotation[2,1] / rotation[1,1])
+  int <- with(pca, center[2] - slp*center[1])
+  tmp.lm <- data.frame(the_int = int, the_slope = slp)
   scalemin = min(c(min(df$x),min(df$y)))
   scalemax = max(c(max(df$x),max(df$y)))
   df_loa2 = df_loa
@@ -286,9 +286,9 @@ agree_nest <- function(x,
     }
 
   }
-  #######################
+
   # Return Results ----
-  #######################
+
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,

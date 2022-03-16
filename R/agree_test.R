@@ -60,16 +60,10 @@ agree_test <- function(x,
 
     stop("conf.level must be a value between 0 and 1")
   }
-  #USER SPECIFICATIONS PORTION
-  #alpha<-0.05 #DESIGNATED ALPHA
-  #prop0<-0.8 #NULL CENTRAL PROPORTION or Limit of Agreement
-  #delta<-0.1 #THRESHOLD
-  #n<-15 #SAMPLE SIZE
-  #xbar<-0.011 #SAMPLE MEAN
-  #s<-0.044 #SAMPLE STANDARD DEVIATION
-  #END OF SPECIFICATION
+  # shieh test ----
   prop0 = agree.level
   alpha = 1 - conf.level
+  # ccc calc ----
   ccc_res = ccc.xy(x, y,
                    conf.level = conf.level,
                    agree.level = agree.level)
@@ -121,7 +115,7 @@ agree_test <- function(x,
   names(shieh_test) = c("prop0","lower.ci","upper.ci", "h0_test","test_statistic")
 
 
-  ### Save limits of agreement
+  # Save LoA ----
 
   df_loa = data.frame(
     estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
@@ -135,9 +129,9 @@ agree_test <- function(x,
     var.loa = ccc_res$delta$var.loa
   )
 
-  #######################
+
   # Plot Results ----
-  #######################
+
 
   scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
   scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
@@ -153,7 +147,7 @@ agree_test <- function(x,
   #tmp.lm <- data.frame(the_int, the_slope)
   pd2 = position_dodge2(.03*(scalemax-scalemin))
 
-  # Deming Regression through PCA
+  # Deming Reg. PCA -----
   pca <- prcomp(~x+y, ccc_res$df_diff)
   slp <- with(pca, rotation[2,1] / rotation[1,1])
   int <- with(pca, center[2] - slp*center[1])
@@ -240,9 +234,9 @@ agree_test <- function(x,
 
 
 
-  #######################
+
   # Return Results ----
-  #######################
+
 
   structure(list(shieh_test = shieh_test,
                  ccc.xy = ccc_res$rho.c,
