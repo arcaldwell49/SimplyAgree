@@ -141,14 +141,12 @@ agree_test <- function(x,
   df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
                         levels = c("Upper LoA", "Bias", "Lower LoA"))
 
-  #z <- lm(y ~ x)
-  #the_int <- summary(z)$coefficients[1,1]
-  #the_slope <-  summary(z)$coefficients[2,1]
-  #tmp.lm <- data.frame(the_int, the_slope)
-  pd2 = position_dodge2(.03*(scalemax-scalemin))
 
+  pd2 = position_dodge2(.03*(scalemax-scalemin))
+model.frame
   # Deming Reg. PCA -----
-  pca <- prcomp(~x+y, ccc_res$df_diff)
+  pca <- prcomp(~x+y, retx = FALSE)
+  lm_mod = list(call = list(formula = as.formula(y~x)))
   slp <- with(pca, rotation[2,1] / rotation[1,1])
   int <- with(pca, center[2] - slp*center[1])
   tmp.lm <- data.frame(the_int = int, the_slope = slp)
@@ -249,6 +247,7 @@ agree_test <- function(x,
                  bland_alt.plot = bland_alt.plot,
                  identity.plot = identity.plot,
                  h0_test = rej_text,
+                 call = lm_mod,
                  class = "simple"),
             class = "simple_agree")
 

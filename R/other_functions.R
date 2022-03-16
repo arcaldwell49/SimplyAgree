@@ -612,3 +612,6 @@ check_reli = function(x){
   return(list(p_norm = p_norm,
               p_het = p_het))
 }
+
+
+
