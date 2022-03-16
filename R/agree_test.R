@@ -143,7 +143,7 @@ agree_test <- function(x,
 
 
   pd2 = position_dodge2(.03*(scalemax-scalemin))
-model.frame
+
   # Deming Reg. PCA -----
   pca <- prcomp(~x+y, retx = FALSE)
   lm_mod = list(call = list(formula = as.formula(y~x)))
@@ -229,12 +229,7 @@ model.frame
 
   }
 
-
-
-
-
   # Return Results ----
-
 
   structure(list(shieh_test = shieh_test,
                  ccc.xy = ccc_res$rho.c,
@@ -248,6 +243,8 @@ model.frame
                  identity.plot = identity.plot,
                  h0_test = rej_text,
                  call = lm_mod,
+                 labs = list(x_lab = x_lab,
+                             y_lab = y_lab),
                  class = "simple"),
             class = "simple_agree")
 

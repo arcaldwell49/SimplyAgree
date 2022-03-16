@@ -159,6 +159,18 @@ agree_reps <- function(x,
   }
 
   # Plots ----
+  #calltest = match.call()
+  #lm_mod = lm(y_bar ~ x_bar + id,
+  #   data = df2,
+  #   model = FALSE,
+  #   qr = FALSE)
+  #lm_mod$coefficients = NULL
+  #lm_mod$residuals = NULL
+  #lm_mod$effects = NULL
+  #lm_mod$fitted.values = NULL
+  #lm_mod$contrasts = NULL
+  lm_mod = list(call = list(formula = as.formula(df2$x_bar ~ df2$y_bar +
+                                                   df2$id)))
 
   pca <- prcomp(~x_bar+y_bar, df2)
   slp <- with(pca, rotation[2,1] / rotation[1,1])
@@ -306,6 +318,7 @@ agree_reps <- function(x,
                  conf.level = conf.level,
                  agree.level = agree.level,
                  ccc.xy = ccc.xy,
+                 call = lm_mod,
                  class = "replicates"),
             class = "simple_agree")
 
