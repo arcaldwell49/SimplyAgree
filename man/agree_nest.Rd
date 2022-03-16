@@ -42,7 +42,7 @@ agree_nest(
 \item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
-Returns single list with the results of the agreement analysis.
+Returns single simple_agree class object with the results of the agreement analysis.
 
 \describe{
   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}

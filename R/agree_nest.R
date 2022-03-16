@@ -12,7 +12,7 @@
 #' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
 #' @param smooth_se Display confidence interval around smooth?
 #'
-#' @return Returns single list with the results of the agreement analysis.
+#' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
 #' \describe{
 #'   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}

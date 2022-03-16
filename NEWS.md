@@ -9,6 +9,8 @@
 - Added agreement coefficient function (`agree_coef`).
 - Assumptions checks are added for all "simple-agree" class results
   - Checks include: normality, heteroscedasticity, and proportional bias
+- Assumptions checks are added for all "simple-reli" class results
+  - Checks include: normality and heteroscedasticity
 
 
 ## v0.0.3
