@@ -169,8 +169,8 @@ agree_reps <- function(x,
   #lm_mod$effects = NULL
   #lm_mod$fitted.values = NULL
   #lm_mod$contrasts = NULL
-  lm_mod = list(call = list(formula = as.formula(df2$x_bar ~ df2$y_bar +
-                                                   df2$id)))
+  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
+                                                   df$id)))
 
   pca <- prcomp(~x_bar+y_bar, df2)
   slp <- with(pca, rotation[2,1] / rotation[1,1])
@@ -309,7 +309,9 @@ agree_reps <- function(x,
 
 
   # Return Results ----
-
+  if(missing(delta)){
+    delta = NULL
+  }
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,
@@ -319,6 +321,11 @@ agree_reps <- function(x,
                  agree.level = agree.level,
                  ccc.xy = ccc.xy,
                  call = lm_mod,
+                 delta = delta,
+                 smooths = list(smooth_method = smooth_method,
+                                smooth_se = smooth_se),
+                 labs = list(x_lab = x_lab,
+                             y_lab = y_lab),
                  class = "replicates"),
             class = "simple_agree")
 

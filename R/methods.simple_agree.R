@@ -116,7 +116,7 @@ plot.simple_agree <- function(x, type = 1, ...){
   if(type == 1){
     return(x$bland_alt.plot)
   } else if (type == 2){
-    return(x$identity.plot)
+    simple_ident_plot(x)
   } else{
    stop("please select type = 1 for a Bland Altman plot or type = 2 for an identity plot")
   }

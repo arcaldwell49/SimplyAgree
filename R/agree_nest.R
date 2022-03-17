@@ -162,6 +162,10 @@ agree_nest <- function(x,
 
   df = df %>%
     mutate(id = as.factor(id))
+
+  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
+                                                   df$id)))
+
   identity.plot = ggplot(df,
                          aes(x = x, y = y,color=id)) +
     geom_point() +
@@ -288,7 +292,9 @@ agree_nest <- function(x,
   }
 
   # Return Results ----
-
+  if(missing(delta)){
+    delta = NULL
+  }
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,
@@ -297,6 +303,7 @@ agree_nest <- function(x,
                  conf.level = conf.level,
                  agree.level = agree.level,
                  ccc.xy = ccc.xy,
+                 call = lm_mod,
                  class = "nested"),
             class = "simple_agree")
 

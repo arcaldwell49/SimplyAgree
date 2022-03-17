@@ -114,7 +114,6 @@ agree_test <- function(x,
   shieh_test = data.frame(prop0,el,eu,rej_text,gam)
   names(shieh_test) = c("prop0","lower.ci","upper.ci", "h0_test","test_statistic")
 
-
   # Save LoA ----
 
   df_loa = data.frame(
@@ -129,9 +128,7 @@ agree_test <- function(x,
     var.loa = ccc_res$delta$var.loa
   )
 
-
   # Plot Results ----
-
 
   scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
   scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
@@ -228,6 +225,9 @@ agree_test <- function(x,
     }
 
   }
+  if(missing(delta)){
+    delta = NULL
+  }
 
   # Return Results ----
 
@@ -243,6 +243,9 @@ agree_test <- function(x,
                  identity.plot = identity.plot,
                  h0_test = rej_text,
                  call = lm_mod,
+                 delta = delta,
+                 smooths = list(smooth_method = smooth_method,
+                                smooth_se = smooth_se),
                  labs = list(x_lab = x_lab,
                              y_lab = y_lab),
                  class = "simple"),
