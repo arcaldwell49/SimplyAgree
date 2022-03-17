@@ -5,17 +5,7 @@ testthat::test_that("Simple Use Run Through", {
   data("reps")
   agree1 = agree_test(x = reps$x,
                       y = reps$y,
-                      delta = 2.5,
-                      smooth_method = "loess")
-  agree1 = agree_test(x = reps$x,
-             y = reps$y,
-             delta = 2.5,
-             smooth_method = "lm")
-  agree1 = agree_test(x = reps$x,
-                      y = reps$y,
-                      delta = 2.5,
-                      smooth_method = "gam",
-                      smooth_se = FALSE)
+                      delta = 2.5)
 
   jmvagree1 = jmvagree(data = reps,
                        method1 = "x",

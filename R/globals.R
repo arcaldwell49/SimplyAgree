@@ -21,4 +21,4 @@ utils::globalVariables(c("boot_bias",
                          "predicted",
                          "the_int",
                          "the_slope",
-                         "ucl"))
+                         "ucl", 'y'))

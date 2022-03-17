@@ -108,15 +108,33 @@ print.simple_agree <- function(x,...){
 
 #' @rdname simple_agree-methods
 #' @method plot simple_agree
+#' @param x_name Name/label for x values (first measurement)
+#' @param y_name Name/label for y values (second measurement)
+#' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
+#' @param smooth_se Display confidence interval around smooth?
 #' @import ggplot2
 #' @export
 
-plot.simple_agree <- function(x, type = 1, ...){
+plot.simple_agree <- function(x, type = 1,
+                              x_name = "x",
+                              y_name = "y",
+                              smooth_method = NULL,
+                              smooth_se = TRUE,
+                              ...){
 
   if(type == 1){
-    return(x$bland_alt.plot)
+    #return(x$bland_alt.plot)
+    simple_ba_plot(x,
+                   x_name,
+                   y_name,
+                   smooth_method,
+                   smooth_se)
   } else if (type == 2){
-    simple_ident_plot(x)
+    simple_ident_plot(x,
+                      x_name,
+                      y_name,
+                      smooth_method,
+                      smooth_se)
   } else{
    stop("please select type = 1 for a Bland Altman plot or type = 2 for an identity plot")
   }
@@ -137,12 +155,100 @@ check <- function(x) {
 #' @export
 
 check.simple_agree <- function(x) {
-  if (x$class == "simple") {
-    check_simple(x)
-  } else if(x$class == "nested" || x$class == "replicates") {
-    if(x$class == "nested"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
-    check_multi(x)
-  } else {
-    stop("Only simple, nested, or replicates supported at this time.")
+
+  if(x$class == "nested"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
+  if(x$class != "simple"){
+    df = model.frame(x$call)
+    colnames(df) = c("x","y","id")
+  } else{
+    df = model.frame(x$call)
   }
+  df$mean = (df$x + df$y)/2
+  df$delta = df$x - df$y
+
+  dat = df
+  ## Heteroskedasticity -------
+  mod_check = if (x$class != "simple") {
+    lme4::lmer(data = dat,
+               delta ~ 1 + (1 | id))
+  } else {
+    lm(data = dat,
+       delta ~ 1)
+  }
+
+  stan_res = residuals(mod_check, type = "pearson")
+  df_het = df.residual(mod_check)
+  sum_het_res = sum(!is.na(stan_res))
+  sigma_het = sigma(mod_check)
+
+  s_sq = df_het * sigma_het^2 / sum_het_res
+
+  u_het = stan_res^2 / s_sq
+
+  mod <- lm(u_het ~ na.omit(dat$mean))
+
+  SS <- anova(mod)$"Sum Sq"
+  RegSS <- sum(SS) - SS[length(SS)]
+  Chisq <- RegSS / 2
+  ### Breusch-Pagan Test
+  p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
+
+  rstan_het =  residuals(mod_check, scaled = TRUE)
+  dat_het <- data.frame(
+    x = na.omit(dat$mean),
+    y = na.omit(sqrt(abs(rstan_het)))
+  )
+  p_het = plot_het(dat_het) +
+    labs(caption = paste0("Heteroskedasticity", " \n",
+                          "Breusch-Pagan Test: p = ",
+                          signif(p_val_het,4)))
+
+
+  ## Normality ------------
+
+  mod_res = residuals(mod_check)
+  if(length(mod_res) < 5000){
+    norm_test = shapiro.test(mod_res)
+    norm_text = "Shapiro-Wilk Test"
+  } else {
+    norm_test = ks.test(mod_res, y = "pnorm",
+                        alternative = "two.sided")
+    norm_text = "Kolmogorov-Smirnov Test"
+  }
+
+  rstan_norm = sort(rstudent(mod_check), na.last = NA)
+  dat_norm <- na.omit(data.frame(y = rstan_norm))
+  p_norm = plot_qq(
+    x = dat_norm
+  ) +
+    labs(caption = paste0("Normality", " \n",
+                          norm_text, ": p = ",
+                          signif(norm_test$p.value,4)))
+
+  # Proportional Bias -----
+  if(x$class == "simple"){
+    mod2 = lm(delta ~ mean,
+              data = dat)
+    aov2 = as.data.frame(anova(mod_check, mod2))
+    colnames(aov2) = c("df1","RSS","df2","SS","f","p")
+    lin_pval = aov2$p[2]
+  } else {
+    mod2 = lmer(data = dat,
+                delta ~ mean + (1 | id))
+    aov2 = suppressMessages(as.data.frame(anova(mod_check, mod2)))
+    colnames(aov2) = c("npar","AIC","BIC","log_lik","dev","chisq","df","p")
+    lin_pval = aov2$p[2]
+  }
+
+  dat2 = data.frame(resid = residuals(mod_check),
+                    mean = na.omit(dat$mean))
+  p_bias = plot_bias(dat2) +
+    labs(caption = paste0("Proportional Bias", " \n",
+                          "Test for Linear Bias", ": p = ",
+                          signif(lin_pval,4)))
+
+  return(list(p_norm = p_norm,
+              p_het = p_het,
+              p_bias = p_bias))
+
 }

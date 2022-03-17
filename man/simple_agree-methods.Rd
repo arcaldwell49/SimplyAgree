@@ -10,7 +10,15 @@
 \usage{
 \method{print}{simple_agree}(x, ...)
 
-\method{plot}{simple_agree}(x, type = 1, ...)
+\method{plot}{simple_agree}(
+  x,
+  type = 1,
+  x_name = "x",
+  y_name = "y",
+  smooth_method = NULL,
+  smooth_se = TRUE,
+  ...
+)
 
 check(x)
 
@@ -24,6 +32,14 @@ for details.
 \code{\link{agree_test}}.}
 
 \item{type}{Type of plot to output. Default (1) is Bland-Altman plot while type=2 will produce a line-of-identity plot.}
+
+\item{x_name}{Name/label for x values (first measurement)}
+
+\item{y_name}{Name/label for y values (second measurement)}
+
+\item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
+
+\item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
 \describe{

@@ -4,19 +4,7 @@
 \alias{agree_nest}
 \title{Tests for Absolute Agreement with Nested Data}
 \usage{
-agree_nest(
-  x,
-  y,
-  id,
-  data,
-  delta,
-  agree.level = 0.95,
-  conf.level = 0.95,
-  x_lab = "x",
-  y_lab = "y",
-  smooth_method = NULL,
-  smooth_se = TRUE
-)
+agree_nest(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
 }
 \arguments{
 \item{x}{Name of column with first measurement}
@@ -32,14 +20,6 @@ agree_nest(
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
-
-\item{x_lab}{Label for x values (first measurement)}
-
-\item{y_lab}{Label for y values (second measurement)}
-
-\item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
-
-\item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
 Returns single simple_agree class object with the results of the agreement analysis.

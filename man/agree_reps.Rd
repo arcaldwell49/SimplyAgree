@@ -4,19 +4,7 @@
 \alias{agree_reps}
 \title{Tests for Absolute Agreement with Replicates}
 \usage{
-agree_reps(
-  x,
-  y,
-  id,
-  data,
-  delta,
-  agree.level = 0.95,
-  conf.level = 0.95,
-  x_lab = "x",
-  y_lab = "y",
-  smooth_method = NULL,
-  smooth_se = TRUE
-)
+agree_reps(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
 }
 \arguments{
 \item{x}{Name of column with first measurement}

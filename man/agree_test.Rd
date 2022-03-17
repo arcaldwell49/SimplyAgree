@@ -26,14 +26,6 @@ agree_test(
 \item{conf.level}{the confidence level required. Default is 95\%.}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
-
-\item{x_lab}{Label for x values (first measurement)}
-
-\item{y_lab}{Label for y values (second measurement)}
-
-\item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
-
-\item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
 Returns single list with the results of the agreement analysis.

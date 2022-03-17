@@ -7,10 +7,6 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
-#' @param x_lab Label for x values (first measurement)
-#' @param y_lab Label for y values (second measurement)
-#' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
-#' @param smooth_se Display confidence interval around smooth?
 #'
 #' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
@@ -49,11 +45,7 @@ agree_nest <- function(x,
                        data,
                        delta,
                        agree.level = .95,
-                       conf.level = .95,
-                       x_lab = "x",
-                       y_lab = "y",
-                       smooth_method = NULL,
-                       smooth_se = TRUE){
+                       conf.level = .95){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
@@ -145,161 +137,16 @@ agree_nest <- function(x,
     rej_text = "No Hypothesis Test"
   }
 
-  # Plots -------
-  # Deming Reg. PCA -----
-  pca <- prcomp(~x_bar+y_bar, df2)
-  slp <- with(pca, rotation[2,1] / rotation[1,1])
-  int <- with(pca, center[2] - slp*center[1])
-  tmp.lm <- data.frame(the_int = int, the_slope = slp)
-  scalemin = min(c(min(df$x),min(df$y)))
-  scalemax = max(c(max(df$x),max(df$y)))
-  df_loa2 = df_loa
-  df_loa2$x = scalemin
-  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
-                        levels = c("Upper LoA", "Bias", "Lower LoA"))
-  pd2 = position_dodge2(.03*(scalemax-scalemin))
-
-
-  df = df %>%
-    mutate(id = as.factor(id))
-
-  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
-                                                   df$id)))
-
-  identity.plot = ggplot(df,
-                         aes(x = x, y = y,color=id)) +
-    geom_point() +
-    geom_abline(intercept = 0, slope = 1) +
-    geom_abline(
-      data = tmp.lm,
-      aes(intercept = the_int, slope = the_slope),
-      linetype = "dashed",
-      color = "red"
-    ) +
-    xlab("Method: x") +
-    xlim(scalemin,scalemax) +
-    ylim(scalemin,scalemax) +
-    ylab("Method: y") +
-    coord_fixed(ratio = 1 / 1) +
-    theme_bw() +
-    scale_color_viridis_d()
-
-  df = df %>%
-    mutate(d = x-y,
-           avg_both = (x+y)/2)
-
-  bland_alt.plot =  ggplot(df,
-                           aes(x = avg_both, y = d)) +
-    geom_point(na.rm = TRUE) +
-    geom_pointrange(data = df_loa2,
-                  aes(
-                    x = x,
-                    y = estimate,
-                    ymin = lower.ci,
-                    ymax = upper.ci,
-                    color = text),
-                  #width = .03*(scalemax-scalemin),
-                  position = pd2,
-                  inherit.aes = FALSE)+
-    labs(x = paste0("Average of ", x_lab ," & ", y_lab),
-         y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
-         caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                          "Confidence Level = ", conf.level * 100, "%"),
-         color = "") +
-    scale_color_viridis_d(option = "C", end = .8) +
-    theme_bw() +
-    theme(legend.position = "left")
-  if (!missing(delta)){
-    df_delta = data.frame(y1 = c(delta, -1*delta))
-    bland_alt.plot = bland_alt.plot +
-      geom_hline(data = df_delta,
-                 aes(yintercept = y1),
-                 linetype = 2) +
-      scale_y_continuous(sec.axis = dup_axis(
-        breaks = c(delta, -1*delta),
-        name = "Maximal Allowable Difference"))
-  }
-  if (!is.null(smooth_method)){
-    if (!(smooth_method %in% c("loess", "lm", "gam"))){
-      stop("Only lm, loess, and gam are supported as smooth_method at this time.")
-    }
-    if(smooth_method == "loess"){
-
-      bland_alt.plot = bland_alt.plot +
-        stat_smooth(
-          method = smooth_method,
-          se = smooth_se,
-          level = conf.level,
-          alpha = 0.2,
-          formula = y ~ x,
-          size = 0.8,
-          colour = "#3aaf85"
-        )
-    } else if(smooth_method == "gam") {
-      if (requireNamespace("mgcv", quietly = TRUE)) {
-        gam1 = mgcv::gam(data = df,
-                   d ~ s(avg_both, bs="tp") + s(id, bs="re"))
-        df2 = data.frame(avg_both = seq(min(df$avg_both, na.rm=TRUE),
-                                        max(df$avg_both, na.rm=TRUE),
-                                        length.out = 100))
-        preds = mgcv::predict.gam(gam1,
-                                  newdata = df2,
-                                  se.fit = TRUE, exclude = 's(id)',
-                                  newdata.guaranteed=TRUE)
-        df2$pred = preds$fit
-        df2$se = preds$se.fit
-        df2$lcl = df2$pred - confq*df2$se
-        df2$ucl = df2$pred + confq*df2$se
-
-        if(smooth_se){
-          bland_alt.plot = bland_alt.plot +
-            geom_ribbon(inherit.aes = FALSE,
-                        data = df2,
-                        alpha = .2,
-                        aes(x=avg_both, ymin=lcl,ymax=ucl))
-        }
-        bland_alt.plot = bland_alt.plot +
-          geom_line(inherit.aes = FALSE,
-                    color = "#3aaf85",
-                    data = df2,
-                    aes(x=avg_both,y=pred))
-      } else {
-        message("For gam smooths, the mgcv package must be installed.")
-      }
-
-    } else if(smooth_method == "lm"){
-      if (requireNamespace("ggeffects", quietly = TRUE)) {
-      lmer1 = lme4::lmer(data = df,
-                       d ~ avg_both + (1|id))
-      df2 = as.data.frame(ggeffects::ggemmeans(lmer1, "avg_both"))
-      if(smooth_se){
-        bland_alt.plot = bland_alt.plot +
-          geom_ribbon(inherit.aes = FALSE,
-                      data = df2,
-                      alpha = .2,
-                      aes(x=x, ymin=conf.low,ymax=conf.high))
-      }
-      bland_alt.plot = bland_alt.plot +
-        geom_line(inherit.aes = FALSE,
-                  color = "#3aaf85",
-                  data = df2,
-                  aes(x=x,y=predicted))
-      }else {
-        message("For lm smooths (for agree_nest and agree_reps), the ggeffects package must be installed")
-      }
-    }
-
-  }
 
   # Return Results ----
   if(missing(delta)){
     delta = NULL
   }
 
+  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
+                                                   df$id)))
   structure(list(loa = df_loa,
                  h0_test = rej_text,
-                 bland_alt.plot = bland_alt.plot,
-                 identity.plot = identity.plot,
                  conf.level = conf.level,
                  agree.level = agree.level,
                  ccc.xy = ccc.xy,
