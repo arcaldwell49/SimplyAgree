@@ -22,7 +22,8 @@ Imports:
     tidyselect,
     tidyr,
     stringr,
-    jmvcore
+    jmvcore,
+    quantreg
 Suggests: 
     knitr,
     rmarkdown,

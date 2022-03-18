@@ -463,5 +463,90 @@ check_reli = function(x){
               p_het = p_het))
 }
 
+# Deming ----
+calc_dem = function(X,Y, w_i, error.ratio){
+  x_w = sum(w_i*X)/sum(w_i)
+  y_w = sum(w_i*Y)/sum(w_i)
+  p_w = sum(w_i * (X - x_w)*(Y - y_w))
+  u_w = sum(w_i * (X - x_w)^2)
+  q_w = sum(w_i * (Y - y_w)^2)
+  b1_w <- ((error.ratio * q_w - u_w) + sqrt((u_w - error.ratio * q_w)^2 +
+                                              4 * error.ratio * p_w^2))/(2 * error.ratio * p_w)
+  b0_w <- y_w- b1_w * x_w
+  return(list(b0 = b0_w, b1 = b1_w))
+}
+jack_dem = function(X,Y, w_i, error.ratio){
+  len <- length(X)
+  u <- list()
+  for (i in 1:len) {
+    u <- append(u,list(calc_dem(X[-i], Y[-i], w_i[-i],
+                                error.ratio)))
+  }
+  b0 = rep(0,length(u))
+  b1 = rep(0,length(u))
+  for (j in 1:length(u)){
+    b0[j] = u[[j]]$b0
+    b1[j] = u[[j]]$b1
+  }
+  theta_b0 <- calc_dem(X,Y, w_i)$b0
+  theta_b1 <- calc_dem(X,Y, w_i)$b1
+  b0_bias <- (n - 1) * (mean(b0) - theta_b0)
+  b1_bias <- (n - 1) * (mean(b1) - theta_b1)
+  b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
+  b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
+  return(
+    list(
+      b0 = theta_b0,
+      b1 = theta_b1,
+      b0_bias = b0_bias,
+      b1_bias =  b1_bias,
+      b0_se =  b0_se ,
+      b1_se = b1_se
+    )
+  )
+}
 
+dem_reg = function(x,y,
+                   id = NULL,
+                   data,
+                   error.ratio = 1,
+                   conf.level = .95){
+  confq = qnorm(1 - (1 - conf.level) / 2)
+  df = data %>%
+    select(all_of(id),all_of(x),all_of(y)) %>%
+    rename(id = all_of(id),
+           x = all_of(x),
+           y = all_of(y)) %>%
+    select(id,x,y)
+
+  if(is.null(id)){
+    df3 = df
+  } else{
+    df2 = df %>%
+      group_by(id) %>%
+      mutate(mean_y = mean(y, na.rm =TRUE),
+             mean_x = mean(x, na.rm =TRUE),
+             n_x = sum(!is.na(x)),
+             n_y = sum(!is.na(y))) %>%
+      ungroup() %>%
+      mutate(diff_y = y - mean_y,
+             diff_y2 = diff_y^2,
+             diff_x = x - mean_x,
+             diff_x2 = diff_x^2)
+    df3 = df2 %>%
+      group_by(id) %>%
+      summarize(n_x = mean(n_x),
+                x = mean(x, na.rm = TRUE),
+                sum_num_x = sum(diff_x2, na.rm = TRUE),
+                n_y = mean(n_y),
+                y = mean(y, na.rm = TRUE),
+                sum_num_y = sum(diff_y2, na.rm = TRUE),
+                .groups = 'drop')
+
+    var_x = sum(df3$sum_num_x) / sum(df3$n_x-1)
+    var_y = sum(df3$sum_num_y) / sum(df3$n_y-1)
+
+    error.ratio = var_x/var_y
+  }
+}
 
