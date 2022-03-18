@@ -4,17 +4,7 @@
 \alias{agree_test}
 \title{Tests for Absolute Agreement}
 \usage{
-agree_test(
-  x,
-  y,
-  delta,
-  conf.level = 0.95,
-  agree.level = 0.95,
-  x_lab = "x",
-  y_lab = "y",
-  smooth_method = NULL,
-  smooth_se = TRUE
-)
+agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
 }
 \arguments{
 \item{x}{Vector with first measurement}
@@ -38,9 +28,7 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
   \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-  \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-
+  \item{\code{"call"}}{the matched call}
 }
 }
 \description{

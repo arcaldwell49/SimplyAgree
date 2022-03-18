@@ -16,8 +16,7 @@
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
 #'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 #'   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics.}
-#'   \item{\code{"conf.level"}}{Returned as input.}
-#'   \item{\code{"agree.level"}}{Returned as input.}
+#'   \item{\code{"call"}}{the matched call}
 #'
 #' }
 
@@ -150,25 +149,26 @@ agree_reps <- function(x,
     rej_text = "No Hypothesis Test"
   }
 
-  # Save call for plots ----
+  # Save call----
 
   lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
                                                    df$id)))
-
-  # Return Results ----
-  if(missing(delta)){
-    delta = NULL
+  call2 = match.call()
+  if(is.null(call2$agree.level)){
+    call2$agree.level = agree.level
   }
+
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
+  }
+  call2$lm_mod = lm_mod
+  # Return Results ----
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,
-                 conf.level = conf.level,
-                 agree.level = agree.level,
                  ccc.xy = ccc.xy,
-                 call = lm_mod,
-                 delta = delta,
+                 call = call2,
                  class = "replicates"),
             class = "simple_agree")
-
 
 }

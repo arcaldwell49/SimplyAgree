@@ -27,7 +27,7 @@ print.simple_agree <- function(x,...){
   if(x$class == "simple") {
   cat("Limit of Agreement = ", x$shieh_test$prop0*100, "%",  sep = "")
   cat("\n")
-  cat("alpha =", (1-x$conf.level), "|", x$conf.level*100,"% Confidence Interval")
+  cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
   cat("\n")
   cat("\n")
   cat("###- Shieh TOST Results -###")
@@ -48,12 +48,12 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("###- Concordance Correlation Coefficient (CCC) -###")
   cat("\n")
-  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
   cat("\n")
   } else if(x$class == "replicates"){
-    cat("Limit of Agreement = ", x$agree.level*100, "%",  sep = "")
+    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
     cat("\n")
-    cat("alpha =", (1-x$conf.level), "|", x$conf.level*100,"% Confidence Interval")
+    cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
     cat("Replicate Data Points (true value does not vary)")
     cat("\n")
@@ -72,14 +72,14 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Concordance Correlation Coefficient* (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics")
     cat("\n")
   } else if(x$class == "nested"){
-    cat("Limit of Agreement = ", x$agree.level*100, "%",  sep = "")
+    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
     cat("\n")
-    cat("alpha =", (1-x$conf.level), "|", x$conf.level*100,"% Confidence Interval")
+    cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
     cat("Nested Data Points (true value may vary)")
     cat("\n")
@@ -98,7 +98,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Concordance Correlation Coefficient (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics; may be biased")
     cat("\n")
@@ -158,10 +158,10 @@ check.simple_agree <- function(x) {
 
   if(x$class == "nested"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
   if(x$class != "simple"){
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
   } else{
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
   }
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y

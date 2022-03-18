@@ -18,6 +18,12 @@ testthat::test_that("Simple Use Run Through", {
   pr_test = print(agree1)
 
   p = plot(agree1,type=1)
+  p = plot(agree1,type=1,
+           smooth_method = "lm")
+  p = plot(agree1,type=1,
+           smooth_method = "loess")
+  p = plot(agree1,type=1,
+           smooth_method = "gam")
   p = plot(agree1,type=2)
   c1 = check(agree1)$p_norm
   c2 = check(agree1)$p_het

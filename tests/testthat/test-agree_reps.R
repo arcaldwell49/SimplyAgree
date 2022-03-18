@@ -8,16 +8,6 @@ testthat::test_that("examples from Zou", {
                          id = "id",
                          data = reps)
 
-  reps_test = agree_reps(x="x",y="y",
-                         id = "id",
-                         data = reps)
-  reps_test = agree_reps(x="x",y="y",
-                         id = "id",
-                         data = reps)
-  reps_test = agree_reps(x="x",y="y",
-                         id = "id",
-                         data = reps)
-
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),
                               tolerance = 0.001)
@@ -62,6 +52,15 @@ testthat::test_that("examples from Zou", {
            smooth_method = "loess")
   p = plot(reps_test, type = 1,
            smooth_method = "gam")
+  p = plot(reps_test, type = 1,
+           smooth_method = "lm",
+           smooth_se = FALSE)
+  p = plot(reps_test, type = 1,
+           smooth_method = "loess",
+           smooth_se = FALSE)
+  p = plot(reps_test, type = 1,
+           smooth_method = "gam",
+           smooth_se = FALSE)
   p = plot(reps_test, type = 2)
   c1 = check(reps_test)$p_norm
   c2 = check(reps_test)$p_het

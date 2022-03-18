@@ -30,8 +30,7 @@ Returns single simple_agree class object with the results of the agreement analy
   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.}
-  \item{\code{"conf.level"}}{Returned as input.}
-  \item{\code{"agree.level"}}{Returned as input.}
+  \item{\code{"call"}}{the matched call}
 
 }
 }

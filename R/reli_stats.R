@@ -21,8 +21,7 @@
 #'   \item{\code{"SEM"}}{Standard Error of Measurement}
 #'   \item{\code{"SEE"}}{Standard Error of the Estimate}
 #'   \item{\code{"SEP"}}{Standard Error of Predicitions}
-#'   \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
-#'
+#'   \item{\code{"call"}}{the matched call}
 #'
 #' }
 
@@ -179,22 +178,11 @@ reli_stats = function(measure,
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))
   SEP = sd_tots*sqrt(1-ICC3^2)
 
-  plot.reliability = ggplot(x.df,
-                            aes(
-                              x = items,
-                              y = values,
-                              color = id,
-                              group = id
-                            )) +
-    geom_point(position = position_dodge(width = 0.2)) +
-    geom_line(color = "black",
-              alpha = .2,
-              position = position_dodge(width = 0.2)) +
-    labs(y = "Measurement",
-         x = "Item",
-         color = "id") +
-    scale_color_viridis_d()+
-    theme_bw()
+  # Save call
+  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
+  call2 = match.call()
+
+  call2$lm_mod = lm_mod
 
   result <- list(icc = results,
                  lmer = mod.lmer,
@@ -202,11 +190,11 @@ reli_stats = function(measure,
                  var_comp = MS.df,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
+                 call = call2,
                  cv = cv_out,
                  SEM = SEM,
                  SEE = SEE,
-                 SEP = SEP,
-                 plot.reliability = plot.reliability)
+                 SEP = SEP)
 
   structure(result,
             class = "simple_reli")

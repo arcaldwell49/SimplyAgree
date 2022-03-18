@@ -20,14 +20,6 @@ agree_reps(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
-
-\item{x_lab}{Label for x values (first measurement)}
-
-\item{y_lab}{Label for y values (second measurement)}
-
-\item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
-
-\item{smooth_se}{Display confidence interval around smooth?}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -38,8 +30,7 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics.}
-  \item{\code{"conf.level"}}{Returned as input.}
-  \item{\code{"agree.level"}}{Returned as input.}
+  \item{\code{"call"}}{the matched call}
 
 }
 }

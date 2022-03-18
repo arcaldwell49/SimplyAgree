@@ -75,6 +75,13 @@ testthat::test_that("examples from Zou", {
 
   pr_test = print(nest_test3)
   p = plot(nest_test3, type = 1)
+  p = plot(nest_test3, type = 1,
+           smooth_method = "lm")
+  p = plot(nest_test3, type = 1,
+           smooth_method = "loess")
+  p = plot(nest_test3, type = 1,
+           smooth_method = "gam")
+  p = plot(nest_test3, type = 1)
   p = plot(nest_test3, type = 2)
 
   test_jmv = jmvagreemulti(

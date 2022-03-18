@@ -15,9 +15,7 @@
 #'   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
 #'   \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-#'
+#'   \item{\code{"call"}}{the matched call}
 #' }
 
 #' @examples
@@ -120,106 +118,17 @@ agree_test <- function(x,
     var.loa = ccc_res$delta$var.loa
   )
 
-  # Plot Results ----
-
-  scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
-  scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
-
-  df_loa2 = df_loa
-  df_loa2$x = scalemin
-  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
-                        levels = c("Upper LoA", "Bias", "Lower LoA"))
-
-
-  pd2 = position_dodge2(.03*(scalemax-scalemin))
-
-  # Deming Reg. PCA -----
-  pca <- prcomp(~x+y, retx = FALSE)
+  # Save call -----
   lm_mod = list(call = list(formula = as.formula(y~x)))
-  slp <- with(pca, rotation[2,1] / rotation[1,1])
-  int <- with(pca, center[2] - slp*center[1])
-  tmp.lm <- data.frame(the_int = int, the_slope = slp)
-
-  identity.plot = ggplot(ccc_res$df_diff,
-                         aes(x = x, y = y)) +
-    geom_point(na.rm = TRUE) +
-    geom_abline(intercept = 0, slope = 1) +
-    geom_abline(
-      data = tmp.lm,
-      aes(intercept = the_int, slope = the_slope),
-      linetype = "dashed",
-      color = "red"
-    ) +
-    xlab(paste0("Method: ",x_lab)) +
-    xlim(scalemin,scalemax) +
-    ylim(scalemin,scalemax) +
-    ylab(paste0("Method: ",y_lab)) +
-    coord_fixed(ratio = 1 / 1) +
-    theme_bw()
-
-  bland_alt.plot =  ggplot(ccc_res$df_diff,
-                           aes(x = mean, y = delta)) +
-    geom_point(na.rm = TRUE) +
-    geom_pointrange(data = df_loa2,
-                    aes(
-                      x = x,
-                      y = estimate,
-                      ymin = lower.ci,
-                      ymax = upper.ci,
-                      color = text),
-                    #width = .03*(scalemax-scalemin),
-                    position = pd2,
-                    inherit.aes = FALSE)+
-    labs(x = paste0("Average of ", x_lab ," & ", y_lab),
-         y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
-         caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                          "Confidence Level = ", conf.level * 100, "%"),
-         color = "") +
-    scale_color_viridis_d(option = "C", end = .8) +
-    theme_bw() +
-    theme(legend.position = "left")
-  if (!missing(delta)){
-    df_delta = data.frame(y1 = c(delta, -1*delta))
-    bland_alt.plot = bland_alt.plot +
-      geom_hline(data = df_delta,
-                 aes(yintercept = y1),
-                 linetype = 2) +
-      scale_y_continuous(sec.axis = dup_axis(
-        breaks = c(delta, -1*delta),
-        name = "Maximal Allowable Difference"))
+  call2 = match.call()
+  if(is.null(call2$agree.level)){
+    call2$agree.level = agree.level
   }
-  if (!is.null(smooth_method)){
-    if (!(smooth_method %in% c("loess", "lm", "gam"))){
-      stop("Only lm, loess, and gam are supported as smooth_method at this time.")
-    }
-    if(smooth_method != "gam"){
-      bland_alt.plot = bland_alt.plot +
-        stat_smooth(
-          method = smooth_method,
-          se = smooth_se,
-          level = conf.level,
-          alpha = 0.2,
-          formula = y ~ x,
-          size = 0.8,
-          colour = "#3aaf85"
-        )
-    } else {
-      bland_alt.plot = bland_alt.plot +
-        stat_smooth(
-          method = smooth_method,
-          se = smooth_se,
-          level = conf.level,
-          alpha = 0.2,
-          formula = y ~ s(x, bs = "tp"),
-          size = 0.8,
-          colour = "#3aaf85"
-        )
-    }
 
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
   }
-  if(missing(delta)){
-    delta = NULL
-  }
+  call2$lm_mod = lm_mod
 
   # Return Results ----
 
@@ -229,13 +138,8 @@ agree_test <- function(x,
                  l.shift = ccc_res$l.shift,
                  bias = ccc_res$bias,
                  loa = df_loa,
-                 conf.level = conf.level,
-                 agree.level = agree.level,
-                 bland_alt.plot = bland_alt.plot,
-                 identity.plot = identity.plot,
                  h0_test = rej_text,
-                 call = lm_mod,
-                 delta = delta,
+                 call = call2,
                  class = "simple"),
             class = "simple_agree")
 

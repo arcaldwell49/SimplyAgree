@@ -1,11 +1,11 @@
 
 simple_ident_plot = function(x,
-                             x_name,
-                             y_name,
-                             smooth_method,
-                             smooth_se) {
+                             x_name = "x",
+                             y_name = "y",
+                             smooth_method = NULL,
+                             smooth_se = TRUE) {
   if(x$class != "simple"){
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
     if(x$class == "replicates"){
     df = df %>%
@@ -20,7 +20,7 @@ simple_ident_plot = function(x,
     }
 
   } else{
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
   }
 
   scalemin = min(c(min(df$x, na.rm = TRUE),min(df$y, na.rm = TRUE)))
@@ -57,16 +57,16 @@ simple_ident_plot = function(x,
 
 
 simple_ba_plot = function(x,
-                          x_name,
-                          y_name,
-                          smooth_method,
-                          smooth_se) {
+                          x_name = "x",
+                          y_name = "y",
+                          smooth_method = NULL,
+                          smooth_se = TRUE) {
   if(x$class != "simple"){
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
 
   } else{
-    df = model.frame(x$call)
+    df = model.frame(x$call$lm_mod)
   }
   df_loa = x$loa
 
@@ -81,10 +81,10 @@ simple_ba_plot = function(x,
                        levels = c("Upper LoA", "Bias", "Lower LoA"))
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  conf.level = x$conf.level
-  agree.level = x$agree.level
+  conf.level = x$call$conf.level
+  agree.level = x$call$agree.level
   confq = qnorm(1 - (1 - conf.level) / 2)
-  delta = x$delta
+  delta = x$call$delta
   #smooth_method = x$smooths$smooth_method
   #smooth_se = x$smooths$smooth_se
   bland_alt.plot = ggplot(df,
@@ -108,8 +108,8 @@ simple_ba_plot = function(x,
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
     theme(legend.position = "left")
-  if (!is.null(x$delta)){
-    delta = x$delta
+  if (!is.null(x$call$delta)){
+    delta = x$call$delta
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
