@@ -63,16 +63,27 @@ agree_np <- function(x,
       drop_na()
   }
 
-  df$mean = (df$x+dfy)/2
+  df$mean = (df$x+df$y)/2
   df$delta = (df$x-df$y)
 
   quan_mod2 = rq(formula =  delta ~ x,
                 data = df,
                 tau = c(agree.u,.5,agree.l))
 
-  quan_mod1 = SuppressWarnings({rq(formula =  delta ~ 1,
+
+  quan_mod1 = suppressWarnings({rq(formula =  delta ~ 1,
                  data = df,
                  tau = c(agree.u,.5,agree.l))})
+  df_coef = data.frame(est = c(),
+                       se = c())
+  quan_coef = summary(quan_mod1, se = "boot")
+  for(i in 1:length(quan_coef)){
+    temp = (as.data.frame(quan_coef[[i]]$coefficients))
+    df_coef = rbind(df_coef,temp[,1:2])
+  }
+  df_coef = data.frame(est = df_coef$Value,
+                       se = df_coef$`Std. Error`)
+  rownames(df_coef) = c("Lower LoA", "Bias", "Upper LoA")
 
   ## Save LoA ----
   df_loa = data.frame(
