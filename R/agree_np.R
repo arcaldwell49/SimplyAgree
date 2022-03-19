@@ -58,8 +58,21 @@ agree_np <- function(x,
       rename(x = all_of(x),
              y = all_of(y)) %>%
       select(x,y)
+    df$id = as.factor(1)
+    df = df %>%
+      drop_na()
   }
 
+  df$mean = (df$x+dfy)/2
+  df$delta = (df$x-df$y)
+
+  quan_mod2 = rq(formula =  delta ~ x,
+                data = df,
+                tau = c(agree.u,.5,agree.l))
+
+  quan_mod1 = SuppressWarnings({rq(formula =  delta ~ 1,
+                 data = df,
+                 tau = c(agree.u,.5,agree.l))})
 
   ## Save LoA ----
   df_loa = data.frame(
