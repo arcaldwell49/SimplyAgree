@@ -110,7 +110,7 @@ agree_test <- function(x,
     estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
     lower.ci = c(ccc_res$delta$d.lci, ccc_res$delta$lower.lci, ccc_res$delta$upper.lci),
     upper.ci = c(ccc_res$delta$d.uci, ccc_res$delta$lower.uci, ccc_res$delta$upper.uci),
-    row.names = c("Difference","Lower LoA","Upper LoA")
+    row.names = c("Bias","Lower LoA","Upper LoA")
   )
   # Should I add this to the output?
   var_comp = data.frame(

@@ -12,11 +12,11 @@
 #'
 #' \describe{
 #'   \item{\code{"loa"}}{a data frame of the limits of agreement.}
+#'   \item{\code{"agee"}}{a data frame of the binomial proportion of results in agreement..}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
 #'   \item{\code{"call"}}{the matched call}
 #'
 #' }
-
 #' @examples
 #' # TBA
 #' @section References:
@@ -44,6 +44,7 @@ agree_np <- function(x,
   confq = qnorm(1 - (1 - conf.level) / 2)
   alpha.l = 1 - (1 - conf.level) / 2
   alpha.u = (1 - conf.level) / 2
+  stopifnot(!is.null(delta) && is.numeric(delta) && delta > 0)
 
   if(!is.null(id)){
     df = data %>%
@@ -51,7 +52,8 @@ agree_np <- function(x,
       rename(id = all_of(id),
              x = all_of(x),
              y = all_of(y)) %>%
-      select(id,x,y)
+      select(id,x,y) %>%
+      drop_na()
   } else {
     df = data %>%
       select(all_of(x),all_of(y)) %>%
@@ -61,50 +63,162 @@ agree_np <- function(x,
     df$id = as.factor(1)
     df = df %>%
       drop_na()
+
   }
 
   df$mean = (df$x+df$y)/2
   df$delta = (df$x-df$y)
+  dbound = delta
+  if(!is.null(id)){
+    df_glm1 = df
+    df_glm1 = df_glm1 %>%
+      mutate(success = ifelse(abs(delta) <= dbound,
+                              1,0),
+             failure = ifelse(abs(delta) > dbound,
+                              1,0))
 
-  quan_mod2 = rq(formula =  delta ~ x,
-                data = df,
-                tau = c(agree.u,.5,agree.l))
+    df_glm = df_glm1 %>%
+      group_by(id) %>%
+      summarize(x = mean(x),
+                y = mean(y),
+                success = sum(success),
+                failure = sum(failure))
 
-
-  quan_mod1 = suppressWarnings({rq(formula =  delta ~ 1,
-                 data = df,
-                 tau = c(agree.u,.5,agree.l))})
-  df_coef = data.frame(est = c(),
-                       se = c())
-  quan_coef = summary(quan_mod1, se = "boot")
-  for(i in 1:length(quan_coef)){
-    temp = (as.data.frame(quan_coef[[i]]$coefficients))
-    df_coef = rbind(df_coef,temp[,1:2])
+  }else{
+    df_glm = df
+    df_glm = df_glm %>%
+      mutate(success = ifelse(abs(delta) <= dbound,
+             1,0),
+             failure = ifelse(abs(delta) > dbound,
+                                        1,0))
   }
-  df_coef = data.frame(est = df_coef$Value,
-                       se = df_coef$`Std. Error`)
-  rownames(df_coef) = c("Lower LoA", "Bias", "Upper LoA")
+
+  if(sum(df_glm$failure) == 0){
+    message("All values within delta bounds. Confidence intervals hypothesis test likely bogus.")
+    test = binom.test(sum(df_glm$success), nrow(df_glm))
+    df_agree = data.frame(
+      row.names = paste0("Prop. within ",dbound),
+      agreement = test$estimate,
+      lower.ci = test$conf.int[1],
+      upper.ci = test$conf.int[2]
+    )
+  } else{
+
+  glm_mod = glm(cbind(success,failure) ~ 1,
+                data = df_glm,
+                family = binomial)
+  glm_emm = as.data.frame(confint(emmeans(glm_mod, ~1,
+                                          type = "response"),
+                                  level = conf.level))
+  df_agree = data.frame(agreement = glm_emm$prob,
+                        lower.ci = glm_emm$asymp.LCL,
+                        upper.ci = glm_emm$asymp.UCL)
+  }
+
+  rej <- glm_emm$asymp.LCL >= agree.level
+  rej_text = "don't reject h0"
+  if (rej == TRUE) {
+    rej_text = "reject h0"
+  }
+
+  if(prop_bias == FALSE){
+    quan_mod = suppressWarnings({rq(formula =  delta ~ 1,
+                                     data = df,
+                                     tau = c(agree.u,.5,agree.l))})
+    quan_mod2 = rq(formula =  delta ~ mean,
+                  data = df,
+                  tau = c(agree.u,.5,agree.l))
+    rq_obj = quantreg::summary.rq(quan_mod2, se = "boot")
+    co <- as.data.frame(rq_obj[["coefficients"]])
+    #tidy.rq(quan_mod2, se.type = "boot")
+    #broom:::tidy.rqs(quan_mod2)
+    rq_summary <- suppressWarnings(quantreg::summary.rqs(quan_mod2,
+                                                         se ="boot",
+                                                         alpha = 1 - conf.level))
+    df_test = data.frame()
+
+    for(i in 1:length(rq_summary)){
+      temp = process_rq(rq_summary[[i]])
+      df_test = rbind(df_test,temp)
+    }
+    df_test = df_test[c(4),]
+    if(df_test$p.value < (1-conf.level)){
+      warning("Evidence of proportional bias. Consider setting prop_bias to TRUE.")
+    }
+
+    quan_coef =  suppressWarnings(quantreg::summary.rqs(quan_mod,
+                                                        se =
+                                                          "boot",
+                                                        alpha = 1 - conf.level))
+    df_coef = data.frame()
+    for(i in 1:length(quan_coef)){
+      temp = process_rq(quan_coef[[i]],
+                        conf.int =  TRUE,
+                        conf.level = conf.level)
+      df_coef = rbind(df_coef,temp)
+    }
+    df_coeff = data.frame(estimate = df_coef$estimate,
+                         lower.ci = df_coef$conf.low,
+                         upper.ci = df_coef$conf.high)
+    rownames(df_coeff) = c("Lower LoA", "Bias", "Upper LoA")
+  } else {
+    quan_mod = rq(formula =  delta ~ mean,
+                   data = df,
+                   tau = c(agree.u,.5,agree.l))
+    minavg = min(df$mean)
+    medavg = median(df$mean)
+    maxavg = max(df$mean)
+    ref_med = ref_grid(quan_mod, se = "boot",
+                    tau = .5,
+                    at = list(mean = c(minavg,medavg,maxavg)))
+    # set se to bootstrapped
+    #summary(quan_mod, se = "boot", covariance = TRUE)
+    quan_emm_med = as.data.frame(confint(emmeans(ref_med,
+                           ~ mean), level = conf.level))
+    quan_emm_med$at = paste0("Bias @ ",quan_emm_med$mean)
+    df_coef_med = data.frame(row.names = quan_emm_med$at,
+                             estimate = quan_emm_med$emmean,
+                             lower.ci = quan_emm_med$lower.CL,
+                             upper.ci = quan_emm_med$upper.CL)
+
+    ref_lloa = ref_grid(quan_mod, se = "boot",
+                       tau = agree.u,
+                       at = list(mean = c(minavg,5,maxavg)))
+    # set se to bootstrapped
+    #summary(quan_mod, se = "boot", covariance = TRUE)
+    quan_emm_lloa = as.data.frame(confint(emmeans(ref_lloa,
+                                                 ~ mean), level = conf.level))
+    quan_emm_lloa$at = paste0("Lower LoA @ ",quan_emm_lloa$mean)
+    df_coef_lloa = data.frame(row.names = quan_emm_lloa$at,
+                             estimate = quan_emm_lloa$emmean,
+                             lower.ci = quan_emm_lloa$lower.CL,
+                             upper.ci = quan_emm_lloa$upper.CL)
+
+    ref_uloa = ref_grid(quan_mod, se = "boot",
+                        tau = agree.l,
+                        at = list(mean = c(minavg,5,maxavg)))
+    # set se to bootstrapped
+    #summary(quan_mod, se = "boot", covariance = TRUE)
+    quan_emm_uloa = as.data.frame(confint(emmeans(ref_uloa,
+                                                  ~ mean), level = conf.level))
+    quan_emm_uloa$at = paste0("Upper LoA @ ",quan_emm_uloa$mean)
+    df_coef_uloa = data.frame(row.names = quan_emm_uloa$at,
+                              estimate = quan_emm_uloa$emmean,
+                              lower.ci = quan_emm_uloa$lower.CL,
+                              upper.ci = quan_emm_uloa$upper.CL)
+    df_coeff = rbind(df_coef_lloa,
+                     df_coef_med,
+                     df_coef_uloa)
+
+  }
 
   ## Save LoA ----
-  df_loa = data.frame(
-    estimate = c(d_bar, loa_l, loa_u),
-    lower.ci = c(d_lo, loa_l.l, loa_u.l),
-    upper.ci = c(d_hi, loa_l.u, loa_u.u),
-    row.names = c("Difference","Lower LoA","Upper LoA")
-  )
-
-  if (!missing(delta)) {
-    rej <- (-delta < loa_l.l) * (loa_u.l < delta)
-    rej_text = "don't reject h0"
-    if (rej == 1) {
-      rej_text = "reject h0"
-    }
-  } else {
-    rej_text = "No Hypothesis Test"
-  }
+  df_loa = df_coeff
 
   # Save call----
   # function name will be: as.character(call2[[1]])
+  lm_mod = list(call = list(formula = as.formula(y~x),
+                            data = df))
   call2 = match.call()
   if(is.null(call2$agree.level)){
     call2$agree.level = agree.level
@@ -113,11 +227,14 @@ agree_np <- function(x,
   if(is.null(call2$conf.level)){
     call2$conf.level = conf.level
   }
+  call2$lm_mod = lm_mod
   # Return Results ----
 
   structure(list(loa = df_loa,
+                 agree = df_agree,
                  h0_test = rej_text,
+                 qr_mod = quan_mod,
                  call = call2),
-            class = "adv_agree")
+            class = "simple_agree")
 
 }

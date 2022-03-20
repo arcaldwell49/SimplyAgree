@@ -24,7 +24,7 @@
 #' @export
 
 print.simple_agree <- function(x,...){
-  if(x$class == "simple") {
+  if(x$call == "agree_test") {
   cat("Limit of Agreement = ", x$shieh_test$prop0*100, "%",  sep = "")
   cat("\n")
   cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
@@ -39,18 +39,14 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
-  cat("Mean Bias: ",x$loa$estimate[1]," [",x$loa$lower.ci[1],", ",x$loa$upper.ci[1],"]", sep = "")
-  cat("\n")
-  cat("Lower LoA: ",x$loa$estimate[2]," [",x$loa$lower.ci[2],", ",x$loa$upper.ci[2],"]", sep = "")
-  cat("\n")
-  cat("Upper LoA: ",x$loa$estimate[3]," [",x$loa$lower.ci[3],", ",x$loa$upper.ci[3],"]", sep = "")
+  print(x$loa, digits = 4)
   cat("\n")
   cat("\n")
   cat("###- Concordance Correlation Coefficient (CCC) -###")
   cat("\n")
   cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
   cat("\n")
-  } else if(x$class == "replicates"){
+  } else if(x$call[1] == "agree_reps()"){
     cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
     cat("\n")
     cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
@@ -63,11 +59,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Bland-Altman Limits of Agreement (LoA) -###")
     cat("\n")
-    cat("Mean Bias: ",x$loa$estimate[1]," [",x$loa$lower.ci[1],", ",x$loa$upper.ci[1],"]", sep = "")
-    cat("\n")
-    cat("Lower LoA: ",x$loa$estimate[2]," [",x$loa$lower.ci[2],", ",x$loa$upper.ci[2],"]", sep = "")
-    cat("\n")
-    cat("Upper LoA: ",x$loa$estimate[3]," [",x$loa$lower.ci[3],", ",x$loa$upper.ci[3],"]", sep = "")
+    print(x$loa, digits = 4)
     cat("\n")
     cat("\n")
     cat("###- Concordance Correlation Coefficient* (CCC) -###")
@@ -76,7 +68,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("*Estimated via U-statistics")
     cat("\n")
-  } else if(x$class == "nested"){
+  } else if(x$call[1] == "agree_nest()"){
     cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
     cat("\n")
     cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
@@ -89,11 +81,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Bland-Altman Limits of Agreement (LoA) -###")
     cat("\n")
-    cat("Mean Bias: ",x$loa$estimate[1]," [",x$loa$lower.ci[1],", ",x$loa$upper.ci[1],"]", sep = "")
-    cat("\n")
-    cat("Lower LoA: ",x$loa$estimate[2]," [",x$loa$lower.ci[2],", ",x$loa$upper.ci[2],"]", sep = "")
-    cat("\n")
-    cat("Upper LoA: ",x$loa$estimate[3]," [",x$loa$lower.ci[3],", ",x$loa$upper.ci[3],"]", sep = "")
+    print(x$loa, digits = 4)
     cat("\n")
     cat("\n")
     cat("###- Concordance Correlation Coefficient (CCC) -###")
@@ -102,6 +90,22 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("*Estimated via U-statistics; may be biased")
     cat("\n")
+  } else if(x$call[1] == "agree_np()"){
+    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+    cat("\n")
+    cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
+    cat("\n")
+    cat("Binomial proportions test and quantile regression for LoA.")
+    cat("\n")
+    cat("\n")
+    print(x$agree, digits = 4)
+    cat("\n")
+    cat("Hypothesis Test: ",x$h0_test, sep = "")
+    cat("\n")
+    cat("\n")
+    cat("###- Quantile Limits of Agreement (LoA) -###")
+    cat("\n")
+    print(x$loa, digits = 4)
   }
 
 }
@@ -156,8 +160,8 @@ check <- function(x) {
 
 check.simple_agree <- function(x) {
 
-  if(x$class == "nested"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
-  if(x$class != "simple"){
+  if(x$call[1] == "agree_nest()"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
+  if(x$call[1] != "agree_test()"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
   } else{
@@ -168,7 +172,7 @@ check.simple_agree <- function(x) {
 
   dat = df
   ## Heteroskedasticity -------
-  mod_check = if (x$class != "simple") {
+  mod_check = if (x$call[1] != "agree_test()") {
     lme4::lmer(data = dat,
                delta ~ 1 + (1 | id))
   } else {
@@ -226,7 +230,7 @@ check.simple_agree <- function(x) {
                           signif(norm_test$p.value,4)))
 
   # Proportional Bias -----
-  if(x$class == "simple"){
+  if(x$call[1] == "agree_test()"){
     mod2 = lm(delta ~ mean,
               data = dat)
     aov2 = as.data.frame(anova(mod_check, mod2))

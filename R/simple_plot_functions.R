@@ -4,10 +4,10 @@ simple_ident_plot = function(x,
                              y_name = "y",
                              smooth_method = NULL,
                              smooth_se = TRUE) {
-  if(x$class != "simple"){
+  if(x$call[1] != "agree_test()"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
-    if(x$class == "replicates"){
+    if(x$call[1] == "agree_reps()"){
     df = df %>%
       group_by(id) %>%
       summarize(mxi = sum(!is.na(x)),
@@ -28,10 +28,10 @@ simple_ident_plot = function(x,
   x_lab = x_name
   y_lab = y_name
 
-  pca <- prcomp(~x+y, data = df, retx = FALSE)
+  dems <- calc_dem(df$x, df$y, w_i = rep(1, length(df$y)), error.ratio = 1)
 
-  slp <- with(pca, rotation[2,1] / rotation[1,1])
-  int <- with(pca, center[2] - slp*center[1])
+  slp <- dems$b1
+  int <- dems$b0
   tmp.lm <- data.frame(the_int = int, the_slope = slp)
 
   p1 = ggplot(df,aes(x = x,
@@ -61,7 +61,7 @@ simple_ba_plot = function(x,
                           y_name = "y",
                           smooth_method = NULL,
                           smooth_se = TRUE) {
-  if(x$class != "simple"){
+  if(x$call[1] != "agree_test()"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
 
@@ -126,7 +126,7 @@ simple_ba_plot = function(x,
     if(smooth_method == "gam"){
       if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
 
-        if(x$class == "simple"){
+        if(x$call[1] == "agree_test()"){
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
@@ -156,8 +156,8 @@ simple_ba_plot = function(x,
       }
     } else if(smooth_method == "lm"){
       if (requireNamespace("ggeffects", quietly = TRUE)) {
-        if(x$class !=
-           "simple"){
+        if(x$call[1] !=
+           "agree_test()"){
           lm1 = lme4::lmer(data = df,
                            delta ~ mean + (1|id))
         } else {
@@ -192,6 +192,127 @@ simple_ba_plot = function(x,
           size = 0.8,
           colour = "#3aaf85"
         )
+    }
+
+  }
+
+  return(bland_alt.plot)
+
+}
+
+
+bias_ba_plot = function(x,
+                        x_name = "x",
+                        y_name = "y"){
+
+  if(x$call[1] != "agree_test()"){
+    df = model.frame(x$call$lm_mod)
+    colnames(df) = c("x","y","id")
+
+  } else{
+    df = model.frame(x$call$lm_mod)
+  }
+
+  agree.level = test$call$agree.level
+
+  agree.l = 1 - (1 - agree.level) / 2
+  agree.u = (1 - agree.level) / 2
+
+  df$mean = (df$x + df$y)/2
+  df$delta = df$x - df$y
+  conf.level = x$call$conf.level
+  confq = qnorm(1 - (1 - conf.level) / 2)
+  delta = x$call$delta
+
+  if(x$call[1] == "agree_np()"){
+    quan_mod = rq(formula =  delta ~ mean,
+                  data = df,
+                  tau = c(agree.u,.5,agree.l))
+    emm = get_qemm(quan_mod, df, agree.l,agree.u,
+                   conf.level)
+    bland_alt.plot = ggplot(df,
+           aes(x=mean,
+               y=delta)) +
+      geom_point()+
+      geom_ribbon(inherit.aes = FALSE,
+                  data = emm,
+                  alpha = .2,
+                  aes(y=estimate,
+                      ymax=upper.ci,
+                      ymin=lower.ci,
+                      x= at,
+                      fill=text)) +
+      geom_line(inherit.aes = FALSE,
+                data = emm,
+                aes(y=estimate,
+                    x= at,
+                    color=text)) +
+      scale_fill_viridis_d(option = "C", end = .8) +
+      scale_color_viridis_d(option = "C", end = .8) +
+      labs(x = paste0("Average of ", x_name ," & ", y_name),
+           y = paste0("Difference between Methods ",x_name ," & ", y_name),
+           caption = paste0("Agreement = ", agree.level * 100,"% \n",
+                            "Confidence Level = ", conf.level * 100, "%"),
+           guides = "") +
+      theme_bw() +
+      theme(legend.position = "left",
+            legend.title = element_blank())
+
+    delta = x$call$delta
+    df_delta = data.frame(y1 = c(delta, -1*delta))
+    bland_alt.plot = bland_alt.plot +
+      geom_hline(data = df_delta,
+                 inherit.aes = FALSE,
+                 aes(yintercept = y1),
+                 linetype = 2) +
+      scale_y_continuous(sec.axis = dup_axis(
+        breaks = c(delta, -1*delta),
+        name = "Maximal Allowable Difference"))
+  } else if(x$call[1] == "agree_test()"){
+    lm_mod = lm(delta ~ mean,
+                data = df)
+    emm = get_lmemm(lm_mod, df,
+                    agree.level,
+                    conf.level)
+
+    bland_alt.plot = ggplot(df,
+                            aes(x=mean,
+                                y=delta)) +
+      geom_point()+
+      geom_ribbon(inherit.aes = FALSE,
+                  data = emm,
+                  alpha = .2,
+                  aes(y=estimate,
+                      ymax=upper.ci,
+                      ymin=lower.ci,
+                      x= at,
+                      fill=text)) +
+      geom_line(inherit.aes = FALSE,
+                data = emm,
+                aes(y=estimate,
+                    x= at,
+                    color=text)) +
+      scale_fill_viridis_d(option = "C", end = .8) +
+      scale_color_viridis_d(option = "C", end = .8) +
+      labs(x = paste0("Average of ", x_name ," & ", y_name),
+           y = paste0("Difference between Methods ",x_name ," & ", y_name),
+           caption = paste0("Agreement = ", agree.level * 100,"% \n",
+                            "Confidence Level = ", conf.level * 100, "%"),
+           guides = "") +
+      theme_bw() +
+      theme(legend.position = "left",
+            legend.title = element_blank())
+    if(!is.null(x$call$delta)) {
+      delta = x$call$delta
+      df_delta = data.frame(y1 = c(delta, -1*delta))
+      bland_alt.plot = bland_alt.plot +
+        geom_hline(data = df_delta,
+                   inherit.aes = FALSE,
+                   aes(yintercept = y1),
+                   linetype = 2) +
+        scale_y_continuous(sec.axis = dup_axis(
+          breaks = c(delta, -1*delta),
+          name = "Maximal Allowable Difference"))
     }
 
   }
