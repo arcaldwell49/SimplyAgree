@@ -107,9 +107,18 @@ phi <- function (X1, Y1, X2, Y2, Dmat, delta)
 }
 
 # for agree_test
-ccc.xy <- function(x, y, conf.level,agree.level) {
+ccc.xy <- function(x, y,
+                   conf.level,
+                   agree.level,
+                   TOST = TRUE) {
   N. <- 1 - ((1 - conf.level) / 2)
+  N.2 = if(TOST == FALSE) {
+    1 - ((1 - conf.level) / 2)
+  } else {
+    conf.level
+  }
   zv <- qnorm(N., mean = 0, sd = 1)
+  zv2 = qnorm(N.2, mean = 0, sd = 1)
   dat <- data.frame(x, y)
   id <- complete.cases(dat)
   nmissing <- sum(!complete.cases(dat))
@@ -140,17 +149,17 @@ ccc.xy <- function(x, y, conf.level,agree.level) {
                  4 / (r) ^ 2
   ) / (k -
          2))
-  ll <- p - (zv * sep)
-  ul <- p + (zv * sep)
+  ll <- p - (zv2 * sep)
+  ul <- p + (zv2 * sep)
   t <- log((1 + p) / (1 - p)) / 2
   set = sep / (1 - ((p) ^ 2))
-  llt = t - (zv * set)
-  ult = t + (zv * set)
+  llt = t - (zv2 * set)
+  ult = t + (zv2 * set)
   llt = (exp(2 * llt) - 1) / (exp(2 * llt) + 1)
   ult = (exp(2 * ult) - 1) / (exp(2 * ult) + 1)
   delta.sd <- sqrt(var(delta, na.rm = TRUE))
   var.d = (delta.sd)^2/k
-  var.dlim = (1/k+zv/(2*(k-1)))*(delta.sd)^2
+  var.dlim = (1/k+zv2/(2*(k-1)))*(delta.sd)^2
 
   ba.p <- mean(delta)
   pct <- 1 - (1 - agree.level) / 2
@@ -165,11 +174,11 @@ ccc.xy <- function(x, y, conf.level,agree.level) {
                        var.d = var.d,
                        var.loa = var.dlim,
                        lower.loa = l.loa,
-                       lower.lci = (l.loa - qt(N.,k-1)*sqrt(var.dlim)),
-                       lower.uci = (l.loa + qt(N.,k-1)*sqrt(var.dlim)),
+                       lower.lci = (l.loa - qt(N.2,k-1)*sqrt(var.dlim)),
+                       lower.uci = (l.loa + qt(N.2,k-1)*sqrt(var.dlim)),
                        upper.loa = u.loa,
-                       upper.lci = (u.loa - qt(N.,k-1)*sqrt(var.dlim)),
-                       upper.uci = (u.loa + qt(N.,k-1)*sqrt(var.dlim)))
+                       upper.lci = (u.loa - qt(N.2,k-1)*sqrt(var.dlim)),
+                       upper.uci = (u.loa + qt(N.2,k-1)*sqrt(var.dlim)))
 
   rho.c <- data.frame(p, llt, ult)
   names(rho.c) <- c("est.ccc", "lower.ci", "upper.ci")
@@ -550,3 +559,94 @@ dem_reg = function(x,y,
   }
 }
 
+# LoA prop bias -----
+
+get_lmemm = function(lm_mod, df, agree.level,
+                     conf.level){
+  pct <- 1 - (1 - agree.level) / 2
+  agreelim = qnorm(pct)
+  delta.sd = sigma(lm_mod)
+  ref_med = ref_grid(lm_mod,
+                     at = list(mean = seq(min(df$mean, na.rm =TRUE),
+                                          max(df$mean, na.rm= TRUE),
+                                          length.out=100)))
+  emm_med = as.data.frame(confint(emmeans(ref_med,
+                                          ~ mean), level = conf.level))
+  df_coef_med = data.frame(at = emm_med$mean,
+                           estimate = emm_med$emmean,
+                           lower.ci = emm_med$lower.CL,
+                           upper.ci = emm_med$upper.CL,
+                           text = "Bias")
+
+  df_coef_lloa = data.frame(at = emm_med$mean,
+                            estimate = emm_med$emmean - agreelim*delta.sd,
+                            lower.ci = emm_med$lower.CL - agreelim*delta.sd,
+                            upper.ci = emm_med$upper.CL - agreelim*delta.sd,
+                            text = "Lower LoA")
+  df_coef_uloa = data.frame(at = emm_med$mean,
+                            estimate = emm_med$emmean + agreelim*delta.sd,
+                            lower.ci = emm_med$lower.CL + agreelim*delta.sd,
+                            upper.ci = emm_med$upper.CL + agreelim*delta.sd,
+                            text = "Upper LoA")
+
+  df_emm = rbind(df_coef_uloa,
+                 df_coef_med,
+                 df_coef_lloa)
+
+  df_emm$text = factor(df_emm$text,
+                       levels = c("Upper LoA", "Bias", "Lower LoA"))
+  return(df_emm)
+}
+# MOVERS ------
+
+mover_emm = function(lmer_mod,
+                      agree.level,
+                      conf.level,
+                      TOST,
+                      var_comp){
+  pct <- 1 - (1 - agree.level) / 2
+  LME = var_comp$LME
+  RME = var_comp$RME
+  var_tot = var_comp$var_tot
+  agreeq = qnorm(pct)
+  confq = qnorm(1 - (1 - conf.level) / 2)
+  if(TOST == TRUE){
+    confq2 = qnorm(1 - (1 - conf.level))
+  } else {
+    confq2 = qnorm(1 - (1 - conf.level) / 2)
+  }
+
+  ref_med = ref_grid(lmer_mod,
+                     at = list(mean = seq(min(df$mean, na.rm =TRUE),
+                                          max(df$mean, na.rm= TRUE),
+                                          length.out=100)))
+
+  emm_med = as.data.frame(confint(emmeans(ref_med,
+                                          ~ mean), level = conf.level))
+  df_coef_med = data.frame(at = emm_med$mean,
+                           estimate = emm_med$emmean,
+                           lower.ci = emm_med$lower.CL,
+                           upper.ci = emm_med$upper.CL,
+                           text = "Bias")
+
+  df_coef_lloa = data.frame(at = emm_med$mean,
+                            estimate = emm_med$emmean - agreeq*sqrt(var_tot))
+  df_coef_lloa$lower.ci = df_coef_lloa$estimate - LME
+  df_coef_lloa$upper.ci = df_coef_lloa$estimate + RME
+  df_coef_lloa$text = "Lower LoA"
+
+  df_coef_uloa = data.frame(at = emm_med$mean,
+                            estimate = emm_med$emmean + agreeq*sqrt(var_tot))
+  df_coef_uloa$lower.ci = df_coef_uloa$estimate - RME
+  df_coef_uloa$upper.ci = df_coef_uloa$estimate + LME
+  df_coef_uloa$text = "Upper LoA"
+
+  df_emm = rbind(df_coef_uloa,
+                 df_coef_med,
+                 df_coef_lloa)
+
+  df_emm$text = factor(df_emm$text,
+                       levels = c("Upper LoA", "Bias", "Lower LoA"))
+  return(df_emm)
+
+}

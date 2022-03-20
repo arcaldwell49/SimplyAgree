@@ -5,6 +5,7 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -39,7 +40,8 @@ agree_test <- function(x,
                        y,
                        delta,
                        conf.level = .95,
-                       agree.level = .95) {
+                       agree.level = .95,
+                       TOST = TRUE) {
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 
@@ -52,11 +54,17 @@ agree_test <- function(x,
   }
   # shieh test ----
   prop0 = agree.level
-  alpha = 1 - conf.level
+  alpha = if(TOST == TRUE) {
+    1 - (1 - conf.level) / 2
+  } else {
+    1 - conf.level
+  }
+  #alpha = 1 - conf.level
   # ccc calc ----
   ccc_res = ccc.xy(x, y,
                    conf.level = conf.level,
-                   agree.level = agree.level)
+                   agree.level = agree.level,
+                   TOST = TOST)
   #pull values from ccc function output
   xbar = ccc_res$delta$d #mean delta
   s = ccc_res$delta$d.sd #sd of delta

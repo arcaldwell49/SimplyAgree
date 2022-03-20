@@ -79,39 +79,4 @@ get_qemm = function(quan_mod, df,
 }
 
 
-get_lmemm = function(lm_mod, df, agree.level,
-                     conf.level){
-  pct <- 1 - (1 - agree.level) / 2
-  agreelim = qnorm(pct)
-  delta.sd = sigma(lm_mod)
-  ref_med = ref_grid(lm_mod,
-                     at = list(mean = seq(min(df$mean, na.rm =TRUE),
-                                          max(df$mean, na.rm= TRUE),
-                                          length.out=100)))
-  emm_med = as.data.frame(confint(emmeans(ref_med,
-                                          ~ mean), level = conf.level))
-  df_coef_med = data.frame(at = emm_med$mean,
-                           estimate = emm_med$emmean,
-                           lower.ci = emm_med$lower.CL,
-                           upper.ci = emm_med$upper.CL,
-                           text = "Bias")
 
-  df_coef_lloa = data.frame(at = emm_med$mean,
-                           estimate = emm_med$emmean - agreelim*delta.sd,
-                           lower.ci = emm_med$lower.CL - agreelim*delta.sd,
-                           upper.ci = emm_med$upper.CL- agreelim*delta.sd,
-                           text = "Lower LoA")
-  df_coef_uloa = data.frame(at = emm_med$mean,
-                            estimate = emm_med$emmean + agreelim*delta.sd,
-                            lower.ci = emm_med$lower.CL + agreelim*delta.sd,
-                            upper.ci = emm_med$upper.CL + agreelim*delta.sd,
-                            text = "Upper LoA")
-
-  df_emm = rbind(df_coef_uloa,
-                 df_coef_med,
-                 df_coef_lloa)
-
-  df_emm$text = factor(df_emm$text,
-                       levels = c("Upper LoA", "Bias", "Lower LoA"))
-  return(df_emm)
-}

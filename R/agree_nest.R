@@ -7,6 +7,8 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #'
 #' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
@@ -44,14 +46,23 @@ agree_nest <- function(x,
                        data,
                        delta,
                        agree.level = .95,
-                       conf.level = .95){
+                       conf.level = .95,
+                       TOST = TRUE,
+                       prop_bias = FALSE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
-  alpha.l = 1 - (1 - conf.level) / 2
-  alpha.u = (1 - conf.level) / 2
+  if(TOST == TRUE){
+    confq2 = qnorm(1 - (1 - conf.level) )
+    alpha.l = 1 - (1 - conf.level)
+    alpha.u = (1 - conf.level)
+  } else {
+    confq2 = qnorm(1 - (1 - conf.level) / 2)
+    alpha.l = 1 - (1 - conf.level) / 2
+    alpha.u = (1 - conf.level) / 2
+  }
 
   df = data %>%
     select(all_of(id),all_of(x),all_of(y)) %>%
@@ -75,7 +86,9 @@ agree_nest <- function(x,
                       lower.ci = ccc_nest[2],
                       upper.ci = ccc_nest[3],
                       SE = ccc_nest[4])
-
+  df_lmer = df %>%
+    mutate(mean = (x+y)/2,
+           delta = x - y)
   df2 = df %>%
     group_by(id) %>%
     summarize(m = n(),
@@ -90,13 +103,40 @@ agree_nest <- function(x,
 
   df3 = df2 %>%
     drop_na()
+  d_varl = c()
+  if(prop_bias == TRUE){
+    form1 = as.formula(delta ~ mean)
+  } else{
+    form1 = as.formula(delta ~ 1)
+  }
+  # Get variance per id
+  for(i in 1:nrow(df3)){
+    idtemp = df3[i,]$id
+    dftemp = df %>% filter(id == idtemp) %>%
+      mutate(mean = (x+y)/2,
+             delta = x - y)
+    d_varl[i] = sigma(lm(delta ~ form1,
+                         data = dftemp))^2
+  }
 
-  d_bar = mean(df2$d)
-  d_var = var(df2$d)
-  sdw2 = sum((df3$m-1)/(nrow(df)-nrow(df3))*df3$d_var)
+  if(prop_bias == FALSE){
+    d_bar = mean(df2$d)
+    d_var = var(df2$d)
+    d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
+    d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
+  } else{
+    lmer_d = lme4::lmer(delta ~ mean + (1 | id),
+                        data = df_lmer)
+    d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
+    d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
+    d_lo = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$lower.CL
+    d_hi = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$upper.CL
+  }
+
+  sdw2 = sum((df3$m-1)/(nrow(df)-nrow(df3))*d_varl)
   mh = nrow(df2)/sum(1/df2$m)
-  d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
-  d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
 
   var_tot = d_var + (1-1/mh) * sdw2
   loa_l = d_bar - agreeq*sqrt(var_tot)
@@ -112,8 +152,8 @@ agree_nest <- function(x,
 
   move.u = var_tot + sqrt(move.u.1+move.u.2)
 
-  LME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(var_tot))^2)
-  RME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(var_tot))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move.l))^2)
 
   loa_l.l = loa_l - LME
   loa_l.u = loa_l + RME
@@ -159,6 +199,10 @@ agree_nest <- function(x,
                  h0_test = rej_text,
                  ccc.xy = ccc.xy,
                  call = call2,
+                 var_comp = list(LME = LME,
+                                 RME = RME,
+                                 tot_var = var_tot,
+                                 sdw2 = sdw2),
                  class = "nested"),
             class = "simple_agree")
 

@@ -160,6 +160,10 @@ check <- function(x) {
 
 check.simple_agree <- function(x) {
 
+  if(!(x$call[1] %in% c("agree_nest()","agree_reps()","agree_test()"))){
+    stop("Method not supported by check method.")
+  }
+
   if(x$call[1] == "agree_nest()"){warning("Warning: assumptions tests for agree_nest are only approximate. Proceed with caution.")}
   if(x$call[1] != "agree_test()"){
     df = model.frame(x$call$lm_mod)

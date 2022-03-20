@@ -7,6 +7,8 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -44,14 +46,24 @@ agree_reps <- function(x,
                        data,
                        delta,
                        agree.level = .95,
-                       conf.level = .95){
+                       conf.level = .95,
+                       prop_bias = FALSE,
+                       TOST = TRUE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
-  alpha.l = 1 - (1 - conf.level) / 2
-  alpha.u = (1 - conf.level) / 2
+  if(TOST == TRUE){
+    confq2 = qnorm(1 - (1 - conf.level) )
+    alpha.l = 1 - (1 - conf.level)
+    alpha.u = (1 - conf.level)
+  } else {
+    confq2 = qnorm(1 - (1 - conf.level) / 2)
+    alpha.l = 1 - (1 - conf.level) / 2
+    alpha.u = (1 - conf.level) / 2
+  }
+
 
   df = data %>%
     select(all_of(id),all_of(x),all_of(y)) %>%
@@ -93,20 +105,46 @@ agree_reps <- function(x,
   df3 = df2 %>%
     drop_na()
 
+  df$mean = (df$x + df$y)/2
+  df$delta = (df$x - df$y)
+  #lmer_mod = lme4::lmer(delta ~ 1 + (1|id),
+  #                data = df)
+ # sum(as.data.frame(VarCorr(lmer_mod))$vcov)
   Nx = sum(df2$mxi)
   Ny = sum(df2$myi)
   mxh = nrow(df2)/sum(1/df2$mxi)
   myh = nrow(df2)/sum(1/df2$myi)
 
+  if(prop_bias == FALSE){
+    sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
+    syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
+    d_bar = mean(df2$d, na.rm = TRUE)
+    d_var = var(df2$d, na.rm = TRUE)
+    d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
+    d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
 
-  sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
-  syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
-  d_bar = mean(df2$d, na.rm = TRUE)
-  d_var = var(df2$d, na.rm = TRUE)
-  d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
-  d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
+    tot_var = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
+  } else {
+    lmer_x = lmer(x ~ 1 + (1|id),
+                  data = df)
+    mxh_l = as.data.frame(emmeans(lmer_x, ~1))$emmean
+    lmer_y = lmer(y ~ 1 + (1|id),
+                  data = df)
+    myh_l = as.data.frame(emmeans(lmer_y, ~1))$emmean
+    lmer_d = lmer(delta ~ 1 + (1|id),
+                  data = df)
 
-  tot_var = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
+    d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
+    d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
+    d_lo = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$lower.CL
+    d_hi = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$upper.CL
+    sxw2 = as.data.frame(VarCorr(lmer_x))$vcov[2]
+    syw2 = as.data.frame(VarCorr(lmer_y))$vcov[2]
+    tot_var = d_var + (1-1/mxh_l)*sxw2 + (1-1/myh_l)*syw2
+  }
+
 
   loa_l = d_bar - agreeq*sqrt(tot_var)
 
@@ -122,8 +160,8 @@ agree_reps <- function(x,
   move.u.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.u,Ny-nrow(df2)))))^2
   move.u = tot_var + sqrt(move.u.1+move.u.2+move.u.3)
 
-  LME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
-  RME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
 
   loa_l.l = loa_l - LME
   loa_l.u = loa_l + RME
@@ -168,6 +206,11 @@ agree_reps <- function(x,
                  h0_test = rej_text,
                  ccc.xy = ccc.xy,
                  call = call2,
+                 var_comp = list(var_tot = tot_var,
+                                 var_y = syw2,
+                                 var_x = sxw2,
+                                 LME = LME,
+                                 RME = RME),
                  class = "replicates"),
             class = "simple_agree")
 
