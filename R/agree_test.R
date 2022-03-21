@@ -5,6 +5,7 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -41,7 +42,8 @@ agree_test <- function(x,
                        delta,
                        conf.level = .95,
                        agree.level = .95,
-                       TOST = TRUE) {
+                       TOST = TRUE,
+                       prop_bias = FALSE) {
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 
@@ -54,13 +56,18 @@ agree_test <- function(x,
   }
   # shieh test ----
   prop0 = agree.level
-  alpha = if(TOST == TRUE) {
-    1 - (1 - conf.level) / 2
+  if(TOST == TRUE) {
+    alpha = (1 - conf.level)
+    conf2 = 1 - (1 - conf.level) * 2
   } else {
-    1 - conf.level
+    alpha = (1 - conf.level) / 2
+    conf2 = conf.level
   }
   #alpha = 1 - conf.level
   # ccc calc ----
+  if(prop_bias == TRUE){
+    message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
+  }
   ccc_res = ccc.xy(x, y,
                    conf.level = conf.level,
                    agree.level = agree.level,
@@ -118,12 +125,13 @@ agree_test <- function(x,
     estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
     lower.ci = c(ccc_res$delta$d.lci, ccc_res$delta$lower.lci, ccc_res$delta$upper.lci),
     upper.ci = c(ccc_res$delta$d.uci, ccc_res$delta$lower.uci, ccc_res$delta$upper.uci),
+    ci.level = c(conf.level, conf2, conf2),
     row.names = c("Bias","Lower LoA","Upper LoA")
   )
   # Should I add this to the output?
   var_comp = data.frame(
-    delta.sd = ccc_res$delta$d.sd,
-    var.loa = ccc_res$delta$var.loa
+    sd_delta = ccc_res$delta$d.sd,
+    sd_loa = sqrt(ccc_res$delta$var.loa)
   )
 
   # Save call -----
@@ -136,6 +144,12 @@ agree_test <- function(x,
   if(is.null(call2$conf.level)){
     call2$conf.level = conf.level
   }
+  if(is.null(call2$TOST)){
+    call2$TOST = TOST
+  }
+  if(is.null(call2$prop_bias)){
+    call2$prop_bias = prop_bias
+  }
   call2$lm_mod = lm_mod
 
   # Return Results ----
@@ -147,6 +161,7 @@ agree_test <- function(x,
                  bias = ccc_res$bias,
                  loa = df_loa,
                  h0_test = rej_text,
+                 var_comp = var_comp,
                  call = call2,
                  class = "simple"),
             class = "simple_agree")

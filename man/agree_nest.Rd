@@ -4,7 +4,17 @@
 \alias{agree_nest}
 \title{Tests for Absolute Agreement with Nested Data}
 \usage{
-agree_nest(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
+agree_nest(
+  x,
+  y,
+  id,
+  data,
+  delta,
+  agree.level = 0.95,
+  conf.level = 0.95,
+  TOST = TRUE,
+  prop_bias = FALSE
+)
 }
 \arguments{
 \item{x}{Name of column with first measurement}
@@ -20,6 +30,10 @@ agree_nest(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
+
+\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 }
 \value{
 Returns single simple_agree class object with the results of the agreement analysis.

@@ -6,7 +6,8 @@ testthat::test_that("examples from Zou", {
 
   reps_test = agree_reps(x="x",y="y",
                          id = "id",
-                         data = reps)
+                         data = reps,
+                         TOST = FALSE)
 
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),

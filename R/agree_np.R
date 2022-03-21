@@ -21,7 +21,7 @@
 #' # TBA
 #' @section References:
 #' TBA
-#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var model.frame
+#' @importFrom stats binom.test binomial confint glm median setNames
 #' @import quantreg
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
@@ -226,6 +226,10 @@ agree_np <- function(x,
 
   if(is.null(call2$conf.level)){
     call2$conf.level = conf.level
+  }
+
+  if(is.null(call2$prop_bias)){
+    call2$TOST = prop_bias
   }
   call2$lm_mod = lm_mod
   # Return Results ----

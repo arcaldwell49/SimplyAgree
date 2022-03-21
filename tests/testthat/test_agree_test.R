@@ -5,14 +5,24 @@ testthat::test_that("Simple Use Run Through", {
   data("reps")
   agree1 = agree_test(x = reps$x,
                       y = reps$y,
-                      delta = 2.5)
+                      delta = 2.5,
+                      TOST = TRUE)
+
+  agree2 = agree_test(x = reps$x,
+                      y = reps$y,
+                      delta = 2.5,
+                      TOST = FALSE)
 
   jmvagree1 = jmvagree(data = reps,
                        method1 = "x",
                        method2 = "y",
                        CCC = TRUE,
-                       plotbland = TRUE,
-                       plotcon = TRUE)
+                       plotbland = FALSE,
+                       plotcon = TRUE,
+                       testValue= 2.5,
+                       ciWidth = 95,
+                       agreeWidth = 95)
+
   jmvp = jmvagree1$plotba
   jmvp = jmvagree1$plotcon
   pr_test = print(agree1)
@@ -28,25 +38,25 @@ testthat::test_that("Simple Use Run Through", {
   c1 = check(agree1)$p_norm
   c2 = check(agree1)$p_het
 
-  testthat::expect_equal(agree1$ccc.xy$est.ccc,
+  testthat::expect_equal(agree2$ccc.xy$est.ccc,
                          .479,
                          tolerance = .0001)
-  testthat::expect_equal(agree1$h0_test,
+  testthat::expect_equal(agree2$h0_test,
                         "don't reject h0")
 
-  testthat::expect_equivalent(agree1$loa$estimate,
+  testthat::expect_equivalent(agree2$loa$estimate,
                               c(0.4383333, -1.9470156, 2.8236823),
                               tolerance = 0.001)
   testthat::expect_equivalent(agree1$loa$estimate,
                               jmvagree1$blandtab$asDF$estimate)
 
-  testthat::expect_equivalent(agree1$loa$lower.ci[2:3],
+  testthat::expect_equivalent(agree2$loa$lower.ci[2:3],
                               c(-2.810938, 1.959760),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$lower.ci,
                               jmvagree1$blandtab$asDF$lowerci)
 
-  testthat::expect_equivalent(agree1$loa$upper.ci[2:3],
+  testthat::expect_equivalent(agree2$loa$upper.ci[2:3],
                               c(-1.083094, 3.687604),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$upper.ci,

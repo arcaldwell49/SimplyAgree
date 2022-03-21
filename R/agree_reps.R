@@ -58,10 +58,12 @@ agree_reps <- function(x,
     confq2 = qnorm(1 - (1 - conf.level) )
     alpha.l = 1 - (1 - conf.level)
     alpha.u = (1 - conf.level)
+    conf2 = 1 - (1 - conf.level) * 2
   } else {
     confq2 = qnorm(1 - (1 - conf.level) / 2)
     alpha.l = 1 - (1 - conf.level) / 2
     alpha.u = (1 - conf.level) / 2
+    conf2 = conf.level
   }
 
 
@@ -169,11 +171,16 @@ agree_reps <- function(x,
   loa_u.l = loa_u - RME
   loa_u.u = loa_u + LME
 
+  if(prop_bias == TRUE){
+    message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
+  }
+
   ## Save LoA ----
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
     lower.ci = c(d_lo, loa_l.l, loa_u.l),
     upper.ci = c(d_hi, loa_l.u, loa_u.u),
+    ci.level = c(conf.level, conf2, conf2),
     row.names = c("Bias","Lower LoA","Upper LoA")
   )
 
@@ -198,6 +205,13 @@ agree_reps <- function(x,
 
   if(is.null(call2$conf.level)){
     call2$conf.level = conf.level
+  }
+
+  if(is.null(call2$TOST)){
+    call2$TOST = TOST
+  }
+  if(is.null(call2$prop_bias)){
+    call2$prop_bias = prop_bias
   }
   call2$lm_mod = lm_mod
   # Return Results ----

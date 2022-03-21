@@ -4,10 +4,10 @@ simple_ident_plot = function(x,
                              y_name = "y",
                              smooth_method = NULL,
                              smooth_se = TRUE) {
-  if(x$call[1] != "agree_test()"){
+  if(as.character(x$call[1]) != "agree_test"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
-    if(x$call[1] == "agree_reps()"){
+    if(as.character(x$call[1]) == "agree_reps"){
     df = df %>%
       group_by(id) %>%
       summarize(mxi = sum(!is.na(x)),
@@ -61,7 +61,7 @@ simple_ba_plot = function(x,
                           y_name = "y",
                           smooth_method = NULL,
                           smooth_se = TRUE) {
-  if(x$call[1] != "agree_test()"){
+  if(as.character(x$call[1]) != "agree_test"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
 
@@ -126,7 +126,7 @@ simple_ba_plot = function(x,
     if(smooth_method == "gam"){
       if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
 
-        if(x$call[1] == "agree_test()"){
+        if(as.character(x$call[1]) == "agree_test"){
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
@@ -156,8 +156,8 @@ simple_ba_plot = function(x,
       }
     } else if(smooth_method == "lm"){
       if (requireNamespace("ggeffects", quietly = TRUE)) {
-        if(x$call[1] !=
-           "agree_test()"){
+        if(as.character(x$call[1]) !=
+           "agree_test"){
           lm1 = lme4::lmer(data = df,
                            delta ~ mean + (1|id))
         } else {
@@ -203,9 +203,11 @@ simple_ba_plot = function(x,
 
 bias_ba_plot = function(x,
                         x_name = "x",
-                        y_name = "y"){
+                        y_name = "y",
+                        smooth_method = NULL,
+                        smooth_se = TRUE){
 
-  if(x$call[1] != "agree_test()"){
+  if(as.character(x$call[1]) != "agree_test"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("x","y","id")
 
@@ -213,7 +215,7 @@ bias_ba_plot = function(x,
     df = model.frame(x$call$lm_mod)
   }
 
-  agree.level = test$call$agree.level
+  agree.level = x$call$agree.level
 
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
@@ -224,16 +226,22 @@ bias_ba_plot = function(x,
   confq = qnorm(1 - (1 - conf.level) / 2)
   delta = x$call$delta
 
-  if(x$call[1] == "agree_np()"){
+  if(as.character(x$call[1]) == "agree_np"){
     quan_mod = rq(formula =  delta ~ mean,
                   data = df,
                   tau = c(agree.u,.5,agree.l))
-    emm = get_qemm(quan_mod, df, agree.l,agree.u,
+    emm = get_qemm(quan_mod,
+                   df,
+                   agree.l,
+                   agree.u,
                    conf.level)
     bland_alt.plot = ggplot(df,
            aes(x=mean,
                y=delta)) +
-      geom_point()+
+      geom_point()
+    if(smooth_se == TRUE) {
+
+    bland_alt.plot = bland_alt.plot +
       geom_ribbon(inherit.aes = FALSE,
                   data = emm,
                   alpha = .2,
@@ -242,12 +250,15 @@ bias_ba_plot = function(x,
                       ymin=lower.ci,
                       x= at,
                       fill=text)) +
+      scale_fill_viridis_d(option = "C", end = .8)
+  }
+    bland_alt.plot = bland_alt.plot +
       geom_line(inherit.aes = FALSE,
                 data = emm,
                 aes(y=estimate,
                     x= at,
                     color=text)) +
-      scale_fill_viridis_d(option = "C", end = .8) +
+
       scale_color_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
@@ -268,17 +279,22 @@ bias_ba_plot = function(x,
       scale_y_continuous(sec.axis = dup_axis(
         breaks = c(delta, -1*delta),
         name = "Maximal Allowable Difference"))
-  } else if(x$call[1] == "agree_test()"){
+  } else if(as.character(x$call[1]) == "agree_test"){
     lm_mod = lm(delta ~ mean,
                 data = df)
-    emm = get_lmemm(lm_mod, df,
-                    agree.level,
-                    conf.level)
+    emm = simple_emm(lm_mod,
+                     df,
+                     agree.level,
+                     conf.level,
+                     TOST = x$call$TOST,
+                     var_comp = x$var_comp)
 
     bland_alt.plot = ggplot(df,
                             aes(x=mean,
                                 y=delta)) +
-      geom_point()+
+      geom_point()
+    if(smooth_se == TRUE){
+    bland_alt.plot = bland_alt.plot +
       geom_ribbon(inherit.aes = FALSE,
                   data = emm,
                   alpha = .2,
@@ -287,12 +303,14 @@ bias_ba_plot = function(x,
                       ymin=lower.ci,
                       x= at,
                       fill=text)) +
+      scale_fill_viridis_d(option = "C", end = .8)
+  }
+    bland_alt.plot = bland_alt.plot +
       geom_line(inherit.aes = FALSE,
                 data = emm,
                 aes(y=estimate,
                     x= at,
                     color=text)) +
-      scale_fill_viridis_d(option = "C", end = .8) +
       scale_color_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
@@ -315,7 +333,62 @@ bias_ba_plot = function(x,
           name = "Maximal Allowable Difference"))
     }
 
-  }
+  } else {
+
+    lmer_mod = lmer(delta ~ mean + (1 | id),
+                    data = df)
+    emm = mover_emm(lmer_mod,
+                    df,
+                    agree.level,
+                    conf.level,
+                    TOST = x$call$TOST,
+                    var_comp = x$var_comp)
+
+    bland_alt.plot = ggplot(df,
+                            aes(x=mean,
+                                y=delta)) +
+      geom_point()
+    if(smooth_se == TRUE){
+      bland_alt.plot = bland_alt.plot +
+        geom_ribbon(inherit.aes = FALSE,
+                    data = emm,
+                    alpha = .2,
+                    aes(y=estimate,
+                        ymax=upper.ci,
+                        ymin=lower.ci,
+                        x= at,
+                        fill=text)) +
+        scale_fill_viridis_d(option = "C", end = .8)
+    }
+
+    bland_alt.plot = bland_alt.plot +
+      geom_line(inherit.aes = FALSE,
+                data = emm,
+                aes(y=estimate,
+                    x= at,
+                    color=text)) +
+      scale_color_viridis_d(option = "C", end = .8) +
+      labs(x = paste0("Average of ", x_name ," & ", y_name),
+           y = paste0("Difference between Methods ",x_name ," & ", y_name),
+           caption = paste0("Agreement = ", agree.level * 100,"% \n",
+                            "Confidence Level = ", conf.level * 100, "%"),
+           guides = "") +
+      theme_bw() +
+      theme(legend.position = "left",
+            legend.title = element_blank())
+    if(!is.null(x$call$delta)) {
+      delta = x$call$delta
+      df_delta = data.frame(y1 = c(delta, -1*delta))
+      bland_alt.plot = bland_alt.plot +
+        geom_hline(data = df_delta,
+                   #inherit.aes = FALSE,
+                   aes(yintercept = y1),
+                   linetype = 2) +
+        scale_y_continuous(sec.axis = dup_axis(
+          breaks = c(delta, -1*delta),
+          name = "Maximal Allowable Difference"))
+    }
+    }
 
   return(bland_alt.plot)
 

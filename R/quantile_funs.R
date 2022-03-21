@@ -28,9 +28,11 @@ process_rq <- function(rq_obj, se.type = "boot",
 }
 
 
-get_qemm = function(quan_mod, df,
+get_qemm = function(quan_mod,
+                    df,
                     agree.l,
-                    agree.u){
+                    agree.u,
+                    conf.level){
   ref_med = ref_grid(quan_mod, se = "boot",
                      tau = .5,
                      at = list(mean = seq(min(df$mean, na.rm =TRUE),
