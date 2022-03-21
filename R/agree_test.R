@@ -19,7 +19,6 @@
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
 #'   \item{\code{"call"}}{the matched call}
 #' }
-
 #' @examples
 #' data('reps')
 #' agree_test(x=reps$x, y=reps$y, delta = 2)

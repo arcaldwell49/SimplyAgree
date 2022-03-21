@@ -507,10 +507,10 @@ jack_dem = function(X,Y, w_i, error.ratio){
     b0[j] = u[[j]]$b0
     b1[j] = u[[j]]$b1
   }
-  theta_b0 <- calc_dem(X,Y, w_i)$b0
-  theta_b1 <- calc_dem(X,Y, w_i)$b1
-  b0_bias <- (n - 1) * (mean(b0) - theta_b0)
-  b1_bias <- (n - 1) * (mean(b1) - theta_b1)
+  theta_b0 <- calc_dem(X,Y, w_i, error.ratio)$b0
+  theta_b1 <- calc_dem(X,Y, w_i, error.ratio)$b1
+  b0_bias <- (len - 1) * (mean(b0) - theta_b0)
+  b1_bias <- (len - 1) * (mean(b1) - theta_b1)
   b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
   b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
   res = data.frame(row.names = c("Intercept","Slope"),

@@ -10,7 +10,24 @@
 #' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
 #' @param keep_data Logical indicator (TRUE/FALSE). If TRUE the jacknife samples are returned; default is FALSE.
 #' @details
-#' The function returns a simple_deming object and will print a table of the coefficients.
+#'
+#' This function provides a Deming regression analysis wherein the sum of distances in both x and y direction is minimized.
+#' Deming is useful in situations where both X & Y are measured with error.
+#' The use of Deming regression is beneficial when comparing to methods for measuring the same continuous variable.
+#'
+#' Currently, the dem_reg function covers simple Deming regression and weighted Deming regression. Weighted Deming regression can be used by setting weighted to TRUE. The weights can be provided by the user or can be calculated within function.
+#'
+#' If the data are measured in replicates, then the measurement error can be directly derived from the data. This can be accomplished by indicating the subject identifier with the id argument.
+#' When the replicates are not available in the data, then the ratio of error variances (y/x) can be provided with the error.ratio argument.
+#' @returns
+#' The function returns a simple_deming object.
+#'
+#' \describe{
+#'   \item{\code{"call"}}{The matched call.}
+#'   \item{\code{"deming"}}{Data frame presenting the results from the Deming regression analysis.}
+#'   \item{\code{"resamples"}}{List containing resamples from jacknife procedure.}
+#' }
+
 #'
 #' @section References:
 #' Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.
@@ -24,7 +41,7 @@
 
 dem_reg <- function(x,
                     y,
-                    id,
+                    id = NULL,
                     data,
                     conf.level = .95,
                     weighted = FALSE,
@@ -33,7 +50,7 @@ dem_reg <- function(x,
                     keep_data = FALSE){
   call2 = match.call()
 
-  confq = qnorm(1 - (1 - conf.level) / 2)
+  conf2 =  1-(1 - conf.level) / 2
   if(is.null(id)){
   df = data %>%
     select(all_of(id),all_of(x),all_of(y)) %>%
@@ -89,17 +106,23 @@ dem_reg <- function(x,
   }
 
   res = jack_dem(df3$x, df3$y,
-                 w_i,
-                 error.ratio)
+                 w_i = w_i,
+                 error.ratio = error.ratio)
   jacks = if (keep_data == TRUE) {
     res$jacks
   } else{
     NULL
   }
   res = res$df
+  confq = qt(conf2, nrow(df3)-2)
+  res$df = nrow(df3)-2
   res$lower.ci = res$coef-confq*res$se
   res$upper.ci = res$coef+confq*res$se
   res$ci.level = conf.level
+  res$t = 0
+  res$t[1] = res$coef[1]/res$se[1]
+  res$t[2] = (res$coef[2] - 1)/res$se[2]
+  res$p.value = 2*pt(abs(res$t), res$df, lower.tail=FALSE)
   return(structure(list(deming = res,
                         resamples = jacks,
                         call = call2),

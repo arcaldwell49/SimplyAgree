@@ -2,7 +2,8 @@
 % Please edit documentation in R/agree_np.R
 \name{agree_np}
 \alias{agree_np}
-\title{Nonparametric Test for Limits of Agreement}
+\title{Nonparametric Test for Limits of Agreement
+A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.}
 \usage{
 agree_np(
   x,
@@ -18,7 +19,7 @@ agree_np(
 \arguments{
 \item{x}{Name of column with first measurement.}
 
-\item{y}{Name of other column with first measurement.}
+\item{y}{Name of other column with the other measurement to compare to the first.}
 
 \item{id}{Column with subject identifier with samples are taken in replicates.}
 
@@ -48,9 +49,10 @@ agree_np produces an agreement analysis based on quantiles and
 }
 \section{References}{
 
-TBA
+Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. <https://doi.org/10.1177/096228029900800204>
 }
 
 \examples{
-# TBA
+data('reps')
+agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
 }

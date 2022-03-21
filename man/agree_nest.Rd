@@ -19,7 +19,7 @@ agree_nest(
 \arguments{
 \item{x}{Name of column with first measurement}
 
-\item{y}{Name of other column with first measurement}
+\item{y}{Name of other column with the other measurement to compare to the first.}
 
 \item{id}{Column with subject identifier}
 
