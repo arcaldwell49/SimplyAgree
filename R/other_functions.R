@@ -513,19 +513,16 @@ jack_dem = function(X,Y, w_i, error.ratio){
   b1_bias <- (n - 1) * (mean(b1) - theta_b1)
   b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
   b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
-  return(
-    list(
-      b0 = theta_b0,
-      b1 = theta_b1,
-      b0_bias = b0_bias,
-      b1_bias =  b1_bias,
-      b0_se =  b0_se ,
-      b1_se = b1_se
-    )
-  )
+  res = data.frame(row.names = c("Intercept","Slope"),
+                   coef = c(theta_b0, theta_b1),
+                   bias = c(b0_bias, b1_bias),
+                   se = c(b0_se, b1_se))
+  return(list(df = res,
+              jacks = list(b0 = b0,
+                           b1 = b1)))
 }
 
-dem_reg = function(x,y,
+dem_reg_old = function(x,y,
                    id = NULL,
                    data,
                    error.ratio = 1,

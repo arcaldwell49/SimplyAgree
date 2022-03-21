@@ -1,7 +1,8 @@
 #' Nonparametric Test for Limits of Agreement
+#' A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
 #' @description agree_np produces an agreement analysis based on quantiles and
 #' @param x Name of column with first measurement.
-#' @param y Name of other column with first measurement.
+#' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier with samples are taken in replicates.
 #' @param data Data frame with all data.
 #' @param conf.level the confidence level required. Default is 95\%.
@@ -18,9 +19,10 @@
 #'
 #' }
 #' @examples
-#' # TBA
+#' data('reps')
+#' agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #' @section References:
-#' TBA
+#' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. <https://doi.org/10.1177/096228029900800204>
 #' @importFrom stats binom.test binomial confint glm median setNames
 #' @import quantreg
 #' @importFrom tidyselect all_of
