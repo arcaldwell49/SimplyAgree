@@ -386,7 +386,8 @@ plot_qq = function (x,
       subtitle = "Dots should fall along the line",
       y = y_lab,
       x = "Standard Normal Distribution Quantiles"
-    )
+    ) +
+    theme_bw()
 }
 
 plot_bias = function(x,

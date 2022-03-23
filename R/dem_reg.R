@@ -20,7 +20,7 @@
 #' If the data are measured in replicates, then the measurement error can be directly derived from the data. This can be accomplished by indicating the subject identifier with the id argument.
 #' When the replicates are not available in the data, then the ratio of error variances (y/x) can be provided with the error.ratio argument.
 #' @returns
-#' The function returns a simple_deming object.
+#' The function returns a simple_eiv (eiv meaning "error in variables") object.
 #'
 #' \describe{
 #'   \item{\code{"call"}}{The matched call.}
@@ -49,6 +49,12 @@ dem_reg <- function(x,
                     error.ratio = 1,
                     keep_data = FALSE){
   call2 = match.call()
+  if(is.null(call2$weighted)){
+    call2$weighted = TRUE
+  }
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
+  }
 
   conf2 =  1-(1 - conf.level) / 2
   if(is.null(id)){
@@ -108,23 +114,29 @@ dem_reg <- function(x,
   res = jack_dem(df3$x, df3$y,
                  w_i = w_i,
                  error.ratio = error.ratio)
-  jacks = if (keep_data == TRUE) {
-    res$jacks
+  if (keep_data == TRUE) {
+    jacks = res$jacks
+    call2$weights = w_i
   } else{
-    NULL
+    jacks = NULL
+    call2$weights = w_i
   }
   res = res$df
   confq = qt(conf2, nrow(df3)-2)
   res$df = nrow(df3)-2
   res$lower.ci = res$coef-confq*res$se
   res$upper.ci = res$coef+confq*res$se
-  res$ci.level = conf.level
+  #res$ci.level = conf.level
   res$t = 0
   res$t[1] = res$coef[1]/res$se[1]
   res$t[2] = (res$coef[2] - 1)/res$se[2]
   res$p.value = 2*pt(abs(res$t), res$df, lower.tail=FALSE)
+  call2$error.ratio = error.ratio
+
+  lm_mod = list(call = list(formula = as.formula(df3$y~df3$x)))
+  call2$lm_mod = lm_mod
   return(structure(list(model = res,
                         resamples = jacks,
                         call = call2),
-                   class = "simple_deming"))
+                   class = "simple_eiv"))
 }

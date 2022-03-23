@@ -37,7 +37,7 @@ dem_reg(
 \item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE the jacknife samples are returned; default is FALSE.}
 }
 \value{
-The function returns a simple_deming object.
+The function returns a simple_eiv (eiv meaning "error in variables") object.
 
 \describe{
   \item{\code{"call"}}{The matched call.}
