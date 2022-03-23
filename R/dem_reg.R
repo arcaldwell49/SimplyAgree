@@ -123,7 +123,7 @@ dem_reg <- function(x,
   res$t[1] = res$coef[1]/res$se[1]
   res$t[2] = (res$coef[2] - 1)/res$se[2]
   res$p.value = 2*pt(abs(res$t), res$df, lower.tail=FALSE)
-  return(structure(list(deming = res,
+  return(structure(list(model = res,
                         resamples = jacks,
                         call = call2),
                    class = "simple_deming"))

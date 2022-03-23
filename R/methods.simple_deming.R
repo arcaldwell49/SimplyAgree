@@ -24,7 +24,7 @@
 
 print.simple_deming <- function(x,...){
 
-  print(x$deming, digits = 4)
+  print(x$model, digits = 4)
 }
 
 #' @rdname simple_deming-methods
