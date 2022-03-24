@@ -11,6 +11,7 @@ reli_stats(
   data,
   wide = FALSE,
   col.names = NULL,
+  cv_calc = "MSE",
   conf.level = 0.95
 )
 }
@@ -26,6 +27,8 @@ reli_stats(
 \item{wide}{Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.}
 
 \item{col.names}{If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.}
+
+\item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
 }
@@ -50,6 +53,9 @@ Returns single list with the results of the agreement analysis.
 }
 \description{
 reli_stats produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
+}
+\details{
+The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.
 }
 \section{References}{
 
