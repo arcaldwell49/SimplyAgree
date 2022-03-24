@@ -114,7 +114,8 @@ agree_np <- function(x,
                                   level = conf.level))
   df_agree = data.frame(agreement = glm_emm$prob,
                         lower.ci = glm_emm$asymp.LCL,
-                        upper.ci = glm_emm$asymp.UCL)
+                        upper.ci = glm_emm$asymp.UCL,
+                        row.names = c("% within delta"))
   }
 
   rej <- glm_emm$asymp.LCL >= agree.level
