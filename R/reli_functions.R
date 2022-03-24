@@ -85,25 +85,25 @@ boot_rel = function(x.df, cv_calc = "MSE",
   theta_SEP <- reli2(x.df,cv_calc)$SEP
   theta_SEE <- reli2(x.df,cv_calc)$SEE
 
-  cv_bias <- (mean(cv) - theta_cv)
-  SEM_bias <- (mean(SEM) - theta_SEM)
-  SEP_bias <- (mean(SEP) - theta_SEP)
-  SEE_bias <- (mean(SEE) - theta_SEE)
+  cv_bias <- (mean(cv, na.rm = TRUE) - theta_cv)
+  SEM_bias <- (mean(SEM, na.rm = TRUE) - theta_SEM)
+  SEP_bias <- (mean(SEP, na.rm = TRUE) - theta_SEP)
+  SEE_bias <- (mean(SEE, na.rm = TRUE) - theta_SEE)
 
   cv_se <- sd(cv, na.rm = TRUE)
   SEM_se <- sd(SEM, na.rm = TRUE)
   SEP_se <- sd(SEP, na.rm = TRUE)
   SEE_se <- sd(SEE, na.rm = TRUE)
 
-  cv_lci = quantile(cv, lconf)
-  SEM_lci = quantile(SEM, lconf)
-  SEP_lci = quantile(SEP, lconf)
-  SEE_lci = quantile(SEE, lconf)
+  cv_lci = quantile(cv, lconf, na.rm = TRUE)
+  SEM_lci = quantile(SEM, lconf, na.rm = TRUE)
+  SEP_lci = quantile(SEP, lconf, na.rm = TRUE)
+  SEE_lci = quantile(SEE, lconf, na.rm = TRUE)
 
-  cv_uci = quantile(cv, uconf)
-  SEM_uci = quantile(SEM, uconf)
-  SEP_uci = quantile(SEP, uconf)
-  SEE_uci = quantile(SEE, uconf)
+  cv_uci = quantile(cv, uconf, na.rm = TRUE)
+  SEM_uci = quantile(SEM, uconf, na.rm = TRUE)
+  SEP_uci = quantile(SEP, uconf, na.rm = TRUE)
+  SEE_uci = quantile(SEE, uconf, na.rm = TRUE)
 
   res = list(
     cv = list(
