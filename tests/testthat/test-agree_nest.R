@@ -14,6 +14,29 @@ testthat::test_that("examples from Zou", {
                          data = reps2,
                          TOST = FALSE)
 
+  nest_test2 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          TOST = FALSE,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test2)
+
+  nest_test3 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          TOST = FALSE,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test3)
+
+
+  nest_test3 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps,
+                          TOST = FALSE,
+                          delta = 5,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test3)
+
   testthat::expect_equivalent(nest_test$loa$estimate,
                               c(.7255,-2.14,3.59),
                               tolerance = 0.001)

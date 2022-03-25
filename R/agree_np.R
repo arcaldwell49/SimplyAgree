@@ -9,6 +9,7 @@
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent and this argument is required. Equivalence Bound for Agreement or Maximal Allowable Difference.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #' @return Returns adv-agree object with the results of the agreement analysis.
 #'
 #' \describe{
@@ -37,15 +38,17 @@ agree_np <- function(x,
                      data,
                      delta = NULL,
                      prop_bias = FALSE,
+                     TOST = TRUE,
                      agree.level = .95,
                      conf.level = .95){
-
-  agreeq = qnorm(1 - (1 - agree.level) / 2)
+  if(TOST == TRUE) {
+    conf2 = 1 - (1 - conf.level) * 2
+  } else {
+    conf2 = conf.level
+  }
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
-  confq = qnorm(1 - (1 - conf.level) / 2)
-  alpha.l = 1 - (1 - conf.level) / 2
-  alpha.u = (1 - conf.level) / 2
+
   stopifnot(!is.null(delta) && is.numeric(delta) && delta > 0)
 
   if(!is.null(id)){
@@ -97,13 +100,18 @@ agree_np <- function(x,
 
   if(sum(df_glm$failure) == 0){
     message("All values within delta bounds. Confidence intervals hypothesis test likely bogus.")
-    test = binom.test(sum(df_glm$success), nrow(df_glm))
+    test = binom.test(sum(df_glm$success), sum(df_glm$success))
     df_agree = data.frame(
-      row.names = paste0("Prop. within ",dbound),
+      row.names = paste0("% within ", dbound),
       agreement = test$estimate,
       lower.ci = test$conf.int[1],
       upper.ci = test$conf.int[2]
     )
+    rej <- df_agree$lower.ci >= agree.level
+    rej_text = "don't reject h0"
+    if (rej == TRUE) {
+      rej_text = "reject h0"
+    }
   } else{
 
   glm_mod = glm(cbind(success,failure) ~ 1,
@@ -115,15 +123,17 @@ agree_np <- function(x,
   df_agree = data.frame(agreement = glm_emm$prob,
                         lower.ci = glm_emm$asymp.LCL,
                         upper.ci = glm_emm$asymp.UCL,
-                        row.names = c("% within delta"))
-  }
-
+                        row.names = paste0("% within ", dbound))
   rej <- glm_emm$asymp.LCL >= agree.level
   rej_text = "don't reject h0"
   if (rej == TRUE) {
     rej_text = "reject h0"
   }
+  }
 
+
+
+  # Quantile reg ------
   if(prop_bias == FALSE){
     quan_mod = suppressWarnings({rq(formula =  delta ~ 1,
                                      data = df,
@@ -149,20 +159,40 @@ agree_np <- function(x,
       warning("Evidence of proportional bias. Consider setting prop_bias to TRUE.")
     }
 
-    quan_coef =  suppressWarnings(quantreg::summary.rqs(quan_mod,
+    quan_coef_med =  suppressWarnings(quantreg::summary.rqs(quan_mod,
                                                         se =
                                                           "boot",
                                                         alpha = 1 - conf.level))
+
+    quan_coef_lim =  suppressWarnings(quantreg::summary.rqs(quan_mod,
+                                                        se =
+                                                          "boot",
+                                                        alpha = 1 - conf2))
     df_coef = data.frame()
-    for(i in 1:length(quan_coef)){
-      temp = process_rq(quan_coef[[i]],
+    for(i in 1:length(quan_coef_med)){
+      temp = process_rq(quan_coef_med[[i]],
                         conf.int =  TRUE,
                         conf.level = conf.level)
       df_coef = rbind(df_coef,temp)
     }
+
+    df_coef2 = data.frame()
+    for(i in 1:length(quan_coef_lim)){
+      temp = process_rq(quan_coef_lim[[i]],
+                        conf.int =  TRUE,
+                        conf.level = conf.level)
+      df_coef2 = rbind(df_coef,temp)
+    }
     df_coeff = data.frame(estimate = df_coef$estimate,
-                         lower.ci = df_coef$conf.low,
-                         upper.ci = df_coef$conf.high)
+                         lower.ci = c(df_coef2$conf.low[1],
+                                      df_coef$conf.low[2],
+                                      df_coef2$conf.low[3]),
+                         upper.ci = c(df_coef2$conf.high[1],
+                                      df_coef$conf.high[2],
+                                      df_coef2$conf.high[3]),
+                         ci.level = c(conf2,
+                                      conf.level,
+                                      conf2))
     rownames(df_coeff) = c("Lower LoA", "Bias", "Upper LoA")
   } else {
     quan_mod = rq(formula =  delta ~ mean,
@@ -178,37 +208,39 @@ agree_np <- function(x,
     #summary(quan_mod, se = "boot", covariance = TRUE)
     quan_emm_med = as.data.frame(confint(emmeans(ref_med,
                            ~ mean), level = conf.level))
-    quan_emm_med$at = paste0("Bias @ ",quan_emm_med$mean)
+    quan_emm_med$at = paste0("Bias @ ",signif(quan_emm_med$mean,3))
     df_coef_med = data.frame(row.names = quan_emm_med$at,
                              estimate = quan_emm_med$emmean,
                              lower.ci = quan_emm_med$lower.CL,
                              upper.ci = quan_emm_med$upper.CL)
-
+    df_coef_med$ci.level = conf.level
     ref_lloa = ref_grid(quan_mod, se = "boot",
                        tau = agree.u,
-                       at = list(mean = c(minavg,5,maxavg)))
+                       at = list(mean = c(minavg,medavg,maxavg)))
     # set se to bootstrapped
     #summary(quan_mod, se = "boot", covariance = TRUE)
     quan_emm_lloa = as.data.frame(confint(emmeans(ref_lloa,
-                                                 ~ mean), level = conf.level))
-    quan_emm_lloa$at = paste0("Lower LoA @ ",quan_emm_lloa$mean)
+                                                 ~ mean), level = conf2))
+    quan_emm_lloa$at = paste0("Lower LoA @ ", signif(quan_emm_lloa$mean,3))
     df_coef_lloa = data.frame(row.names = quan_emm_lloa$at,
                              estimate = quan_emm_lloa$emmean,
                              lower.ci = quan_emm_lloa$lower.CL,
                              upper.ci = quan_emm_lloa$upper.CL)
+    df_coef_lloa$ci.level = conf2
 
     ref_uloa = ref_grid(quan_mod, se = "boot",
                         tau = agree.l,
-                        at = list(mean = c(minavg,5,maxavg)))
+                        at = list(mean = c(minavg,medavg,maxavg)))
     # set se to bootstrapped
     #summary(quan_mod, se = "boot", covariance = TRUE)
     quan_emm_uloa = as.data.frame(confint(emmeans(ref_uloa,
-                                                  ~ mean), level = conf.level))
-    quan_emm_uloa$at = paste0("Upper LoA @ ",quan_emm_uloa$mean)
+                                                  ~ mean), level = conf2))
+    quan_emm_uloa$at = paste0("Upper LoA @ ", signif(quan_emm_uloa$mean,3))
     df_coef_uloa = data.frame(row.names = quan_emm_uloa$at,
                               estimate = quan_emm_uloa$emmean,
                               lower.ci = quan_emm_uloa$lower.CL,
                               upper.ci = quan_emm_uloa$upper.CL)
+    df_coef_uloa$ci.level = conf2
     df_coeff = rbind(df_coef_lloa,
                      df_coef_med,
                      df_coef_uloa)
@@ -220,8 +252,7 @@ agree_np <- function(x,
 
   # Save call----
   # function name will be: as.character(call2[[1]])
-  lm_mod = list(call = list(formula = as.formula(y~x),
-                            data = df))
+  lm_mod = list(call = list(formula = as.formula(df$y~df$x)))
   call2 = match.call()
   if(is.null(call2$agree.level)){
     call2$agree.level = agree.level
@@ -232,7 +263,11 @@ agree_np <- function(x,
   }
 
   if(is.null(call2$prop_bias)){
-    call2$TOST = prop_bias
+    call2$prop_bias = prop_bias
+  }
+
+  if(is.null(call2$TOST)){
+    call2$TOST = TOST
   }
   call2$lm_mod = lm_mod
   # Return Results ----

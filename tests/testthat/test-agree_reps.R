@@ -9,6 +9,22 @@ testthat::test_that("examples from Zou", {
                          data = reps,
                          TOST = FALSE)
 
+  reps_test2 = agree_reps(x="x",y="y",
+                         id = "id",
+                         data = reps,
+                         TOST = FALSE,
+                         prop_bias = TRUE)
+  ptest = plot(reps_test2)
+
+  reps_test3 = agree_reps(x="x",y="y",
+                          id = "id",
+                          data = reps,
+                          TOST = FALSE,
+                          delta = 5,
+                          prop_bias = TRUE)
+  ptest = plot(reps_test2)
+
+
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),
                               tolerance = 0.001)

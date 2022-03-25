@@ -4,9 +4,9 @@ simple_ident_plot = function(x,
                              y_name = "y",
                              smooth_method = NULL,
                              smooth_se = TRUE) {
-  if(as.character(x$call[1]) != "agree_test"){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
     df = model.frame(x$call$lm_mod)
-    colnames(df) = c("x","y","id")
+    colnames(df) = c("y","x","id")
     if(as.character(x$call[1]) == "agree_reps"){
     df = df %>%
       group_by(id) %>%
@@ -21,6 +21,7 @@ simple_ident_plot = function(x,
 
   } else{
     df = model.frame(x$call$lm_mod)
+    colnames(df) = c("y", "x")
   }
 
   scalemin = min(c(min(df$x, na.rm = TRUE),min(df$y, na.rm = TRUE)))
@@ -61,12 +62,13 @@ simple_ba_plot = function(x,
                           y_name = "y",
                           smooth_method = NULL,
                           smooth_se = TRUE) {
-  if(as.character(x$call[1]) != "agree_test"){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
     df = model.frame(x$call$lm_mod)
-    colnames(df) = c("x","y","id")
+    colnames(df) = c("y","x","id")
 
   } else{
     df = model.frame(x$call$lm_mod)
+    colnames(df) = c("y","x")
   }
   df_loa = x$loa
 
@@ -126,7 +128,7 @@ simple_ba_plot = function(x,
     if(smooth_method == "gam"){
       if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
 
-        if(as.character(x$call[1]) == "agree_test"){
+        if(as.character(x$call[1]) %in% c("agree_test", "agree_np") ){
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
@@ -141,7 +143,7 @@ simple_ba_plot = function(x,
 
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
-            geom_ribbon(inherit.aes = FALSE,
+            geom_ribbon(#inherit.aes = FALSE,
                         data = df2,
                         alpha = .2,
                         aes(x=x, ymin=conf.low,ymax=conf.high))
@@ -156,8 +158,8 @@ simple_ba_plot = function(x,
       }
     } else if(smooth_method == "lm"){
       if (requireNamespace("ggeffects", quietly = TRUE)) {
-        if(as.character(x$call[1]) !=
-           "agree_test"){
+        if(!(as.character(x$call[1]) %in%
+           c("agree_test", "agree_np"))){
           lm1 = lme4::lmer(data = df,
                            delta ~ mean + (1|id))
         } else {
@@ -168,7 +170,7 @@ simple_ba_plot = function(x,
         df2 = as.data.frame(ggeffects::ggemmeans(lm1, "mean"))
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
-            geom_ribbon(inherit.aes = FALSE,
+            geom_ribbon(#inherit.aes = FALSE,
                         data = df2,
                         alpha = .2,
                         aes(x=x, ymin=conf.low,ymax=conf.high))
@@ -207,12 +209,13 @@ bias_ba_plot = function(x,
                         smooth_method = NULL,
                         smooth_se = TRUE){
 
-  if(as.character(x$call[1]) != "agree_test"){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
     df = model.frame(x$call$lm_mod)
-    colnames(df) = c("x","y","id")
+    colnames(df) = c("y","x","id")
 
   } else{
     df = model.frame(x$call$lm_mod)
+    colnames(df) = c("y","x")
   }
 
   agree.level = x$call$agree.level
@@ -242,8 +245,7 @@ bias_ba_plot = function(x,
     if(smooth_se == TRUE) {
 
     bland_alt.plot = bland_alt.plot +
-      geom_ribbon(inherit.aes = FALSE,
-                  data = emm,
+      geom_ribbon(data = emm,
                   alpha = .2,
                   aes(y=estimate,
                       ymax=upper.ci,
@@ -273,7 +275,7 @@ bias_ba_plot = function(x,
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
-                 inherit.aes = FALSE,
+                 #inherit.aes = FALSE,
                  aes(yintercept = y1),
                  linetype = 2) +
       scale_y_continuous(sec.axis = dup_axis(
@@ -295,8 +297,7 @@ bias_ba_plot = function(x,
       geom_point()
     if(smooth_se == TRUE){
     bland_alt.plot = bland_alt.plot +
-      geom_ribbon(inherit.aes = FALSE,
-                  data = emm,
+      geom_ribbon(data = emm,
                   alpha = .2,
                   aes(y=estimate,
                       ymax=upper.ci,
@@ -325,7 +326,7 @@ bias_ba_plot = function(x,
       df_delta = data.frame(y1 = c(delta, -1*delta))
       bland_alt.plot = bland_alt.plot +
         geom_hline(data = df_delta,
-                   inherit.aes = FALSE,
+                   #inherit.aes = FALSE,
                    aes(yintercept = y1),
                    linetype = 2) +
         scale_y_continuous(sec.axis = dup_axis(
@@ -350,8 +351,7 @@ bias_ba_plot = function(x,
       geom_point()
     if(smooth_se == TRUE){
       bland_alt.plot = bland_alt.plot +
-        geom_ribbon(inherit.aes = FALSE,
-                    data = emm,
+        geom_ribbon(data = emm,
                     alpha = .2,
                     aes(y=estimate,
                         ymax=upper.ci,

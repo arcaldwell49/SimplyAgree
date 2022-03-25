@@ -49,15 +49,12 @@ dem_reg <- function(x,
                     error.ratio = 1,
                     keep_data = FALSE){
   call2 = match.call()
-  if(is.null(call2$weighted)){
-    call2$weighted = TRUE
-  }
-  if(is.null(call2$conf.level)){
-    call2$conf.level = conf.level
-  }
+  call2$weighted = weighted
+  call2$conf.level = conf.level
+  call2$id = id
 
   conf2 =  1-(1 - conf.level) / 2
-  if(is.null(id)){
+  if(!is.null(id)){
   df = data %>%
     select(all_of(id),all_of(x),all_of(y)) %>%
     rename(id = all_of(id),

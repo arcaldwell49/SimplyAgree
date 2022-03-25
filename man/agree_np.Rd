@@ -12,6 +12,7 @@ agree_np(
   data,
   delta = NULL,
   prop_bias = FALSE,
+  TOST = TRUE,
   agree.level = 0.95,
   conf.level = 0.95
 )
@@ -28,6 +29,8 @@ agree_np(
 \item{delta}{The threshold below which methods agree/can be considered equivalent and this argument is required. Equivalence Bound for Agreement or Maximal Allowable Difference.}
 
 \item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
+
+\item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 

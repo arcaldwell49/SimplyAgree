@@ -196,7 +196,7 @@ agree_reps <- function(x,
 
   # Save call----
 
-  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
+  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
                                                    df$id)))
   call2 = match.call()
   if(is.null(call2$agree.level)){

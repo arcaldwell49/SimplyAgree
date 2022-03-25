@@ -29,6 +29,8 @@ print.simple_agree <- function(x,...){
   } else {
     x$call$conf.level
   }
+  LOA = x$loa
+  colnames(LOA) = c("Estimate", "Lower CI", "Upper CI", "CI Level")
   if(as.character(x$call[1]) == "agree_test") {
   cat("Limit of Agreement = ", x$shieh_test$prop0*100, "%",  sep = "")
   #cat("\n")
@@ -45,7 +47,7 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
-  print(x$loa, digits = 4)
+  print(LOA, digits = 4)
   cat("\n")
   if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
     cat("\n")}
@@ -67,7 +69,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Bland-Altman Limits of Agreement (LoA) -###")
     cat("\n")
-    print(x$loa, digits = 4)
+    print(LOA, digits = 4)
     cat("\n")
     if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
@@ -91,7 +93,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("###- Bland-Altman Limits of Agreement (LoA) -###")
     cat("\n")
-    print(x$loa, digits = 4)
+    print(LOA, digits = 4)
     cat("\n")
     if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
@@ -103,20 +105,22 @@ print.simple_agree <- function(x,...){
     cat("\n")
   } else if(as.character(x$call[1]) == "agree_np"){
     cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+    #cat("\n")
+    #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
-    cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
-    cat("\n")
-    cat("Binomial proportions test and quantile regression for LoA.")
+    cat("Binomial proportions test and quantile regression for LoA")
     cat("\n")
     cat("\n")
+    agree_tab = x$agree
+    colnames(agree_tab) = c("Agreement", "Lower CI", "Upper CI")
     print(x$agree, digits = 4)
-    cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
     cat("\n")
     cat("###- Quantile Limits of Agreement (LoA) -###")
     cat("\n")
-    print(x$loa, digits = 4)
+    print(LOA, digits = 4)
+    cat("\n")
   }
 
 }
@@ -186,9 +190,10 @@ check.simple_agree <- function(x) {
 
   if(as.character(x$call[1]) != "agree_test"){
     df = model.frame(x$call$lm_mod)
-    colnames(df) = c("x","y","id")
+    colnames(df) = c("y","x","id")
   } else{
     df = model.frame(x$call$lm_mod)
+    colnames(df) = c("y","x")
   }
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y

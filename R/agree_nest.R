@@ -188,7 +188,7 @@ agree_nest <- function(x,
     delta = NULL
   }
 
-  lm_mod = list(call = list(formula = as.formula(df$x ~ df$y +
+  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
                                                    df$id)))
   call2 = match.call()
   if(is.null(call2$agree.level)){
@@ -213,7 +213,7 @@ agree_nest <- function(x,
                  call = call2,
                  var_comp = list(LME = LME,
                                  RME = RME,
-                                 tot_var = var_tot,
+                                 var_tot = var_tot,
                                  sdw2 = sdw2),
                  class = "nested"),
             class = "simple_agree")

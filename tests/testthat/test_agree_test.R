@@ -8,6 +8,13 @@ testthat::test_that("Simple Use Run Through", {
                       delta = 2.5,
                       TOST = TRUE)
 
+  agree_pr = agree_test(x = reps$x,
+                      y = reps$y,
+                      delta = 2.5,
+                      TOST = TRUE,
+                      prop_bias = TRUE)
+  p1 = plot(agree_pr)
+
   agree2 = agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,

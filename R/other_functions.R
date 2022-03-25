@@ -523,90 +523,9 @@ jack_dem = function(X,Y, w_i, error.ratio){
                            b1 = b1)))
 }
 
-dem_reg_old = function(x,y,
-                   id = NULL,
-                   data,
-                   error.ratio = 1,
-                   conf.level = .95){
-  confq = qnorm(1 - (1 - conf.level) / 2)
-  df = data %>%
-    select(all_of(id),all_of(x),all_of(y)) %>%
-    rename(id = all_of(id),
-           x = all_of(x),
-           y = all_of(y)) %>%
-    select(id,x,y)
-
-  if(is.null(id)){
-    df3 = df
-  } else{
-    df2 = df %>%
-      group_by(id) %>%
-      mutate(mean_y = mean(y, na.rm =TRUE),
-             mean_x = mean(x, na.rm =TRUE),
-             n_x = sum(!is.na(x)),
-             n_y = sum(!is.na(y))) %>%
-      ungroup() %>%
-      mutate(diff_y = y - mean_y,
-             diff_y2 = diff_y^2,
-             diff_x = x - mean_x,
-             diff_x2 = diff_x^2)
-    df3 = df2 %>%
-      group_by(id) %>%
-      summarize(n_x = mean(n_x),
-                x = mean(x, na.rm = TRUE),
-                sum_num_x = sum(diff_x2, na.rm = TRUE),
-                n_y = mean(n_y),
-                y = mean(y, na.rm = TRUE),
-                sum_num_y = sum(diff_y2, na.rm = TRUE),
-                .groups = 'drop')
-
-    var_x = sum(df3$sum_num_x) / sum(df3$n_x-1)
-    var_y = sum(df3$sum_num_y) / sum(df3$n_y-1)
-
-    error.ratio = var_x/var_y
-  }
-}
 
 # LoA prop bias -----
 
-get_lmemm = function(lm_mod,
-                     df,
-                     agree.level,
-                     conf.level){
-  pct <- 1 - (1 - agree.level) / 2
-  agreelim = qnorm(pct)
-  delta.sd = sigma(lm_mod)
-  ref_med = ref_grid(lm_mod,
-                     at = list(mean = seq(min(df$mean, na.rm =TRUE),
-                                          max(df$mean, na.rm= TRUE),
-                                          length.out=100)))
-  emm_med = as.data.frame(confint(emmeans(ref_med,
-                                          ~ mean), level = conf.level))
-  df_coef_med = data.frame(at = emm_med$mean,
-                           estimate = emm_med$emmean,
-                           lower.ci = emm_med$lower.CL,
-                           upper.ci = emm_med$upper.CL,
-                           text = "Bias")
-
-  df_coef_lloa = data.frame(at = emm_med$mean,
-                            estimate = emm_med$emmean - agreelim*delta.sd,
-                            lower.ci = emm_med$lower.CL - agreelim*delta.sd,
-                            upper.ci = emm_med$upper.CL - agreelim*delta.sd,
-                            text = "Lower LoA")
-  df_coef_uloa = data.frame(at = emm_med$mean,
-                            estimate = emm_med$emmean + agreelim*delta.sd,
-                            lower.ci = emm_med$lower.CL + agreelim*delta.sd,
-                            upper.ci = emm_med$upper.CL + agreelim*delta.sd,
-                            text = "Upper LoA")
-
-  df_emm = rbind(df_coef_uloa,
-                 df_coef_med,
-                 df_coef_lloa)
-
-  df_emm$text = factor(df_emm$text,
-                       levels = c("Upper LoA", "Bias", "Lower LoA"))
-  return(df_emm)
-}
 # MOVERS ------
 
 mover_emm = function(lmer_mod,
