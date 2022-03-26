@@ -34,7 +34,8 @@ Suggests:
     covr,
     cccrm,
     mgcv,
-    ggeffects
+    ggeffects,
+    deming
 VignetteBuilder:
     knitr
 Depends: 
