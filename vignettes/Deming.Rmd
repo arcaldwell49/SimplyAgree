@@ -1,0 +1,38 @@
+---
+title: "Deming Regression"
+author: "Aaron R. Caldwell"
+date: "Last Updated: `r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+bibliography: refs.bib
+vignette: >
+  %\VignetteIndexEntry{Deming Regression}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Simple Deming Regression
+
+## Checking Assumptions
+
+## Plotting Results
+
+
+# Weighted Deming Regression
+
+## Checking Assumptions
+
+## Plotting Results
+
