@@ -186,6 +186,43 @@ $$
 \end{aligned}
 $$
 
+### ICC(1,k)
+
+$$
+\begin{aligned}
+  F =  \frac{MSB - MSW}{MSB} \\
+  df_{n} = n_j - 1 \\
+  df_{d} = n_j \cdot (n_k - 1) \\
+  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
+  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
+  Lower \space CI = 1-\frac{1}{F_L} \\
+  Upper \space CI = 1-\frac{1}{F_U}
+\end{aligned}
+$$
+### ICC(2,k)
+
+$$
+\begin{aligned}
+  F =  \frac{MSB - MSW}{MSB} \\
+  df_{n} = n_j - 1 \\
+  df_{d} = n_j \cdot (n_k - 1) \\
+  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
+  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
+      vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 \\
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
+                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 \\
+   
+  v = \frac{vn}{vd} \\
+  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} \\
+  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} \\
+  L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} \\
+  U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)} \\
+  Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))} \\
+  Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
+\end{aligned}
+$$
+
 ## Standard Error Calculations
 
 The standard error of the measurement (SEM), standard error of the estimate (SEE), and standard error of prediction (SEP) are all estimated with the following calculations.
