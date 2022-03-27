@@ -123,17 +123,61 @@ $$
 
 $$
 \begin{aligned}
-ICC(1,1) = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} \\
-ICC(2,1) = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} \\
-ICC(3,1) = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
+ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} \\
+ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} \\
+ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
 \\
 \\
-ICC(1,k) = \frac{MSB - MSW}{MSB}
+ICC_{(1,k)} = \frac{MSB - MSW}{MSB}
 \\
-ICC(2,k) = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
+ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
 \\
-ICC(3,k) = \frac{MSB - MSE}{MSB}
+ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
 \end{aligned}
 $$
+## ICC Confidence Intervals
+
+TBA
+
+## Standard Error Calculations
+
+The standard error of the measurement (SEM), standard error of the estimate (SEE), and standard error of prediction (SEP) are all estimated with the following calculations.
+
+
+$$
+\begin{aligned}
+ SEM = \sqrt{MSE} \\
+\\
+
+ SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} \\ 
+ \\
+ SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} \\
+  
+\end{aligned}
+$$
+## Coefficient of Variation 
+
+The CV is calculated 3 potential ways within `reli_stats`. I highly recommend reporting the default version of CV.
+
+1. From the MSE (default)
+
+$$
+CV = \frac{MSE }{ \bar y}
+$$
+
+2. From the SEM (most conservative)^[Also called "%SEM" in some texts]
+
+$$
+CV = \frac{SEM}{ \bar y}
+$$
+
+3. From the model residuals (most liberal)
+
+$$
+CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{ \bar y}
+$$
+## Other Confidence Intervals
+
+TBA
 
 # References

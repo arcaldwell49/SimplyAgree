@@ -59,6 +59,7 @@ plot(a1, type = 1)
 plot(a1, type = 2) 
 ```
 
+
 ## Calculations in `agree_test`
 
 ### Shieh's test
@@ -78,6 +79,7 @@ The reported limits of agreement are derived from the work of @bland1986 and @bl
 $$
 LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
 $$
+
 wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores.
 
 ### Concordance Correlation Coefficient
@@ -150,6 +152,19 @@ plot(a3, type = 2)
 All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
 
 In addition, the CCC calculations are derived from the `cccUst` function of the `cccrm` R package. The mathematics for this CCC calculation can be found in the work of @king2007 and @carrasco2009.
+
+# Checking Assumptions
+
+TBA
+
+# Proportional Bias
+
+TBA
+
+
+# Non-parametric Alternatives
+
+TBA
 
 # Agreement with Mixed Models
 
