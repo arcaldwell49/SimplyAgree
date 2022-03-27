@@ -72,7 +72,7 @@ Also included in the results is a plot of the measurements across the items (e.g
 plot(test1)
 ```
 
-## Confidence Intervals
+## Bootstrapped Confidence Intervals
 
 TBA
 
@@ -89,7 +89,7 @@ $$
     \text{, for id j = 1,} \dots \text{,J} \\
     \alpha_{k}  &\sim N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}} \right)
     \text{, for items k = 1,} \dots \text{,K}
-\end{aligned}
+\end{aligned} 
 $$
 
 ## Components of Variance
@@ -135,9 +135,36 @@ ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
 ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
 \end{aligned}
 $$
+
 ## ICC Confidence Intervals
 
-TBA
+### ICC(1,1)
+
+$$
+\begin{aligned}
+  F =  \frac{MSB}{MSW} \\
+  df_{n} = n_j - 1 \\
+  df_{d} = n_j \cdot (n_k - 1) \\
+  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
+  F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} \\
+  Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} \\
+  Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
+\end{aligned}
+$$
+
+### ICC(2,1)
+
+$$
+\begin{aligned}
+  F =  \frac{MSB}{MSE} \\
+  df_{n} = n_j - 1 \\
+  df_{d} = (n_j-1) \cdot (n_k - 1) \\
+  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
+  F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} \\
+  Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} \\
+  Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
+\end{aligned}
+$$
 
 ## Standard Error Calculations
 
@@ -146,15 +173,17 @@ The standard error of the measurement (SEM), standard error of the estimate (SEE
 
 $$
 \begin{aligned}
- SEM = \sqrt{MSE} \\
+SEM = \sqrt{MSE} \\
 \\
 
- SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} \\ 
+SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} \\ 
  \\
- SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} \\
+ 
+SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} \\
   
 \end{aligned}
 $$
+
 ## Coefficient of Variation 
 
 The CV is calculated 3 potential ways within `reli_stats`. I highly recommend reporting the default version of CV.
