@@ -146,7 +146,7 @@ $$
   df_{n} = n_j - 1 \\
   df_{d} = n_j \cdot (n_k - 1) \\
   F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
-  F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} \\
+  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
   Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} \\
   Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
 \end{aligned}
@@ -156,13 +156,33 @@ $$
 
 $$
 \begin{aligned}
-  F =  \frac{MSB}{MSE} \\
+  F =  \frac{MSJ}{MSE} \\
+    vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 \\
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
+                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 \\
+   
+  v = \frac{vn}{vd} \\
+  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} \\
+  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} \\
+  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} \\
+  Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+\end{aligned}
+$$
+
+### ICC(3,1)
+
+$$
+\begin{aligned}
+  F =  \frac{MSJ}{MSE} \\
   df_{n} = n_j - 1 \\
   df_{d} = (n_j-1) \cdot (n_k - 1) \\
   F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
   F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} \\
-  Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} \\
-  Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
+  F3L <- F31/qf(1 - alpha, df21n, df21d) \\
+  F3U <- F31 * qf(1 - alpha, df21d, df21n) \\
+  Lower \space CI = (F3L - 1)/(F3L + n_k - 1) \\
+  Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
 \end{aligned}
 $$
 
