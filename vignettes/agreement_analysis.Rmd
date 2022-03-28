@@ -80,7 +80,7 @@ $$
 LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
 $$
 
-wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores.
+wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores. If `TOST` is set to TRUE then equation is altered slightly with the critical t ($t_{1-\alpha,N-1}$).
 
 ### Concordance Correlation Coefficient
 
@@ -147,11 +147,131 @@ plot(a3, type = 1)
 
 plot(a3, type = 2)
 ```
-### Calculations for `agree_reps` & `agree_nest`
+
+## Calculations for `agree_reps` & `agree_nest`
 
 All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
 
-In addition, the CCC calculations are derived from the `cccUst` function of the `cccrm` R package. The mathematics for this CCC calculation can be found in the work of @king2007 and @carrasco2009.
+## agree_reps LoA
+
+**Step 1: Calculate Individual Subject Means and Variances**
+
+$$
+\bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
+$$
+$$
+\bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
+$$
+$$
+\bar d_i = \bar x_i - \bar y_i
+$$
+
+$$
+\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
+$$
+
+$$
+s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
+$$
+
+$$
+s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
+$$
+
+$$
+s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
+$$
+
+**Step 2: Compute pooled estimates of within subject errors**
+
+$$
+s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
+$$
+
+$$
+s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
+$$
+
+**Step 3: Compute Harmonic Means of Replicates**
+
+$$
+m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
+$$
+
+$$
+m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
+$$
+**Step 4: Compute the variance of the differences**
+
+$$
+s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
+$$
+**Step 5: Compute MOVER Components**
+
+$$
+S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
+$$
+
+$$
+S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
+$$
+$$
+S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
+$$
+
+$$
+S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
+$$
+$$
+l = s_d^2 - S_1
+$$
+
+$$
+u = s_d^2 + S_1
+$$
+
+$$
+LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+$$
+
+$$
+RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
+$$
+### LoA
+
+$$
+LOA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+$$
+
+$$
+LOA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+$$
+
+### Lower LoA CI
+
+$$
+Lower \space CI = LoA_{lower} - LME
+$$
+
+
+$$
+Upper \space CI = LoA_{lower} + RME
+$$
+
+### Upper LoA CI
+
+$$
+Lower \space CI = LoA_{upper} - RME
+$$
+
+
+$$
+Upper \space CI = LoA_{upper} + LME
+$$
+
+## CCC from U-statistics
+
+The CCC calculations are derived from the `cccUst` function of the `cccrm` R package. The mathematics for this CCC calculation can be found in the work of @king2007 and @carrasco2009.
 
 # Checking Assumptions
 

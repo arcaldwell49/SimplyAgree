@@ -83,13 +83,17 @@ TBA
 The linear mixed model used for the calculations is specified as the following:
 
 $$
-\begin{aligned}
-  \operatorname{Y}_{i}  &\sim N \left(\alpha_{j[i],k[i]}, \sigma^2 \right) \\
-    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
-    \text{, for id j = 1,} \dots \text{,J} \\
-    \alpha_{k}  &\sim N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}} \right)
+  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right) 
+$$
+
+$$
+    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for id j = 1,} \dots \text{,J} 
+$$
+
+$$
+    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}} \right)
     \text{, for items k = 1,} \dots \text{,K}
-\end{aligned} 
 $$
 
 ## Components of Variance
@@ -122,18 +126,22 @@ $$
 ## Intraclass Correlation Coefficients
 
 $$
-\begin{aligned}
-ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} \\
-ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} \\
+ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} 
+$$
+$$
+ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} 
+$$
+$$
 ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
-\\
-\\
+$$
+$$
 ICC_{(1,k)} = \frac{MSB - MSW}{MSB}
-\\
+$$
+$$
 ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
-\\
+$$
+$$
 ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
-\end{aligned}
 $$
 
 ## ICC Confidence Intervals
@@ -141,86 +149,199 @@ $$
 ### ICC(1,1)
 
 $$
-\begin{aligned}
-  F =  \frac{MSB}{MSW} \\
-  df_{n} = n_j - 1 \\
-  df_{d} = n_j \cdot (n_k - 1) \\
-  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
-  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
-  Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} \\
-  Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
-\end{aligned}
+F =  \frac{MSB}{MSW} 
 $$
+
+$$
+df_{n} = n_j - 1 
+$$
+
+$$
+df_{d} = n_j \cdot (n_k - 1)
+$$
+
+$$ 
+ F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
+$$
+
+$$
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} 
+$$
+
+$$ 
+Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} 
+$$
+
+$$ 
+Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)} 
+$$
+
 
 ### ICC(2,1)
 
 $$
-\begin{aligned}
-  F =  \frac{MSJ}{MSE} \\
-    vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 \\
+F =  \frac{MSJ}{MSE} 
+$$
+
+$$
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 
+$$
+
+$$
   vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
-                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 \\
-   
-  v = \frac{vn}{vd} \\
-  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} \\
-  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} \\
-  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} \\
+                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 
+$$
+$$
+  v = \frac{vn}{vd} 
+$$
+
+$$
+  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} 
+$$
+
+$$
+  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} 
+$$
+
+$$
+  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} 
+$$
+
+$$
   Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
-\end{aligned}
 $$
 
 ### ICC(3,1)
 
 $$
-\begin{aligned}
-  F =  \frac{MSJ}{MSE} \\
-  df_{n} = n_j - 1 \\
-  df_{d} = (n_j-1) \cdot (n_k - 1) \\
-  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
-  F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} \\
-  F3L <- F31/qf(1 - alpha, df21n, df21d) \\
-  F3U <- F31 * qf(1 - alpha, df21d, df21n) \\
-  Lower \space CI = (F3L - 1)/(F3L + n_k - 1) \\
-  Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
-\end{aligned}
+F =  \frac{MSJ}{MSE} 
+$$
+$$
+df_{n} = n_j - 1 
+$$
+$$
+df_{d} = (n_j-1) \cdot (n_k - 1) 
+$$
+
+$$
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
+$$
+$$
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} 
+$$
+$$
+F3L <- F31/qf(1 - alpha, df21n, df21d) 
+$$
+$$
+F3U <- F31 * qf(1 - alpha, df21d, df21n) 
+$$
+$$
+Lower \space CI = (F3L - 1)/(F3L + n_k - 1) 
+$$
+
+$$
+Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
 $$
 
 ### ICC(1,k)
 
 $$
-\begin{aligned}
-  F =  \frac{MSB - MSW}{MSB} \\
-  df_{n} = n_j - 1 \\
-  df_{d} = n_j \cdot (n_k - 1) \\
-  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
-  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
-  Lower \space CI = 1-\frac{1}{F_L} \\
-  Upper \space CI = 1-\frac{1}{F_U}
-\end{aligned}
+F =  \frac{MSB - MSW}{MSB} 
 $$
+$$
+df_{n} = n_j - 1 
+$$
+
+$$
+df_{d} = n_j \cdot (n_k - 1) 
+$$
+
+$$
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
+$$
+$$
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} 
+$$
+
+$$
+Lower \space CI = 1-\frac{1}{F_L} 
+$$
+$$
+Upper \space CI = 1-\frac{1}{F_U}
+$$
+
 ### ICC(2,k)
 
 $$
-\begin{aligned}
-  F =  \frac{MSB - MSW}{MSB} \\
-  df_{n} = n_j - 1 \\
-  df_{d} = n_j \cdot (n_k - 1) \\
-  F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} \\
-  F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} \\
-      vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 \\
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
-                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 \\
-   
-  v = \frac{vn}{vd} \\
-  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} \\
-  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} \\
-  L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} \\
-  U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)} \\
-  Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))} \\
-  Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
-\end{aligned}
+F =  \frac{MSB - MSW}{MSB} 
+$$
+
+$$
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})]^2
+$$
+
+$$
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot (1 +
+                                                         (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2 
+$$
+
+$$
+v = \frac{vn}{vd} 
+$$
+
+$$
+F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} 
+$$
+$$
+F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} 
+$$
+
+$$
+L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} 
+$$
+
+$$
+U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)} 
+$$
+
+$$
+Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))} 
+$$
+
+$$
+Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
+$$
+
+### ICC(3,k)
+
+$$
+F = \frac{MSB}{MSE}
+$$
+
+$$
+df_n = n_j - 1 
+$$
+
+$$
+df_d = (n_j - 1) \cdot (n_k - 1) 
+$$
+
+$$
+F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})} 
+$$
+
+$$
+F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)} 
+$$
+
+$$
+Lower \space CI = 1-\frac{1}{F_L} 
+$$
+
+$$
+Upper \space CI = 1-\frac{1}{F_U}
 $$
 
 ## Standard Error Calculations
@@ -229,16 +350,15 @@ The standard error of the measurement (SEM), standard error of the estimate (SEE
 
 
 $$
-\begin{aligned}
-SEM = \sqrt{MSE} \\
-\\
+SEM = \sqrt{MSE} 
+$$
 
-SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} \\ 
- \\
- 
-SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} \\
-  
-\end{aligned}
+$$
+SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} 
+$$
+
+$$
+SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} 
 $$
 
 ## Coefficient of Variation 
@@ -262,8 +382,11 @@ $$
 $$
 CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{ \bar y}
 $$
+
 ## Other Confidence Intervals
 
-TBA
+If the `other_ci` argument is set to TRUE then nonparametric bootstrapped confidence intervals will be calculated for the CV, SEM, SEP, and SEE. The number of resamples can be set with the replicates argument (default is 499; increase for greater accuracy). The reported confidence intervals are estimated using the percentile method. 
+
+To ensure reproducibility, please use `set.seed()` when these confidence intervals are calculated.
 
 # References
