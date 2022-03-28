@@ -152,7 +152,7 @@ plot(a3, type = 2)
 
 All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
 
-## agree_reps LoA
+## `agree_nest` LoA
 
 **Step 1: Calculate Individual Subject Means and Variances**
 
@@ -269,13 +269,112 @@ $$
 Upper \space CI = LoA_{upper} + LME
 $$
 
+## `agree_reps` LoA
+
+### LoA
+
+**Step 1: Compute mean and variance**
+
+$$
+\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
+$$
+$$
+\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
+$$
+
+$$
+s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
+$$
+**Step 2: Compute pooled estimate of within subject error**
+
+$$
+s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
+$$
+
+**Step 3: Compute pooled estimate of between subject error**
+
+$$
+s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
+$$
+
+**Step 4: Compute the harmonic mean of the replicate size**
+
+$$
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+$$
+
+**Step 5: Compute SD of the difference **
+
+$$
+s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
+$$
+**Step 6: Calculate l and u**
+
+$$
+l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
+$$
+$$
+u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
+$$
+**Step 7: Compute LME and RME**
+
+$$
+LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
+$$
+
+$$
+RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
+$$
+
+
+### LoA
+
+$$
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+$$
+
+
+$$
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+$$
+
+### Lower LoA CI
+
+$$
+Lower \space CI = LoA_{lower} - LME
+$$
+
+
+$$
+Upper \space CI = LoA_{lower} + RME
+$$
+
+### Upper LoA CI
+
+$$
+Lower \space CI = LoA_{upper} - RME
+$$
+
+
+$$
+Upper \space CI = LoA_{upper} + LME
+$$
+
 ## CCC from U-statistics
 
 The CCC calculations are derived from the `cccUst` function of the `cccrm` R package. The mathematics for this CCC calculation can be found in the work of @king2007 and @carrasco2009.
 
 # Checking Assumptions
 
-TBA
+The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method.
+
+The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and residuals plot.
+
+All 3 plots will have a statistical test in the bottom right corner. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot.
+
+## An Example
+
+
 
 # Proportional Bias
 
