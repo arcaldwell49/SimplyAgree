@@ -70,7 +70,7 @@ $$
 \hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot \frac{S}{\sqrt{N}}
 $$
 
-wherein $\bar{d}$ is the mean difference between the two methods, $S$ is the standard deviation of the sample, $N$ is the total number of pairs, and $\gamma_{1-\alpha}$ critical value (which requires a specialized function within `R` to estimate).
+wherein $\bar{d}$ is the mean difference between the two methods, $S$ is the standard deviation of the differences, $N$ is the total number of pairs, and $\gamma_{1-\alpha}$ critical value (which requires a specialized function within `R` to estimate).
 
 ### Limits of Agreement
 
