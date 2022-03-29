@@ -7,6 +7,7 @@ output:
     toc: true
     toc_depth: 2
 bibliography: refs.bib
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Agreement Analysis}
   %\VignetteEncoding{UTF-8}
@@ -240,11 +241,11 @@ $$
 ### LoA
 
 $$
-LOA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
 $$
 
 $$
-LOA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
 $$
 
 ### Lower LoA CI
@@ -374,18 +375,59 @@ All 3 plots will have a statistical test in the bottom right corner. The Shapiro
 
 ## An Example
 
+```{r}
+a1 = agree_test(x = reps$x,
+                y = reps$y,
+                agree.level = .8)
+
+check(a1)
+```
 
 
 # Proportional Bias
 
-TBA
+As the check plots for `a1` show, proportional bias can sometimes occur. In these cases @bland1999 recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
+
+For any of the "agree" functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots of the data should always be inspected
+
+```{r}
+a1 = agree_test(x = reps$x,
+                y = reps$y,
+                prop_bias = TRUE,
+                agree.level = .8)
+print(a1)
+
+plot(a1)
+```
 
 
 # Non-parametric Alternatives
 
-TBA
+When the assumptions of any of the tests above are violated then a non-parametric alternative may be useful. The `agree_np` function is the non-parametric alternative for the `SimpleAgree` R package, and is largely based on the recommendations of Bland & Altman [@bland1999, pg. 157].
 
-# Agreement with Mixed Models
+The function performs two tests:
+
+1. A binomial test on whether or not the observed differences are within the maximal allowable differences bounds (`delta` argument).
+2. Quantile regression, derived from the `quantreg` package [@quantreg], two estimate the median and 95% limits of agreement. If the default agreement levels are used (`agree.level = .95`) then the 0.025, 0.5 (median), and 0.975 quantiles are estimated.
+
+The function also *requires* the `delta` argument (otherwise the binomial test would be useless). Otherwise, it functions just like the other agreement functions.
+
+In the code demo below, you will notice that the limits of agreement are no longer symmetric around the bias estimate.
+
+```{r}
+a1 = agree_np(x = "x",
+              y = "y",
+              data = reps,
+              delta = 2,
+              prop_bias = FALSE,
+              agree.level = .8)
+print(a1)
+
+plot(a1)
+```
+
+
+# Mixed Models
 
 In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the "recpre_long" data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.
 
