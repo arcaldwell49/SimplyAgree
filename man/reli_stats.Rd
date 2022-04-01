@@ -40,19 +40,29 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"n.id"}}{Number of subjects/participants}
   \item{\code{"n.items"}}{Number of items/time points}
   \item{\code{"cv"}}{Coefficient of Variation}
-  \item{\code{"SEM"}}{Standard Error of Measurement}
-  \item{\code{"SEE"}}{Standard Error of the Estimate}
-  \item{\code{"SEP"}}{Standard Error of Predicitions}
+  \item{\code{"SEM"}}{Standard MSE of Measurement}
+  \item{\code{"SEE"}}{Standard MSE of the Estimate}
+  \item{\code{"SEP"}}{Standard MSE of Predicitions}
   \item{\code{"call"}}{the matched call}
 
 }
 }
 \description{
-reli_stats produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
+reli_stats produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+}
+\details{
+This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
+The estimates of variances for any of the measures are derived from linear mixed models.
+The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
 }
 \section{References}{
 
+
 Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
+
+Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
+
+McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
 }
 
 \examples{

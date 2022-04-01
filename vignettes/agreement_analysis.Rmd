@@ -427,6 +427,20 @@ plot(a1)
 ```
 
 
+We can also perform the same analysis with proportional bias no longer assumed. You can see that the LoA changes but the test for agreement does not.
+
+```{r}
+a1 = agree_np(x = "x",
+              y = "y",
+              data = reps,
+              delta = 2,
+              prop_bias = TRUE,
+              agree.level = .8)
+print(a1)
+
+plot(a1)
+```
+
 # Mixed Models
 
 In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the "recpre_long" data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.
