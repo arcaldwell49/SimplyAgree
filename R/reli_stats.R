@@ -248,8 +248,7 @@ reli_stats = function(measure,
                  cv = res_other$cv,
                  SEM = res_other$SEM,
                  SEE = res_other$SEE,
-                 SEP = res_other$SEP,
-                 plot.reliability = plot.reliability)
+                 SEP = res_other$SEP)
 
   structure(result,
             class = "simple_reli")

@@ -12,7 +12,9 @@ reli_stats(
   wide = FALSE,
   col.names = NULL,
   cv_calc = "MSE",
-  conf.level = 0.95
+  conf.level = 0.95,
+  other_ci = FALSE,
+  replicates = 500
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ reli_stats(
 \item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
+
+\item{replicates}{the number of bootstrap replicates. Passed on to the boot function. Default is 500.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
