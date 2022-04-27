@@ -78,6 +78,35 @@ print.simple_reli <- function(x,...){
 
 plot.simple_reli <- function(x,  ...){
 
-  return(x$plot.reliability)
+  df = model.frame(x$call$lm_mod)
+  colnames(df) = c("values", "id", "items")
+  plot.reliability = ggplot(df,
+                            aes(
+                              x = items,
+                              y = values,
+                              color = id,
+                              group = id
+                            )) +
+    geom_point(position = position_dodge(width = 0.2)) +
+    geom_line(color = "black",
+              alpha = .2,
+              position = position_dodge(width = 0.2)) +
+    labs(y = "Measurement",
+         x = "Item",
+         color = "id") +
+    scale_color_viridis_d()+
+    theme_bw()
+  return(plot.reliability)
 
+}
+
+
+#' @rdname simple_reli-methods
+#' @method check simple_reli
+#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid fitted
+#' @export
+
+check.simple_reli <- function(x) {
+
+  check_reli(x)
 }

@@ -11,7 +11,32 @@ testthat::test_that("examples from Zou", {
 
   nest_test = agree_nest(x="x",y="y",
                          id = "id",
-                         data = reps2)
+                         data = reps2,
+                         TOST = FALSE)
+
+  nest_test2 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          TOST = FALSE,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test2)
+
+  nest_test3 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          TOST = FALSE,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test3)
+
+
+  nest_test3 = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps,
+                          TOST = FALSE,
+                          delta = 5,
+                          prop_bias = TRUE)
+  ptest = plot(nest_test3)
+
   testthat::expect_equivalent(nest_test$loa$estimate,
                               c(.7255,-2.14,3.59),
                               tolerance = 0.001)
@@ -28,6 +53,8 @@ testthat::test_that("examples from Zou", {
   pr_test = print(nest_test)
   p = plot(nest_test, type = 1)
   p = plot(nest_test, type = 2)
+  #expect_warning(check(nest_test)$p_norm)
+  #expect_warning(check(nest_test)$p_het)
 
   nest = reps2
   nest_test2 = agree_nest(
@@ -71,6 +98,13 @@ testthat::test_that("examples from Zou", {
   p = plot(nest_test3, type = 2)
 
   pr_test = print(nest_test3)
+  p = plot(nest_test3, type = 1)
+  p = plot(nest_test3, type = 1,
+           smooth_method = "lm")
+  p = plot(nest_test3, type = 1,
+           smooth_method = "loess")
+  p = plot(nest_test3, type = 1,
+           smooth_method = "gam")
   p = plot(nest_test3, type = 1)
   p = plot(nest_test3, type = 2)
 
@@ -136,7 +170,8 @@ testthat::test_that("example from error message",{
                        id = "IDNum",
                        #delta = 100,
                        data = data2,
-                       agree.level = .8)
+                       agree.level = .8,
+                       TOST = FALSE)
 
   testthat::expect_equivalent(TSTnest$loa$estimate,
                               c(.597,-.568,1.761),
@@ -153,7 +188,8 @@ testthat::test_that("example from error message",{
                        id = "IDNum",
                        #delta = 100,
                        data = data2,
-                       agree.level = .8)
+                       agree.level = .8,
+                      TOST = FALSE)
 
   testthat::expect_equivalent(TSTrep$loa$estimate,
                               c(.717,-.665,2.099),

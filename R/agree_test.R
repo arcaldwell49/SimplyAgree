@@ -4,8 +4,9 @@
 #' @param y Vector with second measurement
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
-#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
-#'
+#' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -16,11 +17,8 @@
 #'   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
 #'   \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-#'
+#'   \item{\code{"call"}}{the matched call}
 #' }
-
 #' @examples
 #' data('reps')
 #' agree_test(x=reps$x, y=reps$y, delta = 2)
@@ -33,7 +31,8 @@
 #' Bland, J. M., & Altman, D. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. The lancet, 327(8476), 307-310.
 #'
 #' Lawrence, I., & Lin, K. (1989). A concordance correlation coefficient to evaluate reproducibility. Biometrics, 255-268.
-#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var
+#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp
+#' @importFrom graphics text
 #' @import ggplot2
 #' @export
 
@@ -41,7 +40,9 @@ agree_test <- function(x,
                        y,
                        delta,
                        conf.level = .95,
-                       agree.level = .95) {
+                       agree.level = .95,
+                       TOST = TRUE,
+                       prop_bias = FALSE) {
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 
@@ -52,19 +53,24 @@ agree_test <- function(x,
 
     stop("conf.level must be a value between 0 and 1")
   }
-  #USER SPECIFICATIONS PORTION
-  #alpha<-0.05 #DESIGNATED ALPHA
-  #prop0<-0.8 #NULL CENTRAL PROPORTION or Limit of Agreement
-  #delta<-0.1 #THRESHOLD
-  #n<-15 #SAMPLE SIZE
-  #xbar<-0.011 #SAMPLE MEAN
-  #s<-0.044 #SAMPLE STANDARD DEVIATION
-  #END OF SPECIFICATION
+  # shieh test ----
   prop0 = agree.level
-  alpha = 1 - conf.level
+  if(TOST == TRUE) {
+    alpha = (1 - conf.level)
+    conf2 = 1 - (1 - conf.level) * 2
+  } else {
+    alpha = (1 - conf.level) / 2
+    conf2 = conf.level
+  }
+  #alpha = 1 - conf.level
+  # ccc calc ----
+  if(prop_bias == TRUE){
+    message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
+  }
   ccc_res = ccc.xy(x, y,
                    conf.level = conf.level,
-                   agree.level = agree.level)
+                   agree.level = agree.level,
+                   TOST = TOST)
   #pull values from ccc function output
   xbar = ccc_res$delta$d #mean delta
   s = ccc_res$delta$d.sd #sd of delta
@@ -112,81 +118,40 @@ agree_test <- function(x,
   shieh_test = data.frame(prop0,el,eu,rej_text,gam)
   names(shieh_test) = c("prop0","lower.ci","upper.ci", "h0_test","test_statistic")
 
-  #######################
-  # Plot Results ----
-  #######################
-
-  z <- lm(y ~ x)
-  the_int <- summary(z)$coefficients[1,1]
-  the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(the_int, the_slope)
-  scalemin = min(c(min(x, na.rm = TRUE),min(y, na.rm = TRUE)))
-  scalemax = max(c(max(x, na.rm = TRUE),max(y, na.rm = TRUE)))
-
-  identity.plot = ggplot(ccc_res$df_diff,
-                         aes(x = x, y = y)) +
-    geom_point(na.rm = TRUE) +
-    geom_abline(intercept = 0, slope = 1) +
-    geom_abline(
-      data = tmp.lm,
-      aes(intercept = the_int, slope = the_slope),
-      linetype = "dashed",
-      color = "red"
-    ) +
-    xlab("Method: x") +
-    xlim(scalemin,scalemax) +
-    ylim(scalemin,scalemax) +
-    ylab("Method: y") +
-    coord_fixed(ratio = 1 / 1) +
-    theme_bw()
-
-  bland_alt.plot =  ggplot(ccc_res$df_diff,
-                           aes(x = mean, y = delta)) +
-    geom_point(na.rm = TRUE) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$lower.lci,
-             ymax = ccc_res$delta$lower.uci,
-             alpha = .5,
-             fill = "#D55E00") +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$upper.lci,
-             ymax = ccc_res$delta$upper.uci,
-             alpha = .5,
-             fill = "#D55E00") +
-    geom_hline(data = ccc_res$delta,
-               aes(yintercept = d),
-               linetype = 1) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = ccc_res$delta$d.lci,
-             ymax = ccc_res$delta$d.uci,
-             alpha = .5,
-             fill = "gray") +
-    xlab("Average of Method x and Method y") +
-    ylab("Difference between Methods x & y") +
-    theme_bw() +
-    theme(legend.position = "none")
-
-  ### Save limits of agreement
+  # Save LoA ----
 
   df_loa = data.frame(
     estimate = c(ccc_res$delta$d, ccc_res$delta$lower.loa, ccc_res$delta$upper.loa),
     lower.ci = c(ccc_res$delta$d.lci, ccc_res$delta$lower.lci, ccc_res$delta$upper.lci),
     upper.ci = c(ccc_res$delta$d.uci, ccc_res$delta$lower.uci, ccc_res$delta$upper.uci),
-    row.names = c("Difference","Lower LoA","Upper LoA")
+    ci.level = c(conf.level, conf2, conf2),
+    row.names = c("Bias","Lower LoA","Upper LoA")
   )
   # Should I add this to the output?
   var_comp = data.frame(
-    delta.sd = ccc_res$delta$d.sd,
-    var.loa = ccc_res$delta$var.loa
+    sd_delta = ccc_res$delta$d.sd,
+    sd_loa = sqrt(ccc_res$delta$var.loa)
   )
 
+  # Save call -----
+  lm_mod = list(call = list(formula = as.formula(y~x)))
+  call2 = match.call()
+  if(is.null(call2$agree.level)){
+    call2$agree.level = agree.level
+  }
 
-  #######################
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
+  }
+  if(is.null(call2$TOST)){
+    call2$TOST = TOST
+  }
+  if(is.null(call2$prop_bias)){
+    call2$prop_bias = prop_bias
+  }
+  call2$lm_mod = lm_mod
+
   # Return Results ----
-  #######################
 
   structure(list(shieh_test = shieh_test,
                  ccc.xy = ccc_res$rho.c,
@@ -194,11 +159,9 @@ agree_test <- function(x,
                  l.shift = ccc_res$l.shift,
                  bias = ccc_res$bias,
                  loa = df_loa,
-                 conf.level = conf.level,
-                 agree.level = agree.level,
-                 bland_alt.plot = bland_alt.plot,
-                 identity.plot = identity.plot,
                  h0_test = rej_text,
+                 var_comp = var_comp,
+                 call = call2,
                  class = "simple"),
             class = "simple_agree")
 

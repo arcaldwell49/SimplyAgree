@@ -7,6 +7,8 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -16,8 +18,7 @@
 #'   \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
 #'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
 #'   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics.}
-#'   \item{\code{"conf.level"}}{Returned as input.}
-#'   \item{\code{"agree.level"}}{Returned as input.}
+#'   \item{\code{"call"}}{the matched call}
 #'
 #' }
 
@@ -32,7 +33,7 @@
 #' King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.
 #'
 #' Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
-#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var
+#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var model.frame
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
 #' @import dplyr
@@ -45,14 +46,26 @@ agree_reps <- function(x,
                        data,
                        delta,
                        agree.level = .95,
-                       conf.level = .95){
+                       conf.level = .95,
+                       prop_bias = FALSE,
+                       TOST = TRUE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
-  alpha.l = 1 - (1 - conf.level) / 2
-  alpha.u = (1 - conf.level) / 2
+  if(TOST == TRUE){
+    confq2 = qnorm(1 - (1 - conf.level) )
+    alpha.l = 1 - (1 - conf.level)
+    alpha.u = (1 - conf.level)
+    conf2 = 1 - (1 - conf.level) * 2
+  } else {
+    confq2 = qnorm(1 - (1 - conf.level) / 2)
+    alpha.l = 1 - (1 - conf.level) / 2
+    alpha.u = (1 - conf.level) / 2
+    conf2 = conf.level
+  }
+
 
   df = data %>%
     select(all_of(id),all_of(x),all_of(y)) %>%
@@ -67,10 +80,12 @@ agree_reps <- function(x,
                  values_to = "measure") %>%
     drop_na()
 
+  # Calculate CCC ----
   ccc_reps = cccUst(dataset = df_long,
                     ry = "measure",
                     rmet = "method",
                     cl = conf.level)
+
 
   ccc.xy = data.frame(est.ccc = ccc_reps[1],
                       lower.ci = ccc_reps[2],
@@ -92,20 +107,46 @@ agree_reps <- function(x,
   df3 = df2 %>%
     drop_na()
 
+  df$mean = (df$x + df$y)/2
+  df$delta = (df$x - df$y)
+  #lmer_mod = lme4::lmer(delta ~ 1 + (1|id),
+  #                data = df)
+ # sum(as.data.frame(VarCorr(lmer_mod))$vcov)
   Nx = sum(df2$mxi)
   Ny = sum(df2$myi)
   mxh = nrow(df2)/sum(1/df2$mxi)
   myh = nrow(df2)/sum(1/df2$myi)
 
+  if(prop_bias == FALSE){
+    sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
+    syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
+    d_bar = mean(df2$d, na.rm = TRUE)
+    d_var = var(df2$d, na.rm = TRUE)
+    d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
+    d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
 
-  sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
-  syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
-  d_bar = mean(df2$d, na.rm = TRUE)
-  d_var = var(df2$d, na.rm = TRUE)
-  d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
-  d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
+    tot_var = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
+  } else {
+    lmer_x = lmer(x ~ 1 + (1|id),
+                  data = df)
+    mxh_l = as.data.frame(emmeans(lmer_x, ~1))$emmean
+    lmer_y = lmer(y ~ 1 + (1|id),
+                  data = df)
+    myh_l = as.data.frame(emmeans(lmer_y, ~1))$emmean
+    lmer_d = lmer(delta ~ 1 + (1|id),
+                  data = df)
 
-  tot_var = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
+    d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
+    d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
+    d_lo = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$lower.CL
+    d_hi = as.data.frame(emmeans(lmer_d, ~1,
+                                 level = conf.level))$upper.CL
+    sxw2 = as.data.frame(VarCorr(lmer_x))$vcov[2]
+    syw2 = as.data.frame(VarCorr(lmer_y))$vcov[2]
+    tot_var = d_var + (1-1/mxh_l)*sxw2 + (1-1/myh_l)*syw2
+  }
+
 
   loa_l = d_bar - agreeq*sqrt(tot_var)
 
@@ -121,8 +162,8 @@ agree_reps <- function(x,
   move.u.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.u,Ny-nrow(df2)))))^2
   move.u = tot_var + sqrt(move.u.1+move.u.2+move.u.3)
 
-  LME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
-  RME = sqrt(confq^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
 
   loa_l.l = loa_l - LME
   loa_l.u = loa_l + RME
@@ -130,11 +171,17 @@ agree_reps <- function(x,
   loa_u.l = loa_u - RME
   loa_u.u = loa_u + LME
 
+  if(prop_bias == TRUE){
+    message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
+  }
+
+  ## Save LoA ----
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
     lower.ci = c(d_lo, loa_l.l, loa_u.l),
     upper.ci = c(d_hi, loa_l.u, loa_u.u),
-    row.names = c("Difference","Lower LoA","Upper LoA")
+    ci.level = c(conf.level, conf2, conf2),
+    row.names = c("Bias","Lower LoA","Upper LoA")
   )
 
   if (!missing(delta)) {
@@ -147,75 +194,38 @@ agree_reps <- function(x,
     rej_text = "No Hypothesis Test"
   }
 
-  ### Plots ----
+  # Save call----
 
-  z <- lm(y_bar ~ x_bar, df2)
-  the_int <- summary(z)$coefficients[1,1]
-  the_slope <-  summary(z)$coefficients[2,1]
-  tmp.lm <- data.frame(the_int, the_slope)
-  scalemin = min(c(min(df2$x_bar),min(df2$y_bar)))
-  scalemax = max(c(max(df2$x_bar),max(df2$y_bar)))
+  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
+                                                   df$id)))
+  call2 = match.call()
+  if(is.null(call2$agree.level)){
+    call2$agree.level = agree.level
+  }
 
-  identity.plot = ggplot(df2,
-                         aes(x = x_bar,
-                             y = y_bar)) +
-    geom_point() +
-    geom_abline(intercept = 0, slope = 1) +
-    geom_abline(
-      data = tmp.lm,
-      aes(intercept = the_int, slope = the_slope),
-      linetype = "dashed",
-      color = "red"
-    ) +
-    xlab("Method: Average of x") +
-    xlim(scalemin,scalemax) +
-    ylim(scalemin,scalemax) +
-    ylab("Method: Average of y") +
-    coord_fixed(ratio = 1 / 1) +
-    theme_bw()
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
+  }
 
-  bland_alt.plot =  ggplot(df2,
-                           aes(x = both_avg, y = d)) +
-    geom_point(na.rm = TRUE) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[2],
-             ymax = df_loa$upper.ci[2],
-             alpha = .5,
-             fill = "#D55E00") +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[3],
-             ymax = df_loa$upper.ci[3],
-             alpha = .5,
-             fill = "#D55E00") +
-    geom_hline(aes(yintercept = d_bar),
-               linetype = 1) +
-    annotate("rect",
-             xmin = -Inf, xmax = Inf,
-             ymin = df_loa$lower.ci[1],
-             ymax = df_loa$upper.ci[1],
-             alpha = .5,
-             fill = "gray") +
-    xlab("Average of Method x and Method y") +
-    ylab("Average Difference between Methods") +
-    theme_bw() +
-    theme(legend.position = "none")
-
-
-  #######################
+  if(is.null(call2$TOST)){
+    call2$TOST = TOST
+  }
+  if(is.null(call2$prop_bias)){
+    call2$prop_bias = prop_bias
+  }
+  call2$lm_mod = lm_mod
   # Return Results ----
-  #######################
 
   structure(list(loa = df_loa,
                  h0_test = rej_text,
-                 bland_alt.plot = bland_alt.plot,
-                 identity.plot = identity.plot,
-                 conf.level = conf.level,
-                 agree.level = agree.level,
                  ccc.xy = ccc.xy,
+                 call = call2,
+                 var_comp = list(var_tot = tot_var,
+                                 var_y = syw2,
+                                 var_x = sxw2,
+                                 LME = LME,
+                                 RME = RME),
                  class = "replicates"),
             class = "simple_agree")
-
 
 }
