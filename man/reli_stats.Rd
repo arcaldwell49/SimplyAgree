@@ -11,7 +11,10 @@ reli_stats(
   data,
   wide = FALSE,
   col.names = NULL,
-  conf.level = 0.95
+  cv_calc = "MSE",
+  conf.level = 0.95,
+  other_ci = FALSE,
+  replicates = 500
 )
 }
 \arguments{
@@ -27,7 +30,13 @@ reli_stats(
 
 \item{col.names}{If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.}
 
+\item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
+
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
+
+\item{replicates}{the number of bootstrap replicates. Passed on to the boot function. Default is 500.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -54,6 +63,9 @@ reli_stats produces reliability statistics described by Weir (2005). This includ
 This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 The estimates of variances for any of the measures are derived from linear mixed models.
 The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
+}
+\details{
+The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.
 }
 \section{References}{
 

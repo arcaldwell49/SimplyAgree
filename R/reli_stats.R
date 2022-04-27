@@ -7,6 +7,12 @@
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
 #' @param conf.level the confidence level required. Default is 95\%.
+#' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
+#' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
+#' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 500.
+#' @details
+#'
+#' The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.
 #'
 #' @details
 #' This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
@@ -56,7 +62,10 @@ reli_stats = function(measure,
                       data,
                       wide = FALSE,
                       col.names = NULL,
-                      conf.level = .95){
+                      cv_calc = "MSE",
+                      conf.level = .95,
+                      other_ci = FALSE,
+                      replicates = 500){
   alpha = 1-conf.level
   x = data
   if(wide == TRUE){
@@ -178,20 +187,55 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
-  mw <- mean(x.df$values, na.rm = TRUE)
-  stddev <- sqrt(mean(residuals(mod.lmer)^2))
-  cv_out = stddev/mw
 
-  SEM = sqrt(MSE)
-  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-  SEP = sd_tots*sqrt(1-ICC3^2)
+  if(other_ci == TRUE){
+  res_other = boot_rel(x.df,
+                       cv_calc = cv_calc,
+                       nboot = replicates,
+                       conf.level = conf.level)
+  } else{
+    SEM = sqrt(MSE)
+    sd_tots = sqrt(sum(stats[2,])/(n.obs-1))
+    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+    SEP = sd_tots*sqrt(1-ICC3^2)
+
+    mw <- mean(x.df$values, na.rm = TRUE)
+    if(cv_calc == "residuals"){
+      stddev <- sqrt(mean(residuals(mod.lmer)^2))
+    } else if(cv_calc == "MSE"){
+      stddev <- sqrt(MSE)
+    } else if(cv_calc == "SEM"){
+      stddev <- SEM
+    } else {
+      stop("cv_calc must be SEM, MSE, or residuals")
+    }
+
+    cv_out = stddev/mw
+    res_other = list(cv = list(est = cv_out),
+               SEM = list(est = SEM),
+               SEP = list(est = SEP),
+               SEE = list(est = SEE))
+  }
+
 
   # Save call
   lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
   call2 = match.call()
 
   call2$lm_mod = lm_mod
+
+  # Save call
+  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
+  call2 = match.call()
+
+  call2$lm_mod = lm_mod
+  if(is.null(call2$conf.level)){
+    call2$conf.level = conf.level
+  }
+
+  if(is.null(call2$other_ci)){
+    call2$other_ci = other_ci
+  }
 
   result <- list(icc = results,
                  lmer = mod.lmer,
@@ -200,10 +244,15 @@ reli_stats = function(measure,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
                  call = call2,
+                 cv = res_other$cv,
+                 SEM = res_other$SEM,
+                 SEE = res_other$SEE,
+                 SEP = res_other$SEP)
                  cv = cv_out,
                  SEM = SEM,
                  SEE = SEE,
                  SEP = SEP)
+
 
   structure(result,
             class = "simple_reli")

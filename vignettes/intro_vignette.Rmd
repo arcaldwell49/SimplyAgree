@@ -203,7 +203,8 @@ Now, that we have a data set (`dat`), I can use it in the `reli_stats` function.
 test1 = reli_stats(
   data = dat,
   wide = TRUE,
-  col.names = c("J1", "J2", "J3", "J4")
+  col.names = c("J1", "J2", "J3", "J4"),
+  other_ci = TRUE
 )
 ```
 
