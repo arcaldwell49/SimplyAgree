@@ -72,10 +72,6 @@ Also included in the results is a plot of the measurements across the items (e.g
 plot(test1)
 ```
 
-## Bootstrapped Confidence Intervals
-
-TBA
-
 # Calculative Approach
 
 ## Model

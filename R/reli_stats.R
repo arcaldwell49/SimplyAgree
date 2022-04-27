@@ -195,7 +195,7 @@ reli_stats = function(measure,
                        conf.level = conf.level)
   } else{
     SEM = sqrt(MSE)
-    sd_tots = sqrt(sum(stats[2,])/(n.obs-1))
+    sd_tots = sqrt(sum(stats[2,])/(n_id-1))
     SEE = sd_tots*sqrt(ICC3*(1-ICC3))
     SEP = sd_tots*sqrt(1-ICC3^2)
 
@@ -248,10 +248,6 @@ reli_stats = function(measure,
                  SEM = res_other$SEM,
                  SEE = res_other$SEE,
                  SEP = res_other$SEP)
-                 cv = cv_out,
-                 SEM = SEM,
-                 SEE = SEE,
-                 SEP = SEP)
 
 
   structure(result,

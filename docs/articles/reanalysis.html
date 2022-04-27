@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,33 +33,36 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+    </li>
+    <li>
+      <a href="../articles/Deming.html">Deming Regression</a>
+    </li>
+    <li>
       <a href="../articles/intro_vignette.html">Introduction to SimplyAgree</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
+    </li>
+    <li>
+      <a href="../articles/reliability_analysis.html">Reliability Analysis</a>
     </li>
   </ul>
 </li>
@@ -75,7 +80,7 @@
 
       
 
-      </header><script src="reanalysis_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Re-analysis of an Agreement Study</h1>
@@ -89,37 +94,75 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cccrm</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/">ggpubr</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">cccrm</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span>
 <span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></code></pre></div>
-<div id="re-analysis-of-a-previous-study-of-agreement" class="section level1">
-<h1 class="hasAnchor">
-<a href="#re-analysis-of-a-previous-study-of-agreement" class="anchor"></a>Re-analysis of a Previous Study of Agreement</h1>
-<p>In the study by <span class="citation">Ravanelli and Jay (2020)</span>, they attempted to estimate the effect of varying the time of day (AM or PM) on the measurement of thermoregulatory variables (e.g., rectal and esophageal temperature). In total, participants completed 6 separate trials wherein these variables were measured. While this is a robust study of these variables the analyses focused on ANOVAs and t-tests to determine whether or not the time-of-day (AM or PM). This poses a problem because 1) they were trying to test for equivalence and 2) this is a study of <em>agreement</em> not <em>differences</em> (See <span class="citation">Lin (1989)</span>). Due to the latter point, the use of t-test or ANOVAs (F-tests) is rather inappropriate since they provide an answer to different, albeit related, question.</p>
-<p>Instead, the authors could test their hypotheses by using tools that estimate the absolute <em>agreement</em> between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in <code>SimplyAgree</code> and <code>cccrm</code> <span class="citation">(Josep Lluis Carrasco and Martinez 2020)</span> I believe we can get closer to the right answer.</p>
-<p>In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the <code>cccrm</code> package please see the work by <span class="citation">Josep L. Carrasco and Jover (2003)</span>, <span class="citation">Josep L. Carrasco, King, and Chinchilli (2009)</span>, and <span class="citation">Josep L. Carrasco et al. (2013)</span>. The <code>loa_mixed</code> function was inspired by the work of <span class="citation">Parker et al. (2016)</span> which documented how to implement multi-level models and bootstrapping to estimate the limits of agreement.</p>
+<div class="section level2">
+<h2 id="re-analysis-of-a-previous-study-of-agreement">Re-analysis of a Previous Study of Agreement<a class="anchor" aria-label="anchor" href="#re-analysis-of-a-previous-study-of-agreement"></a>
+</h2>
+<p>In the study by <span class="citation">Ravanelli and Jay
+(2020)</span>, they attempted to estimate the effect of varying the time
+of day (AM or PM) on the measurement of thermoregulatory variables
+(e.g., rectal and esophageal temperature). In total, participants
+completed 6 separate trials wherein these variables were measured. While
+this is a robust study of these variables the analyses focused on ANOVAs
+and t-tests to determine whether or not the time-of-day (AM or PM). This
+poses a problem because 1) they were trying to test for equivalence and
+2) this is a study of <em>agreement</em> not <em>differences</em> (See
+<span class="citation">Lin (1989)</span>). Due to the latter point, the
+use of t-test or ANOVAs (F-tests) is rather inappropriate since they
+provide an answer to different, albeit related, question.</p>
+<p>Instead, the authors could test their hypotheses by using tools that
+estimate the absolute <em>agreement</em> between the AM and PM sessions
+within each condition. This is rather complicated because we have
+multiple measurement within each participant. However, between the tools
+included in <code>SimplyAgree</code> and <code>cccrm</code> <span class="citation">(Josep Lluis Carrasco and Martinez 2020)</span> I
+believe we can get closer to the right answer.</p>
+<p>In order to understand the underlying processes of these functions
+and procedures I highly recommend reading the statistical literature
+that documents methods within these functions. For the
+<code>cccrm</code> package please see the work by <span class="citation">Josep L. Carrasco and Jover (2003)</span>, <span class="citation">Josep L. Carrasco, King, and Chinchilli (2009)</span>,
+and <span class="citation">Josep L. Carrasco et al. (2013)</span>. The
+<code>loa_mixed</code> function was inspired by the work of <span class="citation">Parker et al. (2016)</span> which documented how to
+implement multi-level models and bootstrapping to estimate the limits of
+agreement.</p>
 </div>
-<div id="concordance" class="section level1">
-<h1 class="hasAnchor">
-<a href="#concordance" class="anchor"></a>Concordance</h1>
-<p>An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. In its simplest form it is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X &amp; Y), the closer those points are to the line of identity the higher the CCC (and vice versa).</p>
+<div class="section level2">
+<h2 id="concordance">Concordance<a class="anchor" aria-label="anchor" href="#concordance"></a>
+</h2>
+<p>An easy approach to measuring agreement between 2 conditions or
+measurement tools is through the concordance correlation coefficient
+(CCC). The CCC essentially provides a single coefficient (values between
+0 and 1) that provides an estimate to how closely one measurement is to
+another. In its simplest form it is a type of intraclass correlation
+coefficient that takes into account the mean difference between two
+measurements. In other words, if we were to draw a line of identity on a
+graph and plot two measurements (X &amp; Y), the closer those points are
+to the line of identity the higher the CCC (and vice versa).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">qplot</span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" alt="Example of the Line of Identity" width="700"><p class="caption">
 Example of the Line of Identity
 </p>
 </div>
-<p>In the following sections, let us see how well esophageal and rectal temperature are in agreement after exercising in the heat for 1 hour at differing conditions.</p>
-<div id="rectal-temperature" class="section level2">
-<h2 class="hasAnchor">
-<a href="#rectal-temperature" class="anchor"></a>Rectal Temperature</h2>
-<p>Now, based on the typical thresholds (0.8 can be considered a “good” CCC), neither Trec as a raw value or a change score (Trec delta) is within acceptable degrees of agreement. As I will address later, this may not be an accurate and there are sometimes where there is a low CCC but the expected differences between conditions is acceptable (limits of agreement).</p>
+<p>In the following sections, let us see how well esophageal and rectal
+temperature are in agreement after exercising in the heat for 1 hour at
+differing conditions.</p>
+<div class="section level3">
+<h3 id="rectal-temperature">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature"></a>
+</h3>
+<p>Now, based on the typical thresholds (0.8 can be considered a “good”
+CCC), neither Trec as a raw value or a change score (Trec delta) is
+within acceptable degrees of agreement. As I will address later, this
+may not be an accurate and there are sometimes where there is a low CCC
+but the expected differences between conditions is acceptable (limits of
+agreement).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccc_rec.post</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
+<code class="sourceCode R"><span class="va">ccc_rec.post</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html" class="external-link">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
                             ry <span class="op">=</span> <span class="st">"trec_post"</span>,
                             rtime <span class="op">=</span> <span class="st">"trial_condition"</span>,
                             rmet <span class="op">=</span> <span class="st">"tod"</span><span class="op">)</span>
@@ -129,7 +172,7 @@ Example of the Line of Identity
 <span class="co">#&gt;         CCC   LL CI 95%   UL CI 95%      SE CCC </span>
 <span class="co">#&gt; 0.218403578 0.007835121 0.410425602 0.104047391</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccc_rec.delta</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
+<code class="sourceCode R"><span class="va">ccc_rec.delta</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html" class="external-link">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
                             ry <span class="op">=</span> <span class="st">"trec_delta"</span>,
                             rtime <span class="op">=</span> <span class="st">"trial_condition"</span>,
                             rmet <span class="op">=</span> <span class="st">"tod"</span><span class="op">)</span>
@@ -138,7 +181,12 @@ Example of the Line of Identity
 <span class="co">#&gt; CCC estimated by U-statistics: </span>
 <span class="co">#&gt;        CCC  LL CI 95%  UL CI 95%     SE CCC </span>
 <span class="co">#&gt; 0.66232800 0.49409601 0.78275101 0.07316927</span></code></pre></div>
-<p>Finally, we can visualize the concordance between the two different types of measurements and the respective time-of-day and conditions. From the plot we can see there is clear bias in the raw post exercise values (higher in the PM), but even when “correcting for baseline differences” by calculating the differences scores we can see a higher degree of disagreement between the two conditions.</p>
+<p>Finally, we can visualize the concordance between the two different
+types of measurements and the respective time-of-day and conditions.
+From the plot we can see there is clear bias in the raw post exercise
+values (higher in the PM), but even when “correcting for baseline
+differences” by calculating the differences scores we can see a higher
+degree of disagreement between the two conditions.</p>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltsrec-1.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
@@ -146,12 +194,16 @@ Concordance Plots of Rectal Temperature
 </div>
 </div>
 </div>
-<div id="esophageal-temperature" class="section level1">
-<h1 class="hasAnchor">
-<a href="#esophageal-temperature" class="anchor"></a>Esophageal Temperature</h1>
-<p>We can replicate the same analyses for esophageal temperature. From the data and plots below we can see that the post exercise CCC is much improved compared to rectal temperature. However, there is no further improvement when looking at the delta (difference scores) for pre-to-post exercise.</p>
+<div class="section level2">
+<h2 id="esophageal-temperature">Esophageal Temperature<a class="anchor" aria-label="anchor" href="#esophageal-temperature"></a>
+</h2>
+<p>We can replicate the same analyses for esophageal temperature. From
+the data and plots below we can see that the post exercise CCC is much
+improved compared to rectal temperature. However, there is no further
+improvement when looking at the delta (difference scores) for
+pre-to-post exercise.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccc_eso.post</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
+<code class="sourceCode R"><span class="va">ccc_eso.post</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html" class="external-link">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
                             ry <span class="op">=</span> <span class="st">"teso_post"</span>,
                             rtime <span class="op">=</span> <span class="st">"trial_condition"</span>,
                             rmet <span class="op">=</span> <span class="st">"tod"</span><span class="op">)</span>
@@ -161,7 +213,7 @@ Concordance Plots of Rectal Temperature
 <span class="co">#&gt;        CCC  LL CI 95%  UL CI 95%     SE CCC </span>
 <span class="co">#&gt; 0.67333327 0.48765924 0.80073160 0.07915895</span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">ccc_eso.delta</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
+<code class="sourceCode R"><span class="va">ccc_eso.delta</span> <span class="op">=</span> <span class="fu">cccrm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/cccrm/man/cccUst.html" class="external-link">cccUst</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">df_temps</span>,
                             ry <span class="op">=</span> <span class="st">"teso_delta"</span>,
                             rtime <span class="op">=</span> <span class="st">"trial_condition"</span>,
                             rmet <span class="op">=</span> <span class="st">"tod"</span><span class="op">)</span>
@@ -170,21 +222,38 @@ Concordance Plots of Rectal Temperature
 <span class="co">#&gt; CCC estimated by U-statistics: </span>
 <span class="co">#&gt;       CCC LL CI 95% UL CI 95%    SE CCC </span>
 <span class="co">#&gt; 0.5654583 0.2663607 0.7652237 0.1276819</span></code></pre></div>
-<pre><code>#&gt; Warning: Removed 3 row(s) containing missing values (geom_path).</code></pre>
+<pre><code><span class="co">#&gt; Warning: Removed 3 row(s) containing missing values (geom_path).</span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltseso-1.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
 </p>
 </div>
 </div>
-<div id="limits-of-agreement" class="section level1">
-<h1 class="hasAnchor">
-<a href="#limits-of-agreement" class="anchor"></a>Limits of Agreement</h1>
-<p>In addition to the CCC we can use the <code>loa_mixed</code> function in order to calculate the “limits of agreement.” Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a “wide” format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this “wide” format, we can then use the <code>loa_mixed</code> function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).</p>
-<div id="rectal-temperature-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#rectal-temperature-1" class="anchor"></a>Rectal Temperature</h2>
-<p>So we will calculate the limits of agreement using the <code>loa_mixed</code> function. We will need to identify the columns with the right information using the <code>diff</code>, <code>condition</code>, and <code>id</code> arguments. We then select the right data set using the <code>data</code> argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use bias-corrected accelerated (bca) bootstrap confidence intervals.</p>
+<div class="section level2">
+<h2 id="limits-of-agreement">Limits of Agreement<a class="anchor" aria-label="anchor" href="#limits-of-agreement"></a>
+</h2>
+<p>In addition to the CCC we can use the <code>loa_mixed</code> function
+in order to calculate the “limits of agreement”. Typically the 95%
+Limits of Agreement are calculated which provide the difference between
+two measuring systems for 95% of future measurements pairs. In order to
+do that we will need the data in a “wide” format where each measurement
+(in this case AM and PM) are their own column and then we can calculate
+a column that is the difference score. Once we have the data in this
+“wide” format, we can then use the <code>loa_mixed</code> function to
+calculate the average difference (mean bias) and the variance (which
+determines the limits of agreement).</p>
+<div class="section level3">
+<h3 id="rectal-temperature-1">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature-1"></a>
+</h3>
+<p>So we will calculate the limits of agreement using the
+<code>loa_mixed</code> function. We will need to identify the columns
+with the right information using the <code>diff</code>,
+<code>condition</code>, and <code>id</code> arguments. We then select
+the right data set using the <code>data</code> argument. Lastly, we
+specify the specifics of the conditions for how the limits are
+calculated. For this specific analysis I decided to calculate 95% limits
+of agreement with 95% confidence intervals, and I will use
+bias-corrected accelerated (bca) bootstrap confidence intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rec.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_mixed.html">loa_mixed</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,
                                      condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
@@ -194,9 +263,11 @@ Concordance Plots of Esophageal Temperature
                                      agree.level <span class="op">=</span> <span class="fl">.95</span>,
                                      replicates <span class="op">=</span> <span class="fl">199</span>,
                                      type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></code></pre></div>
-<p>When we create a table of the results we can see that CCC and limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).</p>
+<p>When we create a table of the results we can see that CCC and limits
+of agreement (LoA), at least for Trec post exercise, are providing the
+same conclusion (poor agreement).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">loa</span>,
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">loa</span>,
              caption <span class="op">=</span> <span class="st">"LoA: Trec Post Exercise"</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <caption>LoA: Trec Post Exercise</caption>
@@ -227,17 +298,21 @@ Concordance Plots of Esophageal Temperature
 </tr>
 </tbody>
 </table>
-<p>Furthermore, we can visualize the results with a typical Bland-Altman plot of the LoA.</p>
+<p>Furthermore, we can visualize the results with a typical Bland-Altman
+plot of the LoA.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-10-1.png" alt="Limits of Agreement for Trec Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Trec Post Exercise
 </p>
 </div>
-<p>Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.</p>
+<p>Now, when we look at the Delta values for Trec we find that there is
+much closer agreement (maybe even acceptable agreement) when we look at
+LoA. However, we cannot say that the average difference would be less
+than 0.25 which may not be acceptable for some researchers.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
              caption <span class="op">=</span> <span class="st">"LoA: Delta Trec"</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <caption>LoA: Delta Trec</caption>
@@ -269,17 +344,20 @@ Limits of Agreement for Trec Post Exercise
 </tbody>
 </table>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-12-1.png" alt="Limits of Agreement for Delta Trec" width="672"><p class="caption">
 Limits of Agreement for Delta Trec
 </p>
 </div>
 </div>
-<div id="esophageal-temperature-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#esophageal-temperature-1" class="anchor"></a>Esophageal Temperature</h2>
-<p>We can repeat the process for esophageal temperature. Overall, the results are fairly similar, and while there is better agreement on the delta (change scores), it is still fairly difficult to determine that there is “good” agreement between the AM and PM measurements.</p>
+<div class="section level3">
+<h3 id="esophageal-temperature-1">Esophageal Temperature<a class="anchor" aria-label="anchor" href="#esophageal-temperature-1"></a>
+</h3>
+<p>We can repeat the process for esophageal temperature. Overall, the
+results are fairly similar, and while there is better agreement on the
+delta (change scores), it is still fairly difficult to determine that
+there is “good” agreement between the AM and PM measurements.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">eso.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_mixed.html">loa_mixed</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,
                                      condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
@@ -290,7 +368,7 @@ Limits of Agreement for Delta Trec
                                      replicates <span class="op">=</span> <span class="fl">199</span>,
                                      type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">loa</span>,
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">loa</span>,
              caption <span class="op">=</span> <span class="st">"LoA: Teso Post Exercise"</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <caption>LoA: Teso Post Exercise</caption>
@@ -322,14 +400,14 @@ Limits of Agreement for Delta Trec
 </tbody>
 </table>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-15-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Teso Post Exercise
 </p>
 </div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
+<code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">loa</span>,
              caption <span class="op">=</span> <span class="st">"LoA: Delta Teso"</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <caption>LoA: Delta Teso</caption>
@@ -361,7 +439,7 @@ Limits of Agreement for Teso Post Exercise
 </tbody>
 </table>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">)</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-17-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
 Limits of Agreement for Delta Teso
@@ -369,30 +447,51 @@ Limits of Agreement for Delta Teso
 </div>
 </div>
 </div>
-<div id="references" class="section level1 unnumbered">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-carrasco2003" class="csl-entry">
-Carrasco, Josep L., and Lluı́s Jover. 2003. <span>“Estimating the Generalized Concordance Correlation Coefficient Through Variance Components.”</span> <em>Biometrics</em> 59 (4): 849–58. <a href="https://doi.org/10.1111/j.0006-341x.2003.00099.x">https://doi.org/10.1111/j.0006-341x.2003.00099.x</a>.
+Carrasco, Josep L., and Lluı́s Jover. 2003. <span>“Estimating the
+Generalized Concordance Correlation Coefficient Through Variance
+Components.”</span> <em>Biometrics</em> 59 (4): 849–58. <a href="https://doi.org/10.1111/j.0006-341x.2003.00099.x" class="external-link">https://doi.org/10.1111/j.0006-341x.2003.00099.x</a>.
 </div>
 <div id="ref-carrasco2009" class="csl-entry">
-Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. <span>“The Concordance Correlation Coefficient for Repeated Measures Estimated by Variance Components.”</span> <em>Journal of Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890">https://doi.org/10.1080/10543400802527890</a>.
-</div>
-<div id="ref-carrasco2013" class="csl-entry">
-Carrasco, Josep L., Brenda R. Phillips, Josep Puig-Martinez, Tonya S. King, and Vernon M. Chinchilli. 2013. <span>“Estimation of the Concordance Correlation Coefficient for Repeated Measures Using <span>SAS</span> and r.”</span> <em>Computer Methods and Programs in Biomedicine</em> 109 (3): 293–304. <a href="https://doi.org/10.1016/j.cmpb.2012.09.002">https://doi.org/10.1016/j.cmpb.2012.09.002</a>.
+Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009.
+<span>“The Concordance Correlation Coefficient for Repeated Measures
+Estimated by Variance Components.”</span> <em>Journal of
+Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890" class="external-link">https://doi.org/10.1080/10543400802527890</a>.
 </div>
 <div id="ref-cccrm" class="csl-entry">
-Carrasco, Josep Lluis, and Josep Puig Martinez. 2020. <em>Cccrm: Concordance Correlation Coefficient for Repeated (and Non-Repeated) Measures</em>. <a href="https://CRAN.R-project.org/package=cccrm">https://CRAN.R-project.org/package=cccrm</a>.
+Carrasco, Josep Lluis, and Josep Puig Martinez. 2020. <em>Cccrm:
+Concordance Correlation Coefficient for Repeated (and Non-Repeated)
+Measures</em>. <a href="https://CRAN.R-project.org/package=cccrm" class="external-link">https://CRAN.R-project.org/package=cccrm</a>.
+</div>
+<div id="ref-carrasco2013" class="csl-entry">
+Carrasco, Josep L., Brenda R. Phillips, Josep Puig-Martinez, Tonya S.
+King, and Vernon M. Chinchilli. 2013. <span>“Estimation of the
+Concordance Correlation Coefficient for Repeated Measures Using
+<span>SAS</span> and r.”</span> <em>Computer Methods and Programs in
+Biomedicine</em> 109 (3): 293–304. <a href="https://doi.org/10.1016/j.cmpb.2012.09.002" class="external-link">https://doi.org/10.1016/j.cmpb.2012.09.002</a>.
 </div>
 <div id="ref-Lin1989" class="csl-entry">
-Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051">https://doi.org/10.2307/2532051</a>.
+Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient
+to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051" class="external-link">https://doi.org/10.2307/2532051</a>.
 </div>
 <div id="ref-Parker2016" class="csl-entry">
-Parker, Richard A., Christopher J. Weir, Noah Rubio, Roberto Rabinovich, Hilary Pinnock, Janet Hanley, Lucy McCloughan, et al. 2016. <span>“Application of Mixed Effects Limits of Agreement in the Presence of Multiple Sources of Variability: Exemplar from the Comparison of Several Devices to Measure Respiratory Rate in <span>COPD</span> Patients.”</span> Edited by Hong-Long (James) Ji. <em><span>PLOS</span> <span>ONE</span></em> 11 (12): e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321">https://doi.org/10.1371/journal.pone.0168321</a>.
+Parker, Richard A., Christopher J. Weir, Noah Rubio, Roberto Rabinovich,
+Hilary Pinnock, Janet Hanley, Lucy McCloughan, et al. 2016.
+<span>“Application of Mixed Effects Limits of Agreement in the Presence
+of Multiple Sources of Variability: Exemplar from the Comparison of
+Several Devices to Measure Respiratory Rate in <span>COPD</span>
+Patients.”</span> Edited by Hong-Long (James) Ji. <em><span>PLOS</span>
+<span>ONE</span></em> 11 (12): e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link">https://doi.org/10.1371/journal.pone.0168321</a>.
 </div>
 <div id="ref-ravanelli2020change" class="csl-entry">
-Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core Temperature and Sweating Response During Exercise Are Unaffected by Time of Day Within the Wake Period.”</span> <em>Medicine and Science in Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575">https://doi.org/10.1249/mss.0000000000002575</a>.
+Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core
+Temperature and Sweating Response During Exercise Are Unaffected by Time
+of Day Within the Wake Period.”</span> <em>Medicine and Science in
+Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575" class="external-link">https://doi.org/10.1249/mss.0000000000002575</a>.
 </div>
 </div>
 </div>
@@ -409,11 +508,13 @@ Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core Temperatur
 
 
       <footer><div class="copyright">
-  <p>Developed by Aaron Caldwell.</p>
+  <p></p>
+<p>Developed by Aaron Caldwell.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -421,6 +522,8 @@ Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core Temperatur
 
   
 
+
+  
 
   </body>
 </html>
