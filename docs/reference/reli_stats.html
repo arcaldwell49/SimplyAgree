@@ -101,7 +101,7 @@
 <dt>other_ci</dt>
 <dd><p>Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.</p></dd>
 <dt>replicates</dt>
-<dd><p>the number of bootstrap replicates. Passed on to the boot function. Default is 500.</p></dd>
+<dd><p>The number of bootstrap replicates. Passed on to the boot function. Default is 500.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -127,13 +127,13 @@
 <dd><p>Coefficient of Variation</p></dd>
 
   <dt><code>"SEM"</code></dt>
-<dd><p>Standard MSE of Measurement</p></dd>
+<dd><p>List with Standard MSE of Measurement estimate (est)</p></dd>
 
   <dt><code>"SEE"</code></dt>
-<dd><p>Standard MSE of the Estimate</p></dd>
+<dd><p>List with Standard MSE of the Estimate estimate (est)</p></dd>
 
   <dt><code>"SEP"</code></dt>
-<dd><p>Standard MSE of Predicitions</p></dd>
+<dd><p>List with Standard MSE of Predicitions (est)</p></dd>
 
   <dt><code>"call"</code></dt>
 <dd><p>the matched call</p></dd>
@@ -143,7 +143,9 @@
 </dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p>The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.</p>
+    <p>The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
+The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
+The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.</p>
 <p>This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 The estimates of variances for any of the measures are derived from linear mixed models.
 The results may differ slightly from the results from ICC calculations derived from an analysis of variance.</p>

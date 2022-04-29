@@ -103,16 +103,10 @@
     <div id="value">
     <h2>Value</h2>
     <p>Returns single simple_agree class object with the results of the agreement analysis.</p><dl><dt><code>"loa"</code></dt>
-<dd><p>a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></dd>
+<dd><p>A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></dd>
 
   <dt><code>"h0_test"</code></dt>
 <dd><p>Decision from hypothesis test.</p></dd>
-
-  <dt><code>"identity.plot"</code></dt>
-<dd><p>Plot of x and y with a line of identity with a linear regression line</p></dd>
-
-  <dt><code>"bland_alt.plot"</code></dt>
-<dd><p>Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x &amp; y.</p></dd>
 
   <dt><code>"ccc.xy"</code></dt>
 <dd><p>Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.</p></dd>
@@ -120,6 +114,11 @@
   <dt><code>"call"</code></dt>
 <dd><p>the matched call</p></dd>
 
+  <dt><code>"var_comp"</code></dt>
+<dd><p>Table of Variance Components</p></dd>
+
+  <dt><code>"class"</code></dt>
+<dd><p>The type of simple_agree analysis</p></dd>
 
 
 </dl></div>
