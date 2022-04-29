@@ -23,17 +23,50 @@
 
 print.simple_reli <- function(x,...){
   cat("\n")
-  cat("Coefficient of Variation (%): ",round(x$cv*100,2))
+  if(x$call$other_ci == TRUE){
+    cat(paste0("Coefficient of Variation (%): ",
+        signif(x$cv$est*100,3), " ",
+        100*x$call$conf.level, "% C.I. [",
+        signif(x$cv$lower.ci*100,3), ", ",
+        signif(x$cv$upper.ci*100,3),
+        "]"))
+    cat("\n")
+    cat(paste0("Standard Error of Measurement (SEM): ",signif(x$SEM$est,3), " ",
+        100*x$call$conf.level, "% C.I. [",
+        signif(x$SEM$lower.ci,3), ", ",
+        signif(x$SEM$upper.ci,3),
+        "]"))
+    cat("\n")
+    cat(paste0("Standard Error of the Estimate (SEE): ",signif(x$SEE$est,3), " ",
+        100*x$call$conf.level, "% C.I. [",
+        signif(x$SEE$lower.ci,3), ", ",
+        signif(x$SEE$upper.ci,3),
+        "]"))
+    cat("\n")
+    cat(paste0("Standard Error of Prediction (SEP): ",signif(x$SEP$est,3), " ",
+        100*x$call$conf.level, "% C.I. [",
+        signif(x$SEP$lower.ci,3), ", ",
+        signif(x$SEP$upper.ci,3),
+        "]"))
+    cat("\n")
+    cat("\n")
+    cat("Intraclass Correlation Coefficients")
+  } else {
+  cat("Coefficient of Variation (%): ",signif(x$cv$est*100,3))
   cat("\n")
-  cat("Standard Error of Measurement (SEM): ",round(x$SEM,4))
+  cat("Standard Error of Measurement (SEM): ",signif(x$SEM$est,3))
   cat("\n")
-  cat("Standard Error of the Estimate (SEE): ",round(x$SEE,4))
+  cat("Standard Error of the Estimate (SEE): ",signif(x$SEE$est,3))
   cat("\n")
-  cat("Standard Error of Prediction (SEP): ",round(x$SEP,4))
+  cat("Standard Error of Prediction (SEP): ",signif(x$SEP$est,3))
   cat("\n")
   cat("\n")
-  cat("Intraclass Correlation Coefficients")
+  cat("Intraclass Correlation Coefficients with ",
+      100*x$call$conf.level, "% C.I.")
+  }
   cat("\n")
+  df_icc = x$icc
+  colnames(df_icc) = c("Model", "Measures", "ICC", "Lower CI", "Upper CI")
   print(x$icc,digits=4)
   cat("\n")
 }
@@ -45,6 +78,35 @@ print.simple_reli <- function(x,...){
 
 plot.simple_reli <- function(x,  ...){
 
-  return(x$plot.reliability)
+  df = model.frame(x$call$lm_mod)
+  colnames(df) = c("values", "id", "items")
+  plot.reliability = ggplot(df,
+                            aes(
+                              x = items,
+                              y = values,
+                              color = id,
+                              group = id
+                            )) +
+    geom_point(position = position_dodge(width = 0.2)) +
+    geom_line(color = "black",
+              alpha = .2,
+              position = position_dodge(width = 0.2)) +
+    labs(y = "Measurement",
+         x = "Item",
+         color = "id") +
+    scale_color_viridis_d()+
+    theme_bw()
+  return(plot.reliability)
 
+}
+
+
+#' @rdname simple_reli-methods
+#' @method check simple_reli
+#' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid fitted
+#' @export
+
+check.simple_reli <- function(x) {
+
+  check_reli(x)
 }

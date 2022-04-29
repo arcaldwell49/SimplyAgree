@@ -22,6 +22,7 @@ testthat::test_that("Simple Use Run Through", {
   test1 = reli_stats(data = dat,
                      wide = TRUE,
                      col.names = c("J1", "J2", "J3", "J4"))
+  checktest1 = check(test1)
   jmvtest2 = jmvreli(data = dat,
                      vars =c("J1", "J2", "J3", "J4"),
                      desc = TRUE,

@@ -11,7 +11,10 @@ reli_stats(
   data,
   wide = FALSE,
   col.names = NULL,
-  conf.level = 0.95
+  cv_calc = "MSE",
+  conf.level = 0.95,
+  other_ci = FALSE,
+  replicates = 500
 )
 }
 \arguments{
@@ -27,7 +30,13 @@ reli_stats(
 
 \item{col.names}{If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.}
 
+\item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
+
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
+
+\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 500.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -40,20 +49,33 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"n.id"}}{Number of subjects/participants}
   \item{\code{"n.items"}}{Number of items/time points}
   \item{\code{"cv"}}{Coefficient of Variation}
-  \item{\code{"SEM"}}{Standard Error of Measurement}
-  \item{\code{"SEE"}}{Standard Error of the Estimate}
-  \item{\code{"SEP"}}{Standard Error of Predicitions}
-  \item{\code{"plot.reliability"}}{Plot of data points within subjects across items}
-
+  \item{\code{"SEM"}}{List with Standard MSE of Measurement estimate (est) }
+  \item{\code{"SEE"}}{List with Standard MSE of the Estimate estimate (est)}
+  \item{\code{"SEP"}}{List with Standard MSE of Predicitions (est)}
+  \item{\code{"call"}}{the matched call}
 
 }
 }
 \description{
-reli_stats produces reliability statistics desccribed by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard error of meassurement.
+reli_stats produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+}
+\details{
+The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
+The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
+The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+
+This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
+The estimates of variances for any of the measures are derived from linear mixed models.
+The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
 }
 \section{References}{
 
+
 Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
+
+Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
+
+McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
 }
 
 \examples{

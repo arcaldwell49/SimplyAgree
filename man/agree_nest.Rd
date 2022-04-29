@@ -4,12 +4,22 @@
 \alias{agree_nest}
 \title{Tests for Absolute Agreement with Nested Data}
 \usage{
-agree_nest(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
+agree_nest(
+  x,
+  y,
+  id,
+  data,
+  delta,
+  agree.level = 0.95,
+  conf.level = 0.95,
+  TOST = TRUE,
+  prop_bias = FALSE
+)
 }
 \arguments{
 \item{x}{Name of column with first measurement}
 
-\item{y}{Name of other column with first measurement}
+\item{y}{Name of other column with the other measurement to compare to the first.}
 
 \item{id}{Column with subject identifier}
 
@@ -20,19 +30,21 @@ agree_nest(x, y, id, data, delta, agree.level = 0.95, conf.level = 0.95)
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
+
+\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 }
 \value{
-Returns single list with the results of the agreement analysis.
+Returns single simple_agree class object with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
+  \item{\code{"loa"}}{A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-  \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.}
-  \item{\code{"conf.level"}}{Returned as input.}
-  \item{\code{"agree.level"}}{Returned as input.}
-
+  \item{\code{"call"}}{the matched call}
+  \item{\code{"var_comp"}}{Table of Variance Components}
+  \item{\code{"class"}}{The type of simple_agree analysis}
 }
 }
 \description{

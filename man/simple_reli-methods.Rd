@@ -4,11 +4,14 @@
 \alias{simple_reli-methods}
 \alias{print.simple_reli}
 \alias{plot.simple_reli}
+\alias{check.simple_reli}
 \title{Methods for simple_reli objects}
 \usage{
 \method{print}{simple_reli}(x, ...)
 
 \method{plot}{simple_reli}(x, ...)
+
+\method{check}{simple_reli}(x)
 }
 \arguments{
 \item{x}{object of class \code{simple_reli} as returned from the reli_stats function}
