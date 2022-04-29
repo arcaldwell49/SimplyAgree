@@ -4,8 +4,7 @@ pkgdown_sha: ~
 articles:
   agreement_analysis: agreement_analysis.html
   Deming: Deming.html
-  intro_vignette: intro_vignette.html
   reanalysis: reanalysis.html
   reliability_analysis: reliability_analysis.html
-last_built: 2022-04-27T21:23Z
+last_built: 2022-04-29T20:59Z
 

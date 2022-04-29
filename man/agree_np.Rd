@@ -2,8 +2,7 @@
 % Please edit documentation in R/agree_np.R
 \name{agree_np}
 \alias{agree_np}
-\title{Nonparametric Test for Limits of Agreement
-A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.}
+\title{Nonparametric Test for Limits of Agreement}
 \usage{
 agree_np(
   x,
@@ -37,18 +36,19 @@ agree_np(
 \item{conf.level}{the confidence level required. Default is 95\%.}
 }
 \value{
-Returns adv-agree object with the results of the agreement analysis.
+Returns simple_agree object with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"loa"}}{a data frame of the limits of agreement.}
-  \item{\code{"agee"}}{a data frame of the binomial proportion of results in agreement..}
+  \item{\code{"loa"}}{A data frame of the limits of agreement.}
+  \item{\code{"agee"}}{A data frame of the binomial proportion of results in agreement.}
   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"call"}}{the matched call}
+  \item{\code{"qr_mod"}}{The quantile regression model.}
+  \item{\code{"call"}}{The matched call}
 
 }
 }
 \description{
-agree_np produces an agreement analysis based on quantiles and
+agree_np A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
 }
 \section{References}{
 

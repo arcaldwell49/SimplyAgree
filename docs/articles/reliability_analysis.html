@@ -56,9 +56,6 @@
       <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/intro_vignette.html">Introduction to SimplyAgree</a>
-    </li>
-    <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
     </li>
     <li>
@@ -87,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-04-27</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-04-29</h4>
       
       
       <div class="hidden name"><code>reliability_analysis.Rmd</code></div>
@@ -161,12 +158,12 @@ are intended to measure, respectively.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Coefficient of Variation (%):  15.36</span>
-<span class="co">#&gt; Standard Error of Measurement (SEM):  1.0097</span>
-<span class="co">#&gt; Standard Error of the Estimate (SEE):  2.6245</span>
-<span class="co">#&gt; Standard Error of Prediction (SEP):  4.065</span>
+<span class="co">#&gt; Coefficient of Variation (%):  19.1</span>
+<span class="co">#&gt; Standard Error of Measurement (SEM):  1.01</span>
+<span class="co">#&gt; Standard Error of the Estimate (SEE):  2.62</span>
+<span class="co">#&gt; Standard Error of Prediction (SEP):  4.06</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Intraclass Correlation Coefficients</span>
+<span class="co">#&gt; Intraclass Correlation Coefficients with  95 % C.I.</span>
 <span class="co">#&gt;            model         measures  type    icc lower.ci upper.ci</span>
 <span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.09672   0.6434</span>
 <span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.04290   0.6911</span>
@@ -179,11 +176,6 @@ items (e.g., time points).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span></code></pre></div>
 <p><img src="reliability_analysis_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
-<div class="section level3">
-<h3 id="bootstrapped-confidence-intervals">Bootstrapped Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrapped-confidence-intervals"></a>
-</h3>
-<p>TBA</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>

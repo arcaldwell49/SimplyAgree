@@ -56,9 +56,6 @@
       <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/intro_vignette.html">Introduction to SimplyAgree</a>
-    </li>
-    <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
     </li>
     <li>
@@ -87,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-04-27</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-04-29</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -657,9 +654,9 @@ are no longer symmetric around the bias estimate.</p>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA    -0.89  -1.3850  -0.3950     0.90</span>
-<span class="co">#&gt; Bias          0.04  -0.6283   0.7083     0.95</span>
-<span class="co">#&gt; Upper LoA     2.45   1.3981   3.5019     0.90</span>
+<span class="co">#&gt; Lower LoA    -0.89  -1.3845  -0.3955     0.90</span>
+<span class="co">#&gt; Bias          0.04  -0.6201   0.7001     0.95</span>
+<span class="co">#&gt; Upper LoA     2.45   1.2365   3.6635     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
@@ -683,15 +680,15 @@ agreement does not.</p>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6794  -0.9001     0.90</span>
-<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6504  -0.2583     0.90</span>
-<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5308   1.2576     0.90</span>
-<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.6426   0.1816     0.95</span>
-<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.7109   0.5661     0.95</span>
-<span class="co">#&gt; Bias @ 7.4        0.99000  -0.1171   2.0971     0.95</span>
-<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.8552   2.0890     0.90</span>
-<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8185   3.2029     0.90</span>
-<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.4153   9.3343     0.90</span>
+<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6938 -0.88566     0.90</span>
+<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6343 -0.27440     0.90</span>
+<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6303  1.15805     0.90</span>
+<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.4047 -0.05637     0.95</span>
+<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6020  0.45721     0.95</span>
+<span class="co">#&gt; Bias @ 7.4        0.99000  -0.5447  2.52465     0.95</span>
+<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.6644  1.89822     0.90</span>
+<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8349  3.18646     0.90</span>
+<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.2327  9.51700     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>

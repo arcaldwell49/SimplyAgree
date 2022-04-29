@@ -1,6 +1,6 @@
 #' Nonparametric Test for Limits of Agreement
-#' A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
-#' @description agree_np produces an agreement analysis based on quantiles and
+#'
+#' @description agree_np A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
 #' @param x Name of column with first measurement.
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier with samples are taken in replicates.
@@ -10,13 +10,14 @@
 #' @param delta The threshold below which methods agree/can be considered equivalent and this argument is required. Equivalence Bound for Agreement or Maximal Allowable Difference.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
-#' @return Returns adv-agree object with the results of the agreement analysis.
+#' @return Returns simple_agree object with the results of the agreement analysis.
 #'
 #' \describe{
-#'   \item{\code{"loa"}}{a data frame of the limits of agreement.}
-#'   \item{\code{"agee"}}{a data frame of the binomial proportion of results in agreement..}
+#'   \item{\code{"loa"}}{A data frame of the limits of agreement.}
+#'   \item{\code{"agee"}}{A data frame of the binomial proportion of results in agreement.}
 #'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"call"}}{the matched call}
+#'   \item{\code{"qr_mod"}}{The quantile regression model.}
+#'   \item{\code{"call"}}{The matched call}
 #'
 #' }
 #' @examples

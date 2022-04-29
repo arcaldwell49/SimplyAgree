@@ -36,7 +36,7 @@ reli_stats(
 
 \item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
 
-\item{replicates}{the number of bootstrap replicates. Passed on to the boot function. Default is 500.}
+\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 500.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -49,9 +49,9 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"n.id"}}{Number of subjects/participants}
   \item{\code{"n.items"}}{Number of items/time points}
   \item{\code{"cv"}}{Coefficient of Variation}
-  \item{\code{"SEM"}}{Standard MSE of Measurement}
-  \item{\code{"SEE"}}{Standard MSE of the Estimate}
-  \item{\code{"SEP"}}{Standard MSE of Predicitions}
+  \item{\code{"SEM"}}{List with Standard MSE of Measurement estimate (est) }
+  \item{\code{"SEE"}}{List with Standard MSE of the Estimate estimate (est)}
+  \item{\code{"SEP"}}{List with Standard MSE of Predicitions (est)}
   \item{\code{"call"}}{the matched call}
 
 }
@@ -60,7 +60,9 @@ Returns single list with the results of the agreement analysis.
 reli_stats produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
 }
 \details{
-The CV calculation has 3 versions. The "MSE" uses the "mean squared error" or residual error from the linear mixed model used to calculate the ICCs. The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean. The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error.
+The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
+The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
+The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 
 This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 The estimates of variances for any of the measures are derived from linear mixed models.
