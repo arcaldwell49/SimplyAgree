@@ -24,7 +24,7 @@ quadratic_weights = function (categ)
 
 pa_coef = function(ratings.mat,
                    conf.level,
-                   weighted =FALSE){
+                   weighted = FALSE){
 
   if (is.character(ratings.mat)){
     ratings.mat <- trim(toupper(ratings.mat))
@@ -63,7 +63,7 @@ pa_coef = function(ratings.mat,
   n2more <- sum(ri.vec>=2)
   pa <- sum(sum.q[ri.vec>=2]/((ri.vec*(ri.vec-1))[ri.vec>=2]))/n2more
   pe <- 0
-  coef_val <- pa
+  coef_val_pa <- pa
 
   den.ivec <- ri.vec*(ri.vec-1)
   den.ivec <- den.ivec - (den.ivec==0) # this operation replaces each 0 value with -1 to make the next ratio calculation always possible.
@@ -75,20 +75,13 @@ pa_coef = function(ratings.mat,
     if (n>=2){
       var.pa <- ((1)/(n*(n-1))) * sum((pa.ivec - pa)^2)
       stderr_pa <- sqrt(var.pa)# pa's standard error
-      p.value_pa <- 1-pt(pa/stderr,n-1)
-      lcb_pa <- pa - stderr*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
-      ucb_pa <- min(1,pa + stderr*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
+      p.value_pa <- 1-pt( coef_val_pa/stderr_pa,n-1)
+      lcb_pa <- pa - stderr_pa*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
+      ucb_pa <- min(1,pa + stderr_pa*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
     }
 
-    coef_se_pa <- stderr.est
   }
 
-  #coef_name <- "Percent Agreement"
-  #df_pa <- data.frame(coef_name = "Percent Agreement",
-  #                     pa,pe,
-  #                     coef_val, coef_se,
-  #                     coef_lower = lcb, coef_upper = ucb,
-  #                    p.value)
 
   # Gwet's AC1 ------
 
@@ -110,11 +103,11 @@ pa_coef = function(ratings.mat,
 
   if (n>=2){
     var.ac1 <- ((1)/(n*(n-1))) * sum((ac1.ivec.x - gwet.ac1)^2)
-    stderr_ac <- sqrt(var.ac1)# ac1's standard error
-    stderr.est_ac <- round(stderr,5)
-    p.value_ac <- 1-pt(gwet.ac1/stderr,n-1)
-    lcb_ac <- gwet.ac1 - stderr*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
-    ucb_ac <- min(1,gwet.ac1 + stderr*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
+    stderr_ac1 <- sqrt(var.ac1)# ac1's standard error
+    stderr.est_ac1 <- round(stderr_ac1,5)
+    p.value_ac1 <- 1-pt(gwet.ac1/stderr_ac1,n-1)
+    lcb_ac1 <- gwet.ac1 - stderr_ac1*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
+    ucb_ac1 <- min(1,gwet.ac1 + stderr_ac1*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
   }
 
   if (q == 1) {
@@ -128,13 +121,6 @@ pa_coef = function(ratings.mat,
     }
   }
   coef_val_ac <- gwet.ac1.est
-  coef_se_ac <- stderr.est
-
-  #df_ac <- data.frame(coef_name = coef_name,
-  #                    pa,pe,
-  #                    coef_val = gwet.ac1, coef_se,
-  #                    coef_lower = lcb, coef_upper = ucb,
-  #                   p.value)
 
   # Fleiss Kappa ---------
   if (q>=2) {
@@ -154,22 +140,22 @@ pa_coef = function(ratings.mat,
   kappa.ivec.x <- kappa.ivec - 2*(1-fleiss.kappa) * (pe.ivec-pe)/(1-pe)
 
   if (n>=2){
-    var.fleiss <- ((1-0)/(n*(n-1))) * sum((kappa.ivec.x - fleiss.kappa)^2)
+    var.fleiss <- ((1)/(n*(n-1))) * sum((kappa.ivec.x - fleiss.kappa)^2)
     stderr_kap <- sqrt(var.fleiss)# kappa's standard error
-    stderr.est_kap <- round(stderr,5)
-    p.value_kap <- 1-pt(fleiss.kappa/stderr,n-1)
-    lcb_kap <- fleiss.kappa - stderr*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
-    ucb_kap <- min(1,fleiss.kappa + stderr*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
+    stderr.est_kap <- round(stderr_kap,5)
+    p.value_kap <- 1-pt(fleiss.kappa/stderr_kap,n-1)
+    lcb_kap <- fleiss.kappa - stderr_kap*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
+    ucb_kap <- min(1,fleiss.kappa + stderr_kap*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
   }
-
-  #df_kap <- data.frame(coef_name = coef_name,
-  #                     pa, pe,
-  #                     coef_val, coef_se,
-  #                     coef_lower = lcb, coef_upper = ucb,
-  #                     p.value)
 
   # Kripendorff's Alpha -------
 
+  ri.vec <- agree.mat%*%rep(1,q)
+  agree.mat <- agree.mat[(ri.vec>=2),]
+  agree.mat.w <- agree.mat.w[(ri.vec>=2),]
+  ri.vec <- ri.vec[(ri.vec>=2)]
+  ri.mean <- mean(ri.vec)
+  n <- nrow(as.matrix(agree.mat))
   epsi <- 1/sum(ri.vec)
   sum.q <- (agree.mat*(agree.mat.w-1))%*%as.matrix(rep(1,q))
   paprime <-sum(sum.q/(ri.mean*(ri.vec-1)))/n
@@ -190,26 +176,23 @@ pa_coef = function(ratings.mat,
     krippen.ivec.x <- krippen.ivec - 2*(1-krippen.alpha.prime) * (pe.ivec-pe)/(1-pe)
 
     if (n>=2){
-      var.krippen <- ((1-f)/(n*(n-1))) * sum((krippen.ivec.x - krippen.alpha.prime)^2)
+      var.krippen <- ((1)/(n*(n-1))) * sum((krippen.ivec.x - krippen.alpha.prime)^2)
       stderr_krippen <- sqrt(var.krippen)# alpha's standard error
-      p.value_krippen <- 1-pt(krippen.alpha/stderr,n0-1)
-      lcb_krippen <- krippen.alpha - stderr*qt(1-(1-conf.level)/2,n0-1) # lower confidence bound
-      ucb_krippen <- min(1,krippen.alpha + stderr*qt(1-(1-conf.level)/2,n0-1)) # upper confidence bound
+      p.value_krippen <- 1-pt(krippen.alpha/stderr_krippen,n-1)
+      lcb_krippen <- krippen.alpha - stderr_krippen*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
+      ucb_krippen <- min(1,krippen.alpha + stderr_krippen*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
     }
-    #conf.int <- paste0("(",round(lcb,3),",",round(ucb,3),")")
-    coeff.se_krippen <- stderr.est
   }
 
-  #df_kr = data.frame(coef_name = coef_name,
-  #                   pa, pe,
-  #                   coef_val, coef_se,
-  #                   coef_lower = lcb, coef_upper = ucb,
-  #                   p.value)
   df_res = data.frame(
-    row.names = c("Gwet's AC",
-                  "Fleiss' Kappa",
+    row.names = c("Percent Agreement",
+                  coef_name_ac,
+                  "Fleiss's Kappa",
                   "Kririppendorff's Alpha"),
-    coef = c(1,1,1)
+    est = c(coef_val_pa, gwet.ac1.est, fleiss.kappa, krippen.alpha),
+    se = c(stderr_pa, stderr_ac1, stderr_kap, stderr_krippen),
+    lower.ci =  c(lcb_pa, lcb_ac1, lcb_kap, lcb_krippen),
+    upper.ci = c(ucb_pa, ucb_ac1, ucb_kap, ucb_krippen)
   )
 
 

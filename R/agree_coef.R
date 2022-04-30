@@ -1,5 +1,5 @@
 #' Agreeement Coefficents
-#' @description agree_coef produces reliability statistics described by Gwet.
+#' @description agree_coef produces inter-rater reliability or "agreement coefficients" as described by Gwet.
 #' @param measure Name of column containing the measurement of interest.
 #' @param item Name of column containing the items. If this is an inter-rater reliability study then this would indicate the rater (e.g., rater1, rater2, rater3, etc).
 #' @param id Column with subject identifier.
@@ -8,7 +8,7 @@
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
 #' @param conf.level the confidence level required. Default is 95\%.
 #'
-#' @return Returns single data frame of inter-rater reliability coefficients. TBA
+#' @return Returns single data frame of inter-rater reliability coefficients.
 
 #' @examples
 #' #TBA
@@ -59,5 +59,9 @@ agree_coef = function(wide = TRUE,
 
   ratings.mat = as.matrix(subset(x_w, select = -c(id)))
 
+  res = pa_coef(ratings.mat,
+                conf.level = conf.level,
+                weighted = weighted)
 
+  return(res)
 }
