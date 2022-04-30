@@ -1,5 +1,5 @@
 #' Agreeement Coefficents
-#' @description agree_coef produces reliability statistics desccribed by Gwet.
+#' @description agree_coef produces reliability statistics described by Gwet.
 #' @param measure Name of column containing the measurement of interest.
 #' @param item Name of column containing the items. If this is an inter-rater reliability study then this would indicate the rater (e.g., rater1, rater2, rater3, etc).
 #' @param id Column with subject identifier.
@@ -14,7 +14,7 @@
 #' #TBA
 #'
 #' @section References:
-#' TBA
+#' Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
 #' @importFrom stats reshape
 #' @importFrom tidyselect all_of
 #' @import dplyr
