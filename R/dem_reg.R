@@ -1,5 +1,5 @@
 #' Deming Regression
-#' A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
+#' @description A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
 #' @param x Name of column with first measurement
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier

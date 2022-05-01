@@ -2,8 +2,7 @@
 % Please edit documentation in R/dem_reg.R
 \name{dem_reg}
 \alias{dem_reg}
-\title{Deming Regression
-A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.}
+\title{Deming Regression}
 \usage{
 dem_reg(
   x,
@@ -46,7 +45,6 @@ The function returns a simple_eiv (eiv meaning "error in variables") object.
 }
 }
 \description{
-Deming Regression
 A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
 }
 \details{
