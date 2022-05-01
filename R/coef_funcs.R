@@ -26,10 +26,6 @@ pa_coef = function(ratings.mat,
                    conf.level,
                    weighted = FALSE){
 
-  if (is.character(ratings.mat)){
-    ratings.mat <- trim(toupper(ratings.mat))
-    ratings.mat[ratings.mat==''] <- NA_character_
-  }
   n <- nrow(ratings.mat) # number of subjects
   r <- ncol(ratings.mat) # number of raters
 
@@ -84,7 +80,9 @@ pa_coef = function(ratings.mat,
 
 
   # Gwet's AC1 ------
-
+  ri.vec <- agree.mat%*%rep(1,q)
+  sum.q <- (agree.mat*(agree.mat.w-1))%*%rep(1,q)
+  n2more <- sum(ri.vec>=2)
   pa <- sum(sum.q[ri.vec>=2]/((ri.vec*(ri.vec-1))[ri.vec>=2]))/n2more
   pi.vec <- t(t(rep(1/n,n))%*%(agree.mat/(ri.vec%*%t(rep(1,q)))))
   if (q >= 2) {
@@ -92,8 +90,9 @@ pa_coef = function(ratings.mat,
   } else {
     pe = 1e-15
   }
-  gwet.ac1.est <-gwet.ac1 <- (pa-pe)/(1-pe)
+  gwet.ac1.est <- gwet.ac1 <- (pa-pe)/(1-pe)
 
+  pa.ivec <- sum.q/den.ivec
   # calculating variance, stderr & p-value of gwet's ac1 coeficient
 
   pe.r2 <- pe*(ri.vec>=2)
@@ -104,7 +103,6 @@ pa_coef = function(ratings.mat,
   if (n>=2){
     var.ac1 <- ((1)/(n*(n-1))) * sum((ac1.ivec.x - gwet.ac1)^2)
     stderr_ac1 <- sqrt(var.ac1)# ac1's standard error
-    stderr.est_ac1 <- round(stderr_ac1,5)
     p.value_ac1 <- 1-pt(gwet.ac1/stderr_ac1,n-1)
     lcb_ac1 <- gwet.ac1 - stderr_ac1*qt(1-(1-conf.level)/2,n-1) # lower confidence bound
     ucb_ac1 <- min(1,gwet.ac1 + stderr_ac1*qt(1-(1-conf.level)/2,n-1)) # upper confidence bound
@@ -187,7 +185,7 @@ pa_coef = function(ratings.mat,
   df_res = data.frame(
     row.names = c("Percent Agreement",
                   coef_name_ac,
-                  "Fleiss's Kappa",
+                  "Fleiss' Kappa",
                   "Kririppendorff's Alpha"),
     est = c(coef_val_pa, gwet.ac1.est, fleiss.kappa, krippen.alpha),
     se = c(stderr_pa, stderr_ac1, stderr_kap, stderr_krippen),

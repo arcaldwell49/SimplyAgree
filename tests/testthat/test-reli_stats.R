@@ -14,6 +14,54 @@ testthat::test_that("Simple Use Run Through", {
     byrow = TRUE
   )
 
+  ratermat1 = ("Rater1 Rater2 Rater3 Rater4
+1       1      1     NA      1
+2       2      2      3      2
+3       3      3      3      3
+4       3      3      3      3
+5       2      2      2      2
+6       1      2      3      4
+7       4      4      4      4
+8       1      1      2      1
+9       2      2      2      2
+10     NA      5      5      5
+11     NA     NA      1      1
+12     NA     NA      3     NA")
+
+  ratermat2 = as.matrix(read.table(textConnection(ratermat1),
+                       header=TRUE,
+                       row.names=1))
+
+  irr1w = agree_coef(data = ratermat2,
+                    wide = TRUE,
+                    weighted = TRUE,
+                    col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
+
+  expect_equivalent(c(0.9753788, .9140007, 0.8649351, 0.8491071),
+                    irr1w$est,
+                    tolerance = .00001)
+  expect_equivalent(c(1, 1, 1, 1),
+                    irr1w$upper.ci,
+                    tolerance = .01)
+  expect_equivalent(c(.775, .685, .543, .561),
+                    irr1w$lower.ci,
+                    tolerance = .01)
+
+  irr1 = agree_coef(data = ratermat2,
+                     wide = TRUE,
+                     weighted = FALSE,
+                     col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
+
+  expect_equivalent(c(.818,.775,.7611,.743),
+                    irr1$est,
+                    tolerance = .001)
+  expect_equivalent(c(1, 1, 1, 1),
+                    irr1$upper.ci,
+                    tolerance = .01)
+  expect_equivalent(c(.5417,.4608,.4243,.4192),
+                    irr1$lower.ci,
+                    tolerance = .01)
+
   colnames(sf) <- paste("J", 1:4, sep = "")
   rownames(sf) <- paste("S", 1:6, sep = "")
   #sf  #example from Shrout and Fleiss (1979)

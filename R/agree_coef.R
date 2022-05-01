@@ -7,14 +7,16 @@
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
 #' @param conf.level the confidence level required. Default is 95\%.
+#' @param weighted Logical value (TRUE or FALSE) indicating whether to weight the responses. If TRUE (default is FALSE) then quadratic weights are utilized. This option should be set to TRUE for ordinal or continuous responses.
 #'
 #' @return Returns single data frame of inter-rater reliability coefficients.
-
 #' @examples
-#' #TBA
+#' data('reps')
+#' agree_coef(data = reps, wide = TRUE, col.names = c("x","y"), weighted = TRUE)
 #'
 #' @section References:
 #' Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
+#' Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
 #' @importFrom stats reshape
 #' @importFrom tidyselect all_of
 #' @import dplyr

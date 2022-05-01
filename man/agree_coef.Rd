@@ -28,6 +28,8 @@ agree_coef(
 
 \item{data}{Data frame with all data.}
 
+\item{weighted}{Logical value (TRUE or FALSE) indicating whether to weight the responses. If TRUE (default is FALSE) then quadratic weights are utilized. This option should be set to TRUE for ordinal or continuous responses.}
+
 \item{conf.level}{the confidence level required. Default is 95\%.}
 }
 \value{
@@ -39,9 +41,11 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
 \section{References}{
 
 Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
+Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
 }
 
 \examples{
-#TBA
+data('reps')
+agree_coef(data = reps, wide = TRUE, col.names = c("x","y"), weighted = TRUE)
 
 }

@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-04-29</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-05-01</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -642,8 +642,6 @@ are no longer symmetric around the bias estimate.</p>
               delta <span class="op">=</span> <span class="fl">2</span>,
               prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
               agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
-<span class="co">#&gt; Warning in agree_np(x = "x", y = "y", data = reps, delta = 2, prop_bias =</span>
-<span class="co">#&gt; FALSE, : Evidence of proportional bias. Consider setting prop_bias to TRUE.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
 <span class="co">#&gt; Limit of Agreement = 95%</span>
 <span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span>
@@ -654,9 +652,9 @@ are no longer symmetric around the bias estimate.</p>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA    -0.89  -1.4058  -0.3742     0.90</span>
-<span class="co">#&gt; Bias          0.04  -0.6295   0.7095     0.95</span>
-<span class="co">#&gt; Upper LoA     2.45   1.3937   3.5063     0.90</span>
+<span class="co">#&gt; Lower LoA    -0.89  -1.3867  -0.3933     0.90</span>
+<span class="co">#&gt; Bias          0.04  -0.6579   0.7379     0.95</span>
+<span class="co">#&gt; Upper LoA     2.45   1.5387   3.3613     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
@@ -680,15 +678,15 @@ agreement does not.</p>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA @ 3.9  -1.28975 -1.68893  -0.8906     0.90</span>
-<span class="co">#&gt; Lower LoA @ 5.24 -0.45436 -0.63736  -0.2714     0.90</span>
-<span class="co">#&gt; Lower LoA @ 7.4   0.89417  0.62626   1.1621     0.90</span>
-<span class="co">#&gt; Bias @ 3.9       -0.73052 -1.29400  -0.1670     0.95</span>
-<span class="co">#&gt; Bias @ 5.24      -0.07238 -0.51373   0.3690     0.95</span>
-<span class="co">#&gt; Bias @ 7.4        0.99000  0.01535   1.9647     0.95</span>
-<span class="co">#&gt; Upper LoA @ 3.9  -0.38310 -2.72804   1.9618     0.90</span>
-<span class="co">#&gt; Upper LoA @ 5.24  2.01069  0.93016   3.0912     0.90</span>
-<span class="co">#&gt; Upper LoA @ 7.4   5.87483  2.35990   9.3898     0.90</span>
+<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7131 -0.86642     0.90</span>
+<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6402 -0.26851     0.90</span>
+<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5861  1.20225     0.90</span>
+<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3714 -0.08964     0.95</span>
+<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.7248  0.57999     0.95</span>
+<span class="co">#&gt; Bias @ 7.4        0.99000  -0.5409  2.52089     0.95</span>
+<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.5678  1.80155     0.90</span>
+<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8737  3.14771     0.90</span>
+<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.5289  9.22076     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>

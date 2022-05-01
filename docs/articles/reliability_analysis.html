@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-04-29</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-05-01</h4>
       
       
       <div class="hidden name"><code>reliability_analysis.Rmd</code></div>
@@ -473,9 +473,83 @@ these confidence intervals are calculated.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="inter-rater-reliability">Inter-Rater Reliability<a class="anchor" aria-label="anchor" href="#inter-rater-reliability"></a>
+</h2>
+<p>In some cases, the reliability of a categorical or ordinal scale may
+be worth investigating. For example, physicians may want to develop a
+diagnosis tool and ensure that the diagnosis is reliable (i.e.,
+categorical designation) or severity of the disease (i.e., a Likert-type
+scale). Coefficients can be calculated to assess the degree of
+inter-rater reliability. In its simplest form, the percent agreement
+between all the raters can be calculated. All other coefficients of
+agreement are esssentially trying to “correct” for random guessing of
+the rater. The function to make these calculations in the
+<code>SimplyAgree</code> is <code>agree_coef</code>, and it produces 4
+estimates: percent agreement, Gwet’s AC, Fleiss’ Kappa, and
+Krippendorff’s Alpha. However, other packages provide much a much
+greater breadth of calculative approaches <span class="citation">(<a href="#ref-irrCAC" role="doc-biblioref">Gwet 2019</a>)</span>.</p>
+<p>In the <code>agree_coef</code> function, the user can specify
+<code>weighted = TRUE</code>. If this argument is set to true than the
+ratings have quadratic weights applied to them. Essentially, this
+penalizes values farther away from each other more than those close to
+each other. For example, a pair of values equal to 3 and 4 would be
+penalized less than a pair of values to 1 and 4. For more details, on
+these “agreement coefficients” I refer all users to Gwet’s textbook on
+inter-rater agreement <span class="citation">(<a href="#ref-gwet" role="doc-biblioref">Gwet 2014</a>)</span>.</p>
+<p>As a demonstration, we can create a matrix of ratings.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R">  <span class="va">ratermat1</span> <span class="op">=</span> <span class="op">(</span><span class="st">"Rater1 Rater2 Rater3 Rater4
+1       1      1     NA      1
+2       2      2      3      2
+3       3      3      3      3
+4       3      3      3      3
+5       2      2      2      2
+6       1      2      3      4
+7       4      4      4      4
+8       1      1      2      1
+9       2      2      2      2
+10     NA      5      5      5
+11     NA     NA      1      1
+12     NA     NA      3     NA"</span><span class="op">)</span>
+
+  <span class="va">ratermat2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/textconnections.html" class="external-link">textConnection</a></span><span class="op">(</span><span class="va">ratermat1</span><span class="op">)</span>,
+                       header<span class="op">=</span><span class="cn">TRUE</span>,
+                       row.names<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>We can then perform the analysis without the weights.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/agree_coef.html">agree_coef</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ratermat2</span>,
+                     wide <span class="op">=</span> <span class="cn">TRUE</span>,
+                     weighted <span class="op">=</span> <span class="cn">FALSE</span>,
+                     col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater1"</span>, <span class="st">"Rater2"</span>, <span class="st">"Rater3"</span>, <span class="st">"Rater4"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;                              est        se  lower.ci upper.ci</span>
+<span class="co">#&gt; Percent Agreement      0.8181818 0.1256090 0.5417184        1</span>
+<span class="co">#&gt; Gwet's AC1             0.7754441 0.1429500 0.4608133        1</span>
+<span class="co">#&gt; Fleiss' Kappa          0.7611693 0.1530192 0.4243763        1</span>
+<span class="co">#&gt; Kririppendorff's Alpha 0.7434211 0.1454787 0.4192743        1</span></code></pre></div>
+<p>Or, perform it with weighting.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/agree_coef.html">agree_coef</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ratermat2</span>,
+                    wide <span class="op">=</span> <span class="cn">TRUE</span>,
+                    weighted <span class="op">=</span> <span class="cn">TRUE</span>,
+                    col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater1"</span>, <span class="st">"Rater2"</span>, <span class="st">"Rater3"</span>, <span class="st">"Rater4"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;                              est         se  lower.ci upper.ci</span>
+<span class="co">#&gt; Percent Agreement      0.9753788 0.09061628 0.7759337        1</span>
+<span class="co">#&gt; Gwet's AC2             0.9140007 0.10396224 0.6851814        1</span>
+<span class="co">#&gt; Fleiss' Kappa          0.8649351 0.14603361 0.5435173        1</span>
+<span class="co">#&gt; Kririppendorff's Alpha 0.8491071 0.12905120 0.5615632        1</span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-gwet" class="csl-entry">
+Gwet, Kilem L. 2014. <em>Handbook of Inter-Rater Reliability</em>.
+Advanced Analytics, LLC. <a href="https://www.agreestat.com/book4/" class="external-link">https://www.agreestat.com/book4/</a>.
+</div>
+<div id="ref-irrCAC" class="csl-entry">
+———. 2019. <em>irrCAC: Computing Chance-Corrected Agreement Coefficients
+(CAC)</em>. <a href="https://CRAN.R-project.org/package=irrCAC" class="external-link">https://CRAN.R-project.org/package=irrCAC</a>.
+</div>
 <div id="ref-mcgraw1996" class="csl-entry">
 McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences
 about Some Intraclass Correlation Coefficients.”</span>
