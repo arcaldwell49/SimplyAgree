@@ -1,7 +1,7 @@
 ---
 title: Flexible and Robust Agreement and Reliability Analyses
 name: SimplyAgree
-version: 0.0.3
+version: 0.0.4
 jms: '1.0'
 authors:
   - Aaron R. Caldwell

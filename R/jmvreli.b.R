@@ -33,16 +33,16 @@ jmvreliClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             tex_res =   paste0(
                 "Coefficient of Variation (%): ",
-                round(res$cv*100,2),
+                round(res$cv$est*100,2),
                 "\n",
                 "Standard Error of Measurement (SEM): ",
-                round(res$SEM,4),
+                round(res$SEM$est,4),
                 "\n",
                 "Standard Error of the Estimate (SEE): ",
-                round(res$SEE,4),
+                round(res$SEE$est,4),
                 "\n",
                 "Standard Error of Prediction (SEP): ",
-                round(res$SEP,4),
+                round(res$SEP$est,4),
                 "\n"
             )
 

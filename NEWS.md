@@ -1,10 +1,26 @@
 # NEWS
 
-## v0.0.3
+# SimplyAgree 0.1.0
+
+- Updated CV calculations for `reli_stats` with the cv_calc argument.
+  - Options now included CV for the model residuals, mean-squared error (MSE), or for the standard error of measurement (SEM).
+- Updated plots to include the `delta` argument on plot if specified, and estimate of LoA.
+- Line-of-identity plot now includes trend line from Deming regression rather than OLS.
+- Deming regression function (`dem_reg`) has been added to the package.
+- Agreement coefficients (`agree_coef`), otherwise known as 
+- Added agreement coefficient function (`agree_coef`).
+- Assumptions checks are added for all "simple-agree" class results
+  - Checks include: normality, heteroscedasticity, and proportional bias
+- Assumptions checks are added for all "simple-reli" class results
+  - Checks include: normality and heteroscedasticity
+- Big thanks go to Greg Atkinson and Ivan Jukic for the many suggestions leading to this update.
+
+
+# SimplyAgree 0.0.3
 - Fixed error in `agree_nest` and `agree_reps`; now properly handles missing values
 - Remove dependencies on sjstats and cccrm packages
 
-## v0.0.2
+# SimplyAgree 0.0.2
 - Fixes typos in jamovi/jmv functions
 - Adds more descriptive errors to jamovi output
 - Remove dontrun from examples in documentation

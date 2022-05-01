@@ -11,18 +11,20 @@ testthat::test_that("basic runs", {
 
   #skip_on_cran()
   set.seed(117)
-  test_bca = loa_mixed(
-    diff = "diff",
-    condition = "trial_condition",
-    id = "id",
-    data = recpre_long,
-    delta = 2,
-    plot.xaxis = "AM",
-    conf.level = .95,
-    agree.level = .95,
-    replicates = 99,
-    type = "bca"
-  )
+  test_bca = suppressWarnings({
+    loa_mixed(
+      diff = "diff",
+      condition = "trial_condition",
+      id = "id",
+      data = recpre_long,
+      delta = 2,
+      plot.xaxis = "AM",
+      conf.level = .95,
+      agree.level = .95,
+      replicates = 99,
+      type = "bca"
+    )
+    })
   testthat::expect_equivalent(test_bca$loa$estimate,
                               estimates1,
                               tolerance = 0.001)
@@ -47,7 +49,7 @@ testthat::test_that("basic runs", {
   testthat::expect_equivalent(test_perc$var_comp$estimate,
                               estimates2,
                               tolerance = 0.001)
-  test_basic = loa_mixed(
+  test_basic = suppressWarnings({loa_mixed(
     diff = "diff",
     condition = "trial_condition",
     id = "id",
@@ -56,14 +58,14 @@ testthat::test_that("basic runs", {
     agree.level = .95,
     replicates = 99,
     type = "basic"
-  )
+  )})
   testthat::expect_equivalent(test_basic$loa$estimate,
                               estimates1,
                               tolerance = 0.001)
   testthat::expect_equivalent(test_basic$var_comp$estimate,
                               estimates2,
                               tolerance = 0.001)
-  test_norm = loa_mixed(
+  test_norm = suppressWarnings({ loa_mixed(
     diff = "diff",
     condition = "trial_condition",
     id = "id",
@@ -72,7 +74,7 @@ testthat::test_that("basic runs", {
     agree.level = .95,
     replicates = 99,
     type = "norm"
-  )
+  ) })
   testthat::expect_equivalent(test_norm$loa$estimate,
                               estimates1,
                               tolerance = 0.001)

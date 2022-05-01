@@ -4,18 +4,30 @@
 \alias{agree_test}
 \title{Tests for Absolute Agreement}
 \usage{
-agree_test(x, y, delta, conf.level = 0.95, agree.level = 0.95)
+agree_test(
+  x,
+  y,
+  delta,
+  conf.level = 0.95,
+  agree.level = 0.95,
+  TOST = TRUE,
+  prop_bias = FALSE
+)
 }
 \arguments{
 \item{x}{Vector with first measurement}
 
 \item{y}{Vector with second measurement}
 
-\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
+\item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
+
+\item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
+
+\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -28,9 +40,7 @@ Returns single list with the results of the agreement analysis.
   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
   \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"identity.plot"}}{Plot of x and y with a line of identity with a linear regression line}
-  \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-
+  \item{\code{"call"}}{the matched call}
 }
 }
 \description{
