@@ -60,8 +60,10 @@ simple_ident_plot = function(x,
 simple_ba_plot = function(x,
                           x_name = "x",
                           y_name = "y",
+                          geom = "geom_point",
                           smooth_method = NULL,
                           smooth_se = TRUE) {
+
   if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
@@ -89,9 +91,40 @@ simple_ba_plot = function(x,
   delta = x$call$delta
   #smooth_method = x$smooths$smooth_method
   #smooth_se = x$smooths$smooth_se
-  bland_alt.plot = ggplot(df,
-         aes(x = mean, y = delta)) +
-    geom_point(na.rm = TRUE) +
+  if(geom == "geom_point"){
+    bland_alt.plot = ggplot(df,
+                            aes(x = mean, y = delta)) +
+      geom_point(na.rm = TRUE)
+  }  else if(geom == "geom_bin2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_bin2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d_filled") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d_filled(na.rm = TRUE,
+                               alpha = 0.5,
+                               contour_var = "ndensity")
+    } else if(geom == "stat_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        stat_density_2d(na.rm = TRUE,
+                        geom = "polygon",
+                        contour = TRUE,
+                        aes(fill = after_stat(level)),
+                        contour_var = "ndensity",
+                        colour = "black",) +
+      scale_fill_distiller(palette = "Blues", direction = 1)
+    }  else {
+    stop("geom option not supported")
+  }
+
+
+  bland_alt.plot = bland_alt.plot +
     geom_pointrange(data = df_loa2,
                     aes(
                       x = x,

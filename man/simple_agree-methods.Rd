@@ -15,6 +15,7 @@
   type = 1,
   x_name = "x",
   y_name = "y",
+  geom = "geom_point",
   smooth_method = NULL,
   smooth_se = TRUE,
   ...
@@ -36,6 +37,8 @@ for details.
 \item{x_name}{Name/label for x values (first measurement)}
 
 \item{y_name}{Name/label for y values (second measurement)}
+
+\item{geom}{String naming the type of geometry to display the data points. Default is "geom_point".}
 
 \item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
 
