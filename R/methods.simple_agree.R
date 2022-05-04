@@ -156,6 +156,7 @@ plot.simple_agree <- function(x, type = 1,
       bias_ba_plot(x,
                    x_name,
                    y_name,
+                   geom,
                    smooth_method,
                    smooth_se)
     }

@@ -441,6 +441,45 @@ print(a1)
 plot(a1)
 ```
 
+
+# "Big" Data
+
+Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom_point` argument.
+
+```{r}
+library(deming)
+data('ferritin')
+
+set.seed(81346)
+
+x = rnorm(750, 100, 10)
+diff = rnorm(750, 0, 1)
+y = x + diff
+
+df = data.frame(x = x,
+                y = y)
+
+a1 = agree_test(x = df$x,
+                y = df$y,
+                agree.level = .95)
+
+plot(a1,
+     geom = "geom_point")
+
+plot(a1,
+     geom = "geom_bin2d")
+
+plot(a1,
+     geom = "geom_density_2d")
+
+plot(a1,
+     geom = "geom_density_2d_filled")
+
+plot(a1,
+     geom = "stat_density_2d")
+```
+
+
 # Mixed Models
 
 In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the "recpre_long" data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.
