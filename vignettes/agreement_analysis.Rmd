@@ -447,11 +447,7 @@ plot(a1)
 Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom_point` argument.
 
 ```{r}
-library(deming)
-data('ferritin')
-
 set.seed(81346)
-
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)
 y = x + diff

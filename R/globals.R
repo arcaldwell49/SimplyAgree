@@ -30,4 +30,5 @@ utils::globalVariables(c("boot_bias",
                          "binomial", "glm",
                          "binom.test", "failure",
                          "success",
-                         "diff_x2"))
+                         "diff_x2",
+                         "level"))
