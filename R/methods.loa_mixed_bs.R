@@ -51,7 +51,7 @@ plot.loa_mixed_bs <- function(x,
   pd2 = position_dodge2(.03 * (scalemax - scalemin))
 
   df_loa2 = df_loa
-  df_loa2$x = scalemin
+  df_loa2$x = scalemin - (.03 * (scalemax - scalemin))
   df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
                         levels = c("Upper LoA", "Bias", "Lower LoA"))
 
@@ -89,6 +89,26 @@ plot.loa_mixed_bs <- function(x,
     }  else {
       stop("geom option not supported")
     }
+
+  bland_alt.plot = bland_alt.plot +
+    geom_pointrange(data = df_loa2,
+                    aes(
+                      x = x,
+                      y = estimate,
+                      ymin = lower.ci,
+                      ymax = upper.ci,
+                      color = text),
+                    #width = .03*(scalemax-scalemin),
+                    position = pd2,
+                    inherit.aes = FALSE)+
+    labs(x = x_label,
+         y = y_label,
+         caption = paste0("Agreement = ", agree.level * 100,"% \n",
+                          "Confidence Level = ", conf.level * 100, "%"),
+         color = "") +
+    scale_color_viridis_d(option = "C", end = .8) +
+    theme_bw() +
+    theme(legend.position = "left")
 
   return(bland_alt.plot)
 
