@@ -129,7 +129,7 @@ print.simple_agree <- function(x,...){
 #' @method plot simple_agree
 #' @param x_name Name/label for x values (first measurement)
 #' @param y_name Name/label for y values (second measurement)
-#' @param geom String naming the type of geometry to display the data points. Default is "geom_point".
+#' @param geom String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".
 #' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
 #' @param smooth_se Display confidence interval around smooth?
 #' @import ggplot2
