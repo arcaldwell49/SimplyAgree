@@ -38,7 +38,7 @@ for details.
 
 \item{y_name}{Name/label for y values (second measurement)}
 
-\item{geom}{String naming the type of geometry to display the data points. Default is "geom_point".}
+\item{geom}{String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".}
 
 \item{smooth_method}{Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.}
 

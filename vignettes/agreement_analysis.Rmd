@@ -480,14 +480,17 @@ plot(a1,
 
 In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the "recpre_long" data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.
 
-The `loa_mixed` function can then calculate the limits of agreement. Like the previous functions, the data set must be set with the `data` argument. The `diff` is the column which contains the difference between the two measurements. The `condition` is the column that indicates the different conditions that the measurements were taken within. The `id` is the column containing the subject/participant identifier. The `plot.xaxis`, if utilized, sets the column from which to plot the data on the x-axis. The final two arguments `replicates` and `type` set the requirements for the bootstrapping procedure. **Warning**: This is a computationally heavy procedure and may take a few minutes to complete. An example code can be seen below.
+The `loa_mixed` function can then calculate the limits of agreement. Like the previous functions, the data set must be set with the `data` argument. The `diff` is the column which contains the difference between the two measurements. The `condition` is the column that indicates the different conditions that the measurements were taken within. The `id` is the column containing the subject/participant identifier. The final two arguments `replicates` and `type` set the requirements for the bootstrapping procedure. **Warning**: This is a computationally heavy procedure and may take a few minutes to complete. An example code can be seen below.
 
 ```{r,warning=FALSE,eval=FALSE}
+
+recpre_long$avg = (recpre_long$PM + recpre_long$PM)/2
 a4 = loa_mixed(data = recpre_long,
                diff = "diff",
-               condition = "trial_condition",
+               avg = "avg",
+               #condition = "trial_condition",
                id = "id",
-               plot.xaxis = "AM",
+               #plot.xaxis = "AM",
                replicates = 199,
                type = "perc")
 ```

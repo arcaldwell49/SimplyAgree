@@ -216,6 +216,7 @@ loa_bs = function(diff,
                   condition,
                   id,
                   data,
+                  formula = NULL,
                   conf.level,
                   agree.level,
                   indices){
@@ -223,11 +224,16 @@ loa_bs = function(diff,
   limits = qnorm(1 - (1 - conf.level) / 2)
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
 
-  formula = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
+  if(is.null(formula)){
+    formula1 = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
+  } else {
+    formula1 = formula
+  }
+
 
   datboot <- data[indices,] # allows boot to select sample
 
-  res3 = lmer(formula,
+  res3 = lmer(formula1,
               data = datboot,
               weights = NULL,
               subset = NULL,
@@ -235,7 +241,7 @@ loa_bs = function(diff,
               na.action = na.omit)
 
   mean = as.data.frame(emmeans(res3, ~1))$emmean
-  se = as.data.frame(emmeans(res3, ~1))$SE
+  #se = as.data.frame(emmeans(res3, ~1))$SE
   vartab = as.data.frame(VarCorr(res3))
   withinsd = vartab$sdcor[2]
   betweensd <- vartab$sdcor[1]
