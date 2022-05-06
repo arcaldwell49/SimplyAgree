@@ -42,12 +42,12 @@ plot.loa_mixed_bs <- function(x,
                               smooth_se = TRUE,
                               ...){
   df_plt = model.frame(x$call$lm_mod)
-  colnames(df_plt) = c("diff", "X", "id")
+  colnames(df_plt) = c("diff", "avg", "id")
 
   df_loa = x$loa
 
-  scalemin = min(df_plt$X)
-  scalemax = max(df_plt$X)
+  scalemin = min(df_plt$avg)
+  scalemax = max(df_plt$avg)
   pd2 = position_dodge2(.03 * (scalemax - scalemin))
 
   df_loa2 = df_loa
@@ -60,25 +60,25 @@ plot.loa_mixed_bs <- function(x,
 
     if(geom == "geom_point"){
       bland_alt.plot = ggplot(df_plt,
-                              aes(x = X, y = diff)) +
+                              aes(x = avg, y = diff)) +
         geom_point(na.rm = TRUE)
     }  else if(geom == "geom_bin2d") {
       bland_alt.plot = ggplot(df_plt,
-                              aes(x = X, y = diff)) +
+                              aes(x = avg, y = diff)) +
         geom_bin2d(na.rm = TRUE)
     } else if(geom == "geom_density_2d") {
       bland_alt.plot = ggplot(df_plt,
-                              aes(x = X, y = diff)) +
+                              aes(x = avg, y = diff)) +
         geom_density_2d(na.rm = TRUE)
     } else if(geom == "geom_density_2d_filled") {
       bland_alt.plot = ggplot(df_plt,
-                              aes(x = X, y = diff)) +
+                              aes(x = avg, y = diff)) +
         geom_density_2d_filled(na.rm = TRUE,
                                alpha = 0.5,
                                contour_var = "ndensity")
     } else if(geom == "stat_density_2d") {
       bland_alt.plot = ggplot(df_plt,
-                              aes(x = X, y = diff)) +
+                              aes(x = avg, y = diff)) +
         stat_density_2d(na.rm = TRUE,
                         geom = "polygon",
                         contour = TRUE,

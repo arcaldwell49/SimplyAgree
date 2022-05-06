@@ -48,6 +48,7 @@ loa_mixed = function(diff,
                      replicates = 1999,
                      type = "bca",
                      prop_bias = FALSE){
+  message("loa_mixed is deprecated: please use loa_lmer or loa_nlme")
   if (conf.level >= 1 || conf.level <= 0) {
     stop("conf.level must be a value between 0 and 1")
   }
@@ -158,7 +159,7 @@ loa_mixed = function(diff,
         diff = all_of(diff),
         id = all_of(id),
         Condition = all_of(condition),
-        X = all_of(avg)
+        avg = all_of(avg)
       )
   } else{
     df_plt = data %>%
@@ -168,10 +169,10 @@ loa_mixed = function(diff,
       rename(
         diff = all_of(diff),
         id = all_of(id),
-        X = all_of(avg)
+        avg = all_of(avg)
       )
   }
-  lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$X+df_plt$id)))
+  lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$id)))
   mc$lm_mod = lm_mod
 
   structure(list(loa = df_loa,
