@@ -3,22 +3,17 @@ loa_lmer = function(diff,
                     condition = NULL,
                     id,
                     data,
+                    type = "perc",
                     conf.level = .95,
                     agree.level = .95,
                     replicates = 1999,
-                    prop_bias = FALSE){
+                    prop_bias = FALSE
+                    ){
   if (conf.level >= 1 || conf.level <= 0) {
     stop("conf.level must be a value between 0 and 1")
   }
   if(is.null(condition) || missing(condition)){
     condition = 1
-  }
-
-  if (agree.level >= 1 || agree.level <= 0) {
-    stop("agree.level must be a value between 0 and 1")
-  }
-
-  if(is.null(condition)){
     df = data[c(diff,avg,id)]
     colnames(df) = c("diff", "avg", "id")
   } else {
@@ -26,21 +21,34 @@ loa_lmer = function(diff,
     colnames(df) = c("diff", "avg", "id", "condition")
   }
 
+  if (agree.level >= 1 || agree.level <= 0) {
+    stop("agree.level must be a value between 0 and 1")
+  }
+
   avg_vals = c(min(df$avg, na.rm = TRUE),
                median(df$avg, na.rm = TRUE),
                max(df$avg, na.rm = TRUE))
 
-  if(is.null(condition)){
+  if(is.null(condition) || condition == 1){
     if (prop_bias == FALSE) {
       formula1 = as.formula("diff ~ 1 +(1| id )")
       newdat = expand.grid(1) %>%
         as.data.frame() %>%
         rename(condition = Var1)
+      newdat2 = expand.grid(c("Bias", "Lower LoA", "Upper LoA")) %>%
+        as.data.frame() %>%
+        rename(value = Var1) %>%
+        select(value)
     } else {
       formula1 = as.formula("diff~avg+(1| id )")
       newdat = expand.grid(avg_vals) %>%
         as.data.frame() %>%
         rename(avg = Var1)
+      newdat2 = expand.grid(avg_vals, c("Bias", "Lower LoA", "Upper LoA")) %>%
+        as.data.frame() %>%
+        rename(avg = Var1,
+               value = Var2) %>%
+        select(value, avg)
     }
   } else{
     if (prop_bias == FALSE) {
@@ -48,6 +56,11 @@ loa_lmer = function(diff,
       newdat = expand.grid(unique(df$condition)) %>%
         as.data.frame() %>%
         rename(condition = Var1)
+      newdat2 = expand.grid(unique(df$condition),c("Bias", "Lower LoA", "Upper LoA")) %>%
+        as.data.frame() %>%
+        rename(condition = Var1,
+               value = Var2) %>%
+        select(value, condition)
     } else {
       formula1 = as.formula("diff~avg+condition+(1| id )")
       newdat = expand.grid(avg_vals, unique(df$condition)) %>%
@@ -72,11 +85,11 @@ loa_lmer = function(diff,
     na.action = na.omit
   )
 
-  boot_sd <- function(.) {
-    c(sd_within = sigma(.),
-      sd_between = sqrt(unlist(VarCorr(.))),
-      sd_total = sigma(.) + sqrt(unlist(VarCorr(.))))
-  }
+  #boot_sd <- function(.) {
+  #  c(sd_within = sigma(.),
+  #    sd_between = sqrt(unlist(VarCorr(.))),
+  #    sd_total = sigma(.) + sqrt(unlist(VarCorr(.))))
+  #}
 
   boot_loa <- function(.) {
     c(bias = pred_bias(.,newdata = newdat),
@@ -84,8 +97,23 @@ loa_lmer = function(diff,
       upper = pred_uloa(.,newdata = newdat, agree.level = agree.level))
   }
 
-  boo1 <- bootMer(res_lmer, boot_sd, nsim = replicates,
-                  type = "parametric", use.u = FALSE)
+  boo1_tab = data.frame(
+    term = c("SD within", "SD between", "SD total"),
+    estimate = c(sigma(res_lmer),
+                 sqrt(unlist(VarCorr(res_lmer))),
+                 sigma(res_lmer) + sqrt(unlist(VarCorr(res_lmer))))
+  )
+  #boo1 <- bootMer(res_lmer, boot_sd, nsim = replicates,
+  #                type = "parametric", use.u = FALSE)
+  #boo1_tab = tidy_boot(boo1,
+  #                     conf.int = TRUE,
+  #                     conf.level = conf.level,
+  #                     conf.method = type) %>%
+  #  mutate(term = c("SD within", "SD between", "SD total")) %>%
+  #  rename(estimate = statistic,
+  #         se = std.error,
+  #         lower.ci = conf.low,
+  #         upper.ci = conf.high)
   boo2 <- bootMer(res_lmer, boot_loa, nsim = replicates,
                   type = "parametric", use.u = FALSE)
   boo2_tab = tidy_boot(boo2,
@@ -94,12 +122,11 @@ loa_lmer = function(diff,
                        conf.method = type) %>%
     bind_cols(newdat2 ,.) %>%
     select(-term) %>%
-    rename(se = std.error,
+    rename(term = value,
+           estimate = statistic,
+           se = std.error,
            lower.ci = conf.low,
-           upper.ci = conf.high) %>%
-    as_tibble()
-  df_loa = res_tab[1:3,]
-  var_comp = res_tab[4:6,]
+           upper.ci = conf.high)
 
   mc = match.call()
 
@@ -135,14 +162,13 @@ loa_lmer = function(diff,
   }
 
   mc$lm_mod = lm_mod
+  mc$agree.level = agree.level
+  mc$conf.level = conf.level
+  mc$type = type
 
-  structure(list(loa = df_loa,
-                 var_comp = var_comp,
-                 h0_test = rej_text,
+  structure(list(loa = boo2_tab,
+                 var_comp = boo1_tab,
                  lmer = res_lmer,
-                 agree.level = agree.level,
-                 conf.level = conf.level,
-                 type = type,
                  call = mc),
-            class = "loa_mixed_bs")
+            class = "loa_mermod")
 }

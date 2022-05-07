@@ -23,16 +23,16 @@ Imports:
     tidyr,
     stringr,
     jmvcore,
-    quantreg
+    quantreg,
+    patchwork,
+    insight
 Suggests: 
     knitr,
     rmarkdown,
     testthat,
     tidyverse,
     readr,
-    ggpubr,
     covr,
-    cccrm,
     mgcv,
     ggeffects,
     deming
