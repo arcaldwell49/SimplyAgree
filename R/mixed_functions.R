@@ -159,8 +159,6 @@ simple_mix_plot = function(x,
   return(bland_alt.plot)
 }
 
-# Prop bias BA plot from loa_mixed ------
-
 bias_mix_plot = function(x,
                          x_label = "Average of Both Methods",
                          y_label = "Difference Between Methods",
@@ -239,7 +237,7 @@ bias_mix_plot = function(x,
   return(bland_alt.plot)
 }
 
-# Miscellaneous for loa_mixed functions
+# Miscellaneous for loa_mixed functions --------
 
 loa_bs = function(diff,
                   condition,

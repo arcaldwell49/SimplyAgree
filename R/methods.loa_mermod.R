@@ -26,7 +26,42 @@ print.loa_mermod <- function(x,...){
   conf = paste0(x$call$conf.level*100)
   title = paste0(agree,"% Limits of Agreement with Boostrapped ", conf, "% Confidence Intervals \n")
   cat(title)
-  print(x$loa)
+  df = x$loa
+  if("avg" %in% colnames(df) && "condition" %in% colnames(df) ){
+    df = df %>%
+      select(avg, condition, term, estimate, lower.ci, upper.ci)%>%
+      rename(Average = avg,
+             Condition = condition,
+             Measures = term,
+             Estimate = estimate,
+             `Lower CI` = lower.ci,
+             `Upper CI` = upper.ci)
+  } else if("avg" %in% colnames(df)){
+    df = df %>%
+      select(avg, term, estimate, lower.ci, upper.ci)%>%
+      rename(Average = avg,
+             Measures = term,
+             Estimate = estimate,
+             `Lower CI` = lower.ci,
+             `Upper CI` = upper.ci)
+  }else if("condition" %in% colnames(df)){
+    df = df %>%
+      select(condition, term, estimate, lower.ci, upper.ci)%>%
+      rename(Condition = condition,
+             Measures = term,
+             Estimate = estimate,
+             `Lower CI` = lower.ci,
+             `Upper CI` = upper.ci)
+  } else {
+    df = df %>%
+      select(term, estimate, lower.ci, upper.ci)%>%
+      rename(Measures = term,
+             Estimate = estimate,
+             `Lower CI` = lower.ci,
+             `Upper CI` = upper.ci)
+  }
+  #colnames(df) = c("Measures", "Estimate", "Lower CI", "Upper CI")
+  print(df, digits = 4)
 }
 
 #' @rdname loa_mermod-methods
@@ -35,12 +70,12 @@ print.loa_mermod <- function(x,...){
 #' @export
 
 plot.loa_mermod <- function(x,
-                              x_label = "Average of Both Methods",
-                              y_label = "Difference Between Methods",
-                              geom = "geom_point",
-                              smooth_method = NULL,
-                              smooth_se = TRUE,
-                              ...){
+                            x_label = "Average of Both Methods",
+                            y_label = "Difference Between Methods",
+                            geom = "geom_point",
+                            smooth_method = NULL,
+                            smooth_se = TRUE,
+                            ...){
   df_plt = model.frame(x$call$lm_mod)
   colnames(df_plt) = c("diff", "avg", "id")
 

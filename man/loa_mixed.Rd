@@ -7,7 +7,7 @@
 loa_mixed(
   diff,
   avg,
-  condition,
+  condition = NULL,
   id,
   formula = NULL,
   data,
