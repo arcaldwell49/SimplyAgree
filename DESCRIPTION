@@ -25,7 +25,8 @@ Imports:
     jmvcore,
     quantreg,
     patchwork,
-    insight
+    insight,
+    nlme
 Suggests: 
     knitr,
     rmarkdown,

@@ -191,10 +191,11 @@ loa_lmer = function(diff,
   if(condition == 1){
     lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$id)))
   } else {
-    lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$condition+df_plt$id)))
+    lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$id+df_plt$condition)))
   }
 
   mc$lm_mod = lm_mod
+  mc$condition = condition
   mc$agree.level = agree.level
   mc$conf.level = conf.level
   mc$type = type

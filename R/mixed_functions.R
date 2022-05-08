@@ -6,45 +6,52 @@ simple_mix_plot = function(x,
                            geom = "geom_point",
                            smooth_method = NULL,
                            smooth_se = TRUE){
-  df_plt = model.frame(x$call$lm_mod)
-  colnames(df_plt) = c("diff", "X", "id")
-  df = df_plt
-  colnames(df) = c("delta", "mean", "id")
-  df_loa = x$loa
 
-  scalemin = min(df_plt$X)
-  scalemax = max(df_plt$X)
+  if(x$call$condition == 1){
+    df_plt = model.frame(x$call$lm_mod)
+    colnames(df_plt) = c("diff", "avg", "id")
+    df_loa = x$loa
+  } else {
+    df_plt = model.frame(x$call$lm_mod)
+    colnames(df_plt) = c("diff", "avg", "id", "condition")
+
+    df_loa = x$loa
+  }
+
+
+  scalemin = min(df_plt$avg)
+  scalemax = max(df_plt$avg)
   pd2 = position_dodge2(.03 * (scalemax - scalemin))
 
   df_loa2 = df_loa
   df_loa2$x = scalemin - (.03 * (scalemax - scalemin))
-  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
-                        levels = c("Upper LoA", "Bias", "Lower LoA"))
-
+  df_loa2$term = factor(df_loa2$term,
+                        levels = c("Upper LoA", "Bias", "Lower LoA"),
+                        ordered = TRUE)
   conf.level = x$call$conf.level
   agree.level = x$call$agree.level
 
   if(geom == "geom_point"){
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_point(na.rm = TRUE)
   }  else if(geom == "geom_bin2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_bin2d(na.rm = TRUE)
   } else if(geom == "geom_density_2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_density_2d(na.rm = TRUE)
   } else if(geom == "geom_density_2d_filled") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_density_2d_filled(na.rm = TRUE,
                              alpha = 0.5,
                              contour_var = "ndensity")
   } else if(geom == "stat_density_2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       stat_density_2d(na.rm = TRUE,
                       geom = "polygon",
                       contour = TRUE,
@@ -56,17 +63,32 @@ simple_mix_plot = function(x,
     stop("geom option not supported")
   }
 
+  if(x$call$condition == 1){
+    bland_alt.plot = bland_alt.plot +
+      geom_pointrange(data = df_loa2,
+                      aes(
+                        x = x,
+                        y = estimate,
+                        ymin = lower.ci,
+                        ymax = upper.ci,
+                        color = term),
+                      #width = .03*(scalemax-scalemin),
+                      position = pd2,
+                      inherit.aes = FALSE)
+  } else{
+    bland_alt.plot = bland_alt.plot +
+      facet_wrap(~condition) +
+      geom_pointrange(data = df_loa2,
+                      aes(
+                        x = x,
+                        y = estimate,
+                        ymin = lower.ci,
+                        ymax = upper.ci,
+                        color = term),
+                      #width = .03*(scalemax-scalemin),
+                      position = pd2)
+  }
   bland_alt.plot = bland_alt.plot +
-    geom_pointrange(data = df_loa2,
-                    aes(
-                      x = x,
-                      y = estimate,
-                      ymin = lower.ci,
-                      ymax = upper.ci,
-                      color = text),
-                    #width = .03*(scalemax-scalemin),
-                    position = pd2,
-                    inherit.aes = FALSE)+
     labs(x = x_label,
          y = y_label,
          caption = paste0("Agreement = ", agree.level * 100,"% \n",
@@ -76,17 +98,17 @@ simple_mix_plot = function(x,
     theme_bw() +
     theme(legend.position = "left")
 
-  if (!is.null(x$call$delta)){
-    delta = x$call$delta
-    df_delta = data.frame(y1 = c(delta, -1*delta))
-    bland_alt.plot = bland_alt.plot +
-      geom_hline(data = df_delta,
-                 aes(yintercept = y1),
-                 linetype = 2) +
-      scale_y_continuous(sec.axis = dup_axis(
-        breaks = c(delta, -1*delta),
-        name = "Maximal Allowable Difference"))
-  }
+  #if (!is.null(x$call$delta)){
+  #  delta = x$call$delta
+  #  df_delta = data.frame(y1 = c(delta, -1*delta))
+  #  bland_alt.plot = bland_alt.plot +
+  #    geom_hline(data = df_delta,
+  #               aes(yintercept = y1),
+  #               linetype = 2) +
+  #    scale_y_continuous(sec.axis = dup_axis(
+  #      breaks = c(delta, -1*delta),
+  #      name = "Maximal Allowable Difference"))
+  #}
   if (!is.null(smooth_method)){
     if (!(smooth_method %in% c("loess", "lm", "gam"))){
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
@@ -95,12 +117,12 @@ simple_mix_plot = function(x,
       if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
 
 
-          gam1 = mgcv::gam(data = df,
-                           delta ~ s(mean, bs = "tp") + s(id, bs="re"))
+          gam1 = mgcv::gam(data = df_plt,
+                           delta ~ s(avg, bs = "tp") + s(id, bs="re"))
 
 
-        df2 = data.frame(mean = seq(min(df$mean, na.rm=TRUE),
-                                    max(df$mean, na.rm=TRUE),
+        df2 = data.frame(mean = seq(min(df$avg, na.rm=TRUE),
+                                    max(df$avg, na.rm=TRUE),
                                     length.out = 100))
         df2 = as.data.frame(ggeffects::ggemmeans(gam1, "mean"))
 
@@ -122,8 +144,8 @@ simple_mix_plot = function(x,
     } else if(smooth_method == "lm"){
       if (requireNamespace("ggeffects", quietly = TRUE)) {
 
-          lm1 = lme4::lmer(data = df,
-                           delta ~ mean + (1|id))
+          lm1 = lme4::lmer(data = df_plt,
+                           delta ~ avg + (1|id))
 
         df2 = as.data.frame(ggeffects::ggemmeans(lm1, "mean"))
         if(smooth_se){
@@ -163,46 +185,53 @@ bias_mix_plot = function(x,
                          x_label = "Average of Both Methods",
                          y_label = "Difference Between Methods",
                          geom = "geom_point",
-                         smooth_method = NULL,
                          smooth_se = TRUE){
-  df_plt = model.frame(x$call$lm_mod)
-  colnames(df_plt) = c("diff", "X", "id")
+  if(x$call$condition == 1){
+    df_plt = model.frame(x$call$lm_mod)
+    colnames(df_plt) = c("diff", "avg", "id")
+    df_loa = x$loa
+  } else {
+    df_plt = model.frame(x$call$lm_mod)
+    colnames(df_plt) = c("diff", "avg", "id", "condition")
 
-  df_loa = x$loa
+    df_loa = x$loa
+  }
 
-  scalemin = min(df_plt$X)
-  scalemax = max(df_plt$X)
+
+  scalemin = min(df_plt$avg)
+  scalemax = max(df_plt$avg)
   pd2 = position_dodge2(.03 * (scalemax - scalemin))
 
   df_loa2 = df_loa
   df_loa2$x = scalemin - (.03 * (scalemax - scalemin))
-  df_loa2$text = factor(c("Bias", "Lower LoA", "Upper LoA"),
-                        levels = c("Upper LoA", "Bias", "Lower LoA"))
+  df_loa2$term = factor(df_loa2$term,
+                        levels = c("Upper LoA", "Bias", "Lower LoA"),
+                        ordered = TRUE)
 
   conf.level = x$call$conf.level
   agree.level = x$call$agree.level
 
   if(geom == "geom_point"){
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_point(na.rm = TRUE)
   }  else if(geom == "geom_bin2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_bin2d(na.rm = TRUE)
   } else if(geom == "geom_density_2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_density_2d(na.rm = TRUE)
   } else if(geom == "geom_density_2d_filled") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       geom_density_2d_filled(na.rm = TRUE,
                              alpha = 0.5,
                              contour_var = "ndensity")
   } else if(geom == "stat_density_2d") {
     bland_alt.plot = ggplot(df_plt,
-                            aes(x = X, y = diff)) +
+                            aes(x = avg, y = diff)) +
       stat_density_2d(na.rm = TRUE,
                       geom = "polygon",
                       contour = TRUE,
@@ -214,17 +243,31 @@ bias_mix_plot = function(x,
     stop("geom option not supported")
   }
 
+  if(smooth_se == TRUE){
+
+  } else {
+
+  }
+
   bland_alt.plot = bland_alt.plot +
-    geom_pointrange(data = df_loa2,
+    geom_line(data = df_loa2,
                     aes(
-                      x = x,
+                      x = avg,
                       y = estimate,
-                      ymin = lower.ci,
-                      ymax = upper.ci,
-                      color = text),
-                    #width = .03*(scalemax-scalemin),
+                      #ymin = lower.ci,
+                      #ymax = upper.ci,
+                      color = term),
                     position = pd2,
-                    inherit.aes = FALSE)+
+              inherit.aes = FALSE) +
+    geom_ribbon(data = df_loa2,
+                aes(
+                  x = avg,
+                  y = estimate,
+                  ymin = lower.ci,
+                  ymax = upper.ci,
+                  fill = term),
+                alpha = .2,
+                position = pd2) +
     labs(x = x_label,
          y = y_label,
          caption = paste0("Agreement = ", agree.level * 100,"% \n",
