@@ -6,31 +6,27 @@
 \usage{
 loa_mixed(
   diff,
-  avg,
-  condition = NULL,
+  condition,
   id,
-  formula = NULL,
   data,
+  plot.xaxis = NULL,
   delta,
   conf.level = 0.95,
   agree.level = 0.95,
   replicates = 1999,
-  type = "bca",
-  prop_bias = FALSE
+  type = "bca"
 )
 }
 \arguments{
-\item{diff}{Column name of the data frame that includes the difference between the 2 measurements of interest.}
+\item{diff}{column name of the data frame that includes the continuous measurement of interest.}
 
-\item{avg}{Column name of the data frame that includes the difference between the 2 measurements of interest.}
+\item{condition}{column name indicating different conditions subjects were tested under.}
 
-\item{condition}{Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
-
-\item{id}{Column name indicating the subject/participant identifier}
-
-\item{formula}{Optional argument: a two-sided linear formula object describing both the fixed-effects and random-effects part of the model, with the response on the left of a ~ operator and the terms, separated by + operators, on the right. Random-effects terms are distinguished by vertical bars (|) separating expressions for design matrices from grouping factors. Two vertical bars (||) can be used to specify multiple uncorrelated random effects for the same grouping variable}
+\item{id}{column name indicating the subject/participant identifier}
 
 \item{data}{A data frame containing the variables within the model.}
+
+\item{plot.xaxis}{column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.}
 
 \item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.}
 
@@ -41,8 +37,6 @@ loa_mixed(
 \item{replicates}{the number of bootstrap replicates. Passed on to the boot function. Default is 500.}
 
 \item{type}{A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", "bca", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.}
-
-\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -61,6 +55,6 @@ This function allows for the calculation of bootstrapped limits of agreement whe
 }
 \section{References}{
 
-Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
+Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 }
 

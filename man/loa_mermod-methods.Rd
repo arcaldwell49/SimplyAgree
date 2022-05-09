@@ -4,6 +4,7 @@
 \alias{loa_mermod-methods}
 \alias{print.loa_mermod}
 \alias{plot.loa_mermod}
+\alias{check.loa_mermod}
 \title{Methods for loa_mermod objects}
 \usage{
 \method{print}{loa_mermod}(x, ...)
@@ -17,6 +18,8 @@
   smooth_se = TRUE,
   ...
 )
+
+\method{check}{loa_mermod}(x)
 }
 \arguments{
 \item{x}{object of class \code{loa_mermod}.}

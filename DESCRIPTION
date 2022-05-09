@@ -26,7 +26,8 @@ Imports:
     quantreg,
     patchwork,
     insight,
-    nlme
+    nlme,
+    purrr
 Suggests: 
     knitr,
     rmarkdown,

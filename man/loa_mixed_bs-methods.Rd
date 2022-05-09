@@ -8,15 +8,7 @@
 \usage{
 \method{print}{loa_mixed_bs}(x, ...)
 
-\method{plot}{loa_mixed_bs}(
-  x,
-  x_label = "Average of Both Methods",
-  y_label = "Difference Between Methods",
-  geom = "geom_point",
-  smooth_method = NULL,
-  smooth_se = TRUE,
-  ...
-)
+\method{plot}{loa_mixed_bs}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{loa_mixed_bs} as returned from \code{loa_mixed}}

@@ -291,8 +291,11 @@ check.simple_agree <- function(x) {
                           "Test for Linear Bias", ": p = ",
                           signif(lin_pval,4)))
 
-  return(list(p_norm = p_norm,
-              p_het = p_het,
-              p_bias = p_bias))
+  #return(list(p_norm = p_norm,
+  #            p_het = p_het,
+  #            p_bias = p_bias))
+
+  wrap_plots(p_norm, p_het,
+             p_bias, ncol = 2)
 
 }

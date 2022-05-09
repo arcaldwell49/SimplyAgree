@@ -1,13 +1,13 @@
-#' Limits of Agreement with Random Effects
+#' Limits of Agreement with Random Effects using lme4
 #' @description This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
 #' @param data A data frame containing the variables within the model.
 #' @param diff Column name of the data frame that includes the difference between the 2 measurements of interest.
 #' @param avg Column name of the data frame that includes the difference between the 2 measurements of interest.
 #' @param condition Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
 #' @param id Column name indicating the subject/participant identifier
-#' @param conf.level the confidence level required. Default is 95\%.
-#' @param agree.level the agreement level required. Default is 95\%.
-#' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 999.
+#' @param conf.level The confidence level required. Default is 95\%.
+#' @param agree.level The agreement level required. Default is 95\%.
+#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 999.
 #' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @return Returns single list with the results of the agreement analysis.
@@ -134,7 +134,7 @@ loa_lmer = function(diff,
     term = c("SD within", "SD between", "SD total"),
     estimate = c(sigma(res_lmer),
                  sqrt(unlist(VarCorr(res_lmer))),
-                 sigma(res_lmer) + sqrt(unlist(VarCorr(res_lmer))))
+                 sqrt(sigma(res_lmer)^2 + (unlist(VarCorr(res_lmer)))))
   )
   #boo1 <- bootMer(res_lmer, boot_sd, nsim = replicates,
   #                type = "parametric", use.u = FALSE)
@@ -203,7 +203,7 @@ loa_lmer = function(diff,
 
   structure(list(loa = boo2_tab,
                  var_comp = boo1_tab,
-                 lmer = res_lmer,
+                 model = res_lmer,
                  call = mc),
             class = "loa_mermod")
 }
