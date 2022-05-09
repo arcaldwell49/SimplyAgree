@@ -168,27 +168,18 @@ para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE){
     mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) %>%
     select(condition, structure, sd_within, sd_between, sd_total)
 
-  if(prop_bias) {
+  if(prop_bias == TRUE) {
     at_list2 = list(avg = at_list)
     ref = ref_grid(model,
                    specs = "condition",
                    at = at_list2,
                    cov.reduce = FALSE,
                    cov.keep = "avg")
-    ref@grid$.wgt. = 1
-    SimplyAgree:::pred_bias(model,newdata = newdat)
-    emmeans(ref_grid(fiber.lm, at = list(diameter = c(15, 25))), "machine",
-            cov.reduce = FALSE,
-            cov.keep = "diameter")
-    emmeans(model, specs = "condition",
-            cov.reduce =FALSE,
-            cov.keep = "avg",
-            at = list(avg = c(37, 37.5))) %>%
-      data.frame()
-    emm_tab = emmeans(ref, specs = "condition") %>%
+    emm_tab = emmeans(ref, ~ condition | avg,
+                      at = at_list) %>%
       as.data.frame()
-    colnames(emm_tab) = c("avg", "condition", "mean", "se", "df", "lower.CL", "upper.CL")
-    emm_tab$avg = avg_vals
+    colnames(emm_tab) = c("condition", "avg", "mean", "se", "df", "lower.CL", "upper.CL")
+    #emm_tab$avg = avg_vals
     emm_tab = emm_tab %>%
       select(avg, condition, mean) %>%
       merge(var_comp1) %>%

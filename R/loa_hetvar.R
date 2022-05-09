@@ -23,7 +23,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select rename
 #' @importFrom tidyselect all_of
-#' @importFrom purrr map map_df
+#' @importFrom purrr map map_df keep
 #' @import nlme
 #' @import ggplot2
 #' @import boot
@@ -98,13 +98,14 @@ loa_hetvar = function(diff,
     purrr::map(ystar, function(y)
       update_mod(model = res_lmer,
                  new.y = y))
+  #test = refits[class(refits) == "lme"]
+  refits  = purrr::keep(refits, function(x) class(x)== "lme" )
+  vals <- refits %>%
+    purrr::map(para_boot2,
+               specs1 = specs1,
+               at_list = avg_vals,
+               prop_bias = prop_bias)
 
-  vals <-
-    purrr::map(refits,
-               ~ para_boot2(model = .x,
-                            specs1 = specs1,
-                            at_list = avg_vals,
-                            prop_bias = prop_bias))
   df_boot = bind_rows(vals, .id = "nboot")
 
   var_comp1 = res_lmer$modelStruct$varStruct %>%
@@ -151,6 +152,7 @@ loa_hetvar = function(diff,
     df_loa_bias = df_loa %>%
       group_by(avg, condition) %>%
       summarize(boot_est = quantile(mean, .5, na.rm = TRUE),
+                se = sd(mean, na.rm = TRUE),
                 lower.ci = quantile(mean, lconf, na.rm = TRUE),
                 upper.ci = quantile(mean, uconf, na.rm = TRUE),
                 .groups = 'drop')  %>%
@@ -172,6 +174,7 @@ loa_hetvar = function(diff,
       group_by(avg, condition) %>%
       summarize(
         boot_est = quantile(low, .5, na.rm = TRUE),
+        se = sd(low, na.rm = TRUE),
         lower.ci = quantile(low, lconf, na.rm = TRUE),
         upper.ci = quantile(low, uconf, na.rm = TRUE),
         .groups = 'drop')%>%
@@ -192,6 +195,7 @@ loa_hetvar = function(diff,
       group_by(avg, condition) %>%
       summarize(
         boot_est = quantile(high, .5, na.rm = TRUE),
+        se = sd(high, na.rm = TRUE),
         lower.ci = quantile(high, lconf, na.rm = TRUE),
         upper.ci = quantile(high, uconf, na.rm = TRUE),
         .groups = 'drop')%>%
