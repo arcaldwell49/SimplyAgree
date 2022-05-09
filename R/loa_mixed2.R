@@ -198,6 +198,7 @@ loa_lmer = function(diff,
   mc$condition = condition
   mc$agree.level = agree.level
   mc$conf.level = conf.level
+  mc$prop_bias = prop_bias
   mc$type = type
 
   structure(list(loa = boo2_tab,

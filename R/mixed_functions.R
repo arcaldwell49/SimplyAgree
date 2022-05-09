@@ -243,39 +243,44 @@ bias_mix_plot = function(x,
     stop("geom option not supported")
   }
 
+  if(x$call$condition != 1){
+    bland_alt.plot = bland_alt.plot +
+      facet_wrap(~condition)
+  }
+
   if(smooth_se == TRUE){
-
-  } else {
-
+    bland_alt.plot = bland_alt.plot +
+      geom_ribbon(
+        data = df_loa2,
+        alpha = .2,
+        aes(
+          y = estimate,
+          ymax = upper.ci,
+          ymin = lower.ci,
+          x = avg,
+          fill = term
+        )
+      ) +
+      scale_fill_viridis_d(option = "C", end = .8)
   }
 
   bland_alt.plot = bland_alt.plot +
-    geom_line(data = df_loa2,
-                    aes(
-                      x = avg,
-                      y = estimate,
-                      #ymin = lower.ci,
-                      #ymax = upper.ci,
-                      color = term),
-                    position = pd2,
-              inherit.aes = FALSE) +
-    geom_ribbon(data = df_loa2,
-                aes(
-                  x = avg,
+    geom_line(inherit.aes = FALSE,
+              data = df_loa2,
+              aes(x = avg,
                   y = estimate,
-                  ymin = lower.ci,
-                  ymax = upper.ci,
-                  fill = term),
-                alpha = .2,
-                position = pd2) +
+                  #ymin = lower.ci,
+                  #ymax = upper.ci,
+                  color = term)) +
+    scale_color_viridis_d(option = "C", end = .8) +
     labs(x = x_label,
          y = y_label,
          caption = paste0("Agreement = ", agree.level * 100,"% \n",
                           "Confidence Level = ", conf.level * 100, "%"),
-         color = "") +
-    scale_color_viridis_d(option = "C", end = .8) +
+         guides = "") +
     theme_bw() +
-    theme(legend.position = "left")
+    theme(legend.position = "left",
+          legend.title = element_blank())
 
   return(bland_alt.plot)
 }
@@ -286,7 +291,6 @@ loa_bs = function(diff,
                   condition,
                   id,
                   data,
-                  formula = NULL,
                   conf.level,
                   agree.level,
                   indices){
@@ -294,16 +298,11 @@ loa_bs = function(diff,
   limits = qnorm(1 - (1 - conf.level) / 2)
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
 
-  if(is.null(formula)){
-    formula1 = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
-  } else {
-    formula1 = formula
-  }
-
+  formula = as.formula(paste0(diff,"~",condition,"+(1|",id,")"))
 
   datboot <- data[indices,] # allows boot to select sample
 
-  res3 = lmer(formula1,
+  res3 = lmer(formula,
               data = datboot,
               weights = NULL,
               subset = NULL,
@@ -311,7 +310,7 @@ loa_bs = function(diff,
               na.action = na.omit)
 
   mean = as.data.frame(emmeans(res3, ~1))$emmean
-  #se = as.data.frame(emmeans(res3, ~1))$SE
+  se = as.data.frame(emmeans(res3, ~1))$SE
   vartab = as.data.frame(VarCorr(res3))
   withinsd = vartab$sdcor[2]
   betweensd <- vartab$sdcor[1]
@@ -646,7 +645,7 @@ pred_bias = function(mod1, newdata){
 pred_lloa = function(mod1, newdata, agree.level){
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
   means = predict(mod1, re.form = NA, newdata = newdata)
-  totalsd = sigma(mod1) + sqrt(unlist(VarCorr(mod1)))
+  totalsd = sqrt(sigma(mod1)^2 + unlist(VarCorr(mod1)))
   res = means - agree.lim * totalsd
   return(res)
 }
@@ -654,7 +653,7 @@ pred_lloa = function(mod1, newdata, agree.level){
 pred_uloa = function(mod1, newdata, agree.level){
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
   means = predict(mod1, re.form = NA, newdata = newdata)
-  totalsd = sigma(mod1) + sqrt(unlist(VarCorr(mod1)))
+  totalsd = sqrt(sigma(mod1)^2 + unlist(VarCorr(mod1)))
   res = means + agree.lim * totalsd
   return(res)
 }
