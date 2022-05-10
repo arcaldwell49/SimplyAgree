@@ -432,9 +432,9 @@ pred_uloa = function(mod1, newdata, agree.level){
 tidy_boot <- function(x,
                       conf.int = FALSE,
                       conf.level = 0.95,
-                      conf.method = c("perc", "bca", "basic", "norm"),
+                      conf.method = "perc",
                       ...) {
-  conf.method <- rlang::arg_match(conf.method)
+  #conf.method <- rlang::arg_match(conf.method)
 
   # calculate the bias and standard error
   # this is an adapted version of the code in print.boot, where the bias
@@ -503,7 +503,7 @@ tidy_boot <- function(x,
     colnames(ci.tab) <- c("conf.low", "conf.high")
     ret <- cbind(ret, ci.tab)
   }
-  as_tibble(ret)
+  dplyr::as_tibble(ret)
 }
 
 as_tidy_tibble = function (x, new_names = NULL, new_column = "term")
@@ -521,9 +521,9 @@ as_tidy_tibble = function (x, new_names = NULL, new_column = "term")
     }
   }
   if (all(rownames(x) == seq_len(nrow(x)))) {
-    tibble::as_tibble(ret)
+    dplyr::as_tibble(ret)
   }
   else {
-    dplyr::bind_cols(`:=`(!!new_column, rownames(x)), tibble::as_tibble(ret))
+    dplyr::bind_cols(`:=`(!!new_column, rownames(x)), dplyr::as_tibble(ret))
   }
 }

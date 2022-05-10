@@ -56,7 +56,7 @@ loa_hetvar = function(diff,
     fixed = all_of(formula1),
     data = df,
     random = ~1|id,
-    weights = varIdent(form = ~ 1 | factor(condition)),
+    weights = nlme::varIdent(form = ~ 1 | factor(condition)),
     na.action = na.omit
   )
 
@@ -80,12 +80,16 @@ loa_hetvar = function(diff,
 
   var_comp1 = res_lmer$modelStruct$varStruct %>%
     coef(unconstrained = FALSE, allCoef = TRUE) %>%
-    enframe(name = "condition", value = "structure") %>%
+    data.frame("structure" = .) %>%
+    #rownames_to_column(var = "condition") %>%
+    mutate(condition = rownames(.)) %>%
     mutate(sigma = res_lmer$sigma) %>%
     mutate(sd_within = sigma * structure) %>%
-    mutate(sd_between = as.numeric(VarCorr(res_lmer)[1,2])) %>%
+    mutate(sd_between = as.numeric(nlme::VarCorr(res_lmer)[1,2])) %>%
     mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) %>%
     select(condition, structure, sd_within, sd_between, sd_total)
+  rownames(var_comp1) = 1:nrow(var_comp1)
+
   if(prop_bias) {
     at_list = list(avg = avg_vals)
 

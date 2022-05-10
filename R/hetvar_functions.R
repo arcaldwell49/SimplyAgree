@@ -163,13 +163,15 @@ para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE,
   #at_list2 = list(avg = at_list)
   var_comp1 = model$modelStruct$varStruct %>%
     coef(unconstrained = FALSE, allCoef = TRUE) %>%
-    enframe(name = "condition", value = "structure") %>%
+    data.frame("structure" = .) %>%
+    #rownames_to_column(var = "condition") %>%
+    mutate(condition = rownames(.)) %>%
     mutate(sigma = model$sigma) %>%
     mutate(sd_within = sigma * structure) %>%
     mutate(sd_between = as.numeric(VarCorr(model)[1,2])) %>%
     mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) %>%
     select(condition, structure, sd_within, sd_between, sd_total)
-
+  rownames(var_comp1) = 1:nrow(var_comp1)
   if(prop_bias == TRUE) {
     at_list2 = list(avg = at_list)
     ref = ref_grid(model,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/loa_lme.R
 \name{loa_lme}
 \alias{loa_lme}
-\title{Limits of Agreement with Random Effects}
+\title{Limits of Agreement with Linear Mixed Effects}
 \usage{
 loa_lme(
   diff,
@@ -37,7 +37,9 @@ loa_lme(
 
 \item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 999.}
 
-\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
+\item{prop_bias}{Logical indicator (default is FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
+
+\item{het_var}{Logical indicator (default is FALSE) of whether to assume homogeneity of variance in each condition.}
 }
 \value{
 Returns single list with the results of the agreement analysis.

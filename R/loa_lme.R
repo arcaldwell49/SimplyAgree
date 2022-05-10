@@ -9,7 +9,8 @@
 #' @param agree.level The agreement level required. Default is 95\%.
 #' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 999.
 #' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
-#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param prop_bias Logical indicator (default is FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
+#' @param het_var Logical indicator (default is FALSE) of whether to assume homogeneity of variance in each condition.
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -20,7 +21,7 @@
 #'
 #' @section References:
 #' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
-#' @importFrom stats qnorm as.formula na.omit
+#' @importFrom stats qnorm as.formula na.omit coef df predict rnorm runif
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select rename
 #' @importFrom tidyselect all_of

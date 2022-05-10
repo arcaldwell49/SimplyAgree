@@ -65,6 +65,11 @@ print.loa_mermod <- function(x,...){
 }
 
 #' @rdname loa_mermod-methods
+#' @param x_label Label for x-axis.
+#' @param y_label Label for y-axis.
+#' @param geom String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".
+#' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
+#' @param smooth_se Display confidence interval around smooth?
 #' @method plot loa_mermod
 #' @import ggplot2
 #' @export
@@ -167,25 +172,36 @@ check.loa_mermod <- function(x) {
   # Prop Bias ----
 
   if ("condition" %in% colnames(df_plt)) {
-    form1 = as.formula(diff ~ condition)
-    form2 =  as.formula(diff ~ avg + condition)
+    #form1 = as.formula(diff ~ condition)
+    #form2 =  as.formula(diff ~ avg + condition)
+    mod1 = lme(
+      data = df_plt,
+      fixed = diff ~ condition,
+      random = ~ 1 | id,
+      method = "ML"
+    )
+    mod2 = lme(
+      data = df_plt,
+      fixed = diff ~ avg + condition,
+      random = ~ 1 | id,
+      method = "ML"
+    )
   } else {
-    form1 = as.formula(diff ~ 1)
-    form2 =  as.formula(diff ~ avg)
+    #form1 = as.formula(diff ~ 1)
+    #form2 =  as.formula(diff ~ avg)
+    mod1 = lme(
+      data = df_plt,
+      fixed = diff ~ 1,
+      random = ~ 1 | id,
+      method = "ML"
+    )
+    mod2 = lme(
+      data = df_plt,
+      fixed = diff ~ avg,
+      random = ~ 1 | id,
+      method = "ML"
+    )
   }
-  mod1 = lme(
-    data = df_plt,
-    fixed = form1,
-    random = ~ 1 | id,
-    method = "ML"
-  )
-  mod2 = lme(
-    data = df_plt,
-    fixed = form2,
-    random = ~ 1 | id,
-    method = "ML"
-  )
-
 
   aov2 = suppressWarnings(as.data.frame(nlme::anova.lme(mod1, mod2)))
   colnames(aov2) = c("call", "model", "df", "aic", "bic", "loglik", "test", "l.ratio", "p.value")
