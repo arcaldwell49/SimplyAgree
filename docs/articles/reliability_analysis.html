@@ -50,10 +50,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -81,10 +81,9 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Reliability Analysis</h1>
-                        <h4 data-toc-skip class="author">Aaron R.
-Caldwell</h4>
+                        <h4 data-toc-skip class="author">Aaron R. Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-05-01</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-05-10</h4>
       
       
       <div class="hidden name"><code>reliability_analysis.Rmd</code></div>
@@ -96,37 +95,14 @@ Caldwell</h4>
 <div class="section level2">
 <h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
 </h2>
-<p>Another feature of this R package is the ability to estimate the
-reliability of a measurement. This R package allows for the calculation
-of Intraclass Correlation Coefficients (ICC), various standard errors
-(SEM, SEE, and SEP), and coefficient of variation. All of the underlying
-calculations (sans the coefficient of variation) is based on the paper
-by <span class="citation">Weir (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. This is a fairly popular paper within my
-own field (kinesiology), and hence was the inspiration for creating this
-function that provides all the calculative approaches included within
-that manuscript.</p>
+<p>Another feature of this R package is the ability to estimate the reliability of a measurement. This R package allows for the calculation of Intraclass Correlation Coefficients (ICC), various standard errors (SEM, SEE, and SEP), and coefficient of variation. All of the underlying calculations (sans the coefficient of variation) is based on the paper by <span class="citation"><a href="#ref-weir2005" role="doc-biblioref">Weir</a> (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. This is a fairly popular paper within my own field (kinesiology), and hence was the inspiration for creating this function that provides all the calculative approaches included within that manuscript.</p>
 </div>
 <div class="section level2">
 <h2 id="code-demonstration">Code Demonstration<a class="anchor" aria-label="anchor" href="#code-demonstration"></a>
 </h2>
-<p>For this package, the test-retest reliability statistics can be
-calculated with the <code>reli_stats</code> function. This function
-allow for data to be input in a long (multiple rows of data for each
-subject) or in wide (one row for each subject but a column for each
-item/measure).</p>
-<p>For the long data form, the column containing the subject identifier
-(<code>id</code>), item number (<code>item</code>), and measurements
-(<code>measure</code>) are provided. In this function I refer to items
-similar to if we were measuring internal consistency for a questionnaire
-(which is just a special case of test-retest reliability). So,
-<code>item</code> could also be refer to time points, which is what is
-typically seen in human performance settings where test-retest
-reliability may be evaluated over the course of repeated visits to the
-same laboratory. If <code>wide</code> is set to <code>TRUE</code> then
-the columns containing the measurements are provided (e.g.,
-<code>c("value1","value2","value3")</code>).</p>
-<p>To demonstrate the function, I will create a data set in the wide
-format.</p>
+<p>For this package, the test-retest reliability statistics can be calculated with the <code>reli_stats</code> function. This function allow for data to be input in a long (multiple rows of data for each subject) or in wide (one row for each subject but a column for each item/measure).</p>
+<p>For the long data form, the column containing the subject identifier (<code>id</code>), item number (<code>item</code>), and measurements (<code>measure</code>) are provided. In this function I refer to items similar to if we were measuring internal consistency for a questionnaire (which is just a special case of test-retest reliability). So, <code>item</code> could also be refer to time points, which is what is typically seen in human performance settings where test-retest reliability may be evaluated over the course of repeated visits to the same laboratory. If <code>wide</code> is set to <code>TRUE</code> then the columns containing the measurements are provided (e.g., <code>c("value1","value2","value3")</code>).</p>
+<p>To demonstrate the function, I will create a data set in the wide format.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
   <span class="co"># Example from Shrout and Fleiss (1979), pg. 423</span>
@@ -138,23 +114,14 @@ format.</p>
                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">3</span>,<span class="fl">6</span>,<span class="fl">2</span>,<span class="fl">6</span>,<span class="fl">4</span><span class="op">)</span>,
                    judge4 <span class="op">=</span> 
                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>,<span class="fl">2</span>,<span class="fl">8</span>,<span class="fl">6</span>,<span class="fl">9</span>,<span class="fl">7</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Now, that we have a data set (<code>dat</code>), I can use it in the
-<code>reli_stats</code> function.</p>
+<p>Now, that we have a data set (<code>dat</code>), I can use it in the <code>reli_stats</code> function.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">test1</span> <span class="op">=</span> <span class="fu"><a href="../reference/reli_stats.html">reli_stats</a></span><span class="op">(</span>
   data <span class="op">=</span> <span class="va">dat</span>,
   wide <span class="op">=</span> <span class="cn">TRUE</span>,
   col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge2"</span>, <span class="st">"judge3"</span>, <span class="st">"judge4"</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
-<p>This function also has generic print and plot functions. The output
-from print provides the coefficient of variation, standard errors, and a
-table of various intraclass correlation coefficients. Notice the
-conclusions about the reliability of the measurement here would vary
-greatly based on the statistic being reported. What statistic you should
-report is beyond the current vignette, but is heavily detailed in <span class="citation">Weir (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span>. However, within the table there
-are columns for <code>model</code> and <code>measures</code> which
-describe the model that is being used and the what these different ICCs
-are intended to measure, respectively.</p>
+<p>This function also has generic print and plot functions. The output from print provides the coefficient of variation, standard errors, and a table of various intraclass correlation coefficients. Notice the conclusions about the reliability of the measurement here would vary greatly based on the statistic being reported. What statistic you should report is beyond the current vignette, but is heavily detailed in <span class="citation"><a href="#ref-weir2005" role="doc-biblioref">Weir</a> (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span>. However, within the table there are columns for <code>model</code> and <code>measures</code> which describe the model that is being used and the what these different ICCs are intended to measure, respectively.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span>
 <span class="co">#&gt; </span>
@@ -171,8 +138,7 @@ are intended to measure, respectively.</p>
 <span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.54504   0.8783</span>
 <span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.15204   0.8995</span>
 <span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.73690   0.9804</span></code></pre></div>
-<p>Also included in the results is a plot of the measurements across the
-items (e.g., time points).</p>
+<p>Also included in the results is a plot of the measurements across the items (e.g., time points).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span></code></pre></div>
 <p><img src="reliability_analysis_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
@@ -183,19 +149,16 @@ items (e.g., time points).</p>
 <div class="section level3">
 <h3 id="model">Model<a class="anchor" aria-label="anchor" href="#model"></a>
 </h3>
-<p>The linear mixed model used for the calculations is specified as the
-following:</p>
+<p>The linear mixed model used for the calculations is specified as the following:</p>
 <p><span class="math display">\[
-  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right)
+  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right) 
 \]</span></p>
 <p><span class="math display">\[
-    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}}
-\right)
-    \text{, for id j = 1,} \dots \text{,J}
+    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for id j = 1,} \dots \text{,J} 
 \]</span></p>
 <p><span class="math display">\[
-    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}}
-\right)
+    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}} \right)
     \text{, for items k = 1,} \dots \text{,K}
 \]</span></p>
 </div>
@@ -223,10 +186,9 @@ MSW = \sigma^2 + \sigma^2_{\alpha_{k}}
 <h3 id="intraclass-correlation-coefficients">Intraclass Correlation Coefficients<a class="anchor" aria-label="anchor" href="#intraclass-correlation-coefficients"></a>
 </h3>
 <p><span class="math display">\[
-ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW}
+ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} 
 \]</span> <span class="math display">\[
-ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ -
-MSE) \cdot n^{-1}}
+ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} 
 \]</span> <span class="math display">\[
 ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
 \]</span> <span class="math display">\[
@@ -244,83 +206,76 @@ ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
 <h4 id="icc11">ICC(1,1)<a class="anchor" aria-label="anchor" href="#icc11"></a>
 </h4>
 <p><span class="math display">\[
-F =  \frac{MSB}{MSW}
+F =  \frac{MSB}{MSW} 
 \]</span></p>
 <p><span class="math display">\[
-df_{n} = n_j - 1
+df_{n} = n_j - 1 
 \]</span></p>
 <p><span class="math display">\[
 df_{d} = n_j \cdot (n_k - 1)
 \]</span></p>
-<p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+<p><span class="math display">\[ 
+ F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
 \]</span></p>
 <p><span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} 
 \]</span></p>
-<p><span class="math display">\[
-Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))}
+<p><span class="math display">\[ 
+Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))} 
 \]</span></p>
-<p><span class="math display">\[
-Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
+<p><span class="math display">\[ 
+Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)} 
 \]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc21">ICC(2,1)<a class="anchor" aria-label="anchor" href="#icc21"></a>
 </h4>
 <p><span class="math display">\[
-F =  \frac{MSJ}{MSE}
+F =  \frac{MSJ}{MSE} 
 \]</span></p>
 <p><span class="math display">\[
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F +
-n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) -
-n_k \cdot ICC_{(2,1)})]^2
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 
 \]</span></p>
 <p><span class="math display">\[
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot
-(1 +
-                                                         (n_k - 1) \cdot
-ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
+                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 
 \]</span> <span class="math display">\[
-  v = \frac{vn}{vd}
+  v = \frac{vn}{vd} 
 \]</span></p>
 <p><span class="math display">\[
-  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
+  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} 
 \]</span></p>
 <p><span class="math display">\[
-  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
+  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} 
 \]</span></p>
 <p><span class="math display">\[
-  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot
-(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot
-MSB)}
+  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} 
 \]</span></p>
 <p><span class="math display">\[
-  Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot
-MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+  Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
 \]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc31">ICC(3,1)<a class="anchor" aria-label="anchor" href="#icc31"></a>
 </h4>
 <p><span class="math display">\[
-F =  \frac{MSJ}{MSE}
+F =  \frac{MSJ}{MSE} 
 \]</span> <span class="math display">\[
-df_{n} = n_j - 1
+df_{n} = n_j - 1 
 \]</span> <span class="math display">\[
-df_{d} = (n_j-1) \cdot (n_k - 1)
+df_{d} = (n_j-1) \cdot (n_k - 1) 
 \]</span></p>
 <p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
 \]</span> <span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})}
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})} 
 \]</span> <span class="math display">\[
-F3L &lt;- F31/qf(1 - alpha, df21n, df21d)
+F3L &lt;- F31/qf(1 - alpha, df21n, df21d) 
 \]</span> <span class="math display">\[
-F3U &lt;- F31 * qf(1 - alpha, df21d, df21n)
+F3U &lt;- F31 * qf(1 - alpha, df21d, df21n) 
 \]</span> <span class="math display">\[
-Lower \space CI = (F3L - 1)/(F3L + n_k - 1)
+Lower \space CI = (F3L - 1)/(F3L + n_k - 1) 
 \]</span></p>
 <p><span class="math display">\[
 Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
@@ -330,20 +285,20 @@ Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
 <h4 id="icc1k">ICC(1,k)<a class="anchor" aria-label="anchor" href="#icc1k"></a>
 </h4>
 <p><span class="math display">\[
-F =  \frac{MSB - MSW}{MSB}
+F =  \frac{MSB - MSW}{MSB} 
 \]</span> <span class="math display">\[
-df_{n} = n_j - 1
+df_{n} = n_j - 1 
 \]</span></p>
 <p><span class="math display">\[
-df_{d} = n_j \cdot (n_k - 1)
+df_{d} = n_j \cdot (n_k - 1) 
 \]</span></p>
 <p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}} 
 \]</span> <span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})} 
 \]</span></p>
 <p><span class="math display">\[
-Lower \space CI = 1-\frac{1}{F_L}
+Lower \space CI = 1-\frac{1}{F_L} 
 \]</span> <span class="math display">\[
 Upper \space CI = 1-\frac{1}{F_U}
 \]</span></p>
@@ -352,38 +307,32 @@ Upper \space CI = 1-\frac{1}{F_U}
 <h4 id="icc2k">ICC(2,k)<a class="anchor" aria-label="anchor" href="#icc2k"></a>
 </h4>
 <p><span class="math display">\[
-F =  \frac{MSB - MSW}{MSB}
+F =  \frac{MSB - MSW}{MSB} 
 \]</span></p>
 <p><span class="math display">\[
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F +
-n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) -
-n_k \cdot ICC_{(2,k)})]^2
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F + n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})]^2
 \]</span></p>
 <p><span class="math display">\[
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot
-(1 +
-                                                         (n_k - 1) \cdot
-ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot (1 +
+                                                         (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2 
 \]</span></p>
 <p><span class="math display">\[
-v = \frac{vn}{vd}
+v = \frac{vn}{vd} 
 \]</span></p>
 <p><span class="math display">\[
-F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
+F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)} 
 \]</span> <span class="math display">\[
-F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
+F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)} 
 \]</span></p>
 <p><span class="math display">\[
-L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ +
-(n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)}
+L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} 
 \]</span></p>
 <p><span class="math display">\[
-U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot
-n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)} 
 \]</span></p>
 <p><span class="math display">\[
-Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))}
+Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))} 
 \]</span></p>
 <p><span class="math display">\[
 Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
@@ -396,19 +345,19 @@ Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
 F = \frac{MSB}{MSE}
 \]</span></p>
 <p><span class="math display">\[
-df_n = n_j - 1
+df_n = n_j - 1 
 \]</span></p>
 <p><span class="math display">\[
-df_d = (n_j - 1) \cdot (n_k - 1)
+df_d = (n_j - 1) \cdot (n_k - 1) 
 \]</span></p>
 <p><span class="math display">\[
-F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})}
+F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})} 
 \]</span></p>
 <p><span class="math display">\[
-F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)}
+F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)} 
 \]</span></p>
 <p><span class="math display">\[
-Lower \space CI = 1-\frac{1}{F_L}
+Lower \space CI = 1-\frac{1}{F_L} 
 \]</span></p>
 <p><span class="math display">\[
 Upper \space CI = 1-\frac{1}{F_U}
@@ -418,26 +367,21 @@ Upper \space CI = 1-\frac{1}{F_U}
 <div class="section level3">
 <h3 id="standard-error-calculations">Standard Error Calculations<a class="anchor" aria-label="anchor" href="#standard-error-calculations"></a>
 </h3>
-<p>The standard error of the measurement (SEM), standard error of the
-estimate (SEE), and standard error of prediction (SEP) are all estimated
-with the following calculations.</p>
+<p>The standard error of the measurement (SEM), standard error of the estimate (SEE), and standard error of prediction (SEP) are all estimated with the following calculations.</p>
 <p><span class="math display">\[
-SEM = \sqrt{MSE}
+SEM = \sqrt{MSE} 
 \]</span></p>
 <p><span class="math display">\[
-SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
-k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})}
+SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} 
 \]</span></p>
 <p><span class="math display">\[
-SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
-k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2}
+SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} 
 \]</span></p>
 </div>
 <div class="section level3">
 <h3 id="coefficient-of-variation">Coefficient of Variation<a class="anchor" aria-label="anchor" href="#coefficient-of-variation"></a>
 </h3>
-<p>The CV is calculated 3 potential ways within <code>reli_stats</code>.
-I highly recommend reporting the default version of CV.</p>
+<p>The CV is calculated 3 potential ways within <code>reli_stats</code>. I highly recommend reporting the default version of CV.</p>
 <ol style="list-style-type: decimal">
 <li>From the MSE (default)</li>
 </ol>
@@ -455,47 +399,21 @@ CV = \frac{SEM}{ \bar y}
 <li>From the model residuals (most liberal)</li>
 </ol>
 <p><span class="math display">\[
-CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
-\bar y}
+CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{ \bar y}
 \]</span></p>
 </div>
 <div class="section level3">
 <h3 id="other-confidence-intervals">Other Confidence Intervals<a class="anchor" aria-label="anchor" href="#other-confidence-intervals"></a>
 </h3>
-<p>If the <code>other_ci</code> argument is set to TRUE then
-nonparametric bootstrapped confidence intervals will be calculated for
-the CV, SEM, SEP, and SEE. The number of resamples can be set with the
-replicates argument (default is 499; increase for greater accuracy). The
-reported confidence intervals are estimated using the percentile
-method.</p>
-<p>To ensure reproducibility, please use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> when
-these confidence intervals are calculated.</p>
+<p>If the <code>other_ci</code> argument is set to TRUE then nonparametric bootstrapped confidence intervals will be calculated for the CV, SEM, SEP, and SEE. The number of resamples can be set with the replicates argument (default is 499; increase for greater accuracy). The reported confidence intervals are estimated using the percentile method.</p>
+<p>To ensure reproducibility, please use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> when these confidence intervals are calculated.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="inter-rater-reliability">Inter-Rater Reliability<a class="anchor" aria-label="anchor" href="#inter-rater-reliability"></a>
 </h2>
-<p>In some cases, the reliability of a categorical or ordinal scale may
-be worth investigating. For example, physicians may want to develop a
-diagnosis tool and ensure that the diagnosis is reliable (i.e.,
-categorical designation) or severity of the disease (i.e., a Likert-type
-scale). Coefficients can be calculated to assess the degree of
-inter-rater reliability. In its simplest form, the percent agreement
-between all the raters can be calculated. All other coefficients of
-agreement are esssentially trying to “correct” for random guessing of
-the rater. The function to make these calculations in the
-<code>SimplyAgree</code> is <code>agree_coef</code>, and it produces 4
-estimates: percent agreement, Gwet’s AC, Fleiss’ Kappa, and
-Krippendorff’s Alpha. However, other packages provide much a much
-greater breadth of calculative approaches <span class="citation">(<a href="#ref-irrCAC" role="doc-biblioref">Gwet 2019</a>)</span>.</p>
-<p>In the <code>agree_coef</code> function, the user can specify
-<code>weighted = TRUE</code>. If this argument is set to true than the
-ratings have quadratic weights applied to them. Essentially, this
-penalizes values farther away from each other more than those close to
-each other. For example, a pair of values equal to 3 and 4 would be
-penalized less than a pair of values to 1 and 4. For more details, on
-these “agreement coefficients” I refer all users to Gwet’s textbook on
-inter-rater agreement <span class="citation">(<a href="#ref-gwet" role="doc-biblioref">Gwet 2014</a>)</span>.</p>
+<p>In some cases, the reliability of a categorical or ordinal scale may be worth investigating. For example, physicians may want to develop a diagnosis tool and ensure that the diagnosis is reliable (i.e., categorical designation) or severity of the disease (i.e., a Likert-type scale). Coefficients can be calculated to assess the degree of inter-rater reliability. In its simplest form, the percent agreement between all the raters can be calculated. All other coefficients of agreement are esssentially trying to “correct” for random guessing of the rater. The function to make these calculations in the <code>SimplyAgree</code> is <code>agree_coef</code>, and it produces 4 estimates: percent agreement, Gwet’s AC, Fleiss’ Kappa, and Krippendorff’s Alpha. However, other packages provide much a much greater breadth of calculative approaches <span class="citation">(<a href="#ref-irrCAC" role="doc-biblioref">Gwet 2019</a>)</span>.</p>
+<p>In the <code>agree_coef</code> function, the user can specify <code>weighted = TRUE</code>. If this argument is set to true than the ratings have quadratic weights applied to them. Essentially, this penalizes values farther away from each other more than those close to each other. For example, a pair of values equal to 3 and 4 would be penalized less than a pair of values to 1 and 4. For more details, on these “agreement coefficients” I refer all users to Gwet’s textbook on inter-rater agreement <span class="citation">(<a href="#ref-gwet" role="doc-biblioref">Gwet 2014</a>)</span>.</p>
 <p>As a demonstration, we can create a matrix of ratings.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R">  <span class="va">ratermat1</span> <span class="op">=</span> <span class="op">(</span><span class="st">"Rater1 Rater2 Rater3 Rater4
@@ -543,36 +461,26 @@ inter-rater agreement <span class="citation">(<a href="#ref-gwet" role="doc-bibl
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-gwet" class="csl-entry">
-Gwet, Kilem L. 2014. <em>Handbook of Inter-Rater Reliability</em>.
-Advanced Analytics, LLC. <a href="https://www.agreestat.com/book4/" class="external-link">https://www.agreestat.com/book4/</a>.
+Gwet, Kilem L. 2014. <em>Handbook of Inter-Rater Reliability</em>. Advanced Analytics, LLC. <a href="https://www.agreestat.com/book4/" class="external-link">https://www.agreestat.com/book4/</a>.
 </div>
 <div id="ref-irrCAC" class="csl-entry">
-———. 2019. <em>irrCAC: Computing Chance-Corrected Agreement Coefficients
-(CAC)</em>. <a href="https://CRAN.R-project.org/package=irrCAC" class="external-link">https://CRAN.R-project.org/package=irrCAC</a>.
+———. 2019. <em>irrCAC: Computing Chance-Corrected Agreement Coefficients (CAC)</em>. <a href="https://CRAN.R-project.org/package=irrCAC" class="external-link">https://CRAN.R-project.org/package=irrCAC</a>.
 </div>
 <div id="ref-mcgraw1996" class="csl-entry">
-McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences
-about Some Intraclass Correlation Coefficients.”</span>
-<em>Psychological Methods</em> 1 (1): 30. <a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">https://doi.org/10.1037/1082-989X.1.1.30</a>.
+McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences about Some Intraclass Correlation Coefficients.”</span> <em>Psychological Methods</em> 1 (1): 30. <a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">https://doi.org/10.1037/1082-989X.1.1.30</a>.
 </div>
 <div id="ref-shrout1979" class="csl-entry">
-Shrout, Patrick E, and Joseph L Fleiss. 1979. <span>“Intraclass
-Correlations: Uses in Assessing Rater Reliability.”</span>
-<em>Psychological Bulletin</em> 86 (2): 420. <a href="https://doi.org/10.1037/0033-2909.86.2.420" class="external-link">https://doi.org/10.1037/0033-2909.86.2.420</a>.
+Shrout, Patrick E, and Joseph L Fleiss. 1979. <span>“Intraclass Correlations: Uses in Assessing Rater Reliability.”</span> <em>Psychological Bulletin</em> 86 (2): 420. <a href="https://doi.org/10.1037/0033-2909.86.2.420" class="external-link">https://doi.org/10.1037/0033-2909.86.2.420</a>.
 </div>
 <div id="ref-weir2005" class="csl-entry">
-Weir, Joseph P. 2005. <span>“Quantifying Test-Retest Reliability Using
-the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span>
-<em>The Journal of Strength and Conditioning Research</em> 19 (1): 231.
-<a href="https://pubmed.ncbi.nlm.nih.gov/15705040/" class="external-link">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.
+Weir, Joseph P. 2005. <span>“Quantifying Test-Retest Reliability Using the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span> <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231. <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/" class="external-link">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.
 </div>
 </div>
 </div>
-<div class="footnotes footnotes-end-of-document">
+<div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>The paper by Weir also appears to heavily rely on the
-work of <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979" role="doc-biblioref">1979</a>)</span> and <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996" role="doc-biblioref">1996</a>)</span><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>The paper by Weir also appears to heavily rely on the work of <span class="citation"><a href="#ref-shrout1979" role="doc-biblioref">Shrout and Fleiss</a> (<a href="#ref-shrout1979" role="doc-biblioref">1979</a>)</span> and <span class="citation"><a href="#ref-mcgraw1996" role="doc-biblioref">McGraw and Wong</a> (<a href="#ref-mcgraw1996" role="doc-biblioref">1996</a>)</span><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>Also called “%SEM” in some texts<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
@@ -595,7 +503,7 @@ work of <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979" role
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
