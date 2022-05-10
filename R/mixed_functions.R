@@ -402,13 +402,17 @@ loa_bstab = function(bsls,
 }
 
 # Parametric bootstrap functions ---------
+# Now for lme -----
 
 pred_bias = function(mod1, newdata){
   predict(mod1, re.form = NA, newdata = newdata)
+  #predict(mod1, newdata = newdata, level = 0)
 }
 
 pred_lloa = function(mod1, newdata, agree.level){
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
+  #means = predict(mod1, newdata = newdata, level = 0)
+  #totalsd = sqrt(sum(as.numeric(VarCorr(mod1)[1:2])))
   means = predict(mod1, re.form = NA, newdata = newdata)
   totalsd = sqrt(sigma(mod1)^2 + unlist(VarCorr(mod1)))
   res = means - agree.lim * totalsd
@@ -417,6 +421,8 @@ pred_lloa = function(mod1, newdata, agree.level){
 
 pred_uloa = function(mod1, newdata, agree.level){
   agree.lim = qnorm(1 - (1 - agree.level) / 2)
+  #means = predict(mod1, newdata = newdata, level = 0)
+  #totalsd = sqrt(sum(as.numeric(VarCorr(mod1)[1:2])))
   means = predict(mod1, re.form = NA, newdata = newdata)
   totalsd = sqrt(sigma(mod1)^2 + unlist(VarCorr(mod1)))
   res = means + agree.lim * totalsd

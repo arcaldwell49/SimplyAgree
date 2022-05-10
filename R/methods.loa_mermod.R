@@ -1,6 +1,6 @@
 #' Methods for loa_mermod objects
 #'
-#' Methods defined for objects returned from the loa_mixed functions.
+#' Methods defined for objects returned from the loa_lme.
 #'
 #' @param x object of class \code{loa_mermod}.
 #' @param ... further arguments passed through, see description of return value
@@ -24,7 +24,7 @@
 print.loa_mermod <- function(x,...){
   agree = paste0(x$call$agree.level*100)
   conf = paste0(x$call$conf.level*100)
-  title = paste0(agree,"% Limits of Agreement with Boostrapped ", conf, "% Confidence Intervals \n")
+  title = paste0(agree,"% Limits of Agreement with Parametric Bootstrap ", conf, "% Confidence Intervals \n")
   cat(title)
   df = x$loa
   if("avg" %in% colnames(df) && "condition" %in% colnames(df) ){
@@ -117,6 +117,9 @@ check.loa_mermod <- function(x) {
 
   stan_res = get_residuals(res_mod, type = "pearson")
   df_het = get_df(res_mod, type = "residual")
+  if(length(df_het) > 1) {
+    df_het = get_df(res_mod, type = "residual")[1]
+  }
   sum_het_res = sum(!is.na(stan_res))
   sigma_het = sigma(res_mod)
 
@@ -142,8 +145,8 @@ check.loa_mermod <- function(x) {
                           signif(p_val_het,4)))
 
   # Normality ------------
-  mod_resid = residuals(mod_res)
-  if(length(mod_res) < 5000){
+  mod_resid = residuals(res_mod)
+  if(length(res_mod) < 5000){
     norm_test = shapiro.test(mod_resid)
     norm_text = "Shapiro-Wilk Test"
   } else {
@@ -152,7 +155,7 @@ check.loa_mermod <- function(x) {
     norm_text = "Kolmogorov-Smirnov Test"
   }
 
-  rstan_norm <- suppressMessages(sort(stats::residuals(model), na.last = NA))
+  rstan_norm <- suppressMessages(sort(stats::residuals(res_mod), na.last = NA))
   dat_norm <- na.omit(data.frame(y = rstan_norm))
   p_norm = plot_qq(
     x = dat_norm
@@ -184,7 +187,7 @@ check.loa_mermod <- function(x) {
   )
 
 
-  aov2 = suppressWarnings(as.data.frame(anova(mod1, mod2)))
+  aov2 = suppressWarnings(as.data.frame(nlme::anova.lme(mod1, mod2)))
   colnames(aov2) = c("call", "model", "df", "aic", "bic", "loglik", "test", "l.ratio", "p.value")
   lin_pval = aov2$p.value[2]
 

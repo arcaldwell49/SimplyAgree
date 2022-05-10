@@ -123,9 +123,10 @@ factory = function (fun, debug = FALSE, errval = "An error occurred in the facto
   }
 }
 
-update_mod = function (model, new.y = NULL, new.data = NULL)
+update_mod = function (model, new.y = NULL, new.data = NULL,
+                       formula1 = formula1)
 {
-  mod.fixd <- as.formula(model$call$fixed)
+  mod.fixd <- formula1
   mod.rand <- model$call$random
   mod.data <- model$data
   mod.weights <- model$call$weights
@@ -157,7 +158,8 @@ update_mod = function (model, new.y = NULL, new.data = NULL)
   out.lme
 }
 
-para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE){
+para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE,
+                      agree.lim){
   #at_list2 = list(avg = at_list)
   var_comp1 = model$modelStruct$varStruct %>%
     coef(unconstrained = FALSE, allCoef = TRUE) %>%
