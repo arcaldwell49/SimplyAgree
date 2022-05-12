@@ -35,7 +35,7 @@ In order to understand the underlying processes of these functions and procedure
 
 # Concordance
 
-An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. In its simplest form it is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa).
+An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. It is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa).
 
 ```{r, fig.cap="Example of the Line of Identity"}
 qplot(1,1) + geom_abline(intercept = 0, slope = 1)
@@ -169,7 +169,7 @@ p_eso.delta
 
 # Limits of Agreement
 
-The `loa_mixed` function in order to calculate the "limits of agreement". Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a "wide" format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this "wide" format, we can then use the `loa_mixed` function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).
+The `loa_lme` function can be used to calculate the "limits of agreement". Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a "wide" format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this "wide" format, we can then use the `loa_lme` function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).
 
 ```{r, echo=FALSE}
 rec.post_loa = readr::read_rds("rec_post_loa.rds")
@@ -182,7 +182,7 @@ eso.delta_loa = readr::read_rds("eso_delta_loa.rds")
 
 ## Rectal Temperature
 
-So we will calculate the limits of agreement using the `loa_mixed` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use percentile bootstrap confidence intervals.
+So we will calculate the limits of agreement using the `loa_lme` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use percentile bootstrap confidence intervals.
 
 ```{r, eval=FALSE}
 rec.post_loa = SimplyAgree::loa_lme(diff = "diff",

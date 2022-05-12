@@ -81,9 +81,10 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Agreement Analysis</h1>
-                        <h4 data-toc-skip class="author">Aaron R. Caldwell</h4>
+                        <h4 data-toc-skip class="author">Aaron R.
+Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-05-10</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-05-12</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -92,12 +93,21 @@
 
     
     
-<p>The <code>SimplyAgree</code> R package was created to make the process of quantifying measurement agreement, consistency, and reliability. This package expands upon the capabilities of currently available R packages (such as <code>psych</code> and <code>blandr</code>) by 1) providing support for agreement studies that involve multiple observations (<code>agree_test</code> and <code>agree_reps</code> functions) 2) provide robust tests of agreement even in simple studies (<code>shieh_test</code> output from the <code>agree_test</code> function) and 3) a robust set of reliability statistics (<code>reli_stats</code> function).</p>
-<p>In this vignette I will shortly demonstrate the implementation of each function and <em>most</em> of the underlying calculations within each function</p>
+<p>The <code>SimplyAgree</code> R package was created to make the
+process of quantifying measurement agreement, consistency, and
+reliability. This package expands upon the capabilities of currently
+available R packages (such as <code>psych</code> and
+<code>blandr</code>) by 1) providing support for agreement studies that
+involve multiple observations (<code>agree_test</code> and
+<code>agree_reps</code> functions) 2) provide robust tests of agreement
+even in simple studies (<code>shieh_test</code> output from the
+<code>agree_test</code> function) and 3) a robust set of reliability
+statistics (<code>reli_stats</code> function).</p>
+<p>In this vignette I will shortly demonstrate the implementation of
+each function and <em>most</em> of the underlying calculations within
+each function</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-<span class="co">#&gt; Warning in .recacheSubclasses(def@className, def, env): undefined subclass</span>
-<span class="co">#&gt; "numericVector" of class "Mnumeric"; definition not updated</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="simple-agreement">Simple Agreement<a class="anchor" aria-label="anchor" href="#simple-agreement"></a>
 </h2>
@@ -105,13 +115,38 @@
 <h3 id="agree_test">
 <code>agree_test</code><a class="anchor" aria-label="anchor" href="#agree_test"></a>
 </h3>
-<p>In the simplest scenario, a study may be conducted to compare one measure (e.g., <code>x</code>) and another (e.g., <code>y</code>). In this scenario each pair of observations (x and y) are <em>independent</em>; meaning that each pair represents one subject/participant. In most cases we have a degree of agreement that we would deem adequate. This may constitute a hypothesis wherein you may believe the agreement between two measurements is within a certain limit (limits of agreement). If this is the goal then the <code>agree_test</code> function is what you need to use in this package.</p>
-<p>The data for the two measurements are put into the <code>x</code> and <code>y</code> arguments. If there is a hypothesized limit of agreement then this can be set with the <code>delta</code> argument (this is optional). Next, the limit of agreement can be set with the <code>agree.level</code> and the confidence level (<span class="math inline">\(1-\alpha\)</span>). Once those are set the analysis can be run. Please note, this package has pre-loaded data from the Zou 2013 paper. While data does not conform the assumptions of the test it can be used to test out many of the functions in this package. Since there isn’t an <em>a priori</em> hypothesis I will not declare a <code>delta</code> argument, but I will estimate the 95% confidence intervals for 80% limits of agreement.</p>
+<p>In the simplest scenario, a study may be conducted to compare one
+measure (e.g., <code>x</code>) and another (e.g., <code>y</code>). In
+this scenario each pair of observations (x and y) are
+<em>independent</em>; meaning that each pair represents one
+subject/participant. In most cases we have a degree of agreement that we
+would deem adequate. This may constitute a hypothesis wherein you may
+believe the agreement between two measurements is within a certain limit
+(limits of agreement). If this is the goal then the
+<code>agree_test</code> function is what you need to use in this
+package.</p>
+<p>The data for the two measurements are put into the <code>x</code> and
+<code>y</code> arguments. If there is a hypothesized limit of agreement
+then this can be set with the <code>delta</code> argument (this is
+optional). Next, the limit of agreement can be set with the
+<code>agree.level</code> and the confidence level (<span class="math inline">\(1-\alpha\)</span>). Once those are set the
+analysis can be run. Please note, this package has pre-loaded data from
+the Zou 2013 paper. While data does not conform the assumptions of the
+test it can be used to test out many of the functions in this package.
+Since there isn’t an <em>a priori</em> hypothesis I will not declare a
+<code>delta</code> argument, but I will estimate the 95% confidence
+intervals for 80% limits of agreement.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
                 y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
                 agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>We can then print the general results. These results include the general parameters of the analysis up top, then the results of the Shieh exact test for agreement (no conclusion is included due to the lack of a <code>delta</code> argument being set). Then the limits of agreement, with confidence limits, are included. Lastly, Lin’s Concordance Correlation Coefficient, another measure of agreement, is also included.</p>
+<p>We can then print the general results. These results include the
+general parameters of the analysis up top, then the results of the Shieh
+exact test for agreement (no conclusion is included due to the lack of a
+<code>delta</code> argument being set). Then the limits of agreement,
+with confidence limits, are included. Lastly, Lin’s Concordance
+Correlation Coefficient, another measure of agreement, is also
+included.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
 <span class="co">#&gt; Limit of Agreement = 80%</span>
@@ -128,7 +163,10 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span>
 <span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span></code></pre></div>
-<p>Next, we can use the generic <code>plot</code> function to produce visualizations of agreement. This includes the Bland-Altman plot (<code>type = 1</code>) and a line-of-identity plot (<code>type = 2</code>).</p>
+<p>Next, we can use the generic <code>plot</code> function to produce
+visualizations of agreement. This includes the Bland-Altman plot
+(<code>type = 1</code>) and a line-of-identity plot
+(<code>type = 2</code>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
@@ -143,49 +181,97 @@
 <div class="section level4">
 <h4 id="shiehs-test">Shieh’s test<a class="anchor" aria-label="anchor" href="#shiehs-test"></a>
 </h4>
-<p>The hypothesis test procedure is based on the “exact” approach details by <span class="citation"><a href="#ref-shieh2019" role="doc-biblioref">Shieh</a> (<a href="#ref-shieh2019" role="doc-biblioref">2019</a>)</span>. In this procedure the null hypothesis (not acceptable agreement) is rejected if the extreme lower bound and upper bound are within the proposed agreement limits. The agreement limits (<span class="math inline">\(\hat\theta_{EL} \space and \space \hat\theta_{EU}\)</span>) are calculated as the following:</p>
+<p>The hypothesis test procedure is based on the “exact” approach
+details by <span class="citation">Shieh (<a href="#ref-shieh2019" role="doc-biblioref">2019</a>)</span>. In this procedure the null
+hypothesis (not acceptable agreement) is rejected if the extreme lower
+bound and upper bound are within the proposed agreement limits. The
+agreement limits (<span class="math inline">\(\hat\theta_{EL} \space and
+\space \hat\theta_{EU}\)</span>) are calculated as the following:</p>
 <p><span class="math display">\[
-\hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot \frac{S}{\sqrt{N}}
+\hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot
+\frac{S}{\sqrt{N}}
 \]</span></p>
-<p>wherein <span class="math inline">\(\bar{d}\)</span> is the mean difference between the two methods, <span class="math inline">\(S\)</span> is the standard deviation of the differences, <span class="math inline">\(N\)</span> is the total number of pairs, and <span class="math inline">\(\gamma_{1-\alpha}\)</span> critical value (which requires a specialized function within <code>R</code> to estimate).</p>
+<p>wherein <span class="math inline">\(\bar{d}\)</span> is the mean
+difference between the two methods, <span class="math inline">\(S\)</span> is the standard deviation of the
+differences, <span class="math inline">\(N\)</span> is the total number
+of pairs, and <span class="math inline">\(\gamma_{1-\alpha}\)</span>
+critical value (which requires a specialized function within
+<code>R</code> to estimate).</p>
 </div>
 <div class="section level4">
 <h4 id="limits-of-agreement">Limits of Agreement<a class="anchor" aria-label="anchor" href="#limits-of-agreement"></a>
 </h4>
-<p>The reported limits of agreement are derived from the work of <span class="citation"><a href="#ref-bland1986" role="doc-biblioref">Bland and Altman</a> (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> and <span class="citation"><a href="#ref-bland1999" role="doc-biblioref">Bland and Altman</a> (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>.</p>
+<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> and <span class="citation">Bland
+and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>.</p>
 <p><span class="math display">\[
-LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
+LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot
+\sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)}
+\right] \cdot S^2}
 \]</span></p>
-<p>wherein, <span class="math inline">\(t\)</span> is the critical t-value at the given sample size and confidence level (<code>conf.level</code>), <span class="math inline">\(z\)</span> is the value of the normal distribution at the given alpha level (<code>agree.level</code>), and <span class="math inline">\(S^2\)</span> is the variance of the difference scores. If <code>TOST</code> is set to TRUE then equation is altered slightly with the critical t (<span class="math inline">\(t_{1-\alpha,N-1}\)</span>).</p>
+<p>wherein, <span class="math inline">\(t\)</span> is the critical
+t-value at the given sample size and confidence level
+(<code>conf.level</code>), <span class="math inline">\(z\)</span> is the
+value of the normal distribution at the given alpha level
+(<code>agree.level</code>), and <span class="math inline">\(S^2\)</span>
+is the variance of the difference scores. If <code>TOST</code> is set to
+TRUE then equation is altered slightly with the critical t (<span class="math inline">\(t_{1-\alpha,N-1}\)</span>).</p>
 </div>
 <div class="section level4">
 <h4 id="concordance-correlation-coefficient">Concordance Correlation Coefficient<a class="anchor" aria-label="anchor" href="#concordance-correlation-coefficient"></a>
 </h4>
-<p>The CCC was calculated as outlined by <span class="citation"><a href="#ref-lin1989" role="doc-biblioref">Lin</a> (<a href="#ref-lin1989" role="doc-biblioref">1989</a>)</span> (with later corrections).</p>
+<p>The CCC was calculated as outlined by <span class="citation">Lin (<a href="#ref-lin1989" role="doc-biblioref">1989</a>)</span> (with later
+corrections).</p>
 <p><span class="math display">\[
 \hat\rho_c = \frac{2 \cdot s_{xy}} {s_x^2 + s_y^2+(\bar x-\bar y)^2}
-\]</span> where <span class="math inline">\(s_{xy}\)</span> is the covariance, <span class="math inline">\(s_x^2\)</span> and <span class="math inline">\(s_y^2\)</span> are the variances of x and y respectively, and <span class="math inline">\((\bar x-\bar y)\)</span> is the difference in the means of x &amp; y.</p>
+\]</span> where <span class="math inline">\(s_{xy}\)</span> is the
+covariance, <span class="math inline">\(s_x^2\)</span> and <span class="math inline">\(s_y^2\)</span> are the variances of x and y
+respectively, and <span class="math inline">\((\bar x-\bar y)\)</span>
+is the difference in the means of x &amp; y.</p>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="repeated-measures-agreement">Repeated Measures Agreement<a class="anchor" aria-label="anchor" href="#repeated-measures-agreement"></a>
 </h2>
-<p>In many cases there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates; <code>agree_reps</code>), or multiple measurements may be taken within an individual <em>and</em> these values are expected to vary (i.e., nested design; <code>agree_nest</code>).</p>
-<p>The confidence limits on the limits of agreement are based on the “MOVER” method described in detail by <span class="citation"><a href="#ref-zou2011" role="doc-biblioref">Zou</a> (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, both functions operate similarly to <code>agree_test</code>; the only difference being that the data has to be provided as a <code>data.frame</code> in R.</p>
+<p>In many cases there are multiple measurements taken within subjects
+when comparing two measurements tools. In some cases the true underlying
+value will not be expected to vary (i.e., replicates;
+<code>agree_reps</code>), or multiple measurements may be taken within
+an individual <em>and</em> these values are expected to vary (i.e.,
+nested design; <code>agree_nest</code>).</p>
+<p>The confidence limits on the limits of agreement are based on the
+“MOVER” method described in detail by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, both
+functions operate similarly to <code>agree_test</code>; the only
+difference being that the data has to be provided as a
+<code>data.frame</code> in R.</p>
 <div class="section level3">
 <h3 id="agree_reps">
 <code>agree_reps</code><a class="anchor" aria-label="anchor" href="#agree_reps"></a>
 </h3>
-<p>This function is for cases where the underlying values do <em>not</em> vary within subjects. This can be considered cases where replicate measure may be taken. For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.</p>
-<p>So, for this function you will have to provide the data frame object with the <code>data</code> argument and the names of the columns containing the first (<code>x</code> argument) and second (<code>y</code> argument) must then be provided. An additional column indicating the subject identifier (<code>id</code>) must also be provided. Again, if there is a hypothesized agreement limit then this could be provided with the <code>delta</code> argument.</p>
+<p>This function is for cases where the underlying values do
+<em>not</em> vary within subjects. This can be considered cases where
+replicate measure may be taken. For example, a researcher may want to
+compare the performance of two ELISA assays where measurements are taken
+in duplicate/triplicate.</p>
+<p>So, for this function you will have to provide the data frame object
+with the <code>data</code> argument and the names of the columns
+containing the first (<code>x</code> argument) and second
+(<code>y</code> argument) must then be provided. An additional column
+indicating the subject identifier (<code>id</code>) must also be
+provided. Again, if there is a hypothesized agreement limit then this
+could be provided with the <code>delta</code> argument.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_reps.html">agree_reps</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
                 y <span class="op">=</span> <span class="st">"y"</span>,
                 id <span class="op">=</span> <span class="st">"id"</span>,
                 data <span class="op">=</span> <span class="va">reps</span>,
                 agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>The results can then be printed. The printing format is very similar to <code>agree_test</code>, but notice that 1) the hypothesis test is based on the limits of agreement (MOVER method), 2) the Concordance Correlation Coefficient is calculated via the U-statistics method, 3) the Shieh TOST results are missing because they cannot be estimated for this type of design.</p>
+<p>The results can then be printed. The printing format is very similar
+to <code>agree_test</code>, but notice that 1) the hypothesis test is
+based on the limits of agreement (MOVER method), 2) the Concordance
+Correlation Coefficient is calculated via the U-statistics method, 3)
+the Shieh TOST results are missing because they cannot be estimated for
+this type of design.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span>
 <span class="co">#&gt; Limit of Agreement = 95%</span>
@@ -214,15 +300,23 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 <h3 id="agree_nest">
 <code>agree_nest</code><a class="anchor" aria-label="anchor" href="#agree_nest"></a>
 </h3>
-<p>This function is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days.</p>
-<p>The function works almost identically to <code>agree_reps</code> but the underlying calculations are different</p>
+<p>This function is for cases where the underlying values may vary
+within subjects. This can be considered cases where there are distinct
+pairs of data wherein data is collected in different times/conditions
+within each subject. An example would be measuring blood pressure on two
+different devices on many people at different time points/days.</p>
+<p>The function works almost identically to <code>agree_reps</code> but
+the underlying calculations are different</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_nest.html">agree_nest</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
                 y <span class="op">=</span> <span class="st">"y"</span>,
                 id <span class="op">=</span> <span class="st">"id"</span>,
                 data <span class="op">=</span> <span class="va">reps</span>,
                 agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>The printed results (and plots) are very similar to <code>agree_reps</code>. However, the CCC result now has a warning because the calculation in this scenario may not be entirely appropriate given the nature of the data.</p>
+<p>The printed results (and plots) are very similar to
+<code>agree_reps</code>. However, the CCC result now has a warning
+because the calculation in this scenario may not be entirely appropriate
+given the nature of the data.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a3</span><span class="op">)</span>
 <span class="co">#&gt; Limit of Agreement = 95%</span>
@@ -248,15 +342,18 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" width="576"></p>
 </div>
 <div class="section level3">
-<h3 id="calculations-for-agree_reps-agree_nest">Calculations for <code>agree_reps</code> &amp; <code>agree_nest</code><a class="anchor" aria-label="anchor" href="#calculations-for-agree_reps-agree_nest"></a>
+<h3 id="calculations-for-agree_reps-agree_nest">Calculations for <code>agree_reps</code> &amp;
+<code>agree_nest</code><a class="anchor" aria-label="anchor" href="#calculations-for-agree_reps-agree_nest"></a>
 </h3>
-<p>All the calculations for the limits of agreement in these two functions can be found in the article by <span class="citation"><a href="#ref-zou2011" role="doc-biblioref">Zou</a> (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>.</p>
+<p>All the calculations for the limits of agreement in these two
+functions can be found in the article by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="agree_nest-loa">
 <code>agree_nest</code> LoA<a class="anchor" aria-label="anchor" href="#agree_nest-loa"></a>
 </h3>
-<p><strong>Step 1: Calculate Individual Subject Means and Variances</strong></p>
+<p><strong>Step 1: Calculate Individual Subject Means and
+Variances</strong></p>
 <p><span class="math display">\[
 \bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
 \]</span> <span class="math display">\[
@@ -265,7 +362,7 @@ LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\
 \bar d_i = \bar x_i - \bar y_i
 \]</span></p>
 <p><span class="math display">\[
-\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
+\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n}
 \]</span></p>
 <p><span class="math display">\[
 s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
@@ -276,7 +373,8 @@ s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
 <p><span class="math display">\[
 s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
 \]</span></p>
-<p><strong>Step 2: Compute pooled estimates of within subject errors</strong></p>
+<p><strong>Step 2: Compute pooled estimates of within subject
+errors</strong></p>
 <p><span class="math display">\[
 s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
 \]</span></p>
@@ -289,17 +387,21 @@ m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
 \]</span></p>
 <p><span class="math display">\[
 m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
-\]</span> <strong>Step 4: Compute the variance of the differences</strong></p>
+\]</span> <strong>Step 4: Compute the variance of the
+differences</strong></p>
 <p><span class="math display">\[
-s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
+s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} +
+(1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
 \]</span> <strong>Step 5: Compute MOVER Components</strong></p>
 <p><span class="math display">\[
 S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
 \]</span></p>
 <p><span class="math display">\[
-S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
+S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha,
+N_x-n)}}) \cdot s^2_{xw}
 \]</span> <span class="math display">\[
-S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
+S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha,
+N_y-n)}}) \cdot s^2_{yw}
 \]</span></p>
 <p><span class="math display">\[
 S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
@@ -310,10 +412,12 @@ l = s_d^2 - S_1
 u = s_d^2 + S_1
 \]</span></p>
 <p><span class="math display">\[
-LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
+\cdot(\sqrt{u} - \sqrt{s^2_d})^2}
 \]</span></p>
 <p><span class="math display">\[
-RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
+RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
+\cdot(\sqrt{l} - \sqrt{s^2_d})^2}
 \]</span> ### LoA</p>
 <p><span class="math display">\[
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
@@ -357,15 +461,18 @@ Upper \space CI = LoA_{upper} + LME
 \]</span></p>
 <p><span class="math display">\[
 s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
-\]</span> <strong>Step 2: Compute pooled estimate of within subject error</strong></p>
+\]</span> <strong>Step 2: Compute pooled estimate of within subject
+error</strong></p>
 <p><span class="math display">\[
 s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
 \]</span></p>
-<p><strong>Step 3: Compute pooled estimate of between subject error</strong></p>
+<p><strong>Step 3: Compute pooled estimate of between subject
+error</strong></p>
 <p><span class="math display">\[
 s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
 \]</span></p>
-<p><strong>Step 4: Compute the harmonic mean of the replicate size</strong></p>
+<p><strong>Step 4: Compute the harmonic mean of the replicate
+size</strong></p>
 <p><span class="math display">\[
 m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 \]</span></p>
@@ -374,15 +481,21 @@ m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
 \]</span> <strong>Step 6: Calculate l and u</strong></p>
 <p><span class="math display">\[
-l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
+l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
+n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
+N-n)}})]^2}
 \]</span> <span class="math display">\[
-u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
+u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
+n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
+N-n)}})]^2}
 \]</span> <strong>Step 7: Compute LME and RME</strong></p>
 <p><span class="math display">\[
-LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
+LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
+(\sqrt{u}-\sqrt{s^2_d} )^2}
 \]</span></p>
 <p><span class="math display">\[
-RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
+RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
+(\sqrt{l}-\sqrt{s^2_d} )^2}
 \]</span></p>
 </div>
 <div class="section level4">
@@ -419,15 +532,23 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level3">
 <h3 id="ccc-from-u-statistics">CCC from U-statistics<a class="anchor" aria-label="anchor" href="#ccc-from-u-statistics"></a>
 </h3>
-<p>The CCC calculations are derived from the <code>cccUst</code> function of the <code>cccrm</code> R package. The mathematics for this CCC calculation can be found in the work of <span class="citation"><a href="#ref-king2007" role="doc-biblioref">King, Chinchilli, and Carrasco</a> (<a href="#ref-king2007" role="doc-biblioref">2007</a>)</span> and <span class="citation"><a href="#ref-carrasco2009" role="doc-biblioref">Carrasco, King, and Chinchilli</a> (<a href="#ref-carrasco2009" role="doc-biblioref">2009</a>)</span>.</p>
+<p>The CCC calculations are derived from the <code>cccUst</code>
+function of the <code>cccrm</code> R package. The mathematics for this
+CCC calculation can be found in the work of <span class="citation">King,
+Chinchilli, and Carrasco (<a href="#ref-king2007" role="doc-biblioref">2007</a>)</span> and <span class="citation">Carrasco, King, and Chinchilli (<a href="#ref-carrasco2009" role="doc-biblioref">2009</a>)</span>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="checking-assumptions">Checking Assumptions<a class="anchor" aria-label="anchor" href="#checking-assumptions"></a>
 </h2>
-<p>The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the <code>check</code> method.</p>
-<p>The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and residuals plot.</p>
-<p>All 3 plots will have a statistical test in the bottom right corner. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot.</p>
+<p>The assumptions of normality, heteroscedasticity, and proportional
+bias can all be checked using the <code>check</code> method.</p>
+<p>The function will provide 3 plots: Q-Q normality plot, standardized
+residuals plot, and residuals plot.</p>
+<p>All 3 plots will have a statistical test in the bottom right corner.
+The Shapiro-Wilk test is included for the normality plot, the
+Bagan-Preusch test for heterogeneity, and the test for linear slope on
+the residuals plot.</p>
 <div class="section level3">
 <h3 id="an-example">An Example<a class="anchor" aria-label="anchor" href="#an-example"></a>
 </h3>
@@ -443,8 +564,19 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level2">
 <h2 id="proportional-bias">Proportional Bias<a class="anchor" aria-label="anchor" href="#proportional-bias"></a>
 </h2>
-<p>As the check plots for <code>a1</code> show, proportional bias can sometimes occur. In these cases <span class="citation"><a href="#ref-bland1999" role="doc-biblioref">Bland and Altman</a> (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span> recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).</p>
-<p>For any of the “agree” functions, this can be accomplished with the <code>prop_bias</code> argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots of the data should always be inspected</p>
+<p>As the check plots for <code>a1</code> show, proportional bias can
+sometimes occur. In these cases <span class="citation">Bland and Altman
+(<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>
+recommended adjusting the bias and LoA for the proportional bias. This
+is simply done by include a slope for the average of both measurements
+(i.e, using an intercept + slope model rather than intercept only
+model).</p>
+<p>For any of the “agree” functions, this can be accomplished with the
+<code>prop_bias</code> argument. When this is set to TRUE, then the
+proportional bias adjusted model is utilized. However, you should be
+careful with interpreting the hypothesis tests in these cases because
+the results are likely bogus for the extreme ends of the measurement. In
+any case, plots of the data should always be inspected</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
                 y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
@@ -474,14 +606,28 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level2">
 <h2 id="non-parametric-alternatives">Non-parametric Alternatives<a class="anchor" aria-label="anchor" href="#non-parametric-alternatives"></a>
 </h2>
-<p>When the assumptions of any of the tests above are violated then a non-parametric alternative may be useful. The <code>agree_np</code> function is the non-parametric alternative for the <code>SimpleAgree</code> R package, and is largely based on the recommendations of Bland &amp; Altman <span class="citation">(<a href="#ref-bland1999" role="doc-biblioref">Bland and Altman 1999</a>, pg. 157)</span>.</p>
+<p>When the assumptions of any of the tests above are violated then a
+non-parametric alternative may be useful. The <code>agree_np</code>
+function is the non-parametric alternative for the
+<code>SimpleAgree</code> R package, and is largely based on the
+recommendations of Bland &amp; Altman <span class="citation">(<a href="#ref-bland1999" role="doc-biblioref">Bland and Altman 1999</a>,
+pg. 157)</span>.</p>
 <p>The function performs two tests:</p>
 <ol style="list-style-type: decimal">
-<li>A binomial test on whether or not the observed differences are within the maximal allowable differences bounds (<code>delta</code> argument).</li>
-<li>Quantile regression, derived from the <code>quantreg</code> package <span class="citation">(<a href="#ref-quantreg" role="doc-biblioref">Koenker 2020</a>)</span>, two estimate the median and 95% limits of agreement. If the default agreement levels are used (<code>agree.level = .95</code>) then the 0.025, 0.5 (median), and 0.975 quantiles are estimated.</li>
+<li>A binomial test on whether or not the observed differences are
+within the maximal allowable differences bounds (<code>delta</code>
+argument).</li>
+<li>Quantile regression, derived from the <code>quantreg</code> package
+<span class="citation">(<a href="#ref-quantreg" role="doc-biblioref">Koenker 2020</a>)</span>, two estimate the median
+and 95% limits of agreement. If the default agreement levels are used
+(<code>agree.level = .95</code>) then the 0.025, 0.5 (median), and 0.975
+quantiles are estimated.</li>
 </ol>
-<p>The function also <em>requires</em> the <code>delta</code> argument (otherwise the binomial test would be useless). Otherwise, it functions just like the other agreement functions.</p>
-<p>In the code demo below, you will notice that the limits of agreement are no longer symmetric around the bias estimate.</p>
+<p>The function also <em>requires</em> the <code>delta</code> argument
+(otherwise the binomial test would be useless). Otherwise, it functions
+just like the other agreement functions.</p>
+<p>In the code demo below, you will notice that the limits of agreement
+are no longer symmetric around the bias estimate.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
               y <span class="op">=</span> <span class="st">"y"</span>,
@@ -489,6 +635,9 @@ Upper \space CI = LoA_{upper} + LME
               delta <span class="op">=</span> <span class="fl">2</span>,
               prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
               agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; Warning in tau &lt; 0 || tau &gt; 1: 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'</span>
+
+<span class="co">#&gt; Warning in tau &lt; 0 || tau &gt; 1: 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'</span>
 <span class="co">#&gt; Warning in agree_np(x = "x", y = "y", data = reps, delta = 2, prop_bias =</span>
 <span class="co">#&gt; FALSE, : Evidence of proportional bias. Consider setting prop_bias to TRUE.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
@@ -501,13 +650,15 @@ Upper \space CI = LoA_{upper} + LME
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA    -0.89  -1.3500  -0.4300     0.90</span>
-<span class="co">#&gt; Bias          0.04  -0.5561   0.6361     0.95</span>
-<span class="co">#&gt; Upper LoA     2.45   1.3658   3.5342     0.90</span>
+<span class="co">#&gt; Lower LoA    -0.89   -1.332  -0.4479     0.90</span>
+<span class="co">#&gt; Bias          0.04   -0.624   0.7040     0.95</span>
+<span class="co">#&gt; Upper LoA     2.45    1.355   3.5453     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<p>We can also perform the same analysis with proportional bias no longer assumed. You can see that the LoA changes but the test for agreement does not.</p>
+<p>We can also perform the same analysis with proportional bias no
+longer assumed. You can see that the LoA changes but the test for
+agreement does not.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
               y <span class="op">=</span> <span class="st">"y"</span>,
@@ -525,15 +676,15 @@ Upper \space CI = LoA_{upper} + LME
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7403  -0.8392     0.90</span>
-<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6509  -0.2578     0.90</span>
-<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5811   1.2072     0.90</span>
-<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3238  -0.1373     0.95</span>
-<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.5353   0.3905     0.95</span>
-<span class="co">#&gt; Bias @ 7.4        0.99000  -0.1362   2.1162     0.95</span>
-<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.8497   2.0835     0.90</span>
-<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.9320   3.0894     0.90</span>
-<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.3310   9.4186     0.90</span>
+<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7414  -0.8381     0.90</span>
+<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6460  -0.2627     0.90</span>
+<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5888   1.1995     0.90</span>
+<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3281  -0.1329     0.95</span>
+<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6106   0.4659     0.95</span>
+<span class="co">#&gt; Bias @ 7.4        0.99000  -0.4865   2.4665     0.95</span>
+<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.6674   1.9012     0.90</span>
+<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.9411   3.0803     0.90</span>
+<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.3806   9.3691     0.90</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
@@ -541,7 +692,10 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level2">
 <h2 id="big-data">“Big” Data<a class="anchor" aria-label="anchor" href="#big-data"></a>
 </h2>
-<p>Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the <code>geom_point</code> argument.</p>
+<p>Sometimes there may be a lot of data and individual points of data on
+Bland-Altman plot may be less than ideal. In order to change the plots
+from showing the individual data points we can modify the
+<code>geom_point</code> argument.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span>
 <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>
@@ -582,8 +736,23 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level2">
 <h2 id="mixed-models">Mixed Models<a class="anchor" aria-label="anchor" href="#mixed-models"></a>
 </h2>
-<p>In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the “recpre_long” data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.</p>
-<p>The <code>loa_mixed</code> function can then calculate the limits of agreement. Like the previous functions, the data set must be set with the <code>data</code> argument. The <code>diff</code> is the column which contains the difference between the two measurements. The <code>condition</code> is the column that indicates the different conditions that the measurements were taken within. The <code>id</code> is the column containing the subject/participant identifier. The final two arguments <code>replicates</code> and <code>type</code> set the requirements for the bootstrapping procedure. <strong>Warning</strong>: This is a computationally heavy procedure and may take a few minutes to complete. An example code can be seen below.</p>
+<p>In some cases, the agreement calculations involve comparing two
+methods within individuals within varying conditions. For example, the
+“recpre_long” data set within this package contains two measurements of
+rectal temperature in 3 different conditions (where there is a fixed
+effect of condition). For this particular case we can use bootstrapping
+to estimate the limits of agreement.</p>
+<p>The <code>loa_mixed</code> function can then calculate the limits of
+agreement. Like the previous functions, the data set must be set with
+the <code>data</code> argument. The <code>diff</code> is the column
+which contains the difference between the two measurements. The
+<code>condition</code> is the column that indicates the different
+conditions that the measurements were taken within. The <code>id</code>
+is the column containing the subject/participant identifier. The final
+two arguments <code>replicates</code> and <code>type</code> set the
+requirements for the bootstrapping procedure. <strong>Warning</strong>:
+This is a computationally heavy procedure and may take a few minutes to
+complete. An example code can be seen below.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">recpre_long</span><span class="op">$</span><span class="va">avg</span> <span class="op">=</span> <span class="op">(</span><span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span> <span class="op">+</span> <span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span>
@@ -599,8 +768,22 @@ Upper \space CI = LoA_{upper} + LME
 <div class="section level2">
 <h2 id="power-analysis-for-agreement">Power Analysis for Agreement<a class="anchor" aria-label="anchor" href="#power-analysis-for-agreement"></a>
 </h2>
-<p>There are surprisingly few resources for planning a study that attempts to quantify agreement between two methods. Therefore, we have added one function, with hopefully more in the future, to aid in the power analysis for simple agreement studies. The current function is <code>blandPowerCurve</code> which constructs a “curve” of power across sample sizes, agreement levels, and confidence levels. This is based on the work of <span class="citation"><a href="#ref-lu2016" role="doc-biblioref">Lu et al.</a> (<a href="#ref-lu2016" role="doc-biblioref">2016</a>)</span>.</p>
-<p>For this function the user must define the hypothesized limits of agreement (<code>delta</code>), mean difference between methods (<code>mu</code>), and the standard deviation of the difference scores (<code>SD</code>). There is also the option of adjusting the range of sample size (default: <code>seq(10,100,1)</code> which is 10 to 100 by 1), the agreement level (default is 95%), and confidence level (default is 95%). The function then produces a data frame of the results. A quick look at the head and we can see that we have low statistical power when the sample size is at the lower end of the range.</p>
+<p>There are surprisingly few resources for planning a study that
+attempts to quantify agreement between two methods. Therefore, we have
+added one function, with hopefully more in the future, to aid in the
+power analysis for simple agreement studies. The current function is
+<code>blandPowerCurve</code> which constructs a “curve” of power across
+sample sizes, agreement levels, and confidence levels. This is based on
+the work of <span class="citation">Lu et al. (<a href="#ref-lu2016" role="doc-biblioref">2016</a>)</span>.</p>
+<p>For this function the user must define the hypothesized limits of
+agreement (<code>delta</code>), mean difference between methods
+(<code>mu</code>), and the standard deviation of the difference scores
+(<code>SD</code>). There is also the option of adjusting the range of
+sample size (default: <code>seq(10,100,1)</code> which is 10 to 100 by
+1), the agreement level (default is 95%), and confidence level (default
+is 95%). The function then produces a data frame of the results. A quick
+look at the head and we can see that we have low statistical power when
+the sample size is at the lower end of the range.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">power_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blandPowerCurve.html">blandPowerCurve</a></span><span class="op">(</span>
   samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,
@@ -619,7 +802,9 @@ Upper \space CI = LoA_{upper} + LME
 <span class="co">#&gt; 4 13 0.5 2.5     6 0.6802613         0.8        0.9</span>
 <span class="co">#&gt; 5 14 0.5 2.5     6 0.7260286         0.8        0.9</span>
 <span class="co">#&gt; 6 15 0.5 2.5     6 0.7649104         0.8        0.9</span></code></pre></div>
-<p>We can then find the sample size at which (or closest to which) a desired power level with the <code>find_n</code> method for <code>powerCurve</code> objects created with the function above.</p>
+<p>We can then find the sample size at which (or closest to which) a
+desired power level with the <code>find_n</code> method for
+<code>powerCurve</code> objects created with the function above.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">power_res</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
 <span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 5</span></span>
@@ -633,7 +818,9 @@ Upper \space CI = LoA_{upper} + LME
 <span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     7       0.9          0.9 0.800    19</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7       0.95         0.8 0.775    11</span>
 <span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     7       0.95         0.9 0.806    24</span></code></pre></div>
-<p>Additionally we can plot the power curve to see how power changes over different levels of <code>delta</code>, <code>agree.level</code>, and <code>conf.level</code></p>
+<p>Additionally we can plot the power curve to see how power changes
+over different levels of <code>delta</code>, <code>agree.level</code>,
+and <code>conf.level</code></p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-1.png" width="576"></p>
@@ -643,31 +830,50 @@ Upper \space CI = LoA_{upper} + LME
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bland1986" class="csl-entry">
-Bland, J Martin, and Douglas G Altman. 1986. <span>“Statistical Methods for Assessing Agreement Between Two Methods of Clinical Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8" class="external-link">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.
+Bland, J Martin, and Douglas G Altman. 1986. <span>“Statistical Methods
+for Assessing Agreement Between Two Methods of Clinical
+Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8" class="external-link">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.
 </div>
 <div id="ref-bland1999" class="csl-entry">
-———. 1999. <span>“Measuring Agreement in Method Comparison Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
+———. 1999. <span>“Measuring Agreement in Method Comparison
+Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2):
+135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
 </div>
 <div id="ref-carrasco2009" class="csl-entry">
-Carrasco, Josep L, Tonya S King, and Vernon M Chinchilli. 2009. <span>“The Concordance Correlation Coefficient for Repeated Measures Estimated by Variance Components.”</span> <em>Journal of Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890" class="external-link">https://doi.org/10.1080/10543400802527890</a>.
+Carrasco, Josep L, Tonya S King, and Vernon M Chinchilli. 2009.
+<span>“The Concordance Correlation Coefficient for Repeated Measures
+Estimated by Variance Components.”</span> <em>Journal of
+Biopharmaceutical Statistics</em> 19 (1): 90–105. <a href="https://doi.org/10.1080/10543400802527890" class="external-link">https://doi.org/10.1080/10543400802527890</a>.
 </div>
 <div id="ref-king2007" class="csl-entry">
-King, Tonya S, Vernon M Chinchilli, and Josep L Carrasco. 2007. <span>“A Repeated Measures Concordance Correlation Coefficient.”</span> <em>Statistics in Medicine</em> 26 (16): 3095–3113. <a href="https://doi.org/10.1002/sim.2778" class="external-link">https://doi.org/10.1002/sim.2778</a>.
+King, Tonya S, Vernon M Chinchilli, and Josep L Carrasco. 2007. <span>“A
+Repeated Measures Concordance Correlation Coefficient.”</span>
+<em>Statistics in Medicine</em> 26 (16): 3095–3113. <a href="https://doi.org/10.1002/sim.2778" class="external-link">https://doi.org/10.1002/sim.2778</a>.
 </div>
 <div id="ref-quantreg" class="csl-entry">
 Koenker, Roger. 2020. <em>Quantreg: Quantile Regression</em>. <a href="https://CRAN.R-project.org/package=quantreg" class="external-link">https://CRAN.R-project.org/package=quantreg</a>.
 </div>
 <div id="ref-lin1989" class="csl-entry">
-Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051" class="external-link">https://doi.org/10.2307/2532051</a>.
+Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient
+to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051" class="external-link">https://doi.org/10.2307/2532051</a>.
 </div>
 <div id="ref-lu2016" class="csl-entry">
-Lu, Meng-Jie, Wei-Hua Zhong, Yu-Xiu Liu, Hua-Zhang Miao, Yong-Chang Li, and Mu-Huo Ji. 2016. <span>“Sample Size for Assessing Agreement Between Two Methods of Measurement by Bland-Altman Method.”</span> <em>The International Journal of Biostatistics</em> 12 (2). <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link">https://doi.org/10.1515/ijb-2015-0039</a>.
+Lu, Meng-Jie, Wei-Hua Zhong, Yu-Xiu Liu, Hua-Zhang Miao, Yong-Chang Li,
+and Mu-Huo Ji. 2016. <span>“Sample Size for Assessing Agreement Between
+Two Methods of Measurement by Bland-Altman Method.”</span> <em>The
+International Journal of Biostatistics</em> 12 (2). <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link">https://doi.org/10.1515/ijb-2015-0039</a>.
 </div>
 <div id="ref-shieh2019" class="csl-entry">
-Shieh, Gwowen. 2019. <span>“Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation.”</span> <em>Statistics in Biopharmaceutical Research</em> 12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495" class="external-link">https://doi.org/10.1080/19466315.2019.1677495</a>.
+Shieh, Gwowen. 2019. <span>“Assessing Agreement Between Two Methods of
+Quantitative Measurements: Exact Test Procedure and Sample Size
+Calculation.”</span> <em>Statistics in Biopharmaceutical Research</em>
+12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495" class="external-link">https://doi.org/10.1080/19466315.2019.1677495</a>.
 </div>
 <div id="ref-zou2011" class="csl-entry">
-Zou, GY. 2011. <span>“Confidence Interval Estimation for the Bland<span><span></span></span>altman Limits of Agreement with Multiple Observations Per Individual.”</span> <em>Statistical Methods in Medical Research</em> 22 (6): 630–42. <a href="https://doi.org/10.1177/0962280211402548" class="external-link">https://doi.org/10.1177/0962280211402548</a>.
+Zou, GY. 2011. <span>“Confidence Interval Estimation for the
+Bland<span></span>altman Limits of Agreement with Multiple Observations
+Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
+22 (6): 630–42. <a href="https://doi.org/10.1177/0962280211402548" class="external-link">https://doi.org/10.1177/0962280211402548</a>.
 </div>
 </div>
 </div>
@@ -690,7 +896,7 @@ Zou, GY. 2011. <span>“Confidence Interval Estimation for the Bland<span><span>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>

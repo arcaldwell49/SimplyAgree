@@ -81,9 +81,10 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Deming Regression</h1>
-                        <h4 data-toc-skip class="author">Aaron R. Caldwell</h4>
+                        <h4 data-toc-skip class="author">Aaron R.
+Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-05-10</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-05-12</h4>
       
       
       <div class="hidden name"><code>Deming.Rmd</code></div>
@@ -95,8 +96,18 @@
 <div class="section level2">
 <h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
 </h2>
-<p>Error-in-variables (EIV) models are useful tools to account for measurement error in the independent variable. For studies of agreement, this is particularly useful where there are paired measurements of the paired measurements (X &amp; Y) of the same underlying value (e.g., two assays of the same analyte).</p>
-<p>Deming regression is one of the simplest forms of of EIV models promoted by <a href="https://en.wikipedia.org/wiki/W._Edwards_Deming" class="external-link">W. Edwards Deming</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The first to detail the method were <span class="citation"><a href="#ref-adcock1878" role="doc-biblioref">Adcock</a> (<a href="#ref-adcock1878" role="doc-biblioref">1878</a>)</span> followed by <span class="citation"><a href="#ref-kummell1879" role="doc-biblioref">Kummell</a> (<a href="#ref-kummell1879" role="doc-biblioref">1879</a>)</span> and <span class="citation"><a href="#ref-koopmans1936" role="doc-biblioref">Koopmans</a> (<a href="#ref-koopmans1936" role="doc-biblioref">1936</a>)</span>. The name comes from the popularity of Deming’s book <span class="citation">(<a href="#ref-deming1943" role="doc-biblioref">Deming 1943</a>)</span>, and within the field of clinical chemistry, the procedure was simply referred to as “Deming regression” (e.g., <span class="citation"><a href="#ref-linnet1990" role="doc-biblioref">Linnet</a> (<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>)</p>
+<p>Error-in-variables (EIV) models are useful tools to account for
+measurement error in the independent variable. For studies of agreement,
+this is particularly useful where there are paired measurements of the
+paired measurements (X &amp; Y) of the same underlying value (e.g., two
+assays of the same analyte).</p>
+<p>Deming regression is one of the simplest forms of of EIV models
+promoted by <a href="https://en.wikipedia.org/wiki/W._Edwards_Deming" class="external-link">W.
+Edwards Deming</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The first to detail the method were <span class="citation">Adcock (<a href="#ref-adcock1878" role="doc-biblioref">1878</a>)</span> followed by <span class="citation">Kummell (<a href="#ref-kummell1879" role="doc-biblioref">1879</a>)</span> and <span class="citation">Koopmans (<a href="#ref-koopmans1936" role="doc-biblioref">1936</a>)</span>. The name comes from the
+popularity of Deming’s book <span class="citation">(<a href="#ref-deming1943" role="doc-biblioref">Deming 1943</a>)</span>, and
+within the field of clinical chemistry, the procedure was simply
+referred to as “Deming regression” (e.g., <span class="citation">Linnet
+(<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>)</p>
 </div>
 <div class="section level2">
 <h2 id="code-demostration">Code Demostration<a class="anchor" aria-label="anchor" href="#code-demostration"></a>
@@ -107,15 +118,15 @@
 <p>We can start by creating some fake data to work with.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-<span class="co">#&gt; Warning in .recacheSubclasses(def@className, def, env): undefined subclass</span>
-<span class="co">#&gt; "numericVector" of class "Mnumeric"; definition not updated</span>
 
 <span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">8.3</span>, <span class="fl">10.5</span>, <span class="fl">9</span>, <span class="fl">5.1</span>, <span class="fl">8.2</span>, <span class="fl">10.2</span>, <span class="fl">10.3</span>, <span class="fl">7.1</span>, <span class="fl">5.9</span><span class="op">)</span>,
   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
-<p>Also, we will assume, based on historical data, that the measurement error ratio is equal to 4.</p>
-<p>The data can be run through the <code>dem_reg</code> function and the results printed.</p>
+<p>Also, we will assume, based on historical data, that the measurement
+error ratio is equal to 4.</p>
+<p>The data can be run through the <code>dem_reg</code> function and the
+results printed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem1</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
                y <span class="op">=</span> <span class="st">"y"</span>,
@@ -131,7 +142,10 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<p>The assumptions of the Deming regression model, primarily normality and homogeneity of variance, can then be check with the <code>check</code> method for Deming regression results. Both plots appear to be fine with regards to the assumptions.</p>
+<p>The assumptions of the Deming regression model, primarily normality
+and homogeneity of variance, can then be check with the
+<code>check</code> method for Deming regression results. Both plots
+appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span>
 <span class="co">#&gt; $p_norm</span></code></pre></div>
@@ -143,7 +157,8 @@
 <div class="section level3">
 <h3 id="weighted-deming-regression">Weighted Deming Regression<a class="anchor" aria-label="anchor" href="#weighted-deming-regression"></a>
 </h3>
-<p>For this example, I will rely upon the “ferritin” data from the <code>deming</code> R package.</p>
+<p>For this example, I will rely upon the “ferritin” data from the
+<code>deming</code> R package.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span>
@@ -156,7 +171,9 @@
 <span class="co">#&gt; 4  4      1      13      11</span>
 <span class="co">#&gt; 5  5      1      13      12</span>
 <span class="co">#&gt; 6  6      1      15      13</span></code></pre></div>
-<p>Let me demonstrate the problem with using simple Deming regression when the weights are helpful. When we look at the two plots below, we can see there is severe problem with using the “un-weighted” model.</p>
+<p>Let me demonstrate the problem with using simple Deming regression
+when the weights are helpful. When we look at the two plots below, we
+can see there is severe problem with using the “un-weighted” model.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="st">"new.lot"</span>,
@@ -176,7 +193,8 @@
 <pre><code><span class="co">#&gt; </span>
 <span class="co">#&gt; $p_het</span></code></pre>
 <p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" width="700"></p>
-<p>Now, let us see what happens when <code>weighted</code> is set to TRUE.</p>
+<p>Now, let us see what happens when <code>weighted</code> is set to
+TRUE.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="st">"new.lot"</span>,
@@ -205,13 +223,15 @@
 <div class="section level2">
 <h2 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h2>
-<p>Deming regression assumes paired measures (<span class="math inline">\(x_i, \space y_i\)</span>) are each measured with error.</p>
+<p>Deming regression assumes paired measures (<span class="math inline">\(x_i, \space y_i\)</span>) are each measured with
+error.</p>
 <p><span class="math display">\[
 x_i = X_i + \epsilon_i
 \]</span></p>
 <p><span class="math display">\[
 y_i = Y_i + \delta_i
-\]</span> We can then measure the relationship between the two variables with the following model.</p>
+\]</span> We can then measure the relationship between the two variables
+with the following model.</p>
 <p><span class="math display">\[
 \hat Y_i = \beta_0 + \beta_1 \cdot \hat X_i
 \]</span> Traditionally there are 2 null hypotheses</p>
@@ -226,9 +246,16 @@ H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 </h3>
 <p>A deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant.</p>
 <p><span class="math display">\[
-\lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta} 
-\]</span> In <code>SimplyAgree</code>, the error ratio can be set with the <code>error.ratio</code> argument. It defaults to 1, but can be changed by the user. If replicate measures are taken, then the user can use the <code>id</code> argument to indicate which measures belong to which subject/participant. The measurement error, and the error ratio, will then be estimated from the data itself.</p>
-<p>If the data was not measured in replicate then the error ratio (<span class="math inline">\(\lambda\)</span>) can be estimated from the coefficient of variation (if that data is available) and the mean of x and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
+\lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta}
+\]</span> In <code>SimplyAgree</code>, the error ratio can be set with
+the <code>error.ratio</code> argument. It defaults to 1, but can be
+changed by the user. If replicate measures are taken, then the user can
+use the <code>id</code> argument to indicate which measures belong to
+which subject/participant. The measurement error, and the error ratio,
+will then be estimated from the data itself.</p>
+<p>If the data was not measured in replicate then the error ratio (<span class="math inline">\(\lambda\)</span>) can be estimated from the
+coefficient of variation (if that data is available) and the mean of x
+and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
 <p><span class="math display">\[
 \lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2}
 \]</span></p>
@@ -236,37 +263,52 @@ H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 <div class="section level3">
 <h3 id="weights">Weights<a class="anchor" aria-label="anchor" href="#weights"></a>
 </h3>
-<p>In some cases the variance of X and Y may increase proportional to the true value of the measure. In these cases, it may be prudent to use “weighted” Deming regression models. The weights used in <code>SimplyAgree</code> are the same as those suggested by <span class="citation"><a href="#ref-linnet1993" role="doc-biblioref">Linnet</a> (<a href="#ref-linnet1993" role="doc-biblioref">1993</a>)</span>.</p>
+<p>In some cases the variance of X and Y may increase proportional to
+the true value of the measure. In these cases, it may be prudent to use
+“weighted” Deming regression models. The weights used in
+<code>SimplyAgree</code> are the same as those suggested by <span class="citation">Linnet (<a href="#ref-linnet1993" role="doc-biblioref">1993</a>)</span>.</p>
 <p><span class="math display">\[
 \hat w_i = \frac{1}{ [ \frac{x_i + \lambda \cdot y_i}{1 + \lambda}]^2}
 \]</span></p>
-<p>Weights can also be provided through the <code>weights</code> argument. If weighted Deming regression is not selected (<code>weighted = FALSE</code>), the weights for each observation is equal to 1.</p>
-<p>The estimated mean of X and Y are then estimated as the following.</p>
+<p>Weights can also be provided through the <code>weights</code>
+argument. If weighted Deming regression is not selected
+(<code>weighted = FALSE</code>), the weights for each observation is
+equal to 1.</p>
+<p>The estimated mean of X and Y are then estimated as the
+following.</p>
 <p><span class="math display">\[
-\bar x_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot x_i}{\Sigma^{N}_{i=1} \hat w_i}
+\bar x_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot x_i}{\Sigma^{N}_{i=1}
+\hat w_i}
 \]</span></p>
 <p><span class="math display">\[
-\bar y_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot y_i}{\Sigma^{N}_{i=1} \hat w_i}
+\bar y_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot y_i}{\Sigma^{N}_{i=1}
+\hat w_i}
 \]</span></p>
 </div>
 <div class="section level3">
 <h3 id="estimating-the-slope-and-interept">Estimating the Slope and Interept<a class="anchor" aria-label="anchor" href="#estimating-the-slope-and-interept"></a>
 </h3>
-<p>First, there are 3 components (<span class="math inline">\(v_x, \space v_y, \space cov_{xy}\)</span>)</p>
+<p>First, there are 3 components (<span class="math inline">\(v_x,
+\space v_y, \space cov_{xy}\)</span>)</p>
 <p><span class="math display">\[
 v_x = \Sigma_{i=1}^N \space \hat w_i \cdot (x_i- \bar x_w)^2
 \]</span> <span class="math display">\[
 v_y = \Sigma_{i=1}^N \space \hat w_i \cdot (y_i- \bar y_w)^2
 \]</span> <span class="math display">\[
-cov_{xy} = \Sigma_{i=1}^N \space \hat w_i \cdot  (x_i- \bar x_w) \cdot (y_i- \bar y_w)
+cov_{xy} = \Sigma_{i=1}^N \space \hat w_i \cdot  (x_i- \bar x_w) \cdot
+(y_i- \bar y_w)
 \]</span></p>
-<p>The slope (<span class="math inline">\(b_1\)</span>) can then be estimated with the following equation.</p>
+<p>The slope (<span class="math inline">\(b_1\)</span>) can then be
+estimated with the following equation.</p>
 <p><span class="math display">\[
-b_1 = \frac{(\lambda \cdot v_y - v_x) + \sqrt{(v_x-\lambda \cdot v_y)^2 + 4 \cdot \lambda \cdot cov_{xy}^2}}{2 \cdot \lambda \cdot cov_{xy}}
-\]</span> The intercept (<span class="math inline">\(b_0\)</span>) can then be estimated with the following equation.</p>
+b_1 = \frac{(\lambda \cdot v_y - v_x) + \sqrt{(v_x-\lambda \cdot v_y)^2
++ 4 \cdot \lambda \cdot cov_{xy}^2}}{2 \cdot \lambda \cdot cov_{xy}}
+\]</span> The intercept (<span class="math inline">\(b_0\)</span>) can
+then be estimated with the following equation.</p>
 <p><span class="math display">\[
 b_0 = \bar y_w - b_1 \cdot \bar x_w
-\]</span> The standard errors of b1 and b0 are both estimated using a jackknife method (detailed by <span class="citation"><a href="#ref-linnet1990" role="doc-biblioref">Linnet</a> (<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>).</p>
+\]</span> The standard errors of b1 and b0 are both estimated using a
+jackknife method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>).</p>
 </div>
 </div>
 <div class="section level2">
@@ -274,29 +316,39 @@ b_0 = \bar y_w - b_1 \cdot \bar x_w
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-adcock1878" class="csl-entry">
-Adcock, R J. 1878. <span>“A Problem in Least Squares.”</span> <em>The Analyst</em> 5 (2): 53. <a href="https://doi.org/10.2307/2635758" class="external-link">https://doi.org/10.2307/2635758</a>.
+Adcock, R J. 1878. <span>“A Problem in Least Squares.”</span> <em>The
+Analyst</em> 5 (2): 53. <a href="https://doi.org/10.2307/2635758" class="external-link">https://doi.org/10.2307/2635758</a>.
 </div>
 <div id="ref-deming1943" class="csl-entry">
 Deming, W E. 1943. <em>Statistical Adjustment of Data</em>. Wiley.
 </div>
 <div id="ref-koopmans1936" class="csl-entry">
-Koopmans, Tjalling Charles. 1936. <em>Linear Regression Analysis of Economic Time Series</em>. Vol. 20. DeErven F. Bohn, Haarlem, Netherlands.
+Koopmans, Tjalling Charles. 1936. <em>Linear Regression Analysis of
+Economic Time Series</em>. Vol. 20. DeErven F. Bohn, Haarlem,
+Netherlands.
 </div>
 <div id="ref-kummell1879" class="csl-entry">
-Kummell, C H. 1879. <span>“Reduction of Observation Equations Which Contain More Than One Observed Quantity.”</span> <em>The Analyst</em> 6 (4): 97. <a href="https://doi.org/10.2307/2635646" class="external-link">https://doi.org/10.2307/2635646</a>.
+Kummell, C H. 1879. <span>“Reduction of Observation Equations Which
+Contain More Than One Observed Quantity.”</span> <em>The Analyst</em> 6
+(4): 97. <a href="https://doi.org/10.2307/2635646" class="external-link">https://doi.org/10.2307/2635646</a>.
 </div>
 <div id="ref-linnet1990" class="csl-entry">
-Linnet, Kristian. 1990. <span>“Estimation of the Linear Relationship Between the Measurements of Two Methods with Proportional Errors.”</span> <em>Statistics in Medicine</em> 9 (12): 1463–73. <a href="https://doi.org/10.1002/sim.4780091210" class="external-link">https://doi.org/10.1002/sim.4780091210</a>.
+Linnet, Kristian. 1990. <span>“Estimation of the Linear Relationship
+Between the Measurements of Two Methods with Proportional
+Errors.”</span> <em>Statistics in Medicine</em> 9 (12): 1463–73. <a href="https://doi.org/10.1002/sim.4780091210" class="external-link">https://doi.org/10.1002/sim.4780091210</a>.
 </div>
 <div id="ref-linnet1993" class="csl-entry">
-———. 1993. <span>“Evaluation of Regression Procedures for Methods Comparison Studies.”</span> <em>Clinical Chemistry</em> 39 (3): 424–32.
+———. 1993. <span>“Evaluation of Regression Procedures for Methods
+Comparison Studies.”</span> <em>Clinical Chemistry</em> 39 (3): 424–32.
 </div>
 </div>
 </div>
-<div class="footnotes">
+<div class="footnotes footnotes-end-of-document">
 <hr>
 <ol>
-<li id="fn1"><p>Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>Deming was a titan of the fields of statistics and
+engineering and I would highly recommend reading some of his academic
+work and books<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
@@ -318,7 +370,7 @@ Linnet, Kristian. 1990. <span>“Estimation of the Linear Relationship Between t
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
