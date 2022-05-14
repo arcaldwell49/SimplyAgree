@@ -207,7 +207,8 @@ reli_stats = function(measure,
       rename(estimate = statistic,
              se = std.error,
              lower.ci = conf.low,
-             upper.ci = conf.high)
+             upper.ci = conf.high) %>%
+      column_to_rownames(var = "term")
   } else{
     SEM = sqrt(MSE)
     sd_tots = sqrt(sum(stats[2,])/(n_id-1))
