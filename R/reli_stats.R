@@ -52,6 +52,7 @@
 #'
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals
 #' @importFrom tidyselect all_of
+#' @importFrom insight get_response
 #' @import dplyr
 #' @import ggplot2
 #' @import lme4
@@ -67,7 +68,8 @@ reli_stats = function(measure,
                       cv_calc = "MSE",
                       conf.level = .95,
                       other_ci = FALSE,
-                      replicates = 500){
+                      type = "perc",
+                      replicates = 1999){
   alpha = 1-conf.level
   x = data
   if(wide == TRUE){
@@ -191,10 +193,21 @@ reli_stats = function(measure,
 
 
   if(other_ci == TRUE){
-  res_other = boot_rel(x.df,
-                       cv_calc = cv_calc,
-                       nboot = replicates,
-                       conf.level = conf.level)
+
+    boot_reli <- function(.) {
+      reli_mod_mse(., cv_calc = cv_calc)
+    }
+
+    boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
+                    type = "parametric", use.u = FALSE)
+    boo2_tab = tidy_boot(boo2,
+                         conf.int = TRUE,
+                         conf.level = conf.level,
+                         conf.method = type) %>%
+      rename(estimate = statistic,
+             se = std.error,
+             lower.ci = conf.low,
+             upper.ci = conf.high)
   } else{
     SEM = sqrt(MSE)
     sd_tots = sqrt(sum(stats[2,])/(n_id-1))
