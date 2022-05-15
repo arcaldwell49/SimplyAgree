@@ -9,17 +9,18 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
 #' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
-#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 500.
+#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
 #' @details
 #'
 #' The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 #' The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
-#'The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+#' The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 #'
 #' @details
 #' This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 #' The estimates of variances for any of the measures are derived from linear mixed models.
 #' The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
+#' When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'

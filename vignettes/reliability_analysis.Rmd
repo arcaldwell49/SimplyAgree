@@ -381,7 +381,7 @@ $$
 
 ## Other Confidence Intervals
 
-If the `other_ci` argument is set to TRUE then nonparametric bootstrapped confidence intervals will be calculated for the CV, SEM, SEP, and SEE. The number of resamples can be set with the replicates argument (default is 499; increase for greater accuracy). The reported confidence intervals are estimated using the percentile method. 
+If the `other_ci` argument is set to TRUE then parametric bootstrapped confidence intervals (using) will be calculated for the CV, SEM, SEP, and SEE. The number of resamples can be set with the replicates argument (default is 1999; increase for greater accuracy or lower for greater speed). The reported confidence intervals are estimated using the percentile method `type = 'perc'`, the normal `type = 'norm'`, or basic methods `type = 'basic'`. 
 
 To ensure reproducibility, please use `set.seed()` when these confidence intervals are calculated.
 
