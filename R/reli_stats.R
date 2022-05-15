@@ -200,7 +200,7 @@ reli_stats = function(measure,
 
     boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
                     type = "parametric", use.u = FALSE)
-    boo2_tab = tidy_boot(boo2,
+    res_other = tidy_boot(boo2,
                          conf.int = TRUE,
                          conf.level = conf.level,
                          conf.method = type) %>%
@@ -227,10 +227,14 @@ reli_stats = function(measure,
     }
 
     cv_out = stddev/mw
-    res_other = list(cv = list(est = cv_out),
-               SEM = list(est = SEM),
-               SEP = list(est = SEP),
-               SEE = list(est = SEE))
+    res_other = data.frame(
+      estimate = c(cv_out, SEM, SEP, SEE),
+      bias = NA,
+      se = NA,
+      lower.ci = NA,
+      upper.ci = NA,
+      row.names = c("cv", "SEM", "SEP", "SEE")
+    )
   }
 
 
@@ -260,10 +264,10 @@ reli_stats = function(measure,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
                  call = call2,
-                 cv = res_other$cv,
-                 SEM = res_other$SEM,
-                 SEE = res_other$SEE,
-                 SEP = res_other$SEP)
+                 cv = res_other["cv",],
+                 SEM = res_other["SEM",],
+                 SEE = res_other["SEE",],
+                 SEP = res_other["SEP",])
 
 
   structure(result,

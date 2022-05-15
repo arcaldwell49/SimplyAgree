@@ -14,7 +14,8 @@ reli_stats(
   cv_calc = "MSE",
   conf.level = 0.95,
   other_ci = FALSE,
-  replicates = 500
+  type = "perc",
+  replicates = 1999
 )
 }
 \arguments{
