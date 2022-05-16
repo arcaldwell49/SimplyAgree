@@ -34,18 +34,31 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                  delta = delta_val,
                                  conf.level = ciWidth,
                                  agree.level = agreeWidth)
+                pr_res = res$call
 
-                pr_res = paste0("Limit of Agreement = ", res$shieh_test$prop0*100, "%",
-                                "\n",
-                                "alpha =", (1-res$conf.level), "|", res$conf.level*100,"% Confidence Interval",
-                                "\n",
-                                "\n",
-                                "Shieh Test of Agreement",
-                                "\n",
-                                "Exact C.I.:"," [",round(res$shieh_test$lower.ci,4),", ",round(res$shieh_test$upper.ci, 4), "]",
-                                "\n",
-                                "\n",
-                                "Hypothesis Test: ",res$shieh_test$h0_test)
+                pr_res2 = paste0(
+                  "Limit of Agreement = ",
+                  res$shieh_test$prop0 * 100,
+                  "%",
+                  "\n",
+                  # "alpha =", (1-res$call$conf.level),   "|",
+                  ciWidth,
+                  "% Confidence Interval",
+                  "\n",
+                  "\n",
+                  "Shieh Test of Agreement",
+                  "\n",
+                  "Exact C.I.:",
+                  " [",
+                  round(res$shieh_test$lower.ci, 4),
+                  ", ",
+                  round(res$shieh_test$upper.ci, 4),
+                  "]",
+                  "\n",
+                  "\n",
+                  "Hypothesis Test: ",
+                  res$shieh_test$h0_test
+                )
 
                 self$results$text$setContent(pr_res)
                 table1 <- self$results$blandtab
@@ -97,12 +110,12 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             plotpr = plot(image$state)+
                 # set transparency
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    panel.background = element_rect(fill = "transparent",colour = NA),
-                    plot.background = element_rect(fill = "transparent",colour = NA)
-                )
+                #theme(
+                #    panel.grid.major = element_blank(),
+                #    panel.grid.minor = element_blank(),
+                #    panel.background = element_rect(fill = "transparent",colour = NA),
+                #    plot.background = element_rect(fill = "transparent",colour = NA)
+                #)
 
 
             print(plotpr)

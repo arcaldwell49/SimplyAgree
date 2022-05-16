@@ -26,15 +26,12 @@ children:
             name: method2
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    stretchFactor: 1
+  - type: Label
+    label: Limits of Agreement Settings
     children:
       - type: LayoutBox
-        cell:
-          column: 0
-          row: 0
-        stretchFactor: 1
+        margin: large
+        style: inline
         children:
           - type: TextBox
             name: ciWidth
@@ -45,15 +42,14 @@ children:
           - type: TextBox
             name: testValue
             format: number
-      - type: LayoutBox
-        cell:
-          column: 1
-          row: 0
-        stretchFactor: 1
-        children:
-          - type: CheckBox
-            name: CCC
-          - type: CheckBox
-            name: plotbland
-          - type: CheckBox
-            name: plotcon
+  - type: CollapseBox
+    label: Output
+    name: dispanel
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: CCC
+      - type: CheckBox
+        name: plotbland
+      - type: CheckBox
+        name: plotcon

@@ -65,16 +65,15 @@ view.layout = ui.extend({
 			]
 		},
 		{
-			type: DefaultControls.LayoutBox,
-			typeName: 'LayoutBox',
-			margin: "large",
-			stretchFactor: 1,
+			type: DefaultControls.Label,
+			typeName: 'Label',
+			label: "Limits of Agreement Settings",
 			controls: [
 				{
 					type: DefaultControls.LayoutBox,
 					typeName: 'LayoutBox',
-					cell: {"column":0,"row":0},
-					stretchFactor: 1,
+					margin: "large",
+					style: "inline",
 					controls: [
 						{
 							type: DefaultControls.TextBox,
@@ -95,29 +94,30 @@ view.layout = ui.extend({
 							format: FormatDef.number
 						}
 					]
+				}
+			]
+		},
+		{
+			type: DefaultControls.CollapseBox,
+			typeName: 'CollapseBox',
+			label: "Output",
+			name: "dispanel",
+			collapsed: false,
+			controls: [
+				{
+					type: DefaultControls.CheckBox,
+					typeName: 'CheckBox',
+					name: "CCC"
 				},
 				{
-					type: DefaultControls.LayoutBox,
-					typeName: 'LayoutBox',
-					cell: {"column":1,"row":0},
-					stretchFactor: 1,
-					controls: [
-						{
-							type: DefaultControls.CheckBox,
-							typeName: 'CheckBox',
-							name: "CCC"
-						},
-						{
-							type: DefaultControls.CheckBox,
-							typeName: 'CheckBox',
-							name: "plotbland"
-						},
-						{
-							type: DefaultControls.CheckBox,
-							typeName: 'CheckBox',
-							name: "plotcon"
-						}
-					]
+					type: DefaultControls.CheckBox,
+					typeName: 'CheckBox',
+					name: "plotbland"
+				},
+				{
+					type: DefaultControls.CheckBox,
+					typeName: 'CheckBox',
+					name: "plotcon"
 				}
 			]
 		}

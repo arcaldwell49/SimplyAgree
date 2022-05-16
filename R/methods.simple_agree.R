@@ -25,9 +25,9 @@
 
 print.simple_agree <- function(x,...){
   conf_TOST = if(x$call$TOST){
-    1-(1-x$call$conf.level)*2
+    1-(1-ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level))*2
   } else {
-    x$call$conf.level
+    ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level)
   }
   LOA = x$loa
   colnames(LOA) = c("Estimate", "Lower CI", "Upper CI", "CI Level")
@@ -53,10 +53,11 @@ print.simple_agree <- function(x,...){
     cat("\n")}
   cat("###- Concordance Correlation Coefficient (CCC) -###")
   cat("\n")
-  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level),
+      "% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
   cat("\n")
   } else if(as.character(x$call[1]) == "agree_reps"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+    cat("Limit of Agreement = ", ifelse(inherits(x$call$agree.level, "name"), get(test1$call$agree.level), test1$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
@@ -75,12 +76,13 @@ print.simple_agree <- function(x,...){
       cat("\n")}
     cat("###- Concordance Correlation Coefficient* (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level),
+        "% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics")
     cat("\n")
   } else if(as.character(x$call[1]) == "agree_nest"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+    cat("Limit of Agreement = ", ifelse(inherits(x$call$agree.level, "name"), get(test1$call$agree.level), test1$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
@@ -99,12 +101,12 @@ print.simple_agree <- function(x,...){
       cat("\n")}
     cat("###- Concordance Correlation Coefficient (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level),"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics; may be biased")
     cat("\n")
   } else if(as.character(x$call[1]) == "agree_np"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+    cat("Limit of Agreement = ", ifelse(inherits(x$call$agree.level, "name"), get(test1$call$agree.level), test1$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
@@ -145,7 +147,7 @@ plot.simple_agree <- function(x, type = 1,
 
   if(type == 1){
     #return(x$bland_alt.plot)
-    if(x$call$prop_bias != TRUE){
+    if(all_of(x$call$prop_bias) != TRUE){
       simple_ba_plot(x,
                      x_name,
                      y_name,

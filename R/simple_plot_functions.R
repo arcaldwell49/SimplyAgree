@@ -85,10 +85,10 @@ simple_ba_plot = function(x,
                        levels = c("Upper LoA", "Bias", "Lower LoA"))
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  conf.level = x$call$conf.level
-  agree.level = x$call$agree.level
-  confq = qnorm(1 - (1 - conf.level) / 2)
-  delta = x$call$delta
+  conf.level = all_of(x$call$conf.level)
+  agree.level = all_of(x$call$agree.level)
+  confq = qnorm(1 - (1 - all_of(x$call$conf.level)) / 2)
+  delta = all_of(x$call$delta)
   #smooth_method = x$smooths$smooth_method
   #smooth_se = x$smooths$smooth_se
   if(geom == "geom_point"){
@@ -143,8 +143,8 @@ simple_ba_plot = function(x,
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
     theme(legend.position = "left")
-  if (!is.null(x$call$delta)){
-    delta = x$call$delta
+  if (!is.null(all_of(x$call$delta))){
+    delta = all_of(x$call$delta)
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
@@ -252,16 +252,17 @@ bias_ba_plot = function(x,
     colnames(df) = c("y","x")
   }
 
-  agree.level = x$call$agree.level
+  agree.level = all_of(x$call$agree.level)
 
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
 
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  conf.level = x$call$conf.level
+  conf.level = all_of(x$call$conf.level)
+
   confq = qnorm(1 - (1 - conf.level) / 2)
-  delta = x$call$delta
+  delta = all_of(x$call$delta)
 
   if(as.character(x$call[1]) == "agree_np"){
     quan_mod = rq(formula =  delta ~ mean,
@@ -334,7 +335,7 @@ bias_ba_plot = function(x,
       theme(legend.position = "left",
             legend.title = element_blank())
 
-    delta = x$call$delta
+    delta = all_of(x$call$delta)
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
@@ -385,7 +386,7 @@ bias_ba_plot = function(x,
       theme(legend.position = "left",
             legend.title = element_blank())
     if(!is.null(x$call$delta)) {
-      delta = x$call$delta
+      delta = all_of(x$call$delta)
       df_delta = data.frame(y1 = c(delta, -1*delta))
       bland_alt.plot = bland_alt.plot +
         geom_hline(data = df_delta,
@@ -439,8 +440,8 @@ bias_ba_plot = function(x,
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())
-    if(!is.null(x$call$delta)) {
-      delta = x$call$delta
+    if(!is.null(all_of(x$call$delta))) {
+      delta = all_of(x$call$delta)
       df_delta = data.frame(y1 = c(delta, -1*delta))
       bland_alt.plot = bland_alt.plot +
         geom_hline(data = df_delta,
