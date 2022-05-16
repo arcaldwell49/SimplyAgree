@@ -9,6 +9,7 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
 #' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
+#' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
 #' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
 #' @details
 #'
@@ -208,8 +209,10 @@ reli_stats = function(measure,
       rename(estimate = statistic,
              se = std.error,
              lower.ci = conf.low,
-             upper.ci = conf.high) %>%
-      column_to_rownames(var = "term")
+             upper.ci = conf.high)
+      row.names(res) = res_other$term
+      res_other = res_other %>%
+        select(estimate,bias,se,lower.ci,upper.ci)
   } else{
     SEM = sqrt(MSE)
     sd_tots = sqrt(sum(stats[2,])/(n_id-1))

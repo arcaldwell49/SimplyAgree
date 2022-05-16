@@ -24,7 +24,7 @@
 #' @export
 
 find_n <- function(x, power = 0.8){
-  if(!"powerCurve" %in% class(x)) warning("input is not a powerCurve object")
+  if(!inherits(x,"powerCurve")) warning("input is not a powerCurve object")
   powtest = power
 
   test = x %>%
