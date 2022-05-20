@@ -15,7 +15,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             CCC = TRUE,
             valEq = FALSE,
             plotbland = FALSE,
-            plotcon = FALSE, ...) {
+            plotcon = FALSE,
+            prop_bias = FALSE,
+            xlabel = "Average of Both Methods",
+            ylabel = "Difference between Methods", ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -74,6 +77,18 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "plotcon",
                 plotcon,
                 default=FALSE)
+            private$..prop_bias <- jmvcore::OptionBool$new(
+                "prop_bias",
+                prop_bias,
+                default=FALSE)
+            private$..xlabel <- jmvcore::OptionString$new(
+                "xlabel",
+                xlabel,
+                default="Average of Both Methods")
+            private$..ylabel <- jmvcore::OptionString$new(
+                "ylabel",
+                ylabel,
+                default="Difference between Methods")
 
             self$.addOption(private$..method1)
             self$.addOption(private$..method2)
@@ -85,6 +100,9 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..valEq)
             self$.addOption(private$..plotbland)
             self$.addOption(private$..plotcon)
+            self$.addOption(private$..prop_bias)
+            self$.addOption(private$..xlabel)
+            self$.addOption(private$..ylabel)
         }),
     active = list(
         method1 = function() private$..method1$value,
@@ -96,7 +114,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         CCC = function() private$..CCC$value,
         valEq = function() private$..valEq$value,
         plotbland = function() private$..plotbland$value,
-        plotcon = function() private$..plotcon$value),
+        plotcon = function() private$..plotcon$value,
+        prop_bias = function() private$..prop_bias$value,
+        xlabel = function() private$..xlabel$value,
+        ylabel = function() private$..ylabel$value),
     private = list(
         ..method1 = NA,
         ..method2 = NA,
@@ -107,7 +128,10 @@ jmvagreemultiOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..CCC = NA,
         ..valEq = NA,
         ..plotbland = NA,
-        ..plotcon = NA)
+        ..plotcon = NA,
+        ..prop_bias = NA,
+        ..xlabel = NA,
+        ..ylabel = NA)
 )
 
 jmvagreemultiResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -231,6 +255,9 @@ jmvagreemultiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   plot
 #' @param plotcon \code{TRUE} or \code{FALSE} (default), for Line of identity
 #'   plot
+#' @param prop_bias \code{TRUE} or \code{FALSE}
+#' @param xlabel The label for the x-axis on the BA plot
+#' @param ylabel The label for the y-axis on the BA plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -258,7 +285,10 @@ jmvagreemulti <- function(
     CCC = TRUE,
     valEq = FALSE,
     plotbland = FALSE,
-    plotcon = FALSE) {
+    plotcon = FALSE,
+    prop_bias = FALSE,
+    xlabel = "Average of Both Methods",
+    ylabel = "Difference between Methods") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jmvagreemulti requires jmvcore to be installed (restart may be required)")
@@ -284,7 +314,10 @@ jmvagreemulti <- function(
         CCC = CCC,
         valEq = valEq,
         plotbland = plotbland,
-        plotcon = plotcon)
+        plotcon = plotcon,
+        prop_bias = prop_bias,
+        xlabel = xlabel,
+        ylabel = ylabel)
 
     analysis <- jmvagreemultiClass$new(
         options = options,

@@ -525,3 +525,15 @@ simple_emm = function(lm_mod,
   return(df_emm)
 
 }
+
+
+
+# Get call item --------
+
+get_call = function(x){
+  if(inherits(x,"name")){
+    get(x)
+  } else {
+    x
+  }
+}

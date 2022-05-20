@@ -18,6 +18,7 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 plotba <- self$results$plotba
                 plotcon <- self$results$plotcon
+                plotcheck <- self$results$plotcheck
 
                 # get the data
                 data <- self$data
@@ -28,27 +29,34 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 ciWidth = self$options$ciWidth/100
                 agreeWidth = self$options$agreeWidth/100
+                prop_bias = self$options$prop_bias
                 delta_val = self$options$testValue
                 res = agree_test(x = data[[method1]],
                                  y = data[[method2]],
                                  delta = delta_val,
                                  conf.level = ciWidth,
-                                 agree.level = agreeWidth)
-                pr_res = res$call
+                                 agree.level = agreeWidth,
+                                 prop_bias = prop_bias)
+                res$call$conf.level = ciWidth
+                res$call$agree.level = agreeWidth
+                res$call$delta = delta_val
+                res$call$prop_bias = prop_bias
 
-                pr_res2 = paste0(
-                  "Limit of Agreement = ",
-                  res$shieh_test$prop0 * 100,
-                  "%",
+                pr_res1 = res$call
+                exact_ci = ifelse(res$call$TOST,
+                                  1-((1-res$call$conf.level)*2),
+                                  res$call$conf.level)
+                if(res$call$prop_bias){
+                  pbias_txt = "Warning: hypothesis test likely bogus with proportional bias. \n"
+                } else {
+                  pbias_txt = "\n"
+                }
+                pr_ci = paste0(ciWidth*100, "% (Bias), ",(1-(1-ciWidth)*2)*100, "% (LoA)")
+                pr_res = paste0(
+                  pbias_txt,
+                  "Shieh Test of Agreement ",
                   "\n",
-                  # "alpha =", (1-res$call$conf.level),   "|",
-                  ciWidth,
-                  "% Confidence Interval",
-                  "\n",
-                  "\n",
-                  "Shieh Test of Agreement",
-                  "\n",
-                  "Exact C.I.:",
+                  "Exact ", exact_ci*100,"% C.I.:",
                   " [",
                   round(res$shieh_test$lower.ci, 4),
                   ", ",
@@ -57,7 +65,16 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                   "\n",
                   "\n",
                   "Hypothesis Test: ",
-                  res$shieh_test$h0_test
+                  res$shieh_test$h0_test,
+                  "\n",
+                  "\n",
+                  "Limit of Agreement = ",
+                  res$shieh_test$prop0 * 100,
+                  "%",
+                  "\n",
+                  "Confidence Interval = ",
+                  #"alpha =", (1-res$call$conf.level),   "|",
+                  pr_ci
                 )
 
                 self$results$text$setContent(pr_res)
@@ -92,6 +109,7 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                 plotba$setState(res)
                 plotcon$setState(res)
+                plotcheck$setState(res)
             }
 
 
@@ -108,14 +126,18 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = plot(image$state)+
-                # set transparency
-                #theme(
-                #    panel.grid.major = element_blank(),
-                #    panel.grid.minor = element_blank(),
-                #    panel.background = element_rect(fill = "transparent",colour = NA),
-                #    plot.background = element_rect(fill = "transparent",colour = NA)
-                #)
+            plotpr = plot(image$state,
+                          x_name = "Method 1", y_name = "Method 2") +
+              labs(y = self$options$ylabel,
+                   x = self$options$xlabel) +
+                 #set transparency
+                theme(
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    legend.background = element_rect(fill = "transparent",colour = NA),
+                    panel.background = element_rect(fill = "transparent",colour = NA),
+                    plot.background = element_rect(fill = "transparent",colour = NA)
+                )
 
 
             print(plotpr)
@@ -128,11 +150,13 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = image$state$identity.plot +
+            plotpr = plot(image$state, type = 2,
+                          x_name = "1", y_name = "2") +
                 # set transparency
                 theme(
                     panel.grid.major = element_blank(),
                     panel.grid.minor = element_blank(),
+                    legend.key = element_rect(colour = "transparent", fill = "transparent"),
                     panel.background = element_rect(fill = "transparent",colour = NA),
                     plot.background = element_rect(fill = "transparent",colour = NA)
                 )
@@ -141,6 +165,26 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             print(plotpr)
 
             return(TRUE)
+
+        },
+        .plotcheck = function(image,...){
+
+          if (is.null(image$state))
+            return(FALSE)
+
+          plotpr = check(image$state) +
+            # set transparency
+            theme(
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.background = element_rect(fill = "transparent",colour = NA),
+              plot.background = element_rect(fill = "transparent",colour = NA)
+            )
+
+
+          print(plotpr)
+
+          return(TRUE)
 
         })
 )

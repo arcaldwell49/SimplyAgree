@@ -10,9 +10,9 @@
         `publisher`="[Computer software]. Retrieved from https://cran.r-project.org/", 
         `url`="https://cran.r-project.org/"), 
     `SimplyAgree`=list(
-        `type`="software", 
+        `type`="artcle", 
         `author`="Caldwell, A.R.", 
         `year`=2021, 
-        `title`="SimplyAgree: Flexible and Robust Agreement and Reliability Analyses", 
-        `publisher`="doi: 10.5281/zenodo.4743814", 
-        `url`="https://aaroncaldwell.us/SimplyAgree"))
+        `title`="SimplyAgree: An R package and jamovi Module for Simplifying Agreement and Reliability Analysess", 
+        `publisher`="Journal of Open Source Software", 
+        `url`="https://doi.org/10.21105/joss.04148"))

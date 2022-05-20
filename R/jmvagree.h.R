@@ -12,8 +12,12 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             agreeWidth = 95,
             testValue = 2,
             CCC = TRUE,
-            plotbland = FALSE,
-            plotcon = FALSE, ...) {
+            plotbland = TRUE,
+            plotcon = FALSE,
+            plotcheck = FALSE,
+            prop_bias = FALSE,
+            xlabel = "Average of Both Methods",
+            ylabel = "Difference between Methods", ...) {
 
             super$initialize(
                 package="SimplyAgree",
@@ -60,11 +64,27 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..plotbland <- jmvcore::OptionBool$new(
                 "plotbland",
                 plotbland,
-                default=FALSE)
+                default=TRUE)
             private$..plotcon <- jmvcore::OptionBool$new(
                 "plotcon",
                 plotcon,
                 default=FALSE)
+            private$..plotcheck <- jmvcore::OptionBool$new(
+                "plotcheck",
+                plotcheck,
+                default=FALSE)
+            private$..prop_bias <- jmvcore::OptionBool$new(
+                "prop_bias",
+                prop_bias,
+                default=FALSE)
+            private$..xlabel <- jmvcore::OptionString$new(
+                "xlabel",
+                xlabel,
+                default="Average of Both Methods")
+            private$..ylabel <- jmvcore::OptionString$new(
+                "ylabel",
+                ylabel,
+                default="Difference between Methods")
 
             self$.addOption(private$..method1)
             self$.addOption(private$..method2)
@@ -74,6 +94,10 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..CCC)
             self$.addOption(private$..plotbland)
             self$.addOption(private$..plotcon)
+            self$.addOption(private$..plotcheck)
+            self$.addOption(private$..prop_bias)
+            self$.addOption(private$..xlabel)
+            self$.addOption(private$..ylabel)
         }),
     active = list(
         method1 = function() private$..method1$value,
@@ -83,7 +107,11 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         testValue = function() private$..testValue$value,
         CCC = function() private$..CCC$value,
         plotbland = function() private$..plotbland$value,
-        plotcon = function() private$..plotcon$value),
+        plotcon = function() private$..plotcon$value,
+        plotcheck = function() private$..plotcheck$value,
+        prop_bias = function() private$..prop_bias$value,
+        xlabel = function() private$..xlabel$value,
+        ylabel = function() private$..ylabel$value),
     private = list(
         ..method1 = NA,
         ..method2 = NA,
@@ -92,7 +120,11 @@ jmvagreeOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..testValue = NA,
         ..CCC = NA,
         ..plotbland = NA,
-        ..plotcon = NA)
+        ..plotcon = NA,
+        ..plotcheck = NA,
+        ..prop_bias = NA,
+        ..xlabel = NA,
+        ..ylabel = NA)
 )
 
 jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -103,7 +135,8 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         blandtab = function() private$.items[["blandtab"]],
         ccctab = function() private$.items[["ccctab"]],
         plotba = function() private$.items[["plotba"]],
-        plotcon = function() private$.items[["plotcon"]]),
+        plotcon = function() private$.items[["plotcon"]],
+        plotcheck = function() private$.items[["plotcheck"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -176,6 +209,14 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(plotcon)",
                 renderFun=".plotcon",
                 width=450,
+                height=400))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="plotcheck",
+                title="Check Assumptions",
+                visible="(plotcheck)",
+                renderFun=".plotcheck",
+                width=450,
                 height=400))}))
 
 jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -213,6 +254,10 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
 #'   plot
 #' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
+#' @param plotcheck \code{TRUE} or \code{FALSE} (default), assumptions plots
+#' @param prop_bias \code{TRUE} or \code{FALSE}
+#' @param xlabel The label for the x-axis on the BA plot
+#' @param ylabel The label for the y-axis on the BA plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
@@ -220,6 +265,7 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$plotcheck} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -237,8 +283,12 @@ jmvagree <- function(
     agreeWidth = 95,
     testValue = 2,
     CCC = TRUE,
-    plotbland = FALSE,
-    plotcon = FALSE) {
+    plotbland = TRUE,
+    plotcon = FALSE,
+    plotcheck = FALSE,
+    prop_bias = FALSE,
+    xlabel = "Average of Both Methods",
+    ylabel = "Difference between Methods") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("jmvagree requires jmvcore to be installed (restart may be required)")
@@ -260,7 +310,11 @@ jmvagree <- function(
         testValue = testValue,
         CCC = CCC,
         plotbland = plotbland,
-        plotcon = plotcon)
+        plotcon = plotcon,
+        plotcheck = plotcheck,
+        prop_bias = prop_bias,
+        xlabel = xlabel,
+        ylabel = ylabel)
 
     analysis <- jmvagreeClass$new(
         options = options,

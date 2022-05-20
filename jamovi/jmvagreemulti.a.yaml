@@ -114,4 +114,31 @@ options:
           R: >
             `TRUE` or `FALSE` (default), for Line of identity plot
 
+    - name: prop_bias
+      title: Assume proportional bias?
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE`
+    - name: xlabel
+      title: Label for x-axis
+      type: String
+      default: "Average of Both Methods"
+      description:
+          ui: >
+            The label for the x-axis on the BA plot
+          R: >
+            The label for the x-axis on the BA plot
+
+    - name: ylabel
+      title: Label for (left) y-axis
+      type: String
+      default:  "Difference between Methods"
+      description:
+          ui: >
+            The label for the y-axis on the BA plot
+          R: >
+            The label for the y-axis on the BA plot
+
 ...

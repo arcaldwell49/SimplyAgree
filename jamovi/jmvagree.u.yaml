@@ -26,8 +26,10 @@ children:
             name: method2
             maxItemCount: 1
             isTarget: true
-  - type: Label
+  - type: CollapseBox
     label: Limits of Agreement Settings
+    name: loapanel
+    collapsed: false
     children:
       - type: LayoutBox
         margin: large
@@ -39,17 +41,33 @@ children:
           - type: TextBox
             name: agreeWidth
             format: number
-          - type: TextBox
-            name: testValue
-            format: number
+      - type: TextBox
+        name: testValue
+        format: number
+      - type: CheckBox
+        name: prop_bias
   - type: CollapseBox
-    label: Output
+    label: Other Settings
     name: dispanel
-    collapsed: false
+    collapsed: true
     children:
       - type: CheckBox
         name: CCC
       - type: CheckBox
         name: plotbland
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TextBox
+            name: xlabel
+            format: string
+          - type: TextBox
+            name: ylabel
+            format: string
       - type: CheckBox
         name: plotcon
+      - type: CheckBox
+        name: plotcheck
+
+

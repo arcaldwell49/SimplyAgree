@@ -60,6 +60,14 @@ items:
       renderFun: .plotcon
       width: 450
       height: 400
+
+    - name: plotcheck
+      type: Image
+      title: Check Assumptions
+      visible: (plotcheck)
+      renderFun: .plotcheck
+      width: 450
+      height: 400
     #- name:  cites
     #  title: Methods
     #  type:  Preformatted

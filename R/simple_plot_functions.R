@@ -4,10 +4,11 @@ simple_ident_plot = function(x,
                              y_name = "y",
                              smooth_method = NULL,
                              smooth_se = TRUE) {
-  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps",
+                                    "SimplyAgree::agree_nest", "SimplyAgree::agree_reps")){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
-    if(as.character(x$call[1]) == "agree_reps"){
+    if(as.character(x$call[1]) == "agree_reps" | as.character(x$call[1]) == "SimplyAgree::agree_reps"){
     df = df %>%
       group_by(id) %>%
       summarize(mxi = sum(!is.na(x)),
@@ -64,7 +65,8 @@ simple_ba_plot = function(x,
                           smooth_method = NULL,
                           smooth_se = TRUE) {
 
-  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps",
+                                    "SimplyAgree::agree_nest", "SimplyAgree::agree_reps")){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
 
@@ -85,10 +87,10 @@ simple_ba_plot = function(x,
                        levels = c("Upper LoA", "Bias", "Lower LoA"))
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  conf.level = all_of(x$call$conf.level)
-  agree.level = all_of(x$call$agree.level)
-  confq = qnorm(1 - (1 - all_of(x$call$conf.level)) / 2)
-  delta = all_of(x$call$delta)
+  conf.level = get_call(x$call$conf.level)
+  agree.level = get_call(x$call$agree.level)
+  confq = qnorm(1 - (1 - get_call(x$call$conf.level)) / 2)
+  delta = get_call(x$call$delta)
   #smooth_method = x$smooths$smooth_method
   #smooth_se = x$smooths$smooth_se
   if(geom == "geom_point"){
@@ -143,8 +145,8 @@ simple_ba_plot = function(x,
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
     theme(legend.position = "left")
-  if (!is.null(all_of(x$call$delta))){
-    delta = all_of(x$call$delta)
+  if (!is.null(get_call(x$call$delta))){
+    delta = get_call(x$call$delta)
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
@@ -161,7 +163,8 @@ simple_ba_plot = function(x,
     if(smooth_method == "gam"){
       if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
 
-        if(as.character(x$call[1]) %in% c("agree_test", "agree_np") ){
+        if(as.character(x$call[1]) %in% c("agree_test", "agree_np",
+                                          "SimplyAgree::agree_test", "SimplyAgree::agree_np") ){
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
@@ -192,7 +195,8 @@ simple_ba_plot = function(x,
     } else if(smooth_method == "lm"){
       if (requireNamespace("ggeffects", quietly = TRUE)) {
         if(!(as.character(x$call[1]) %in%
-           c("agree_test", "agree_np"))){
+           c("agree_test", "agree_np",
+             "SimplyAgree::agree_test", "SimplyAgree::agree_np"))){
           lm1 = lme4::lmer(data = df,
                            delta ~ mean + (1|id))
         } else {
@@ -243,7 +247,7 @@ bias_ba_plot = function(x,
                         smooth_method = NULL,
                         smooth_se = TRUE){
 
-  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps")){
+  if(as.character(x$call[1]) %in% c("agree_nest", "agree_reps", "SimplyAgree::agree_nest", "SimplyAgree::agree_reps")){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
 
@@ -259,12 +263,12 @@ bias_ba_plot = function(x,
 
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  conf.level = all_of(x$call$conf.level)
+  conf.level = get_call(x$call$conf.level)
 
   confq = qnorm(1 - (1 - conf.level) / 2)
-  delta = all_of(x$call$delta)
+  delta = get_call(x$call$delta)
 
-  if(as.character(x$call[1]) == "agree_np"){
+  if(as.character(x$call[1]) == "agree_np" | as.character(x$call[1]) == "SimplyAgree::agree_np"){
     quan_mod = rq(formula =  delta ~ mean,
                   data = df,
                   tau = c(agree.u,.5,agree.l))
@@ -335,7 +339,7 @@ bias_ba_plot = function(x,
       theme(legend.position = "left",
             legend.title = element_blank())
 
-    delta = all_of(x$call$delta)
+    delta = get_call(x$call$delta)
     df_delta = data.frame(y1 = c(delta, -1*delta))
     bland_alt.plot = bland_alt.plot +
       geom_hline(data = df_delta,
@@ -345,14 +349,14 @@ bias_ba_plot = function(x,
       scale_y_continuous(sec.axis = dup_axis(
         breaks = c(delta, -1*delta),
         name = "Maximal Allowable Difference"))
-  } else if(as.character(x$call[1]) == "agree_test"){
+  } else if(as.character(x$call[1]) == "agree_test" | as.character(x$call[1]) == "SimplyAgree::agree_test"){
     lm_mod = lm(delta ~ mean,
                 data = df)
     emm = simple_emm(lm_mod,
                      df,
                      agree.level,
                      conf.level,
-                     TOST = x$call$TOST,
+                     TOST = get_call(x$call$TOST),
                      var_comp = x$var_comp)
 
     bland_alt.plot = ggplot(df,

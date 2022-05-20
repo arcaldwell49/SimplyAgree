@@ -70,7 +70,8 @@ agree_test <- function(x,
   ccc_res = ccc.xy(x, y,
                    conf.level = conf.level,
                    agree.level = agree.level,
-                   TOST = TOST)
+                   TOST = TOST,
+                   prop_bias = prop_bias)
   #pull values from ccc function output
   xbar = ccc_res$delta$d #mean delta
   s = ccc_res$delta$d.sd #sd of delta

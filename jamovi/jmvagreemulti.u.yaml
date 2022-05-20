@@ -29,15 +29,14 @@ children:
             name: id
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    stretchFactor: 1
+  - type: CollapseBox
+    label: Limits of Agreement Settings
+    name: loapanel
+    collapsed: false
     children:
       - type: LayoutBox
-        cell:
-          column: 0
-          row: 0
-        stretchFactor: 1
+        margin: large
+        style: inline
         children:
           - type: TextBox
             name: ciWidth
@@ -45,20 +44,31 @@ children:
           - type: TextBox
             name: agreeWidth
             format: number
-          - type: TextBox
-            name: testValue
-            format: number
+      - type: TextBox
+        name: testValue
+        format: number
+      - type: CheckBox
+        name: prop_bias
+      - type: CheckBox
+        name: valEq
+  - type: CollapseBox
+    label: Other Settings
+    name: dispanel
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: CCC
+      - type: CheckBox
+        name: plotbland
       - type: LayoutBox
-        cell:
-          column: 1
-          row: 0
-        stretchFactor: 1
+        margin: large
+        style: inline
         children:
-          - type: CheckBox
-            name: CCC
-          - type: CheckBox
-            name: valEq
-          - type: CheckBox
-            name: plotbland
-          - type: CheckBox
-            name: plotcon
+          - type: TextBox
+            name: xlabel
+            format: string
+          - type: TextBox
+            name: ylabel
+            format: string
+      - type: CheckBox
+        name: plotcon
