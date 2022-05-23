@@ -105,3 +105,6 @@ export(jmvagreemultiOptions)
 
 export(jmvreliClass)
 export(jmvreliOptions)
+
+export(jmvdemingClass)
+export(jmvdemingOptions)

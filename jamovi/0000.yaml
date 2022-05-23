@@ -25,6 +25,11 @@ analyses:
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Reliability Analysis
+  - title: Deming Regression
+    name: jmvdeming
+    ns: SimplyAgree
+    menuGroup: SimplyAgree
+    menuTitle: Deming Regression
 datasets:
   - name: reps
     path: reps.csv

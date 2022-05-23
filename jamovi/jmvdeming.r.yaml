@@ -1,0 +1,52 @@
+---
+name:  jmvdeming
+title: Deming Regression
+jrs:   '1.1'
+
+items:
+
+
+    - name:  demtab
+      title: Regression Coefficients
+      type: Table
+      rows:  2
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: se
+          title: 'SE'
+          type: number
+        - name: df
+          title: 'df'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name: plotcon
+      type: Image
+      title: Line-of-Identity Plot
+      visible: (plotcon)
+      renderFun: .plotcon
+      width: 450
+      height: 400
+
+    - name: plotcheck
+      type: Image
+      title: Check Assumptions
+      visible: (plotcheck)
+      renderFun: .plotcheck
+      width: 500
+      height: 400
+    #- name:  cites
+    #  title: Methods
+    #  type:  Preformatted
+
+...

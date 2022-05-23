@@ -1,0 +1,107 @@
+---
+name:  jmvdeming
+title: Deming Regression
+menuGroup: SimplyAgree
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+      description:
+          ui: >
+            Data
+          R: >
+            Data
+
+    - name: method1
+      title: Method 1
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          ui: >
+            1st method of measurement
+          R: >
+            Name of column containing 1st Vector of data
+
+    - name: method2
+      title: Method 2
+      type: Variable
+      suggested:
+        - continuous
+      permitted:
+        - numeric
+      rejectInf: false
+      description:
+          ui: >
+            2nd method of measurement
+          R: >
+            Name of column containing Vector of data
+
+    - name: ciWidth
+      title: Confidence level (%)
+      type: Number
+      min: 50.0
+      max: 99.9
+      default: 95
+      description:
+          ui: >
+            the confidence interval width.
+          R: >
+            a number between 50 and 99.9 (default: 95), the width of confidence
+            intervals
+
+    - name: testValue
+      title: Error Ratio between X & Y
+      type: Number
+      default: 1
+      description:
+          ui: Ratio of the two error variances. Default is 1.
+          R: Ratio of the two error variances. Default is 1.
+
+    - name: plotcon
+      title: Line-of-Identity plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), for Bland-Altman plot
+    - name: plotcheck
+      title: Check assumptions
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), assumptions plots
+    - name: weighted
+      title: Weighted Deming regression?
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE`
+
+    - name: xlabel
+      title: Label for x-axis
+      type: String
+      default: "Method: 1"
+      description:
+          ui: >
+            The label for the x-axis
+          R: >
+            The label for the x-axis
+
+    - name: ylabel
+      title: Label for y-axis
+      type: String
+      default:  "Method: 2"
+      description:
+          ui: >
+            The label for the y-axis
+          R: >
+            The label for the y-axis
+...
