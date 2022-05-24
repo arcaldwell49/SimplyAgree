@@ -198,7 +198,7 @@ check.simple_agree <- function(x) {
     stop("agree_np is not supported by check method.")
   }
 
-  if(as.character(x$call[1]) != "agree_test" | as.character(x$call[1]) != "SimplyAgree::agree_test"){
+  if(as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
   } else{
@@ -218,7 +218,7 @@ check.simple_agree <- function(x) {
 
   dat = df
   ## Heteroskedasticity -------
-  mod_check = if (as.character(x$call[1]) != "agree_test" || as.character(x$call[1]) != "SimplyAgree::agree_test") {
+  mod_check = if (as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test") {
     lme4::lmer(data = dat,
                form_lmer1)
   } else {
