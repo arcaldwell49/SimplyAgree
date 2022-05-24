@@ -18,6 +18,7 @@
   - Checks include: normality, heteroscedasticity, and proportional bias
 - Assumptions checks are added for all "simple-reli" class results
   - Checks include: normality and heteroscedasticity
+- All jamovi functions updated with new UI layout
 - Big thanks go to Greg Atkinson and Ivan Jukic for the many suggestions leading to this update.
 
 
