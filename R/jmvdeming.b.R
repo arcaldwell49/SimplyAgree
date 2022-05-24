@@ -45,8 +45,13 @@ jmvdemingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           #res$call$prop_bias = prop_bias
 
           pr_res1 = res$call
+          if(self$options$weighted){
+            pr_res = paste0("Weighted Deming Regression with ", self$options$ciWidth, "% Confidence Intervals")
+          } else {
+            pr_res = paste0("Deming Regression with ", self$options$ciWidth, "% Confidence Intervals")
+          }
 
-          #self$results$text$setContent(pr_res1)
+          self$results$text$setContent(pr_res)
           table1 <- self$results$demtab
           table1$setRow(rowNo=1, values=list(
             var="Intercept",

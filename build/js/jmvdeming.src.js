@@ -21,7 +21,7 @@ const view = function() {
 
 view.layout = ui.extend({
 
-    label: "Deming Regression in jamovi",
+    label: "Deming Regression",
     jus: "3.0",
     type: "root",
     stage: 0, //0 - release, 1 - development, 2 - proposed
