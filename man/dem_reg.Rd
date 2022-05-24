@@ -40,7 +40,7 @@ The function returns a simple_eiv (eiv meaning "error in variables") object.
 
 \describe{
   \item{\code{"call"}}{The matched call.}
-  \item{\code{"deming"}}{Data frame presenting the results from the Deming regression analysis.}
+  \item{\code{"model"}}{Data frame presenting the results from the Deming regression analysis.}
   \item{\code{"resamples"}}{List containing resamples from jacknife procedure.}
 }
 }

@@ -12,8 +12,12 @@ jmvagree(
   agreeWidth = 95,
   testValue = 2,
   CCC = TRUE,
-  plotbland = FALSE,
-  plotcon = FALSE
+  plotbland = TRUE,
+  plotcon = FALSE,
+  plotcheck = FALSE,
+  prop_bias = FALSE,
+  xlabel = "Average of Both Methods",
+  ylabel = "Difference between Methods"
 )
 }
 \arguments{
@@ -37,6 +41,14 @@ agreement limits}
 plot}
 
 \item{plotcon}{\code{TRUE} or \code{FALSE} (default), for Bland-Altman plot}
+
+\item{plotcheck}{\code{TRUE} or \code{FALSE} (default), assumptions plots}
+
+\item{prop_bias}{\code{TRUE} or \code{FALSE}}
+
+\item{xlabel}{The label for the x-axis on the BA plot}
+
+\item{ylabel}{The label for the y-axis on the BA plot}
 }
 \value{
 A results object containing:
@@ -46,6 +58,7 @@ A results object containing:
   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
   \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
+  \code{results$plotcheck} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
