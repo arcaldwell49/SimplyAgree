@@ -130,11 +130,16 @@ agree_nest <- function(x,
     lmer_d = lme4::lmer(delta ~ mean + (1 | id),
                         data = df_lmer)
     d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
-    d_bar = as.data.frame(emmeans(lmer_d, ~1))[1,2]
-    d_lo = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))[1,5]
-    d_hi = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))[1,6]
+    #em_frame1 = as.data.frame(emmeans(lmer_d, ~1))
+    em_frame2 =as.data.frame(emmeans(lmer_d, ~1,
+                                    level = conf.level))
+    #colnames(em_frame1) = c("overall", "emmean", "se", "df", "lower", "upper")
+    colnames(em_frame2) = c("overall", "emmean", "se", "df", "lower", "upper")
+    d_bar =  em_frame2$emmean#as.data.frame(emmeans(lmer_d, ~1))$emmean #[1,2]
+    d_lo = em_frame2$lower #as.data.frame(emmeans(lmer_d, ~1,
+           #                      level = conf.level))$lower #[1,5]
+    d_hi = em_frame$upper #as.data.frame(emmeans(lmer_d, ~1,
+           #                      level = conf.level))$upper #[1,6]
     #if(length(d_hi) == 0 | length(d_lo) == 0 | length(d_hi) == 0){
     #  stop("emmeans broken")
     #}
