@@ -434,12 +434,13 @@ mover_emm = function(lmer_mod,
                        length.out = 100
                      )))
 
-  emm_med = confint(emmeans(ref_med,~ mean), level = conf.level)
+  emm_med = summary(emmeans(ref_med,~ mean), level = conf.level)
+  colnames(emm_med) = c("mean", "emmean", "se", "df", "lower", "upper")
   df_coef_med = data.frame(
     at = emm_med$mean,
     estimate = emm_med$emmean,
-    lower.ci = emm_med$lower.CL,
-    upper.ci = emm_med$upper.CL,
+    lower.ci = emm_med$lower,
+    upper.ci = emm_med$upper,
     text = "Bias"
   )
 
@@ -492,13 +493,14 @@ simple_emm = function(lm_mod,
                        max(df$mean, na.rm = TRUE),
                        length.out = 100
                      )))
-
-  emm_med = confint(emmeans(ref_med,  ~ mean), level = conf)
+  emm_med = summary(emmeans(ref_med,~ mean), level = conf.level)
+  colnames(emm_med) = c("mean", "emmean", "se", "df", "lower", "upper")
+  #emm_med = confint(emmeans(ref_med,  ~ mean), level = conf)
   df_coef_med = data.frame(
     at = emm_med$mean,
     estimate = emm_med$emmean,
-    lower.ci = emm_med$lower.CL,
-    upper.ci = emm_med$upper.CL,
+    lower.ci = emm_med$lower,
+    upper.ci = emm_med$upper,
     text = "Bias"
   )
 
