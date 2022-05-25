@@ -15,7 +15,10 @@ jmvagreemulti(
   CCC = TRUE,
   valEq = FALSE,
   plotbland = FALSE,
-  plotcon = FALSE
+  plotcon = FALSE,
+  prop_bias = FALSE,
+  xlabel = "Average of Both Methods",
+  ylabel = "Difference between Methods"
 )
 }
 \arguments{
@@ -44,6 +47,12 @@ plot}
 
 \item{plotcon}{\code{TRUE} or \code{FALSE} (default), for Line of identity
 plot}
+
+\item{prop_bias}{\code{TRUE} or \code{FALSE}}
+
+\item{xlabel}{The label for the x-axis on the BA plot}
+
+\item{ylabel}{The label for the y-axis on the BA plot}
 }
 \value{
 A results object containing:

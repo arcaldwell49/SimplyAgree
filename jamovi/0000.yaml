@@ -1,7 +1,7 @@
 ---
 title: Flexible and Robust Agreement and Reliability Analyses
 name: SimplyAgree
-version: 0.0.4
+version: 0.1.0
 jms: '1.0'
 authors:
   - Aaron R. Caldwell
@@ -25,6 +25,11 @@ analyses:
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Reliability Analysis
+  - title: Deming Regression
+    name: jmvdeming
+    ns: SimplyAgree
+    menuGroup: SimplyAgree
+    menuTitle: Deming Regression
 datasets:
   - name: reps
     path: reps.csv

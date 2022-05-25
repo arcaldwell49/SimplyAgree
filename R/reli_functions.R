@@ -1,7 +1,7 @@
-reli2 = function(x.df, cv_calc = "MSE") {
-  mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
-                   data = x.df,
-                   na.action = na.omit)
+
+
+reli_mod_mse = function(mod.lmer, cv_calc = "MSE") {
+
   num_lvls = ngrps(mod.lmer)
   nj = num_lvls["items"]
   n.obs = num_lvls["id"]
@@ -50,90 +50,12 @@ reli2 = function(x.df, cv_calc = "MSE") {
   } else {
     stop("cv_calc must be SEM, MSE, or residuals")
   }
-  mw <- mean(x.df$values, na.rm = TRUE)
+  mw <- mean(get_response(mod.lmer), na.rm = TRUE)
   cv_out = stddev/mw
 
-  return(list(cv = cv_out,
-              SEM = SEM,
-              SEE = SEE,
-              SEP = SEP))
+  res_out = c(cv_out, SEM, SEE, SEP)
+  names(res_out) = c("cv", "SEM", "SEE", "SEP")
+  return(res_out)
 }
 
-boot_rel = function(x.df, cv_calc = "MSE",
-                    nboot = 499,
-                    conf.level){
-  len = nrow(x.df)
-  u <- list()
-  for (i in 1:nboot) {
-    mysample = sample(1:len,replace=TRUE)
-    df2 = x.df[mysample,]
-    u <- append(u,list(reli2(df2,
-                             cv_calc)))
-  }
-  cv = SEM = SEP = SEE = rep(0,nboot)
-  lconf = (1 - conf.level)/2
-  uconf = 1-(1 - conf.level)/2
-  for (j in 1:nboot){
-    cv[j] = u[[j]]$cv
-    SEM[j] = u[[j]]$SEM
-    SEP[j] = u[[j]]$SEP
-    SEE[j] = u[[j]]$SEE
-  }
 
-  theta_cv <- reli2(x.df,cv_calc)$cv
-  theta_SEM <- reli2(x.df,cv_calc)$SEM
-  theta_SEP <- reli2(x.df,cv_calc)$SEP
-  theta_SEE <- reli2(x.df,cv_calc)$SEE
-
-  cv_bias <- (mean(cv, na.rm = TRUE) - theta_cv)
-  SEM_bias <- (mean(SEM, na.rm = TRUE) - theta_SEM)
-  SEP_bias <- (mean(SEP, na.rm = TRUE) - theta_SEP)
-  SEE_bias <- (mean(SEE, na.rm = TRUE) - theta_SEE)
-
-  cv_se <- sd(cv, na.rm = TRUE)
-  SEM_se <- sd(SEM, na.rm = TRUE)
-  SEP_se <- sd(SEP, na.rm = TRUE)
-  SEE_se <- sd(SEE, na.rm = TRUE)
-
-  cv_lci = quantile(cv, lconf, na.rm = TRUE)
-  SEM_lci = quantile(SEM, lconf, na.rm = TRUE)
-  SEP_lci = quantile(SEP, lconf, na.rm = TRUE)
-  SEE_lci = quantile(SEE, lconf, na.rm = TRUE)
-
-  cv_uci = quantile(cv, uconf, na.rm = TRUE)
-  SEM_uci = quantile(SEM, uconf, na.rm = TRUE)
-  SEP_uci = quantile(SEP, uconf, na.rm = TRUE)
-  SEE_uci = quantile(SEE, uconf, na.rm = TRUE)
-
-  res = list(
-    cv = list(
-      est = theta_cv,
-      bias = cv_bias,
-      se = cv_se,
-      lower.ci = cv_lci,
-      upper.ci = cv_uci
-    ),
-    SEM = list(
-      est = theta_SEM,
-      bias = SEM_bias,
-      se = SEM_se,
-      lower.ci = SEM_lci,
-      upper.ci = SEM_uci
-    ),
-    SEP = list(
-      est = theta_SEP,
-      bias = SEP_bias,
-      se = SEP_se,
-      lower.ci = SEP_lci,
-      upper.ci = SEP_uci
-    ),
-    SEE = list(
-      est = theta_SEE,
-      bias = SEE_bias,
-      se = SEE_se,
-      lower.ci = SEE_lci,
-      upper.ci = SEE_uci
-    )
-  )
-  return(res)
-}

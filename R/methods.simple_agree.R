@@ -24,14 +24,14 @@
 #' @export
 
 print.simple_agree <- function(x,...){
-  conf_TOST = if(x$call$TOST){
-    1-(1-x$call$conf.level)*2
+  conf_TOST = if(get_call(x$call$TOST)){
+    1-(1-get_call(x$call$conf.level))*2 #ifelse(inherits(x$call$conf.level, "name"), get(test1$call$conf.level), test1$call$conf.level)
   } else {
-    x$call$conf.level
+    get_call(x$call$conf.level)
   }
   LOA = x$loa
   colnames(LOA) = c("Estimate", "Lower CI", "Upper CI", "CI Level")
-  if(as.character(x$call[1]) == "agree_test") {
+  if(as.character(x$call[1]) == "agree_test" | as.character(x$call[1]) == "SimplyAgree::agree_test") {
   cat("Limit of Agreement = ", x$shieh_test$prop0*100, "%",  sep = "")
   #cat("\n")
   #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
@@ -43,26 +43,27 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("Hypothesis Test: ",x$shieh_test$h0_test, sep = "")
   cat("\n")
-  if(x$call$prop_bias == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+  if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
   cat("\n")
   cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
   print(LOA, digits = 4)
   cat("\n")
-  if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
+  if(get_call(x$call$prop_bias) == TRUE) {cat("LoA at average of both measures. Please check plot.")
     cat("\n")}
   cat("###- Concordance Correlation Coefficient (CCC) -###")
   cat("\n")
-  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+  cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*get_call(x$call$conf.level),
+      "% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
   cat("\n")
-  } else if(as.character(x$call[1]) == "agree_reps"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+  } else if(as.character(x$call[1]) == "agree_reps" | as.character(x$call[1]) == "SimplyAgree::agree_reps"){
+    cat("Limit of Agreement = ", get_call(x$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
     cat("Replicate Data Points (true value does not vary)")
     cat("\n")
-    if(x$call$prop_bias == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
@@ -71,22 +72,23 @@ print.simple_agree <- function(x,...){
     cat("\n")
     print(LOA, digits = 4)
     cat("\n")
-    if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
+    if(get_call(x$call$prop_bias) == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
     cat("###- Concordance Correlation Coefficient* (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*get_call(x$call$conf.level),
+        "% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics")
     cat("\n")
-  } else if(as.character(x$call[1]) == "agree_nest"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+  } else if(as.character(x$call[1]) == "agree_nest" | as.character(x$call[1]) == "SimplyAgree::agree_nest"){
+    cat("Limit of Agreement = ", get_call(x$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
     cat("Nested Data Points (true value may vary)")
     cat("\n")
-    if(x$call$prop_bias == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
@@ -95,16 +97,17 @@ print.simple_agree <- function(x,...){
     cat("\n")
     print(LOA, digits = 4)
     cat("\n")
-    if(x$call$prop_bias == TRUE) {cat("LoA at average of both measures. Please check plot.")
+    if(get_call(x$call$prop_bias) == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
     cat("###- Concordance Correlation Coefficient (CCC) -###")
     cat("\n")
-    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*x$call$conf.level,"% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
+    cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*get_call(x$call$conf.level),
+        "% C.I. ","[",round(x$ccc.xy$lower.ci,4),", ",round(x$ccc.xy$upper.ci,4),"]",sep = "")
     cat("\n")
     cat("*Estimated via U-statistics; may be biased")
     cat("\n")
-  } else if(as.character(x$call[1]) == "agree_np"){
-    cat("Limit of Agreement = ", x$call$conf.level*100, "%",  sep = "")
+  } else if(as.character(x$call[1]) == "agree_np" | as.character(x$call[1]) == "SimplyAgree::agree_np"){
+    cat("Limit of Agreement = ", get_call(x$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
     #cat("alpha =", (1-x$call$conf.level), "|", x$call$conf.level*100,"% Confidence Interval")
     cat("\n")
@@ -129,6 +132,7 @@ print.simple_agree <- function(x,...){
 #' @method plot simple_agree
 #' @param x_name Name/label for x values (first measurement)
 #' @param y_name Name/label for y values (second measurement)
+#' @param geom String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".
 #' @param smooth_method Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.
 #' @param smooth_se Display confidence interval around smooth?
 #' @import ggplot2
@@ -137,22 +141,25 @@ print.simple_agree <- function(x,...){
 plot.simple_agree <- function(x, type = 1,
                               x_name = "x",
                               y_name = "y",
+                              geom = "geom_point",
                               smooth_method = NULL,
                               smooth_se = TRUE,
                               ...){
 
   if(type == 1){
     #return(x$bland_alt.plot)
-    if(x$call$prop_bias != TRUE){
+    if(get_call(x$call$prop_bias) != TRUE){
       simple_ba_plot(x,
                      x_name,
                      y_name,
+                     geom,
                      smooth_method,
                      smooth_se)
     } else {
       bias_ba_plot(x,
                    x_name,
                    y_name,
+                   geom,
                    smooth_method,
                    smooth_se)
     }
@@ -184,11 +191,14 @@ check <- function(x) {
 
 check.simple_agree <- function(x) {
 
-  if(!(as.character(x$call[1]) %in% c("agree_nest","agree_reps","agree_test"))){
+  if(!(as.character(x$call[1]) %in% c("agree_nest","agree_reps","agree_test",
+                                      "SimplyAgree::agree_nest",
+                                      "SimplyAgree::agree_reps",
+                                      "SimplyAgree::agree_test"))){
     stop("agree_np is not supported by check method.")
   }
 
-  if(as.character(x$call[1]) != "agree_test"){
+  if(as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test"){
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
   } else{
@@ -208,7 +218,7 @@ check.simple_agree <- function(x) {
 
   dat = df
   ## Heteroskedasticity -------
-  mod_check = if (as.character(x$call[1]) != "agree_test") {
+  mod_check = if (as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test") {
     lme4::lmer(data = dat,
                form_lmer1)
   } else {
@@ -266,7 +276,7 @@ check.simple_agree <- function(x) {
                           signif(norm_test$p.value,4)))
 
   # Proportional Bias -----
-  if(as.character(x$call[1]) == "agree_test"){
+  if(as.character(x$call[1]) == "agree_test" || as.character(x$call[1]) == "SimplyAgree::agree_test"){
     mod2 = lm(delta ~ mean,
               data = dat)
     aov2 = as.data.frame(anova(mod_check, mod2))
@@ -287,8 +297,11 @@ check.simple_agree <- function(x) {
                           "Test for Linear Bias", ": p = ",
                           signif(lin_pval,4)))
 
-  return(list(p_norm = p_norm,
-              p_het = p_het,
-              p_bias = p_bias))
+  #return(list(p_norm = p_norm,
+  #            p_het = p_het,
+  #            p_bias = p_bias))
+
+  wrap_plots(p_norm, p_het,
+             p_bias, ncol = 2)
 
 }

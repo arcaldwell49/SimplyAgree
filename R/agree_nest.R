@@ -50,9 +50,10 @@ agree_nest <- function(x,
                        prop_bias = FALSE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
-  agree.l = 1 - (1 - agree.level) / 2
-  agree.u = (1 - agree.level) / 2
+  agree_l = 1 - (1 - agree.level) / 2
+  agree_u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
+  conf1 = conf.level
   if(TOST == TRUE){
     confq2 = qnorm(1 - (1 - conf.level) )
     alpha.l = 1 - (1 - conf.level)
@@ -129,11 +130,19 @@ agree_nest <- function(x,
     lmer_d = lme4::lmer(delta ~ mean + (1 | id),
                         data = df_lmer)
     d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
-    d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
-    d_lo = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))$lower.CL
-    d_hi = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))$upper.CL
+    #em_frame1 = as.data.frame(emmeans(lmer_d, ~1))
+    em_frame2 = summary(emmeans(lmer_d, ~1,
+                                    level = conf.level))
+    #colnames(em_frame1) = c("overall", "emmean", "se", "df", "lower", "upper")
+    colnames(em_frame2) = c("overall", "emmean", "se", "df", "lower", "upper")
+    d_bar =  em_frame2$emmean#as.data.frame(emmeans(lmer_d, ~1))$emmean #[1,2]
+    d_lo = em_frame2$lower #as.data.frame(emmeans(lmer_d, ~1,
+           #                      level = conf.level))$lower #[1,5]
+    d_hi = em_frame2$upper #as.data.frame(emmeans(lmer_d, ~1,
+           #                      level = conf.level))$upper #[1,6]
+    #if(length(d_hi) == 0 | length(d_lo) == 0 | length(d_hi) == 0){
+    #  stop("emmeans broken")
+    #}
   }
 
   sdw2 = sum((df3$m-1)/(nrow(df)-nrow(df3))*d_varl)
@@ -143,37 +152,37 @@ agree_nest <- function(x,
   loa_l = d_bar - agreeq*sqrt(var_tot)
   loa_u = d_bar + agreeq*sqrt(var_tot)
 
-  move.l.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
-  move.l.2 = ((1-1/mh)*sdw2*(1-(nrow(df)-nrow(df2))/(qchisq(alpha.l,nrow(df)-nrow(df2)))))^2
+  move_l_1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
+  move_l_2 = ((1-1/mh)*sdw2*(1-(nrow(df)-nrow(df2))/(qchisq(alpha.l,nrow(df)-nrow(df2)))))^2
 
-  move.l = var_tot - sqrt(move.l.1+move.l.2)
+  move_l = var_tot - sqrt(move_l_1+move_l_2)
 
-  move.u.1 = (d_var*((nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))-1))^2
-  move.u.2 = ((1-1/mh)*sdw2*((nrow(df)-nrow(df2))/(qchisq(alpha.u,nrow(df)-nrow(df2)))-1))^2
+  move_u_1 = (d_var*((nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))-1))^2
+  move_u_2 = ((1-1/mh)*sdw2*((nrow(df)-nrow(df2))/(qchisq(alpha.u,nrow(df)-nrow(df2)))-1))^2
 
-  move.u = var_tot + sqrt(move.u.1+move.u.2)
+  move_u = var_tot + sqrt(move_u_1+move_u_2)
 
-  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(var_tot))^2)
-  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(var_tot))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move_l))^2)
 
-  loa_l.l = loa_l - LME
-  loa_l.u = loa_l + RME
+  loa_l_l = loa_l - LME
+  loa_l_u = loa_l + RME
 
-  loa_u.l = loa_u - RME
-  loa_u.u = loa_u + LME
+  loa_u_l = loa_u - RME
+  loa_u_u = loa_u + LME
 
   if(prop_bias == TRUE){
     message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
   }
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
-    lower.ci = c(d_lo, loa_l.l, loa_u.l),
-    upper.ci = c(d_hi, loa_l.u, loa_u.u),
-    ci.level = c(conf.level, conf2, conf2),
+    lower.ci = c(d_lo, loa_l_l, loa_u_l),
+    upper.ci = c(d_hi, loa_l_u, loa_u_u),
+    ci.level = c(conf1, conf2, conf2),
     row.names = c("Bias","Lower LoA","Upper LoA")
   )
   if (!missing(delta)) {
-  rej <- (-delta < loa_l.l) * (loa_u.l < delta)
+  rej <- (-delta < loa_l_l) * (loa_u_l < delta)
   rej_text = "don't reject h0"
   if (rej == 1) {
     rej_text = "reject h0"

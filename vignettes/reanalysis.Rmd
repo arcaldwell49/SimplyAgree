@@ -7,21 +7,20 @@ vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = TRUE,
   comment = "#>"
 )
 ```
 
 ```{r setup, message=FALSE,warning=FALSE}
 library(SimplyAgree)
-library(cccrm)
 library(tidyverse)
-library(ggpubr)
 data("temps")
 df_temps = temps
 ```
@@ -30,13 +29,13 @@ df_temps = temps
 
 In the study by @ravanelli2020change, they attempted to estimate the effect of varying the time of day (AM or PM) on the measurement of thermoregulatory variables (e.g., rectal and esophageal temperature). In total, participants completed 6 separate trials wherein these variables were measured. While this is a robust study of these variables the analyses focused on ANOVAs and t-tests to determine whether or not the time-of-day (AM or PM). This poses a problem because 1) they were trying to test for equivalence and 2) this is a study of *agreement* not *differences* (See @Lin1989). Due to the latter point, the use of t-test or ANOVAs (F-tests) is rather inappropriate since they provide an answer to different, albeit related, question.
 
-Instead, the authors could test their hypotheses by using tools that  estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in `SimplyAgree` and `cccrm` [@cccrm] I believe we can get closer to the right answer.
+Instead, the authors could test their hypotheses by using tools that  estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in `SimplyAgree`^[ @cccrm is another package to check out] I believe we can get closer to the right answer.
 
-In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the `cccrm` package please see the work by @carrasco2003, @carrasco2009, and @carrasco2013. The `loa_mixed` function was inspired by the work of @Parker2016 which documented how to implement multi-level models and bootstrapping to estimate the limits of agreement. 
+In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the `cccrm` package please see the work by @carrasco2003, @carrasco2009, and @carrasco2013. The `loa_lme` function was inspired by the work of @Parker2016 which documented how to implement multi-level models and bootstrapping to estimate the limits of agreement. 
 
 # Concordance
 
-An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. In its simplest form it is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa).
+An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. It is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa).
 
 ```{r, fig.cap="Example of the Line of Identity"}
 qplot(1,1) + geom_abline(intercept = 0, slope = 1)
@@ -46,28 +45,7 @@ In the following sections, let us see how well esophageal and rectal temperature
 
 ## Rectal Temperature
 
-Now, based on the typical thresholds (0.8 can be considered a "good" CCC), neither Trec as a raw value or a change score (Trec delta) is within acceptable degrees of agreement. As I will address later, this may not be an accurate and there are sometimes where there is a low CCC but the expected differences between conditions is acceptable (limits of agreement).
-
-```{r}
-ccc_rec.post = cccrm::cccUst(dataset = df_temps,
-                            ry = "trec_post",
-                            rtime = "trial_condition",
-                            rmet = "tod")
-
-ccc_rec.post
-```
-
-
-```{r}
-ccc_rec.delta = cccrm::cccUst(dataset = df_temps,
-                            ry = "trec_delta",
-                            rtime = "trial_condition",
-                            rmet = "tod")
-
-ccc_rec.delta
-```
-
-Finally, we can visualize the concordance between the two different types of measurements and the respective time-of-day and conditions. From the plot we can see there is clear bias in the raw post exercise values (higher in the PM), but even when "correcting for baseline differences" by calculating the differences scores we can see a higher degree of disagreement between the two conditions. 
+We can visualize the concordance between the two different types of measurements and the respective time-of-day and conditions. From the plot we can see there is clear bias in the raw post exercise values (higher in the PM), but even when "correcting for baseline differences" by calculating the differences scores we can see a higher degree of disagreement between the two conditions. 
 
 ```{r pltsrec,fig.cap="Concordance Plots of Rectal Temperature",echo=FALSE,fig.width=8.5,fig.height=5}
 df_rec.delta = df_temps %>%
@@ -123,31 +101,11 @@ p_rec.post <- ggplot(df_rec.post, aes(x=AM, y=PM)) +
   theme_classic() +
   theme(legend.position = "bottom") +
   scale_color_viridis_d()
-ggarrange(p_rec.post,p_rec.delta)
+p_rec.post
+p_rec.delta
 ```
 
 # Esophageal Temperature
-
-We can replicate the same analyses for esophageal temperature. From the data and plots below we can see that the post exercise CCC is much improved compared to rectal temperature. However, there is no further improvement when looking at the delta (difference scores) for pre-to-post exercise. 
-
-```{r}
-ccc_eso.post = cccrm::cccUst(dataset = df_temps,
-                            ry = "teso_post",
-                            rtime = "trial_condition",
-                            rmet = "tod")
-
-ccc_eso.post
-```
-
-
-```{r}
-ccc_eso.delta = cccrm::cccUst(dataset = df_temps,
-                            ry = "teso_delta",
-                            rtime = "trial_condition",
-                            rmet = "tod")
-
-ccc_eso.delta
-```
 
 ```{r pltseso,fig.cap="Concordance Plots of Esophageal Temperature",echo=FALSE,fig.width=8.5,fig.height=5}
 df_eso.delta = df_temps %>%
@@ -203,12 +161,15 @@ p_eso.post <- ggplot(df_eso.post, aes(x=AM, y=PM)) +
   theme_classic() +
   theme(legend.position = "bottom") +
   scale_color_viridis_d()
-ggarrange(p_eso.post,p_eso.delta)
+
+p_eso.post
+
+p_eso.delta
 ```
 
 # Limits of Agreement
 
-In addition to the CCC we can use the `loa_mixed` function in order to calculate the "limits of agreement". Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a "wide" format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this "wide" format, we can then use the `loa_mixed` function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).
+The `loa_lme` function can be used to calculate the "limits of agreement". Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a "wide" format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this "wide" format, we can then use the `loa_lme` function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).
 
 ```{r, echo=FALSE}
 rec.post_loa = readr::read_rds("rec_post_loa.rds")
@@ -221,20 +182,21 @@ eso.delta_loa = readr::read_rds("eso_delta_loa.rds")
 
 ## Rectal Temperature
 
-So we will calculate the limits of agreement using the `loa_mixed` function. We will need to identify the columns with the right information using the `diff`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use bias-corrected accelerated (bca) bootstrap confidence intervals.
+So we will calculate the limits of agreement using the `loa_lme` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use percentile bootstrap confidence intervals.
 
 ```{r, eval=FALSE}
-rec.post_loa = SimplyAgree::loa_mixed(diff = "diff",
-                                     condition = "trial_condition",
-                                     id = "id",
-                                     data = df_rec.post,
-                                     conf.level = .95,
-                                     agree.level = .95,
-                                     replicates = 199,
-                                     type = "bca")
+rec.post_loa = SimplyAgree::loa_lme(diff = "diff",
+                                    condition = "trial_condition",
+                                    id = "id",
+                                    avg = "Average",
+                                    data = df_rec.post,
+                                    conf.level = .95,
+                                    agree.level = .95,
+                                    replicates = 199,
+                                    type = "perc")
 ```
 
-When we create a table of the results we can see that CCC and limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).
+When we create a table of the limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).
 
 ```{r}
 knitr::kable(rec.post_loa$loa,
@@ -248,6 +210,7 @@ plot(rec.post_loa)
 ```
 
 Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.
+
 ```{r}
 knitr::kable(rec.delta_loa$loa,
              caption = "LoA: Delta Trec")

@@ -15,10 +15,40 @@ testthat::test_that("Simple Use Run Through", {
                       prop_bias = TRUE)
   p1 = plot(agree_pr)
 
+  p1 = plot(agree_pr,
+       geom = "geom_point")
+
+  p1 = plot(agree_pr,
+       geom = "geom_bin2d")
+
+  p1 = plot(agree_pr,
+       geom = "geom_density_2d")
+
+  p1 = plot(agree_pr,
+       geom = "geom_density_2d_filled")
+
+  p1 = plot(agree_pr,
+       geom = "stat_density_2d")
+
   agree2 = agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
                       TOST = FALSE)
+
+  p1 = plot(agree2,
+            geom = "geom_point")
+
+  p1 = plot(agree2,
+            geom = "geom_bin2d")
+
+  p1 = plot(agree2,
+            geom = "geom_density_2d")
+
+  p1 = plot(agree2,
+            geom = "geom_density_2d_filled")
+
+  p1 = plot(agree2,
+            geom = "stat_density_2d")
 
   jmvagree1 = jmvagree(data = reps,
                        method1 = "x",

@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -75,6 +75,7 @@
   type <span class="op">=</span> <span class="fl">1</span>,
   x_name <span class="op">=</span> <span class="st">"x"</span>,
   y_name <span class="op">=</span> <span class="st">"y"</span>,
+  geom <span class="op">=</span> <span class="st">"geom_point"</span>,
   smooth_method <span class="op">=</span> <span class="cn">NULL</span>,
   smooth_se <span class="op">=</span> <span class="cn">TRUE</span>,
   <span class="va">...</span>
@@ -100,6 +101,8 @@ for details.
 <dd><p>Name/label for x values (first measurement)</p></dd>
 <dt>y_name</dt>
 <dd><p>Name/label for y values (second measurement)</p></dd>
+<dt>geom</dt>
+<dd><p>String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".</p></dd>
 <dt>smooth_method</dt>
 <dd><p>Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.</p></dd>
 <dt>smooth_se</dt>

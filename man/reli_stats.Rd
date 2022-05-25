@@ -14,7 +14,8 @@ reli_stats(
   cv_calc = "MSE",
   conf.level = 0.95,
   other_ci = FALSE,
-  replicates = 500
+  type = "perc",
+  replicates = 1999
 )
 }
 \arguments{
@@ -36,7 +37,9 @@ reli_stats(
 
 \item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
 
-\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 500.}
+\item{type}{A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.}
+
+\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 1999.}
 }
 \value{
 Returns single list with the results of the agreement analysis.
@@ -67,6 +70,7 @@ The "residuals" option uses the sjstats R package approach which uses the model 
 This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 The estimates of variances for any of the measures are derived from linear mixed models.
 The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
+When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
 }
 \section{References}{
 

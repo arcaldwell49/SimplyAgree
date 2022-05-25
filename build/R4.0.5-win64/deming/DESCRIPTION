@@ -1,0 +1,16 @@
+Title: Deming, Theil-Sen, Passing-Bablock and Total Least Squares
+        Regression
+Maintainer: Terry Therneau <therneau.terry@mayo.edu>
+Description: Generalized Deming regression, Theil-Sen regression and Passing-Bablock regression functions.
+Imports: boot
+Priority: optional
+Package: deming
+Version: 1.4
+LazyData: Yes
+Author: Terry Therneau
+License: LGPL (>= 2)
+NeedsCompilation: no
+Packaged: 2018-11-13 16:44:52 UTC; therneau
+Repository: CRAN
+Date/Publication: 2018-11-13 17:50:13 UTC
+Built: R 4.0.4; ; 2021-03-28 05:46:28 UTC; windows

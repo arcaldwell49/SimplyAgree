@@ -86,7 +86,7 @@ options:
     - name: plotbland
       title: Bland-Altman plot
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             `TRUE` or `FALSE` (default), for Bland-Altman plot
@@ -98,4 +98,39 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), for Bland-Altman plot
+    - name: plotcheck
+      title: Check assumptions
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), assumptions plots
+    - name: prop_bias
+      title: Assume proportional bias?
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE`
+
+    - name: xlabel
+      title: Label for x-axis
+      type: String
+      default: "Average of Both Methods"
+      description:
+          ui: >
+            The label for the x-axis on the BA plot
+          R: >
+            The label for the x-axis on the BA plot
+
+    - name: ylabel
+      title: Label for (left) y-axis
+      type: String
+      default:  "Difference between Methods"
+      description:
+          ui: >
+            The label for the y-axis on the BA plot
+          R: >
+            The label for the y-axis on the BA plot
+
 ...

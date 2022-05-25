@@ -169,13 +169,13 @@ loa_mixed = function(diff,
            color = "Conditions") +
       theme_bw()
 
-      if(condition == 1){
-        p = p + geom_point()
-      } else{
-        p = p +
-          geom_point(aes(color=Condition)) +
-          scale_color_viridis_d()
-      }
+    if(condition == 1){
+      p = p + geom_point()
+    } else{
+      p = p +
+        geom_point(aes(color=Condition)) +
+        scale_color_viridis_d()
+    }
 
   } else {
     p = NULL

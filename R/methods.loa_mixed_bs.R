@@ -24,7 +24,7 @@
 print.loa_mixed_bs <- function(x,...){
   agree = paste0(x$agree.level*100)
   conf = paste0(x$conf.level*100)
-  title = paste0(agree,"% Limits of Agreement with Boostrap ",conf, "% Confidence Intervals \n")
+  title = paste0(agree,"% Limits of Agreement with Bootstrap ",conf, "% Confidence Intervals \n")
   cat(title)
   print(x$loa)
 }

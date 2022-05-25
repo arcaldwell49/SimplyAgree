@@ -23,20 +23,22 @@ Imports:
     tidyr,
     stringr,
     jmvcore,
-    quantreg
+    quantreg,
+    patchwork,
+    insight,
+    nlme,
+    purrr
 Suggests: 
     knitr,
     rmarkdown,
     testthat,
     tidyverse,
     readr,
-    ggpubr,
     covr,
-    cccrm,
     mgcv,
     ggeffects,
     deming
 VignetteBuilder:
     knitr
 Depends: 
-    R (>= 3.5)
+    R (>= 3.6)

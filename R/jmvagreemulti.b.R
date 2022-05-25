@@ -33,25 +33,52 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 ciWidth = self$options$ciWidth/100
                 agreeWidth = self$options$agreeWidth/100
                 delta_val = jmvcore::toNumeric(self$options$testValue)
+                prop_bias = self$options$prop_bias
                 if(self$options$valEq){
 
-                    res = agree_reps(
+                    res = SimplyAgree::agree_reps(
                         x = method1,
                         y = method2,
                         id = id,
                         data = data,
                         delta = delta_val,
                         conf.level = ciWidth,
-                        agree.level = agreeWidth
+                        agree.level = agreeWidth,
+                        TOST = TRUE
 
                     )
 
-                    pr_res = paste0("Limit of Agreement = ", res$agree.level*100, "%",
-                                    "\n",
-                                    "alpha =", (1-res$conf.level), "|", res$conf.level*100,"% Confidence Interval",
-                                    "\n",
-                                    "\n",
-                                    "Hypothesis Test: ",res$h0_test)
+                    res$call$conf.level = ciWidth
+                    res$call$agree.level = agreeWidth
+                    res$call$delta = as.numeric(delta_val)
+                    res$call$id = "id"
+                    res$call$x = "method1"
+                    res$call$y = "method2"
+                    res$call$data = as.data.frame(data)
+                    res$call$prop_bias = prop_bias
+                    res$call$TOST = TRUE
+
+                    pr_res1 = res$call
+                    exact_ci = ifelse(res$call$TOST,
+                                      1-((1-res$call$conf.level)*2),
+                                      res$call$conf.level)
+                    if(res$call$prop_bias){
+                      pbias_txt = "Warning: agreement limits at average response with proportional bias. Check plots."
+                    } else {
+                      pbias_txt = "\n"
+                    }
+                    pr_res = paste0(
+                      pbias_txt,
+                      "\n",
+                      "Limit of Agreement = ",
+                      agreeWidth * 100,
+                      "%",
+                      "\n",
+                      "Confidence Interval = ",
+                      #"alpha =", (1-res$call$conf.level),   "|",
+                      ciWidth*100,
+                      "%"
+                    )
 
                     self$results$text$setContent(pr_res)
                     table1 <- self$results$blandtab
@@ -92,15 +119,40 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                         data = data,
                         delta = delta_val,
                         conf.level = ciWidth,
-                        agree.level = agreeWidth
+                        agree.level = agreeWidth,
+                        TOST = TRUE
                     )
 
-                    pr_res = paste0("Limit of Agreement = ", res$agree.level*100, "%",
-                                    "\n",
-                                    "alpha =", (1-res$conf.level), "|", res$conf.level*100,"% Confidence Interval",
-                                    "\n",
-                                    "\n",
-                                    "Hypothesis Test: ",res$h0_test)
+                    res$call$conf.level = ciWidth
+                    res$call$agree.level = agreeWidth
+                    res$call$delta = as.numeric(delta_val)
+                    res$call$data = as.data.frame(data)
+                    res$call$prop_bias = prop_bias
+                    res$call$id = "id"
+                    res$call$x = "method1"
+                    res$call$y = "method2"
+                    pr_ci = paste0(ciWidth*100, "% (Bias), ",(1-(1-ciWidth)*2)*100, "% (LoA)")
+
+                    pr_res1 = res$call
+                    exact_ci = ifelse(res$call$TOST,
+                                      1-((1-res$call$conf.level)*2),
+                                      res$call$conf.level)
+                    if(res$call$prop_bias){
+                      pbias_txt = "Warning: agreement limits at average response with proportional bias. Check plots. \n"
+                    } else {
+                      pbias_txt = "\n"
+                    }
+                    pr_res = paste0(
+                      pbias_txt,
+                      "\n",
+                      "Limit of Agreement = ",
+                      agreeWidth * 100,
+                      "%",
+                      "\n",
+                      "Confidence Interval = ",
+                      #"alpha =", (1-res$call$conf.level),   "|",
+                      pr_ci
+                    )
 
                     self$results$text$setContent(pr_res)
                     table1 <- self$results$blandtab
@@ -157,11 +209,15 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = plot(image$state) +
+            plotpr = plot(image$state,
+                          x_name = "Method 1", y_name = "Method 2") +
+              labs(y = self$options$ylabel,
+                   x = self$options$xlabel) +
                 # set transparency
                 theme(
                     panel.grid.major = element_blank(),
                     panel.grid.minor = element_blank(),
+                    legend.background = element_rect(fill = "transparent",colour = NA),
                     panel.background = element_rect(fill = "transparent",colour = NA),
                     plot.background = element_rect(fill = "transparent",colour = NA)
                 )
@@ -177,7 +233,8 @@ jmvagreemultiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = image$state$identity.plot+
+            plotpr = plot(image$state, type =2,
+                          x_name = "1", y_name = "2")+
                 # set transparency
                 theme(
                     panel.grid.major = element_blank(),

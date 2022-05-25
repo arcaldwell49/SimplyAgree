@@ -9,17 +9,19 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
 #' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
-#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 500.
+#' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
+#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
 #' @details
 #'
 #' The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 #' The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
-#'The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+#' The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 #'
 #' @details
 #' This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
 #' The estimates of variances for any of the measures are derived from linear mixed models.
 #' The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
+#' When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
@@ -52,6 +54,7 @@
 #'
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals
 #' @importFrom tidyselect all_of
+#' @importFrom insight get_response
 #' @import dplyr
 #' @import ggplot2
 #' @import lme4
@@ -67,7 +70,8 @@ reli_stats = function(measure,
                       cv_calc = "MSE",
                       conf.level = .95,
                       other_ci = FALSE,
-                      replicates = 500){
+                      type = "perc",
+                      replicates = 1999){
   alpha = 1-conf.level
   x = data
   if(wide == TRUE){
@@ -191,10 +195,24 @@ reli_stats = function(measure,
 
 
   if(other_ci == TRUE){
-  res_other = boot_rel(x.df,
-                       cv_calc = cv_calc,
-                       nboot = replicates,
-                       conf.level = conf.level)
+
+    boot_reli <- function(.) {
+      reli_mod_mse(., cv_calc = cv_calc)
+    }
+
+    boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
+                    type = "parametric", use.u = FALSE)
+    res_other = tidy_boot(boo2,
+                         conf.int = TRUE,
+                         conf.level = conf.level,
+                         conf.method = type) %>%
+      rename(estimate = statistic,
+             se = std.error,
+             lower.ci = conf.low,
+             upper.ci = conf.high)
+      row.names(res) = res_other$term
+      res_other = res_other %>%
+        select(estimate,bias,se,lower.ci,upper.ci)
   } else{
     SEM = sqrt(MSE)
     sd_tots = sqrt(sum(stats[2,])/(n_id-1))
@@ -213,10 +231,14 @@ reli_stats = function(measure,
     }
 
     cv_out = stddev/mw
-    res_other = list(cv = list(est = cv_out),
-               SEM = list(est = SEM),
-               SEP = list(est = SEP),
-               SEE = list(est = SEE))
+    res_other = data.frame(
+      estimate = c(cv_out, SEM, SEP, SEE),
+      bias = NA,
+      se = NA,
+      lower.ci = NA,
+      upper.ci = NA,
+      row.names = c("cv", "SEM", "SEP", "SEE")
+    )
   }
 
 
@@ -246,10 +268,10 @@ reli_stats = function(measure,
                  n.id = nrow(ranef(mod.lmer)$id),
                  n.item = nrow(ranef(mod.lmer)$item),
                  call = call2,
-                 cv = res_other$cv,
-                 SEM = res_other$SEM,
-                 SEE = res_other$SEE,
-                 SEP = res_other$SEP)
+                 cv = res_other["cv",],
+                 SEM = res_other["SEM",],
+                 SEE = res_other["SEE",],
+                 SEP = res_other["SEP",])
 
 
   structure(result,

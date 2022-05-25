@@ -33,7 +33,7 @@ testthat::test_that("basic runs", {
                               tolerance = 0.001)
   pr_test = print(test_bca)
   p = plot(test_bca)
-  test_perc = loa_mixed(
+  test_perc = suppressWarnings(loa_mixed(
     diff = "diff",
     condition = "trial_condition",
     id = "id",
@@ -42,7 +42,7 @@ testthat::test_that("basic runs", {
     agree.level = .95,
     replicates = 99,
     type = "perc"
-  )
+  ))
   testthat::expect_equivalent(test_perc$loa$estimate,
                               estimates1,
                               tolerance = 0.001)
