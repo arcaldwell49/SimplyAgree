@@ -434,8 +434,7 @@ mover_emm = function(lmer_mod,
                        length.out = 100
                      )))
 
-  emm_med = as.data.frame(confint(emmeans(ref_med,
-                                          ~ mean), level = conf.level))
+  emm_med = confint(emmeans(ref_med,~ mean), level = conf.level)
   df_coef_med = data.frame(
     at = emm_med$mean,
     estimate = emm_med$emmean,
@@ -494,8 +493,7 @@ simple_emm = function(lm_mod,
                        length.out = 100
                      )))
 
-  emm_med = as.data.frame(confint(emmeans(ref_med,
-                                          ~ mean), level = conf))
+  emm_med = confint(emmeans(ref_med,  ~ mean), level = conf)
   df_coef_med = data.frame(
     at = emm_med$mean,
     estimate = emm_med$emmean,
