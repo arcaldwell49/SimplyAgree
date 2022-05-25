@@ -164,11 +164,11 @@ agree_reps <- function(x,
   LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
   RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
 
-  loa_l.l = loa_l - LME
-  loa_l.u = loa_l + RME
+  loa_l_l = loa_l - LME
+  loa_l_u = loa_l + RME
 
-  loa_u.l = loa_u - RME
-  loa_u.u = loa_u + LME
+  loa_u_l = loa_u - RME
+  loa_u_u = loa_u + LME
 
   if(prop_bias == TRUE){
     message("prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.")
@@ -177,14 +177,14 @@ agree_reps <- function(x,
   ## Save LoA ----
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
-    lower.ci = c(d_lo, loa_l.l, loa_u.l),
-    upper.ci = c(d_hi, loa_l.u, loa_u.u),
+    lower.ci = c(d_lo, loa_l_l, loa_u_l),
+    upper.ci = c(d_hi, loa_l_u, loa_u_u),
     ci.level = c(conf.level, conf2, conf2),
     row.names = c("Bias","Lower LoA","Upper LoA")
   )
 
   if (!missing(delta)) {
-    rej <- (-delta < loa_l.l) * (loa_u.l < delta)
+    rej <- (-delta < loa_l_l) * (loa_u_l < delta)
     rej_text = "don't reject h0"
     if (rej == 1) {
       rej_text = "reject h0"
