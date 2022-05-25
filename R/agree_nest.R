@@ -50,9 +50,10 @@ agree_nest <- function(x,
                        prop_bias = FALSE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
-  agree.l = 1 - (1 - agree.level) / 2
-  agree.u = (1 - agree.level) / 2
+  agree_l = 1 - (1 - agree.level) / 2
+  agree_u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
+  conf1 = conf.level
   if(TOST == TRUE){
     confq2 = qnorm(1 - (1 - conf.level) )
     alpha.l = 1 - (1 - conf.level)
@@ -169,8 +170,8 @@ agree_nest <- function(x,
     estimate = c(d_bar, loa_l, loa_u),
     lower.ci = c(d_lo, loa_l_l, loa_u_l),
     upper.ci = c(d_hi, loa_l_u, loa_u_u),
-    ci.level = c(conf.level, conf2, conf2),
-    row.names = c("Bias","Lower LoA","Upper LoA")
+    ci.level = c(conf1, conf2, conf2)#,
+    #row.names = c("Bias","Lower LoA","Upper LoA")
   )
   if (!missing(delta)) {
   rej <- (-delta < loa_l_l) * (loa_u_l < delta)
