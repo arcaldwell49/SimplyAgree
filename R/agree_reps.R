@@ -137,11 +137,17 @@ agree_reps <- function(x,
                   data = df)
 
     d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
-    d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
-    d_lo = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))$lower.CL
-    d_hi = as.data.frame(emmeans(lmer_d, ~1,
-                                 level = conf.level))$upper.CL
+    em_frame = summary(emmeans(lmer_d, ~1,
+                       level = conf.level))
+    colnames(em_frame) = c("overall", "emmean", "se", "df", "lower", "upper")
+    d_bar = em_frame$emmean
+    d_lo = em_frame$lower
+    d_hi = em_frame$upper
+    #d_bar = as.data.frame(emmeans(lmer_d, ~1))$emmean
+    #d_lo = as.data.frame(emmeans(lmer_d, ~1,
+    #                             level = conf.level))$lower.CL
+    #d_hi = as.data.frame(emmeans(lmer_d, ~1,
+    #                             level = conf.level))$upper.CL
     sxw2 = as.data.frame(VarCorr(lmer_x))$vcov[2]
     syw2 = as.data.frame(VarCorr(lmer_y))$vcov[2]
     tot_var = d_var + (1-1/mxh_l)*sxw2 + (1-1/myh_l)*syw2

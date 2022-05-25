@@ -131,7 +131,7 @@ agree_nest <- function(x,
                         data = df_lmer)
     d_var = as.data.frame(VarCorr(lmer_d))$vcov[1]
     #em_frame1 = as.data.frame(emmeans(lmer_d, ~1))
-    em_frame2 =as.data.frame(emmeans(lmer_d, ~1,
+    em_frame2 = summary(emmeans(lmer_d, ~1,
                                     level = conf.level))
     #colnames(em_frame1) = c("overall", "emmean", "se", "df", "lower", "upper")
     colnames(em_frame2) = c("overall", "emmean", "se", "df", "lower", "upper")
