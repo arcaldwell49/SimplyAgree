@@ -135,6 +135,9 @@ agree_nest <- function(x,
                                  level = conf.level))$lower.CL
     d_hi = as.data.frame(emmeans(lmer_d, ~1,
                                  level = conf.level))$upper.CL
+    if(length(d_hi) == 0 | length(d_lo) == 0 | length(d_hi) == 0){
+      stop("emmeans broken")
+    }
   }
 
   sdw2 = sum((df3$m-1)/(nrow(df)-nrow(df3))*d_varl)
@@ -168,10 +171,10 @@ agree_nest <- function(x,
   }
   df_loa = data.frame(
     estimate = c(d_bar, loa_l, loa_u),
-    lower.ci = c(d_lo, loa_l_l, loa_u_l),
-    upper.ci = c(d_hi, loa_l_u, loa_u_u),
-    ci.level = c(conf1, conf2, conf2)#,
-    #row.names = c("Bias","Lower LoA","Upper LoA")
+    #lower.ci = c(d_lo, loa_l_l, loa_u_l),
+    #upper.ci = c(d_hi, loa_l_u, loa_u_u),
+    ci.level = c(conf1, conf2, conf2),
+    row.names = c("Bias","Lower LoA","Upper LoA")
   )
   if (!missing(delta)) {
   rej <- (-delta < loa_l_l) * (loa_u_l < delta)
