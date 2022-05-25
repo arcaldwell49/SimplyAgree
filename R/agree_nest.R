@@ -138,7 +138,7 @@ agree_nest <- function(x,
     d_bar =  em_frame2$emmean#as.data.frame(emmeans(lmer_d, ~1))$emmean #[1,2]
     d_lo = em_frame2$lower #as.data.frame(emmeans(lmer_d, ~1,
            #                      level = conf.level))$lower #[1,5]
-    d_hi = em_frame$upper #as.data.frame(emmeans(lmer_d, ~1,
+    d_hi = em_frame2$upper #as.data.frame(emmeans(lmer_d, ~1,
            #                      level = conf.level))$upper #[1,6]
     #if(length(d_hi) == 0 | length(d_lo) == 0 | length(d_hi) == 0){
     #  stop("emmeans broken")
