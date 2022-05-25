@@ -143,18 +143,18 @@ agree_nest <- function(x,
   loa_l = d_bar - agreeq*sqrt(var_tot)
   loa_u = d_bar + agreeq*sqrt(var_tot)
 
-  move.l.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
-  move.l.2 = ((1-1/mh)*sdw2*(1-(nrow(df)-nrow(df2))/(qchisq(alpha.l,nrow(df)-nrow(df2)))))^2
+  move_l_1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
+  move_l_2 = ((1-1/mh)*sdw2*(1-(nrow(df)-nrow(df2))/(qchisq(alpha.l,nrow(df)-nrow(df2)))))^2
 
-  move.l = var_tot - sqrt(move.l.1+move.l.2)
+  move_l = var_tot - sqrt(move_l_1+move_l_2)
 
-  move.u.1 = (d_var*((nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))-1))^2
-  move.u.2 = ((1-1/mh)*sdw2*((nrow(df)-nrow(df2))/(qchisq(alpha.u,nrow(df)-nrow(df2)))-1))^2
+  move_u_1 = (d_var*((nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))-1))^2
+  move_u_2 = ((1-1/mh)*sdw2*((nrow(df)-nrow(df2))/(qchisq(alpha.u,nrow(df)-nrow(df2)))-1))^2
 
-  move.u = var_tot + sqrt(move.u.1+move.u.2)
+  move_u = var_tot + sqrt(move_u_1+move_u_2)
 
-  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(var_tot))^2)
-  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(var_tot))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(var_tot)-sqrt(move_l))^2)
 
   loa_l_l = loa_l - LME
   loa_l_u = loa_l + RME

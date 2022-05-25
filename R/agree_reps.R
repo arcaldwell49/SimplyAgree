@@ -55,13 +55,13 @@ agree_reps <- function(x,
   confq = qnorm(1 - (1 - conf.level) / 2)
   if(TOST == TRUE){
     confq2 = qnorm(1 - (1 - conf.level) )
-    alpha.l = 1 - (1 - conf.level)
-    alpha.u = (1 - conf.level)
+    alpha_l = 1 - (1 - conf.level)
+    alpha_u = (1 - conf.level)
     conf2 = 1 - (1 - conf.level) * 2
   } else {
     confq2 = qnorm(1 - (1 - conf.level) / 2)
-    alpha.l = 1 - (1 - conf.level) / 2
-    alpha.u = (1 - conf.level) / 2
+    alpha_l = 1 - (1 - conf.level) / 2
+    alpha_u = (1 - conf.level) / 2
     conf2 = conf.level
   }
 
@@ -93,11 +93,11 @@ agree_reps <- function(x,
 
   df2 = df %>%
     group_by(id) %>%
-    summarize(mxi = sum(!is.na(x)),
-              myi = sum(!is.na(y)),
-              x_bar = mean(x, na.rm=TRUE),
+    summarize(mxi = base::sum(!is.na(x)),
+              myi = base::sum(!is.na(y)),
+              x_bar = base::mean(x, na.rm=TRUE),
               x_var = var(x, na.rm=TRUE),
-              y_bar = mean(y, na.rm=TRUE),
+              y_bar = base::mean(y, na.rm=TRUE),
               y_var = var(y, na.rm=TRUE),
               .groups = "drop") %>%
     mutate(d = x_bar-y_bar,
@@ -110,16 +110,16 @@ agree_reps <- function(x,
   df$delta = (df$x - df$y)
   #lmer_mod = lme4::lmer(delta ~ 1 + (1|id),
   #                data = df)
- # sum(as.data.frame(VarCorr(lmer_mod))$vcov)
-  Nx = sum(df2$mxi)
-  Ny = sum(df2$myi)
-  mxh = nrow(df2)/sum(1/df2$mxi)
-  myh = nrow(df2)/sum(1/df2$myi)
+ # base::sum(as.data.frame(VarCorr(lmer_mod))$vcov)
+  Nx = base::sum(df2$mxi)
+  Ny = base::sum(df2$myi)
+  mxh = nrow(df2)/base::sum(1/df2$mxi)
+  myh = nrow(df2)/base::sum(1/df2$myi)
 
   if(prop_bias == FALSE){
-    sxw2 = sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
-    syw2 = sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
-    d_bar = mean(df2$d, na.rm = TRUE)
+    sxw2 = base::sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
+    syw2 = base::sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
+    d_bar = base::mean(df2$d, na.rm = TRUE)
     d_var = var(df2$d, na.rm = TRUE)
     d_lo = d_bar - confq*sqrt(d_var)/sqrt(nrow(df2))
     d_hi = d_bar + confq*sqrt(d_var)/sqrt(nrow(df2))
@@ -151,18 +151,18 @@ agree_reps <- function(x,
 
   loa_u = d_bar + agreeq*sqrt(tot_var)
 
-  move.l.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.l,nrow(df2)-1))))^2
-  move.l.2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha.l,Nx-nrow(df2)))))^2
-  move.l.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.l,Ny-nrow(df2)))))^2
-  move.l = tot_var - sqrt(move.l.1+move.l.2+move.l.3)
+  move_l_1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha_l,nrow(df2)-1))))^2
+  move_l_2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha_l,Nx-nrow(df2)))))^2
+  move_l_3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha_l,Ny-nrow(df2)))))^2
+  move_l = tot_var - sqrt(move_l_1+move_l_2+move_l_3)
 
-  move.u.1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha.u,nrow(df2)-1))))^2
-  move.u.2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha.u,Nx-nrow(df2)))))^2
-  move.u.3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha.u,Ny-nrow(df2)))))^2
-  move.u = tot_var + sqrt(move.u.1+move.u.2+move.u.3)
+  move_u_1 = (d_var*(1-(nrow(df2)-1)/(qchisq(alpha_u,nrow(df2)-1))))^2
+  move_u_2 = ((1-1/mxh)*sxw2*(1-(Nx-nrow(df2))/(qchisq(alpha_u,Nx-nrow(df2)))))^2
+  move_u_3 = ((1-1/myh)*syw2*(1-(Ny-nrow(df2))/(qchisq(alpha_u,Ny-nrow(df2)))))^2
+  move_u = tot_var + sqrt(move_u_1+move_u_2+move_u_3)
 
-  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move.u)-sqrt(tot_var))^2)
-  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move.l))^2)
+  LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(tot_var))^2)
+  RME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(tot_var)-sqrt(move_l))^2)
 
   loa_l_l = loa_l - LME
   loa_l_u = loa_l + RME
