@@ -21,7 +21,7 @@ loa_lme(
 \arguments{
 \item{diff}{Column name of the data frame that includes the difference between the 2 measurements of interest.}
 
-\item{avg}{Column name of the data frame that includes the difference between the 2 measurements of interest.}
+\item{avg}{Column name of the data frame that includes the average of the 2 measurements of interest.}
 
 \item{condition}{Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
 

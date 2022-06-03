@@ -2,7 +2,7 @@
 #' @description This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
 #' @param data A data frame containing the variables within the model.
 #' @param diff Column name of the data frame that includes the difference between the 2 measurements of interest.
-#' @param avg Column name of the data frame that includes the difference between the 2 measurements of interest.
+#' @param avg Column name of the data frame that includes the average of the 2 measurements of interest.
 #' @param condition Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
 #' @param id Column name indicating the subject/participant identifier
 #' @param conf.level The confidence level required. Default is 95\%.
