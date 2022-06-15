@@ -123,6 +123,23 @@ simple_ba_plot = function(x,
       scale_fill_distiller(palette = "Blues", direction = 1)
     }  else {
     stop("geom option not supported")
+    }
+
+  if(x$call$TOST){
+    cap1 = paste0("Agreement = ",
+                  agree.level * 100,
+                  "% \n",
+                  "Confidence Level = ",
+                  conf.level * 100, "(Bias)/",
+                  conf.level * 100, "(LoA)",
+                  "%")
+  } else {
+    cap1 = paste0("Agreement = ",
+                  agree.level * 100,
+                  "% \n",
+                  "Confidence Level = ",
+                  conf.level * 100,
+                  "%")
   }
 
 
@@ -139,8 +156,7 @@ simple_ba_plot = function(x,
                     inherit.aes = FALSE)+
     labs(x = paste0("Average of ", x_lab ," & ", y_lab),
          y = paste0("Difference between Methods ",x_lab ," & ", y_lab),
-         caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                          "Confidence Level = ", conf.level * 100, "%"),
+         caption = cap1,
          color = "") +
     scale_color_viridis_d(option = "C", end = .8) +
     theme_bw() +
@@ -321,7 +337,24 @@ bias_ba_plot = function(x,
                       x= at,
                       fill=text)) +
       scale_fill_viridis_d(option = "C", end = .8)
-  }
+    }
+
+    if(x$call$TOST){
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100, "(Bias)/",
+                    conf.level * 100, "(LoA)",
+                    "%")
+    } else {
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100,
+                    "%")
+    }
     bland_alt.plot = bland_alt.plot +
       geom_line(inherit.aes = FALSE,
                 data = emm,
@@ -332,8 +365,7 @@ bias_ba_plot = function(x,
       scale_color_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
-           caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                            "Confidence Level = ", conf.level * 100, "%"),
+           caption = cap1,
            guides = "") +
       theme_bw() +
       theme(legend.position = "left",
@@ -373,7 +405,24 @@ bias_ba_plot = function(x,
                       x= at,
                       fill=text)) +
       scale_fill_viridis_d(option = "C", end = .8)
-  }
+    }
+
+    if(x$call$TOST){
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100, "(Bias)/",
+                    conf.level * 100, "(LoA)",
+                    "%")
+    } else {
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100,
+                    "%")
+    }
     bland_alt.plot = bland_alt.plot +
       geom_line(inherit.aes = FALSE,
                 data = emm,
@@ -383,8 +432,7 @@ bias_ba_plot = function(x,
       scale_color_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
-           caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                            "Confidence Level = ", conf.level * 100, "%"),
+           caption = cap1,
            guides = "") +
       theme_bw() +
       theme(legend.position = "left",
@@ -429,6 +477,22 @@ bias_ba_plot = function(x,
         scale_fill_viridis_d(option = "C", end = .8)
     }
 
+    if(x$call$TOST){
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100, "(Bias)/",
+                    conf.level * 100, "(LoA)",
+                    "%")
+    } else {
+      cap1 = paste0("Agreement = ",
+                    agree.level * 100,
+                    "% \n",
+                    "Confidence Level = ",
+                    conf.level * 100,
+                    "%")
+    }
     bland_alt.plot = bland_alt.plot +
       geom_line(inherit.aes = FALSE,
                 data = emm,
@@ -438,8 +502,7 @@ bias_ba_plot = function(x,
       scale_color_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
-           caption = paste0("Agreement = ", agree.level * 100,"% \n",
-                            "Confidence Level = ", conf.level * 100, "%"),
+           caption = cap1,
            guides = "") +
       theme_bw() +
       theme(legend.position = "left",

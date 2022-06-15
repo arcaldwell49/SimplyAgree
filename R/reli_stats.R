@@ -209,8 +209,9 @@ reli_stats = function(measure,
       rename(estimate = statistic,
              se = std.error,
              lower.ci = conf.low,
-             upper.ci = conf.high)
-      row.names(res) = res_other$term
+             upper.ci = conf.high) %>%
+      as.data.frame()
+      row.names(res_other) = res_other$term
       res_other = res_other %>%
         select(estimate,bias,se,lower.ci,upper.ci)
   } else{

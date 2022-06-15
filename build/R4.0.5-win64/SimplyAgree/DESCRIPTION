@@ -17,6 +17,6 @@ Imports: ggplot2, emmeans, lme4, boot, stats, dplyr, magrittr,
 Suggests: knitr, rmarkdown, testthat, tidyverse, readr, covr, mgcv,
         ggeffects, deming
 VignetteBuilder: knitr
-Depends: R (>= 3.5)
+Depends: R (>= 3.6)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.0.5; ; 2022-05-24 15:14:20 UTC; windows
+Built: R 4.0.5; ; 2022-06-15 19:48:51 UTC; windows
