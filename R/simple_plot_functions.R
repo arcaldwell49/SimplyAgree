@@ -130,9 +130,8 @@ simple_ba_plot = function(x,
                   agree.level * 100,
                   "% \n",
                   "Confidence Level = ",
-                  conf.level * 100, "(Bias)/",
-                  conf.level * 100, "(LoA)",
-                  "%")
+                  conf.level * 100, "% (Bias) & ",
+                  (1-(1-conf.level)*2) * 100, "% (LoA)")
   } else {
     cap1 = paste0("Agreement = ",
                   agree.level * 100,
@@ -344,9 +343,8 @@ bias_ba_plot = function(x,
                     agree.level * 100,
                     "% \n",
                     "Confidence Level = ",
-                    conf.level * 100, "(Bias)/",
-                    conf.level * 100, "(LoA)",
-                    "%")
+                    conf.level * 100, "% (Bias) & ",
+                    (1-(1-conf.level)*2) * 100, "% (LoA)")
     } else {
       cap1 = paste0("Agreement = ",
                     agree.level * 100,
@@ -412,9 +410,8 @@ bias_ba_plot = function(x,
                     agree.level * 100,
                     "% \n",
                     "Confidence Level = ",
-                    conf.level * 100, "(Bias)/",
-                    conf.level * 100, "(LoA)",
-                    "%")
+                    conf.level * 100, "% (Bias) & ",
+                    (1-(1-conf.level)*2) * 100, "% (LoA)")
     } else {
       cap1 = paste0("Agreement = ",
                     agree.level * 100,
@@ -482,9 +479,8 @@ bias_ba_plot = function(x,
                     agree.level * 100,
                     "% \n",
                     "Confidence Level = ",
-                    conf.level * 100, "(Bias)/",
-                    conf.level * 100, "(LoA)",
-                    "%")
+                    conf.level * 100, "% (Bias) & ",
+                    (1-(1-conf.level)*2) * 100, "% (LoA)")
     } else {
       cap1 = paste0("Agreement = ",
                     agree.level * 100,
