@@ -109,4 +109,20 @@ testthat::test_that("Simple Use Run Through", {
     expect_error(check(agree1))
 
 
+    p1 = plot(agree1,
+              geom = "geom_point")
+
+    p1 = plot(agree1,
+              geom = "geom_bin2d")
+
+    p1 = plot(agree1,
+              geom = "geom_density_2d")
+
+    p1 = plot(agree1,
+              geom = "geom_density_2d_filled")
+
+    p1 = plot(agree1,
+              geom = "stat_density_2d")
+
+
 })
