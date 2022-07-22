@@ -8,3 +8,5 @@ inst/doc
 CRAN-RELEASE
 .DS_Store
 .DS_Store?
+/doc/
+/Meta/
