@@ -11,6 +11,15 @@ testthat::test_that("Compare to NCSS 303-26", {
                 data = df1,
                 weighted = FALSE,
                 error.ratio = 4)
+  dm_u_jam = jmvdeming(data = df1,
+                       method1 = 'x',
+                       method2 = 'y')
+  dm_u_jam2 = jmvdeming(data = df1,
+                       method1 = 'x',
+                       method2 = 'y',
+                       plotcon = TRUE,
+                       plotcheck = TRUE,
+                       weighted = TRUE)
   expect_equivalent(round(dm_u$model$coef,4),
                     c(-0.0897, 1.0012))
 

@@ -142,11 +142,11 @@ agree_np <- function(x,
     quan_mod2 = rq(formula =  delta ~ mean,
                   data = df,
                   tau = c(agree.u,.5,agree.l))
-    rq_obj = quantreg::summary.rq(quan_mod2, se = "boot")
-    co <- as.data.frame(rq_obj[["coefficients"]])
+    #rq_obj = suppressWarnings(quantreg::summary.rq(quan_mod2, se = "boot"))
+    #co <- as.data.frame(rq_obj[["coefficients"]])
     #tidy.rq(quan_mod2, se.type = "boot")
     #broom:::tidy.rqs(quan_mod2)
-    rq_summary <- suppressWarnings(quantreg::summary.rqs(quan_mod2,
+    rq_summary <- suppressWarnings(summary.rqs(quan_mod2,
                                                          se ="boot",
                                                          alpha = 1 - conf.level))
     df_test = data.frame()
@@ -160,12 +160,12 @@ agree_np <- function(x,
       warning("Evidence of proportional bias. Consider setting prop_bias to TRUE.")
     }
 
-    quan_coef_med =  suppressWarnings(quantreg::summary.rqs(quan_mod,
+    quan_coef_med =  suppressWarnings(summary.rqs(quan_mod,
                                                         se =
                                                           "boot",
                                                         alpha = 1 - conf.level))
 
-    quan_coef_lim =  suppressWarnings(quantreg::summary.rqs(quan_mod,
+    quan_coef_lim =  suppressWarnings(summary.rqs(quan_mod,
                                                         se =
                                                           "boot",
                                                         alpha = 1 - conf2))

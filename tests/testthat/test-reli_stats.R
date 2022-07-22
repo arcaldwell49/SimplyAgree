@@ -104,12 +104,26 @@ testthat::test_that("Simple Use Run Through", {
                          10,5,6,9,
                          6,2,4,7))
 
+  coeftest = agree_coef(wide = FALSE,
+                        data = df,
+                        measure = "va",
+                        item = "it",
+                        id = "id",
+                        weighted = TRUE)
   test2 = reli_stats(data = df,
                      measure = "va",
                      item = "it",
                      id = "id")
 
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     other_ci = TRUE,
+                     replicates = 49)
 
+  pr_test = print(test3)
+  p = plot(test3)
   pr_test = print(test2)
   p = plot(test2)
 
