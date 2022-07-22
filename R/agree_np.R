@@ -142,8 +142,8 @@ agree_np <- function(x,
     quan_mod2 = rq(formula =  delta ~ mean,
                   data = df,
                   tau = c(agree.u,.5,agree.l))
-    rq_obj = suppressWarnings(summary.rq(quan_mod2, se = "boot"))
-    co <- as.data.frame(rq_obj[["coefficients"]])
+    #rq_obj = suppressWarnings(quantreg::summary.rq(quan_mod2, se = "boot"))
+    #co <- as.data.frame(rq_obj[["coefficients"]])
     #tidy.rq(quan_mod2, se.type = "boot")
     #broom:::tidy.rqs(quan_mod2)
     rq_summary <- suppressWarnings(summary.rqs(quan_mod2,
