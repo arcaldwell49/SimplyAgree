@@ -12,7 +12,7 @@
 - Added agreement coefficient function (`agree_coef`).
 - Added `loa_lme` function
   - `loa_mixed` now deprecated
-  - `loa_lme` allows for hetergenous variance by condition
+  - `loa_lme` allows for heterogenous variance by condition
   - New function is faster and relies on parametric bootstrap
 - Assumptions checks are added for all "simple-agree" class results
   - Checks include: normality, heteroscedasticity, and proportional bias
