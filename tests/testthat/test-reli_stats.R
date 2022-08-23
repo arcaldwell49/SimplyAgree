@@ -148,5 +148,89 @@ testthat::test_that("Simple Use Run Through", {
   testthat::expect_equal(test1$SEP,
                          test2$SEP)
 
+  df2 =  data.frame(
+    id = c(
+      1,1,
+      3,3,
+      4,4,
+      5,5,
+      6,6,
+      7,7,
+      9,9,
+      10,10,
+      12,12,
+      13,13,
+      14,14
+    ),
+    time = c(
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1,
+      0,1
+    ),
+    fam_trial =
+      c(1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2,
+        1,2),
+    dyspnea = c(
+      7,8,
+      7,7,
+      4,4,
+      8,6,
+      5,3,
+      7,5,
+      3,3,
+      5,6,
+      1,3,
+      3,4,
+      4,8
+    ),
+    headache = c(
+      0,0,
+      8,7.5,
+      0.5,4,
+      2.5,3.5,
+      0,0,
+      1.5,1,
+      0,1,
+      1.5,1,
+      0.5,0,
+      0,0,
+      4.5,6.5
+    )
+  )
+
+  df2$id = as.factor(df2$id)
+  df2$fam_trial = as.factor(df2$fam_trial)
+
+  coeftest2 = agree_coef(wide = FALSE,
+                        data = df2,
+                        measure = "dyspnea",
+                        item = "fam_trial",
+                        id = "id",
+                        weighted = TRUE)
+
+  coeftest3 = agree_coef(wide = FALSE,
+                         data = df2,
+                         measure = "headache",
+                         item = "fam_trial",
+                         id = "id",
+                         weighted = TRUE)
+
 
 })
