@@ -27,27 +27,27 @@ loa_hetvar = function(diff,
 
   if (prop_bias == FALSE) {
     formula1 = as.formula("diff ~ condition")
-    newdat = expand.grid(unique(df$condition)) %>%
-      as.data.frame() %>%
+    newdat = expand.grid(unique(df$condition)) |>
+      as.data.frame() |>
       rename(condition = Var1)
-    newdat2 = expand.grid(unique(df$condition), c("Bias", "Lower LoA", "Upper LoA")) %>%
-      as.data.frame() %>%
+    newdat2 = expand.grid(unique(df$condition), c("Bias", "Lower LoA", "Upper LoA")) |>
+      as.data.frame() |>
       rename(condition = Var1,
-             value = Var2) %>%
+             value = Var2) |>
       select(value, condition)
   } else {
     formula1 = as.formula("diff~avg+condition")
-    newdat = expand.grid(avg_vals, unique(df$condition)) %>%
-      as.data.frame() %>%
+    newdat = expand.grid(avg_vals, unique(df$condition)) |>
+      as.data.frame() |>
       rename(condition = Var2,
              avg = Var1)
     newdat2 = expand.grid(avg_vals,
                           unique(df$condition),
-                          c("Bias", "Lower LoA", "Upper LoA")) %>%
-      as.data.frame() %>%
+                          c("Bias", "Lower LoA", "Upper LoA")) |>
+      as.data.frame() |>
       rename(condition = Var2,
              avg = Var1,
-             value = Var3) %>%
+             value = Var3) |>
       select(value, avg, condition)
   }
 
@@ -69,7 +69,7 @@ loa_hetvar = function(diff,
                  formula1 = formula1))
   #test = refits[class(refits) == "lme"]
   refits  = purrr::keep(refits, function(x) class(x)== "lme" )
-  vals <- refits %>%
+  vals <- refits |>
     purrr::map(para_boot2,
                specs1 = specs1,
                at_list = avg_vals,
@@ -78,15 +78,15 @@ loa_hetvar = function(diff,
 
   df_boot = bind_rows(vals, .id = "nboot")
 
-  var_comp1 = res_lmer$modelStruct$varStruct %>%
-    coef(unconstrained = FALSE, allCoef = TRUE) %>%
-    data.frame("structure" = .) %>%
-    #rownames_to_column(var = "condition") %>%
-    mutate(condition = rownames(.)) %>%
-    mutate(sigma = res_lmer$sigma) %>%
-    mutate(sd_within = sigma * structure) %>%
-    mutate(sd_between = as.numeric(nlme::VarCorr(res_lmer)[1,2])) %>%
-    mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) %>%
+  var_comp11 = res_lmer$modelStruct$varStruct |>
+    coef(unconstrained = FALSE, allCoef = TRUE) |>
+    data.frame("structure" = _)#  |>
+  var_comp11$condition = row.names(var_comp11)
+  var_comp1 = var_comp11 |>
+    mutate(sigma = res_lmer$sigma) |>
+    mutate(sd_within = sigma * structure) |>
+    mutate(sd_between = as.numeric(nlme::VarCorr(res_lmer)[1,2])) |>
+    mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) |>
     select(condition, structure, sd_within, sd_between, sd_total)
   rownames(var_comp1) = 1:nrow(var_comp1)
 
@@ -94,24 +94,24 @@ loa_hetvar = function(diff,
     at_list = list(avg = avg_vals)
 
     emm_tab = emmeans(res_lmer, ~ condition | avg,
-                      at = at_list) %>%
+                      at = at_list) |>
       as.data.frame()
     colnames(emm_tab) = c("condition", "avg", "mean", "se", "df", "lower.CL", "upper.CL")
-    emm_tab = emm_tab %>%
-      select(avg, condition, mean) %>%
-      merge(var_comp1) %>%
+    emm_tab = emm_tab |>
+      select(avg, condition, mean) |>
+      merge(var_comp1) |>
       mutate(
         low = mean - agree.lim * sd_total,
         high = mean + agree.lim * sd_total)
   } else {
     emm_tab = emmeans(res_lmer,
-                      specs=specs1) %>%
+                      specs=specs1) |>
       as.data.frame()
     colnames(emm_tab) = c("condition", "mean", "se", "df", "lower.CL", "upper.CL")
 
-    emm_tab = emm_tab %>%
-      select(condition, mean) %>%
-      merge(var_comp1) %>%
+    emm_tab = emm_tab |>
+      select(condition, mean) |>
+      merge(var_comp1) |>
       mutate(low = mean - agree.lim * sd_total,
              high = mean + agree.lim * sd_total)
   }
@@ -120,21 +120,21 @@ loa_hetvar = function(diff,
   uconf = 1-(1 - conf.level)/2
 
   if(prop_bias){
-    df_loa = df_boot %>%
+    df_loa = df_boot |>
       select(nboot, avg, condition, mean, low, high)
 
-    df_loa_bias = df_loa %>%
-      group_by(avg, condition) %>%
+    df_loa_bias = df_loa |>
+      group_by(avg, condition) |>
       summarize(boot_est = quantile(mean, .5, na.rm = TRUE),
                 se = sd(mean, na.rm = TRUE),
                 lower.ci = quantile(mean, lconf, na.rm = TRUE),
                 upper.ci = quantile(mean, uconf, na.rm = TRUE),
-                .groups = 'drop')  %>%
-      mutate(term = "Bias") %>%
-      merge(x= ., y = emm_tab %>% select(condition, avg, mean),
-            by = c("condition", "avg")) %>%
-      rename(estimate = mean) %>%
-      mutate(bias = estimate - boot_est) %>%
+                .groups = 'drop')  |>
+      mutate(term = "Bias") |>
+      merge(x = _, y = emm_tab |> select(condition, avg, mean),
+            by = c("condition", "avg")) |>
+      rename(estimate = mean) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              avg,
              condition,
@@ -144,19 +144,19 @@ loa_hetvar = function(diff,
              lower.ci,
              upper.ci)
 
-    df_loa_low = df_loa %>%
-      group_by(avg, condition) %>%
+    df_loa_low = df_loa |>
+      group_by(avg, condition) |>
       summarize(
         boot_est = quantile(low, .5, na.rm = TRUE),
         se = sd(low, na.rm = TRUE),
         lower.ci = quantile(low, lconf, na.rm = TRUE),
         upper.ci = quantile(low, uconf, na.rm = TRUE),
-        .groups = 'drop')%>%
-    mutate(term = "Lower LoA") %>%
-      merge(x= ., y = emm_tab %>% select(condition, avg, low),
-            by = c("condition", "avg")) %>%
-      rename(estimate = low) %>%
-      mutate(bias = estimate - boot_est) %>%
+        .groups = 'drop')|>
+    mutate(term = "Lower LoA") |>
+      merge(x= _, y = emm_tab |> select(condition, avg, low),
+            by = c("condition", "avg")) |>
+      rename(estimate = low) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              avg,
              condition,
@@ -166,19 +166,19 @@ loa_hetvar = function(diff,
              lower.ci,
              upper.ci)
 
-    df_loa_hi = df_loa %>%
-      group_by(avg, condition) %>%
+    df_loa_hi = df_loa |>
+      group_by(avg, condition) |>
       summarize(
         boot_est = quantile(high, .5, na.rm = TRUE),
         se = sd(high, na.rm = TRUE),
         lower.ci = quantile(high, lconf, na.rm = TRUE),
         upper.ci = quantile(high, uconf, na.rm = TRUE),
-        .groups = 'drop')%>%
-      mutate(term = "Upper LoA")%>%
-      merge(x= ., y = emm_tab %>% select(condition, avg, high),
-            by = c("condition", "avg")) %>%
-      rename(estimate = high) %>%
-      mutate(bias = estimate - boot_est) %>%
+        .groups = 'drop')|>
+      mutate(term = "Upper LoA")|>
+      merge(x = _, y = emm_tab |> select(condition, avg, high),
+            by = c("condition", "avg")) |>
+      rename(estimate = high) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              avg,
              condition,
@@ -190,24 +190,24 @@ loa_hetvar = function(diff,
 
     df_loa_all = bind_rows(df_loa_bias,
                            df_loa_low,
-                           df_loa_hi) %>%
+                           df_loa_hi) |>
       arrange(avg, condition)
   } else {
-    df_loa = df_boot %>%
+    df_loa = df_boot |>
       select(nboot, condition, mean, low, high)
 
-    df_loa_bias = df_loa %>%
-      group_by( condition) %>%
+    df_loa_bias = df_loa |>
+      group_by( condition) |>
       summarize(boot_est = quantile(mean, .5, na.rm = TRUE),
                 se = sd(mean, na.rm = TRUE),
                 lower.ci = quantile(mean, lconf, na.rm = TRUE),
                 upper.ci = quantile(mean, uconf, na.rm = TRUE),
-                .groups = 'drop') %>%
-      mutate(term = "Bias") %>%
-      merge(x= ., y = emm_tab %>% select(condition, mean),
-            by = c("condition")) %>%
-      rename(estimate = mean) %>%
-      mutate(bias = estimate - boot_est) %>%
+                .groups = 'drop') |>
+      mutate(term = "Bias") |>
+      merge(x= _, y = emm_tab |> select(condition, mean),
+            by = c("condition")) |>
+      rename(estimate = mean) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              condition,
              estimate,
@@ -216,19 +216,19 @@ loa_hetvar = function(diff,
              lower.ci,
              upper.ci)
 
-    df_loa_low = df_loa %>%
-      group_by(condition) %>%
+    df_loa_low = df_loa |>
+      group_by(condition) |>
       summarize(
         boot_est = quantile(low, .5, na.rm = TRUE),
         se = sd(low, na.rm = TRUE),
         lower.ci = quantile(low, lconf, na.rm = TRUE),
         upper.ci = quantile(low, uconf, na.rm = TRUE),
-        .groups = 'drop')%>%
-      mutate(term = "Lower LoA") %>%
-      merge(x= ., y = emm_tab %>% select(condition,low),
-            by = c("condition"))%>%
-      rename(estimate = low) %>%
-      mutate(bias = estimate - boot_est) %>%
+        .groups = 'drop')|>
+      mutate(term = "Lower LoA") |>
+      merge(x= _, y = emm_tab |> select(condition,low),
+            by = c("condition"))|>
+      rename(estimate = low) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              condition,
              estimate,
@@ -237,19 +237,19 @@ loa_hetvar = function(diff,
              lower.ci,
              upper.ci)
 
-    df_loa_hi = df_loa %>%
-      group_by(condition) %>%
+    df_loa_hi = df_loa |>
+      group_by(condition) |>
       summarize(
         boot_est = quantile(high, .5, na.rm = TRUE),
         se = sd(high, na.rm =TRUE),
         lower.ci = quantile(high, lconf, na.rm = TRUE),
         upper.ci = quantile(high, uconf, na.rm = TRUE),
-        .groups = 'drop')%>%
-      mutate(term = "Upper LoA")%>%
-      merge(x= ., y = emm_tab %>% select(condition,high),
-            by = c("condition")) %>%
-      rename(estimate = high) %>%
-      mutate(bias = estimate - boot_est) %>%
+        .groups = 'drop')|>
+      mutate(term = "Upper LoA")|>
+      merge(x= _, y = emm_tab |> select(condition,high),
+            by = c("condition")) |>
+      rename(estimate = high) |>
+      mutate(bias = estimate - boot_est) |>
       select(term,
              condition,
              estimate,
@@ -260,7 +260,7 @@ loa_hetvar = function(diff,
 
     df_loa_all = bind_rows(df_loa_bias,
                            df_loa_low,
-                           df_loa_hi) %>%
+                           df_loa_hi) |>
       arrange(condition)
   }
 
@@ -269,11 +269,11 @@ loa_hetvar = function(diff,
   mc$agree.level = agree.level
   mc$conf.level = conf.level
 
-  df_plt = data %>%
+  df_plt = data |>
     select(all_of(diff),
            all_of(id),
            all_of(avg),
-           all_of(condition)) %>%
+           all_of(condition)) |>
     rename(diff = all_of(diff),
            id = all_of(id),
            avg = all_of(avg),

@@ -24,7 +24,6 @@
 #' @section References:
 #' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 #' @importFrom stats qnorm as.formula na.omit
-#' @importFrom magrittr %>%
 #' @importFrom dplyr select rename
 #' @importFrom tidyselect all_of
 #' @import lme4
@@ -109,11 +108,11 @@ loa_mixed = function(diff,
 
   if(!missing(plot.xaxis) || !is.null(plot.xaxis)){
     if (condition != 1) {
-      df_plt = data %>%
+      df_plt = data |>
         select(all_of(diff),
                all_of(id),
                all_of(condition),
-               all_of(plot.xaxis)) %>%
+               all_of(plot.xaxis)) |>
         rename(
           diff = all_of(diff),
           id = all_of(id),
@@ -121,10 +120,10 @@ loa_mixed = function(diff,
           X = all_of(plot.xaxis)
         )
     } else{
-      df_plt = data %>%
+      df_plt = data |>
         select(all_of(diff),
                all_of(id),
-               all_of(plot.xaxis)) %>%
+               all_of(plot.xaxis)) |>
         rename(
           diff = all_of(diff),
           id = all_of(id),

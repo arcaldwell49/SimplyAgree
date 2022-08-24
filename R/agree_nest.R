@@ -66,15 +66,15 @@ agree_nest <- function(x,
     conf2 = conf.level
   }
 
-  df = data %>%
-    select(all_of(id),all_of(x),all_of(y)) %>%
+  df = data |>
+    select(all_of(id),all_of(x),all_of(y)) |>
     rename(id = all_of(id),
            x = all_of(x),
-           y = all_of(y)) %>%
-    select(id,x,y) %>%
+           y = all_of(y)) |>
+    select(id,x,y) |>
     drop_na()
 
-  df_long = df %>%
+  df_long = df |>
     pivot_longer(!id,
                  names_to = "method",
                  values_to = "measure")
@@ -88,11 +88,11 @@ agree_nest <- function(x,
                       lower.ci = ccc_nest[2],
                       upper.ci = ccc_nest[3],
                       SE = ccc_nest[4])
-  df_lmer = df %>%
+  df_lmer = df |>
     mutate(mean = (x+y)/2,
            delta = x - y)
-  df2 = df %>%
-    group_by(id) %>%
+  df2 = df |>
+    group_by(id) |>
     summarize(m = n(),
               x_bar = mean(x, na.rm=TRUE),
               x_var = var(x, na.rm=TRUE),
@@ -100,10 +100,10 @@ agree_nest <- function(x,
               y_var = var(y, na.rm=TRUE),
               d = mean(x-y),
               d_var = var(x-y),
-              .groups = "drop") %>%
+              .groups = "drop") |>
     mutate(both_avg = (x_bar+y_bar)/2)
 
-  df3 = df2 %>%
+  df3 = df2 |>
     drop_na()
   d_varl = c()
   if(prop_bias == TRUE){
@@ -114,7 +114,7 @@ agree_nest <- function(x,
   # Get variance per id
   for(i in 1:nrow(df3)){
     idtemp = df3[i,]$id
-    dftemp = df %>% filter(id == idtemp) %>%
+    dftemp = df |> filter(id == idtemp) |>
       mutate(mean = (x+y)/2,
              delta = x - y)
     d_varl[i] = sigma(lm(form1,

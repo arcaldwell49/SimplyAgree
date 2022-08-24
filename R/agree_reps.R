@@ -67,17 +67,17 @@ agree_reps <- function(x,
   }
 
 
-  df = data %>%
-    select(all_of(id),all_of(x),all_of(y)) %>%
+  df = data |>
+    select(all_of(id),all_of(x),all_of(y)) |>
     rename(id = all_of(id),
            x = all_of(x),
-           y = all_of(y)) %>%
+           y = all_of(y)) |>
     select(id,x,y)
 
-  df_long = df %>%
+  df_long = df |>
     pivot_longer(!id,
                  names_to = "method",
-                 values_to = "measure") %>%
+                 values_to = "measure") |>
     drop_na()
 
   # Calculate CCC ----
@@ -92,19 +92,19 @@ agree_reps <- function(x,
                       upper.ci = ccc_reps[3],
                       SE = ccc_reps[4])
 
-  df2 = df %>%
-    group_by(id) %>%
+  df2 = df |>
+    group_by(id) |>
     summarize(mxi = base::sum(!is.na(x)),
               myi = base::sum(!is.na(y)),
               x_bar = base::mean(x, na.rm=TRUE),
               x_var = var(x, na.rm=TRUE),
               y_bar = base::mean(y, na.rm=TRUE),
               y_var = var(y, na.rm=TRUE),
-              .groups = "drop") %>%
+              .groups = "drop") |>
     mutate(d = x_bar-y_bar,
            both_avg = (x_bar+y_bar)/2)
 
-  df3 = df2 %>%
+  df3 = df2 |>
     drop_na()
 
   df$mean = (df$x + df$y)/2

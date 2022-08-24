@@ -9,8 +9,8 @@ simple_ident_plot = function(x,
     df = model.frame(x$call$lm_mod)
     colnames(df) = c("y","x","id")
     if(as.character(x$call[1]) == "agree_reps" | as.character(x$call[1]) == "SimplyAgree::agree_reps"){
-    df = df %>%
-      group_by(id) %>%
+    df = df |>
+      group_by(id) |>
       summarize(mxi = sum(!is.na(x)),
                 myi = sum(!is.na(y)),
                 x = mean(x, na.rm=TRUE),

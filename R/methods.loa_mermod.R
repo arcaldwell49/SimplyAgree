@@ -28,8 +28,8 @@ print.loa_mermod <- function(x,...){
   cat(title)
   df = x$loa
   if("avg" %in% colnames(df) && "condition" %in% colnames(df) ){
-    df = df %>%
-      select(avg, condition, term, estimate, lower.ci, upper.ci)%>%
+    df = df |>
+      select(avg, condition, term, estimate, lower.ci, upper.ci)|>
       rename(Average = avg,
              Condition = condition,
              Measures = term,
@@ -37,24 +37,24 @@ print.loa_mermod <- function(x,...){
              `Lower CI` = lower.ci,
              `Upper CI` = upper.ci)
   } else if("avg" %in% colnames(df)){
-    df = df %>%
-      select(avg, term, estimate, lower.ci, upper.ci)%>%
+    df = df |>
+      select(avg, term, estimate, lower.ci, upper.ci)|>
       rename(Average = avg,
              Measures = term,
              Estimate = estimate,
              `Lower CI` = lower.ci,
              `Upper CI` = upper.ci)
   }else if("condition" %in% colnames(df)){
-    df = df %>%
-      select(condition, term, estimate, lower.ci, upper.ci)%>%
+    df = df |>
+      select(condition, term, estimate, lower.ci, upper.ci)|>
       rename(Condition = condition,
              Measures = term,
              Estimate = estimate,
              `Lower CI` = lower.ci,
              `Upper CI` = upper.ci)
   } else {
-    df = df %>%
-      select(term, estimate, lower.ci, upper.ci)%>%
+    df = df |>
+      select(term, estimate, lower.ci, upper.ci)|>
       rename(Measures = term,
              Estimate = estimate,
              `Lower CI` = lower.ci,

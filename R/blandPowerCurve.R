@@ -25,7 +25,6 @@
 #' }
 #' # If the desired power is not found then
 #' ## Sample size range must be expanded
-#' @importFrom magrittr "%>%"
 #' @import dplyr
 #' @export
 blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
@@ -51,27 +50,27 @@ blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
                                    agree.level = dat_grid$agree.level[i])
 
   df <- lapply(samplesizes, function(this_n) {
-    LOA %>%
+    LOA |>
       estimateConfidenceIntervals(n = this_n,
-                                  conf.level = dat_grid$conf.level[i]) %>%
-      estimateTypeIIerror(delta = dat_grid$delta[i]) %>%
-      estimatePowerFromBeta() %>%
-      unlist(recursive = FALSE) %>%
+                                  conf.level = dat_grid$conf.level[i]) |>
+      estimateTypeIIerror(delta = dat_grid$delta[i]) |>
+      estimatePowerFromBeta() |>
+      unlist(recursive = FALSE) |>
       as.data.frame()
   })
-  result <- do.call(rbind, df) %>%
+  result <- do.call(rbind, df) |>
     select(CI.n,LOA.mu,LOA.SD,beta.delta,
-           power.power) %>%
+           power.power) |>
     rename(mu = LOA.mu,
            SD = LOA.SD,
            N = CI.n,
            delta = beta.delta,
-           power = power.power) %>%
+           power = power.power) |>
     mutate(agree.level = dat_grid$agree.level[i],
            conf.level = dat_grid$conf.level[i])
   final_dat = rbind(final_dat,result)
   }
-  final_dat = final_dat %>%
+  final_dat = final_dat |>
     mutate(power = ifelse(power < 0, 0,power))
   class(final_dat) <- list("powerCurve","data.frame")
   return(final_dat)

@@ -88,7 +88,7 @@ reli_stats = function(measure,
     if(is.null(measure) || is.null(item) ||is.null(id)){
       stop("Must provide measure, item, and id column names if wide = FALSE")
     }
-    x.df = x %>%
+    x.df = x |>
       select(all_of(measure),all_of(item),all_of(id))
   }
 
@@ -205,14 +205,14 @@ reli_stats = function(measure,
     res_other = tidy_boot(boo2,
                          conf.int = TRUE,
                          conf.level = conf.level,
-                         conf.method = type) %>%
+                         conf.method = type) |>
       rename(estimate = statistic,
              se = std.error,
              lower.ci = conf.low,
-             upper.ci = conf.high) %>%
+             upper.ci = conf.high) |>
       as.data.frame()
       row.names(res_other) = res_other$term
-      res_other = res_other %>%
+      res_other = res_other |>
         select(estimate,bias,se,lower.ci,upper.ci)
   } else{
     SEM = sqrt(MSE)

@@ -34,46 +34,46 @@ loa_lmer = function(diff,
   if(is.null(condition) || condition == 1){
     if (prop_bias == FALSE) {
       formula1 = as.formula("diff ~ 1 +(1| id )")
-      newdat = expand.grid(1) %>%
-        as.data.frame() %>%
+      newdat = expand.grid(1) |>
+        as.data.frame() |>
         rename(condition = Var1)
-      newdat2 = expand.grid(c("Bias", "Lower LoA", "Upper LoA")) %>%
-        as.data.frame() %>%
-        rename(value = Var1) %>%
+      newdat2 = expand.grid(c("Bias", "Lower LoA", "Upper LoA")) |>
+        as.data.frame() |>
+        rename(value = Var1) |>
         select(value)
     } else {
       formula1 = as.formula("diff~avg+(1| id )")
-      newdat = expand.grid(avg_vals) %>%
-        as.data.frame() %>%
+      newdat = expand.grid(avg_vals) |>
+        as.data.frame() |>
         rename(avg = Var1)
-      newdat2 = expand.grid(avg_vals, c("Bias", "Lower LoA", "Upper LoA")) %>%
-        as.data.frame() %>%
+      newdat2 = expand.grid(avg_vals, c("Bias", "Lower LoA", "Upper LoA")) |>
+        as.data.frame() |>
         rename(avg = Var1,
-               value = Var2) %>%
+               value = Var2) |>
         select(value, avg)
     }
   } else{
     if (prop_bias == FALSE) {
       formula1 = as.formula("diff ~ condition +(1| id )")
-      newdat = expand.grid(unique(df$condition)) %>%
-        as.data.frame() %>%
+      newdat = expand.grid(unique(df$condition)) |>
+        as.data.frame() |>
         rename(condition = Var1)
-      newdat2 = expand.grid(unique(df$condition),c("Bias", "Lower LoA", "Upper LoA")) %>%
-        as.data.frame() %>%
+      newdat2 = expand.grid(unique(df$condition),c("Bias", "Lower LoA", "Upper LoA")) |>
+        as.data.frame() |>
         rename(condition = Var1,
-               value = Var2) %>%
+               value = Var2) |>
         select(value, condition)
     } else {
       formula1 = as.formula("diff~avg+condition+(1| id )")
-      newdat = expand.grid(avg_vals, unique(df$condition)) %>%
-        as.data.frame() %>%
+      newdat = expand.grid(avg_vals, unique(df$condition)) |>
+        as.data.frame() |>
         rename(condition = Var2,
                avg = Var1)
-      newdat2 = expand.grid(avg_vals, unique(df$condition),c("Bias", "Lower LoA", "Upper LoA")) %>%
-        as.data.frame() %>%
+      newdat2 = expand.grid(avg_vals, unique(df$condition),c("Bias", "Lower LoA", "Upper LoA")) |>
+        as.data.frame() |>
         rename(condition = Var2,
                avg = Var1,
-               value = Var3) %>%
+               value = Var3) |>
         select(value, avg, condition)
     }
   }
@@ -110,8 +110,8 @@ loa_lmer = function(diff,
   #boo1_tab = tidy_boot(boo1,
   #                     conf.int = TRUE,
   #                     conf.level = conf.level,
-  #                     conf.method = type) %>%
-  #  mutate(term = c("SD within", "SD between", "SD total")) %>%
+  #                     conf.method = type) |>
+  #  mutate(term = c("SD within", "SD between", "SD total")) |>
   #  rename(estimate = statistic,
   #         se = std.error,
   #         lower.ci = conf.low,
@@ -121,9 +121,9 @@ loa_lmer = function(diff,
   boo2_tab = tidy_boot(boo2,
                        conf.int = TRUE,
                        conf.level = conf.level,
-                       conf.method = type) %>%
-    bind_cols(newdat2 ,.) %>%
-    select(-term) %>%
+                       conf.method = type) |>
+    bind_cols(newdat2,.id = _) |>
+    select(-term) |>
     rename(term = value,
            estimate = statistic,
            se = std.error,
@@ -135,11 +135,11 @@ loa_lmer = function(diff,
   mc$agree.level = agree.level
   mc$conf.level = conf.level
   if (condition != 1) {
-    df_plt = data %>%
+    df_plt = data |>
       select(all_of(diff),
              all_of(id),
              all_of(condition),
-             all_of(avg)) %>%
+             all_of(avg)) |>
       rename(
         diff = all_of(diff),
         id = all_of(id),
@@ -147,10 +147,10 @@ loa_lmer = function(diff,
         avg = all_of(avg)
       )
   } else{
-    df_plt = data %>%
+    df_plt = data |>
       select(all_of(diff),
              all_of(id),
-             all_of(avg)) %>%
+             all_of(avg)) |>
       rename(
         diff = all_of(diff),
         id = all_of(id),

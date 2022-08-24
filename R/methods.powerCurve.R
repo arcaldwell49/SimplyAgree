@@ -20,16 +20,15 @@
 
 #' @rdname powerCurve-methods
 #' @importFrom stringr str_split
-#' @importFrom magrittr "%>%"
 #' @export
 
 find_n <- function(x, power = 0.8){
   if(!inherits(x,"powerCurve")) warning("input is not a powerCurve object")
   powtest = power
 
-  test = x %>%
-    as.data.frame() %>%
-    group_by(delta,conf.level,agree.level) %>%
+  test = x |>
+    as.data.frame() |>
+    group_by(delta,conf.level,agree.level) |>
     summarise(power = nth(power, which.min(abs(power-powtest))),
               .groups = 'drop')
   test$N = NA
@@ -52,7 +51,6 @@ find_n <- function(x, power = 0.8){
 #' @rdname powerCurve-methods
 #' @method plot powerCurve
 #' @import ggplot2
-#' @importFrom magrittr "%>%"
 #' @importFrom tidyr pivot_longer
 #' @importFrom dplyr mutate select
 #' @export

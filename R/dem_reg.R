@@ -55,43 +55,43 @@ dem_reg <- function(x,
 
   conf2 =  1-(1 - conf.level) / 2
   if(!is.null(id)){
-  df = data %>%
-    select(all_of(id),all_of(x),all_of(y)) %>%
+  df = data |>
+    select(all_of(id),all_of(x),all_of(y)) |>
     rename(id = all_of(id),
            x = all_of(x),
-           y = all_of(y)) %>%
+           y = all_of(y)) |>
     select(id,x,y)
   } else {
-    df = data %>%
-      select(all_of(x),all_of(y)) %>%
+    df = data |>
+      select(all_of(x),all_of(y)) |>
       rename(x = all_of(x),
-             y = all_of(y)) %>%
+             y = all_of(y)) |>
       select(x,y)
   }
 
   if(is.null(id)){
-    df3 = df %>% drop_na()
+    df3 = df |> drop_na()
   } else {
-    df2 = df %>%
-      group_by(id) %>%
+    df2 = df |>
+      group_by(id) |>
       mutate(mean_y = mean(y, na.rm =TRUE),
              mean_x = mean(x, na.rm =TRUE),
              n_x = sum(!is.na(x)),
-             n_y = sum(!is.na(y))) %>%
-      ungroup() %>%
+             n_y = sum(!is.na(y))) |>
+      ungroup() |>
       mutate(diff_y = y - mean_y,
              diff_y2 = diff_y^2,
              diff_x = x - mean_x,
              diff_x2 = diff_x^2)
-    df3 = df2 %>%
-      group_by(id) %>%
+    df3 = df2 |>
+      group_by(id) |>
       summarize(n_x = mean(n_x),
                 x = mean(x, na.rm = TRUE),
                 sum_num_x = sum(diff_x2, na.rm = TRUE),
                 n_y = mean(n_y),
                 y = mean(y, na.rm = TRUE),
                 sum_num_y = sum(diff_y2, na.rm = TRUE),
-                .groups = 'drop') %>%
+                .groups = 'drop') |>
       drop_na()
 
     var_x = sum(df3$sum_num_x) / sum(df3$n_x-1)

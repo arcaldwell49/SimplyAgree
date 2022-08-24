@@ -9,9 +9,9 @@ cccUst = function (dataset, ry, rmet, rtime = NULL, Dmat = NULL, delta = 1,
 {
   dades <- data.frame(dataset)
   if (length(rtime) == 0)
-    dades <- dades %>% rename(y = all_of(ry), met = all_of(rmet))
+    dades <- dades |> rename(y = all_of(ry), met = all_of(rmet))
   if (length(rtime) > 0)
-    dades <- dades %>% rename(y = all_of(ry), met = all_of(rmet),
+    dades <- dades |> rename(y = all_of(ry), met = all_of(rmet),
                                      time = all_of(rtime))
   catmet <- unique(dades$met)
   if (length(rtime) == 0) {

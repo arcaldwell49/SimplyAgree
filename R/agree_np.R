@@ -53,21 +53,21 @@ agree_np <- function(x,
   stopifnot(!is.null(delta) && is.numeric(delta) && delta > 0)
 
   if(!is.null(id)){
-    df = data %>%
-      select(all_of(id),all_of(x),all_of(y)) %>%
+    df = data |>
+      select(all_of(id),all_of(x),all_of(y)) |>
       rename(id = all_of(id),
              x = all_of(x),
-             y = all_of(y)) %>%
-      select(id,x,y) %>%
+             y = all_of(y)) |>
+      select(id,x,y) |>
       drop_na()
   } else {
-    df = data %>%
-      select(all_of(x),all_of(y)) %>%
+    df = data |>
+      select(all_of(x),all_of(y)) |>
       rename(x = all_of(x),
-             y = all_of(y)) %>%
+             y = all_of(y)) |>
       select(x,y)
     df$id = as.factor(1)
-    df = df %>%
+    df = df |>
       drop_na()
 
   }
@@ -77,14 +77,14 @@ agree_np <- function(x,
   dbound = delta
   if(!is.null(id)){
     df_glm1 = df
-    df_glm1 = df_glm1 %>%
+    df_glm1 = df_glm1 |>
       mutate(success = ifelse(abs(delta) <= dbound,
                               1,0),
              failure = ifelse(abs(delta) > dbound,
                               1,0))
 
-    df_glm = df_glm1 %>%
-      group_by(id) %>%
+    df_glm = df_glm1 |>
+      group_by(id) |>
       summarize(x = mean(x),
                 y = mean(y),
                 success = sum(success),
@@ -92,7 +92,7 @@ agree_np <- function(x,
 
   }else{
     df_glm = df
-    df_glm = df_glm %>%
+    df_glm = df_glm |>
       mutate(success = ifelse(abs(delta) <= dbound,
              1,0),
              failure = ifelse(abs(delta) > dbound,

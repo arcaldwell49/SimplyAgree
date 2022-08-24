@@ -161,15 +161,17 @@ update_mod = function (model, new.y = NULL, new.data = NULL,
 para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE,
                       agree.lim){
   #at_list2 = list(avg = at_list)
-  var_comp1 = model$modelStruct$varStruct %>%
-    coef(unconstrained = FALSE, allCoef = TRUE) %>%
-    data.frame("structure" = .) %>%
-    #rownames_to_column(var = "condition") %>%
-    mutate(condition = rownames(.)) %>%
-    mutate(sigma = model$sigma) %>%
-    mutate(sd_within = sigma * structure) %>%
-    mutate(sd_between = as.numeric(VarCorr(model)[1,2])) %>%
-    mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) %>%
+  var_comp11 = model$modelStruct$varStruct |>
+    coef(unconstrained = FALSE, allCoef = TRUE) |>
+    data.frame("structure" = _)#  |>
+  var_comp11$condition = row.names(var_comp11)
+  var_comp1 = var_comp11 |>
+    #rownames_to_column(var = "condition") |>
+    #mutate(condition = rownames(_)) |>
+    mutate(sigma = model$sigma) |>
+    mutate(sd_within = sigma * structure) |>
+    mutate(sd_between = as.numeric(VarCorr(model)[1,2])) |>
+    mutate(sd_total = sqrt(sd_within^2 + sd_between^2)) |>
     select(condition, structure, sd_within, sd_between, sd_total)
   rownames(var_comp1) = 1:nrow(var_comp1)
   if(prop_bias == TRUE) {
@@ -180,25 +182,25 @@ para_boot2 = function(model, specs1, at_list = NULL, prop_bias = FALSE,
                    cov.reduce = FALSE,
                    cov.keep = "avg")
     emm_tab = emmeans(ref, ~ condition | avg,
-                      at = at_list) %>%
+                      at = at_list) |>
       as.data.frame()
     colnames(emm_tab) = c("condition", "avg", "mean", "se", "df", "lower.CL", "upper.CL")
     #emm_tab$avg = avg_vals
-    emm_tab = emm_tab %>%
-      select(avg, condition, mean) %>%
-      merge(var_comp1) %>%
+    emm_tab = emm_tab |>
+      select(avg, condition, mean) |>
+      merge(var_comp1) |>
       mutate(
         low = mean - agree.lim * sd_total,
         high = mean + agree.lim * sd_total)
   } else {
     emm_tab = emmeans(model,
-                      specs=specs1) %>%
+                      specs=specs1) |>
       as.data.frame()
     colnames(emm_tab) = c("condition", "mean", "se", "df", "lower.CL", "upper.CL")
 
-    emm_tab = emm_tab %>%
-      select(condition, mean) %>%
-      merge(var_comp1) %>%
+    emm_tab = emm_tab |>
+      select(condition, mean) |>
+      merge(var_comp1) |>
       mutate(low = mean - agree.lim * sd_total,
              high = mean + agree.lim * sd_total)
   }
