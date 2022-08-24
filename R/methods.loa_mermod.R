@@ -103,7 +103,6 @@ plot.loa_mermod <- function(x,
 #' @method check loa_mermod
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @importFrom insight get_df get_residuals
-#' @importFrom patchwork wrap_plots
 #' @export
 
 check.loa_mermod <- function(x) {
@@ -216,8 +215,8 @@ check.loa_mermod <- function(x) {
 
   # All plots ----
 
-  wrap_plots(p_norm, p_het,
-             p_bias, ncol = 2)
+  grid.arrange(p_norm, p_het,
+             p_bias, nrow = 2)
 }
 
 

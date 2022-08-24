@@ -34,7 +34,6 @@
 #' Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
-#' @importFrom tidyr drop_na pivot_longer
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -72,12 +71,21 @@ agree_nest <- function(x,
            x = all_of(x),
            y = all_of(y)) |>
     select(id,x,y) |>
-    drop_na()
+    na.omit()
 
-  df_long = df |>
-    pivot_longer(!id,
-                 names_to = "method",
-                 values_to = "measure")
+  df_l1 = df
+  df_l1$id2  = row.names(df_l1)
+  df_long = reshape(
+    df_l1,
+    idvar = "id2",
+    varying = c("x", "y"),
+    v.names = "measure",
+    timevar = "method",
+    times = c("x", "y"),
+    direction = "long"
+  ) |>
+    select(id, method, measure) |>
+    na.omit()
 
   ccc_nest = cccUst(dataset = df_long,
                     ry = "measure",
@@ -104,7 +112,7 @@ agree_nest <- function(x,
     mutate(both_avg = (x_bar+y_bar)/2)
 
   df3 = df2 |>
-    drop_na()
+    na.omit()
   d_varl = c()
   if(prop_bias == TRUE){
     form1 = as.formula(delta ~ mean)

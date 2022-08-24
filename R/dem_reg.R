@@ -70,7 +70,7 @@ dem_reg <- function(x,
   }
 
   if(is.null(id)){
-    df3 = df |> drop_na()
+    df3 = df |> na.omit()
   } else {
     df2 = df |>
       group_by(id) |>
@@ -92,7 +92,7 @@ dem_reg <- function(x,
                 y = mean(y, na.rm = TRUE),
                 sum_num_y = sum(diff_y2, na.rm = TRUE),
                 .groups = 'drop') |>
-      drop_na()
+      na.omit()
 
     var_x = sum(df3$sum_num_x) / sum(df3$n_x-1)
     var_y = sum(df3$sum_num_y) / sum(df3$n_y-1)

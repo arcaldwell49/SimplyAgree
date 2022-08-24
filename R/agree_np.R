@@ -28,7 +28,6 @@
 #' @importFrom stats binom.test binomial confint glm median setNames quantile
 #' @import quantreg
 #' @importFrom tidyselect all_of
-#' @importFrom tidyr drop_na pivot_longer
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -59,7 +58,7 @@ agree_np <- function(x,
              x = all_of(x),
              y = all_of(y)) |>
       select(id,x,y) |>
-      drop_na()
+      na.omit()
   } else {
     df = data |>
       select(all_of(x),all_of(y)) |>
@@ -68,7 +67,7 @@ agree_np <- function(x,
       select(x,y)
     df$id = as.factor(1)
     df = df |>
-      drop_na()
+      na.omit()
 
   }
 

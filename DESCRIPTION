@@ -19,13 +19,13 @@ Imports:
     stats,
     dplyr,
     tidyselect,
-    tidyr,
     jmvcore,
     quantreg,
     patchwork,
     insight,
     nlme,
-    purrr
+    purrr,
+    gridExtra
 Suggests: 
     knitr,
     rmarkdown,

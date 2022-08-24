@@ -50,7 +50,6 @@ find_n <- function(x, power = 0.8){
 #' @rdname powerCurve-methods
 #' @method plot powerCurve
 #' @import ggplot2
-#' @importFrom tidyr pivot_longer
 #' @importFrom dplyr mutate select
 #' @export
 

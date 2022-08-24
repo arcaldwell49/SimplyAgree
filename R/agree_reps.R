@@ -32,9 +32,8 @@
 #' King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.
 #'
 #' Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
-#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var model.frame
+#' @importFrom stats pnorm qnorm lm anova dchisq qchisq sd var model.frame reshape
 #' @importFrom tidyselect all_of
-#' @importFrom tidyr drop_na pivot_longer
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -74,11 +73,19 @@ agree_reps <- function(x,
            y = all_of(y)) |>
     select(id,x,y)
 
-  df_long = df |>
-    pivot_longer(!id,
-                 names_to = "method",
-                 values_to = "measure") |>
-    drop_na()
+  df_l1 = df
+  df_l1$id2  = row.names(df_l1)
+  df_long = reshape(
+    df_l1,
+    idvar = "id2",
+    varying = c("x", "y"),
+    v.names = "measure",
+    timevar = "method",
+    times = c("x", "y"),
+    direction = "long"
+  ) |>
+    select(id, method, measure) |>
+    na.omit()
 
   # Calculate CCC ----
   ccc_reps = cccUst(dataset = df_long,
@@ -105,7 +112,7 @@ agree_reps <- function(x,
            both_avg = (x_bar+y_bar)/2)
 
   df3 = df2 |>
-    drop_na()
+    na.omit()
 
   df$mean = (df$x + df$y)/2
   df$delta = (df$x - df$y)

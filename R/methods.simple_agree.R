@@ -186,6 +186,7 @@ check <- function(x) {
 
 #' @rdname simple_agree-methods
 #' @method check simple_agree
+#' @importFrom gridExtra grid.arrange
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
@@ -301,7 +302,10 @@ check.simple_agree <- function(x) {
   #            p_het = p_het,
   #            p_bias = p_bias))
 
-  wrap_plots(p_norm, p_het,
-             p_bias, ncol = 2)
+  #wrap_plots(p_norm, p_het,
+  #           p_bias, ncol = 2)
+  grid.arrange(p_norm, p_het,
+                          p_bias,
+                          nrow = 2)
 
 }

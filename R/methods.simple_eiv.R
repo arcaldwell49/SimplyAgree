@@ -132,5 +132,5 @@ check.simple_eiv <- function(x) {
     labs(caption = paste0("Normality", " \n",
                           norm_text, ": p = ",
                           signif(norm_test$p.value,4)))
-  wrap_plots(p2, p1, ncol = 2)
+  grid.arrange(p2, p1, nrow = 1)
 }
