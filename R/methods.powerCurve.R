@@ -19,7 +19,6 @@
 ### methods for powerCurve objects
 
 #' @rdname powerCurve-methods
-#' @importFrom stringr str_split
 #' @export
 
 find_n <- function(x, power = 0.8){
