@@ -21,7 +21,6 @@ Imports:
     tidyselect,
     jmvcore,
     quantreg,
-    patchwork,
     insight,
     nlme,
     purrr,
