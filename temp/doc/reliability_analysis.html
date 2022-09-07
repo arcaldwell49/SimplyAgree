@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Aaron R. Caldwell" />
+
+
+<title>Reliability Analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Reliability Analysis</h1>
+<h4 class="author">Aaron R. Caldwell</h4>
+<h4 class="date">Last Updated: 2022-07-22</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#code-demonstration">Code Demonstration</a></li>
+<li><a href="#calculative-approach">Calculative Approach</a>
+<ul>
+<li><a href="#model">Model</a></li>
+<li><a href="#components-of-variance">Components of Variance</a></li>
+<li><a href="#intraclass-correlation-coefficients">Intraclass
+Correlation Coefficients</a></li>
+<li><a href="#icc-confidence-intervals">ICC Confidence
+Intervals</a></li>
+<li><a href="#standard-error-calculations">Standard Error
+Calculations</a></li>
+<li><a href="#coefficient-of-variation">Coefficient of
+Variation</a></li>
+<li><a href="#other-confidence-intervals">Other Confidence
+Intervals</a></li>
+</ul></li>
+<li><a href="#inter-rater-reliability">Inter-Rater Reliability</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>Another feature of this R package is the ability to estimate the
+reliability of a measurement. This R package allows for the calculation
+of Intraclass Correlation Coefficients (ICC), various standard errors
+(SEM, SEE, and SEP), and coefficient of variation. All of the underlying
+calculations (sans the coefficient of variation) is based on the paper
+by <span class="citation">Weir (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. This is a fairly popular paper within my
+own field (kinesiology), and hence was the inspiration for creating this
+function that provides all the calculative approaches included within
+that manuscript.</p>
+</div>
+<div id="code-demonstration" class="section level1">
+<h1>Code Demonstration</h1>
+<p>For this package, the test-retest reliability statistics can be
+calculated with the <code>reli_stats</code> function. This function
+allow for data to be input in a long (multiple rows of data for each
+subject) or in wide (one row for each subject but a column for each
+item/measure).</p>
+<p>For the long data form, the column containing the subject identifier
+(<code>id</code>), item number (<code>item</code>), and measurements
+(<code>measure</code>) are provided. In this function I refer to items
+similar to if we were measuring internal consistency for a questionnaire
+(which is just a special case of test-retest reliability). So,
+<code>item</code> could also be refer to time points, which is what is
+typically seen in human performance settings where test-retest
+reliability may be evaluated over the course of repeated visits to the
+same laboratory. If <code>wide</code> is set to <code>TRUE</code> then
+the columns containing the measurements are provided (e.g.,
+<code>c(&quot;value1&quot;,&quot;value2&quot;,&quot;value3&quot;)</code>).</p>
+<p>To demonstrate the function, I will create a data set in the wide
+format.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Example from Shrout and Fleiss (1979), pg. 423</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">judge1 =</span> </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">c</span>(<span class="dv">9</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">6</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">judge2 =</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">2</span>),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                   <span class="at">judge3 =</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">2</span>,<span class="dv">6</span>,<span class="dv">4</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">judge4 =</span> </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">c</span>(<span class="dv">8</span>,<span class="dv">2</span>,<span class="dv">8</span>,<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">7</span>))</span></code></pre></div>
+<p>Now, that we have a data set (<code>dat</code>), I can use it in the
+<code>reli_stats</code> function.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">reli_stats</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">wide =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;judge1&quot;</span>, <span class="st">&quot;judge2&quot;</span>, <span class="st">&quot;judge3&quot;</span>, <span class="st">&quot;judge4&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>This function also has generic print and plot functions. The output
+from print provides the coefficient of variation, standard errors, and a
+table of various intraclass correlation coefficients. Notice the
+conclusions about the reliability of the measurement here would vary
+greatly based on the statistic being reported. What statistic you should
+report is beyond the current vignette, but is heavily detailed in <span class="citation">Weir (<a href="#ref-weir2005" role="doc-biblioref">2005</a>)</span>. However, within the table there
+are columns for <code>model</code> and <code>measures</code> which
+describe the model that is being used and the what these different ICCs
+are intended to measure, respectively.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(test1)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficient of Variation (%):  19.1</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard Error of Measurement (SEM):  1.01</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard Error of the Estimate (SEE):  2.62</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard Error of Prediction (SEP):  4.06</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Intraclass Correlation Coefficients with  95 % C.I.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            Model         Measures  Type    ICC Lower CI Upper CI</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.09672   0.6434</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.04290   0.6911</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  two-way fixed      Consistency  ICC3 0.7148  0.41184   0.9258</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.54504   0.8783</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.15204   0.8995</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.73690   0.9804</span></span></code></pre></div>
+<p>Also included in the results is a plot of the measurements across the
+items (e.g., time points).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="calculative-approach" class="section level1">
+<h1>Calculative Approach</h1>
+<div id="model" class="section level2">
+<h2>Model</h2>
+<p>The linear mixed model used for the calculations is specified as the
+following:</p>
+<p><span class="math display">\[
+  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right)
+\]</span></p>
+<p><span class="math display">\[
+    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}}
+\right)
+    \text{, for id j = 1,} \dots \text{,J}
+\]</span></p>
+<p><span class="math display">\[
+    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}}
+\right)
+    \text{, for items k = 1,} \dots \text{,K}
+\]</span></p>
+</div>
+<div id="components-of-variance" class="section level2">
+<h2>Components of Variance</h2>
+<p><strong>Mean Squared Error (MSE)</strong></p>
+<p><span class="math display">\[
+MSE = \sigma^2
+\]</span></p>
+<p><strong>Variance Between Subjects</strong></p>
+<p><span class="math display">\[
+MSB = n_k \cdot \sigma^2_{\alpha j} + \sigma^2
+\]</span></p>
+<p><strong>Variance Between Items/Judges</strong></p>
+<p><span class="math display">\[
+MSJ = n_{j} \cdot \sigma^2_{\alpha_{k}} + \sigma^2
+\]</span></p>
+<p><strong>Variance Within Subjects/Participants</strong></p>
+<p><span class="math display">\[
+MSW = \sigma^2 + \sigma^2_{\alpha_{k}}
+\]</span></p>
+</div>
+<div id="intraclass-correlation-coefficients" class="section level2">
+<h2>Intraclass Correlation Coefficients</h2>
+<p><span class="math display">\[
+ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW}
+\]</span> <span class="math display">\[
+ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ -
+MSE) \cdot n^{-1}}
+\]</span> <span class="math display">\[
+ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
+\]</span> <span class="math display">\[
+ICC_{(1,k)} = \frac{MSB - MSW}{MSB}
+\]</span> <span class="math display">\[
+ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
+\]</span> <span class="math display">\[
+ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
+\]</span></p>
+</div>
+<div id="icc-confidence-intervals" class="section level2">
+<h2>ICC Confidence Intervals</h2>
+<div id="icc11" class="section level3">
+<h3>ICC(1,1)</h3>
+<p><span class="math display">\[
+F =  \frac{MSB}{MSW}
+\]</span></p>
+<p><span class="math display">\[
+df_{n} = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
+df_{d} = n_j \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+\]</span></p>
+<p><span class="math display">\[
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
+\]</span></p>
+<p><span class="math display">\[
+Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))}
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
+\]</span></p>
+</div>
+<div id="icc21" class="section level3">
+<h3>ICC(2,1)</h3>
+<p><span class="math display">\[
+F =  \frac{MSJ}{MSE}
+\]</span></p>
+<p><span class="math display">\[
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F +
+n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) -
+n_k \cdot ICC_{(2,1)})]^2
+\]</span></p>
+<p><span class="math display">\[
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot
+(1 +
+                                                         (n_k - 1) \cdot
+ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2
+\]</span> <span class="math display">\[
+  v = \frac{vn}{vd}
+\]</span></p>
+<p><span class="math display">\[
+  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
+\]</span></p>
+<p><span class="math display">\[
+  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
+\]</span></p>
+<p><span class="math display">\[
+  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot
+(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot
+MSB)}
+\]</span></p>
+<p><span class="math display">\[
+  Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot
+MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+\]</span></p>
+</div>
+<div id="icc31" class="section level3">
+<h3>ICC(3,1)</h3>
+<p><span class="math display">\[
+F =  \frac{MSJ}{MSE}
+\]</span> <span class="math display">\[
+df_{n} = n_j - 1
+\]</span> <span class="math display">\[
+df_{d} = (n_j-1) \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+\]</span> <span class="math display">\[
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})}
+\]</span> <span class="math display">\[
+F3L &lt;- F31/qf(1 - alpha, df21n, df21d)
+\]</span> <span class="math display">\[
+F3U &lt;- F31 * qf(1 - alpha, df21d, df21n)
+\]</span> <span class="math display">\[
+Lower \space CI = (F3L - 1)/(F3L + n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
+\]</span></p>
+</div>
+<div id="icc1k" class="section level3">
+<h3>ICC(1,k)</h3>
+<p><span class="math display">\[
+F =  \frac{MSB - MSW}{MSB}
+\]</span> <span class="math display">\[
+df_{n} = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
+df_{d} = n_j \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
+F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
+\]</span> <span class="math display">\[
+F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
+\]</span></p>
+<p><span class="math display">\[
+Lower \space CI = 1-\frac{1}{F_L}
+\]</span> <span class="math display">\[
+Upper \space CI = 1-\frac{1}{F_U}
+\]</span></p>
+</div>
+<div id="icc2k" class="section level3">
+<h3>ICC(2,k)</h3>
+<p><span class="math display">\[
+F =  \frac{MSB - MSW}{MSB}
+\]</span></p>
+<p><span class="math display">\[
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F +
+n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) -
+n_k \cdot ICC_{(2,k)})]^2
+\]</span></p>
+<p><span class="math display">\[
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot
+(1 +
+                                                         (n_k - 1) \cdot
+ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2
+\]</span></p>
+<p><span class="math display">\[
+v = \frac{vn}{vd}
+\]</span></p>
+<p><span class="math display">\[
+F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
+\]</span> <span class="math display">\[
+F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
+\]</span></p>
+<p><span class="math display">\[
+L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ +
+(n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)}
+\]</span></p>
+<p><span class="math display">\[
+U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot
+n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+\]</span></p>
+<p><span class="math display">\[
+Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))}
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
+\]</span></p>
+</div>
+<div id="icc3k" class="section level3">
+<h3>ICC(3,k)</h3>
+<p><span class="math display">\[
+F = \frac{MSB}{MSE}
+\]</span></p>
+<p><span class="math display">\[
+df_n = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
+df_d = (n_j - 1) \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
+F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})}
+\]</span></p>
+<p><span class="math display">\[
+F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)}
+\]</span></p>
+<p><span class="math display">\[
+Lower \space CI = 1-\frac{1}{F_L}
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = 1-\frac{1}{F_U}
+\]</span></p>
+</div>
+</div>
+<div id="standard-error-calculations" class="section level2">
+<h2>Standard Error Calculations</h2>
+<p>The standard error of the measurement (SEM), standard error of the
+estimate (SEE), and standard error of prediction (SEP) are all estimated
+with the following calculations.</p>
+<p><span class="math display">\[
+SEM = \sqrt{MSE}
+\]</span></p>
+<p><span class="math display">\[
+SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
+k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})}
+\]</span></p>
+<p><span class="math display">\[
+SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
+k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2}
+\]</span></p>
+</div>
+<div id="coefficient-of-variation" class="section level2">
+<h2>Coefficient of Variation</h2>
+<p>The CV is calculated 3 potential ways within <code>reli_stats</code>.
+I highly recommend reporting the default version of CV.</p>
+<ol style="list-style-type: decimal">
+<li>From the MSE (default)</li>
+</ol>
+<p><span class="math display">\[
+CV = \frac{MSE }{ \bar y}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>From the SEM (most conservative)<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></li>
+</ol>
+<p><span class="math display">\[
+CV = \frac{SEM}{ \bar y}
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>From the model residuals (most liberal)</li>
+</ol>
+<p><span class="math display">\[
+CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
+\bar y}
+\]</span></p>
+</div>
+<div id="other-confidence-intervals" class="section level2">
+<h2>Other Confidence Intervals</h2>
+<p>If the <code>other_ci</code> argument is set to TRUE then parametric
+bootstrapped confidence intervals (using) will be calculated for the CV,
+SEM, SEP, and SEE. The number of resamples can be set with the
+replicates argument (default is 1999; increase for greater accuracy or
+lower for greater speed). The reported confidence intervals are
+estimated using the percentile method <code>type = &#39;perc&#39;</code>, the
+normal <code>type = &#39;norm&#39;</code>, or basic methods
+<code>type = &#39;basic&#39;</code>.</p>
+<p>To ensure reproducibility, please use <code>set.seed()</code> when
+these confidence intervals are calculated.</p>
+</div>
+</div>
+<div id="inter-rater-reliability" class="section level1">
+<h1>Inter-Rater Reliability</h1>
+<p>In some cases, the reliability of a categorical or ordinal scale may
+be worth investigating. For example, physicians may want to develop a
+diagnosis tool and ensure that the diagnosis is reliable (i.e.,
+categorical designation) or severity of the disease (i.e., a Likert-type
+scale). Coefficients can be calculated to assess the degree of
+inter-rater reliability. In its simplest form, the percent agreement
+between all the raters can be calculated. All other coefficients of
+agreement are esssentially trying to “correct” for random guessing of
+the rater. The function to make these calculations in the
+<code>SimplyAgree</code> is <code>agree_coef</code>, and it produces 4
+estimates: percent agreement, Gwet’s AC, Fleiss’ Kappa, and
+Krippendorff’s Alpha. However, other packages provide much a much
+greater breadth of calculative approaches <span class="citation">(<a href="#ref-irrCAC" role="doc-biblioref">Gwet 2019</a>)</span>.</p>
+<p>In the <code>agree_coef</code> function, the user can specify
+<code>weighted = TRUE</code>. If this argument is set to true than the
+ratings have quadratic weights applied to them. Essentially, this
+penalizes values farther away from each other more than those close to
+each other. For example, a pair of values equal to 3 and 4 would be
+penalized less than a pair of values to 1 and 4. For more details, on
+these “agreement coefficients” I refer all users to Gwet’s textbook on
+inter-rater agreement <span class="citation">(<a href="#ref-gwet" role="doc-biblioref">Gwet 2014</a>)</span>.</p>
+<p>As a demonstration, we can create a matrix of ratings.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>  ratermat1 <span class="ot">=</span> (<span class="st">&quot;Rater1 Rater2 Rater3 Rater4</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="st">1       1      1     NA      1</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">2       2      2      3      2</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="st">3       3      3      3      3</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">4       3      3      3      3</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">5       2      2      2      2</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">6       1      2      3      4</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">7       4      4      4      4</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">8       1      1      2      1</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">9       2      2      2      2</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">10     NA      5      5      5</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">11     NA     NA      1      1</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">12     NA     NA      3     NA&quot;</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  ratermat2 <span class="ot">=</span> <span class="fu">as.matrix</span>(<span class="fu">read.table</span>(<span class="fu">textConnection</span>(ratermat1),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                       <span class="at">header=</span><span class="cn">TRUE</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                       <span class="at">row.names=</span><span class="dv">1</span>))</span></code></pre></div>
+<p>We can then perform the analysis without the weights.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">agree_coef</span>(<span class="at">data =</span> ratermat2,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">wide =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">weighted =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Rater1&quot;</span>, <span class="st">&quot;Rater2&quot;</span>, <span class="st">&quot;Rater3&quot;</span>, <span class="st">&quot;Rater4&quot;</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                              est        se  lower.ci upper.ci</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Percent Agreement      0.8181818 0.1256090 0.5417184        1</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Gwet&#39;s AC1             0.7754441 0.1429500 0.4608133        1</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Fleiss&#39; Kappa          0.7611693 0.1530192 0.4243763        1</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Kririppendorff&#39;s Alpha 0.7434211 0.1454787 0.4192743        1</span></span></code></pre></div>
+<p>Or, perform it with weighting.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">agree_coef</span>(<span class="at">data =</span> ratermat2,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">wide =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">weighted =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;Rater1&quot;</span>, <span class="st">&quot;Rater2&quot;</span>, <span class="st">&quot;Rater3&quot;</span>, <span class="st">&quot;Rater4&quot;</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                              est         se  lower.ci upper.ci</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Percent Agreement      0.9753788 0.09061628 0.7759337        1</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Gwet&#39;s AC2             0.9140007 0.10396224 0.6851814        1</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Fleiss&#39; Kappa          0.8649351 0.14603361 0.5435173        1</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Kririppendorff&#39;s Alpha 0.8491071 0.12905120 0.5615632        1</span></span></code></pre></div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-gwet" class="csl-entry">
+Gwet, Kilem L. 2014. <em>Handbook of Inter-Rater Reliability</em>.
+Advanced Analytics, LLC. <a href="https://www.agreestat.com/book4/">https://www.agreestat.com/book4/</a>.
+</div>
+<div id="ref-irrCAC" class="csl-entry">
+———. 2019. <em>irrCAC: Computing Chance-Corrected Agreement Coefficients
+(CAC)</em>. <a href="https://CRAN.R-project.org/package=irrCAC">https://CRAN.R-project.org/package=irrCAC</a>.
+</div>
+<div id="ref-mcgraw1996" class="csl-entry">
+McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences
+about Some Intraclass Correlation Coefficients.”</span>
+<em>Psychological Methods</em> 1 (1): 30. <a href="https://doi.org/10.1037/1082-989X.1.1.30">https://doi.org/10.1037/1082-989X.1.1.30</a>.
+</div>
+<div id="ref-shrout1979" class="csl-entry">
+Shrout, Patrick E, and Joseph L Fleiss. 1979. <span>“Intraclass
+Correlations: Uses in Assessing Rater Reliability.”</span>
+<em>Psychological Bulletin</em> 86 (2): 420. <a href="https://doi.org/10.1037/0033-2909.86.2.420">https://doi.org/10.1037/0033-2909.86.2.420</a>.
+</div>
+<div id="ref-weir2005" class="csl-entry">
+Weir, Joseph P. 2005. <span>“Quantifying Test-Retest Reliability Using
+the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span>
+<em>The Journal of Strength and Conditioning Research</em> 19 (1): 231.
+<a href="https://pubmed.ncbi.nlm.nih.gov/15705040/">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.
+</div>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>The paper by Weir also appears to heavily rely on the
+work of <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979" role="doc-biblioref">1979</a>)</span> and <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996" role="doc-biblioref">1996</a>)</span><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>Also called “%SEM” in some texts<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

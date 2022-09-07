@@ -1,0 +1,74 @@
+---
+name:  jmvagree
+title: Simple Agreement Analysis
+jrs:   '1.1'
+
+items:
+    - name:  text
+      type:  Preformatted
+      refs: [SimplyAgree]
+
+    - name:  blandtab
+      title: Bland-Altman Limits of Agreement
+      type: Table
+      rows:  3
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name:  ccctab
+      title: Concordance Correlation Coefficient
+      type: Table
+      visible: (CCC)
+      rows:  1
+      columns:
+        - name: var
+          title: ''
+          type: text
+        - name: estimate
+          title: 'Estimate'
+          type: number
+        - name: lowerci
+          title: 'Lower C.I.'
+          type: number
+        - name: upperci
+          title: 'Upper C.I'
+          type: number
+
+    - name: plotba
+      type: Image
+      title: Bland-Altman Plot
+      visible: (plotbland)
+      renderFun: .plotba
+      width: 450
+      height: 400
+
+    - name: plotcon
+      type: Image
+      title: Line-of-Identity Plot
+      visible: (plotcon)
+      renderFun: .plotcon
+      width: 450
+      height: 400
+
+    - name: plotcheck
+      type: Image
+      title: Check Assumptions
+      visible: (plotcheck)
+      renderFun: .plotcheck
+      width: 450
+      height: 400
+    #- name:  cites
+    #  title: Methods
+    #  type:  Preformatted
+...

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Daniel Lüdecke" />
+
+<meta name="date" content="2021-05-11" />
+
+<title>Working with Labelled Data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Working with Labelled Data</h1>
+<h4 class="author">Daniel Lüdecke</h4>
+<h4 class="date">2021-05-11</h4>
+
+
+
+<p>This vignette shows a small example how functions to work with labelled data can be implemented in a typical data visualization workflow.</p>
+<div id="labelled-data" class="section level1">
+<h1>Labelled Data</h1>
+<p>In software like SPSS, it is common to have value and variable labels as variable attributes. Variable values, even if categorical, are mostly numeric. In R, however, you may use labels as values directly:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">factor</span>(<span class="kw">c</span>(<span class="st">&quot;low&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;mid&quot;</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;low&quot;</span>))</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co">#&gt; [1] low  high mid  high low </span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="co">#&gt; Levels: high low mid</span></span></code></pre></div>
+<p>Reading SPSS-data with <strong>haven</strong> or <strong>sjlabelled</strong> keeps the numeric values for variables and adds the value and variable labels as attributes. See following example from the sample-dataset efc, which is part of the <strong>sjlabelled</strong>-package:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">library</span>(sjlabelled)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">data</span>(efc)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">str</span>(efc<span class="op">$</span>e42dep)</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="co">#&gt;  num [1:908] 3 3 3 4 4 4 4 4 4 4 ...</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="co">#&gt;  - attr(*, &quot;label&quot;)= chr &quot;elder&#39;s dependency&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="co">#&gt;  - attr(*, &quot;labels&quot;)= Named num [1:4] 1 2 3 4</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="co">#&gt;   ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;independent&quot; &quot;slightly dependent&quot; &quot;moderately dependent&quot; &quot;severely dependent&quot;</span></span></code></pre></div>
+<p>While all plotting and table functions of the <a href="https://cran.r-project.org/package=sjPlot">sjPlot-package</a> make use of these attributes, many packages and/or functions do not consider these attributes, e.g. R base graphics:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(sjlabelled)</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">data</span>(efc)</span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">barplot</span>(</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="kw">table</span>(efc<span class="op">$</span>e42dep, efc<span class="op">$</span>e16sex), </span>
+<span id="cb3-5"><a href="#cb3-5"></a>  <span class="dt">beside =</span> <span class="ot">TRUE</span>, </span>
+<span id="cb3-6"><a href="#cb3-6"></a>  <span class="dt">legend.text =</span> <span class="ot">TRUE</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAJACAMAAABlpiR1AAAAUVBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6kNtNTU1mAABmtv+QOgCQZgCQ2/+Wlpa2ZgC2///Dw8PbkDrb///m5ub/tmb/25D//7b//9v///8oF1f6AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAQkUlEQVR4nO3d63YaSRZEYXybdssatz24saT3f9CRQJJlS1mXLMiKhG//Yq0mw2Sc3QUUqNjcAcFs1n4AwBAERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQERTQExUQ21Sz6V4/18HHubP6thKBoAUERDUERDUERDUERDUERDUERTQ+C3l4fzry+/77k30SXdCDodvP5cGP3dAOXwwtBG36oNGfF7fWzltsPP2b/U+ibzRGOiacV9Obqy9PNnSf5iyNfUEfQiyZf0PvXoI+HUK9BL5AOBL1/kj+81HX8vEB6EBQXDEERTQ+COlF/wXQgqBP1l0y+oE4zXTT5gpZP1B/n76MQTb6gE46gBD1f8gWdcKKeoOdLB4KOn6gn6PlSFHTG15VWPw9K0POlLOjfv3gtwM+/XrxdISjGqP8uZ5WgN1fvGwq6vX+Y+5eh28KpeoLGs/lfJVWC7n7/VOfUb5Lefb3/P+LjHUE7pqmg9++md+0EPZxmur2+f4tE0G5pewT945R5mxP13z78IGi3nLGgzyfqv30kaLecsaDPT+w3V6XvMxE0nnMW9PmjpNtrgvbKWQvaOg7H5wSCDn6SRFDM4viCDkNQzIKgiKa1oL//4w1WtIzD8SEooiEooiEooiEooiEooml9ov73u85/uLNXtIzD8TmBoP/84g8B9peiefEHlgTFGC0Fvb1+9/Vuu/n4667zH27dLhvF4fi0FPTnp4cvF734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EXSkoCWLJ8YRdKAwgo4UtGTxxDiCDhRG0JGCliyeGEfQgcIIOlLQksUT4wg6UBhBRwpasnhiHEEHCiPoSEFLFk+MI+hAYQQdKWjJ4olxBB0ojKAjBS1ZPDGOoAOFEXSkoCWLJ8YRdKAwgo4UtGTxxDiCDhRG0JGCliyeGEfQgcIIOlLQksUT4wg6UBhBRwpasnhiHEEHCiPoSEFLFk+MI+hAYQQdKWjJ4olxBB0ojKAjBS1ZPDGOoAOFEXSkoCWLJ8YRdKAwgo4UtGTxxDiCDhRG0JGCliyeGEfQgcIIOlLQksUT4wg6UBhBRwpasnhiHEEHCiPoSEFLFk+MI+hAYQQdKWjJ4olxBB0ojKAjBS1ZPDGOoAOFEXSkoFn3vr0+/H7R++9z4ghahqBjBc2583bz+XBj93RjUhxByxB0rKAZ9729ftZy++HH9DiCliHoWEEz7ntz9eXp5u73J/lfP1745r9xAVTWfxHdJB1BgeMy8zXo4yG0+BoUOC7zDr83V4djtuMnGnHk86DAcSEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEooiEoojlHQX/+Vbr43qWzvzphX9fcOENBb66KV4e8cG6v3329224+rv045nB+gu4GLl964fz89HDpom1X9ZydoLvN511XE2jO7v4w2g9nJ+jdq2tD4ne+dVUPQS+Nzq5MSNALY9fXeySCXhidHT8JemFse/OToBfF8yWy+4GgF8TPT70dPwl6UWwPF3B3HhQ4FgRFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNARFNP8HkcALcGa0DuYAAAAASUVORK5CYII=" /><!-- --></p>
+<p>As you can see in the above figure, the plot has neither axis nor legend labels.</p>
+</div>
+<div id="adding-value-labels-as-factor-values" class="section level1">
+<h1>Adding value labels as factor values</h1>
+<p><code>as_label()</code> is a sjlabelled-function that converts a numeric variable into a factor and sets attribute-value-labels as factor levels. When using factors with valued levels, the bar plot will be labelled.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">barplot</span>(</span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="kw">table</span>(sjlabelled<span class="op">::</span><span class="kw">as_label</span>(efc<span class="op">$</span>e42dep),</span>
+<span id="cb4-3"><a href="#cb4-3"></a>        sjlabelled<span class="op">::</span><span class="kw">as_label</span>(efc<span class="op">$</span>e16sex)), </span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="dt">beside =</span> <span class="ot">TRUE</span>, </span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="dt">legend.text =</span> <span class="ot">TRUE</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="getting-and-setting-value-and-variable-labels" class="section level1">
+<h1>Getting and setting value and variable labels</h1>
+<p>There are four functions that let you easily set or get value and variable labels of either a single vector or a complete data frame:</p>
+<ul>
+<li><code>get_label()</code> to get variable labels</li>
+<li><code>get_labels()</code> to get value labels</li>
+<li><code>set_label()</code> to set variable labels (add them as vector attribute)</li>
+<li><code>set_labels()</code> to set value labels (add them as vector attribute)</li>
+</ul>
+<p>With this function, you can easily add titles to plots dynamically, i.e. depending on the variable that is plotted.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">barplot</span>(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="kw">table</span>(sjlabelled<span class="op">::</span><span class="kw">as_label</span>(efc<span class="op">$</span>e42dep),</span>
+<span id="cb5-3"><a href="#cb5-3"></a>        sjlabelled<span class="op">::</span><span class="kw">as_label</span>(efc<span class="op">$</span>e16sex)), </span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="dt">beside =</span> <span class="ot">TRUE</span>, </span>
+<span id="cb5-5"><a href="#cb5-5"></a>  <span class="dt">legend.text =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>  <span class="dt">main =</span> <span class="kw">get_label</span>(efc<span class="op">$</span>e42dep)</span>
+<span id="cb5-7"><a href="#cb5-7"></a>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="restore-labels-from-subsetted-data" class="section level1">
+<h1>Restore labels from subsetted data</h1>
+<p>The base <code>subset()</code> function drops label attributes (or vector attributes in general) when subsetting data. In the sjlabelled-package, there are handy functions to deal with this problem: <code>copy_labels()</code> and <code>remove_labels()</code>.</p>
+<p><code>copy_labels()</code> adds back labels to a subsetted data frame based on the original data frame. And <code>remove_labels()</code> removes all label attributes.</p>
+<div id="losing-labels-during-subset" class="section level2">
+<h2>Losing labels during subset</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>efc.sub &lt;-<span class="st"> </span><span class="kw">subset</span>(efc, <span class="dt">subset =</span> e16sex <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">select =</span> <span class="kw">c</span>(<span class="dv">4</span><span class="op">:</span><span class="dv">8</span>))</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">str</span>(efc.sub)</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#&gt; &#39;data.frame&#39;:    296 obs. of  5 variables:</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co">#&gt;  $ e17age : num  74 68 80 72 94 79 67 80 76 88 ...</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#&gt;  $ e42dep : num  4 4 1 3 3 4 3 4 2 4 ...</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="co">#&gt;  $ c82cop1: num  4 3 3 4 3 3 4 2 2 3 ...</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="co">#&gt;  $ c83cop2: num  2 4 2 2 2 2 1 3 2 2 ...</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="co">#&gt;  $ c84cop3: num  4 4 1 1 1 4 2 4 2 4 ...</span></span></code></pre></div>
+</div>
+<div id="add-back-labels" class="section level2">
+<h2>Add back labels</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>efc.sub &lt;-<span class="st"> </span><span class="kw">copy_labels</span>(efc.sub, efc)</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="kw">str</span>(efc.sub)</span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#&gt; &#39;data.frame&#39;:    296 obs. of  5 variables:</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#&gt;  $ e17age : num  74 68 80 72 94 79 67 80 76 88 ...</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#&gt;   ..- attr(*, &quot;label&quot;)= chr &quot;elder&#39; age&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#&gt;  $ e42dep : num  4 4 1 3 3 4 3 4 2 4 ...</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#&gt;   ..- attr(*, &quot;label&quot;)= chr &quot;elder&#39;s dependency&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt;   ..- attr(*, &quot;labels&quot;)= Named num [1:4] 1 2 3 4</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt;   .. ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;independent&quot; &quot;slightly dependent&quot; &quot;moderately dependent&quot; &quot;severely dependent&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt;  $ c82cop1: num  4 3 3 4 3 3 4 2 2 3 ...</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt;   ..- attr(*, &quot;label&quot;)= chr &quot;do you feel you cope well as caregiver?&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt;   ..- attr(*, &quot;labels&quot;)= Named num [1:4] 1 2 3 4</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt;   .. ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;never&quot; &quot;sometimes&quot; &quot;often&quot; &quot;always&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="co">#&gt;  $ c83cop2: num  2 4 2 2 2 2 1 3 2 2 ...</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="co">#&gt;   ..- attr(*, &quot;label&quot;)= chr &quot;do you find caregiving too demanding?&quot;</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="co">#&gt;   ..- attr(*, &quot;labels&quot;)= Named num [1:4] 1 2 3 4</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="co">#&gt;   .. ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;Never&quot; &quot;Sometimes&quot; &quot;Often&quot; &quot;Always&quot;</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="co">#&gt;  $ c84cop3: num  4 4 1 1 1 4 2 4 2 4 ...</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a><span class="co">#&gt;   ..- attr(*, &quot;label&quot;)= chr &quot;does caregiving cause difficulties in your relationship with your friends?&quot;</span></span>
+<span id="cb7-20"><a href="#cb7-20"></a><span class="co">#&gt;   ..- attr(*, &quot;labels&quot;)= Named num [1:4] 1 2 3 4</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a><span class="co">#&gt;   .. ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;Never&quot; &quot;Sometimes&quot; &quot;Often&quot; &quot;Always&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>When working with labelled data, especially when working with data sets imported from other software packages, it comes very handy to make use of the label attributes. The <strong>sjlabelled</strong>-package supports this feature and offers useful functions for these tasks.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

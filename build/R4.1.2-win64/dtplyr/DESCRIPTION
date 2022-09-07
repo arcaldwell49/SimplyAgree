@@ -1,0 +1,46 @@
+Package: dtplyr
+Title: Data Table Back-End for 'dplyr'
+Version: 1.2.0
+Authors@R: 
+    c(person(given = "Hadley",
+             family = "Wickham",
+             role = c("cre", "aut"),
+             email = "hadley@rstudio.com"),
+      person(given = "Maximilian",
+             family = "Girlich",
+             role = "aut"),
+      person(given = "Mark",
+             family = "Fairbanks",
+             role = "aut"),
+      person(given = "Ryan",
+             family = "Dickerson",
+             role = "aut"),
+      person(given = "RStudio",
+             role = "cph"))
+Description: Provides a data.table backend for 'dplyr'. The goal
+    of 'dtplyr' is to allow you to write 'dplyr' code that is
+    automatically translated to the equivalent, but usually much faster,
+    data.table code.
+License: MIT + file LICENSE
+URL: https://dtplyr.tidyverse.org, https://github.com/tidyverse/dtplyr
+BugReports: https://github.com/tidyverse/dtplyr/issues
+Depends: R (>= 3.3)
+Imports: crayon, data.table (>= 1.13.0), dplyr (>= 1.0.3), ellipsis,
+        glue, lifecycle, rlang, tibble, tidyselect, vctrs
+Suggests: bench, covr, knitr, rmarkdown, testthat (>= 3.0.0), tidyr (>=
+        1.1.0)
+VignetteBuilder: knitr
+Encoding: UTF-8
+RoxygenNote: 7.1.2
+Config/testthat/edition: 3
+NeedsCompilation: no
+Packaged: 2021-12-03 16:20:10 UTC; hadleywickham
+Author: Hadley Wickham [cre, aut],
+  Maximilian Girlich [aut],
+  Mark Fairbanks [aut],
+  Ryan Dickerson [aut],
+  RStudio [cph]
+Maintainer: Hadley Wickham <hadley@rstudio.com>
+Repository: CRAN
+Date/Publication: 2021-12-05 14:20:02 UTC
+Built: R 4.1.2; ; 2021-12-25 22:39:12 UTC; windows

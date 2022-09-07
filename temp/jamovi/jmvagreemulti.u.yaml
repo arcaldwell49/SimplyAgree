@@ -1,0 +1,74 @@
+title: Nested/Replicate Data Agreement Analysis
+name: jmvagreemulti
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Method 1
+        children:
+          - type: VariablesListBox
+            name: method1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Method 2
+        children:
+          - type: VariablesListBox
+            name: method2
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Subject Identifier
+        children:
+          - type: VariablesListBox
+            name: id
+            maxItemCount: 1
+            isTarget: true
+  - type: CollapseBox
+    label: Limits of Agreement Settings
+    name: loapanel
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TextBox
+            name: ciWidth
+            format: number
+          - type: TextBox
+            name: agreeWidth
+            format: number
+      - type: TextBox
+        name: testValue
+        format: number
+      - type: CheckBox
+        name: prop_bias
+      - type: CheckBox
+        name: valEq
+  - type: CollapseBox
+    label: Other Settings
+    name: dispanel
+    collapsed: true
+    children:
+      - type: CheckBox
+        name: CCC
+      - type: CheckBox
+        name: plotbland
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: TextBox
+            name: xlabel
+            format: string
+          - type: TextBox
+            name: ylabel
+            format: string
+      - type: CheckBox
+        name: plotcon
