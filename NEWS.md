@@ -1,5 +1,9 @@
 # NEWS
 
+# SimplyAgree 0.1.1
+
+- Minor cosmetic updates for jamovi submission.
+
 # SimplyAgree 0.1.0
 
 - Updated CV calculations for `reli_stats` with the cv_calc argument.
