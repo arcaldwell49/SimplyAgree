@@ -5,8 +5,6 @@ stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
-    suggested:
-      - continuous
     permitted:
       - numeric
     persistentItems: false
@@ -56,9 +54,11 @@ children:
         children:
           - type: TextBox
             name: xlabel
+            width: largest
             format: string
           - type: TextBox
             name: ylabel
+            width: largest
             format: string
       - type: CheckBox
         name: plotcheck

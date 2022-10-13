@@ -59,12 +59,26 @@ jmvreliClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
         },
-        .plot=function(image, ...) {
+        .plot=function(image, ggtheme, ...) {
 
             if (is.null(image$state))
                 return(FALSE)
 
-            plotpr = plot(image$state)
+            plotpr = plot(image$state)+
+            ggtheme +
+              theme(legend.position = "none")
+            #theme(#strip.text = element_text(face = "bold", size = 11),
+            #legend.text = element_text(face = "bold", size = 11),
+            #legend.title = element_text(face = "bold", size = 11),
+            #axis.text.x = element_text(face = "bold", size = 11),
+            #axis.text.y = element_text(face = "bold", size = 11),
+            #axis.title.x = element_text(face = "bold", size = 11),
+            #panel.grid.major = element_blank(),
+            #panel.grid.minor = element_blank(),
+            #panel.background = element_rect(fill = "transparent",colour = NA),
+            #plot.background = element_rect(fill = "transparent",colour = NA),
+            #legend.background = element_rect(fill = "transparent",colour = NA),
+            #legend.position = "none")
 
 
             print(plotpr)

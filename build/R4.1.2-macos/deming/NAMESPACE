@@ -1,0 +1,8 @@
+export("deming", "pbreg", "theilsen")
+import("boot")
+importFrom(stats, approx, lm.wfit, mad, median, model.extract, 
+           model.matrix, model.response, model.weights, naprint, 
+           optimize, qnorm, rbinom, terms, var)
+S3method(print, deming)
+S3method(print, pbreg)
+S3method(print, theilsen)

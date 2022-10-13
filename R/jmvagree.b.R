@@ -121,7 +121,7 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #)
             #self$results$cites$setContent(citethis)
         },
-        .plotba = function(image,...){
+        .plotba = function(image,ggtheme,...){
 
             if (is.null(image$state))
                 return(FALSE)
@@ -131,13 +131,14 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               labs(y = self$options$ylabel,
                    x = self$options$xlabel) +
                  #set transparency
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    legend.background = element_rect(fill = "transparent",colour = NA),
-                    panel.background = element_rect(fill = "transparent",colour = NA),
-                    plot.background = element_rect(fill = "transparent",colour = NA)
-                )
+              ggtheme
+                #theme(
+                #    panel.grid.major = element_blank(),
+                #    panel.grid.minor = element_blank(),
+                #    legend.background = element_rect(fill = "transparent",colour = NA),
+                #    panel.background = element_rect(fill = "transparent",colour = NA),
+                #    plot.background = element_rect(fill = "transparent",colour = NA)
+                #)
 
 
             print(plotpr)
@@ -145,21 +146,22 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(TRUE)
 
         },
-        .plotcon = function(image,...){
+        .plotcon = function(image,ggtheme,...){
 
             if (is.null(image$state))
                 return(FALSE)
 
             plotpr = plot(image$state, type = 2,
                           x_name = "1", y_name = "2") +
+              ggtheme
                 # set transparency
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    legend.key = element_rect(colour = "transparent", fill = "transparent"),
-                    panel.background = element_rect(fill = "transparent",colour = NA),
-                    plot.background = element_rect(fill = "transparent",colour = NA)
-                )
+                #theme(
+                #    panel.grid.major = element_blank(),
+                #    panel.grid.minor = element_blank(),
+                #    legend.key = element_rect(colour = "transparent", fill = "transparent"),
+                #    panel.background = element_rect(fill = "transparent",colour = NA),
+                #    plot.background = element_rect(fill = "transparent",colour = NA)
+                #)
 
 
             print(plotpr)
@@ -167,19 +169,26 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(TRUE)
 
         },
-        .plotcheck = function(image,...){
+        .plotcheck = function(image, ggtheme,...){
 
           if (is.null(image$state))
             return(FALSE)
 
           plotpr = check(image$state) +
             # set transparency
-            theme(
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.background = element_rect(fill = "transparent",colour = NA),
-              plot.background = element_rect(fill = "transparent",colour = NA)
-            )
+            ggtheme
+            #theme(strip.text = element_text(face = "bold", size = 11),
+            #          legend.text = element_text(face = "bold", size = 11),
+            #          legend.title = element_text(face = "bold", size = 11),
+            #          axis.text.x = element_text(face = "bold", size = 11),
+            #          axis.text.y = element_text(face = "bold", size = 11),
+            #          axis.title.x = element_text(face = "bold", size = 11),
+            #          panel.grid.major = element_blank(),
+            #          panel.grid.minor = element_blank(),
+            #          panel.background = element_rect(fill = "transparent",colour = NA),
+            #          plot.background = element_rect(fill = "transparent",colour = NA),
+            #          legend.background = element_rect(fill = "transparent",colour = NA))
+
 
 
           print(plotpr)

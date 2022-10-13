@@ -91,15 +91,16 @@ jmvdemingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         plotpr = plot(image$state) +
           labs(x = self$options$xlabel,
-               y = self$options$ylabel)
+               y = self$options$ylabel) +
+          ggtheme
           # set transparency
-          theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            legend.key = element_rect(colour = "transparent", fill = "transparent"),
-            panel.background = element_rect(fill = "transparent",colour = NA),
-            plot.background = element_rect(fill = "transparent",colour = NA)
-          )
+          #theme(
+          #  panel.grid.major = element_blank(),
+          #  panel.grid.minor = element_blank(),
+          #  legend.key = element_rect(colour = "transparent", fill = "transparent"),
+          #  panel.background = element_rect(fill = "transparent",colour = NA),
+          #  plot.background = element_rect(fill = "transparent",colour = NA)
+          #)
 
 
         print(plotpr)
@@ -107,19 +108,20 @@ jmvdemingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return(TRUE)
 
       },
-      .plotcheck = function(image,...){
+      .plotcheck = function(image,ggtheme...){
 
         if (is.null(image$state))
           return(FALSE)
 
         plotpr = check(image$state) +
+          ggtheme
           # set transparency
-          theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.background = element_rect(fill = "transparent",colour = NA),
-            plot.background = element_rect(fill = "transparent",colour = NA)
-          )
+          #theme(
+          #  panel.grid.major = element_blank(),
+          #  panel.grid.minor = element_blank(),
+          #  panel.background = element_rect(fill = "transparent",colour = NA),
+          #  plot.background = element_rect(fill = "transparent",colour = NA)
+          #)
 
 
         print(plotpr)

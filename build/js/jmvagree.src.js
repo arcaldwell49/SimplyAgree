@@ -131,6 +131,7 @@ view.layout = ui.extend({
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
 							name: "xlabel",
+							width: "large",
 							format: FormatDef.string
 						},
 						{

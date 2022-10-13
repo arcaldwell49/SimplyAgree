@@ -66,9 +66,11 @@ children:
         children:
           - type: TextBox
             name: xlabel
+            width: largest
             format: string
           - type: TextBox
             name: ylabel
+            width: largest
             format: string
       - type: CheckBox
         name: plotcon

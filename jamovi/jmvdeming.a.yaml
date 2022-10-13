@@ -78,7 +78,7 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assumptions plots
     - name: weighted
-      title: Weighted Deming regression?
+      title: Weighted Deming regression
       type: Bool
       default: false
       description:
