@@ -216,8 +216,8 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Check Assumptions",
                 visible="(plotcheck)",
                 renderFun=".plotcheck",
-                width=450,
-                height=400))}))
+                width=550,
+                height=450))}))
 
 jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvagreeBase",

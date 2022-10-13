@@ -66,8 +66,8 @@ items:
       title: Check Assumptions
       visible: (plotcheck)
       renderFun: .plotcheck
-      width: 450
-      height: 400
+      width: 550
+      height: 450
     #- name:  cites
     #  title: Methods
     #  type:  Preformatted

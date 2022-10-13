@@ -119,12 +119,14 @@ view.layout = ui.extend({
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
 							name: "xlabel",
+							width: "largest",
 							format: FormatDef.string
 						},
 						{
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
 							name: "ylabel",
+							width: "largest",
 							format: FormatDef.string
 						}
 					]

@@ -48,17 +48,13 @@ children:
     children:
       - type: CheckBox
         name: plotcon
-      - type: LayoutBox
-        margin: large
-        style: inline
-        children:
-          - type: TextBox
-            name: xlabel
-            width: largest
-            format: string
-          - type: TextBox
-            name: ylabel
-            width: largest
-            format: string
+      - type: TextBox
+        name: xlabel
+        width: largest
+        format: string
+      - type: TextBox
+        name: ylabel
+        width: largest
+        format: string
       - type: CheckBox
         name: plotcheck
