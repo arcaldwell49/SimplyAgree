@@ -3,6 +3,7 @@
 # SimplyAgree 0.1.1
 
 - Minor cosmetic updates for jamovi submission.
+- Minor cosmetic changes to plots (transparent backgrounds)
 
 # SimplyAgree 0.1.0
 

@@ -43,7 +43,7 @@ options:
             Name of column containing Vector of data
 
     - name: ciWidth
-      title: Confidence level (%)
+      title: Confidence level
       type: Number
       min: 50.0
       max: 99.9

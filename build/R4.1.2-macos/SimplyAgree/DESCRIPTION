@@ -19,4 +19,4 @@ Suggests: knitr, rmarkdown, testthat, readr, covr, mgcv, ggeffects,
 VignetteBuilder: knitr
 Depends: R (>= 3.6)
 Author: Aaron Caldwell [aut, cre]
-Built: R 4.1.2; ; 2022-10-14 16:40:26 UTC; unix
+Built: R 4.1.2; ; 2022-10-14 22:39:39 UTC; unix

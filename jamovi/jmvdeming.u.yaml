@@ -34,10 +34,11 @@ children:
         style: inline
         children:
           - type: TextBox
-            name: ciWidth
+            name: testValue
             format: number
           - type: TextBox
-            name: testValue
+            name: ciWidth
+            suffix: "%"
             format: number
       - type: CheckBox
         name: weighted

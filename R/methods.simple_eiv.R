@@ -38,6 +38,7 @@ print.simple_eiv <- function(x,...){
 #' @param x_name Name/label for x values (first measurement)
 #' @param y_name Name/label for y values (second measurement)
 #' @import ggplot2
+#' @importFrom patchwork plot_annotation
 #' @export
 
 plot.simple_eiv <- function(x,
@@ -123,7 +124,15 @@ check.simple_eiv <- function(x) {
          caption = paste0("Heteroskedasticity", " \n",
                                     "Breusch-Pagan Test: p = ",
                                     signif(p_val_het,4))) +
-    theme_bw()
+    theme_bw() +
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
 
   dat_norm <- na.omit(data.frame(y = opt_res))
   norm_test = shapiro.test(opt_res)
@@ -131,6 +140,22 @@ check.simple_eiv <- function(x) {
   p2 = plot_qq(x = dat_norm) +
     labs(caption = paste0("Normality", " \n",
                           norm_text, ": p = ",
-                          signif(norm_test$p.value,4)))
-  wrap_plots(p2, p1, ncol = 2)
+                          signif(norm_test$p.value,4)))+
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
+  wrap_plots(p2, p1, ncol = 2) & plot_annotation(
+    theme = theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    ))
 }

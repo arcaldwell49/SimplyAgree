@@ -79,13 +79,14 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
-							name: "ciWidth",
+							name: "testValue",
 							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
-							name: "testValue",
+							name: "ciWidth",
+							suffix: "%",
 							format: FormatDef.number
 						}
 					]

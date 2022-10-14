@@ -40,9 +40,11 @@ children:
         children:
           - type: TextBox
             name: ciWidth
+            suffix: "%"
             format: number
           - type: TextBox
             name: agreeWidth
+            suffix: "%"
             format: number
       - type: TextBox
         name: testValue
