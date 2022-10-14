@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-05-12</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-10-14</h4>
       
       
       <div class="hidden name"><code>Deming.Rmd</code></div>
@@ -147,19 +147,15 @@ and homogeneity of variance, can then be check with the
 <code>check</code> method for Deming regression results. Both plots
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span>
-<span class="co">#&gt; $p_norm</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
-<pre><code><span class="co">#&gt; </span>
-<span class="co">#&gt; $p_het</span></code></pre>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-2.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="weighted-deming-regression">Weighted Deming Regression<a class="anchor" aria-label="anchor" href="#weighted-deming-regression"></a>
 </h3>
 <p>For this example, I will rely upon the “ferritin” data from the
 <code>deming</code> R package.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span>
 
@@ -174,7 +170,7 @@ appear to be fine with regards to the assumptions.</p>
 <p>Let me demonstrate the problem with using simple Deming regression
 when the weights are helpful. When we look at the two plots below, we
 can see there is severe problem with using the “un-weighted” model.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="st">"new.lot"</span>,
   y <span class="op">=</span> <span class="st">"old.lot"</span>,
@@ -187,15 +183,11 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span class="co">#&gt; Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821</span>
 <span class="co">#&gt; Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949</span>
 
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span>
-<span class="co">#&gt; $p_norm</span></code></pre></div>
+<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
-<pre><code><span class="co">#&gt; </span>
-<span class="co">#&gt; $p_het</span></code></pre>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="st">"new.lot"</span>,
   y <span class="op">=</span> <span class="st">"old.lot"</span>,
@@ -210,14 +202,10 @@ TRUE.</p>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span>
-<span class="co">#&gt; $p_norm</span></code></pre></div>
+<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
-<pre><code><span class="co">#&gt; </span>
-<span class="co">#&gt; $p_het</span></code></pre>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-3.png" width="700"></p>
 </div>
 </div>
 <div class="section level2">

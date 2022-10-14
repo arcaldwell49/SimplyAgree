@@ -5,7 +5,7 @@ jrs:   '1.1'
 
 items:
     - name:  text
-      type:  Preformatted
+      type:  Html
 
     - name:  demtab
       title: Regression Coefficients
@@ -44,7 +44,7 @@ items:
       title: Check Assumptions
       visible: (plotcheck)
       renderFun: .plotcheck
-      width: 600
+      width: 650
       height: 400
     #- name:  cites
     #  title: Methods

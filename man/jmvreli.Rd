@@ -23,7 +23,7 @@ variance components}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$text} \tab \tab \tab \tab \tab a html \cr
   \code{results$icctab} \tab \tab \tab \tab \tab a table \cr
   \code{results$vartab} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an image \cr

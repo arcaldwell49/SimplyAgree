@@ -42,7 +42,7 @@ confidence intervals}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$text} \tab \tab \tab \tab \tab a html \cr
   \code{results$demtab} \tab \tab \tab \tab \tab a table \cr
   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
   \code{results$plotcheck} \tab \tab \tab \tab \tab an image \cr

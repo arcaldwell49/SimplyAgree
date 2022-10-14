@@ -139,26 +139,18 @@ view.layout = ui.extend({
 					name: "plotbland"
 				},
 				{
-					type: DefaultControls.LayoutBox,
-					typeName: 'LayoutBox',
-					margin: "large",
-					style: "inline",
-					controls: [
-						{
-							type: DefaultControls.TextBox,
-							typeName: 'TextBox',
-							name: "xlabel",
-							width: "largest",
-							format: FormatDef.string
-						},
-						{
-							type: DefaultControls.TextBox,
-							typeName: 'TextBox',
-							name: "ylabel",
-							width: "largest",
-							format: FormatDef.string
-						}
-					]
+					type: DefaultControls.TextBox,
+					typeName: 'TextBox',
+					name: "xlabel",
+					width: "largest",
+					format: FormatDef.string
+				},
+				{
+					type: DefaultControls.TextBox,
+					typeName: 'TextBox',
+					name: "ylabel",
+					width: "largest",
+					format: FormatDef.string
 				},
 				{
 					type: DefaultControls.CheckBox,

@@ -84,7 +84,7 @@ jmvdemingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         #)
         #self$results$cites$setContent(citethis)
       },
-      .plotcon = function(image,...){
+      .plotcon = function(image,ggtheme,...){
 
         if (is.null(image$state))
           return(FALSE)
@@ -108,21 +108,25 @@ jmvdemingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         return(TRUE)
 
       },
-      .plotcheck = function(image,ggtheme...){
+      .plotcheck = function(image,ggtheme,...){
 
         if (is.null(image$state))
           return(FALSE)
 
-        plotpr = check(image$state) +
-          ggtheme
+        plotpr = check(image$state) #+
           # set transparency
-          #theme(
-          #  panel.grid.major = element_blank(),
-          #  panel.grid.minor = element_blank(),
-          #  panel.background = element_rect(fill = "transparent",colour = NA),
-          #  plot.background = element_rect(fill = "transparent",colour = NA)
-          #)
-
+          #ggtheme
+        #theme(strip.text = element_text(face = "bold", size = 11),
+        #          legend.text = element_text(face = "bold", size = 11),
+        #          legend.title = element_text(face = "bold", size = 11),
+        #          axis.text.x = element_text(face = "bold", size = 11),
+        #          axis.text.y = element_text(face = "bold", size = 11),
+        #          axis.title.x = element_text(face = "bold", size = 11),
+        #          panel.grid.major = element_blank(),
+        #          panel.grid.minor = element_blank(),
+        #          panel.background = element_rect(fill = "transparent",colour = NA),
+        #          plot.background = element_rect(fill = "transparent",colour = NA),
+        #          legend.background = element_rect(fill = "transparent",colour = NA))
 
         print(plotpr)
 

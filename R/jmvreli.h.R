@@ -72,7 +72,7 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Reliability Analysis")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 refs=list(
@@ -85,14 +85,14 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="model", 
-                        `title`="model", 
+                        `title`="Model", 
                         `type`="text"),
                     list(
                         `name`="measures", 
-                        `title`="measures"),
+                        `title`="Measures"),
                     list(
                         `name`="type", 
-                        `title`="type", 
+                        `title`="Type", 
                         `type`="text"),
                     list(
                         `name`="icc", 
@@ -100,11 +100,11 @@ jmvreliResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number"),
                     list(
                         `name`="lower.ci", 
-                        `title`="lower.ci", 
+                        `title`="Lower C.I.", 
                         `type`="number"),
                     list(
                         `name`="upper.ci", 
-                        `title`="upper.ci", 
+                        `title`="Upper C.I.", 
                         `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -166,7 +166,7 @@ jmvreliBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plots \code{TRUE} or \code{FALSE} (default), plot data
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$icctab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$vartab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an image \cr

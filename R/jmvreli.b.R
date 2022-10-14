@@ -34,16 +34,16 @@ jmvreliClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tex_res =   paste0(
                 "Coefficient of Variation (%): ",
                 round(res$cv$est*100,2),
-                "\n",
+                "<br>",
                 "Standard Error of Measurement (SEM): ",
                 round(res$SEM$est,4),
-                "\n",
+                "<br>",
                 "Standard Error of the Estimate (SEE): ",
                 round(res$SEE$est,4),
-                "\n",
+                "<br>",
                 "Standard Error of Prediction (SEP): ",
                 round(res$SEP$est,4),
-                "\n"
+                "<br>"
             )
 
             plot$setState(res)

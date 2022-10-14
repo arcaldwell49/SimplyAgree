@@ -47,31 +47,37 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                   1-((1-res$call$conf.level)*2),
                                   res$call$conf.level)
                 if(res$call$prop_bias){
-                  pbias_txt = "Warning: hypothesis test likely bogus with proportional bias. \n"
+                  pbias_txt = "&#x1f6a8 Warning: hypothesis test likely bogus with proportional bias. <br>"
                 } else {
-                  pbias_txt = "\n"
+                  pbias_txt = "<br>"
+                }
+                if(grepl(res$shieh_test$h0_test, pattern="don't")){
+                  h0_text = "&#10060"
+                } else{
+                  h0_text = "&#9989"
+
                 }
                 pr_ci = paste0(ciWidth*100, "% (Bias), ",(1-(1-ciWidth)*2)*100, "% (LoA)")
                 pr_res = paste0(
                   pbias_txt,
                   "Shieh Test of Agreement ",
-                  "\n",
+                  "<br>",
                   "Exact ", exact_ci*100,"% C.I.:",
                   " [",
                   round(res$shieh_test$lower.ci, 4),
                   ", ",
                   round(res$shieh_test$upper.ci, 4),
                   "]",
-                  "\n",
-                  "\n",
-                  "Hypothesis Test: ",
+                  "<br>",
+                  "<br>", h0_text,
+                  " Hypothesis Test: ",
                   res$shieh_test$h0_test,
-                  "\n",
-                  "\n",
+                  "<br>",
+                  "<br>",
                   "Limit of Agreement = ",
                   res$shieh_test$prop0 * 100,
                   "%",
-                  "\n",
+                  "<br>",
                   "Confidence Interval = ",
                   #"alpha =", (1-res$call$conf.level),   "|",
                   pr_ci
@@ -131,7 +137,8 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               labs(y = self$options$ylabel,
                    x = self$options$xlabel) +
                  #set transparency
-              ggtheme
+              ggtheme+
+              theme(legend.title=element_blank())
                 #theme(
                 #    panel.grid.major = element_blank(),
                 #    panel.grid.minor = element_blank(),
@@ -153,7 +160,8 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             plotpr = plot(image$state, type = 2,
                           x_name = "1", y_name = "2") +
-              ggtheme
+              ggtheme +
+              theme(legend.title=element_blank())
                 # set transparency
                 #theme(
                 #    panel.grid.major = element_blank(),
@@ -174,9 +182,9 @@ jmvagreeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (is.null(image$state))
             return(FALSE)
 
-          plotpr = check(image$state) +
+          plotpr = check(image$state) #+
             # set transparency
-            ggtheme
+            #ggtheme
             #theme(strip.text = element_text(face = "bold", size = 11),
             #          legend.text = element_text(face = "bold", size = 11),
             #          legend.title = element_text(face = "bold", size = 11),
