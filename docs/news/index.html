@@ -61,21 +61,34 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.0" id="simplyagree-010">SimplyAgree 0.1.0<a class="anchor" aria-label="anchor" href="#simplyagree-010"></a></h2>
+<h2 class="page-header" data-toc-text="0.1.1" id="simplyagree-011">SimplyAgree 0.1.1<a class="anchor" aria-label="anchor" href="#simplyagree-011"></a></h2>
+<ul><li>Minor cosmetic updates for jamovi submission.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.0" id="simplyagree-010">SimplyAgree 0.1.0<small>2022-08-24</small><a class="anchor" aria-label="anchor" href="#simplyagree-010"></a></h2>
 <ul><li>Updated CV calculations for <code>reli_stats</code> with the cv_calc argument.
 <ul><li>Options now included CV for the model residuals, mean-squared error (MSE), or for the standard error of measurement (SEM).</li>
+<li>Parametric bootstrap CI for all “other” statistics (CV, SEM, SEE, and SEP)</li>
 </ul></li>
 <li>Updated plots to include the <code>delta</code> argument on plot if specified, and estimate of LoA.</li>
 <li>Line-of-identity plot now includes trend line from Deming regression rather than OLS.</li>
 <li>Deming regression function (<code>dem_reg</code>) has been added to the package.</li>
 <li>Agreement coefficients (<code>agree_coef</code>), otherwise known as</li>
 <li>Added agreement coefficient function (<code>agree_coef</code>).</li>
+<li>Added <code>loa_lme</code> function
+<ul><li>
+<code>loa_mixed</code> now deprecated</li>
+<li>
+<code>loa_lme</code> allows for heterogenous variance by condition</li>
+<li>New function is faster and relies on parametric bootstrap</li>
+</ul></li>
 <li>Assumptions checks are added for all “simple-agree” class results
 <ul><li>Checks include: normality, heteroscedasticity, and proportional bias</li>
 </ul></li>
 <li>Assumptions checks are added for all “simple-reli” class results
 <ul><li>Checks include: normality and heteroscedasticity</li>
 </ul></li>
+<li>All jamovi functions updated with new UI layout</li>
 <li>Big thanks go to Greg Atkinson and Ivan Jukic for the many suggestions leading to this update.</li>
 </ul></div>
     <div class="section level2">

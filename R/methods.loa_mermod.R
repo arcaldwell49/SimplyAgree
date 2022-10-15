@@ -147,7 +147,15 @@ check.loa_mermod <- function(x) {
   p_het = plot_het(dat_het) +
     labs(caption = paste0("Heteroskedasticity", " \n",
                           "Breusch-Pagan Test: p = ",
-                          signif(p_val_het,4)))
+                          signif(p_val_het,4)))+
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
 
   # Normality ------------
   mod_resid = residuals(res_mod)
@@ -167,7 +175,15 @@ check.loa_mermod <- function(x) {
   ) +
     labs(caption = paste0("Normality", " \n",
                           norm_text, ": p = ",
-                          signif(norm_test$p.value,4)))
+                          signif(norm_test$p.value,4))) +
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
 
   # Prop Bias ----
 
@@ -212,12 +228,28 @@ check.loa_mermod <- function(x) {
   p_bias = plot_bias(dat2) +
     labs(caption = paste0("Proportional Bias", " \n",
                           "Test for Linear Bias", ": p = ",
-                          signif(lin_pval,4)))
+                          signif(lin_pval,4))) +
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
 
   # All plots ----
 
   wrap_plots(p_norm, p_het,
-             p_bias, ncol = 2)
+             p_bias, ncol = 2) & plot_annotation(
+               theme = theme(
+                 panel.background = element_rect(fill='transparent'), #transparent panel bg
+                 plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+                 panel.grid.major = element_blank(), #remove major gridlines
+                 panel.grid.minor = element_blank(), #remove minor gridlines
+                 legend.background = element_rect(fill='transparent'), #transparent legend bg
+                 legend.box.background = element_rect(fill='transparent') #transparent legend panel
+               ))
 }
 
 

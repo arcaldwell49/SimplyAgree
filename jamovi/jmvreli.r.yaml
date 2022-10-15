@@ -5,7 +5,7 @@ jrs:   '1.1'
 
 items:
     - name:  text
-      type:  Preformatted
+      type:  Html
       refs: [SimplyAgree]
 
     - name:  icctab
@@ -14,21 +14,21 @@ items:
       rows:  6
       columns:
         - name: model
-          title: model
+          title: Model
           type: text
         - name: measures
-          title: measures
+          title: Measures
         - name: type
-          title: type
+          title: Type
           type: text
         - name: icc
           title: ICC
           type: number
         - name: lower.ci
-          title: lower.ci
+          title: Lower C.I.
           type: number
         - name: upper.ci
-          title: upper.ci
+          title: Upper C.I.
           type: number
 
     - name:  vartab

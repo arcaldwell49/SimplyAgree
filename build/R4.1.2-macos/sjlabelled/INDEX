@@ -1,0 +1,35 @@
+add_labels              Add, replace or remove value labels of
+                        variables
+as_character            Convert variable into factor with associated
+                        value labels
+as_factor               Convert variable into factor and keep value
+                        labels
+as_labelled             Convert vector to labelled class
+as_numeric              Convert factors to numeric variables
+convert_case            Generic case conversion for labels
+copy_labels             Copy value and variable labels to (subsetted)
+                        data frames
+drop_labels             Drop, add or convert (non-)labelled values
+efc                     Sample dataset from the EUROFAMCARE project
+get_label               Retrieve variable label(s) of labelled data
+get_labels              Retrieve value labels of labelled data
+get_na                  Retrieve tagged NA values of labelled variables
+get_values              Retrieve values of labelled variables
+is_labelled             Check whether object is of class "labelled"
+label_to_colnames       Use variable labels as column names
+read_spss               Import data from other statistical software
+                        packages
+remove_all_labels       Remove value and variable labels from vector or
+                        data frame
+remove_label            Remove variable labels from variables
+set_label               Add variable label(s) to variables
+set_labels              Add value labels to variables
+set_na                  Replace specific values in vector with NA
+sjlabelled-package      Labelled Data Utility Functions
+term_labels             Retrieve labels of model terms from regression
+                        models
+tidy_labels             Repair value labels
+unlabel                 Convert labelled vectors into normal classes
+write_spss              Write data to other statistical software
+                        packages
+zap_na_tags             Convert tagged NA values into regular NA

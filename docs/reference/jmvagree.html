@@ -74,8 +74,12 @@
   agreeWidth <span class="op">=</span> <span class="fl">95</span>,
   testValue <span class="op">=</span> <span class="fl">2</span>,
   CCC <span class="op">=</span> <span class="cn">TRUE</span>,
-  plotbland <span class="op">=</span> <span class="cn">FALSE</span>,
-  plotcon <span class="op">=</span> <span class="cn">FALSE</span>
+  plotbland <span class="op">=</span> <span class="cn">TRUE</span>,
+  plotcon <span class="op">=</span> <span class="cn">FALSE</span>,
+  plotcheck <span class="op">=</span> <span class="cn">FALSE</span>,
+  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
+  xlabel <span class="op">=</span> <span class="st">"Average of Both Methods"</span>,
+  ylabel <span class="op">=</span> <span class="st">"Difference between Methods"</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -102,10 +106,18 @@ agreement limits</p></dd>
 plot</p></dd>
 <dt>plotcon</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code> (default), for Bland-Altman plot</p></dd>
+<dt>plotcheck</dt>
+<dd><p><code>TRUE</code> or <code>FALSE</code> (default), assumptions plots</p></dd>
+<dt>prop_bias</dt>
+<dd><p><code>TRUE</code> or <code>FALSE</code></p></dd>
+<dt>xlabel</dt>
+<dd><p>The label for the x-axis on the BA plot</p></dd>
+<dt>ylabel</dt>
+<dd><p>The label for the y-axis on the BA plot</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$blandtab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ccctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotba</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotcon</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$blandtab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ccctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotba</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotcon</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotcheck</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:
 <code>results$blandtab$asDF</code><code>as.data.frame(results$blandtab)</code></p>
     </div>
 

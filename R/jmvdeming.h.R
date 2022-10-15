@@ -116,7 +116,7 @@ jmvdemingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Deming Regression")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text"))
             self$add(jmvcore::Table$new(
@@ -163,7 +163,7 @@ jmvdemingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Check Assumptions",
                 visible="(plotcheck)",
                 renderFun=".plotcheck",
-                width=600,
+                width=650,
                 height=400))}))
 
 jmvdemingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -202,7 +202,7 @@ jmvdemingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ylabel The label for the y-axis
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$demtab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plotcheck} \tab \tab \tab \tab \tab an image \cr

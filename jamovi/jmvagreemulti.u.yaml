@@ -40,9 +40,11 @@ children:
         children:
           - type: TextBox
             name: ciWidth
+            suffix: "%"
             format: number
           - type: TextBox
             name: agreeWidth
+            suffix: "%"
             format: number
       - type: TextBox
         name: testValue
@@ -60,15 +62,13 @@ children:
         name: CCC
       - type: CheckBox
         name: plotbland
-      - type: LayoutBox
-        margin: large
-        style: inline
-        children:
-          - type: TextBox
-            name: xlabel
-            format: string
-          - type: TextBox
-            name: ylabel
-            format: string
+      - type: TextBox
+        name: xlabel
+        width: largest
+        format: string
+      - type: TextBox
+        name: ylabel
+        width: largest
+        format: string
       - type: CheckBox
         name: plotcon

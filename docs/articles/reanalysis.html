@@ -92,7 +92,11 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span>
+<span class="co">#library(tidyverse)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span>
 <span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></code></pre></div>
 <div class="section level2">
@@ -132,11 +136,11 @@ agreement.</p>
 measurement tools is through the concordance correlation coefficient
 (CCC). The CCC essentially provides a single coefficient (values between
 0 and 1) that provides an estimate to how closely one measurement is to
-another. In its simplest form it is a type of intraclass correlation
-coefficient that takes into account the mean difference between two
-measurements. In other words, if we were to draw a line of identity on a
-graph and plot two measurements (X &amp; Y), the closer those points are
-to the line of identity the higher the CCC (and vice versa).</p>
+another. It is a type of intraclass correlation coefficient that takes
+into account the mean difference between two measurements. In other
+words, if we were to draw a line of identity on a graph and plot two
+measurements (X &amp; Y), the closer those points are to the line of
+identity the higher the CCC (and vice versa).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <div class="figure">
@@ -186,28 +190,28 @@ Concordance Plots of Esophageal Temperature
 <div class="section level2">
 <h2 id="limits-of-agreement">Limits of Agreement<a class="anchor" aria-label="anchor" href="#limits-of-agreement"></a>
 </h2>
-<p>The <code>loa_mixed</code> function in order to calculate the “limits
-of agreement”. Typically the 95% Limits of Agreement are calculated
-which provide the difference between two measuring systems for 95% of
-future measurements pairs. In order to do that we will need the data in
-a “wide” format where each measurement (in this case AM and PM) are
-their own column and then we can calculate a column that is the
+<p>The <code>loa_lme</code> function can be used to calculate the
+“limits of agreement”. Typically the 95% Limits of Agreement are
+calculated which provide the difference between two measuring systems
+for 95% of future measurements pairs. In order to do that we will need
+the data in a “wide” format where each measurement (in this case AM and
+PM) are their own column and then we can calculate a column that is the
 difference score. Once we have the data in this “wide” format, we can
-then use the <code>loa_mixed</code> function to calculate the average
+then use the <code>loa_lme</code> function to calculate the average
 difference (mean bias) and the variance (which determines the limits of
 agreement).</p>
 <div class="section level3">
 <h3 id="rectal-temperature-1">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature-1"></a>
 </h3>
 <p>So we will calculate the limits of agreement using the
-<code>loa_mixed</code> function. We will need to identify the columns
-with the right information using the <code>diff</code>,
-<code>avg</code>, <code>condition</code>, and <code>id</code> arguments.
-We then select the right data set using the <code>data</code> argument.
-Lastly, we specify the specifics of the conditions for how the limits
-are calculated. For this specific analysis I decided to calculate 95%
-limits of agreement with 95% confidence intervals, and I will use
-percentile bootstrap confidence intervals.</p>
+<code>loa_lme</code> function. We will need to identify the columns with
+the right information using the <code>diff</code>, <code>avg</code>,
+<code>condition</code>, and <code>id</code> arguments. We then select
+the right data set using the <code>data</code> argument. Lastly, we
+specify the specifics of the conditions for how the limits are
+calculated. For this specific analysis I decided to calculate 95% limits
+of agreement with 95% confidence intervals, and I will use percentile
+bootstrap confidence intervals.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rec.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,
                                     condition <span class="op">=</span> <span class="st">"trial_condition"</span>,

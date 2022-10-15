@@ -3,7 +3,7 @@
 
 'use strict';
 
-const options = [{"name":"data","type":"Data","description":{"ui":"Data\n","R":"Data\n"}},{"name":"method1","title":"Method 1","type":"Variable","suggested":["continuous"],"permitted":["numeric"],"rejectInf":false,"description":{"ui":"1st method of measurement\n","R":"Name of column containing 1st Vector of data\n"}},{"name":"method2","title":"Method 2","type":"Variable","suggested":["continuous"],"permitted":["numeric"],"rejectInf":false,"description":{"ui":"2nd method of measurement\n","R":"Name of column containing Vector of data\n"}},{"name":"id","title":"Subject Identifier","type":"Variable","description":{"ui":"Column with subject identifier\n","R":"Name of column containing subject identifier\n"}},{"name":"ciWidth","title":"Confidence level (%)","type":"Number","min":50,"max":99.9,"default":95,"description":{"ui":"the confidence interval width.\n","R":"a number between 50 and 99.9 (default: 95), the width of confidence intervals\n"}},{"name":"agreeWidth","title":"Agreement level (%)","type":"Number","min":50,"max":99.9,"default":95,"description":{"ui":"The agreement level\n","R":"a number between 50 and 99.9 (default: 95), the width of agreement limits\n"}},{"name":"testValue","title":"Agreement bound (±)","type":"Number","default":2,"description":{"ui":"Value that would define adequate absolute agreement.","R":"a number specifying the limit of agreement"}},{"name":"CCC","title":"Concordance Correlation Coefficient (CCC)","type":"Bool","default":true,"description":{"R":"`TRUE` or `FALSE` (default), produce CCC table\n"}},{"name":"valEq","title":"Assume underlying value does not vary?","type":"Bool","default":false},{"name":"plotbland","title":"Bland-Altman plot","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE` (default), for Bland-Altman plot\n"}},{"name":"plotcon","title":"Line-of-Identity plot","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE` (default), for Line of identity plot\n"}},{"name":"prop_bias","title":"Assume proportional bias?","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE`\n"}},{"name":"xlabel","title":"Label for x-axis","type":"String","default":"Average of Both Methods","description":{"ui":"The label for the x-axis on the BA plot\n","R":"The label for the x-axis on the BA plot\n"}},{"name":"ylabel","title":"Label for (left) y-axis","type":"String","default":"Difference between Methods","description":{"ui":"The label for the y-axis on the BA plot\n","R":"The label for the y-axis on the BA plot\n"}}];
+const options = [{"name":"data","type":"Data","description":{"ui":"Data\n","R":"Data\n"}},{"name":"method1","title":"Method 1","type":"Variable","suggested":["continuous"],"permitted":["numeric"],"rejectInf":false,"description":{"ui":"1st method of measurement\n","R":"Name of column containing 1st Vector of data\n"}},{"name":"method2","title":"Method 2","type":"Variable","suggested":["continuous"],"permitted":["numeric"],"rejectInf":false,"description":{"ui":"2nd method of measurement\n","R":"Name of column containing Vector of data\n"}},{"name":"id","title":"Subject Identifier","type":"Variable","description":{"ui":"Column with subject identifier\n","R":"Name of column containing subject identifier\n"}},{"name":"ciWidth","title":"Confidence level","type":"Number","min":50,"max":99.9,"default":95,"description":{"ui":"the confidence interval width.\n","R":"a number between 50 and 99.9 (default: 95), the width of confidence intervals\n"}},{"name":"agreeWidth","title":"Agreement level","type":"Number","min":50,"max":99.9,"default":95,"description":{"ui":"The agreement level\n","R":"a number between 50 and 99.9 (default: 95), the width of agreement limits\n"}},{"name":"testValue","title":"Agreement bound (±)","type":"Number","default":2,"description":{"ui":"Value that would define adequate absolute agreement.","R":"a number specifying the limit of agreement"}},{"name":"CCC","title":"Concordance Correlation Coefficient (CCC)","type":"Bool","default":true,"description":{"R":"`TRUE` or `FALSE` (default), produce CCC table\n"}},{"name":"valEq","title":"Assume underlying value does not vary?","type":"Bool","default":false},{"name":"plotbland","title":"Bland-Altman plot","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE` (default), for Bland-Altman plot\n"}},{"name":"plotcon","title":"Line-of-Identity plot","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE` (default), for Line of identity plot\n"}},{"name":"prop_bias","title":"Assume proportional bias?","type":"Bool","default":false,"description":{"R":"`TRUE` or `FALSE`\n"}},{"name":"xlabel","title":"Label for x-axis","type":"String","default":"Average of Both Methods","description":{"ui":"The label for the x-axis on the BA plot\n","R":"The label for the x-axis on the BA plot\n"}},{"name":"ylabel","title":"Label for (left) y-axis","type":"String","default":"Difference between Methods","description":{"ui":"The label for the y-axis on the BA plot\n","R":"The label for the y-axis on the BA plot\n"}}];
 
 const view = function() {
     
@@ -93,12 +93,14 @@ view.layout = ui.extend({
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
 							name: "ciWidth",
+							suffix: "%",
 							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.TextBox,
 							typeName: 'TextBox',
 							name: "agreeWidth",
+							suffix: "%",
 							format: FormatDef.number
 						}
 					]
@@ -139,24 +141,18 @@ view.layout = ui.extend({
 					name: "plotbland"
 				},
 				{
-					type: DefaultControls.LayoutBox,
-					typeName: 'LayoutBox',
-					margin: "large",
-					style: "inline",
-					controls: [
-						{
-							type: DefaultControls.TextBox,
-							typeName: 'TextBox',
-							name: "xlabel",
-							format: FormatDef.string
-						},
-						{
-							type: DefaultControls.TextBox,
-							typeName: 'TextBox',
-							name: "ylabel",
-							format: FormatDef.string
-						}
-					]
+					type: DefaultControls.TextBox,
+					typeName: 'TextBox',
+					name: "xlabel",
+					width: "largest",
+					format: FormatDef.string
+				},
+				{
+					type: DefaultControls.TextBox,
+					typeName: 'TextBox',
+					name: "ylabel",
+					width: "largest",
+					format: FormatDef.string
 				},
 				{
 					type: DefaultControls.CheckBox,

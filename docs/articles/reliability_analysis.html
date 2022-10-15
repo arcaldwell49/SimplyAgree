@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-05-12</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-10-14</h4>
       
       
       <div class="hidden name"><code>reliability_analysis.Rmd</code></div>
@@ -164,7 +164,7 @@ are intended to measure, respectively.</p>
 <span class="co">#&gt; Standard Error of Prediction (SEP):  4.06</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Intraclass Correlation Coefficients with  95 % C.I.</span>
-<span class="co">#&gt;            model         measures  type    icc lower.ci upper.ci</span>
+<span class="co">#&gt;            Model         Measures  Type    ICC Lower CI Upper CI</span>
 <span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.09672   0.6434</span>
 <span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.04290   0.6911</span>
 <span class="co">#&gt; 3  two-way fixed      Consistency  ICC3 0.7148  0.41184   0.9258</span>
@@ -462,12 +462,14 @@ CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
 <div class="section level3">
 <h3 id="other-confidence-intervals">Other Confidence Intervals<a class="anchor" aria-label="anchor" href="#other-confidence-intervals"></a>
 </h3>
-<p>If the <code>other_ci</code> argument is set to TRUE then
-nonparametric bootstrapped confidence intervals will be calculated for
-the CV, SEM, SEP, and SEE. The number of resamples can be set with the
-replicates argument (default is 499; increase for greater accuracy). The
-reported confidence intervals are estimated using the percentile
-method.</p>
+<p>If the <code>other_ci</code> argument is set to TRUE then parametric
+bootstrapped confidence intervals (using) will be calculated for the CV,
+SEM, SEP, and SEE. The number of resamples can be set with the
+replicates argument (default is 1999; increase for greater accuracy or
+lower for greater speed). The reported confidence intervals are
+estimated using the percentile method <code>type = 'perc'</code>, the
+normal <code>type = 'norm'</code>, or basic methods
+<code>type = 'basic'</code>.</p>
 <p>To ensure reproducibility, please use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> when
 these confidence intervals are calculated.</p>
 </div>

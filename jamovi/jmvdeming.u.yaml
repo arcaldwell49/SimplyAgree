@@ -5,8 +5,6 @@ stage: 0
 compilerMode: tame
 children:
   - type: VariableSupplier
-    suggested:
-      - continuous
     permitted:
       - numeric
     persistentItems: false
@@ -36,10 +34,11 @@ children:
         style: inline
         children:
           - type: TextBox
-            name: ciWidth
+            name: testValue
             format: number
           - type: TextBox
-            name: testValue
+            name: ciWidth
+            suffix: "%"
             format: number
       - type: CheckBox
         name: weighted
@@ -50,15 +49,13 @@ children:
     children:
       - type: CheckBox
         name: plotcon
-      - type: LayoutBox
-        margin: large
-        style: inline
-        children:
-          - type: TextBox
-            name: xlabel
-            format: string
-          - type: TextBox
-            name: ylabel
-            format: string
+      - type: TextBox
+        name: xlabel
+        width: largest
+        format: string
+      - type: TextBox
+        name: ylabel
+        width: largest
+        format: string
       - type: CheckBox
         name: plotcheck

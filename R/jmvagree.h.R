@@ -144,7 +144,7 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="Simple Agreement Analysis")
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="text",
                 refs=list(
@@ -216,8 +216,8 @@ jmvagreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Check Assumptions",
                 visible="(plotcheck)",
                 renderFun=".plotcheck",
-                width=450,
-                height=400))}))
+                width=550,
+                height=450))}))
 
 jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jmvagreeBase",
@@ -260,7 +260,7 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ylabel The label for the y-axis on the BA plot
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
