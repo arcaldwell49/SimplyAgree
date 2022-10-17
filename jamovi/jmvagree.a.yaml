@@ -106,7 +106,7 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assumptions plots
     - name: prop_bias
-      title: Assume proportional bias?
+      title: Assume proportional bias
       type: Bool
       default: false
       description:

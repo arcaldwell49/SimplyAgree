@@ -10,3 +10,4 @@ CRAN-RELEASE
 .DS_Store?
 /doc/
 /Meta/
+/build/
