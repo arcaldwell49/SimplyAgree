@@ -94,7 +94,7 @@ options:
             `TRUE` or `FALSE` (default), produce CCC table
 
     - name: valEq
-      title: Assume underlying value does not vary?
+      title: Assume underlying value does not vary
       type: Bool
       default: false
 
@@ -115,7 +115,7 @@ options:
             `TRUE` or `FALSE` (default), for Line of identity plot
 
     - name: prop_bias
-      title: Assume proportional bias?
+      title: Assume proportional bias
       type: Bool
       default: false
       description:
