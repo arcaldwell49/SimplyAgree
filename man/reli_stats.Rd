@@ -2,6 +2,7 @@
 % Please edit documentation in R/reli_stats.R
 \name{reli_stats}
 \alias{reli_stats}
+\alias{reli_aov}
 \title{Reliability Statistics}
 \usage{
 reli_stats(
@@ -11,7 +12,21 @@ reli_stats(
   data,
   wide = FALSE,
   col.names = NULL,
-  cv_calc = "MSE",
+  cv_calc = c("MSE", "residuals", "SEM"),
+  conf.level = 0.95,
+  other_ci = FALSE,
+  type = c("perc", "norm", "basic"),
+  replicates = 1999
+)
+
+reli_aov(
+  measure,
+  item,
+  id,
+  data,
+  wide = FALSE,
+  col.names = NULL,
+  cv_calc = c("MSE", "residuals", "SEM"),
   conf.level = 0.95,
   other_ci = FALSE,
   type = "perc",
@@ -60,17 +75,20 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-reli_stats produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+reli_stats and reli_aov produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
 }
 \details{
+These functions return intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
+The estimates of variances for any of the measures are derived from linear mixed models.
+When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
+
+reli_stats uses a linear mixed model to estimate variance components. In some cases there are convergence issues.
+When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
+The results may differ slightly between the functions.
+
 The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
-The "residuals" option uses the sjstats R package approach which uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
-
-This function returns intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
-The estimates of variances for any of the measures are derived from linear mixed models.
-The results may differ slightly from the results from ICC calculations derived from an analysis of variance.
-When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
+The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 }
 \section{References}{
 
