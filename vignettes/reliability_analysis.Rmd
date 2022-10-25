@@ -26,7 +26,7 @@ library(SimplyAgree)
 
 # Background
 
-Another feature of this R package is the ability to estimate the reliability of a measurement. This R package allows for the calculation of Intraclass Correlation Coefficients (ICC), various standard errors (SEM, SEE, and SEP), and coefficient of variation. All of the underlying calculations (sans the coefficient of variation) is based on the paper by @weir2005^[The paper by Weir also appears to heavily rely on the work of @shrout1979 and @mcgraw1996]. This is a fairly popular paper within my own field (kinesiology), and hence was the inspiration for creating this function that provides all the calculative approaches included within that manuscript.
+Another feature of this R package is the ability to estimate the reliability of a measurement. This R package allows for the calculation of Intraclass Correlation Coefficients (ICC), various standard errors (SEM, SEE, and SEP), and coefficient of variation. All of the underlying calculations (sans the coefficient of variation) are based on the paper by @weir2005^[The paper by Weir also appears to heavily rely on the work of @shrout1979 and @mcgraw1996]. This is a fairly popular paper within my own field (kinesiology), and hence was the inspiration for creating this function that provides all the calculative approaches included within that manuscript.
 
 # Code Demonstration
 
@@ -58,6 +58,7 @@ test1 = reli_stats(
   wide = TRUE,
   col.names = c("judge1", "judge2", "judge3", "judge4")
 )
+
 ```
 
 This function also has generic print and plot functions. The output from print provides the coefficient of variation, standard errors, and a table of various intraclass correlation coefficients. Notice the conclusions about the reliability of the measurement here would vary greatly based on the statistic being reported. What statistic you should report is beyond the current vignette, but is heavily detailed in @weir2005. However, within the table there are columns for `model` and `measures` which describe the model that is being used and the what these different ICCs are intended to measure, respectively.
@@ -71,6 +72,26 @@ Also included in the results is a plot of the measurements across the items (e.g
 ```{r, fig.width=6, fig.height=6}
 plot(test1)
 ```
+
+# Convergence Issues
+
+In some cases there are convergence issues for the linear mixed models. For this reason,
+I have added a function, `reli_aov`, which uses a sums of squares approach 
+(i.e., analysis of variance) rather than a linear mixed model. As you can see
+below the results will often match that of `reli_stats`. The only time this 
+function is necessary to use is when there are convergence issues. 
+Rows with missing data are dropped when using `reli_aov`.
+
+```{r}
+test2 = reli_aov(
+  data = dat,
+  wide = TRUE,
+  col.names = c("judge1", "judge2", "judge3", "judge4")
+)
+
+test2
+```
+
 
 # Calculative Approach
 
