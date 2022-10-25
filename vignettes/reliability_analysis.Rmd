@@ -79,7 +79,8 @@ In some cases there are convergence issues for the linear mixed models. For this
 I have added a function, `reli_aov`, which uses a sums of squares approach 
 (i.e., analysis of variance) rather than a linear mixed model. As you can see
 below the results will often match that of `reli_stats`. The only time this 
-function is necessary to use is when there are convergence issues.
+function is necessary to use is when there are convergence issues. 
+Rows with missing data are dropped when using `reli_aov`.
 
 ```{r}
 test2 = reli_aov(

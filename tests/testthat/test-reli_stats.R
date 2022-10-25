@@ -70,7 +70,16 @@ testthat::test_that("Simple Use Run Through", {
   test1 = reli_stats(data = dat,
                      wide = TRUE,
                      col.names = c("J1", "J2", "J3", "J4"))
+
+  test1_aov = reli_aov(data = dat,
+                         wide = TRUE,
+                         col.names = c("J1", "J2", "J3", "J4"))
+
+  expect_equivalent(test1$icc$icc, test1$icc$icc)
   checktest1 = check(test1)
+  checktest2 = check(test1_aov)
+  ptest = print(test1_aov)
+  ptest2 = plot(test1_aov)
   jmvtest2 = jmvreli(data = dat,
                      vars =c("J1", "J2", "J3", "J4"),
                      desc = TRUE,
@@ -114,6 +123,13 @@ testthat::test_that("Simple Use Run Through", {
                      measure = "va",
                      item = "it",
                      id = "id")
+  test2_aov = reli_aov(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id")
+
+  expect_equivalent(round(test2$icc$icc,4), round(test2_aov$icc$icc,4))
+  expect_equivalent(test1_aov$icc$icc, test2_aov$icc$icc)
 
   test3 = reli_stats(data = df,
                      measure = "va",
@@ -121,6 +137,12 @@ testthat::test_that("Simple Use Run Through", {
                      id = "id",
                      other_ci = TRUE,
                      replicates = 49)
+  expect_error(reli_aov(data = df,
+                          measure = "va",
+                          item = "it",
+                          id = "id",
+                          other_ci = TRUE,
+                          replicates = 49))
 
   pr_test = print(test3)
   p = plot(test3)

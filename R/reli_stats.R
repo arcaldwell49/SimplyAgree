@@ -319,16 +319,17 @@ reli_aov = function(measure,
   }
 
   colnames(x.df) <- c("values", "items", "id")
-  x.df = na.omit(x.df)
+  na_df = subset(x.df, is.na(values))
+  na_drops = unique(na_df$id)
+  if(any(is.na(x.df$items)) || any(is.na(x.df$id))){
+    stop("Missing values found in item label and/or id labels.")
+  }
+  x.df =  subset(x.df, !(x.df$id %in% na_drops))
 
-  n_id <- dim(x)[1]
-  n_items <- dim(x)[2]
+  n_id <- length(unique(x.df$id))
+  n_items <- length(unique(x.df$items))
 
-  mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
-                   data = x.df,
-                   na.action = na.omit)
-
-  aov.x <- aov(values~id+items,data=x.df)
+  aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
   s.aov <- summary(aov.x)
   stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
   MSB <- stats[3,1]
@@ -426,25 +427,8 @@ reli_aov = function(measure,
 
 
   if(other_ci == TRUE){
-    stop("Bootstrapping currently not supported for this function.")
-    boot_reli <- function(.) {
-      reli_aov_mse(., cv_calc = cv_calc)
-    }
+    stop("Bootstrapping for these statistics is currently not supported for this function.")
 
-    boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
-                    type = "parametric", use.u = FALSE)
-    res_other = tidy_boot(boo2,
-                          conf.int = TRUE,
-                          conf.level = conf.level,
-                          conf.method = type) %>%
-      rename(estimate = statistic,
-             se = std.error,
-             lower.ci = conf.low,
-             upper.ci = conf.high) %>%
-      as.data.frame()
-    row.names(res_other) = res_other$term
-    res_other = res_other %>%
-      select(estimate,bias,se,lower.ci,upper.ci)
   } else{
     SEM = sqrt(MSE)
     sd_tots = sqrt(sum(stats[2,])/(n_id-1))
@@ -453,7 +437,7 @@ reli_aov = function(measure,
 
     mw <- mean(x.df$values, na.rm = TRUE)
     if(cv_calc == "residuals"){
-      stddev <- sqrt(mean(residuals(mod.lmer)^2))
+      stddev <- sqrt(mean(residuals(aov.x)^2))
     } else if(cv_calc == "MSE"){
       stddev <- sqrt(MSE)
     } else if(cv_calc == "SEM"){
@@ -494,11 +478,11 @@ reli_aov = function(measure,
   }
 
   result <- list(icc = results,
-                 lmer = mod.lmer,
+                 lmer = aov.x,
                  anova = stats,
                  var_comp = MS.df,
-                 n.id = nrow(ranef(mod.lmer)$id),
-                 n.item = nrow(ranef(mod.lmer)$item),
+                 n.id = n_id,
+                 n.item = n_items,
                  call = call2,
                  cv = res_other["cv",],
                  SEM = res_other["SEM",],
