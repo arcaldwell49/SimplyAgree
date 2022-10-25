@@ -1,5 +1,8 @@
 # NEWS
 
+# SimplyAgree 0.1.2
+- Fix to `agree_np` plot. (colors now align with order of LoA elements)
+
 # SimplyAgree 0.1.1
 
 - Minor cosmetic updates for jamovi submission.
