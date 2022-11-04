@@ -15,7 +15,8 @@
   type = 1,
   x_name = "x",
   y_name = "y",
-  geom = "geom_point",
+  geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled",
+    "stat_density_2d"),
   smooth_method = NULL,
   smooth_se = TRUE,
   ...
