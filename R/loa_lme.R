@@ -39,12 +39,13 @@ loa_lme = function(diff,
                    condition = NULL,
                    id,
                    data,
-                   type = "perc",
+                   type = c("perc","norm", "basic"),
                    conf.level = .95,
                    agree.level = .95,
                    replicates = 999,
                    prop_bias = FALSE,
                    het_var = FALSE){
+  type = match.arg(type)
   if(is.null(condition) && het_var){
     stop("If het_var TRUE, then condition column must be provided.")
   }

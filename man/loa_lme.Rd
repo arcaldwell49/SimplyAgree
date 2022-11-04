@@ -10,7 +10,7 @@ loa_lme(
   condition = NULL,
   id,
   data,
-  type = "perc",
+  type = c("perc", "norm", "basic"),
   conf.level = 0.95,
   agree.level = 0.95,
   replicates = 999,

@@ -141,10 +141,11 @@ print.simple_agree <- function(x,...){
 plot.simple_agree <- function(x, type = 1,
                               x_name = "x",
                               y_name = "y",
-                              geom = "geom_point",
+                              geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", "stat_density_2d"),
                               smooth_method = NULL,
                               smooth_se = TRUE,
                               ...){
+  geom = match.arg(geom)
 
   if(type == 1){
     #return(x$bland_alt.plot)
