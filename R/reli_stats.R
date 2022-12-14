@@ -1,5 +1,5 @@
 #' Reliability Statistics
-#' @description reli_stats and reli_aov produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+#' @description The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
 #' @param measure Name of column containing the measurement of interest
 #' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
 #' @param id Column with subject identifier

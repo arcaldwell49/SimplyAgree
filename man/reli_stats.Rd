@@ -75,7 +75,7 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-reli_stats and reli_aov produces reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
 }
 \details{
 These functions return intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
