@@ -44,7 +44,8 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-The agree_test function calculates a variety of agreement statistics. The hypothesis test of agreement is calculated by the method described by Shieh (2019). Bland-Altman limits of agreement, and confidence intervals, are also provided (Bland & Altman 1999; Bland & Altman 1986). In addition, the concordance correlation coefficient (CCC; Lin 1989) is also provided.
+The agree_test function calculates a variety of agreement statistics. The hypothesis test of agreement is calculated by the method described by Shieh (2019). Bland-Altman limits of agreement, and confidence intervals, are also provided (Bland & Altman 1999; Bland & Altman 1986).
+In addition, the concordance correlation coefficient (CCC; Lin 1989) is additional part of the output.
 }
 \section{References}{
 

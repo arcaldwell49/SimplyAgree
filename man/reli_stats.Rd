@@ -85,6 +85,7 @@ When other_ci is set to TRUE, then a parametric bootstrap approach to calculatin
 reli_stats uses a linear mixed model to estimate variance components. In some cases there are convergence issues.
 When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
 The results may differ slightly between the functions.
+If reli_aov is used then rows with missing observations (e.g., if a participant has a missing observation) will be dropped.
 
 The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.

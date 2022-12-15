@@ -89,7 +89,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-11-04</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2022-12-14</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -640,6 +640,8 @@ are no longer symmetric around the bias estimate.</p>
 <span>              delta <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>              prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in agree_np(x = "x", y = "y", data = reps, delta = 2, prop_bias =</span></span>
+<span><span class="co">#&gt; FALSE, : Evidence of proportional bias. Consider setting prop_bias to TRUE.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
 <span><span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span></span>
@@ -650,9 +652,9 @@ are no longer symmetric around the bias estimate.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA    -0.89  -1.3759  -0.4041     0.90</span></span>
-<span><span class="co">#&gt; Bias          0.04  -0.6582   0.7382     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA     2.45   1.3896   3.5104     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA    -0.89   -1.333  -0.4469     0.90</span></span>
+<span><span class="co">#&gt; Bias          0.04   -0.572   0.6520     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA     2.45    1.405   3.4953     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
@@ -676,15 +678,15 @@ agreement does not.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7276  -0.8519     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6417  -0.2670     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5876   1.2008     0.90</span></span>
-<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.7030   0.2420     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.8649   0.7201     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.7445   2.7245     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.6429   1.8767     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.9399   3.0815     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.3076   9.4420     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7260 -0.85353     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6408 -0.26793     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5712  1.21717     0.90</span></span>
+<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.4932  0.03214     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6278  0.48298     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.1227  2.10275     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.9008  2.13461     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8340  3.18741     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.2596  9.49009     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
@@ -757,7 +759,7 @@ to a few minutes to complete depending the number of replicates or if
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">recpre_long</span><span class="op">$</span><span class="va">avg</span> <span class="op">=</span> <span class="op">(</span><span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span> <span class="op">+</span> <span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span></span>
-<span><span class="va">a4</span> <span class="op">=</span> <span class="fu"><a href="../reference/loa_mixed.html">loa_mixed</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">recpre_long</span>,</span>
+<span><span class="va">a4</span> <span class="op">=</span> <span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">recpre_long</span>,</span>
 <span>               diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
 <span>               avg <span class="op">=</span> <span class="st">"avg"</span>,</span>
 <span>               <span class="co">#condition = "trial_condition",</span></span>
