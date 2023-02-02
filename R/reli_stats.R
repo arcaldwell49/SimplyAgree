@@ -513,27 +513,15 @@ reli_aov = function(measure,
 
 cv_ci = function(cv,
                  df,
-                 alpha,
-                 type = "mckay"){
+                 alpha){
   df2 = df + 1
   u1 = qchisq(p = 1-alpha/2, df = df)
   u2 = qchisq(p = alpha/2, df = df)
 
-  if(type == "mckay"){
+  lcl = cv / sqrt(((u1 + 2) / df2 - 1) * cv ^ 2 + u1 / df)
+  ucl = cv / sqrt(((u2 + 2) / df2 - 1) * cv ^ 2 + u2 / df)
 
-    lcl = cv / sqrt((u1/df2-1)*cv^2+u1/df)
-    ucl = cv / sqrt((u2/df2-1)*cv^2+u2/df)
-
-    res_vec = c(lcl,ucl)
-  }
-
-  if(type == "vangal"){
-
-    lcl = cv / sqrt(((u1+2)/df2-1)*cv^2+u1/df)
-    ucl = cv / sqrt(((u2+2)/df2-1)*cv^2+u2/df)
-
-    res_vec = c(lcl,ucl)
-  }
+  res_vec = c(lcl, ucl)
 
   return(res_vec)
 }
