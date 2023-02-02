@@ -530,9 +530,9 @@ sigma_ci = function(sigma,
                     df,
                     alpha){
 
-  lcl <- sigma * sqrt( df / qchisq(p = 1-alpha/2, df = df) )
-
-  ucl <- sigma * sqrt( df / qchisq(p = alpha/2, df = df) )
+  lcl <-  sqrt( (df*sigma^2) / qchisq(p = 1-alpha/2, df = df) )
+  ucl <-  sqrt( (df*sigma^2) / qchisq(p = alpha/2, df = df) )
+  res_vec <- c(lcl,ucl)
 
   return(res_vec)
 }
