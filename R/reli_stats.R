@@ -460,6 +460,7 @@ reli_aov = function(measure,
   # Other stats -----
   SEM = sqrt(MSE)
   sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))
   SEP = sd_tots*sqrt(1-ICC3^2)
 
@@ -478,6 +479,55 @@ reli_aov = function(measure,
   if(other_ci == TRUE){
     if(type != "chisq"){
       stop("Bootstrapping for these statistics is currently not supported for this function.")
+
+      wide_df = x.df %>%
+        pivot_wider(values_from = values,
+                    names_from = items,
+                    names_prefix = "item_")
+      long_df = wide_df %>%
+        pivot_longer(cols = starts_with("item"),
+                     names_to = "items",
+                     values_to = "values")
+
+      boot_function <- function(data, indices,
+                                cv_calc = "MSE") {
+        d <- data[indices, ] # allows boot to select sample
+        d$id = 1:nrow(d)
+
+        x.df = d %>%
+          pivot_longer(cols = starts_with("item"),
+                       names_to = "items",
+                       values_to = "values") %>%
+          mutate(id = factor(id),
+                 items = factor(items))
+
+        n_id <- length(unique(x.df$id))
+        n_items <- length(unique(x.df$items))
+
+        aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
+        s.aov <- summary(aov.x)
+        stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
+        MSB <- stats[3,1]
+        MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
+        MSJ <- stats[3,2]
+        MSE <- stats[3,3]
+        SEM = sqrt(MSE)
+        sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+        SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+        SEP = sd_tots*sqrt(1-ICC3^2)
+
+        mw <- mean(x.df$values, na.rm = TRUE)
+        if(cv_calc == "residuals"){
+          stddev <- sqrt(mean(residuals(aov.x)^2))
+        } else if(cv_calc == "MSE"){
+          stddev <- sqrt(MSE)
+        } else if(cv_calc == "SEM"){
+          stddev <- SEM
+        } else {
+          stop("cv_calc must be SEM, MSE, or residuals")
+        }
+        cv_out = stddev/mw
+        }
     } else{
       ## chisq ----
       cv_ci = cv_ci(cv_out,
