@@ -72,7 +72,7 @@ reli_stats = function(measure,
                       cv_calc = c("MSE","residuals","SEM"),
                       conf.level = .95,
                       other_ci = FALSE,
-                      type = c("perc", "norm", "basic") ,
+                      type = c("chisq", "perc", "norm", "basic"),
                       replicates = 1999){
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
@@ -197,9 +197,28 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
+  # Other CIs -----
+
+  SEM = sqrt(MSE)
+  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+  SEP = sd_tots*sqrt(1-ICC3^2)
+
+  mw <- mean(x.df$values, na.rm = TRUE)
+  if(cv_calc == "residuals"){
+    stddev <- sqrt(mean(residuals(mod.lmer)^2))
+  } else if(cv_calc == "MSE"){
+    stddev <- sqrt(MSE)
+  } else if(cv_calc == "SEM"){
+    stddev <- SEM
+  } else {
+    stop("cv_calc must be SEM, MSE, or residuals")
+  }
+
+  cv_out = stddev/mw
 
   if(other_ci == TRUE){
-
+    if(type != "chisq"){
     boot_reli <- function(.) {
       reli_mod_mse(., cv_calc = cv_calc)
     }
@@ -218,24 +237,35 @@ reli_stats = function(measure,
       row.names(res_other) = res_other$term
       res_other = res_other %>%
         select(estimate,bias,se,lower.ci,upper.ci)
-  } else{
-    SEM = sqrt(MSE)
-    sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-    SEP = sd_tots*sqrt(1-ICC3^2)
-
-    mw <- mean(x.df$values, na.rm = TRUE)
-    if(cv_calc == "residuals"){
-      stddev <- sqrt(mean(residuals(mod.lmer)^2))
-    } else if(cv_calc == "MSE"){
-      stddev <- sqrt(MSE)
-    } else if(cv_calc == "SEM"){
-      stddev <- SEM
     } else {
-      stop("cv_calc must be SEM, MSE, or residuals")
-    }
+        ## chisq ----
+      cv_ci = cv_ci(cv_out,
+                    df = dfE,
+                    alpha = alpha)
+      sem_ci = sigma_ci(SEM,
+                        df = dfE,
+                        alpha = alpha)
+      sep_ci = sigma_ci(SEP,
+                        df = dfE,
+                        alpha = alpha)
+      see_ci = sigma_ci(SEE,
+                        df = dfE,
+                        alpha = alpha)
 
-    cv_out = stddev/mw
+      res_other = data.frame(
+        estimate = c(cv_out, SEM, SEP, SEE),
+        bias = NA,
+        se = NA,
+        lower.ci = c(cv_ci[1],sem_ci[1],
+                     sep_ci[1],see_ci[1]),
+        upper.ci = c(cv_ci[2],sem_ci[2],
+                     sep_ci[2],see_ci[2]),
+        row.names = c("cv", "SEM", "SEP", "SEE")
+      )
+      }
+
+  } else{
+
     res_other = data.frame(
       estimate = c(cv_out, SEM, SEP, SEE),
       bias = NA,
@@ -449,13 +479,28 @@ reli_aov = function(measure,
     if(type != "chisq"){
       stop("Bootstrapping for these statistics is currently not supported for this function.")
     } else{
+      ## chisq ----
+      cv_ci = cv_ci(cv_out,
+                    df = dfE,
+                    alpha = alpha)
+      sem_ci = sigma_ci(SEM,
+                        df = dfE,
+                        alpha = alpha)
+      sep_ci = sigma_ci(SEP,
+                        df = dfE,
+                        alpha = alpha)
+      see_ci = sigma_ci(SEE,
+                        df = dfE,
+                        alpha = alpha)
 
       res_other = data.frame(
         estimate = c(cv_out, SEM, SEP, SEE),
         bias = NA,
         se = NA,
-        lower.ci = NA,
-        upper.ci = NA,
+        lower.ci = c(cv_ci[1],sem_ci[1],
+                     sep_ci[1],see_ci[1]),
+        upper.ci = c(cv_ci[2],sem_ci[2],
+                     sep_ci[2],see_ci[2]),
         row.names = c("cv", "SEM", "SEP", "SEE")
       )
 
@@ -514,14 +559,13 @@ reli_aov = function(measure,
 cv_ci = function(cv,
                  df,
                  alpha){
-  df2 = df + 1
-  u1 = qchisq(p = 1-alpha/2, df = df)
-  u2 = qchisq(p = alpha/2, df = df)
+  u1 <- qchisq(1-alpha/2,df)
+  u2 <- qchisq(alpha/2,df)
+  u = c(u1,u2)
+  #lower <- cv/sqrt(( (u1+2)/(df+1) -1)*cv*cv + u1/df)
+  #upper <- cv/sqrt(( (u2+2)/(df+1) -1)*cv*cv + u2/df)
 
-  lcl = cv / sqrt(((u1 + 2) / df2 - 1) * cv ^ 2 + u1 / df)
-  ucl = cv / sqrt(((u2 + 2) / df2 - 1) * cv ^ 2 + u2 / df)
-
-  res_vec = c(lcl, ucl)
+  res_vec = cv/sqrt(( (u+2)/(df+1) -1)*cv*cv + u/df)
 
   return(res_vec)
 }

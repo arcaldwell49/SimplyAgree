@@ -1,5 +1,9 @@
 # NEWS
 
+# SimplyAgree 0.1.3
+
+- Added `chisq` type of confidence intervals for "Other" CIs for `reli_stats` and `reli_aov`
+
 # SimplyAgree 0.1.2
 - Fix to `agree_np` plot. (colors now align with order of LoA elements).
 - Added `reli_aov` function for sums of squares approach.
