@@ -147,7 +147,8 @@ words, if we were to draw a line of identity on a graph and plot two
 measurements (X &amp; Y), the closer those points are to the line of
 identity the higher the CCC (and vice versa).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" alt="Example of the Line of Identity" width="700"><p class="caption">
 Example of the Line of Identity
@@ -165,6 +166,8 @@ plot we can see there is clear bias in the raw post exercise values
 (higher in the PM), but even when “correcting for baseline differences”
 by calculating the differences scores we can see a higher degree of
 disagreement between the two conditions.</p>
+<pre><code><span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltsrec-1.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
@@ -180,7 +183,7 @@ Concordance Plots of Rectal Temperature
 <div class="section level2">
 <h2 id="esophageal-temperature">Esophageal Temperature<a class="anchor" aria-label="anchor" href="#esophageal-temperature"></a>
 </h2>
-<pre><code><span><span class="co">#&gt; Warning: Removed 3 row(s) containing missing values (geom_path).</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 3 rows containing missing values (`geom_line()`).</span></span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltseso-1.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
@@ -217,7 +220,7 @@ specify the specifics of the conditions for how the limits are
 calculated. For this specific analysis I decided to calculate 95% limits
 of agreement with 95% confidence intervals, and I will use percentile
 bootstrap confidence intervals.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
 <span>                                    condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
 <span>                                    id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -230,7 +233,7 @@ bootstrap confidence intervals.</p>
 <p>When we create a table of the limits of agreement (LoA), at least for
 Trec post exercise, are providing the same conclusion (poor
 agreement).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"LoA: Trec Post Exercise"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -339,7 +342,7 @@ agreement).</p>
 </table>
 <p>Furthermore, we can visualize the results with a typical Bland-Altman
 plot of the LoA.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" alt="Limits of Agreement for Trec Post Exercise" width="672"><p class="caption">
@@ -350,7 +353,7 @@ Limits of Agreement for Trec Post Exercise
 much closer agreement (maybe even acceptable agreement) when we look at
 LoA. However, we cannot say that the average difference would be less
 than 0.25 which may not be acceptable for some researchers.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"LoA: Delta Trec"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -457,7 +460,7 @@ than 0.25 which may not be acceptable for some researchers.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-8-1.png" alt="Limits of Agreement for Delta Trec" width="672"><p class="caption">
@@ -472,7 +475,7 @@ Limits of Agreement for Delta Trec
 results are fairly similar, and while there is better agreement on the
 delta (change scores), it is still fairly difficult to determine that
 there is “good” agreement between the AM and PM measurements.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eso.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_mixed.html">loa_mixed</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
 <span>                                     condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
 <span>                                     id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -481,7 +484,7 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span>                                     agree.level <span class="op">=</span> <span class="fl">.95</span>,</span>
 <span>                                     replicates <span class="op">=</span> <span class="fl">199</span>,</span>
 <span>                                     type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"LoA: Teso Post Exercise"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -588,14 +591,14 @@ there is “good” agreement between the AM and PM measurements.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Teso Post Exercise
 </p>
 </div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"LoA: Delta Teso"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -702,7 +705,7 @@ Limits of Agreement for Teso Post Exercise
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-13-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">

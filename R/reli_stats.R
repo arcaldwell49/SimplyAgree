@@ -25,6 +25,13 @@
 #' The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
 #' The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 #'
+#' The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
+#' For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+#' For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
+#' All other methods are bootstrapping based methods (see ?boot::boot).
+#' The reli_stats functions utilizes a parametric bootstrap while the reli_aov
+#' function utilizes an ordinary (non-parametric) bootstrap method.
+#'
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -53,6 +60,10 @@
 #' Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
 #'
 #' McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
+#'
+#' Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
+#'
+#' Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
 #'
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals aov
 #' @importFrom tidyselect all_of
@@ -101,6 +112,9 @@ reli_stats = function(measure,
   mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
                    data = x.df,
                    na.action = na.omit)
+  if(length(unique(x.df$items)) == 2){
+    message("Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.")
+  }
   num_lvls = ngrps(mod.lmer)
   n_items = num_lvls["items"]
   n_id = num_lvls["id"]
@@ -325,9 +339,10 @@ reli_aov = function(measure,
                     cv_calc = c("MSE","residuals","SEM"),
                     conf.level = .95,
                     other_ci = FALSE,
-                    type = "chisq",
+                    type = c("chisq", "perc", "norm", "basic"),
                     replicates = 1999) {
   cv_calc = match.arg(cv_calc)
+  type = match.arg(type)
 
   alpha = 1-conf.level
   x = data
@@ -478,7 +493,7 @@ reli_aov = function(measure,
   # Other CIs-----
   if(other_ci == TRUE){
     if(type != "chisq"){
-      stop("Bootstrapping for these statistics is currently not supported for this function.")
+      #stop("Bootstrapping for these statistics is currently not supported for this function.")
 
       wide_df = x.df %>%
         pivot_wider(values_from = values,
@@ -527,7 +542,30 @@ reli_aov = function(measure,
           stop("cv_calc must be SEM, MSE, or residuals")
         }
         cv_out = stddev/mw
-        }
+
+        res = c(
+          cv = cv_out,
+          SEM = SEM,
+          SEE = SEE,
+          SEP = SEP
+        )
+        return(res)
+      }
+
+      boo2 = boot::boot(wide_df, boot_function,  R = replicates)
+
+      res_other = tidy_boot(boo2,
+                            conf.int = TRUE,
+                            conf.level = conf.level,
+                            conf.method = type) %>%
+        rename(estimate = statistic,
+               se = std.error,
+               lower.ci = conf.low,
+               upper.ci = conf.high) %>%
+        as.data.frame()
+      row.names(res_other) = res_other$term
+      res_other = res_other %>%
+        select(estimate,bias,se,lower.ci,upper.ci)
     } else{
       ## chisq ----
       cv_ci = cv_ci(cv_out,
@@ -630,3 +668,6 @@ sigma_ci = function(sigma,
 
   return(res_vec)
 }
+
+
+

@@ -76,7 +76,7 @@
 <span>  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
 <span>  replicates <span class="op">=</span> <span class="fl">1999</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -90,7 +90,7 @@
 <span>  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  type <span class="op">=</span> <span class="st">"perc"</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
 <span>  replicates <span class="op">=</span> <span class="fl">1999</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -196,6 +196,12 @@ If reli_aov is used then rows with missing observations (e.g., if a participant 
 <p>The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
 The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.</p>
+<p>The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
+For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+For the other measures, a simple chi-squared approximation is utilized (Hann &amp; Meeker, 1991).
+All other methods are bootstrapping based methods (see ?boot::boot).
+The reli_stats functions utilizes a parametric bootstrap while the reli_aov
+function utilizes an ordinary (non-parametric) bootstrap method.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -205,12 +211,15 @@ The "residuals" option u uses the model residuals to calculate the root mean squ
 <p>Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength &amp; Conditioning Research, 19(1), 231-240.</p>
 <p>Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.</p>
 <p>McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.</p>
+<p>Hahn, G. J., &amp; Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley &amp; Sons. pp. 55-56.</p>
+<p>Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">reli_stats</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coefficient of Variation (%):  15.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Measurement (SEM):  0.863</span>
