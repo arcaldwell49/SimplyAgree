@@ -130,6 +130,28 @@ testthat::test_that("Simple Use Run Through", {
 
   expect_equivalent(round(test2$icc$icc,4), round(test2_aov$icc$icc,4))
   expect_equivalent(test1_aov$icc$icc, test2_aov$icc$icc)
+  test3_chi = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     other_ci = TRUE,
+                     type = "chi")
+
+  test3_chi = reli_stats(data = df,
+                         measure = "va",
+                         item = "it",
+                         id = "id",
+                         other_ci = TRUE,
+                         type = "chi",
+                         cv_calc = "resid")
+
+  test3_chi = reli_stats(data = df,
+                         measure = "va",
+                         item = "it",
+                         id = "id",
+                         other_ci = TRUE,
+                         type = "chi",
+                         cv_calc = "SEM")
 
   test3 = reli_stats(data = df,
                      measure = "va",
@@ -153,6 +175,23 @@ testthat::test_that("Simple Use Run Through", {
                        id = "id",
                        other_ci = TRUE,
                        type = "chi")
+
+  test3_aov = reli_aov(data = df,
+                       measure = "va",
+                       item = "it",
+                       id = "id",
+                       other_ci = TRUE,
+                       type = "chi",
+                       cv_calc = "resid")
+
+  test3_aov = reli_aov(data = df,
+                       measure = "va",
+                       item = "it",
+                       id = "id",
+                       other_ci = TRUE,
+                       type = "chi",
+                       cv_calc = "SEM")
+
 
 
   pr_test = print(test3)
