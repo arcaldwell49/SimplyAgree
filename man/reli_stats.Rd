@@ -15,7 +15,7 @@ reli_stats(
   cv_calc = c("MSE", "residuals", "SEM"),
   conf.level = 0.95,
   other_ci = FALSE,
-  type = c("perc", "norm", "basic"),
+  type = c("chisq", "perc", "norm", "basic"),
   replicates = 1999
 )
 
@@ -29,7 +29,7 @@ reli_aov(
   cv_calc = c("MSE", "residuals", "SEM"),
   conf.level = 0.95,
   other_ci = FALSE,
-  type = "perc",
+  type = c("chisq", "perc", "norm", "basic"),
   replicates = 1999
 )
 }
@@ -90,6 +90,13 @@ If reli_aov is used then rows with missing observations (e.g., if a participant 
 The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
 The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
 The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+
+The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
+For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
+All other methods are bootstrapping based methods (see ?boot::boot).
+The reli_stats functions utilizes a parametric bootstrap while the reli_aov
+function utilizes an ordinary (non-parametric) bootstrap method.
 }
 \section{References}{
 
@@ -99,6 +106,10 @@ Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass cor
 Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
 
 McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
+
+Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
+
+Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
 }
 
 \examples{

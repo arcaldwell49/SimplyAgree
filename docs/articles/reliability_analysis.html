@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3</span>
       </span>
     </div>
 
@@ -89,7 +89,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2022-12-14</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-02-05</h4>
       
       
       <div class="hidden name"><code>reliability_analysis.Rmd</code></div>
@@ -500,16 +500,55 @@ CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
 <div class="section level3">
 <h3 id="other-confidence-intervals">Other Confidence Intervals<a class="anchor" aria-label="anchor" href="#other-confidence-intervals"></a>
 </h3>
-<p>If the <code>other_ci</code> argument is set to TRUE then parametric
-bootstrapped confidence intervals (using) will be calculated for the CV,
-SEM, SEP, and SEE. The number of resamples can be set with the
-replicates argument (default is 1999; increase for greater accuracy or
-lower for greater speed). The reported confidence intervals are
-estimated using the percentile method <code>type = 'perc'</code>, the
-normal <code>type = 'norm'</code>, or basic methods
+<p>If the <code>other_ci</code> argument is set to TRUE then confidence
+intervals will be calculated for the CV, SEM, SEP, and SEE.</p>
+<div class="section level4">
+<h4 id="chi-square">Chi-square<a class="anchor" aria-label="anchor" href="#chi-square"></a>
+</h4>
+<p>The default method is <code>type = 'chisq</code>. This method
+utilizes the chi-square distribution to <em>approximate</em> confidence
+intervals for these measurements. The accuracy of these estimates is
+likely variable, and is probably poor for small samples.</p>
+<p>For the CV, the calculation is as follows:</p>
+<p><span class="math display">\[
+Lower \space CI =
+\frac{CV}{\sqrt{(\frac{\chi^2_{1-\alpha/2}}{df_{error}+1}-1) \cdot CV^2
+\cdot \frac{\chi^2_{1-\alpha/2}}{df_{error}}}}
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI =
+\frac{CV}{\sqrt{(\frac{\chi^2_{\alpha/2}}{df_{error}+1}-1) \cdot CV^2
+\cdot \frac{\chi^2_{\alpha/2}}{df_{error}}}}
+\]</span> For the variance based measures (s) the calculation is as
+follows:</p>
+<p><span class="math display">\[
+Lower \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{1-\alpha/2}}}
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{\alpha/2}}}
+\]</span></p>
+</div>
+<div class="section level4">
+<h4 id="bootstrap">Bootstrap<a class="anchor" aria-label="anchor" href="#bootstrap"></a>
+</h4>
+<p>If type is not set to <code>chisq</code> then bootstrapping is
+performed.</p>
+<ol style="list-style-type: decimal">
+<li>
+<code>reli_aov</code> utilizes a non-parametric ordinary
+bootstrap.</li>
+<li>
+<code>reli_stats</code> utilizes a parametric bootstrap.</li>
+</ol>
+<p>The number of resamples can be set with the replicates argument
+(default is 1999; increase for greater accuracy or lower for greater
+speed). The reported confidence intervals are estimated using the
+percentile method <code>type = 'perc'</code>, the normal
+<code>type = 'norm'</code>, or basic methods
 <code>type = 'basic'</code>.</p>
 <p>To ensure reproducibility, please use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> when
 these confidence intervals are calculated.</p>
+</div>
 </div>
 </div>
 <div class="section level2">

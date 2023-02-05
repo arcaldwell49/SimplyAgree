@@ -25,6 +25,13 @@
 #' The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
 #' The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 #'
+#' The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
+#' For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+#' For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
+#' All other methods are bootstrapping based methods (see ?boot::boot).
+#' The reli_stats functions utilizes a parametric bootstrap while the reli_aov
+#' function utilizes an ordinary (non-parametric) bootstrap method.
+#'
 #' @return Returns single list with the results of the agreement analysis.
 #'
 #' \describe{
@@ -54,9 +61,14 @@
 #'
 #' McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
 #'
+#' Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
+#'
+#' Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
+#'
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals aov
 #' @importFrom tidyselect all_of
 #' @importFrom insight get_response
+#' @importFrom tidyr pivot_wider
 #' @import dplyr
 #' @import ggplot2
 #' @import lme4
@@ -72,7 +84,7 @@ reli_stats = function(measure,
                       cv_calc = c("MSE","residuals","SEM"),
                       conf.level = .95,
                       other_ci = FALSE,
-                      type = c("perc", "norm", "basic") ,
+                      type = c("chisq", "perc", "norm", "basic"),
                       replicates = 1999){
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
@@ -101,6 +113,9 @@ reli_stats = function(measure,
   mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
                    data = x.df,
                    na.action = na.omit)
+  if(length(unique(x.df$items)) == 2){
+    message("Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.")
+  }
   num_lvls = ngrps(mod.lmer)
   n_items = num_lvls["items"]
   n_id = num_lvls["id"]
@@ -197,9 +212,28 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
+  # Other CIs -----
+
+  SEM = sqrt(MSE)
+  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+  SEP = sd_tots*sqrt(1-ICC3^2)
+
+  mw <- mean(x.df$values, na.rm = TRUE)
+  if(cv_calc == "residuals"){
+    stddev <- sqrt(mean(residuals(mod.lmer)^2))
+  } else if(cv_calc == "MSE"){
+    stddev <- sqrt(MSE)
+  } else if(cv_calc == "SEM"){
+    stddev <- SEM
+  } else {
+    stop("cv_calc must be SEM, MSE, or residuals")
+  }
+
+  cv_out = stddev/mw
 
   if(other_ci == TRUE){
-
+    if(type != "chisq"){
     boot_reli <- function(.) {
       reli_mod_mse(., cv_calc = cv_calc)
     }
@@ -218,24 +252,35 @@ reli_stats = function(measure,
       row.names(res_other) = res_other$term
       res_other = res_other %>%
         select(estimate,bias,se,lower.ci,upper.ci)
-  } else{
-    SEM = sqrt(MSE)
-    sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-    SEP = sd_tots*sqrt(1-ICC3^2)
-
-    mw <- mean(x.df$values, na.rm = TRUE)
-    if(cv_calc == "residuals"){
-      stddev <- sqrt(mean(residuals(mod.lmer)^2))
-    } else if(cv_calc == "MSE"){
-      stddev <- sqrt(MSE)
-    } else if(cv_calc == "SEM"){
-      stddev <- SEM
     } else {
-      stop("cv_calc must be SEM, MSE, or residuals")
-    }
+        ## chisq ----
+      cv_ci = cv_ci(cv_out,
+                    df = dfE,
+                    alpha = alpha)
+      sem_ci = sigma_ci(SEM,
+                        df = dfE,
+                        alpha = alpha)
+      sep_ci = sigma_ci(SEP,
+                        df = dfE,
+                        alpha = alpha)
+      see_ci = sigma_ci(SEE,
+                        df = dfE,
+                        alpha = alpha)
 
-    cv_out = stddev/mw
+      res_other = data.frame(
+        estimate = c(cv_out, SEM, SEP, SEE),
+        bias = NA,
+        se = NA,
+        lower.ci = c(cv_ci[1],sem_ci[1],
+                     sep_ci[1],see_ci[1]),
+        upper.ci = c(cv_ci[2],sem_ci[2],
+                     sep_ci[2],see_ci[2]),
+        row.names = c("cv", "SEM", "SEP", "SEE")
+      )
+      }
+
+  } else{
+
     res_other = data.frame(
       estimate = c(cv_out, SEM, SEP, SEE),
       bias = NA,
@@ -295,9 +340,10 @@ reli_aov = function(measure,
                     cv_calc = c("MSE","residuals","SEM"),
                     conf.level = .95,
                     other_ci = FALSE,
-                    type = "perc",
+                    type = c("chisq", "perc", "norm", "basic"),
                     replicates = 1999) {
   cv_calc = match.arg(cv_calc)
+  type = match.arg(type)
 
   alpha = 1-conf.level
   x = data
@@ -366,7 +412,7 @@ reli_aov = function(measure,
   rownames(stats) <- c("df", "SumSq", "MS", "F", "p")
   # transpose
   stat.final = t(stats)
-  # Calculate ICCs
+  # Calculate ICCs-----
   ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
   ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
                                                                 MSE)/n_id)
@@ -393,6 +439,7 @@ reli_aov = function(measure,
   results$type = c("ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k")
   results$icc = c(ICC1,ICC2,ICC3,ICC_1_k,ICC_2_k,ICC_3_k)
 
+  # F-tests ------
   F1L <- F11/qf(1 - alpha, df11n, df11d)
   F1U <- F11 * qf(1 - alpha, df11d, df11n)
   L1 <- (F1L - 1)/(F1L + (n_items - 1))
@@ -426,28 +473,125 @@ reli_aov = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
+  # Other stats -----
+  SEM = sqrt(MSE)
+  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
+  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+  SEP = sd_tots*sqrt(1-ICC3^2)
 
+  mw <- mean(x.df$values, na.rm = TRUE)
+  if(cv_calc == "residuals"){
+    stddev <- sqrt(mean(residuals(aov.x)^2))
+  } else if(cv_calc == "MSE"){
+    stddev <- sqrt(MSE)
+  } else if(cv_calc == "SEM"){
+    stddev <- SEM
+  } else {
+    stop("cv_calc must be SEM, MSE, or residuals")
+  }
+  cv_out = stddev/mw
+  # Other CIs-----
   if(other_ci == TRUE){
-    stop("Bootstrapping for these statistics is currently not supported for this function.")
+    if(type != "chisq"){
+      #stop("Bootstrapping for these statistics is currently not supported for this function.")
 
-  } else{
-    SEM = sqrt(MSE)
-    sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-    SEP = sd_tots*sqrt(1-ICC3^2)
+      wide_df = x.df %>%
+        pivot_wider(values_from = values,
+                    names_from = items,
+                    names_prefix = "item_")
 
-    mw <- mean(x.df$values, na.rm = TRUE)
-    if(cv_calc == "residuals"){
-      stddev <- sqrt(mean(residuals(aov.x)^2))
-    } else if(cv_calc == "MSE"){
-      stddev <- sqrt(MSE)
-    } else if(cv_calc == "SEM"){
-      stddev <- SEM
-    } else {
-      stop("cv_calc must be SEM, MSE, or residuals")
+      boot_function <- function(data, indices,
+                                cv_calc = "MSE") {
+        d <- data[indices, ] # allows boot to select sample
+        d$id = 1:nrow(d)
+
+        x.df = d %>%
+          pivot_longer(cols = starts_with("item"),
+                       names_to = "items",
+                       values_to = "values") %>%
+          mutate(id = factor(id),
+                 items = factor(items))
+
+        n_id <- length(unique(x.df$id))
+        n_items <- length(unique(x.df$items))
+
+        aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
+        s.aov <- summary(aov.x)
+        stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
+        MSB <- stats[3,1]
+        MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
+        MSJ <- stats[3,2]
+        MSE <- stats[3,3]
+        SEM = sqrt(MSE)
+        sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+        SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+        SEP = sd_tots*sqrt(1-ICC3^2)
+
+        mw <- mean(x.df$values, na.rm = TRUE)
+        if(cv_calc == "residuals"){
+          stddev <- sqrt(mean(residuals(aov.x)^2))
+        } else if(cv_calc == "MSE"){
+          stddev <- sqrt(MSE)
+        } else if(cv_calc == "SEM"){
+          stddev <- SEM
+        } else {
+          stop("cv_calc must be SEM, MSE, or residuals")
+        }
+        cv_out = stddev/mw
+
+        res = c(
+          cv = cv_out,
+          SEM = SEM,
+          SEE = SEE,
+          SEP = SEP
+        )
+        return(res)
+      }
+
+      boo2 = boot::boot(wide_df, boot_function,  R = replicates)
+
+      res_other = tidy_boot(boo2,
+                            conf.int = TRUE,
+                            conf.level = conf.level,
+                            conf.method = type) %>%
+        rename(estimate = statistic,
+               se = std.error,
+               lower.ci = conf.low,
+               upper.ci = conf.high) %>%
+        as.data.frame()
+      row.names(res_other) = res_other$term
+      res_other = res_other %>%
+        select(estimate,bias,se,lower.ci,upper.ci)
+    } else{
+      ## chisq ----
+      cv_ci = cv_ci(cv_out,
+                    df = dfE,
+                    alpha = alpha)
+      sem_ci = sigma_ci(SEM,
+                        df = dfE,
+                        alpha = alpha)
+      sep_ci = sigma_ci(SEP,
+                        df = dfE,
+                        alpha = alpha)
+      see_ci = sigma_ci(SEE,
+                        df = dfE,
+                        alpha = alpha)
+
+      res_other = data.frame(
+        estimate = c(cv_out, SEM, SEP, SEE),
+        bias = NA,
+        se = NA,
+        lower.ci = c(cv_ci[1],sem_ci[1],
+                     sep_ci[1],see_ci[1]),
+        upper.ci = c(cv_ci[2],sem_ci[2],
+                     sep_ci[2],see_ci[2]),
+        row.names = c("cv", "SEM", "SEP", "SEE")
+      )
+
     }
 
-    cv_out = stddev/mw
+  } else{
     res_other = data.frame(
       estimate = c(cv_out, SEM, SEP, SEE),
       bias = NA,
@@ -494,3 +638,33 @@ reli_aov = function(measure,
   structure(result,
             class = "simple_reli")
 }
+
+# other functions ----
+
+cv_ci = function(cv,
+                 df,
+                 alpha){
+  u1 <- qchisq(1-alpha/2,df)
+  u2 <- qchisq(alpha/2,df)
+  u = c(u1,u2)
+  #lower <- cv/sqrt(( (u1+2)/(df+1) -1)*cv*cv + u1/df)
+  #upper <- cv/sqrt(( (u2+2)/(df+1) -1)*cv*cv + u2/df)
+
+  res_vec = cv/sqrt(( (u+2)/(df+1) -1)*cv*cv + u/df)
+
+  return(res_vec)
+}
+
+sigma_ci = function(sigma,
+                    df,
+                    alpha){
+
+  lcl <-  sqrt( (df*sigma^2) / qchisq(p = 1-alpha/2, df = df) )
+  ucl <-  sqrt( (df*sigma^2) / qchisq(p = alpha/2, df = df) )
+  res_vec <- c(lcl,ucl)
+
+  return(res_vec)
+}
+
+
+

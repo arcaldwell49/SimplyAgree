@@ -402,7 +402,44 @@ $$
 
 ## Other Confidence Intervals
 
-If the `other_ci` argument is set to TRUE then parametric bootstrapped confidence intervals (using) will be calculated for the CV, SEM, SEP, and SEE. The number of resamples can be set with the replicates argument (default is 1999; increase for greater accuracy or lower for greater speed). The reported confidence intervals are estimated using the percentile method `type = 'perc'`, the normal `type = 'norm'`, or basic methods `type = 'basic'`. 
+If the `other_ci` argument is set to TRUE then  confidence intervals  will be calculated for the CV, SEM, SEP, and SEE. 
+
+
+### Chi-square
+
+The default method is `type = 'chisq`. This method utilizes the chi-square distribution to *approximate* confidence intervals for these measurements. The accuracy of these estimates is likely variable, and is probably poor for small samples.
+
+For the CV, the calculation is as follows:
+
+$$
+Lower \space CI = \frac{CV}{\sqrt{(\frac{\chi^2_{1-\alpha/2}}{df_{error}+1}-1) \cdot CV^2 \cdot \frac{\chi^2_{1-\alpha/2}}{df_{error}}}}
+$$
+
+
+
+$$
+Upper \space CI = \frac{CV}{\sqrt{(\frac{\chi^2_{\alpha/2}}{df_{error}+1}-1) \cdot CV^2 \cdot \frac{\chi^2_{\alpha/2}}{df_{error}}}}
+$$
+For the variance based measures (s) the calculation is as follows:
+
+$$
+Lower \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{1-\alpha/2}}}
+$$
+
+
+
+$$
+Upper \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{\alpha/2}}}
+$$
+
+### Bootstrap
+
+If type is not set to `chisq` then bootstrapping is performed.
+
+1. `reli_aov` utilizes a non-parametric ordinary bootstrap.
+2. `reli_stats` utilizes a parametric bootstrap.
+
+The number of resamples can be set with the replicates argument (default is 1999; increase for greater accuracy or lower for greater speed). The reported confidence intervals are estimated using the percentile method `type = 'perc'`, the normal `type = 'norm'`, or basic methods `type = 'basic'`. 
 
 To ensure reproducibility, please use `set.seed()` when these confidence intervals are calculated.
 
