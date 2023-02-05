@@ -68,6 +68,7 @@
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals aov
 #' @importFrom tidyselect all_of
 #' @importFrom insight get_response
+#' @importFrom tidyr pivot_wider
 #' @import dplyr
 #' @import ggplot2
 #' @import lme4
@@ -499,10 +500,6 @@ reli_aov = function(measure,
         pivot_wider(values_from = values,
                     names_from = items,
                     names_prefix = "item_")
-      long_df = wide_df %>%
-        pivot_longer(cols = starts_with("item"),
-                     names_to = "items",
-                     values_to = "values")
 
       boot_function <- function(data, indices,
                                 cv_calc = "MSE") {

@@ -137,12 +137,7 @@ testthat::test_that("Simple Use Run Through", {
                      id = "id",
                      other_ci = TRUE,
                      replicates = 49)
-  expect_error(reli_aov(data = df,
-                          measure = "va",
-                          item = "it",
-                          id = "id",
-                          other_ci = TRUE,
-                          replicates = 49))
+
 
   pr_test = print(test3)
   p = plot(test3)

@@ -229,7 +229,7 @@ plot_het = function (x,
       se = TRUE,
       alpha = alpha_level,
       formula = y ~ x,
-      size = size_line,
+      linewidth = size_line,
       colour = colors[1]
     ) +
     labs(
@@ -256,7 +256,7 @@ plot_qq = function (x,
       size = size_point,
       colour = colors[2]
     ),
-    geom_qq_line(size = size_line,
+    geom_qq_line(linewidth = size_line,
                           colour = colors[1])
   )
   y_lab <- "Sample Quantiles"
@@ -287,7 +287,7 @@ plot_bias = function(x,
       se = TRUE,
       alpha = alpha_level,
       formula = y ~ x,
-      size = size_line,
+      linewidth = size_line,
       colour = colors[1]
     ) +
     labs(
