@@ -136,7 +136,23 @@ testthat::test_that("Simple Use Run Through", {
                      item = "it",
                      id = "id",
                      other_ci = TRUE,
+                     type = "perc",
                      replicates = 49)
+
+  test3_aov = reli_aov(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 49)
+
+  test3_aov = reli_aov(data = df,
+                       measure = "va",
+                       item = "it",
+                       id = "id",
+                       other_ci = TRUE,
+                       type = "chi")
 
 
   pr_test = print(test3)
