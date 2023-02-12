@@ -81,11 +81,13 @@ reli_stats = function(measure,
                       data,
                       wide = FALSE,
                       col.names = NULL,
+                      se_type = c("MSE",1,2,3,4,5,6),
                       cv_calc = c("MSE","residuals","SEM"),
                       conf.level = .95,
                       other_ci = FALSE,
                       type = c("chisq", "perc", "norm", "basic"),
                       replicates = 1999){
+  se_type = match.arg(se_type)
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
   alpha = 1-conf.level
@@ -212,26 +214,36 @@ reli_stats = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
-  # Other CIs -----
+  # Other stats -----
 
-  SEM = sqrt(MSE)
   sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-  SEP = sd_tots*sqrt(1-ICC3^2)
+  if(se_type == "MSE"){
+    SEM = sqrt(MSE)
+  } else{
+    SEM = sd_tots * sqrt(1-results$icc[se_type])
+  }
+
+  if(se_type == "MSE"){
+    ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
+    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+    SEP = sd_tots*sqrt(1-ICC3^2)
+  } else {
+    SEE = sd_tots*sqrt(results$icc[se_type]*(1-results$icc[se_type]))
+    SEP = sd_tots*sqrt(1-results$icc[se_type]^2)
+  }
 
   mw <- mean(x.df$values, na.rm = TRUE)
   if(cv_calc == "residuals"){
-    stddev <- sqrt(mean(residuals(mod.lmer)^2))
-  } else if(cv_calc == "MSE"){
-    stddev <- sqrt(MSE)
-  } else if(cv_calc == "SEM"){
-    stddev <- SEM
-  } else {
-    stop("cv_calc must be SEM, MSE, or residuals")
+    stddev <- sqrt(mean(residuals(aov.x)^2))
   }
-
+  if(cv_calc == "MSE"){
+    stddev <- MSE
+  }
+  if(cv_calc == "SEM"){
+    stddev <- SEM
+  }
   cv_out = stddev/mw
-
+# Other CIs -----
   if(other_ci == TRUE){
     if(type != "chisq"){
     boot_reli <- function(.) {
@@ -337,11 +349,13 @@ reli_aov = function(measure,
                     data,
                     wide = FALSE,
                     col.names = NULL,
+                    se_type = c("MSE",1,2,3,4,5,6),
                     cv_calc = c("MSE","residuals","SEM"),
                     conf.level = .95,
                     other_ci = FALSE,
                     type = c("chisq", "perc", "norm", "basic"),
                     replicates = 1999) {
+  se_type = match.arg(se_type)
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
 
@@ -378,11 +392,13 @@ reli_aov = function(measure,
 
   aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
   s.aov <- summary(aov.x)
+
   stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
   MSB <- stats[3,1]
   MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
   MSJ <- stats[3,2]
   MSE <- stats[3,3]
+
 
   # Create variance table
   MS_items = MSW - MSE
@@ -474,21 +490,31 @@ reli_aov = function(measure,
   results[5, 6] <- U3k
 
   # Other stats -----
-  SEM = sqrt(MSE)
   sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  if(se_type == "MSE"){
+    SEM = sqrt(MSE)
+  } else{
+    SEM = sd_tots * sqrt(1-results$icc[se_type])
+  }
+
+  if(se_type == "MSE"){
   ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))
   SEP = sd_tots*sqrt(1-ICC3^2)
+  } else {
+    SEE = sd_tots*sqrt(results$icc[se_type]*(1-results$icc[se_type]))
+    SEP = sd_tots*sqrt(1-results$icc[se_type]^2)
+  }
 
   mw <- mean(x.df$values, na.rm = TRUE)
   if(cv_calc == "residuals"){
     stddev <- sqrt(mean(residuals(aov.x)^2))
-  } else if(cv_calc == "MSE"){
-    stddev <- sqrt(MSE)
-  } else if(cv_calc == "SEM"){
+  }
+  if(cv_calc == "MSE"){
+    stddev <- MSE
+  }
+  if(cv_calc == "SEM"){
     stddev <- SEM
-  } else {
-    stop("cv_calc must be SEM, MSE, or residuals")
   }
   cv_out = stddev/mw
   # Other CIs-----
