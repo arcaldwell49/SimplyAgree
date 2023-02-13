@@ -465,18 +465,15 @@ SEM = \sqrt{MSE}
 \]</span> Alternatively, the SEM can be calculated as the following and
 the ICC is determined through the <code>se_type</code> argument:</p>
 <p><span class="math display">\[
-SEM = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
-k}}{(N-1)}} \cdot \sqrt{1-ICC}
+SEM = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC}
 \]</span> The other measures default to using the following equations.
 The default is to use <span class="math inline">\(ICC_{3,1}\)</span>,
 but can be modified with the <code>se_type</code> argument.</p>
 <p><span class="math display">\[
-SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
-k}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)}
+SEE = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)}
 \]</span></p>
 <p><span class="math display">\[
-SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha
-k}}{(N-1)}} \cdot \sqrt{1-ICC^2}
+SEP = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC^2}
 \]</span></p>
 </div>
 <div class="section level3">
