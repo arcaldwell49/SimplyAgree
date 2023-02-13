@@ -12,6 +12,7 @@ reli_stats(
   data,
   wide = FALSE,
   col.names = NULL,
+  se_type = c("MSE", "ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k"),
   cv_calc = c("MSE", "residuals", "SEM"),
   conf.level = 0.95,
   other_ci = FALSE,
@@ -26,6 +27,7 @@ reli_aov(
   data,
   wide = FALSE,
   col.names = NULL,
+  se_type = c("MSE", "ICC1", "ICC2", "ICC3", "ICC1k", "ICC2k", "ICC3k"),
   cv_calc = c("MSE", "residuals", "SEM"),
   conf.level = 0.95,
   other_ci = FALSE,
@@ -45,6 +47,8 @@ reli_aov(
 \item{wide}{Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.}
 
 \item{col.names}{If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.}
+
+\item{se_type}{Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.}
 
 \item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
 

@@ -50,4 +50,10 @@ utils::globalVariables(c("boot_bias",
                          "term",
                          "sd_total",
                          ".",
-                         ":="))
+                         ":=",
+                         "n_items",
+                         "n_id",
+                         "n_obs",
+                         "se_type",
+                         "type",
+                         "x.df"))

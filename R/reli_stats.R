@@ -9,6 +9,7 @@
 #' @param conf.level the confidence level required. Default is 95\%.
 #' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
 #' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
+#' @param se_type Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.
 #' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
 #' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
 #' @details
@@ -81,7 +82,7 @@ reli_stats = function(measure,
                       data,
                       wide = FALSE,
                       col.names = NULL,
-                      se_type = c("MSE",1,2,3,4,5,6),
+                      se_type = c("MSE","ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k"),
                       cv_calc = c("MSE","residuals","SEM"),
                       conf.level = .95,
                       other_ci = FALSE,
@@ -91,6 +92,7 @@ reli_stats = function(measure,
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
   alpha = 1-conf.level
+  # Organize Data ----
   x = data
   if(wide == TRUE){
     if(is.null(col.names)){
@@ -121,11 +123,12 @@ reli_stats = function(measure,
   num_lvls = ngrps(mod.lmer)
   n_items = num_lvls["items"]
   n_id = num_lvls["id"]
+  n_obs = nrow(na.omit(x.df))
   vc <- VarCorr(mod.lmer) # Get Variance Components
   MS_id <- vc$id[1, 1] # var by id
   MS_items <- vc$items[1, 1] # var by item
   MSE <- (attributes(vc)$sc)^2
-  # Create variance table
+  # Create variance table ------
   MS.df <- data.frame(variance = c(MS_id, MS_items, MSE,
                                    NA))
   rownames(MS.df) <- c("ID", "Items", "Residual", "Total")
@@ -154,7 +157,7 @@ reli_stats = function(measure,
   rownames(stats) <- c("df", "SumSq", "MS", "F", "p")
   # transpose
   stat.final = t(stats)
-  # Calculate ICCs
+  # Calculate ICCs ----
   ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
   ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
                                                       MSE)/n_id)
@@ -215,12 +218,11 @@ reli_stats = function(measure,
   results[5, 6] <- U3k
 
   # Other stats -----
-
-  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
   if(se_type == "MSE"){
     SEM = sqrt(MSE)
   } else{
-    SEM = sd_tots * sqrt(1-results$icc[se_type])
+    SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
   }
 
   if(se_type == "MSE"){
@@ -228,16 +230,16 @@ reli_stats = function(measure,
     SEE = sd_tots*sqrt(ICC3*(1-ICC3))
     SEP = sd_tots*sqrt(1-ICC3^2)
   } else {
-    SEE = sd_tots*sqrt(results$icc[se_type]*(1-results$icc[se_type]))
-    SEP = sd_tots*sqrt(1-results$icc[se_type]^2)
+    SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
+    SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
   }
 
   mw <- mean(x.df$values, na.rm = TRUE)
   if(cv_calc == "residuals"){
-    stddev <- sqrt(mean(residuals(aov.x)^2))
+    stddev <- sqrt(mean(residuals(mod.lmer)^2))
   }
   if(cv_calc == "MSE"){
-    stddev <- MSE
+    stddev <- sqrt(MSE)
   }
   if(cv_calc == "SEM"){
     stddev <- SEM
@@ -247,7 +249,8 @@ reli_stats = function(measure,
   if(other_ci == TRUE){
     if(type != "chisq"){
     boot_reli <- function(.) {
-      reli_mod_mse(., cv_calc = cv_calc)
+      reli_mod_mse(., cv_calc = cv_calc,
+                   se_type = se_type)
     }
 
     boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
@@ -349,7 +352,7 @@ reli_aov = function(measure,
                     data,
                     wide = FALSE,
                     col.names = NULL,
-                    se_type = c("MSE",1,2,3,4,5,6),
+                    se_type = c("MSE","ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k"),
                     cv_calc = c("MSE","residuals","SEM"),
                     conf.level = .95,
                     other_ci = FALSE,
@@ -359,6 +362,7 @@ reli_aov = function(measure,
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
 
+  # Organize Data ----
   alpha = 1-conf.level
   x = data
   if(wide == TRUE){
@@ -389,6 +393,7 @@ reli_aov = function(measure,
 
   n_id <- length(unique(x.df$id))
   n_items <- length(unique(x.df$items))
+  n_obs = nrow(x.df)
 
   aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
   s.aov <- summary(aov.x)
@@ -400,12 +405,17 @@ reli_aov = function(measure,
   MSE <- stats[3,3]
 
 
-  # Create variance table
+  # Create variance table -----
   MS_items = MSW - MSE
   MS_id = (MSB-MSE)/n_items
-  MS.df <- data.frame(variance = c(MS_id, MS_items, MSE,
+  MS.df <- data.frame(variance = c(MS_id,
+                                   ifelse(MS_items < 0 , 0,MS_items),
+                                   MSE,
                                    NA))
-  rownames(MS.df) <- c("ID", "Items", "Residual", "Total")
+  rownames(MS.df) <- c("ID",
+                       "Items",
+                       "Residual",
+                       "Total")
   MS.df["Total", ] <- sum(MS.df[1:3, 1], na.rm = TRUE)
   MS.df["percent"] <- MS.df/MS.df["Total", 1]
 
@@ -489,12 +499,13 @@ reli_aov = function(measure,
   results[5, 5] <- L3k
   results[5, 6] <- U3k
 
+
   # Other stats -----
-  sd_tots = sqrt(sum(stats[2,])/(n_id-1))
+  sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
   if(se_type == "MSE"){
     SEM = sqrt(MSE)
   } else{
-    SEM = sd_tots * sqrt(1-results$icc[se_type])
+    SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
   }
 
   if(se_type == "MSE"){
@@ -502,8 +513,8 @@ reli_aov = function(measure,
   SEE = sd_tots*sqrt(ICC3*(1-ICC3))
   SEP = sd_tots*sqrt(1-ICC3^2)
   } else {
-    SEE = sd_tots*sqrt(results$icc[se_type]*(1-results$icc[se_type]))
-    SEP = sd_tots*sqrt(1-results$icc[se_type]^2)
+    SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
+    SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
   }
 
   mw <- mean(x.df$values, na.rm = TRUE)
@@ -511,7 +522,7 @@ reli_aov = function(measure,
     stddev <- sqrt(mean(residuals(aov.x)^2))
   }
   if(cv_calc == "MSE"){
-    stddev <- MSE
+    stddev <- sqrt(MSE)
   }
   if(cv_calc == "SEM"){
     stddev <- SEM

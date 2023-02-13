@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,65 +66,43 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dem_reg</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">y</span>,</span>
-<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">data</span>,</span>
-<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  weighted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  error.ratio <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  keep_data <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">dem_reg</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">y</span>,
+  id <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">data</span>,
+  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
+  weighted <span class="op">=</span> <span class="cn">FALSE</span>,
+  weights <span class="op">=</span> <span class="cn">NULL</span>,
+  error.ratio <span class="op">=</span> <span class="fl">1</span>,
+  keep_data <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>Name of column with first measurement</p></dd>
-
-
 <dt>y</dt>
 <dd><p>Name of other column with the other measurement to compare to the first.</p></dd>
-
-
 <dt>id</dt>
 <dd><p>Column with subject identifier</p></dd>
-
-
 <dt>data</dt>
 <dd><p>Data frame with all data</p></dd>
-
-
 <dt>conf.level</dt>
 <dd><p>The confidence level required. Default is 95%.</p></dd>
-
-
 <dt>weighted</dt>
 <dd><p>Logical indicator (TRUE/FALSE) for whether to use weighted Deming regression. Default is FALSE.</p></dd>
-
-
 <dt>weights</dt>
 <dd><p>an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.</p></dd>
-
-
 <dt>error.ratio</dt>
 <dd><p>Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.</p></dd>
-
-
 <dt>keep_data</dt>
 <dd><p>Logical indicator (TRUE/FALSE). If TRUE the jacknife samples are returned; default is FALSE.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>The function returns a simple_eiv (eiv meaning "error in variables") object.</p>
-
-
-<dl><dt><code>"call"</code></dt>
+    <p>The function returns a simple_eiv (eiv meaning "error in variables") object.</p><dl><dt><code>"call"</code></dt>
 <dd><p>The matched call.</p></dd>
 
   <dt><code>"model"</code></dt>
@@ -164,7 +142,7 @@ When the replicates are not available in the data, then the ratio of error varia
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

@@ -161,6 +161,7 @@ testthat::test_that("Simple Use Run Through", {
                      type = "perc",
                      replicates = 49)
 
+
   test3_aov = reli_aov(data = df,
                      measure = "va",
                      item = "it",
@@ -168,7 +169,10 @@ testthat::test_that("Simple Use Run Through", {
                      other_ci = TRUE,
                      type = "perc",
                      replicates = 49)
-
+  testthat::expect_equivalent(round(test3$icc$icc,4),
+                              round(test3_aov$icc$icc,4))
+  testthat::expect_equivalent(round(test3$var_comp$percent,4),
+                              round(test3_aov$var_comp$percent,4))
   test3_aov = reli_aov(data = df,
                        measure = "va",
                        item = "it",
@@ -304,5 +308,35 @@ testthat::test_that("Simple Use Run Through", {
                          id = "id",
                          weighted = TRUE)
 
+
+})
+
+test_that("Weir dataset A",{
+  df_a = data.frame(
+    x = c(146, 148, 170, 90, 157, 156, 176, 205),
+    y = c(140, 152, 152, 99, 145, 153, 167, 218)
+  )
+
+  test_a = reli_aov(data = df_a,
+                    col.names = c("x", "y"),
+                    wide = TRUE)
+
+  #testlmer = reli_stats(data = df_a,
+  #                    col.names = c("x", "y"),
+  #                    wide = TRUE)
+
+  expect_equal(round(test_a$SEM$estimate,1),
+               7.6) # page 236 paragraph 1
+
+  test_a = reli_aov(data = df_a,
+                    col.names = c("x", "y"),
+                    wide = TRUE,
+                    se_type = "ICC3")
+
+  expect_equal(round(test_a$SEP$estimate,1),
+               10.2) # page 236 2nd column
+
+  expect_equal(round(test_a$SEE$estimate,1),
+               7.1) # page 236 2nd column
 
 })

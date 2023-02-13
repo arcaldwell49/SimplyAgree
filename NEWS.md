@@ -1,5 +1,9 @@
 # NEWS
 
+# SimplyAgree 0.1.4
+
+- Major error in SEP/SEE calculations. SD total calculation adjusted
+
 # SimplyAgree 0.1.3
 
 - Added `chisq` type of confidence intervals for "Other" CIs for `reli_stats` and `reli_aov`

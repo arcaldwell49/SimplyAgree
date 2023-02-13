@@ -363,7 +363,7 @@ $$
 
 ## Standard Error Calculations
 
-The standard error of the measurement (SEM), standard error of the estimate (SEE), and standard error of prediction (SEP) are all estimated with the following calculations.
+The standard error of the measurement (SEM), standard error of the estimate (SEE), and standard error of prediction (SEP) are all estimated with the following calculations.^[This section was previously incorrect. The variance calculation used to utilize $n_j$ instead of N.]
 
 The default SEM calculation is the following:
 
@@ -373,16 +373,16 @@ $$
 Alternatively, the SEM can be calculated as the following and the ICC is determined through the `se_type` argument:
 
 $$
-SEM = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC}
+SEM = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC}
 $$
-The other measures default to using
+The other measures default to using the following equations. The default is to use $ICC_{3,1}$, but can be modified with the `se_type` argument.
 
 $$
-SEE = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{ICC_{(3,1)} \cdot (1-ICC_{(3,1)})} 
+SEE = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)} 
 $$
 
 $$
-SEP = \sqrt{\frac{\sigma^2+\sigma^2_{\alpha j}+\sigma^2_{\alpha k}}{(n_j-1)}} \cdot \sqrt{1-ICC_{(3,1)}^2} 
+SEP = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC^2} 
 $$
 
 ## Coefficient of Variation 
@@ -395,7 +395,7 @@ $$
 CV = \frac{ \sqrt{MSE} }{ \bar y}
 $$
 
-2. From the SEM (most conservative)^[Also called "%SEM" in some texts]
+2. From the SEM^[Also called "%SEM" in some texts. Equivalent to MSE if the `se_type` is set to "MSE"]
 
 $$
 CV = \frac{SEM}{ \bar y}
