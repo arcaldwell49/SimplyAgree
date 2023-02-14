@@ -1,10 +1,10 @@
 pandoc: 2.19.2
-pkgdown: 2.0.6
+pkgdown: 2.0.3
 pkgdown_sha: ~
 articles:
-  agreement_analysis: agreement_analysis.html
   Deming: Deming.html
+  agreement_analysis: agreement_analysis.html
   reanalysis: reanalysis.html
   reliability_analysis: reliability_analysis.html
-last_built: 2023-02-05T16:53Z
+last_built: 2023-02-13T20:42Z
 

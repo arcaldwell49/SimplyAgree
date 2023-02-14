@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,70 +66,46 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loa_mixed</span><span class="op">(</span></span>
-<span>  <span class="va">diff</span>,</span>
-<span>  <span class="va">condition</span>,</span>
-<span>  <span class="va">id</span>,</span>
-<span>  <span class="va">data</span>,</span>
-<span>  plot.xaxis <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">delta</span>,</span>
-<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  replicates <span class="op">=</span> <span class="fl">1999</span>,</span>
-<span>  type <span class="op">=</span> <span class="st">"bca"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">loa_mixed</span><span class="op">(</span>
+  <span class="va">diff</span>,
+  <span class="va">condition</span>,
+  <span class="va">id</span>,
+  <span class="va">data</span>,
+  plot.xaxis <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">delta</span>,
+  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
+  agree.level <span class="op">=</span> <span class="fl">0.95</span>,
+  replicates <span class="op">=</span> <span class="fl">1999</span>,
+  type <span class="op">=</span> <span class="st">"bca"</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>diff</dt>
 <dd><p>column name of the data frame that includes the continuous measurement of interest.</p></dd>
-
-
 <dt>condition</dt>
 <dd><p>column name indicating different conditions subjects were tested under.</p></dd>
-
-
 <dt>id</dt>
 <dd><p>column name indicating the subject/participant identifier</p></dd>
-
-
 <dt>data</dt>
 <dd><p>A data frame containing the variables within the model.</p></dd>
-
-
 <dt>plot.xaxis</dt>
 <dd><p>column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.</p></dd>
-
-
 <dt>delta</dt>
 <dd><p>The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.</p></dd>
-
-
 <dt>conf.level</dt>
 <dd><p>the confidence level required. Default is 95%.</p></dd>
-
-
 <dt>agree.level</dt>
 <dd><p>the agreement level required. Default is 95%.</p></dd>
-
-
 <dt>replicates</dt>
 <dd><p>the number of bootstrap replicates. Passed on to the boot function. Default is 500.</p></dd>
-
-
 <dt>type</dt>
 <dd><p>A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", "bca", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>Returns single list with the results of the agreement analysis.</p>
-
-
-<dl><dt><code>"var_comp"</code></dt>
+    <p>Returns single list with the results of the agreement analysis.</p><dl><dt><code>"var_comp"</code></dt>
 <dd><p>Table of variance components</p></dd>
 
   <dt><code>"loa"</code></dt>
@@ -168,7 +144,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

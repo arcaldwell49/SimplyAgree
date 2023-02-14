@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,100 +66,63 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">jmvagreemulti</span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
-<span>  <span class="va">method1</span>,</span>
-<span>  <span class="va">method2</span>,</span>
-<span>  <span class="va">id</span>,</span>
-<span>  ciWidth <span class="op">=</span> <span class="fl">95</span>,</span>
-<span>  agreeWidth <span class="op">=</span> <span class="fl">95</span>,</span>
-<span>  testValue <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  CCC <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  valEq <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  plotbland <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  plotcon <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  xlabel <span class="op">=</span> <span class="st">"Average of Both Methods"</span>,</span>
-<span>  ylabel <span class="op">=</span> <span class="st">"Difference between Methods"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">jmvagreemulti</span><span class="op">(</span>
+  <span class="va">data</span>,
+  <span class="va">method1</span>,
+  <span class="va">method2</span>,
+  <span class="va">id</span>,
+  ciWidth <span class="op">=</span> <span class="fl">95</span>,
+  agreeWidth <span class="op">=</span> <span class="fl">95</span>,
+  testValue <span class="op">=</span> <span class="fl">2</span>,
+  CCC <span class="op">=</span> <span class="cn">TRUE</span>,
+  valEq <span class="op">=</span> <span class="cn">FALSE</span>,
+  plotbland <span class="op">=</span> <span class="cn">FALSE</span>,
+  plotcon <span class="op">=</span> <span class="cn">FALSE</span>,
+  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
+  xlabel <span class="op">=</span> <span class="st">"Average of Both Methods"</span>,
+  ylabel <span class="op">=</span> <span class="st">"Difference between Methods"</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>data</dt>
 <dd><p>Data</p></dd>
-
-
 <dt>method1</dt>
 <dd><p>Name of column containing 1st Vector of data</p></dd>
-
-
 <dt>method2</dt>
 <dd><p>Name of column containing Vector of data</p></dd>
-
-
 <dt>id</dt>
 <dd><p>Name of column containing subject identifier</p></dd>
-
-
 <dt>ciWidth</dt>
 <dd><p>a number between 50 and 99.9 (default: 95), the width of
 confidence intervals</p></dd>
-
-
 <dt>agreeWidth</dt>
 <dd><p>a number between 50 and 99.9 (default: 95), the width of
 agreement limits</p></dd>
-
-
 <dt>testValue</dt>
 <dd><p>a number specifying the limit of agreement</p></dd>
-
-
 <dt>CCC</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code> (default), produce CCC table</p></dd>
-
-
 <dt>valEq</dt>
 <dd><p>.</p></dd>
-
-
 <dt>plotbland</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code> (default), for Bland-Altman
 plot</p></dd>
-
-
 <dt>plotcon</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code> (default), for Line of identity
 plot</p></dd>
-
-
 <dt>prop_bias</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code></p></dd>
-
-
 <dt>xlabel</dt>
 <dd><p>The label for the x-axis on the BA plot</p></dd>
-
-
 <dt>ylabel</dt>
 <dd><p>The label for the y-axis on the BA plot</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$blandtab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ccctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotba</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotcon</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:</p>
-
-
-<p><code>results$blandtab$asDF</code></p>
-
-
-
-<p><code>as.data.frame(results$blandtab)</code></p>
-
-
+    <p>A results object containing:</p><table class="table table"><tr><td><code>results$text</code></td><td></td><td></td><td></td><td></td><td>a preformatted</td></tr><tr><td><code>results$blandtab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$ccctab</code></td><td></td><td></td><td></td><td></td><td>a table</td></tr><tr><td><code>results$plotba</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr><tr><td><code>results$plotcon</code></td><td></td><td></td><td></td><td></td><td>an image</td></tr></table><p>Tables can be converted to data frames with <code>asDF</code> or <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></code>. For example:
+<code>results$blandtab$asDF</code><code>as.data.frame(results$blandtab)</code></p>
     </div>
 
   </div>
@@ -174,7 +137,7 @@ plot</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>
