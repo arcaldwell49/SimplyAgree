@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
       </span>
     </div>
 
@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,43 +66,65 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">agree_nest</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">y</span>,
-  <span class="va">id</span>,
-  <span class="va">data</span>,
-  <span class="va">delta</span>,
-  agree.level <span class="op">=</span> <span class="fl">0.95</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  TOST <span class="op">=</span> <span class="cn">TRUE</span>,
-  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">agree_nest</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">y</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">delta</span>,</span>
+<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  TOST <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>Name of column with first measurement</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Name of other column with the other measurement to compare to the first.</p></dd>
+
+
 <dt>id</dt>
 <dd><p>Column with subject identifier</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Data frame with all data</p></dd>
+
+
 <dt>delta</dt>
 <dd><p>The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.</p></dd>
+
+
 <dt>agree.level</dt>
 <dd><p>the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.</p></dd>
+
+
 <dt>conf.level</dt>
 <dd><p>the confidence level required. Default is 95%.</p></dd>
+
+
 <dt>TOST</dt>
 <dd><p>Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.</p></dd>
+
+
 <dt>prop_bias</dt>
 <dd><p>Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns single simple_agree class object with the results of the agreement analysis.</p><dl><dt><code>"loa"</code></dt>
+    
+
+<p>Returns single simple_agree class object with the results of the agreement analysis.</p>
+
+
+<dl><dt><code>"loa"</code></dt>
 <dd><p>A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></dd>
 
   <dt><code>"h0_test"</code></dt>
@@ -134,8 +156,8 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">agree_nest</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, id <span class="op">=</span> <span class="st">"id"</span>, data <span class="op">=</span> <span class="va">reps</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">agree_nest</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, id <span class="op">=</span> <span class="st">"id"</span>, data <span class="op">=</span> <span class="va">reps</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Limit of Agreement = 95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Nested Data Points (true value may vary)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -164,7 +186,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

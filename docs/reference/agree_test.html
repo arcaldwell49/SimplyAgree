@@ -18,7 +18,7 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
       </span>
     </div>
 
@@ -33,10 +33,10 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -68,37 +68,55 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">agree_test</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">y</span>,
-  <span class="va">delta</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  agree.level <span class="op">=</span> <span class="fl">0.95</span>,
-  TOST <span class="op">=</span> <span class="cn">TRUE</span>,
-  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">agree_test</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">y</span>,</span>
+<span>  <span class="va">delta</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  TOST <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>Vector with first measurement</p></dd>
+
+
 <dt>y</dt>
 <dd><p>Vector with second measurement</p></dd>
+
+
 <dt>delta</dt>
 <dd><p>The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".</p></dd>
+
+
 <dt>conf.level</dt>
 <dd><p>the confidence level required. Default is 95%.</p></dd>
+
+
 <dt>agree.level</dt>
 <dd><p>the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.</p></dd>
+
+
 <dt>TOST</dt>
 <dd><p>Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.</p></dd>
+
+
 <dt>prop_bias</dt>
 <dd><p>Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns single list with the results of the agreement analysis.</p><dl><dt><code>"shieh_test"</code></dt>
+    
+
+<p>Returns single list with the results of the agreement analysis.</p>
+
+
+<dl><dt><code>"shieh_test"</code></dt>
 <dd><p>The TOST hypothesis test as described by Shieh.</p></dd>
 
   <dt><code>"ccc.xy"</code></dt>
@@ -136,8 +154,8 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">agree_test</span><span class="op">(</span>x<span class="op">=</span><span class="va">reps</span><span class="op">$</span><span class="va">x</span>, y<span class="op">=</span><span class="va">reps</span><span class="op">$</span><span class="va">y</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">agree_test</span><span class="op">(</span>x<span class="op">=</span><span class="va">reps</span><span class="op">$</span><span class="va">x</span>, y<span class="op">=</span><span class="va">reps</span><span class="op">$</span><span class="va">y</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Limit of Agreement = 95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###- Shieh Results -###</span>
@@ -152,7 +170,7 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###- Concordance Correlation Coefficient (CCC) -###</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -167,7 +185,7 @@ In addition, the concordance correlation coefficient (CCC; Lin 1989) is addition
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

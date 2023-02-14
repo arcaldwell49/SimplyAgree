@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
       </span>
     </div>
 
@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,67 +66,91 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">reli_stats</span><span class="op">(</span>
-  <span class="va">measure</span>,
-  <span class="va">item</span>,
-  <span class="va">id</span>,
-  <span class="va">data</span>,
-  wide <span class="op">=</span> <span class="cn">FALSE</span>,
-  col.names <span class="op">=</span> <span class="cn">NULL</span>,
-  se_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"ICC1"</span>, <span class="st">"ICC2"</span>, <span class="st">"ICC3"</span>, <span class="st">"ICC1k"</span>, <span class="st">"ICC2k"</span>, <span class="st">"ICC3k"</span><span class="op">)</span>,
-  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,
-  replicates <span class="op">=</span> <span class="fl">1999</span>
-<span class="op">)</span>
-
-<span class="fu">reli_aov</span><span class="op">(</span>
-  <span class="va">measure</span>,
-  <span class="va">item</span>,
-  <span class="va">id</span>,
-  <span class="va">data</span>,
-  wide <span class="op">=</span> <span class="cn">FALSE</span>,
-  col.names <span class="op">=</span> <span class="cn">NULL</span>,
-  se_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"ICC1"</span>, <span class="st">"ICC2"</span>, <span class="st">"ICC3"</span>, <span class="st">"ICC1k"</span>, <span class="st">"ICC2k"</span>, <span class="st">"ICC3k"</span><span class="op">)</span>,
-  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,
-  replicates <span class="op">=</span> <span class="fl">1999</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reli_stats</span><span class="op">(</span></span>
+<span>  <span class="va">measure</span>,</span>
+<span>  <span class="va">item</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  col.names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
+<span>  replicates <span class="op">=</span> <span class="fl">1999</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">reli_aov</span><span class="op">(</span></span>
+<span>  <span class="va">measure</span>,</span>
+<span>  <span class="va">item</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  col.names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  se_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  cv_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MSE"</span>, <span class="st">"residuals"</span>, <span class="st">"SEM"</span><span class="op">)</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  other_ci <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
+<span>  replicates <span class="op">=</span> <span class="fl">1999</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>measure</dt>
 <dd><p>Name of column containing the measurement of interest</p></dd>
+
+
 <dt>item</dt>
 <dd><p>Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)</p></dd>
+
+
 <dt>id</dt>
 <dd><p>Column with subject identifier</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Data frame with all data</p></dd>
+
+
 <dt>wide</dt>
 <dd><p>Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.</p></dd>
+
+
 <dt>col.names</dt>
 <dd><p>If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.</p></dd>
-<dt>se_type</dt>
-<dd><p>Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.</p></dd>
+
+
 <dt>cv_calc</dt>
 <dd><p>Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.</p></dd>
+
+
 <dt>conf.level</dt>
 <dd><p>the confidence level required. Default is 95%.</p></dd>
+
+
 <dt>other_ci</dt>
 <dd><p>Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.</p></dd>
+
+
 <dt>type</dt>
 <dd><p>A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.</p></dd>
+
+
 <dt>replicates</dt>
 <dd><p>The number of bootstrap replicates. Passed on to the boot function. Default is 1999.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Returns single list with the results of the agreement analysis.</p><dl><dt><code>"icc"</code></dt>
+    
+
+<p>Returns single list with the results of the agreement analysis.</p>
+
+
+<dl><dt><code>"icc"</code></dt>
 <dd><p>Table of ICC results</p></dd>
 
   <dt><code>"lmer"</code></dt>
@@ -195,14 +219,14 @@ function utilizes an ordinary (non-parametric) bootstrap method.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">reli_stats</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">reli_stats</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficient of Variation (%):  15.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficient of Variation (%):  13.6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Measurement (SEM):  0.863</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of the Estimate (SEE):  0.655</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Prediction (SEP):  1.11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of the Estimate (SEE):  0.914</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Prediction (SEP):  1.55</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Intraclass Correlation Coefficients with  95 % C.I.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Model         Measures  Type    ICC Lower CI Upper CI</span>
@@ -213,7 +237,7 @@ function utilizes an ordinary (non-parametric) bootstrap method.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 two-way random   Avg. Agreement ICC2k 0.6753   0.3209   0.8476</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6  two-way fixed Avg. Consistency ICC3k 0.7000   0.3495   0.8616</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -228,7 +252,7 @@ function utilizes an ordinary (non-parametric) bootstrap method.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

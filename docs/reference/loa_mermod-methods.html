@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
       </span>
     </div>
 
@@ -32,10 +32,10 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -66,46 +66,61 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for loa_mermod</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for loa_mermod</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  x_label <span class="op">=</span> <span class="st">"Average of Both Methods"</span>,
-  y_label <span class="op">=</span> <span class="st">"Difference Between Methods"</span>,
-  geom <span class="op">=</span> <span class="st">"geom_point"</span>,
-  smooth_method <span class="op">=</span> <span class="cn">NULL</span>,
-  smooth_se <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for loa_mermod</span>
-<span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for loa_mermod</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for loa_mermod</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  x_label <span class="op">=</span> <span class="st">"Average of Both Methods"</span>,</span>
+<span>  y_label <span class="op">=</span> <span class="st">"Difference Between Methods"</span>,</span>
+<span>  geom <span class="op">=</span> <span class="st">"geom_point"</span>,</span>
+<span>  smooth_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smooth_se <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for loa_mermod</span></span>
+<span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>object of class <code>loa_mermod</code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments passed through, see description of return value
 for details.
 <code><a href="loa_mixed.html">loa_mixed</a></code>.</p></dd>
+
+
 <dt>x_label</dt>
 <dd><p>Label for x-axis.</p></dd>
+
+
 <dt>y_label</dt>
 <dd><p>Label for y-axis.</p></dd>
+
+
 <dt>geom</dt>
 <dd><p>String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".</p></dd>
+
+
 <dt>smooth_method</dt>
 <dd><p>Smoothing method (function) to use, accepts either NULL or a character vector, e.g. "lm", "glm", "gam", "loess" or a function. Default is NULL, which will not include a trend line.</p></dd>
+
+
 <dt>smooth_se</dt>
 <dd><p>Display confidence interval around smooth?</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <dl><dt><code>print</code></dt>
+    
+
+<dl><dt><code>print</code></dt>
 <dd><p>Prints short summary of the Limits of Agreement</p></dd>
 
   <dt><code>plot</code></dt>
@@ -126,7 +141,7 @@ for details.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

@@ -2,7 +2,7 @@
 
 # SimplyAgree 0.1.4
 
-- Major error in SEP/SEE calculations. SD total calculation adjusted
+- Major error in SEP/SEE calculations. SD total calculation adjusted. See `vignette("reliability_analysis",package ="SimplyAgree")` for details.
 
 # SimplyAgree 0.1.3
 
