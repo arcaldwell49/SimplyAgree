@@ -1,7 +1,7 @@
 citHeader("To cite SimplyAgree in publications use:")
 
-citEntry(
-  entry    = "Article",
+bibentry(
+  bibtype = "article",
   title={"SimplyAgree: An R package and jamovi Module for Simplifying Agreement and Reliability Analyses"},
   author= c(person(c("Aaron", "R"), "Caldwell")),
   journal="Journal of Open Source Software",
