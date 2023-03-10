@@ -1,5 +1,9 @@
 # NEWS
 
+# SimplyAgree 0.1.5
+
+- Add option to drop "CCC" calculation from `agree_reps` and `agree_nest` functions.
+
 # SimplyAgree 0.1.4
 
 - Major error in SEP/SEE calculations. SD total calculation adjusted. See `vignette("reliability_analysis",package ="SimplyAgree")` for details.
