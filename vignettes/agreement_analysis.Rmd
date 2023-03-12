@@ -77,8 +77,17 @@ wherein $\bar{d}$ is the mean difference between the two methods, $S$ is the sta
 
 The reported limits of agreement are derived from the work of @bland1986 and @bland1999.
 
+**LoA**
+
 $$
-LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
+LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
+$$
+wherein $z_{1-(1-agree)/2}$ is the value of the normal distribution at the given agreement level (default is 95%), $\bar d$ is the mean of the differences, and $S_d$ is the standard deviations of the differences.
+
+**Confidence Interval**
+
+$$
+LoA_{C.I.} = LoA \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
 $$
 
 wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores. If `TOST` is set to TRUE then equation is altered slightly with the critical t ($t_{1-\alpha,N-1}$).
