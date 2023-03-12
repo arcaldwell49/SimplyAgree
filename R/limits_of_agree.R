@@ -80,28 +80,21 @@ loa_data_org = function(data,
   return(df)
 }
 
-calc_loa_sumstats_simple = function(df,
-                                    conf.level = .95,
-                                    agree.level = .95,
-                                    TOST = TRUE,
-                                    prop_bias = FALSE){
-
+.calc_var_simple = function(df,
+                            conf.level = .95,
+                            agree.level = .95,
+                            prop_bias = FALSE) {
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree_l = 1 - (1 - agree.level) / 2
   agree_u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
   conf1 = conf.level
-  if(TOST == TRUE){
-    confq2 = qnorm(1 - (1 - conf.level) )
-    alpha.l = 1 - (1 - conf.level)
-    alpha.u = (1 - conf.level)
-    conf2 = 1 - (1 - conf.level) * 2
-  } else {
-    confq2 = qnorm(1 - (1 - conf.level) / 2)
-    alpha.l = 1 - (1 - conf.level) / 2
-    alpha.u = (1 - conf.level) / 2
-    conf2 = conf.level
-  }
+
+
+  confq2 = qnorm(1 - (1 - conf.level))
+  alpha.l = 1 - (1 - conf.level)
+  alpha.u = (1 - conf.level)
+  conf2 = 1 - (1 - conf.level) * 2
 
   k <- nrow(df)
   yb <- mean(df$y)
@@ -116,56 +109,53 @@ calc_loa_sumstats_simple = function(df,
 
   df = df %>%
     mutate(delta = x - y,
-           avg = (x+y)/2)
+           avg = (x + y) / 2)
 
-  if(prop_bias == FALSE){
+  if (prop_bias == FALSE) {
     # sqrt(var(delta, na.rm = TRUE))
     delta.sd <- sigma(lm(formula = delta ~ 1,
-                         data=df))
+                         data = df))
     dfs = df.residual(lm(formula = delta ~ 1,
-                         data=df))
+                         data = df))
   } else {
     delta.sd <- sigma(lm(formula = delta ~ avg,
-                         data=df))
+                         data = df))
     dfs = df.residual(lm(formula = delta ~ avg,
-                         data=df))
+                         data = df))
   }
-  var.d = (delta.sd)^2/k
-  var.dlim = (1/k+zv2/(2*(k-1)))*(delta.sd)^2
+  var.d = (delta.sd) ^ 2 / k
+  var.dlim = (1 / k + zv2 / (2 * (k - 1))) * (delta.sd) ^ 2
 
   bias <- mean(df$delta)
-  bias_ci = (bias + c(-1,1) * qt(conf1,dfs)*sqrt(var.d))
-  lower_loa = bias - agreeq*delta.sd
-  lower_loa_ci = (lower_loa - c(-1,1) *qt(conf2,dfs)*sqrt(var.dlim))
-  upper_loa = bias + agreeq*delta.sd
-  upper_loa_ci = (upper_loa  - c(-1,1) *qt(conf2,dfs)*sqrt(var.dlim))
+  bias_ci = (bias + c(-1, 1) * qt(conf1, dfs) * sqrt(var.d))
+  lower_loa = bias - agreeq * delta.sd
+  lower_loa_ci = (lower_loa - c(-1, 1) * qt(conf2, dfs) * sqrt(var.dlim))
+  upper_loa = bias + agreeq * delta.sd
+  upper_loa_ci = (upper_loa  - c(-1, 1) * qt(conf2, dfs) * sqrt(var.dlim))
   df_loa = data.frame(
-    estimate = c(
-      upper_loa,
-      bias,
-      lower_loa),
-    lower.ci = c(
-      upper_loa_ci[2],
-      bias_ci[2],
-      lower_loa_ci[2]
-                 ),
-    upper.ci = c(
-      upper_loa_ci[1],
-      bias_ci[1],
-      lower_loa_ci[1]
-                 ),
+    estimate = c(upper_loa,
+                 bias,
+                 lower_loa),
+    lower.ci = c(upper_loa_ci[2],
+                 bias_ci[2],
+                 lower_loa_ci[2]),
+    upper.ci = c(upper_loa_ci[1],
+                 bias_ci[1],
+                 lower_loa_ci[1]),
     ci.level = c(conf2, conf1, conf2),
-    row.names = c("Upper LoA","Bias","Lower LoA")
+    row.names = c("Upper LoA", "Bias", "Lower LoA")
   )
 
-  var_comp = list(
-    method = "blandaltman",
-    type = "simple",
+  var_comp = list(#method = "blandaltman",
+    #type = "simple",
     n = k,
-    total_variance = delta.sd^2
-  )
+    total_variance = delta.sd ^ 2)
 
-return(var_comp)
+  return(var_comp)
+}
+
+.calc_loa_simple(var_comp){
+
 }
 
 calc_loa_sumstats_reps = function(df){
