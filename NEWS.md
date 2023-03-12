@@ -1,5 +1,10 @@
 # NEWS
 
+# SimplyAgree 0.2.0
+
+- Add universal tolerance limits function
+- Add universal agreement limits function
+
 # SimplyAgree 0.1.5
 
 - Add option to drop "CCC" calculation from `agree_reps` and `agree_nest` functions.

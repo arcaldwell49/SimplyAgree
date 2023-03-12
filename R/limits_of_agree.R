@@ -27,7 +27,7 @@
 #' @import ggplot2
 #' @export
 
-limits_of_agree = function(x,
+agreement_limit = function(x,
                            y,
                            id = NULL,
                            data,
@@ -158,14 +158,14 @@ calc_loa_sumstats_simple = function(df,
     row.names = c("Upper LoA","Bias","Lower LoA")
   )
 
-  loa_info = list(
+  var_comp = list(
     method = "blandaltman",
     type = "simple",
     n = k,
     total_variance = delta.sd^2
   )
 
-
+return(var_comp)
 }
 
 calc_loa_sumstats_reps = function(df){
