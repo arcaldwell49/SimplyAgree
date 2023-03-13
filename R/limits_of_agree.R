@@ -64,8 +64,8 @@ agreement_limit = function(x,
                     df = df,
                     conf.level = conf.level,
                     agree.level = agree.level,
-                    loa_calc,
-                    prop_bias = FALSE
+                    loa_calc = loa_calc,
+                    prop_bias = prop_bias
                   ),
                   reps,
                   nest) %>%
@@ -159,7 +159,7 @@ agreement_limit = function(x,
                                max(df$avg)
                              )
                            )) %>%
-      emmeans( ~avg) %>%
+      emmeans(~avg) %>%
       confint(level = conf.level) %>%
       as.data.frame() %>%
       rename(bias = emmean)
@@ -227,11 +227,12 @@ agreement_limit = function(x,
 
 }
 
-calc_loa_sumstats_reps = function(df){
 
-}
-
-calc_loa_sumstats_nest = function(df){
+.calc_loa_nest = function(df,
+                          conf.level = .95,
+                          agree.level = .95,
+                          loa_calc,
+                          prop_bias = FALSE){
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree_l = 1 - (1 - agree.level) / 2
   agree_u = (1 - agree.level) / 2
@@ -263,6 +264,7 @@ calc_loa_sumstats_nest = function(df){
   } else{
     form1 = as.formula(delta ~ 1 + (1|id))
   }
+  # Model ----
   model = lme4::lmer(form1,
                      data = df,
                      REML = TRUE)
@@ -276,13 +278,71 @@ calc_loa_sumstats_nest = function(df){
   n_sub = nrow(df2)
   n_obs = nrow(df)
 
+  # LoA Variance ----
+  loa_var = (between_variance/n_sub) + agreeq^2 / (2*total_variance) *
+    ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
-  # MOVER Components
-  move_u_1 = (between_variance*((n_sub-1)/(qchisq(alpha.u,n_sub-1))-1))^2
-  move_u_2 = ((1-1/mh)*within_variance*((n_obs-n_sub)/(qchisq(alpha.u,n_obs-n_sub))-1))^2
-  move_u = total_variance + sqrt(move_u_1+move_u_2)
+  if (prop_bias == FALSE) {
+    bias_values = emmeans(model, ~1) %>%
+      confint(level = conf.level) %>%
+      as.data.frame() %>%
+      rename(bias = emmean,
+             avg = `1`)
+  } else {
+    bias_values = ref_grid(model,
+                           at = list(
+                             avg = c(
+                               min(df$avg),
+                               mean(df$avg),
+                               max(df$avg)
+                             )
+                           )) %>%
+      emmeans(~avg) %>%
+      confint(level = conf.level) %>%
+      as.data.frame() %>%
+      rename(bias = emmean)
+  }
 
-  # LME
-  LME = sqrt(confq2^2*(between_variance/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
+  if(loa_calc == "blandaltman"){
 
+    df_loa = bias_values %>%
+      mutate(
+        sd_delta = total_variance,
+        var_loa = loa_var,
+        agree_int = agreeq * sd_delta,
+        lme = qt(conf2, df) * sqrt(var_loa)
+      ) %>%
+      mutate(
+        lower_loa = bias - agree_int,
+        lower_loa_ci = (lower_loa - lme),
+        upper_loa = bias + agree_int,
+        upper_loa_ci = (upper_loa  + lme)
+      )
+
+  }
+
+  if(loa_calc == "mover"){
+
+    # MOVER Components -----
+    move_u_1 = (between_variance*((n_sub-1)/(qchisq(alpha.u,n_sub-1))-1))^2
+    move_u_2 = ((1-1/mh)*within_variance*((n_obs-n_sub)/(qchisq(alpha.u,n_obs-n_sub))-1))^2
+    move_u = total_variance + sqrt(move_u_1+move_u_2)
+
+    # LME -----
+    LME = sqrt(confq2^2*(between_variance/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
+
+    df_loa = bias_values %>%
+      mutate(
+        sd_delta = total_variance,
+        var_loa = loa_var,
+        agree_int = agreeq * sd_delta,
+        lme = sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(conf2,dfs))-1)^2)
+      ) %>%
+      mutate(
+        lower_loa = bias - agree_int,
+        lower_loa_ci = (lower_loa - lme),
+        upper_loa = bias + agree_int,
+        upper_loa_ci = (upper_loa  + lme)
+      )
+  }
 }
