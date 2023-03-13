@@ -194,8 +194,8 @@ agree_reps <- function(x,
     estimate = c(d_bar, loa_l, loa_u),
     lower.ci = c(d_lo, loa_l_l, loa_u_l),
     upper.ci = c(d_hi, loa_l_u, loa_u_u),
-    ci.level = c(conf1, conf2, conf2)#,
-    #row.names = c("Bias","Lower LoA","Upper LoA")
+    ci.level = c(conf1, conf2, conf2),
+    row.names = c("Bias","Lower LoA","Upper LoA")
   )
 
   if (!missing(delta)) {

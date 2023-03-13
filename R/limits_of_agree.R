@@ -7,7 +7,6 @@
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param alpha The alpha-level for confidence levels.
-#' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
 #' @param log Calculate limits of agreement using log-transformed data.
 #' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
@@ -34,28 +33,54 @@ agreement_limit = function(x,
                            data_type = c("simple","nest","reps"),
                            loa_calc = c("mover","blandaltman"),
                            agree.level = 0.95,
-                           alpha = 0.5,
+                           alpha = 0.05,
                            prop_bias = FALSE,
-                           TOST = TRUE,
                            log = FALSE){
   data_type = match.arg(data_type)
   loa_calc = match.arg(loa_calc)
   conf.level = 1- alpha
 
+  call2 = match.call()
+  call2$data_type = data_type
+  call2$loa_calc = loa_calc
+  call2$conf.level = conf.level
+  call2$alpha = alpha
+  call2$id = id
+  call2$prop_bias  = prop_bias
+  call2$log = log
 
-  df = loa_data_org(data = data,
-                    x = x,
-                    y = y,
-                    id = id,
-                    data_type=data_type)
+  df = .loa_data_org(
+    data = data,
+    x = x,
+    y = y,
+    id = id,
+    data_type = data_type,
+    log = log
+  )
+
+  # Get LoA ----
+  df_loa = switch(data_type,
+                  simple = .calc_loa_simple(
+                    df = df,
+                    conf.level = conf.level,
+                    agree.level = agree.level,
+                    loa_calc,
+                    prop_bias = FALSE
+                  ),
+                  reps,
+                  nest) %>%
+    rename(lower_ci = lower.CL,
+           upper_ci = upper.CL)
+
 
 }
 
-loa_data_org = function(data,
+.loa_data_org = function(data,
                         x,
                         y,
                         id,
-                        data_type){
+                        data_type,
+                        log = FALSE){
   if(data_type == "simple"){
     df = data %>%
       select(all_of(x),all_of(y)) %>%
@@ -77,19 +102,25 @@ loa_data_org = function(data,
       drop_na()
   }
 
+  df = df %>%
+    mutate(avg = (x+y)/2) %>%
+    mutate(x = ifelse(log,log(x),x),
+           y = ifelse(log,log(y),y),
+           delta = x-y)
+
   return(df)
 }
 
-.calc_var_simple = function(df,
+.calc_loa_simple = function(df,
                             conf.level = .95,
                             agree.level = .95,
+                            loa_calc,
                             prop_bias = FALSE) {
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree_l = 1 - (1 - agree.level) / 2
   agree_u = (1 - agree.level) / 2
   confq = qnorm(1 - (1 - conf.level) / 2)
-  conf1 = conf.level
-
+  conf1 = 1-((1-conf.level)/2)
 
   confq2 = qnorm(1 - (1 - conf.level))
   alpha.l = 1 - (1 - conf.level)
@@ -107,54 +138,92 @@ loa_data_org = function(data,
   sl <- r * sd1 / sd2
   sxy <- r * sqrt(sx2 * sy2)
 
-  df = df %>%
-    mutate(delta = x - y,
-           avg = (x + y) / 2)
-
   if (prop_bias == FALSE) {
     # sqrt(var(delta, na.rm = TRUE))
-    delta.sd <- sigma(lm(formula = delta ~ 1,
-                         data = df))
-    dfs = df.residual(lm(formula = delta ~ 1,
-                         data = df))
+    model = lm(formula = delta ~ 1,
+               data = df)
+    bias_values = emmeans(model, ~1) %>%
+      confint(level = conf.level) %>%
+      as.data.frame() %>%
+      rename(bias = emmean,
+             avg = `1`)
   } else {
-    delta.sd <- sigma(lm(formula = delta ~ avg,
-                         data = df))
-    dfs = df.residual(lm(formula = delta ~ avg,
-                         data = df))
+    model <- lm(formula = delta ~ avg,
+                         data = df)
+
+    bias_values = ref_grid(model,
+                           at = list(
+                             avg = c(
+                               min(df$avg),
+                               mean(df$avg),
+                               max(df$avg)
+                             )
+                           )) %>%
+      emmeans( ~avg) %>%
+      confint(level = conf.level) %>%
+      as.data.frame() %>%
+      rename(bias = emmean)
   }
-  var.d = (delta.sd) ^ 2 / k
-  var.dlim = (1 / k + zv2 / (2 * (k - 1))) * (delta.sd) ^ 2
+  delta.sd <- sigma(model)
+  dfs = df.residual(model)
 
-  bias <- mean(df$delta)
-  bias_ci = (bias + c(-1, 1) * qt(conf1, dfs) * sqrt(var.d))
-  lower_loa = bias - agreeq * delta.sd
-  lower_loa_ci = (lower_loa - c(-1, 1) * qt(conf2, dfs) * sqrt(var.dlim))
-  upper_loa = bias + agreeq * delta.sd
-  upper_loa_ci = (upper_loa  - c(-1, 1) * qt(conf2, dfs) * sqrt(var.dlim))
-  df_loa = data.frame(
-    estimate = c(upper_loa,
-                 bias,
-                 lower_loa),
-    lower.ci = c(upper_loa_ci[2],
-                 bias_ci[2],
-                 lower_loa_ci[2]),
-    upper.ci = c(upper_loa_ci[1],
-                 bias_ci[1],
-                 lower_loa_ci[1]),
-    ci.level = c(conf2, conf1, conf2),
-    row.names = c("Upper LoA", "Bias", "Lower LoA")
-  )
+  if(loa_calc == "blandaltman"){
+    df_loa = bias_values %>%
+      mutate(
+        sd_delta = delta.sd,
+        var_loa = (1 / k + confq2 / (2 * (k - 1))) * (delta.sd) ^ 2,
+        agree_int = agreeq * sd_delta,
+        lme = qt(conf2, df) * sqrt(var_loa)
+        ) %>%
+      mutate(
+        lower_loa = bias - agree_int,
+        lower_loa_ci = (lower_loa - lme),
+        upper_loa = bias + agree_int,
+        upper_loa_ci = (upper_loa  + lme)
+      )
 
-  var_comp = list(#method = "blandaltman",
-    #type = "simple",
-    n = k,
-    total_variance = delta.sd ^ 2)
+    #lower_loa = bias - agreeq * delta.sd
+    #lower_loa_ci = (lower_loa - qt(conf2, dfs) * sqrt(var_loa))
+    #upper_loa = bias + agreeq * delta.sd
+    #upper_loa_ci = (upper_loa  + qt(conf2, dfs) * sqrt(var_loa))
+  }
 
-  return(var_comp)
+  if(loa_calc == "mover"){
+    #a_val = sqrt(dfs/qchisq(conf1,dfs))
+    #b_bal = sqrt(dfs/qchisq(1-conf1,dfs))
+    df_loa = bias_values %>%
+      mutate(
+        sd_delta = delta.sd,
+        var_loa = (1 / k + confq2 / (2 * (k - 1))) * (delta.sd) ^ 2,
+        agree_int = agreeq * sd_delta,
+        lme = sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(conf2,dfs))-1)^2)
+      ) %>%
+      mutate(
+        lower_loa = bias - agree_int,
+        lower_loa_ci = (lower_loa - lme),
+        upper_loa = bias + agree_int,
+        upper_loa_ci = (upper_loa  + lme)
+      )
+  }
+
+  return(df_loa)
 }
 
-.calc_loa_simple(var_comp){
+.calc_loa_reps = function(df,
+                            conf.level = .95,
+                            agree.level = .95,
+                            loa_calc,
+                            prop_bias = FALSE) {
+  agreeq = qnorm(1 - (1 - agree.level) / 2)
+  agree_l = 1 - (1 - agree.level) / 2
+  agree_u = (1 - agree.level) / 2
+  confq = qnorm(1 - (1 - conf.level) / 2)
+  conf1 = 1-((1-conf.level)/2)
+
+  confq2 = qnorm(1 - (1 - conf.level))
+  alpha.l = 1 - (1 - conf.level)
+  alpha.u = (1 - conf.level)
+  conf2 = 1 - (1 - conf.level) * 2
 
 }
 
@@ -163,5 +232,57 @@ calc_loa_sumstats_reps = function(df){
 }
 
 calc_loa_sumstats_nest = function(df){
+  agreeq = qnorm(1 - (1 - agree.level) / 2)
+  agree_l = 1 - (1 - agree.level) / 2
+  agree_u = (1 - agree.level) / 2
+  confq = qnorm(1 - (1 - conf.level) / 2)
+  conf1 = 1-((1-conf.level)/2)
+
+  confq2 = qnorm(1 - (1 - conf.level))
+  alpha.l = 1 - (1 - conf.level)
+  alpha.u = (1 - conf.level)
+  conf2 = 1 - (1 - conf.level) * 2
+
+  df2 = df %>%
+    group_by(id) %>%
+    summarize(m = n(),
+              x_bar = mean(x, na.rm=TRUE),
+              x_var = var(x, na.rm=TRUE),
+              y_bar = mean(y, na.rm=TRUE),
+              y_var = var(y, na.rm=TRUE),
+              d = mean(x-y),
+              d_var = var(x-y),
+              .groups = "drop") %>%
+    mutate(both_avg = (x_bar+y_bar)/2)
+
+  df3 = df2 %>%
+    drop_na()
+
+  if(prop_bias == TRUE){
+    form1 = as.formula(delta ~ mean + (1|id))
+  } else{
+    form1 = as.formula(delta ~ 1 + (1|id))
+  }
+  model = lme4::lmer(form1,
+                     data = df,
+                     REML = TRUE)
+  df_var = as.data.frame(VarCorr(model))
+  total_variance = sum(df_var$vcov)
+  within_variance = subset(df_var, grp == "Residual")$vcov
+  between_variance = total_variance-subset(df_var, grp == "Residual")$vcov
+  sd_w = sqrt(within_variance)
+  sd_b = sqrt(between_variance)
+  mh = nrow(df2)/sum(1/df2$m)
+  n_sub = nrow(df2)
+  n_obs = nrow(df)
+
+
+  # MOVER Components
+  move_u_1 = (between_variance*((n_sub-1)/(qchisq(alpha.u,n_sub-1))-1))^2
+  move_u_2 = ((1-1/mh)*within_variance*((n_obs-n_sub)/(qchisq(alpha.u,n_obs-n_sub))-1))^2
+  move_u = total_variance + sqrt(move_u_1+move_u_2)
+
+  # LME
+  LME = sqrt(confq2^2*(between_variance/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
 }
