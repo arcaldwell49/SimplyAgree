@@ -120,6 +120,8 @@ ccc.xy <- function(x, y,
   }
   zv <- qnorm(N., mean = 0, sd = 1)
   zv2 = qnorm(N.2, mean = 0, sd = 1)
+  pct <- 1 - (1 - agree.level) / 2
+  agreelim = qnorm(pct)
   dat <- data.frame(x, y)
   id <- complete.cases(dat)
   nmissing <- sum(!complete.cases(dat))
@@ -168,11 +170,11 @@ ccc.xy <- function(x, y,
     dfs = df.residual(lm(formula = delta ~ rmean))
     }
   var.d = (delta.sd)^2/k
-  var.dlim = (1/k+zv2/(2*(k-1)))*(delta.sd)^2
-
+  # var.dlim = (1/k+zv2/(2*(k-1)))*(delta.sd)^2
+  var.dlim = (delta.sd*sqrt(1/k + agreelim^2 / (2*(k-1))) )^2
+  lme = delta.sd * var.dlim
   ba.p <- mean(delta)
-  pct <- 1 - (1 - agree.level) / 2
-  agreelim = qnorm(pct)
+
   l.loa = ba.p - agreelim*delta.sd
   u.loa = ba.p + agreelim*delta.sd
 

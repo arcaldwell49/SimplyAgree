@@ -102,7 +102,7 @@ agreement_limit = function(x,
              y = all_of(y)) %>%
       select(x,y) %>%
       drop_na()
-    df$id = 1:nrow
+    df$id = 1:nrow(df)
   } else {
     if(is.null(id)){
       stop("id must be provided if data_type != \'simple\'.")
@@ -117,10 +117,14 @@ agreement_limit = function(x,
   }
 
   df = df %>%
-    mutate(avg = (x+y)/2) %>%
-    mutate(x = ifelse(log,log(x),x),
-           y = ifelse(log,log(y),y),
-           delta = x-y)
+    mutate(avg = (x+y)/2)
+  if(log == TRUE){
+    df = df %>%
+      mutate(x = log(x),
+             y = log(y))
+  }
+    df = df %>%
+      mutate(delta = x-y)
 
   return(df)
 }
