@@ -42,7 +42,8 @@ agreement_limit(
 Returns single simple_agree class object with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"loa"}}{A.}
+  \item{\code{"loa"}}{A data frame containing.}
+  \item{\code{"call"}}{The matched call.}
 }
 }
 \description{
@@ -50,7 +51,20 @@ A function for calculating for limits of agreement.
 }
 \section{References}{
 
+
+MOVER methods:
+
 Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
+
+Donner, A., & Zou, G. Y. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4), 347-359.
+
+Bland & Altman methods:
+
+Bland, J. M., & Altman, D. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. The Lancet, 327(8476), 307-310.
+
+Bland, J. M., & Altman, D. (1999). Measuring agreement in method comparison studies. Statistical methods in medical research, 8(2), 135-160.
+
+Bland, J. M., & Altman, D. G. (1996). Statistics notes: measurement error proportional to the mean. BMJ, 313(7049), 106.
 }
 
 \examples{

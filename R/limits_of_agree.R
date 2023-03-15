@@ -13,14 +13,29 @@
 #' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
 #' \describe{
-#'   \item{\code{"loa"}}{A.}
+#'   \item{\code{"loa"}}{A data frame containing.}
+#'   \item{\code{"call"}}{The matched call.}
 #' }
 
 #' @examples
 #' data('reps')
 #'
 #' @section References:
+#'
+#' MOVER methods:
+#'
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
+#'
+#' Donner, A., & Zou, G. Y. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4), 347-359.
+#'
+#' Bland & Altman methods:
+#'
+#' Bland, J. M., & Altman, D. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. The Lancet, 327(8476), 307-310.
+#'
+#' Bland, J. M., & Altman, D. (1999). Measuring agreement in method comparison studies. Statistical methods in medical research, 8(2), 135-160.
+#'
+#' Bland, J. M., & Altman, D. G. (1996). Statistics notes: measurement error proportional to the mean. BMJ, 313(7049), 106.
+#'
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
@@ -45,6 +60,7 @@ agreement_limit = function(x,
   call2 = match.call()
   call2$data_type = data_type
   call2$loa_calc = loa_calc
+  call2$agree.level = agree.level
   call2$conf.level = conf.level
   call2$alpha = alpha
   call2$id = id
@@ -86,7 +102,9 @@ agreement_limit = function(x,
     rename(lower_ci = lower.CL,
            upper_ci = upper.CL)
 
-  return(df_loa)
+  structure(list(loa = df_loa,
+             call =call2),
+            class = "loa")
 }
 
 .loa_data_org = function(data,
@@ -143,7 +161,7 @@ agreement_limit = function(x,
   confq2 = qnorm(1 - (1 - conf.level))
   alpha.l = 1 - (1 - conf.level)
   alpha.u = (1 - conf.level)
-  conf2 = 1 - (1 - conf.level) * 2
+  #conf2 = conf.level
 
   k <- nrow(df)
   yb <- mean(df$y)
@@ -191,7 +209,7 @@ agreement_limit = function(x,
         sd_delta = delta.sd,
         var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
-        lme = qt(conf2, dfs) * sqrt(var_loa)
+        lme = qt(conf.level, df) * sqrt(var_loa)
         ) %>%
       mutate(
         lower_loa = bias - agree_int,
@@ -223,6 +241,7 @@ agreement_limit = function(x,
         upper_loa_ci = (upper_loa  + lme)
       )
   }
+
 
   return(df_loa)
 }
