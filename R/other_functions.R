@@ -172,7 +172,7 @@ ccc.xy <- function(x, y,
   var.d = (delta.sd)^2/k
   # var.dlim = (1/k+zv2/(2*(k-1)))*(delta.sd)^2
   var.dlim = (delta.sd*sqrt(1/k + agreelim^2 / (2*(k-1))) )^2
-  lme = delta.sd * var.dlim
+
   ba.p <- mean(delta)
 
   l.loa = ba.p - agreelim*delta.sd
@@ -190,7 +190,8 @@ ccc.xy <- function(x, y,
                        lower.uci = (l.loa + qt(N.2,dfs)*sqrt(var.dlim)),
                        upper.loa = u.loa,
                        upper.lci = (u.loa - qt(N.2,dfs)*sqrt(var.dlim)),
-                       upper.uci = (u.loa + qt(N.2,dfs)*sqrt(var.dlim)))
+                       upper.uci = (u.loa + qt(N.2,dfs)*sqrt(var.dlim))
+                       )
 
   rho.c <- data.frame(p, llt, ult)
   names(rho.c) <- c("est.ccc", "lower.ci", "upper.ci")

@@ -189,9 +189,9 @@ agreement_limit = function(x,
     df_loa = bias_values %>%
       mutate(
         sd_delta = delta.sd,
-        var_loa = (1 / k + confq2 / (2 * (k - 1))) * (delta.sd) ^ 2,
+        var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
-        lme = qt(conf2, df) * sqrt(var_loa)
+        lme = qt(conf2, dfs) * sqrt(var_loa)
         ) %>%
       mutate(
         lower_loa = bias - agree_int,
@@ -212,7 +212,7 @@ agreement_limit = function(x,
     df_loa = bias_values %>%
       mutate(
         sd_delta = delta.sd,
-        var_loa = (1 / k + confq2 / (2 * (k - 1))) * (delta.sd) ^ 2,
+        var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
         lme = sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(conf2,dfs))-1)^2)
       ) %>%
