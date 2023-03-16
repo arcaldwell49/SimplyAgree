@@ -160,14 +160,6 @@ plot.loa <- function(x,
 
 }
 
-
-#' @rdname loa-methods
-#' @export
-
-check <- function(x) {
-  UseMethod("check")
-}
-
 #' @rdname loa-methods
 #' @method check loa
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid

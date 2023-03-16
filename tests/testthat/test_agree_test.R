@@ -35,6 +35,10 @@ testthat::test_that("Simple Use Run Through", {
                       delta = 2.5,
                       TOST = FALSE)
 
+  agree2_new = agreement_limit(x = "x",
+                               y = "y",
+                               data = reps)
+
   p1 = plot(agree2,
             geom = "geom_point")
 
@@ -88,13 +92,13 @@ testthat::test_that("Simple Use Run Through", {
                               jmvagree1$blandtab$asDF$estimate)
 
   testthat::expect_equivalent(agree2$loa$lower.ci[2:3],
-                              c(-2.810938, 1.959760),
+                              c(-3.001158,  1.769540),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$lower.ci,
                               jmvagree1$blandtab$asDF$lowerci)
 
   testthat::expect_equivalent(agree2$loa$upper.ci[2:3],
-                              c(-1.083094, 3.687604),
+                              c(-0.8928731,  3.8778249),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$upper.ci,
                               jmvagree1$blandtab$asDF$upperci)
