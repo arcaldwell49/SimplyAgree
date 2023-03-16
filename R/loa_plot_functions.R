@@ -2,7 +2,7 @@
 simple_loa_plot = function(x,
                            geom = "geom_point",
                            delta = NULL) {
-
+  call2 = x$call
   df = .loa_data_org(
     data = get(x$call$data),
     x = x$call$x,
@@ -131,7 +131,7 @@ simple_loa_plot = function(x,
 bias_loa_plot = function(x,
                          geom = "geom_point",
                          delta = NULL){
-
+  call2 = x$call
   df = .loa_data_org(
     data = get(x$call$data),
     x = x$call$x,

@@ -9,6 +9,22 @@ testthat::test_that("examples from Zou", {
                          data = reps,
                          TOST = FALSE)
 
+  reps_test_new  = agreement_limit(x="x",y="y",
+                              id = "id",
+                              data = reps,
+                              data_type = "reps",
+                              alpha = .025,
+                              prop_bias = FALSE)
+  testthat::expect_equal(round(reps_test_new$loa$bias,2),
+                         round(reps_test$loa$estimate[1],2),
+                         tolerance = .01)
+  reps_test_newlog  = agreement_limit(x="x",y="y",
+                                   id = "id",
+                                   data = reps,
+                                   data_type = "reps",
+                                   alpha = .025,
+                                   log = TRUE)
+
   reps_test2 = agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,

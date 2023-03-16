@@ -19,7 +19,27 @@ testthat::test_that("examples from Zou", {
                           data = reps2,
                           TOST = FALSE,
                           prop_bias = TRUE)
+  nest_test_new = agreement_limit(x="x",y="y",
+                         id = "id",
+                         data = reps2,
+                         data_type = "nest",
+                         alpha = .025)
+  ch1_new = check(nest_test_new)
+  nest_test_newlog = agreement_limit(x="x",y="y",
+                                  id = "id",
+                                  data = reps2,
+                                  data_type = "nest",
+                                  log =TRUE)
+  pr1 = print(nest_test_newlog)
+  nest_test2_new = agreement_limit(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          prop_bias = TRUE,
+                          data_type = "nest")
+
   ptest = plot(nest_test2)
+  ptest = plot(nest_test2_new)
+  ptest = plot(nest_test_new)
 
   nest_test3 = agree_nest(x="x",y="y",
                           id = "id",
@@ -40,6 +60,15 @@ testthat::test_that("examples from Zou", {
   testthat::expect_equivalent(nest_test$loa$estimate,
                               c(.7255,-2.14,3.59),
                               tolerance = 0.001)
+  testthat::expect_equivalent(c(nest_test_new$loa$bias,
+                                nest_test_new$loa$lower_loa,
+                                nest_test_new$loa$upper_loa),
+                              c(.7255,-2.14,3.59),
+                              tolerance = 0.005)
+  testthat::expect_equivalent(c(nest_test_new$loa$lower_loa_ci,
+                                nest_test_new$loa$upper_loa_ci),
+                              c(-9.8,11.2),
+                              tolerance = 0.01)
   testthat::expect_equivalent(nest_test$loa$lower.ci[2:3],
                               c(-9.83,1.77),
                               tolerance = 0.01)

@@ -33,3 +33,25 @@
 #' }
 #' @rdname Data
 "reps"
+
+
+#' @title ba1986
+#' @description The data set published in the original Bland & Altman paper on agreement.
+#' @format A data frame with 17 rows with 5 variables
+#' \describe{
+#'   \item{id}{Subject identifier}
+#'   \item{wright1}{PERF measurement #1 using Wright device}
+#'   \item{wright2}{PERF measurement #2 using Wright device}
+#'   \item{mini1}{PERF measurement #1 using Mini device}
+#'   \item{mini2}{PERF measurement #2 using Mini device}
+#'  }
+#' @section References:
+#'
+#' Bland, J. M., & Altman, D. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. The Lancet, 327(8476), 307-310.
+#'
+#'
+#'
+#'
+#' @rdname Data
+"ba1986"
+

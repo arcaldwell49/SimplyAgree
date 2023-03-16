@@ -130,8 +130,7 @@ agreement_limit = function(x,
       rename(id = all_of(id),
              x = all_of(x),
              y = all_of(y)) %>%
-      select(id,x,y) %>%
-      drop_na()
+      select(id,x,y)
   }
 
   df = df %>%
@@ -161,7 +160,7 @@ agreement_limit = function(x,
   confq2 = qnorm(1 - (1 - conf.level))
   alpha.l = 1 - (1 - conf.level)
   alpha.u = (1 - conf.level)
-  #conf2 = conf.level
+  conf2 = conf.level
 
   k <- nrow(df)
   yb <- mean(df$y)
@@ -232,7 +231,7 @@ agreement_limit = function(x,
         sd_delta = delta.sd,
         var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
-        lme = sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(conf2,dfs))-1)^2)
+        lme =  sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2)
       ) %>%
       mutate(
         lower_loa = bias - agree_int,
@@ -258,10 +257,11 @@ agreement_limit = function(x,
   conf1 = 1-((1-conf.level)/2)
 
   confq2 = qnorm(1 - (1 - conf.level))
-  alpha.l = 1 - (1 - conf.level)
-  alpha.u = (1 - conf.level)
+  alpha_l = 1 - (1 - conf.level)
+  alpha_u = (1 - conf.level)
   conf2 = 1 - (1 - conf.level) * 2
 
+  df = df
   df2 = df %>%
     group_by(id) %>%
     summarize(mxi = base::sum(!is.na(x)),
@@ -272,7 +272,7 @@ agreement_limit = function(x,
               y_var = var(y, na.rm=TRUE),
               .groups = "drop") %>%
     mutate(d = x_bar-y_bar,
-           both_avg = (x_bar+y_bar)/2)
+           avg = (x_bar+y_bar)/2)
 
   df3 = df2 %>%
     drop_na()
@@ -283,10 +283,8 @@ agreement_limit = function(x,
   myh = nrow(df2)/base::sum(1/df2$myi)
 
   if(prop_bias == TRUE){
-    form1 = as.formula(delta ~ mean + (1|id))
-    model = lme4::lmer(form1,
-                       data = df,
-                       REML = TRUE)
+    form1 = as.formula(d ~ avg)
+    model = lm(form1, data = df2)
     bias_values = ref_grid(model,
                            at = list(
                              avg = c(
@@ -300,18 +298,20 @@ agreement_limit = function(x,
       as.data.frame() %>%
       rename(bias = emmean)
 
-    sxw2 = as.data.frame(VarCorr(lmer_x))$vcov[2]
-    syw2 = as.data.frame(VarCorr(lmer_y))$vcov[2]
+    sxw2 = base::sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
+    syw2 = base::sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
+    d_bar = base::mean(df2$d, na.rm = TRUE)
+    d_var = sigma(model)^2
+    between_variance = d_var
     total_variance = d_var + (1-1/mxh_l)*sxw2 + (1-1/myh_l)*syw2
 
   } else{
-    form1 = as.formula(delta ~ 1 + (1|id))
-    model = lme4::lmer(form1,
-                       data = df,
-                       REML = TRUE)
+    form1 = as.formula(d ~ 1 )
+    model = lm(form1, data = df2)
     sxw2 = base::sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
     syw2 = base::sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
-    d_var <- between_variance = var(df2$d, na.rm = TRUE)
+    d_var = sigma(model)^2
+    between_variance = d_var
     total_variance = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
 
     bias_values = emmeans(model, ~1) %>%
@@ -345,7 +345,9 @@ agreement_limit = function(x,
         lower_loa = bias - agree_int,
         lower_loa_ci = (lower_loa - lme),
         upper_loa = bias + agree_int,
-        upper_loa_ci = (upper_loa  + lme)
+        upper_loa_ci = (upper_loa  + lme),
+        within_variance_x = sxw2,
+        within_variance_y = syw2
       )
 
   }
@@ -353,13 +355,13 @@ agreement_limit = function(x,
   if(loa_calc == "mover"){
 
     # MOVER Components -----
-    move_u_1 = (d_var*(1-(n_obs-1)/(qchisq(alpha_u,n_obs-1))))^2
-    move_u_2 = ((1-1/mxh)*sxw2*(1-(Nx-n_obs)/(qchisq(alpha_u,Nx-n_obs))))^2
-    move_u_3 = ((1-1/myh)*syw2*(1-(Ny-n_obs)/(qchisq(alpha_u,Ny-n_obs))))^2
-    move_u = tot_var + sqrt(move_u_1+move_u_2+move_u_3)
+    move_u_1 = (d_var*(1-(n_sub-1)/(qchisq(alpha_u,n_sub-1))))^2
+    move_u_2 = ((1-1/mxh)*sxw2*(1-(Nx-n_sub)/(qchisq(alpha_u,Nx-n_sub))))^2
+    move_u_3 = ((1-1/myh)*syw2*(1-(Ny-n_sub)/(qchisq(alpha_u,Ny-n_sub))))^2
+    move_u = total_variance + sqrt(move_u_1+move_u_2+move_u_3)
 
     # LME -----
-    LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(tot_var))^2)
+    LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
     df_loa = bias_values %>%
       mutate(
@@ -372,7 +374,9 @@ agreement_limit = function(x,
         lower_loa = bias - agree_int,
         lower_loa_ci = (lower_loa - lme),
         upper_loa = bias + agree_int,
-        upper_loa_ci = (upper_loa  + lme)
+        upper_loa_ci = (upper_loa  + lme),
+        within_variance_x = sxw2,
+        within_variance_y = syw2
       )
   }
 
@@ -393,8 +397,8 @@ agreement_limit = function(x,
   conf1 = 1-((1-conf.level)/2)
 
   confq2 = qnorm(1 - (1 - conf.level))
-  alpha.l = 1 - (1 - conf.level)
-  alpha.u = (1 - conf.level)
+  alpha.l = alpha_l = 1 - (1 - conf.level)
+  alpha.u = alpha_u = (1 - conf.level)
   conf2 = 1 - (1 - conf.level) * 2
 
   df2 = df %>%
@@ -407,13 +411,13 @@ agreement_limit = function(x,
               d = mean(x-y),
               d_var = var(x-y),
               .groups = "drop") %>%
-    mutate(both_avg = (x_bar+y_bar)/2)
+    mutate(avg = (x_bar+y_bar)/2)
 
   df3 = df2 %>%
     drop_na()
 
   if(prop_bias == TRUE){
-    form1 = as.formula(delta ~ mean + (1|id))
+    form1 = as.formula(delta ~ avg + (1|id))
   } else{
     form1 = as.formula(delta ~ 1 + (1|id))
   }

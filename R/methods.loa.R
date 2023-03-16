@@ -54,9 +54,9 @@ print.loa <- function(x,
       ),
       `LoA CI` = paste0(
         "[",
-        round(lower_ci,digits = digits),
+        round(lower_loa_ci,digits = digits),
         ", ",
-        round(upper_ci,digits = digits),
+        round(upper_loa_ci,digits = digits),
         "]"
       )
     ) %>%
@@ -99,10 +99,13 @@ print.loa <- function(x,
   )
   dat_type = switch(
     call2$data_type,
-    simple = "All Independent Data Points",
+    simple = "Independent Data Points",
     nest = "Nested Data",
     reps = "Data with Replicates"
   )
+  if(call2$log){
+    dat_type = paste0("Log-transformed ", dat_type)
+  }
   var_print = switch(ifelse(call2$log,"log","norm"),
                      "log" = paste0(
                        "Coefficient of Variation (%) = ",
@@ -112,6 +115,8 @@ print.loa <- function(x,
                        "SD of Differences = ",
                        round(x$loa$sd_delta[1],digits=digits)
                      ))
+
+
 
   cat(title1, sep = "")
   cat("\n")
@@ -124,6 +129,15 @@ print.loa <- function(x,
   cat("\n")
   cat(var_print, sep = "")
   cat("\n")
+  if(call2$data_type == "reps"){
+    var_print2 = paste0(
+      "Within-Subject Variances of X & Y = ",
+      round(x$loa$within_variance_x[1],digits=digits),
+      " & ",
+      round(x$loa$within_variance_y[1],digits=digits)
+    )
+  }
+
 }
 
 #' @rdname loa-methods
@@ -167,22 +181,18 @@ plot.loa <- function(x,
 
 check.loa <- function(x) {
 
-  if(!(as.character(x$call[1]) %in% c("agree_nest","agree_reps","agree_test",
-                                      "SimplyAgree::agree_nest",
-                                      "SimplyAgree::agree_reps",
-                                      "SimplyAgree::agree_test"))){
-    stop("agree_np is not supported by check method.")
-  }
 
-  if(as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test"){
-    df = model.frame(x$call$lm_mod)
-    colnames(df) = c("y","x","id")
-  } else{
-    df = model.frame(x$call$lm_mod)
-    colnames(df) = c("y","x")
-  }
-  df$mean = (df$x + df$y)/2
-  df$delta = df$x - df$y
+  call2 = x$call
+  df = .loa_data_org(
+    data = get(x$call$data),
+    x = x$call$x,
+    y = x$call$y,
+    id = x$call$id,
+    data_type = x$call$data_type,
+    log = x$call$log
+  ) %>%
+    rename(mean = avg)
+
   if(x$call$prop_bias == TRUE){
     form_lm1 = as.formula(delta ~ mean)
     form_lmer1 = as.formula(delta ~ mean + (1|id))
@@ -194,7 +204,7 @@ check.loa <- function(x) {
 
   dat = df
   ## Heteroskedasticity -------
-  mod_check = if (as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test") {
+  mod_check = if (call2$data_type != "simple") {
     lme4::lmer(data = dat,
                form_lmer1)
   } else {
@@ -268,7 +278,7 @@ check.loa <- function(x) {
     )
 
   # Proportional Bias -----
-  if(as.character(x$call[1]) == "agree_test" || as.character(x$call[1]) == "SimplyAgree::agree_test"){
+  if(call2$data_type == "simple"){
     mod2 = lm(delta ~ mean,
               data = dat)
     aov2 = as.data.frame(anova(mod_check, mod2))

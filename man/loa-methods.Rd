@@ -4,7 +4,6 @@
 \alias{loa-methods}
 \alias{print.loa}
 \alias{plot.loa}
-\alias{check}
 \alias{check.loa}
 \title{Methods for loa objects}
 \usage{
@@ -17,8 +16,6 @@
   delta = NULL,
   ...
 )
-
-check(x)
 
 \method{check}{loa}(x)
 }
