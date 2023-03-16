@@ -37,7 +37,13 @@ testthat::test_that("Simple Use Run Through", {
 
   agree2_new = agreement_limit(x = "x",
                                y = "y",
-                               data = reps)
+                               data = reps,
+                               loa_calc = "b")
+
+  testthat::expect_equivalent(c(agree2$loa$estimate),
+                              c(agree2_new$loa$bias,
+                                agree2_new$loa$lower_loa,
+                                agree2_new$loa$upper_loa))
 
   p1 = plot(agree2,
             geom = "geom_point")
