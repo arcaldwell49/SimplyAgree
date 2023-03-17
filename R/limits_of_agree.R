@@ -464,6 +464,7 @@ calc_loa_nest = function(df,
       as.data.frame() %>%
       rename(bias = emmean) #%>%
       #mutate(avg = "overall") %>%
+    warning(toString(colnames(bias_values)))
       colnames(bias_values) = c("avg", "bias", "SE", "df", "lower.CL", "upper.CL")
     class(bias_values) = "data.frame"
     if(any(colnames(bias_values) != c("avg","bias","SE","df","lower.CL","upper.CL"))){
