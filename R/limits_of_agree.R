@@ -77,6 +77,7 @@ agreement_limit = function(x,
   )
 
   # Get LoA ----
+  ## simple -----
   if(data_type == "simple"){
     df_loa = .calc_loa_simple(
       df = df,
@@ -86,6 +87,7 @@ agreement_limit = function(x,
       prop_bias = prop_bias)
 
   }
+  ## reps -----
   if(data_type == "reps"){
     df_loa = .calc_loa_reps(
       df = df,
@@ -95,8 +97,9 @@ agreement_limit = function(x,
       prop_bias = prop_bias
     )
   }
+  ## nest -----
   if(data_type == "nest"){
-    .calc_loa_nest(
+    df_loa = .calc_loa_nest(
       df = df,
       conf.level = conf.level,
       agree.level = agree.level,
