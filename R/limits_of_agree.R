@@ -459,18 +459,12 @@ calc_loa_nest = function(df,
     ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
   if (prop_bias == FALSE) {
-    bias_values = emmeans(model, ~1) %>%
+    bias_values = emmeans(model, ~1, lmer.df = "k") %>%
       confint(level = conf.level) %>%
       as.data.frame() %>%
       rename(bias = emmean) #%>%
       #mutate(avg = "overall") %>%
     warning(toString(colnames(bias_values)))
-      colnames(bias_values) = c("avg", "bias", "SE", "df", "lower.CL", "upper.CL")
-    class(bias_values) = "data.frame"
-    if(any(colnames(bias_values) != c("avg","bias","SE","df","lower.CL","upper.CL"))){
-      print(colnames(bias_values))
-      stop('Interval error. Column name mismatch.')
-    }
 
   } else {
     bias_values = ref_grid(model,
@@ -481,7 +475,7 @@ calc_loa_nest = function(df,
                                max(df$avg)
                              )
                            )) %>%
-      emmeans(~avg) %>%
+      emmeans(~avg, lmer.df = "k") %>%
       confint(level = conf.level) %>%
       as.data.frame() %>%
       rename(bias = emmean)
