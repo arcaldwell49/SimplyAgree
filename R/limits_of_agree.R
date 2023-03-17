@@ -441,10 +441,10 @@ calc_loa_nest = function(df,
     form1 = as.formula(delta ~ 1 + (1|id))
   }
   # Model ----
-  model = lme4::lmer(form1,
+  model = lmer(form1,
                      data = df,
                      REML = TRUE)
-  df_var = as.data.frame(lme4::VarCorr(model))
+  df_var = as.data.frame(VarCorr(model))
   total_variance = sum(df_var$vcov)
   within_variance = subset(df_var, grp == "Residual")$vcov
   between_variance = total_variance-subset(df_var, grp == "Residual")$vcov

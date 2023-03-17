@@ -39,6 +39,8 @@ testthat::test_that("examples from Zou", {
                                      log =TRUE)
   testthat::expect_equal(agree_test_newlog$loa$lower.CL,-0.02185209,
                          tolerance = .0001)
+  testthat::expect_equal(!is.null(nest_test_newlog$loa), TRUE)
+  testthat::expect_equal(nrow(nest_test_newlog$loa), 1)
   testthat::expect_equal(nest_test_newlog$loa$lower.CL,-0.3191434,
                          tolerance = .0001)
   testthat::expect_equal(class(nest_test_newlog), "loa")
