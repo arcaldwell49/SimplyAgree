@@ -57,6 +57,9 @@ utils::globalVariables(c("boot_bias",
                          "se_type",
                          "type",
                          "x.df",
-                         "agree_int", "alpha_u", "between_variance", "call2", "conf2", "emmean", "grp",
-                         "lmer_x", "lmer_y", "lower.CL", "lower_ci", "lower_loa", "lower_loa_ci", "mxh_l", "myh_l",
-                         "sd_delta", "tot_var", "upper.CL", "upper_ci", "upper_loa", "upper_loa_ci", "var_loa", "x"))
+                         "agree_int", "alpha_u", "between_variance",
+                         "call2", "conf2", "emmean", "grp",
+                         "lmer_x", "lmer_y", "lower.CL", "lower_ci",
+                         "lower_loa", "lower_loa_ci", "mxh_l", "myh_l",
+                         "sd_delta", "tot_var", "upper.CL", "upper_ci",
+                         "upper_loa", "upper_loa_ci", "var_loa", "x","1"))

@@ -102,6 +102,12 @@ agreement_limit = function(x,
     rename(lower_ci = lower.CL,
            upper_ci = upper.CL)
 
+  # Save data
+
+  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
+                                                   df$id + df$avg + df$delta)))
+  call2$lm_mod = lm_mod
+
   structure(list(loa = df_loa,
              call =call2),
             class = "loa")

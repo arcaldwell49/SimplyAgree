@@ -53,7 +53,7 @@ loa_hetvar = function(diff,
 
 
   res_lmer = lme(
-    fixed = all_of(formula1),
+    fixed = formula1,
     data = df,
     random = ~1|id,
     weights = nlme::varIdent(form = ~ 1 | factor(condition)),

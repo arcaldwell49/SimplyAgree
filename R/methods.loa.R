@@ -183,15 +183,8 @@ check.loa <- function(x) {
 
 
   call2 = x$call
-  df = .loa_data_org(
-    data = get(x$call$data),
-    x = x$call$x,
-    y = x$call$y,
-    id = x$call$id,
-    data_type = x$call$data_type,
-    log = x$call$log
-  ) %>%
-    rename(mean = avg)
+  df = model.frame(x$call$lm_mod)
+  colnames(df) = c("y","x","id","mean","delta")
 
   if(x$call$prop_bias == TRUE){
     form_lm1 = as.formula(delta ~ mean)

@@ -3,15 +3,9 @@ simple_loa_plot = function(x,
                            geom = "geom_point",
                            delta = NULL) {
   call2 = x$call
-  df = .loa_data_org(
-    data = get(x$call$data),
-    x = x$call$x,
-    y = x$call$y,
-    id = x$call$id,
-    data_type = x$call$data_type,
-    log = x$call$log
-  ) %>%
-    rename(mean = avg)
+  df = model.frame(x$call$lm_mod)
+  colnames(df) = c("y","x","id","mean","delta")
+
   df_loa = x$loa
   if(x$call$log){
     df_loa = exp(df_loa)
@@ -132,15 +126,8 @@ bias_loa_plot = function(x,
                          geom = "geom_point",
                          delta = NULL){
   call2 = x$call
-  df = .loa_data_org(
-    data = get(x$call$data),
-    x = x$call$x,
-    y = x$call$y,
-    id = x$call$id,
-    data_type = x$call$data_type,
-    log = x$call$log
-  ) %>%
-    rename(mean = avg)
+  df = model.frame(x$call$lm_mod)
+  colnames(df) = c("y","x","id","mean","delta")
   df_loa = x$loa
   if(x$call$log){
     df_loa = exp(df_loa)

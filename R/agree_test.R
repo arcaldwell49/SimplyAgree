@@ -139,17 +139,17 @@ agree_test <- function(x,
   lm_mod = list(call = list(formula = as.formula(y~x)))
   call2 = match.call()
   if(is.null(call2$agree.level)){
-    call2$agree.level = all_of(agree.level)
+    call2$agree.level = agree.level
   }
 
   if(is.null(call2$conf.level)){
-    call2$conf.level = all_of(conf.level)
+    call2$conf.level = conf.level
   }
   if(is.null(call2$TOST)){
-    call2$TOST = all_of(TOST)
+    call2$TOST = TOST
   }
   if(is.null(call2$prop_bias)){
-    call2$prop_bias = all_of(prop_bias)
+    call2$prop_bias = prop_bias
   }
   call2$lm_mod = lm_mod
 

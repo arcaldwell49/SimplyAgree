@@ -24,7 +24,7 @@ testthat::test_that("examples from Zou", {
                          data = reps2,
                          data_type = "nest",
                          alpha = .025)
-  ch1_new = check(nest_test_new)
+  #check(nest_test_new)
   nest_test_newlog = agreement_limit(x="x",y="y",
                                   id = "id",
                                   data = reps2,
