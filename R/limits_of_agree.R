@@ -462,9 +462,9 @@ calc_loa_nest = function(df,
     bias_values = emmeans(model, ~1) %>%
       confint(level = conf.level) %>%
       as.data.frame() %>%
-      rename(bias = emmean) %>%
-      mutate(avg = "overall") %>%
-      select(avg, bias, SE, df, lower.CL, upper.CL)
+      rename(bias = emmean) #%>%
+      #mutate(avg = "overall") %>%
+      colnames(bias_values) = c("avg", "bias", "SE", "df", "lower.CL", "upper.CL")
     class(bias_values) = "data.frame"
     if(any(colnames(bias_values) != c("avg","bias","SE","df","lower.CL","upper.CL"))){
       print(colnames(bias_values))
