@@ -43,6 +43,10 @@ testthat::test_that("examples from Zou", {
   testthat::expect_equal(nrow(nest_test_newlog$loa), 1)
   testthat::expect_equal(nest_test_newlog$loa$lower.CL,-0.3191434,
                          tolerance = .0001)
+  testthat::expect_equal(nest_test_newlog$loa$bias,0.1138129,
+                         tolerance = .0001)
+  testthat::expect_equal(nest_test_newlog$loa$lme,1.030285,
+                         tolerance = .0001)
   testthat::expect_equal(class(nest_test_newlog), "loa")
   pr1 = print(nest_test_newlog)
   nest_test2_new = agreement_limit(x="x",y="y",

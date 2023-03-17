@@ -442,8 +442,8 @@ calc_loa_nest = function(df,
   }
   # Model ----
   model = lmer(form1,
-                     data = df,
-                     REML = TRUE)
+               data = df,
+               REML = TRUE)
   df_var = as.data.frame(VarCorr(model))
   total_variance = sum(df_var$vcov)
   within_variance = subset(df_var, grp == "Residual")$vcov
