@@ -29,6 +29,9 @@ print.loa <- function(x,
                       ...){
 
   df_loa = x$loa
+  if(is.null(df_loa$lower.CL)){
+    warning(toString(colnames(df_loa)))
+  }
   call2 = x$call
   pr_table = df_loa %>%
     select(avg,
