@@ -444,6 +444,7 @@ calc_loa_nest = function(df,
   model = lmer(form1,
                data = df,
                REML = TRUE)
+  print(model)
   df_var = as.data.frame(VarCorr(model))
   total_variance = sum(df_var$vcov)
   within_variance = subset(df_var, grp == "Residual")$vcov
@@ -460,13 +461,14 @@ calc_loa_nest = function(df,
 
   if (prop_bias == FALSE) {
     bias_values = emmeans(model, ~1, lmer.df = "kenward-roger") %>%
-      confint(level = conf.level,
-              adjust = "none",
-              df=n_sub-1) %>%
+      #confint(level = conf.level,
+      #        adjust = "none",
+      #        df=n_sub-1) %>%
       as.data.frame() %>%
-      rename(bias = emmean) #%>%
-      #mutate(avg = "overall") %>%
+      rename(bias = emmean) %>%
+      mutate(avg = "overall")
     warning(toString(colnames(bias_values)))
+    print(bias_values)
 
   } else {
     bias_values = ref_grid(model,

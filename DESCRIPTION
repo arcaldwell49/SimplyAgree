@@ -36,7 +36,8 @@ Suggests:
     covr,
     mgcv,
     ggeffects,
-    deming
+    deming,
+    pbkrtest
 VignetteBuilder:
     knitr
 Depends: 
