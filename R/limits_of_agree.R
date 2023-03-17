@@ -461,14 +461,10 @@ calc_loa_nest = function(df,
 
   if (prop_bias == FALSE) {
     bias_values = emmeans(model, ~1, lmer.df = "kenward-roger") %>%
-      #confint(level = conf.level,
-      #        adjust = "none",
-      #        df=n_sub-1) %>%
       as.data.frame() %>%
       rename(bias = emmean) %>%
-      mutate(avg = "overall")
-    warning(toString(colnames(bias_values)))
-    print(bias_values)
+      mutate(avg = "overall") %>%
+      select(avg, bias, SE, df, lower.CL, upper.CL)
 
   } else {
     bias_values = ref_grid(model,
@@ -480,12 +476,10 @@ calc_loa_nest = function(df,
                              )
                            )) %>%
       emmeans(~avg, lmer.df = "kenward-roger") %>%
-      confint(level = conf.level,
-              adjust = "none",
-              df=n_sub-2) %>%
       as.data.frame() %>%
-      rename(bias = emmean)
-    class(bias_values) = "data.frame"
+      rename(bias = emmean) %>%
+      select(avg, bias, SE, df, lower.CL, upper.CL)
+
   }
 
   if(loa_calc == "blandaltman"){
