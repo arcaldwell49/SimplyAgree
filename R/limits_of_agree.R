@@ -39,7 +39,7 @@
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
-#' @import dplyr
+#' @importFrom dplyr rename mutate
 #' @import ggplot2
 #' @export
 
@@ -67,7 +67,7 @@ agreement_limit = function(x,
   call2$prop_bias  = prop_bias
   call2$log = log
 
-  df = .loa_data_org(
+  df = loa_data_org(
     data = data,
     x = x,
     y = y,
@@ -76,10 +76,14 @@ agreement_limit = function(x,
     log = log
   )
 
+  if(ncol(df) != 5){
+    stop("incorrect df dimensions. internal error.")
+  }
+
   # Get LoA ----
   ## simple -----
   if(data_type == "simple"){
-    df_loa = .calc_loa_simple(
+    df_loa = calc_loa_simple(
       df = df,
       conf.level = conf.level,
       agree.level = agree.level,
@@ -89,7 +93,7 @@ agreement_limit = function(x,
   }
   ## reps -----
   if(data_type == "reps"){
-    df_loa = .calc_loa_reps(
+    df_loa = calc_loa_reps(
       df = df,
       conf.level = conf.level,
       agree.level = agree.level,
@@ -99,7 +103,7 @@ agreement_limit = function(x,
   }
   ## nest -----
   if(data_type == "nest"){
-    df_loa = .calc_loa_nest(
+    df_loa = calc_loa_nest(
       df = df,
       conf.level = conf.level,
       agree.level = agree.level,
@@ -108,18 +112,22 @@ agreement_limit = function(x,
     )
   }
 
+  if(!is.data.frame(df_loa)){
+    stop("Internal error. LoA data frame not created.")
+  }
+
   # Save data
 
   lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
                                                    df$id + df$avg + df$delta)))
   call2$lm_mod = lm_mod
-
-  return(structure(list(loa = df_loa,
-             call =call2),
-            class = "loa"))
+  res = structure(list(loa = df_loa,
+                       call = call2),
+                 class = "loa")
+  return(res)
 }
 
-.loa_data_org = function(data,
+loa_data_org = function(data,
                         x,
                         y,
                         id,
@@ -158,7 +166,7 @@ agreement_limit = function(x,
   return(df)
 }
 
-.calc_loa_simple = function(df,
+calc_loa_simple = function(df,
                             conf.level = .95,
                             agree.level = .95,
                             loa_calc,
@@ -257,7 +265,7 @@ agreement_limit = function(x,
   return(df_loa)
 }
 
-.calc_loa_reps = function(df,
+calc_loa_reps = function(df,
                             conf.level = .95,
                             agree.level = .95,
                             loa_calc,
@@ -273,7 +281,6 @@ agreement_limit = function(x,
   alpha_u = (1 - conf.level)
   conf2 = 1 - (1 - conf.level) * 2
 
-  df = df
   df2 = df %>%
     group_by(id) %>%
     summarize(mxi = base::sum(!is.na(x)),
@@ -397,7 +404,7 @@ agreement_limit = function(x,
 }
 
 
-.calc_loa_nest = function(df,
+calc_loa_nest = function(df,
                           conf.level = .95,
                           agree.level = .95,
                           loa_calc,
