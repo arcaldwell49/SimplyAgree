@@ -77,30 +77,33 @@ agreement_limit = function(x,
   )
 
   # Get LoA ----
-  df_loa = switch(data_type,
-                  simple = .calc_loa_simple(
-                    df = df,
-                    conf.level = conf.level,
-                    agree.level = agree.level,
-                    loa_calc = loa_calc,
-                    prop_bias = prop_bias
-                  ),
-                  reps = .calc_loa_reps(
-                    df = df,
-                    conf.level = conf.level,
-                    agree.level = agree.level,
-                    loa_calc = loa_calc,
-                    prop_bias = prop_bias
-                  ),
-                  nest= .calc_loa_nest(
-                    df = df,
-                    conf.level = conf.level,
-                    agree.level = agree.level,
-                    loa_calc = loa_calc,
-                    prop_bias = prop_bias
-                  )) %>%
-    rename(lower_ci = lower.CL,
-           upper_ci = upper.CL)
+  if(data_type == "simple"){
+    df_loa = .calc_loa_simple(
+      df = df,
+      conf.level = conf.level,
+      agree.level = agree.level,
+      loa_calc = loa_calc,
+      prop_bias = prop_bias)
+
+  }
+  if(data_type == "reps"){
+    df_loa = .calc_loa_reps(
+      df = df,
+      conf.level = conf.level,
+      agree.level = agree.level,
+      loa_calc = loa_calc,
+      prop_bias = prop_bias
+    )
+  }
+  if(data_type == "nest"){
+    .calc_loa_nest(
+      df = df,
+      conf.level = conf.level,
+      agree.level = agree.level,
+      loa_calc = loa_calc,
+      prop_bias = prop_bias
+    )
+  }
 
   # Save data
 
@@ -108,9 +111,9 @@ agreement_limit = function(x,
                                                    df$id + df$avg + df$delta)))
   call2$lm_mod = lm_mod
 
-  structure(list(loa = df_loa,
+  return(structure(list(loa = df_loa,
              call =call2),
-            class = "loa")
+            class = "loa"))
 }
 
 .loa_data_org = function(data,

@@ -33,8 +33,8 @@ print.loa <- function(x,
   pr_table = df_loa %>%
     select(avg,
            bias,
-           lower_ci,
-           upper_ci,
+           lower.CL,
+           upper.CL,
            lower_loa,
            upper_loa,
            lower_loa_ci,
@@ -47,9 +47,9 @@ print.loa <- function(x,
     mutate(
       `Bias CI` = paste0(
         "[",
-        round(lower_ci, digits = digits),
+        round(lower.CL, digits = digits),
         ", ",
-        round(upper_ci, digits = digits),
+        round(upper.CL, digits = digits),
         "]"
       ),
       `LoA CI` = paste0(

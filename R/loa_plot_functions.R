@@ -21,8 +21,8 @@ simple_loa_plot = function(x,
                   levels = c("Upper LoA", "Bias", "Lower LoA"),
                   ordered  = TRUE),
     estimate = c(df_loa$upper_loa, df_loa$bias, df_loa$lower_loa),
-    lower.ci = c(df_loa$upper_loa, df_loa$lower_ci, df_loa$lower_loa_ci),
-    upper.ci = c(df_loa$upper_loa_ci, df_loa$upper_ci, df_loa$lower_loa)
+    lower.ci = c(df_loa$upper_loa, df_loa$lower.CL, df_loa$lower_loa_ci),
+    upper.ci = c(df_loa$upper_loa_ci, df_loa$upper.CL, df_loa$lower_loa)
   )
 
   df_loa2$x = scalemin
@@ -147,10 +147,10 @@ bias_loa_plot = function(x,
                   levels = c("Upper LoA", "Bias", "Lower LoA"),
                   ordered  = TRUE),
     estimate = c(df_loa$upper_loa, df_loa$bias, df_loa$lower_loa),
-    lower.ci = c(df_loa$upper_loa, df_loa$lower_ci, df_loa$lower_loa_ci),
-    upper.ci = c(df_loa$upper_loa_ci, df_loa$upper_ci, df_loa$lower_loa),
-    x = df_loa$avg
+    lower.ci = c(df_loa$upper_loa, df_loa$lower.CL, df_loa$lower_loa_ci),
+    upper.ci = c(df_loa$upper_loa_ci, df_loa$upper.CL, df_loa$lower_loa)
   )
+  df_loa2$x = df_loa$avg
 
   #df_loa2$x = scalemin
 

@@ -24,22 +24,26 @@ testthat::test_that("examples from Zou", {
                          data = reps2,
                          data_type = "nest",
                          alpha = .025)
-  #check(nest_test_new)
+  testthat::expect_equal(nest_test_new$loa$bias,0.7234979,
+                         tolerance = .0001)
+  ch1 = check(nest_test_new)
   nest_test_newlog = agreement_limit(x="x",y="y",
                                   id = "id",
                                   data = reps2,
                                   data_type = "nest",
                                   log =TRUE)
-  pr1 = print(nest_test_newlog)
+  testthat::expect_equal(nest_test_newlog$loa$lower.CL,-0.3191434,
+                         tolerance = .0001)
+  #pr1 = print(nest_test_newlog)
   nest_test2_new = agreement_limit(x="x",y="y",
                           id = "id",
                           data = reps2,
                           prop_bias = TRUE,
                           data_type = "nest")
 
-  ptest = plot(nest_test2)
-  ptest = plot(nest_test2_new)
-  ptest = plot(nest_test_new)
+  #ptest = plot(nest_test2)
+  #ptest = plot(nest_test2_new)
+  #ptest = plot(nest_test_new)
 
   nest_test3 = agree_nest(x="x",y="y",
                           id = "id",
