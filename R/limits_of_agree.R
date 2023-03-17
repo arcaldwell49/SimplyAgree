@@ -466,6 +466,10 @@ calc_loa_nest = function(df,
       mutate(avg = "overall") %>%
       select(avg, bias, SE, df, lower.CL, upper.CL)
     class(bias_values) = "data.frame"
+    if(any(colnames(bias_values) != c("avg","bias","SE","df","lower.CL","upper.CL"))){
+      print(colnames(bias_values))
+      stop('Interval error. Column name mismatch.')
+    }
 
   } else {
     bias_values = ref_grid(model,
@@ -485,7 +489,7 @@ calc_loa_nest = function(df,
 
   if(loa_calc == "blandaltman"){
 
-    df_loa = bias_values %>%
+    df_loa <- bias_values %>%
       mutate(
         sd_delta = sqrt(total_variance),
         var_loa = loa_var,
@@ -511,7 +515,7 @@ calc_loa_nest = function(df,
     # LME -----
     LME = sqrt(confq2^2*(between_variance/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
-    df_loa = bias_values %>%
+    df_loa <- bias_values %>%
       mutate(
         sd_delta = sqrt(total_variance),
         var_loa = loa_var,
