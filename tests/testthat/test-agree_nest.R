@@ -32,8 +32,16 @@ testthat::test_that("examples from Zou", {
                                   data = reps2,
                                   data_type = "nest",
                                   log =TRUE)
+  agree_test_newlog = agreement_limit(x="x",y="y",
+                                     id = "id",
+                                     data = reps2,
+                                     data_type = "simple",
+                                     log =TRUE)
+  testthat::expect_equal(agree_test_newlog$loa$lower.CL,-0.02185209,
+                         tolerance = .0001)
   testthat::expect_equal(nest_test_newlog$loa$lower.CL,-0.3191434,
                          tolerance = .0001)
+  testthat::expect_equal(class(nest_test_newlog), "loa")
   pr1 = print(nest_test_newlog)
   nest_test2_new = agreement_limit(x="x",y="y",
                           id = "id",
