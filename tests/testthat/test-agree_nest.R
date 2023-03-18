@@ -24,6 +24,12 @@ testthat::test_that("examples from Zou", {
                          data = reps2,
                          data_type = "nest",
                          alpha = .025)
+  nest_test_new2 = agreement_limit(x="x",y="y",
+                                  id = "id",
+                                  data = reps2,
+                                  data_type = "nest",
+                                  alpha = .025,
+                                  prop_bias = TRUE)
   testthat::expect_equal(nest_test_new$loa$bias,0.7234979,
                          tolerance = .0001)
   ch1 = check(nest_test_new)
@@ -32,12 +38,49 @@ testthat::test_that("examples from Zou", {
                                   data = reps2,
                                   data_type = "nest",
                                   log =TRUE)
+  nest_test_bland = agreement_limit(x="x",y="y",
+                                     id = "id",
+                                     data = reps2,
+                                     data_type = "nest",
+                                     log =TRUE,
+                                    loa_calc = "b")
+  print(nest_test_bland)
   agree_test_newlog = agreement_limit(x="x",y="y",
                                      id = "id",
                                      data = reps2,
                                      data_type = "simple",
                                      log =TRUE)
+
+  ptest = plot(nest_test_new)
+  ptest = plot(nest_test_new,
+               delta = 5)
+  ptest = plot(nest_test_new,
+               geom = "geom_bin2d")
+  ptest = plot(nest_test_new,
+               geom = "geom_density_2d")
+  ptest = plot(nest_test_new,
+               geom = "geom_density_2d_filled")
+  ptest = plot(nest_test_new,
+               geom = "stat_density_2d")
+
+  print(nest_test_new2)
+  ptest = plot(nest_test_new2)
+  ptest = plot(nest_test_new2,
+               delta = 5)
+  ptest = plot(nest_test_new2,
+               geom = "geom_bin2d")
+  ptest = plot(nest_test_new2,
+               geom = "geom_density_2d")
+  ptest = plot(nest_test_new2,
+               geom = "geom_density_2d_filled")
+  ptest = plot(nest_test_new2,
+               geom = "stat_density_2d")
+
+
+  # Ensure emmeans working appropriately
   testthat::expect_equal(agree_test_newlog$loa$lower.CL,-0.02185209,
+                         tolerance = .0001)
+  testthat::expect_equal(nest_test_newlog$loa$df,3,
                          tolerance = .0001)
   testthat::expect_equal(!is.null(nest_test_newlog$loa), TRUE)
   testthat::expect_equal(nrow(nest_test_newlog$loa), 1)

@@ -24,7 +24,16 @@ testthat::test_that("examples from Zou", {
                                    data_type = "reps",
                                    alpha = .025,
                                    log = TRUE)
-
+  reps_test_blan = agreement_limit(x="x",y="y",
+                                      id = "id",
+                                      data = reps,
+                                      data_type = "reps",
+                                   loa_calc = "b",
+                                      alpha = .025,
+                                      log = TRUE)
+  print(reps_test_blan)
+  print(reps_test_newlog)
+  print(reps_test_new)
   reps_test2 = agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,
@@ -39,7 +48,29 @@ testthat::test_that("examples from Zou", {
                           delta = 5,
                           prop_bias = TRUE)
   ptest = plot(reps_test2)
+  ptest = plot(reps_test2,
+               delta = 5)
+  ptest = plot(reps_test2,
+               geom = "geom_bin2d")
+  ptest = plot(reps_test2,
+               geom = "geom_density_2d")
+  ptest = plot(reps_test2,
+               geom = "geom_density_2d_filled")
+  ptest = plot(reps_test2,
+               geom = "stat_density_2d")
 
+  print(reps_test3)
+  ptest = plot(reps_test3)
+  ptest = plot(reps_test3,
+               delta = 5)
+  ptest = plot(reps_test3,
+               geom = "geom_bin2d")
+  ptest = plot(reps_test3,
+               geom = "geom_density_2d")
+  ptest = plot(reps_test3,
+               geom = "geom_density_2d_filled")
+  ptest = plot(reps_test3,
+               geom = "stat_density_2d")
 
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),

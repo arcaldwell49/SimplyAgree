@@ -30,5 +30,6 @@
 ^CODE_OF_CONDUCT\.md$
 ^doc$
 ^Meta$
+^mess$
 ^CRAN-SUBMISSION$
 ^.covrignore
