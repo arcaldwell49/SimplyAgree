@@ -6,13 +6,15 @@ tolerance_delta_gls = function(data,
                                id = NULL,
                                condition = NULL,
                                time = NULL,
-                               tol.level = 0.95,
+                               pred.level = 0.95,
                                alpha = 0.05,
                                prop_bias = FALSE,
                                log_tf = FALSE,
                                cor_type = c("sym", "car1", "ar1", "none"),
                                correlation = NULL,
-                               weights = NULL){
+                               weights = NULL,
+                               keep_model = TRUE){
+  alpha.pred=1-pred.level
   # match args -----
   cor_type = match.arg(cor_type)
   # set call ----
@@ -28,18 +30,21 @@ tolerance_delta_gls = function(data,
   call2$weights = weights
 
   # organize data -----
-  df = data[c(x,y,id,condition,time)]
-  colnames(df) = c(x,y,id,condition,time)
-  df = na.omit(df)
-  df$avg = (df$x + df$y)/2
+  temp_frame = data[c(x,y,id,condition,time)]
+  colnames(temp_frame) = c(x,y,id,condition,time)
+  temp_frame = na.omit(temp_frame)
+  temp_frame$avg = (temp_frame$x + temp_frame$y)/2
   if(log_tf){
-    df$x = log(df$x)
-    df$y = log(df$y)
+    temp_frame$x = log(temp_frame$x)
+    temp_frame$y = log(temp_frame$y)
   }
-  df$delta = df$x - df$y
-
+  temp_frame$delta = temp_frame$x - temp_frame$y
+  if(!("id" %in% colnames(temp_frame))){
+    temp_frame$id = 1:nrow(temp_frame)
+  }
+  deg_of_freedom = length(unique(temp_frame$id)) -1
   # MODEL ----
-  model = gls(delta ~ 1, data = df)
+  model = gls(delta ~ 1, data = temp_frame)
 
   if(!is.null(condition)){
     model = update(model,
@@ -48,7 +53,7 @@ tolerance_delta_gls = function(data,
 
   }
 
-  if(!is.null(prop_bias)){
+  if(prop_bias){
     model = update(model,
                    . ~ . + avg)
   }
@@ -79,11 +84,44 @@ tolerance_delta_gls = function(data,
   if(prop_bias){
     if(!is.null(condition)){
 
+      res_emm = emmeans(ref_grid(model,
+                                 at = list(avg = c(
+                                   min(temp_frame$avg),
+                                   median(temp_frame$avg),
+                                   max(temp_frame$avg)
+                                 ))),
+                        ~ condition + avg,
+                        mode = "satterthwaite")
+    } else{
+      res_emm = emmeans(ref_grid(model,
+                                 at = list(avg = c(
+                                   min(temp_frame$avg),
+                                   median(temp_frame$avg),
+                                   max(temp_frame$avg)
+                                 ))),
+                        ~ avg,
+                        mode = "satterthwaite")
     }
 
   } else {
     if(!is.null(condition)){
-
+      res_emm = emmeans(model,
+                        ~ condition ,
+                        mode = "satterthwaite")
+    } else{
+      res_emm = emmeans(model,
+                        ~ 1 ,
+                        mode = "satterthwaite")
     }
   }
+
+  emm_df = as.data.frame(res_emm) %>%
+    rename(SEM = SE) %>%
+    mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
+    mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
+           upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP,
+           lower.PL.CL = emmean - qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)),
+           upper.PL.CL = emmean + qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)))
+
+  return(res)
 }

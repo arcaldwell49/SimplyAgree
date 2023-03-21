@@ -47,3 +47,4 @@ simp_covar_hetvar = update(simp_covar_model,
 simp_cov_model = update(simple_model,
                         ~ trec_pre + tod)
 
+emmeans(simp_con_hetvar, ~tod)
