@@ -7,13 +7,13 @@
 #' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param alpha The alpha-level for confidence levels.
-#' @param log Calculate limits of agreement using log-transformed data.
+#' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).
 #' @param loa_calc The mehtod by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
-#' @return Returns single simple_agree class object with the results of the agreement analysis.
+#' @return Returns single loa class object with the results of the agreement analysis.
 #'
 #' \describe{
-#'   \item{\code{"loa"}}{A data frame containing.}
+#'   \item{\code{"loa"}}{A data frame containing the Limits of Agreement.}
 #'   \item{\code{"call"}}{The matched call.}
 #' }
 
@@ -52,7 +52,7 @@ agreement_limit = function(x,
                            agree.level = 0.95,
                            alpha = 0.05,
                            prop_bias = FALSE,
-                           log = FALSE){
+                           log_tf = FALSE){
   data_type = match.arg(data_type)
   loa_calc = match.arg(loa_calc)
   conf.level = 1- alpha
@@ -65,7 +65,7 @@ agreement_limit = function(x,
   call2$alpha = alpha
   call2$id = id
   call2$prop_bias  = prop_bias
-  call2$log = log
+  call2$log_tf = log_tf
 
   df = loa_data_org(
     data = data,
@@ -73,7 +73,7 @@ agreement_limit = function(x,
     y = y,
     id = id,
     data_type = data_type,
-    log = log
+    log_tf = log_tf
   )
 
   if(ncol(df) != 5){
@@ -132,7 +132,7 @@ loa_data_org = function(data,
                         y,
                         id,
                         data_type,
-                        log = FALSE){
+                        log_tf = FALSE){
   if(data_type == "simple"){
     df = data %>%
       select(all_of(x),all_of(y)) %>%
@@ -155,7 +155,7 @@ loa_data_org = function(data,
 
   df = df %>%
     mutate(avg = (x+y)/2)
-  if(log == TRUE){
+  if(log_tf == TRUE){
     df = df %>%
       mutate(x = log(x),
              y = log(y))

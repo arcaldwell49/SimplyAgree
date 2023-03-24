@@ -23,14 +23,14 @@ testthat::test_that("examples from Zou", {
                                    data = reps,
                                    data_type = "reps",
                                    alpha = .025,
-                                   log = TRUE)
+                                   log_tf = TRUE)
   reps_test_blan = agreement_limit(x="x",y="y",
                                       id = "id",
                                       data = reps,
                                       data_type = "reps",
                                    loa_calc = "b",
                                       alpha = .025,
-                                      log = TRUE)
+                                      log_tf = TRUE)
   print(reps_test_blan)
   print(reps_test_newlog)
   print(reps_test_new)

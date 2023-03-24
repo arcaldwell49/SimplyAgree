@@ -1,5 +1,36 @@
+#' Calculate the Tolerance Limits from a Agreement Study
+#' @description A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
+#' @param x Name of column with first measurement
+#' @param y Name of other column with the other measurement to compare to the first.
+#' @param id Column with subject identifier. Default is "id" if no entry is provided.
+#' @param condition Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
+#' @param time A column naming/numbering the time point. Only necessary if the data is from time series collection.
+#' @param data Data frame with all data.
+#' @param pred_level The prediction level. Default is 95\%.
+#' @param tol_level The tolerance level related to the prediction level. Default is 95\%.
+#' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the prediction/tolerance limits calculations.
+#' @param log_tf Calculate limits of agreement using log-transformed data.
+#' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.
+#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL
+#' @param weights an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
+#' @param keep_model Logical indicator to retain the GLS model. Useful when working with large datasets and the model is very large.
+#'
+#' @return Returns single tolerance_delta class object with the results of the agreement analysis with prediction/tolerance limits..
+#'
+#' \describe{
+#'   \item{\code{"limits"}}{A data frame containing the prediction/tolerance limits.}
+#'   \item{\code{"model"}}{The GLS model; NULL if keep_model set to FALSE.}
+#'   \item{\code{"call"}}{The matched call.}
+#' }
 
-#' @importFrom nlme gls corCompSymm corAR1 corCAR1 varIdent
+#' @examples
+#' data('reps')
+#'
+#' @section References:
+#'
+#' @importFrom nlme gls  corCompSymm corAR1 corCAR1 varIdent
+#' @export
+
 tolerance_delta_gls = function(data,
                                x,
                                y,
@@ -22,6 +53,7 @@ tolerance_delta_gls = function(data,
   call2 = match.call()
   call2$id = id
   call2$condition = condition
+  call2$pred_level = pred_level
   call2$tol_level = tol_level
   call2$prop_bias = prop_bias
   call2$log_tf = log_tf
@@ -37,6 +69,7 @@ tolerance_delta_gls = function(data,
   names(temp_frame)[names(temp_frame) == condition] <- "condition"
   names(temp_frame)[names(temp_frame) == time] <- "time"
   #colnames(temp_frame) = c(x,y,id,condition,time)
+
   temp_frame = na.omit(temp_frame)
   temp_frame$avg = (temp_frame$x + temp_frame$y)/2
   if(log_tf){
@@ -138,45 +171,46 @@ tolerance_delta_gls = function(data,
     mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
            upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP,
            lower.TL = emmean - qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)),
-           upper.TL = emmean + qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)))
+           upper.TL = emmean + qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df))) %>%
+    rename(bias = emmean)
   model <- if(keep_model){
     model
   } else{
     NULL
   }
 
-  res = list(limits = emm_df,
+  if(!("condition" %in% colnames(emm_df))){
+    emm_df$condition = NA
+  }
+
+  if(!("avg" %in% colnames(emm_df))){
+    emm_df$avg = NA
+  }
+
+  if(!("condition" %in% colnames(temp_frame))){
+    temp_frame$condition = 1:nrow(temp_frame)
+  }
+
+  if(!("id" %in% colnames(temp_frame))){
+    temp_frame$id = 1:nrow(temp_frame)
+  }
+
+  if(!("time" %in% colnames(temp_frame))){
+    temp_frame$time = 1:nrow(temp_frame)
+  }
+
+  df = as.data.frame(temp_frame)
+  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x + df$id + df$avg + df$delta + df$condition + df$time)))
+  call2$lm_mod = lm_mod
+
+  res = structure(list(limits = emm_df,
+             emmeans = res_emm,
              model = model,
-             call = call2)
+             call = call2),
+             class = "tolerance_delta")
+
   return(res)
 }
 
 
-data(reps)
-
-test1 = tolerance_delta_gls(
-  data = reps,
-  x = "x",
-  y = "y"
-)
-test1
-test1$call$lm_mod
-model.frame(test1$call$lm_mod)
-test2 = agreement_limit(
-  data = reps,
-  x = "x",
-  y = "y"
-)
-test1$call$lm_mod
-model.frame(test1$call$lm_mod)
-x = test1
-
-data(temps)
-test3 = tolerance_delta_gls(
-  data = temps,
-  x = "trec_pre",
-  y = "teso_pre",
-  id = "id",
-  condition = "tod"
-)
 

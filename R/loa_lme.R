@@ -26,7 +26,7 @@
 #' @importFrom dplyr select rename
 #' @importFrom tidyselect all_of
 #' @importFrom purrr map map_df keep
-#' @importFrom nlme lme
+#' @importFrom nlme lme gls
 #' @import lme4
 #' @import ggplot2
 #' @import boot

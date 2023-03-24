@@ -37,19 +37,19 @@ testthat::test_that("examples from Zou", {
                                   id = "id",
                                   data = reps2,
                                   data_type = "nest",
-                                  log =TRUE)
+                                  log_tf =TRUE)
   nest_test_bland = agreement_limit(x="x",y="y",
                                      id = "id",
                                      data = reps2,
                                      data_type = "nest",
-                                     log =TRUE,
+                                     log_tf =TRUE,
                                     loa_calc = "b")
   print(nest_test_bland)
   agree_test_newlog = agreement_limit(x="x",y="y",
                                      id = "id",
                                      data = reps2,
                                      data_type = "simple",
-                                     log =TRUE)
+                                     log_tf =TRUE)
 
   ptest = plot(nest_test_new)
   ptest = plot(nest_test_new,

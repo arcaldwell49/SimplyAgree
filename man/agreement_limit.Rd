@@ -14,7 +14,7 @@ agreement_limit(
   agree.level = 0.95,
   alpha = 0.05,
   prop_bias = FALSE,
-  log = FALSE
+  log_tf = FALSE
 )
 }
 \arguments{
@@ -36,13 +36,13 @@ agreement_limit(
 
 \item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 
-\item{log}{Calculate limits of agreement using log-transformed data.}
+\item{log_tf}{Calculate limits of agreement using log-transformed data.}
 }
 \value{
-Returns single simple_agree class object with the results of the agreement analysis.
+Returns single loa class object with the results of the agreement analysis.
 
 \describe{
-  \item{\code{"loa"}}{A data frame containing.}
+  \item{\code{"loa"}}{A data frame containing the Limits of Agreement.}
   \item{\code{"call"}}{The matched call.}
 }
 }

@@ -29,9 +29,7 @@ print.loa <- function(x,
                       ...){
 
   df_loa = x$loa
-  if(is.null(df_loa$lower.CL)){
-    warning(toString(colnames(df_loa)))
-  }
+
   call2 = x$call
   pr_table = df_loa %>%
     select(avg,
@@ -42,8 +40,12 @@ print.loa <- function(x,
            upper_loa,
            lower_loa_ci,
            upper_loa_ci)
-  if(call2$log){
+  if(call2$log_tf){
     pr_table = pr_table %>% mutate_if(is.numeric,exp)
+    if(call2$prop_bias){
+      pr_table = pr_table %>%
+        mutate(avg = log(avg))
+    }
   }
 
   pr_table2 = pr_table %>%
@@ -106,10 +108,10 @@ print.loa <- function(x,
     nest = "Nested Data",
     reps = "Data with Replicates"
   )
-  if(call2$log){
+  if(call2$log_tf){
     dat_type = paste0("Log-transformed ", dat_type)
   }
-  var_print = switch(ifelse(call2$log,"log","norm"),
+  var_print = switch(ifelse(call2$log_tf,"log","norm"),
                      "log" = paste0(
                        "Coefficient of Variation (%) = ",
                        round((exp(x$loa$sd_delta[1])-1)*100,digits=digits)
