@@ -66,7 +66,7 @@ print.tolerance_delta <- function(x,
         round(upper.CL, digits = digits),
         "]"
       ),
-      `Prediction Limits` = paste0(
+      `Prediction Interval` = paste0(
         "[",
         round(lower.PL,digits = digits),
         ", ",
@@ -90,7 +90,7 @@ print.tolerance_delta <- function(x,
            `Average of Both Methods`,
            Bias,
            `Bias CI`,
-           `Prediction Limits`,
+           `Prediction Interval`,
            `Tolerance Limits`)
   if(call2$prop_bias){
     if(is.null(call2$condition)){
@@ -98,7 +98,7 @@ print.tolerance_delta <- function(x,
         "Average of Both Methods",
         "Bias",
         "Bias CI",
-        "Prediction Limits",
+        "Prediction Interval",
         "Tolerance Limits"
       )]
     } else {
@@ -107,7 +107,7 @@ print.tolerance_delta <- function(x,
         "Average of Both Methods",
         "Bias",
         "Bias CI",
-        "Prediction Limits",
+        "Prediction Interval",
         "Tolerance Limits"
       )]
     }
@@ -118,14 +118,14 @@ print.tolerance_delta <- function(x,
       "Condition",
       "Bias",
       "Bias CI",
-      "Prediction Limits",
+      "Prediction Interval",
       "Tolerance Limits"
     )]
     } else {
       pr_table3 = pr_table2[,c(
         "Bias",
         "Bias CI",
-        "Prediction Limits",
+        "Prediction Interval",
         "Tolerance Limits"
       )]
     }
@@ -136,7 +136,7 @@ print.tolerance_delta <- function(x,
     x$call$pred_level*100,
     "% Prediction Interval with ",
     x$call$tol_level*100,
-    "% Tolerance"
+    "% Tolerance Limits"
   )
 
   if(call2$log_tf){
