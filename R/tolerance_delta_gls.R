@@ -148,7 +148,9 @@ tolerance_delta_gls = function(data,
              lower.TL = emmean - qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)),
              upper.TL = emmean + qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df))) %>%
       rename(bias = emmean)
-  } else {
+  }
+
+  if(tol_method == "perc"){
     emm_df = as.data.frame(res_emm) %>%
       rename(SEM = SE) %>%
       mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
