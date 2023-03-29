@@ -19,11 +19,12 @@ tolerance_delta_gls(
   cor_type = c("sym", "car1", "ar1", "none"),
   correlation = NULL,
   weights = NULL,
-  keep_model = TRUE
+  keep_model = TRUE,
+  replicates = 999
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables x, y, id, condition, and time.}
+\item{data}{A data frame containing the variables.}
 
 \item{x}{Name of the variable for the first measurement.}
 
@@ -52,6 +53,8 @@ tolerance_delta_gls(
 \item{weights}{an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.}
 
 \item{keep_model}{Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.}
+
+\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 999.}
 }
 \value{
 Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.

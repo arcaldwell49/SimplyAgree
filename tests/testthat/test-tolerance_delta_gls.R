@@ -16,6 +16,11 @@ test_that("tolerance_delta_gls returns a tolerance_delta class", {
                                       x = "x",
                                       y = "y"),
                   "tolerance_delta")
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      keep_model = FALSE),
+                  "tolerance_delta")
 
   expect_s3_class(tolerance_delta_gls(data = temps2,
                                       x = "x",
@@ -36,6 +41,41 @@ test_that("tolerance_delta_gls returns a tolerance_delta class", {
                                       id = "id",
                                       cor_type = "car1"),
                   "tolerance_delta")
+
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      id = "id",
+                                      time = "ts",
+                                      cor_type = "ar1"),
+                  "tolerance_delta")
+
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      id = "id",
+                                      time = "ts",
+                                      cor_type = "car1"),
+                  "tolerance_delta")
+
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      id = "id",
+                                      condition = "condition",
+                                      correlation = nlme::corAR1(form=~1|id),
+                                      weights = nlme::varIdent(form=~condition)),
+                  "tolerance_delta")
+
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      id = "id",
+                                      condition = "condition",
+                                      tol_method = "p",
+                                      replicates = 20),
+                  "tolerance_delta")
+
 
 
 

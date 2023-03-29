@@ -63,4 +63,12 @@ utils::globalVariables(c("boot_bias",
                          "lmer_x", "lmer_y", "lower.CL", "lower_ci",
                          "lower_loa", "lower_loa_ci", "mxh_l", "myh_l",
                          "sd_delta", "tot_var", "upper.CL", "upper_ci",
-                         "upper_loa", "upper_loa_ci", "var_loa", "x","1"))
+                         "upper_loa", "upper_loa_ci", "var_loa", "x","1",
+                         "Average of Both Methods",
+                         "Bias",
+                         "Bias CI",
+                         "Prediction Interval",
+                         "SEM", "SEP",
+                         "Tolerance Limits", "replicates",
+                         "upper.PL", "upper.TL",
+                         "lower.PL", "lower.TL"))

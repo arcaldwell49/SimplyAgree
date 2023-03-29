@@ -100,10 +100,10 @@ predict_varFunc = function (object, newdata)
     ans <- sigma(object) * sqrt(newdata[[as.character(formula(vrSt)[2])]])
   }
   if (inherits(vrSt, "varIdent")) {
-    if (is.null(getGroups(vrSt)))
+    if (is.null(nlme::getGroups(vrSt)))
       stop("Groups should be present for varIdent", call. = FALSE)
     ans <- numeric(nrow(newdata))
-    grp.nm <- as.character(getGroupsFormula(vrSt)[[2]])
+    grp.nm <- as.character(nlme::getGroupsFormula(vrSt)[[2]])
     if (!grp.nm %in% names(newdata))
       stop("Grouping factor should be present in 'newdata' object",
            call. = FALSE)
@@ -117,7 +117,7 @@ predict_varFunc = function (object, newdata)
   }
   if (inherits(vrSt, "varExp")) {
     var_exp_fun <- function(x, t) exp(2 * t * x)
-    if (is.null(getGroups(vrSt))) {
+    if (is.null(nlme::getGroups(vrSt))) {
       if (any(grepl("fitted", as.character(formula(vrSt))))) {
         cvrt <- fttd
       }

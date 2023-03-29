@@ -1,7 +1,7 @@
 #' Calculate the Tolerance Limits from a Agreement Study
 #'
 #' @description A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
-#' @param data A data frame containing the variables x, y, id, condition, and time.
+#' @param data A data frame containing the variables.
 #' @param x Name of the variable for the first measurement.
 #' @param y Name of the variable for the second measurement.
 #' @param id Name of the variable for the subject ID.
@@ -16,7 +16,7 @@
 #' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL
 #' @param weights an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
 #' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
-#'
+#' @inheritParams loa_lme
 #' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
 #' When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
 #' However, these are only an approximation and overly conservative.
@@ -42,8 +42,11 @@
 #' Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.
 #'
 #' @importFrom nlme gls  corCompSymm corAR1 corCAR1 varIdent
+#' @importFrom stats vcov model.matrix formula na.fail update
 #' @importFrom emmeans ref_grid
 #' @importFrom dplyr inner_join join_by
+#' @importFrom MASS mvrnorm
+#' @importFrom Matrix chol Matrix bdiag
 #' @export
 
 tolerance_delta_gls = function(data,
@@ -60,7 +63,8 @@ tolerance_delta_gls = function(data,
                                cor_type = c("sym", "car1", "ar1", "none"),
                                correlation = NULL,
                                weights = NULL,
-                               keep_model = TRUE){
+                               keep_model = TRUE,
+                               replicates = 999){
   alpha = 1 - tol_level
   alpha.pred=1-pred_level
   # match args -----
@@ -103,12 +107,15 @@ tolerance_delta_gls = function(data,
   deg_of_freedom = length(unique(temp_frame$id)) -1
   # MODEL ----
   model = gls(delta ~ 1, data = temp_frame)
-
+  # Set to null for when not used
+  var1 = NULL
+  cor1 = NULL
   ## Update model with condition -----
   if(!is.null(condition)){
+    var1 = varIdent(form=~1|condition)
     model = update(model,
                    . ~ . + condition,
-                   weights = varIdent(form=~1|condition))
+                   weights = var1)
 
   }
 
@@ -140,13 +147,17 @@ tolerance_delta_gls = function(data,
   ## Custom model input -----
 
   if(!is.null(weights)){
+    var1 = weights
     model = update(model,
-           weights = weights)
+           weights = var1)
+
   }
 
   if(!is.null(correlation)){
+    cor1 = correlation
     model = update(model,
-           correlation = correlation)
+           correlation = cor1)
+
   }
 
   # EMMEANS ----
@@ -176,16 +187,20 @@ tolerance_delta_gls = function(data,
       mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
       mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
              upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)
+
     res_sum_df = boot_delta_gls(model = model,
                                 temp_frame = temp_frame,
                                 avg_vals = avg_vals,
                                 res_emm = res_emm,
                                 tol_level = tol_level,
                                 alpha.pred = alpha.pred,
-                                replicates = replicates)
+                                replicates = replicates,
+                                cor1 = cor1,
+                                var1 = var1)
 
-    emm_df = full_join(emm_df, res_sum_df) %>%
+    emm_df = suppressMessages({ full_join(emm_df, res_sum_df) %>%
       rename(bias = emmean)
+    })
   }
 
 
@@ -274,7 +289,9 @@ boot_delta_gls = function(model,
                           res_emm,
                           tol_level,
                           alpha.pred,
-                          replicates){
+                          replicates,
+                          cor1,
+                          var1){
   emm_df = as.data.frame(res_emm) %>%
     rename(SEM = SE) %>%
     mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
@@ -350,8 +367,8 @@ boot_delta_gls = function(model,
 }
 
 r_gen <- function(dat, mle) {
-  out   <- dat
-  out$delta <- sim_gls(mle)
+  out <- dat
+  out$delta <- sim_gls(mle, data = dat)
   return(out)
 }
 

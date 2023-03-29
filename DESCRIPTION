@@ -27,7 +27,9 @@ Imports:
     patchwork,
     insight,
     nlme,
-    purrr
+    purrr,
+    Matrix,
+    MASS
 Suggests: 
     knitr,
     rmarkdown,
