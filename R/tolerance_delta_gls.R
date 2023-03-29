@@ -93,14 +93,15 @@ tolerance_delta_gls = function(data,
 
   temp_frame = na.omit(temp_frame)
   temp_frame$avg = (temp_frame$x + temp_frame$y)/2
+  avg_vals = c(min(temp_frame$avg),
+               median(temp_frame$avg),
+               max(temp_frame$avg))
   if(log_tf){
     temp_frame$x = log(temp_frame$x)
     temp_frame$y = log(temp_frame$y)
   }
   temp_frame$delta = temp_frame$x - temp_frame$y
-  avg_vals = c(min(temp_frame$delta),
-               median(temp_frame$delta),
-               max(temp_frame$delta))
+
   if(!("id" %in% colnames(temp_frame))){
     temp_frame$id = 1:nrow(temp_frame)
   }
@@ -254,13 +255,15 @@ gls_emm_delta = function(model,
     if("condition" %in% paste0(nlme::getCovariateFormula(model))){
 
       res_emm = emmeans(ref_grid(model,
-                                 at = list(avg = avg_vals)),
+                                 at = list(avg = avg_vals),
+                                 data = temp_frame),
                         ~ condition + avg,
                         mode = "satterthwaite",
                         data = temp_frame)
     } else{
       res_emm = emmeans(ref_grid(model,
-                                 at = list(avg = avg_vals)),
+                                 at = list(avg = avg_vals),
+                                 data = temp_frame),
                         ~ avg,
                         mode = "satterthwaite",
                         data = temp_frame)

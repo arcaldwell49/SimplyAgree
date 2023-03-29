@@ -76,6 +76,14 @@ test_that("tolerance_delta_gls returns a tolerance_delta class", {
                                       replicates = 20),
                   "tolerance_delta")
 
+  expect_s3_class(tolerance_delta_gls(data = temps2,
+                                      x = "x",
+                                      y = "y",
+                                      id = "id",
+                                      log_tf = TRUE,
+                                      prop_bias = TRUE),
+                  "tolerance_delta")
+
 
 
 

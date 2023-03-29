@@ -142,15 +142,15 @@ print.tolerance_delta <- function(x,
   if(call2$log_tf){
     title1 = "Agreement between Measures (Ratio: x/y)"
   }
-  var_print = switch(ifelse(call2$log_tf,"log","norm"),
-                     "log" = paste0(
-                       "Coefficient of Variation (%) = ",
-                       round((exp(x$limits$SEP[1])-1)*100,digits=digits)
-                     ),
-                     "norm" =  paste0(
-                       "Standard Error of Prediction = ",
-                       round(x$limits$SEP[1],digits=digits)
-                     ))
+  #var_print = switch(ifelse(call2$log_tf,"log","norm"),
+  #                   "log" = paste0(
+  #                     "Coefficient of Variation (%) = ",
+  #                     round((exp(x$limits$SEP[1])-1)*100,digits=digits)
+  #                   ),
+  #                   "norm" =  paste0(
+  #                     "Standard Error of Prediction = ",
+  #                     round(x$limits$SEP[1],digits=digits)
+  #                   ))
 
 
 
@@ -161,7 +161,7 @@ print.tolerance_delta <- function(x,
   cat("\n")
   print(pr_table3, digits = digits, row.names = FALSE)
   cat("\n")
-  cat(var_print, sep = "")
+  #cat(var_print, sep = "")
   cat("\n")
 
 }
