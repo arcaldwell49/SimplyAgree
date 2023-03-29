@@ -13,6 +13,7 @@ tolerance_delta_gls(
   time = NULL,
   pred_level = 0.95,
   tol_level = 0.95,
+  tol_method = c("approx", "perc"),
   prop_bias = FALSE,
   log_tf = FALSE,
   cor_type = c("sym", "car1", "ar1", "none"),
@@ -22,23 +23,25 @@ tolerance_delta_gls(
 )
 }
 \arguments{
-\item{data}{Data frame with all data.}
+\item{data}{A data frame containing the variables x, y, id, condition, and time.}
 
-\item{x}{Name of column with first measurement}
+\item{x}{Name of the variable for the first measurement.}
 
-\item{y}{Name of other column with the other measurement to compare to the first.}
+\item{y}{Name of the variable for the second measurement.}
 
-\item{id}{Column with subject identifier. Default is "id" if no entry is provided.}
+\item{id}{Name of the variable for the subject ID.}
 
 \item{condition}{Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
 
 \item{time}{A column naming/numbering the time point. Only necessary if the data is from time series collection.}
 
-\item{pred_level}{The prediction level. Default is 95\%.}
+\item{pred_level}{Prediction level for the prediction interval. Default is 95\%.}
 
-\item{tol_level}{The tolerance level related to the prediction level. Default is 95\%.}
+\item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the predicition limit). Default is 95\%.}
 
-\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the prediction/tolerance limits calculations.}
+\item{tol_method}{Method for calculating the tolerance interval.}
+
+\item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.}
 
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
 
@@ -48,10 +51,10 @@ tolerance_delta_gls(
 
 \item{weights}{an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.}
 
-\item{keep_model}{Logical indicator to retain the GLS model. Useful when working with large datasets and the model is very large.}
+\item{keep_model}{Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.}
 }
 \value{
-Returns single tolerance_delta class object with the results of the agreement analysis with prediction/tolerance limits..
+Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 
 \describe{
   \item{\code{"limits"}}{A data frame containing the prediction/tolerance limits.}
@@ -62,8 +65,20 @@ Returns single tolerance_delta class object with the results of the agreement an
 \description{
 A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
 }
+\details{
+The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
+When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
+However, these are only an approximation and overly conservative.
+Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
+}
 \section{References}{
 
+
+Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in medicine, 35(14), 2328-2358.
+
+Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.
+
+Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.
 }
 
 \examples{

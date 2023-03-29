@@ -17,7 +17,12 @@
 #' @param weights an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
 #' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
 #'
-#' @return Returns single\code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
+#' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
+#' When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
+#' However, these are only an approximation and overly conservative.
+#' Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
+#'
+#' @return Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
 #' \describe{
 #'   \item{\code{"limits"}}{A data frame containing the prediction/tolerance limits.}
@@ -37,6 +42,7 @@
 #' Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.
 #'
 #' @importFrom nlme gls  corCompSymm corAR1 corCAR1 varIdent
+#' @importFrom emmeans ref_grid
 #' @importFrom dplyr inner_join join_by
 #' @export
 
@@ -98,6 +104,7 @@ tolerance_delta_gls = function(data,
   # MODEL ----
   model = gls(delta ~ 1, data = temp_frame)
 
+  ## Update model with condition -----
   if(!is.null(condition)){
     model = update(model,
                    . ~ . + condition,
@@ -105,28 +112,32 @@ tolerance_delta_gls = function(data,
 
   }
 
+  ## Update model for prop bias ----
   if(prop_bias){
     model = update(model,
                    . ~ . + avg)
   }
 
+  ## Correlation -----
   if(!is.null(id) && cor_type != "none"){
 
     if(!is.null(time)){
       cor1 = switch(cor_type,
-                    sym = corCompSymm(form = ~time|id),
-                    car1 = corCAR1(form = ~time|id),
-                    ar1 = corAR1(form= ~time|id))
+                    sym = nlme::corCompSymm(form = ~time|id),
+                    car1 = nlme::corCAR1(form = ~time|id),
+                    ar1 = nlme::corAR1(form= ~time|id))
     } else {
       cor1 = switch(cor_type,
-                    sym = corCompSymm(form = ~1|id),
-                    car1 = corCAR1(form = ~1|id),
-                    ar1 = corAR1(form= ~1|id))
+                    sym = nlme::corCompSymm(form = ~1|id),
+                    car1 = nlme::corCAR1(form = ~1|id),
+                    ar1 = nlme::corAR1(form= ~1|id))
     }
 
     model = update(model,
                    correlation = cor1)
   }
+
+  ## Custom model input -----
 
   if(!is.null(weights)){
     model = update(model,
@@ -143,6 +154,7 @@ tolerance_delta_gls = function(data,
   ## Ref Grid then Marginal Means ----
   # Need to have condition and/or avg in ref grid
   # otherwise just 1
+
   res_emm = gls_emm_delta(model = model,
                           temp_frame = temp_frame,
                           avg_vals = avg_vals)
@@ -229,23 +241,27 @@ gls_emm_delta = function(model,
       res_emm = emmeans(ref_grid(model,
                                  at = list(avg = avg_vals)),
                         ~ condition + avg,
-                        mode = "satterthwaite")
+                        mode = "satterthwaite",
+                        data = temp_frame)
     } else{
       res_emm = emmeans(ref_grid(model,
                                  at = list(avg = avg_vals)),
                         ~ avg,
-                        mode = "satterthwaite")
+                        mode = "satterthwaite",
+                        data = temp_frame)
     }
 
   } else {
     if("condition" %in% paste0(nlme::getCovariateFormula(model))){
       res_emm = emmeans(model,
                         ~ condition ,
-                        mode = "satterthwaite")
+                        mode = "satterthwaite",
+                        data = temp_frame)
     } else{
       res_emm = emmeans(model,
                         ~ 1 ,
-                        mode = "satterthwaite")
+                        mode = "satterthwaite",
+                        data = temp_frame)
     }
   }
   return(res_emm)
