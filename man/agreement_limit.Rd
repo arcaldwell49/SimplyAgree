@@ -28,7 +28,7 @@ agreement_limit(
 
 \item{data_type}{The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).}
 
-\item{loa_calc}{The mehtod by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).}
+\item{loa_calc}{The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).}
 
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 

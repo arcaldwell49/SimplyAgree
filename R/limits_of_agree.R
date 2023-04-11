@@ -9,7 +9,7 @@
 #' @param alpha The alpha-level for confidence levels.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).
-#' @param loa_calc The mehtod by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
+#' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
 #' @return Returns single loa class object with the results of the agreement analysis.
 #'
 #' \describe{
