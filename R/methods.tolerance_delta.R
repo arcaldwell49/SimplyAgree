@@ -354,7 +354,8 @@ check.tolerance_delta <- function(x) {
   }
 
 
-  dat = df
+  dat = model.frame(x$call$lm_mod)
+  colnames(dat) = c("y","x","id","mean","delta","condition","time")
   ## Heteroskedasticity -------
   mod_check = if (call2$data_type != "simple") {
     lme4::lmer(data = dat,
@@ -364,10 +365,10 @@ check.tolerance_delta <- function(x) {
        form_lm1)
   }
 
-  stan_res = residuals(mod_check, type = "pearson")
-  df_het = df.residual(mod_check)
+  stan_res = residuals(x$model, type = "pearson")
+  df_het = x$model$dims[["N"]] - x$model$dims[["p"]]
   sum_het_res = sum(!is.na(stan_res))
-  sigma_het = sigma(mod_check)
+  sigma_het = sigma(x$model)
 
   s_sq = df_het * sigma_het^2 / sum_het_res
 
@@ -381,7 +382,7 @@ check.tolerance_delta <- function(x) {
   ### Breusch-Pagan Test
   p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
 
-  rstan_het =  residuals(mod_check, scaled = TRUE)
+  rstan_het =  residuals(x$model, scaled = TRUE)
   dat_het <- data.frame(
     x = na.omit(dat$mean),
     y = na.omit(sqrt(abs(rstan_het)))
@@ -401,7 +402,7 @@ check.tolerance_delta <- function(x) {
 
 
   ## Normality ------------
-
+  mod_check = x$model
   mod_res = residuals(mod_check)
   if(length(mod_res) < 5000){
     norm_test = shapiro.test(mod_res)
@@ -412,9 +413,9 @@ check.tolerance_delta <- function(x) {
     norm_text = "Kolmogorov-Smirnov Test"
   }
 
-  rstan_norm = sort(rstudent(mod_check), na.last = NA)
+  rstan_norm = sort(resid(mod_check, type = "normalized"), na.last = NA)
   dat_norm <- na.omit(data.frame(y = rstan_norm))
-  p_norm = plot_qq(
+  p_norm = SimplyAgree:::plot_qq(
     x = dat_norm
   ) +
     labs(caption = paste0("Normality", " \n",
@@ -446,10 +447,7 @@ check.tolerance_delta <- function(x) {
 
   dat2 = data.frame(resid = residuals(mod_check),
                     mean = na.omit(dat$mean))
-  p_bias = plot_bias(dat2) +
-    labs(caption = paste0("Proportional Bias", " \n",
-                          "Test for Linear Bias", ": p = ",
-                          signif(lin_pval,4))) +
+  p_bias = SimplyAgree:::plot_bias(dat2) +
     theme(
       panel.background = element_rect(fill='transparent'), #transparent panel bg
       plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
