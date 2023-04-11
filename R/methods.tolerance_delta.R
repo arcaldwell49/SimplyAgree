@@ -266,7 +266,7 @@ plot.tolerance_delta <- function(x,
                 pred.level * 100,
                 "% \n",
                 "Tolerance Limits = ",
-                tol.level * 100,
+                x$call$tol_level * 100,
                 "%")
   if(call2$prop_bias){
 
@@ -329,6 +329,7 @@ plot.tolerance_delta <- function(x,
         name = "Maximal Allowable Difference"))
   }
 
+  return(bland_alt.plot)
 
 
 }
@@ -357,13 +358,7 @@ check.tolerance_delta <- function(x) {
   dat = model.frame(x$call$lm_mod)
   colnames(dat) = c("y","x","id","mean","delta","condition","time")
   ## Heteroskedasticity -------
-  mod_check = if (call2$data_type != "simple") {
-    lme4::lmer(data = dat,
-               form_lmer1)
-  } else {
-    lm(data = dat,
-       form_lm1)
-  }
+
 
   stan_res = residuals(x$model, type = "pearson")
   df_het = x$model$dims[["N"]] - x$model$dims[["p"]]
@@ -431,19 +426,6 @@ check.tolerance_delta <- function(x) {
     )
 
   # Proportional Bias -----
-  if(call2$data_type == "simple"){
-    mod2 = lm(delta ~ mean,
-              data = dat)
-    aov2 = as.data.frame(anova(mod_check, mod2))
-    colnames(aov2) = c("df1","RSS","df2","SS","f","p")
-    lin_pval = aov2$p[2]
-  } else {
-    mod2 = lmer(data = dat,
-                delta ~ mean + (1 | id))
-    aov2 = suppressMessages(as.data.frame(anova(mod_check, mod2)))
-    colnames(aov2) = c("npar","AIC","BIC","log_lik","dev","chisq","df","p")
-    lin_pval = aov2$p[2]
-  }
 
   dat2 = data.frame(resid = residuals(mod_check),
                     mean = na.omit(dat$mean))
