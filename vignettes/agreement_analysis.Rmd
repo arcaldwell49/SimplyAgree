@@ -72,7 +72,7 @@ Overall, the model is fit using the `gls` function, and I would suggest reading 
 
 Users of the this function have a number of options with the arguments provided in the `tolerance_limit` function. The only required arguments are `x`, `y`, and `data` which dictate the data frame, and the columns that contain the 2 measurements. The `id` argument, when specified, identifies the column that contains the subject identifier or some time of nesting within which the data should be correlated to some degree. The `time`, argument is utilized when the data come from a repeated measures or time series data, and indicates the order of the data points. The `condition` argument identifies some factor within a data frame that may effect the mean difference (and variance) of the differences between the 2 measurements. The `cor_type` argument can also be utilized to specific 1 of 3 possible correlation structure types. Lastly, savvy users can specify a particular variance or correlation structure using the `weights` and `correlation` arguments which directly alter the model being fit using `gls`.
 
-### Prediction Interval
+### Prediction 
 
 After the model is fit, the marginal means (EMM), and their associated standard errors (SEM), are calculated based on the `gls` fit model using `emmeans`. The standard error of prediction (SEP) for each EMM is then calculated using the SEM and residual standard error from the model (formula below).
 
@@ -88,7 +88,19 @@ $$
 
 **NOTE**: the degrees of freedom (df) are calculated using Satterthwaite's approximation.
 
-### Tolerance Limits
+### Tolerance 
+
+Tolerance limits are calculated either through the "Beta expectation" approximation detailed by @francq2020tolerate or through a parametric bootstrap method. 
+The bootstrap methods re-samples from the model and after a certain number of replicates (default is 1999) calculates the bounds the prediction interval.
+The bootstrap method is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes.
+The approximation is the default only because it is substantially quicker.
+
+The approximate tolerance limits based on the work of @francq2020tolerate are calculated as the following:
+
+$$
+TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
+$$
+**NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument) whereas $alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument).
 
 # Agreement
 
