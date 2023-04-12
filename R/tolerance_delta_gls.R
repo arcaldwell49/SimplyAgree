@@ -1,4 +1,4 @@
-#' Calculate the Tolerance Limits from a Agreement Study
+#' Tolerance Limits from an Agreement Study
 #'
 #' @description A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
 #' @param data A data frame containing the variables.
@@ -49,7 +49,7 @@
 #' @importFrom Matrix chol Matrix bdiag
 #' @export
 
-tolerance_delta_gls = function(data,
+tolerance_limit = function(data,
                                x,
                                y,
                                id = NULL,

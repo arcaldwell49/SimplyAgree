@@ -359,17 +359,20 @@ check.tolerance_delta <- function(x) {
   colnames(dat) = c("y","x","id","mean","delta","condition","time")
   ## Heteroskedasticity -------
 
+  #stan_res = residuals(x$model, type = "pearson")
+  #df_het = x$model$dims[["N"]] - x$model$dims[["p"]]
+  #sum_het_res = sum(!is.na(stan_res))
+  #sigma_het = sigma(x$model)
+  #s_sq = df_het * sigma_het^2 / sum_het_res
+  #u_het = stan_res^2 / s_sq
 
-  stan_res = residuals(x$model, type = "pearson")
-  df_het = x$model$dims[["N"]] - x$model$dims[["p"]]
-  sum_het_res = sum(!is.na(stan_res))
-  sigma_het = sigma(x$model)
-
-  s_sq = df_het * sigma_het^2 / sum_het_res
-
-  u_het = stan_res^2 / s_sq
-
-  mod <- lm(u_het ~ na.omit(dat$mean))
+  rstan_het =  residuals(x$model, scaled = TRUE)
+  dat_het <- data.frame(
+    x = na.omit(dat$mean),
+    y = na.omit(sqrt(abs(rstan_het)))
+  )
+  mod <- lm(y ~ x,
+            data=dat_het)
 
   SS <- anova(mod)$"Sum Sq"
   RegSS <- sum(SS) - SS[length(SS)]
@@ -377,11 +380,7 @@ check.tolerance_delta <- function(x) {
   ### Breusch-Pagan Test
   p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
 
-  rstan_het =  residuals(x$model, scaled = TRUE)
-  dat_het <- data.frame(
-    x = na.omit(dat$mean),
-    y = na.omit(sqrt(abs(rstan_het)))
-  )
+
   p_het = plot_het(dat_het) +
     labs(caption = paste0("Heteroskedasticity", " \n",
                           "Breusch-Pagan Test: p = ",
