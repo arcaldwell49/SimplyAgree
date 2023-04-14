@@ -105,6 +105,19 @@ $$
 
 ## Example 
 
+In the `temps` data we have different measures of core temperature at varying times of day. 
+Let us assume we want to measure pre-exercise agreement between esophageal and rectal temperature while controlling for time of day (`tod`).
+
+```{r}
+test1 = tolerance_limit(data = temps,
+                        x = "teso_pre",
+                        y = "trec_pre",
+                        id = "id",
+                        condition = "tod")
+
+test1
+```
+
 
 
 # Agreement
@@ -114,7 +127,7 @@ There are only 3 types of calculations that can be made: simple, replicate, and 
 The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
 Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
 
-The `agreement_limit` function, unlike the other agreement functions in the package, allows users to make any of the three calculations all in one function.
+The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all in one function.
 
 ## Arguments Influencing the Calculations
 
@@ -144,59 +157,92 @@ a1 = agreement_limit(data = reps,
 a1
 ```
 
+### Calculation Steps
 
-# Repeated Measures Agreement
+The reported limits of agreement are derived from the work of @bland1986 and @bland1999.
 
-In many cases there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates; `agree_reps`), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested design; `agree_nest`).
+**LoA**
 
-The confidence limits on the limits of agreement are based on the "MOVER" method described in detail by @zou2011. However, both functions operate similarly to `agree_test`; the only difference being that the data has to be provided as a `data.frame` in R.
 
-## `agree_reps`
+$$
+LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
+$$
 
-This function is for cases where the underlying values do *not* vary within subjects. This can be considered cases where replicate measure may be taken. For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
 
-So, for this function you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. An additional column indicating the subject identifier (`id`) must also be provided. Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
+wherein $z_{1-(1-agree)/2}$ is the value of the normal distribution at the given agreement level (default is 95%), $\bar d$ is the mean of the differences, and $S_d$ is the standard deviations of the differences.
+
+**Confidence Interval**
+
+1. Calculate variance of LoA
+
+$$
+S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_{1-(1-agree)/2}}{2 \cdot(N-1)} }
+$$
+
+
+2.  Calculate Left Moving Estimator
+
+**Bland-Altman Method**
+
+$$
+LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
+$$
+**MOVER Method**
+sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2)
+$$
+LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot (\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
+$$
+
+
+3. Calculate Confidence Interval
+
+$$
+Lower \space LoA \space C.I. = Lower \space LoA - LME
+$$
+
+
+$$
+Upper \space LoA \space C.I. = Upper \space LoA + LME
+$$
+
+
+## Repeated Measures Agreement
+
+In many cases there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., `data_type = "reps"`), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., `data_type = "nest"`).
+
+## Replicates
+
+This limit of agreement type is for cases where the underlying values do *not* vary within subjects. This can be considered cases where replicate measure may be taken. For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
+
+So, you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. An additional column indicating the subject identifier (`id`) must also be provided. Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
 
 ```{r}
-a2 = agree_reps(x = "x",
+a2 = agreement_limit(x = "x",
                 y = "y",
                 id = "id",
                 data = reps,
+                data_type = "reps",
                 agree.level = .8)
+
+a2
 ```
 
-The results can then be printed and plotted.
 
-```{r}
-print(a2)
-```
-```{r, fig.width=6, fig.height=6}
-plot(a2)
-```
+## Nested
 
-## `agree_nest`
-
-This function is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days.
-
-The function works almost identically to `agree_reps` but the underlying calculations are different
+This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days.
 
 
 ```{r}
-a3 = agree_nest(x = "x",
+a3 = agreement_limit(x = "x",
                 y = "y",
                 id = "id",
                 data = reps,
+                data_type = "nest",
                 agree.level = .8)
+a3
 ```
 
-The printed results (and plots) are very similar to `agree_reps`. However, the CCC result now has a warning because the calculation in this scenario may not be entirely appropriate given the nature of the data.
-
-```{r}
-print(a3)
-```
-```{r, fig.width=6, fig.height=6}
-plot(a3)
-```
 
 # How to Test a Hypothesis
 
@@ -213,11 +259,17 @@ All 3 plots will have a statistical test in the bottom right corner^[No test is 
 ## An Example
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                agree.level = .8)
+test_agree = agreement_limit(x = "x",
+                           y = "y",
+                           data = reps)
 
-check(a1)
+check(test_agree)
+
+test_tol = tolerance_limit(x = "x",
+                           y = "y",
+                           data = reps)
+
+check(test_tol)
 ```
 
 
@@ -228,17 +280,18 @@ As the check plots for `a1` show, proportional bias can sometimes occur. In thes
 For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots and checks of the data should always be inspected.
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                prop_bias = TRUE,
-                agree.level = .8)
-print(a1)
+
+test_tol = tolerance_limit(x = "x",
+                           y = "y",
+                           data = reps,
+                           prop_bias = TRUE)
+print(test_tol)
 
 # See effect of proportional bias on limits
-plot(a1)
+plot(test_tol)
 
 # Confirm its effects in proportional bias check plot (should be horizontal now)
-check(a1)
+check(test_tol)
 ```
 
 
