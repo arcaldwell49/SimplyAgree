@@ -8,21 +8,20 @@
 \format{
 A data frame with 20 rows with 3 variables
 \describe{
-  \item{id}{Subject identifier}
-  \item{x}{X measurement}
-  \item{y}{Y measurement}
-
+\item{id}{Subject identifier}
+\item{x}{X measurement}
+\item{y}{Y measurement}
 
 }
 
 A data frame with 17 rows with 5 variables
 \describe{
-  \item{id}{Subject identifier}
-  \item{wright1}{PERF measurement #1 using Wright device}
-  \item{wright2}{PERF measurement #2 using Wright device}
-  \item{mini1}{PERF measurement #1 using Mini device}
-  \item{mini2}{PERF measurement #2 using Mini device}
- }
+\item{id}{Subject identifier}
+\item{wright1}{PERF measurement #1 using Wright device}
+\item{wright2}{PERF measurement #2 using Wright device}
+\item{mini1}{PERF measurement #1 using Mini device}
+\item{mini2}{PERF measurement #2 using Mini device}
+}
 }
 \usage{
 reps

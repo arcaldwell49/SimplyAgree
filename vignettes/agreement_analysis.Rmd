@@ -86,12 +86,13 @@ $$
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 $$
 
-**NOTE**: the degrees of freedom (df) are calculated using Satterthwaite's approximation.
+**NOTE**: the degrees of freedom (df) are calculated using approximation of satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
 
 ### Tolerance 
 
-Tolerance limits are calculated either through the "Beta expectation" approximation detailed by @francq2020tolerate or through a parametric bootstrap method. 
-The bootstrap methods re-samples from the model and after a certain number of replicates (default is 1999) calculates the bounds the prediction interval.
+The type of tolerance limit calculation can be set using the `tol_method` argument with options including "approx" and "perc".
+Tolerance limits are calculated either through the "Beta expectation" approximation (`tol_method = "approx"`) detailed by @francq2020tolerate or through a parametric bootstrap method (`tol_method = "perc"`). 
+The bootstrap methods re-samples from the model and, after a certain number of replicates (default is 1999), calculates the bounds the prediction interval based on the quantiles of the replicates for the lower and upper limit.
 The bootstrap method is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes.
 The approximation is the default only because it is substantially quicker.
 
@@ -100,65 +101,49 @@ The approximate tolerance limits based on the work of @francq2020tolerate are ca
 $$
 TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
 $$
-**NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument) whereas $alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument).
+**NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument; `1-pred_level`) whereas $\alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument; `1-tol_level`).
+
+## Example 
+
+
 
 # Agreement
 
-## Calculations for Simple Agreement
+The agreement limits calculations in `SimplyAgree` are a tad more constrained that tolerance limits.
+There are only 3 types of calculations that can be made: simple, replicate, and nested.
+The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
+Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
 
-## Calculations for Replicate Agreement
+The `agreement_limit` function, unlike the other agreement functions in the package, allows users to make any of the three calculations all in one function.
 
-## Calculations for Nested Agreement
+## Arguments Influencing the Calculations
+
+Users of the this function have a number of options with the arguments provided in the `agreement_limit` function. 
+The only required arguments are `x`, `y`, and `data` which dictate the data frame, 
+and the columns that contain the 2 measurements. 
+The `id` argument, when specified, identifies the column that contains the subject identifier. 
+This is only necessary if it is a replicate or nested design.
+The type of design is dictated by `data_type` argument.
+Additionally, the `loa_calc` function dictates how the limits of agreement are calculated.
+Users have the option of computing @bland1999 or MOVER [@zou2011; @donner2012closed] limits of agreement (calculations detailed below).
+I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altman limits [@zou2011; @donner2012closed].
 
 
-# Simple Agreement
+## Simple Agreement
 
-In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). In this scenario each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
+In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). In this scenario each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant that is uncorrelated with other pairs.
 
-The data for the two measurements are put into the `x` and `y` arguments. If there is a hypothesized limit of agreement then this can be set with the `delta` argument (this is optional). Next, the limit of agreement can be set with the `agree.level` and the confidence level ($1-\alpha$). Once those are set the analysis can be run. Please note, this package has pre-loaded data from the Zou 2013 paper. While data does not conform the assumptions of the test it can be used to test out many of the functions in this package. Since there isn't an *a priori* hypothesis I will not declare a `delta` argument, but I will estimate the 95% confidence intervals for 80% limits of agreement.
+The data for the two measurements are put into the `x` and `y` arguments. 
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                agree.level = .8)
+# Calc. LoA
+a1 = agreement_limit(data = reps,
+                     x = "x",
+                     y = "y")
+# print
+a1
 ```
 
-We can then print the general results. These results include the general parameters of the analysis up top, then the results of the Shieh exact test for agreement (no conclusion is included due to the lack of a `delta` argument being set). Then the limits of agreement, with confidence limits, are included. Lastly, Lin's Concordance Correlation Coefficient, another measure of agreement, is also included.
-
-```{r}
-print(a1)
-```
-
-Next, we can use the generic `plot` function to produce visualizations of agreement. This includes the Bland-Altman plot (`type = 1`) and a line-of-identity plot (`type = 2`).
-
-```{r, fig.width=6, fig.height=6}
-plot(a1, type = 1)
-
-plot(a1, type = 2) 
-```
-
-
-## Calculations in for Simple Agreement
-
-
-### Limits of Agreement
-
-The reported limits of agreement are derived from the work of @bland1986 and @bland1999.
-
-**LoA**
-
-$$
-LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
-$$
-wherein $z_{1-(1-agree)/2}$ is the value of the normal distribution at the given agreement level (default is 95%), $\bar d$ is the mean of the differences, and $S_d$ is the standard deviations of the differences.
-
-**Confidence Interval**
-
-$$
-LoA_{C.I.} = LoA \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
-$$
-
-wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores. If `TOST` is set to TRUE then equation is altered slightly with the critical t ($t_{1-\alpha,N-1}$).
 
 # Repeated Measures Agreement
 
@@ -213,225 +198,17 @@ print(a3)
 plot(a3)
 ```
 
-## Calculations for `agree_reps` & `agree_nest`
+# How to Test a Hypothesis
 
-All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
-
-## `agree_nest` LoA
-
-**Step 1: Calculate Individual Subject Means and Variances**
-
-$$
-\bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
-$$
-$$
-\bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
-$$
-$$
-\bar d_i = \bar x_i - \bar y_i
-$$
-
-$$
-\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
-$$
-
-$$
-s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
-$$
-
-$$
-s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
-$$
-
-$$
-s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
-$$
-
-**Step 2: Compute pooled estimates of within subject errors**
-
-$$
-s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
-$$
-
-$$
-s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
-$$
-
-**Step 3: Compute Harmonic Means of Replicates**
-
-$$
-m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
-$$
-
-$$
-m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
-$$
-**Step 4: Compute the variance of the differences**
-
-$$
-s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
-$$
-**Step 5: Compute MOVER Components**
-
-$$
-S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
-$$
-
-$$
-S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
-$$
-$$
-S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
-$$
-
-$$
-S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
-$$
-$$
-l = s_d^2 - S_1
-$$
-
-$$
-u = s_d^2 + S_1
-$$
-
-$$
-LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
-$$
-
-$$
-RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
-$$
-### LoA
-
-$$
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-$$
-
-$$
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-$$
-
-### Lower LoA CI
-
-$$
-Lower \space CI = LoA_{lower} - LME
-$$
-
-
-$$
-Upper \space CI = LoA_{lower} + RME
-$$
-
-### Upper LoA CI
-
-$$
-Lower \space CI = LoA_{upper} - RME
-$$
-
-
-$$
-Upper \space CI = LoA_{upper} + LME
-$$
-
-## `agree_reps` LoA
-
-### LoA
-
-**Step 1: Compute mean and variance**
-
-$$
-\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
-$$
-$$
-\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
-$$
-
-$$
-s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
-$$
-**Step 2: Compute pooled estimate of within subject error**
-
-$$
-s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
-$$
-
-**Step 3: Compute pooled estimate of between subject error**
-
-$$
-s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
-$$
-
-**Step 4: Compute the harmonic mean of the replicate size**
-
-$$
-m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
-$$
-
-**Step 5: Compute SD of the difference **
-
-$$
-s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
-$$
-**Step 6: Calculate l and u**
-
-$$
-l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-$$
-$$
-u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-$$
-**Step 7: Compute LME and RME**
-
-$$
-LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
-$$
-
-$$
-RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
-$$
-
-
-### LoA
-
-$$
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-$$
-
-
-$$
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-$$
-
-### Lower LoA CI
-
-$$
-Lower \space CI = LoA_{lower} - LME
-$$
-
-
-$$
-Upper \space CI = LoA_{lower} + RME
-$$
-
-### Upper LoA CI
-
-$$
-Lower \space CI = LoA_{upper} - RME
-$$
-
-
-$$
-Upper \space CI = LoA_{upper} + LME
-$$
+- MAD for plots
 
 # Checking Assumptions
 
-The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method.
+The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method for either agreement or tolerance limits.
 
 The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and residuals plot.
 
-All 3 plots will have a statistical test in the bottom right corner. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
+All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
 
 ## An Example
 
@@ -448,7 +225,7 @@ check(a1)
 
 As the check plots for `a1` show, proportional bias can sometimes occur. In these cases @bland1999 recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
 
-For any of the "agree" functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots of the data should always be inspected
+For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots and checks of the data should always be inspected.
 
 ```{r}
 a1 = agree_test(x = reps$x,
@@ -457,13 +234,17 @@ a1 = agree_test(x = reps$x,
                 agree.level = .8)
 print(a1)
 
+# See effect of proportional bias on limits
 plot(a1)
+
+# Confirm its effects in proportional bias check plot (should be horizontal now)
+check(a1)
 ```
 
 
-# "Big" Data
+# Visualizing "Big" Data
 
-Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom_point` argument.
+Sometimes there may be a lot of data and individual points of data on mean difference visualization may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom` argument.
 
 ```{r}
 set.seed(81346)

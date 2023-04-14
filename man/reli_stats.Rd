@@ -62,49 +62,61 @@ reli_aov(
 }
 \value{
 Returns single list with the results of the agreement analysis.
-
-\describe{
-  \item{\code{"icc"}}{Table of ICC results}
-  \item{\code{"lmer"}}{Linear mixed model from lme4}
-  \item{\code{"anova"}}{Analysis of Variance table}
-  \item{\code{"var_comp"}}{Table of Variance Components}
-  \item{\code{"n.id"}}{Number of subjects/participants}
-  \item{\code{"n.items"}}{Number of items/time points}
-  \item{\code{"cv"}}{Coefficient of Variation}
-  \item{\code{"SEM"}}{List with Standard MSE of Measurement estimate (est) }
-  \item{\code{"SEE"}}{List with Standard MSE of the Estimate estimate (est)}
-  \item{\code{"SEP"}}{List with Standard MSE of Predicitions (est)}
-  \item{\code{"call"}}{the matched call}
-
+\itemize{
+\item \code{icc}: Table of ICC results
+\item \code{lmer}: Linear mixed model from lme4
+\item \code{anova}: Analysis of Variance table
+\item \code{var_comp}: Table of Variance Components
+\item \code{n.id}: Number of subjects/participants
+\item \code{n.items}: Number of items/time points
+\item \code{cv}: Coefficient of Variation
+\item \code{SEM}: List with Standard MSE of Measurement estimate (est)
+\item \code{SEE}: List with Standard MSE of the Estimate estimate (est)
+\item \code{SEP}: List with Standard MSE of Predicitions (est)
+\item \code{call}: the matched call
 }
 }
 \description{
-The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
+This includes intraclass correlation coefficients, the coefficient of variation,
+and the standard MSE of measurement.
 }
 \details{
-These functions return intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
+These functions return intraclass correlation coefficients
+and other measures of reliability (CV, SEM, SEE, and SEP).
 The estimates of variances for any of the measures are derived from linear mixed models.
-When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
+When other_ci is set to TRUE,
+then a parametric bootstrap approach to calculating confidence intervals is used for the
+CV, SEM, SEE, and SEP.
 
-reli_stats uses a linear mixed model to estimate variance components. In some cases there are convergence issues.
+reli_stats uses a linear mixed model to estimate variance components.
+In some cases there are convergence issues.
 When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
 The results may differ slightly between the functions.
-If reli_aov is used then rows with missing observations (e.g., if a participant has a missing observation) will be dropped.
+If reli_aov is used then rows with missing observations
+(e.g., if a participant has a missing observation) will be dropped.
 
-The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
-The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
+The CV calculation has 3 versions. The "MSE" uses the "mean squared error"
+from the linear mixed model used to calculate the ICCs.
+The "SEM" option instead uses the SEM calculation and
+expresses CV as a ratio of the SEM to the overall mean.
 The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 
 The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
-For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+For the CV, the default method (\code{type = "chisq"}) is Vangal's modification of the McKay approximation.
 For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
-All other methods are bootstrapping based methods (see ?boot::boot).
+All other methods are bootstrapping based methods (see \code{?boot::boot}).
 The reli_stats functions utilizes a parametric bootstrap while the reli_aov
 function utilizes an ordinary (non-parametric) bootstrap method.
 }
-\section{References}{
+\examples{
+data('reps')
+reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 
-
+}
+\references{
 Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
 
 Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
@@ -114,10 +126,4 @@ McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass c
 Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
 
 Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
-}
-
-\examples{
-data('reps')
-reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
-
 }

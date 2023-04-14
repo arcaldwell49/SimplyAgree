@@ -37,14 +37,15 @@ dem_reg(
 }
 \value{
 The function returns a simple_eiv (eiv meaning "error in variables") object.
-
-\describe{
-  \item{\code{"call"}}{The matched call.}
-  \item{\code{"model"}}{Data frame presenting the results from the Deming regression analysis.}
-  \item{\code{"resamples"}}{List containing resamples from jacknife procedure.}
+\itemize{
+\item \code{call}: The matched call.
+\item \code{model}: Data frame presenting the results from the Deming regression analysis.
+\item \code{resamples}: List containing resamples from jacknife procedure.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
 }
 \details{
@@ -52,15 +53,17 @@ This function provides a Deming regression analysis wherein the sum of distances
 Deming is useful in situations where both X & Y are measured with error.
 The use of Deming regression is beneficial when comparing to methods for measuring the same continuous variable.
 
-Currently, the dem_reg function covers simple Deming regression and weighted Deming regression. Weighted Deming regression can be used by setting weighted to TRUE. The weights can be provided by the user or can be calculated within function.
+Currently, the dem_reg function covers simple Deming regression and weighted Deming regression.
+Weighted Deming regression can be used by setting weighted to TRUE.
+The weights can be provided by the user or can be calculated within function.
 
-If the data are measured in replicates, then the measurement error can be directly derived from the data. This can be accomplished by indicating the subject identifier with the id argument.
-When the replicates are not available in the data, then the ratio of error variances (y/x) can be provided with the error.ratio argument.
+If the data are measured in replicates, then the measurement error can be directly derived from the data.
+This can be accomplished by indicating the subject identifier with the id argument.
+When the replicates are not available in the data,
+then the ratio of error variances (y/x) can be provided with the error.ratio argument.
 }
-\section{References}{
-
+\references{
 Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.
 
 Linnet, K. (1993). Evaluation of regression procedures for methods comparison studies. Clinical chemistry, 39, 424-432.
 }
-

@@ -29,7 +29,8 @@ Imports:
     nlme,
     purrr,
     Matrix,
-    MASS
+    MASS,
+    lifecycle
 Suggests: 
     knitr,
     rmarkdown,
@@ -44,3 +45,4 @@ VignetteBuilder:
     knitr
 Depends: 
     R (>= 3.6)
+Roxygen: list(markdown = TRUE)

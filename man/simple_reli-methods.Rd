@@ -22,8 +22,8 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the Limits of Agreement}
-  \item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
+\item{\code{print}}{Prints short summary of the Limits of Agreement}
+\item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
 }
 }
 \description{

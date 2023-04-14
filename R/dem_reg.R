@@ -1,10 +1,14 @@
 #' Deming Regression
-#' @description A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function for fitting a straight line to two-dimensional data (i.e., X and Y) are measured with error.
+#'
 #' @param x Name of column with first measurement
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier
 #' @param data Data frame with all data
-#' @param conf.level The confidence level required. Default is 95\%.
+#' @param conf.level The confidence level required. Default is 95%.
 #' @param weighted Logical indicator (TRUE/FALSE) for whether to use weighted Deming regression. Default is FALSE.
 #' @param weights an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
@@ -15,21 +19,22 @@
 #' Deming is useful in situations where both X & Y are measured with error.
 #' The use of Deming regression is beneficial when comparing to methods for measuring the same continuous variable.
 #'
-#' Currently, the dem_reg function covers simple Deming regression and weighted Deming regression. Weighted Deming regression can be used by setting weighted to TRUE. The weights can be provided by the user or can be calculated within function.
+#' Currently, the dem_reg function covers simple Deming regression and weighted Deming regression.
+#' Weighted Deming regression can be used by setting weighted to TRUE.
+#' The weights can be provided by the user or can be calculated within function.
 #'
-#' If the data are measured in replicates, then the measurement error can be directly derived from the data. This can be accomplished by indicating the subject identifier with the id argument.
-#' When the replicates are not available in the data, then the ratio of error variances (y/x) can be provided with the error.ratio argument.
+#' If the data are measured in replicates, then the measurement error can be directly derived from the data.
+#' This can be accomplished by indicating the subject identifier with the id argument.
+#' When the replicates are not available in the data,
+#' then the ratio of error variances (y/x) can be provided with the error.ratio argument.
 #' @returns
 #' The function returns a simple_eiv (eiv meaning "error in variables") object.
 #'
-#' \describe{
-#'   \item{\code{"call"}}{The matched call.}
-#'   \item{\code{"model"}}{Data frame presenting the results from the Deming regression analysis.}
-#'   \item{\code{"resamples"}}{List containing resamples from jacknife procedure.}
-#' }
-
+#'   - `call`: The matched call.
+#'   - `model`: Data frame presenting the results from the Deming regression analysis.
+#'   - `resamples`: List containing resamples from jacknife procedure.
 #'
-#' @section References:
+#' @references
 #' Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.
 #'
 #' Linnet, K. (1993). Evaluation of regression procedures for methods comparison studies. Clinical chemistry, 39, 424-432.

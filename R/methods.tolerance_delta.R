@@ -211,6 +211,7 @@ plot.tolerance_delta <- function(x,
   x_name = "x"
   y_name = "y"
   y_lab = "y"
+  if(is.null(x$call$condition)){
   df_loa2 = data.frame(
     text = factor(c(rep("Upper Limit",nrow(df_loa)),
                     rep("Bias",nrow(df_loa)),
@@ -221,6 +222,19 @@ plot.tolerance_delta <- function(x,
     lower.ci = c(df_loa$upper.PL, df_loa$lower.CL, df_loa$lower.TL),
     upper.ci = c(df_loa$upper.TL, df_loa$upper.CL, df_loa$lower.PL)
   )
+  } else {
+    df_loa2 = data.frame(
+      text = factor(c(rep("Upper Limit",nrow(df_loa)),
+                      rep("Bias",nrow(df_loa)),
+                      rep("Lower Limit",nrow(df_loa))),
+                    levels = c("Upper Limit", "Bias", "Lower Limit"),
+                    ordered  = TRUE),
+      condition = rep(df_loa$condition, nrow(df_loa)),
+      estimate = c(df_loa$upper.PL, df_loa$bias, df_loa$lower.PL),
+      lower.ci = c(df_loa$upper.PL, df_loa$lower.CL, df_loa$lower.TL),
+      upper.ci = c(df_loa$upper.TL, df_loa$upper.CL, df_loa$lower.PL)
+    )
+  }
   df_loa2$x = df_loa$avg
 
   #df_loa2$x = scalemin
@@ -327,6 +341,10 @@ plot.tolerance_delta <- function(x,
       scale_y_continuous(sec.axis = dup_axis(
         breaks = c(delta, -1*delta),
         name = "Maximal Allowable Difference"))
+  }
+
+  if(!is.null(x$call$condition)){
+    bland_alt.plot = bland_alt.plot + facet_wrap(~condition)
   }
 
   return(bland_alt.plot)

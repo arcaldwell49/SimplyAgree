@@ -21,8 +21,8 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-  \item{\code{find_n}}{Find sample size at which desired power is achieved}
+\item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
+\item{\code{find_n}}{Find sample size at which desired power is achieved}
 }
 }
 \description{

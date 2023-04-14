@@ -1,5 +1,5 @@
 home:
-  title: The SimplyAgree R package
+  title: SimplyAgree R package
   description: An R package for agreement and reliability estimation
 
 
@@ -14,7 +14,19 @@ template:
 
 reference:
 
-- title: "Agreement"
+- title: "Tolerance & Agreement"
+
+- subtitle: "Limits Calculations"
+  contents:
+  - tolerance_limit
+  - agreement_limit
+
+- subtitle: "Methods"
+  contents:
+  - loa-methods
+  - tolerance_delta-methods
+
+- title: "Agreement Tests"
 
 - subtitle: "Simple"
   contents:

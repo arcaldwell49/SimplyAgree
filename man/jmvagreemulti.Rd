@@ -57,11 +57,11 @@ plot}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
-  \code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
-  \code{results$plotba} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$blandtab} \tab \tab \tab \tab \tab a table \cr
+\code{results$ccctab} \tab \tab \tab \tab \tab a table \cr
+\code{results$plotba} \tab \tab \tab \tab \tab an image \cr
+\code{results$plotcon} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

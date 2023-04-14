@@ -1,60 +1,73 @@
 #' Reliability Statistics
-#' @description The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005). This includes intraclass correlation coefficients, the coefficient of variation, and the standard MSE of measurement.
+#'
+#' @description
+#'
+#' `r lifecycle::badge('stable')`
+#'
+#' The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
+#' This includes intraclass correlation coefficients, the coefficient of variation,
+#'  and the standard MSE of measurement.
+#'
 #' @param measure Name of column containing the measurement of interest
 #' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
 #' @param id Column with subject identifier
 #' @param data Data frame with all data
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
-#' @param conf.level the confidence level required. Default is 95\%.
+#' @param conf.level the confidence level required. Default is 95%.
 #' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
 #' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
 #' @param se_type Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.
 #' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
 #' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
-#' @details
-#' These functions return intraclass correlation coefficients and other measures of reliability (CV, SEM, SEE, and SEP).
-#' The estimates of variances for any of the measures are derived from linear mixed models.
-#' When other_ci is set to TRUE, then a parametric bootstrap approach to calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
 #'
-#' reli_stats uses a linear mixed model to estimate variance components. In some cases there are convergence issues.
+#' @details
+#' These functions return intraclass correlation coefficients
+#' and other measures of reliability (CV, SEM, SEE, and SEP).
+#' The estimates of variances for any of the measures are derived from linear mixed models.
+#' When other_ci is set to TRUE,
+#' then a parametric bootstrap approach to calculating confidence intervals is used for the
+#' CV, SEM, SEE, and SEP.
+#'
+#' reli_stats uses a linear mixed model to estimate variance components.
+#' In some cases there are convergence issues.
 #' When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
 #' The results may differ slightly between the functions.
-#' If reli_aov is used then rows with missing observations (e.g., if a participant has a missing observation) will be dropped.
+#' If reli_aov is used then rows with missing observations
+#' (e.g., if a participant has a missing observation) will be dropped.
 #'
-#' The CV calculation has 3 versions. The "MSE" uses the "mean squared error" from the linear mixed model used to calculate the ICCs.
-#' The "SEM" option instead uses the SEM calculation and expresses CV as a ratio of the SEM to the overall mean.
+#' The CV calculation has 3 versions. The "MSE" uses the "mean squared error"
+#' from the linear mixed model used to calculate the ICCs.
+#' The "SEM" option instead uses the SEM calculation and
+#' expresses CV as a ratio of the SEM to the overall mean.
 #' The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
 #'
 #' The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
-#' For the CV, the default method (type = "chisq") is Vangal's modification of the McKay approximation.
+#' For the CV, the default method (`type = "chisq"`) is Vangal's modification of the McKay approximation.
 #' For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
-#' All other methods are bootstrapping based methods (see ?boot::boot).
+#' All other methods are bootstrapping based methods (see `?boot::boot`).
 #' The reli_stats functions utilizes a parametric bootstrap while the reli_aov
 #' function utilizes an ordinary (non-parametric) bootstrap method.
 #'
 #' @return Returns single list with the results of the agreement analysis.
 #'
-#' \describe{
-#'   \item{\code{"icc"}}{Table of ICC results}
-#'   \item{\code{"lmer"}}{Linear mixed model from lme4}
-#'   \item{\code{"anova"}}{Analysis of Variance table}
-#'   \item{\code{"var_comp"}}{Table of Variance Components}
-#'   \item{\code{"n.id"}}{Number of subjects/participants}
-#'   \item{\code{"n.items"}}{Number of items/time points}
-#'   \item{\code{"cv"}}{Coefficient of Variation}
-#'   \item{\code{"SEM"}}{List with Standard MSE of Measurement estimate (est) }
-#'   \item{\code{"SEE"}}{List with Standard MSE of the Estimate estimate (est)}
-#'   \item{\code{"SEP"}}{List with Standard MSE of Predicitions (est)}
-#'   \item{\code{"call"}}{the matched call}
-#'
-#' }
+#'   - `icc`: Table of ICC results
+#'   - `lmer`: Linear mixed model from lme4
+#'   - `anova`: Analysis of Variance table
+#'   - `var_comp`: Table of Variance Components
+#'   - `n.id`: Number of subjects/participants
+#'   - `n.items`: Number of items/time points
+#'   - `cv`: Coefficient of Variation
+#'   - `SEM`: List with Standard MSE of Measurement estimate (est)
+#'   - `SEE`: List with Standard MSE of the Estimate estimate (est)
+#'   - `SEP`: List with Standard MSE of Predicitions (est)
+#'   - `call`: the matched call
 
 #' @examples
 #' data('reps')
 #' reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 #'
-#' @section References:
+#' @references
 #'
 #' Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
 #'

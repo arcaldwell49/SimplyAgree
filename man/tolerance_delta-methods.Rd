@@ -34,9 +34,9 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the tolerance limits.}
-  \item{\code{plot}}{Returns a plot of the tolerance limits.}
-  \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+\item{\code{print}}{Prints short summary of the tolerance limits.}
+\item{\code{plot}}{Returns a plot of the tolerance limits.}
+\item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
 }
 }
 \description{

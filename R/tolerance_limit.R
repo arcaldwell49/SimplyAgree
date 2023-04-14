@@ -1,14 +1,19 @@
 #' Tolerance Limits from an Agreement Study
 #'
-#' @description A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
+#' @description `r lifecycle::badge('maturing')`
+#'
+#' A function for calculating tolerance limits for the difference between two measurements.
+#' This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
+#' See `vignette("agreement_analysis")` for more details.
+#'
 #' @param data A data frame containing the variables.
 #' @param x Name of the variable for the first measurement.
 #' @param y Name of the variable for the second measurement.
 #' @param id Name of the variable for the subject ID.
 #' @param condition Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
 #' @param time A column naming/numbering the time point. Only necessary if the data is from time series collection.
-#' @param pred_level Prediction level for the prediction interval. Default is 95\%.
-#' @param tol_level Tolerance level for the tolerance limit (i.e., the CI of the predicition limit). Default is 95\%.
+#' @param pred_level Prediction level for the prediction interval. Default is 95%.
+#' @param tol_level Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95%.
 #' @param tol_method Method for calculating the tolerance interval.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
@@ -18,22 +23,19 @@
 #' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
 #' @inheritParams loa_lme
 #' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
-#' When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
+#' When `tol_method` is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
 #' However, these are only an approximation and overly conservative.
-#' Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
+#' Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (`tol_method = "perc"`).
 #'
-#' @return Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
+#' @return Returns single `tolerance_delta`` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
-#' \describe{
-#'   \item{\code{"limits"}}{A data frame containing the prediction/tolerance limits.}
-#'   \item{\code{"model"}}{The GLS model; NULL if keep_model set to FALSE.}
-#'   \item{\code{"call"}}{The matched call.}
-#' }
-
+#'   - `limits`: A data frame containing the prediction/tolerance limits.
+#'   - `model`: The GLS model; NULL if keep_model set to FALSE.
+#'   - `call`: The matched call.
 #' @examples
 #' data('reps')
 #'
-#' @section References:
+#' @references
 #'
 #' Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in medicine, 35(14), 2328-2358.
 #'

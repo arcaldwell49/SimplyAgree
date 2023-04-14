@@ -1,10 +1,14 @@
 #' Calculate the Limits of Agreement
-#' @description A function for calculating for limits of agreement.
+#'
+#' @description
+#' `r lifecycle::badge('maturing')`
+#'
+#' A function for calculating for limits of agreement. Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
 #' @param x Name of column with first measurement
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier. Default is "id" if no entry is provided.
 #' @param data Data frame with all data.
-#' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
+#' @param agree.level the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param alpha The alpha-level for confidence levels.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
@@ -12,15 +16,22 @@
 #' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
 #' @return Returns single loa class object with the results of the agreement analysis.
 #'
-#' \describe{
-#'   \item{\code{"loa"}}{A data frame containing the Limits of Agreement.}
-#'   \item{\code{"call"}}{The matched call.}
-#' }
-
+#'   - `loa`: A data frame containing the Limits of Agreement.
+#'   - `call`:The matched call.
+#'
 #' @examples
 #' data('reps')
 #'
-#' @section References:
+#' # Simple
+#' agreement_limit(x = "x", y ="y", data = reps)
+#'
+#' # Replicates
+#' agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "rep")
+#'
+#' # Nested
+#' agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")
+#'
+#' @references
 #'
 #' MOVER methods:
 #'

@@ -19,8 +19,8 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the Limits of Agreement}
-  \item{\code{plot}}{Returns a plot of the limits of agreement}
+\item{\code{print}}{Prints short summary of the Limits of Agreement}
+\item{\code{plot}}{Returns a plot of the limits of agreement}
 }
 }
 \description{

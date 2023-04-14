@@ -38,14 +38,12 @@ Returns single data frame of inter-rater reliability coefficients.
 \description{
 agree_coef produces inter-rater reliability or "agreement coefficients" as described by Gwet.
 }
-\section{References}{
-
-Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
-Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
-}
-
 \examples{
 data('reps')
 agree_coef(data = reps, wide = TRUE, col.names = c("x","y"), weighted = TRUE)
 
+}
+\references{
+Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
+Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
 }

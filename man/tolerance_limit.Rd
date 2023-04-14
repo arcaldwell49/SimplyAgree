@@ -38,7 +38,7 @@ tolerance_limit(
 
 \item{pred_level}{Prediction level for the prediction interval. Default is 95\%.}
 
-\item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the predicition limit). Default is 95\%.}
+\item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95\%.}
 
 \item{tol_method}{Method for calculating the tolerance interval.}
 
@@ -57,16 +57,19 @@ tolerance_limit(
 \item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 999.}
 }
 \value{
-Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
-
-\describe{
-  \item{\code{"limits"}}{A data frame containing the prediction/tolerance limits.}
-  \item{\code{"model"}}{The GLS model; NULL if keep_model set to FALSE.}
-  \item{\code{"call"}}{The matched call.}
+Returns single `tolerance_delta`` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
+\itemize{
+\item \code{limits}: A data frame containing the prediction/tolerance limits.
+\item \code{model}: The GLS model; NULL if keep_model set to FALSE.
+\item \code{call}: The matched call.
 }
 }
 \description{
-A function for calculating tolerance limits for the difference between two measurements. Approximately the same procedure as Bland-Altman limits of agreement.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
+A function for calculating tolerance limits for the difference between two measurements.
+This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
+See \code{vignette("agreement_analysis")} for more details.
 }
 \details{
 The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
@@ -74,17 +77,14 @@ When \code{tol_method} is set to "approx", the tolerance limits are calculated u
 However, these are only an approximation and overly conservative.
 Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
 }
-\section{References}{
+\examples{
+data('reps')
 
-
+}
+\references{
 Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in medicine, 35(14), 2328-2358.
 
 Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.
 
 Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.
-}
-
-\examples{
-data('reps')
-
 }
