@@ -434,12 +434,12 @@ calc_loa_nest = function(df,
   df2 = df %>%
     group_by(id) %>%
     summarize(m = n(),
-              x_bar = mean(x, na.rm=TRUE),
-              x_var = var(x, na.rm=TRUE),
-              y_bar = mean(y, na.rm=TRUE),
-              y_var = var(y, na.rm=TRUE),
-              d = mean(x-y),
-              d_var = var(x-y),
+              x_bar = mean(x, na.rm= TRUE),
+              x_var = var(x, na.rm= TRUE),
+              y_bar = mean(y, na.rm= TRUE),
+              y_var = var(y, na.rm= TRUE),
+              d = mean(x-y, na.rm = TRUE),
+              d_var = var(x-y, na.rm = TRUE),
               .groups = "drop") %>%
     mutate(avg = (x_bar+y_bar)/2)
 

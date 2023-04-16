@@ -128,8 +128,9 @@ The simple calculation each pair of observations (x and y) are *independent*; me
 Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
 
 The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all in one function.
+Further, `agreement_limit` assumes you are only interested in the outermost confindence interval of the limits of agreement and therefore one-tailed confidence intervals are only calculated for the LoA.
 
-## Arguments Influencing the Calculations
+## Arguments Influencing the LoA Calculations
 
 Users of the this function have a number of options with the arguments provided in the `agreement_limit` function. 
 The only required arguments are `x`, `y`, and `data` which dictate the data frame, 
@@ -227,6 +228,104 @@ a2 = agreement_limit(x = "x",
 a2
 ```
 
+### Calculative Steps
+
+1. Compute mean and variance
+
+
+$$
+\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
+$$
+$$
+\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
+$$
+
+$$
+s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
+$$
+
+2. Compute pooled estimate of within subject error
+
+
+$$
+s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
+$$
+
+
+3. Compute pooled estimate of between subject error
+
+
+$$
+s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
+$$
+
+
+4. Compute the harmonic mean of the replicate size
+
+
+$$
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+$$
+
+
+5. Compute SD of the difference 
+
+
+$$
+s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
+$$
+
+6. Calculate LME
+
+**MOVER Method**
+
+$$
+u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
+$$
+
+
+$$
+LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
+$$
+
+
+**Bland-Atlman Method**
+
+$$
+ S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x - n} +  (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
+ 
+$$
+
+
+$$
+LME = z_{1-\alpha} \cdot S_{LoA}
+$$
+
+
+7. Calculate LoA
+
+$$
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+$$
+
+
+$$
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+$$
+
+
+8. Calculate LoA CI
+
+
+$$
+Lower \space CI = LoA_{lower} - LME
+$$
+
+
+$$
+Upper \space CI = LoA_{upper} + LME
+$$
+
 
 ## Nested
 
@@ -239,74 +338,98 @@ a3 = agreement_limit(x = "x",
                 id = "id",
                 data = reps,
                 data_type = "nest",
-                agree.level = .8)
+                loa_calc = "bland",
+                agree.level = .95)
 a3
 ```
 
 
-## `agree_nest` LoA
+### Calculation Steps
 
-**Step 1: Calculate Individual Subject Means and Variances**
+1. Calculate Individual Subject Means and Variances
 
 $$
 \bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
 $$
+
+
 $$
 \bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
 $$
+
+
 $$
 \bar d_i = \bar x_i - \bar y_i
 $$
+
 
 $$
 \bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
 $$
 
+
 $$
 s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
 $$
+
 
 $$
 s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
 $$
 
+
 $$
 s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
 $$
 
-**Step 2: Compute pooled estimates of within subject errors**
+
+2. Compute pooled estimates of within subject errors
+
 
 $$
 s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
 $$
 
+
 $$
 s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
 $$
 
-**Step 3: Compute Harmonic Means of Replicates**
+
+3. Compute Harmonic Means of Replicates
 
 $$
 m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
 $$
 
+
 $$
 m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
 $$
-**Step 4: Compute the variance of the differences**
+
+
+4. Compute the variance of the differences
+
 
 $$
 s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
 $$
-**Step 5: Compute MOVER Components**
+
+
+5. Compute LME
+
+**MOVER Method**
 
 $$
 S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
 $$
 
+
 $$
 S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
 $$
+
+
 $$
 S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
 $$
@@ -314,22 +437,21 @@ $$
 $$
 S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
 $$
-$$
-l = s_d^2 - S_1
-$$
 
 $$
 u = s_d^2 + S_1
 $$
 
+
 $$
 LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
 $$
 
-$$
-RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
-$$
-### LoA
+**Bland-Altman Method**
+
+
+
+6. Calculate LoA
 
 $$
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
@@ -339,112 +461,11 @@ $$
 LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
 $$
 
-### Lower LoA CI
+
+7. Calculate LoA CI
 
 $$
 Lower \space CI = LoA_{lower} - LME
-$$
-
-
-$$
-Upper \space CI = LoA_{lower} + RME
-$$
-
-### Upper LoA CI
-
-$$
-Lower \space CI = LoA_{upper} - RME
-$$
-
-
-$$
-Upper \space CI = LoA_{upper} + LME
-$$
-
-## `agree_reps` LoA
-
-### LoA
-
-**Step 1: Compute mean and variance**
-
-$$
-\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
-$$
-$$
-\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
-$$
-
-$$
-s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
-$$
-**Step 2: Compute pooled estimate of within subject error**
-
-$$
-s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
-$$
-
-**Step 3: Compute pooled estimate of between subject error**
-
-$$
-s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
-$$
-
-**Step 4: Compute the harmonic mean of the replicate size**
-
-$$
-m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
-$$
-
-**Step 5: Compute SD of the difference **
-
-$$
-s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
-$$
-**Step 6: Calculate l and u**
-
-$$
-l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-$$
-$$
-u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-$$
-**Step 7: Compute LME and RME**
-
-$$
-LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
-$$
-
-$$
-RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
-$$
-
-
-### LoA
-
-$$
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-$$
-
-
-$$
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-$$
-
-### Lower LoA CI
-
-$$
-Lower \space CI = LoA_{lower} - LME
-$$
-
-
-$$
-Upper \space CI = LoA_{lower} + RME
-$$
-
-### Upper LoA CI
-
-$$
-Lower \space CI = LoA_{upper} - RME
 $$
 
 
