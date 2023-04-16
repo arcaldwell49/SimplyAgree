@@ -471,7 +471,7 @@ calc_loa_nest = function(df,
     ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
   if (prop_bias == FALSE) {
-    bias_values = emmeans(model, ~1, lmer.df = "kenward-roger") %>%
+    bias_values = emmeans(model, ~1, lmer.df = "satterthwaite") %>%
       as.data.frame() %>%
       rename(bias = emmean) %>%
       mutate(avg = "overall") %>%
@@ -486,7 +486,7 @@ calc_loa_nest = function(df,
                                max(df$avg)
                              )
                            )) %>%
-      emmeans(~avg, lmer.df = "kenward-roger") %>%
+      emmeans(~avg, lmer.df = "satterthwaite") %>%
       as.data.frame() %>%
       rename(bias = emmean) %>%
       select(avg, bias, SE, df, lower.CL, upper.CL)

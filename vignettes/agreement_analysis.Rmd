@@ -32,7 +32,7 @@ data(temps)
 
 # Agree or Tolerate?
 
-@francq2020tolerate pose this question in a paper published in *Statistics in Medicine*. Traditionally, those working in medicine or physiology have defaulted to calculating some form of "limits of agreement" that @bland1986 once recommended. The recommendation by @bland1986 was only an approximation, and that has undergone many modifications [@bland1999; @zou2011] to improve the accuracy of the agreement interval and their associated confidence intervals. Meanwhile, the field of industrial statistics has focused on calculating tolerance limits. There are R packages, such as the `tolerance` R package available on CRAN, that are entirely dedicated to calculating tolerance limits. It is important to note that tolerance is not limited to the normal distribution and can be applied to other distributions (please see the tolerance package for more details). However, in agreement studies typically seen in medicine, tolerance limits may be a more accurate way of determining whether two measurements adequately close to one another.
+@francq2020tolerate pose this question in a paper published in *Statistics in Medicine*. Traditionally, those working in medicine or physiology have defaulted to calculating some form of "limits of agreement" that @bland1986 once recommended. The recommendation by @bland1986 was only an approximation, and that has undergone many modifications [@bland1999; @zou2011] to improve the accuracy of the agreement interval and their associated confidence intervals. Meanwhile, the field of industrial statistics has focused on calculating tolerance limits. There are R packages, such as the `tolerance` R package available on CRAN, that are entirely dedicated to calculating tolerance limits. It is important to note that tolerance is not limited to the normal distribution and can be applied to other distributions (please see the tolerance package by @young2010tolerance for more details). However, in agreement studies typically seen in medicine, tolerance limits may be a more accurate way of determining whether two measurements adequately close to one another.
 
 To quote @francq2020tolerate:
 
@@ -86,7 +86,7 @@ $$
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 $$
 
-**NOTE**: the degrees of freedom (df) are calculated using approximation of satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
+**NOTE**: the degrees of freedom (df) are calculated using approximation of @satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
 
 ### Tolerance 
 
@@ -189,7 +189,8 @@ $$
 LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
 $$
 **MOVER Method**
-sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2)
+
+
 $$
 LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot (\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
 $$
@@ -291,6 +292,7 @@ $$
 
 **Bland-Atlman Method**
 
+
 $$
  S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x - n} +  (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
  
@@ -329,7 +331,7 @@ $$
 
 ## Nested
 
-This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days.
+This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days. The method utilized in `agreement_limit` is similar to, but not the exact same as those described by @zou2011. However, the results should be approximately the same as `agree_nest`.
 
 
 ```{r}
@@ -338,7 +340,7 @@ a3 = agreement_limit(x = "x",
                 id = "id",
                 data = reps,
                 data_type = "nest",
-                loa_calc = "bland",
+                loa_calc = "mover",
                 agree.level = .95)
 a3
 ```
@@ -346,100 +348,43 @@ a3
 
 ### Calculation Steps
 
-1. Calculate Individual Subject Means and Variances
+1. Model 
+
+A linear mixed model (detailed below) is fit to estimate the bias (mean difference) and variance components (within and between subject variance).
 
 $$
-\bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
+\begin{aligned}
+  \operatorname{difference}_{i}  &\sim N \left(\alpha_{j[i]}, \sigma^2 \right) \\
+    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for subject j = 1,} \dots \text{,J}
+\end{aligned}
 $$
+2. Extract Components
 
+The two variance components, ($s_b^2$ and $s_w^2$ for $\sigma^2$ and $\sigma_{\alpha_j}^2$), are estimated from the model. 
+The sum of both ($s_{total}^2$) is the total variance, and grand intercept represents the bias (mean difference, $\bar d$).
 
-$$
-\bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
-$$
-
-
-$$
-\bar d_i = \bar x_i - \bar y_i
-$$
-
-
-$$
-\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
-$$
-
+The harmonic mean is also calculated.
 
 $$
-s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 $$
 
-
-$$
-s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
-$$
-
-
-$$
-s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
-$$
-
-
-2. Compute pooled estimates of within subject errors
-
-
-$$
-s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
-$$
-
-
-$$
-s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
-$$
-
-
-3. Compute Harmonic Means of Replicates
-
-$$
-m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
-$$
-
-
-$$
-m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
-$$
-
-
-4. Compute the variance of the differences
-
-
-$$
-s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
-$$
-
-
-5. Compute LME
+3. Compute LME
 
 **MOVER Method**
 
-$$
-S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
-$$
-
 
 $$
-S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
-$$
-
-
-$$
-S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
+u_1 =   (s_b^2 \cdot ((n-1)/(\chi^2_{\alpha,n-1})-1))^2
 $$
 
 $$
-S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
+u_2 = ((1-1/m_h) \cdot s_w^2 \cdot ((N-n)/( \chi^2_{\alpha,N-n} -1))^2
 $$
 
 $$
-u = s_d^2 + S_1
+u = s_{total}^2 + \sqrt{u_1 + u_2}
 $$
 
 
@@ -449,9 +394,14 @@ $$
 
 **Bland-Altman Method**
 
+$$
+S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot ((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
+$$
+$$
+LME = 
+$$
 
-
-6. Calculate LoA
+4. Calculate LoA
 
 $$
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
@@ -462,7 +412,7 @@ LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
 $$
 
 
-7. Calculate LoA CI
+5. Calculate LoA CI
 
 $$
 Lower \space CI = LoA_{lower} - LME
@@ -476,7 +426,22 @@ $$
 
 # How to Test a Hypothesis
 
-- MAD for plots
+Unlike the "test" functions, `agreement_limits` and `tolerance_limits` do not test a hypothesis agreement, but only estimate the limits.
+It is up to the user to determine if the limits are within a maximal allowable difference.
+However, the results a maximal allowable difference can be visualized against the tolerance/agreement limits using the `delta` argument for the `plot` method.
+
+```{r}
+res1 = tolerance_limit(
+  data = temps,
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
+plot(res1, delta = .25) # Set maximal allowable difference to .25 units
+```
+
 
 # Checking Assumptions
 

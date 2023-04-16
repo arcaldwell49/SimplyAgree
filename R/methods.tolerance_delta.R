@@ -229,7 +229,7 @@ plot.tolerance_delta <- function(x,
                       rep("Lower Limit",nrow(df_loa))),
                     levels = c("Upper Limit", "Bias", "Lower Limit"),
                     ordered  = TRUE),
-      condition = rep(df_loa$condition, nrow(df_loa)),
+      condition = df_loa$condition,
       estimate = c(df_loa$upper.PL, df_loa$bias, df_loa$lower.PL),
       lower.ci = c(df_loa$upper.PL, df_loa$lower.CL, df_loa$lower.TL),
       upper.ci = c(df_loa$upper.TL, df_loa$upper.CL, df_loa$lower.PL)

@@ -55,13 +55,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-04-13</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-04-16</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -109,8 +109,8 @@ prediction intervals. Please read the references listed in this vignette
 <em>before</em> going further if you are not familiar with these
 concepts.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">temps</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">temps</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="agree-or-tolerate">Agree or Tolerate?<a class="anchor" aria-label="anchor" href="#agree-or-tolerate"></a>
 </h2>
@@ -174,20 +174,20 @@ esophageal and rectal temperatures between different times of day
 (<code>tod</code>) and controlling for the intra-subject
 correlation.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
-  data <span class="op">=</span> <span class="va">temps</span>,
-  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span>
-  y <span class="op">=</span> <span class="st">"teso_pre"</span>, <span class="co"># Second measure</span>
-  id <span class="op">=</span> <span class="st">"id"</span>, <span class="co"># Subject ID</span>
-  condition <span class="op">=</span> <span class="st">"tod"</span>, <span class="co"># Identify condition that may affect differences</span>
-  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span>
-<span class="op">)</span>
-<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
-<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span>
-<span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478]    [-0.292, 0.5993] [-0.4982, 0.8056]</span>
-<span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6984, 1.1544]</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
+<span>  y <span class="op">=</span> <span class="st">"teso_pre"</span>, <span class="co"># Second measure</span></span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>, <span class="co"># Subject ID</span></span>
+<span>  condition <span class="op">=</span> <span class="st">"tod"</span>, <span class="co"># Identify condition that may affect differences</span></span>
+<span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478]    [-0.292, 0.5993] [-0.4982, 0.8056]</span></span>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6984, 1.1544]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -235,7 +235,9 @@ calculated with following:</p>
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 \]</span></p>
 <p><strong>NOTE</strong>: the degrees of freedom (df) are calculated
-using Satterthwaite’s approximation.</p>
+using approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946" role="doc-biblioref">1946</a>)</span> (see
+<span class="citation">Kuznetsova, Brockhoff, and Christensen (<a href="#ref-lmertest" role="doc-biblioref">2017</a>)</span> for an
+explanation of this implementation in R).</p>
 </div>
 <div class="section level4">
 <h4 id="tolerance-1">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance-1"></a>
@@ -247,8 +249,9 @@ expectation” approximation (<code>tol_method = "approx"</code>) detailed
 by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span> or
 through a parametric bootstrap method
 (<code>tol_method = "perc"</code>). The bootstrap methods re-samples
-from the model and after a certain number of replicates (default is
-1999) calculates the bounds the prediction interval. The bootstrap
+from the model and, after a certain number of replicates (default is
+1999), calculates the bounds the prediction interval based on the
+quantiles of the replicates for the lower and upper limit. The bootstrap
 method is preferred for its accuracy and power, but is
 <em>extremely</em> slow which may involve computations lasting greater
 than 2 minutes. The approximation is the default only because it is
@@ -260,15 +263,73 @@ TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot
 \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
 \]</span> <strong>NOTE</strong>: <span class="math inline">\(\alpha_1\)</span> refers to the alpha-level for
 the prediction interval (modified by the <code>pred_level</code>
-argument; <code>1-pred_level</code>) whereas <span class="math inline">\(alpha_2\)</span> refers to the alpha-level for the
-tolerance limit (modified by the <code>tol_level</code> argument;
+argument; <code>1-pred_level</code>) whereas <span class="math inline">\(\alpha_2\)</span> refers to the alpha-level for
+the tolerance limit (modified by the <code>tol_level</code> argument;
 <code>1-tol_level</code>).</p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h3>
+<p>In the <code>temps</code> data we have different measures of core
+temperature at varying times of day. Let us assume we want to measure
+pre-exercise agreement between esophageal and rectal temperature while
+controlling for time of day (<code>tod</code>).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>                        x <span class="op">=</span> <span class="st">"teso_pre"</span>,</span>
+<span>                        y <span class="op">=</span> <span class="st">"trec_pre"</span>,</span>
+<span>                        id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>                        condition <span class="op">=</span> <span class="st">"tod"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">test1</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM -0.1537 [-0.2478, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4982]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]   [-0.7723, 0.3163] [-1.1544, 0.6984]</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="agreement">Agreement<a class="anchor" aria-label="anchor" href="#agreement"></a>
 </h2>
+<p>The agreement limits calculations in <code>SimplyAgree</code> are a
+tad more constrained that tolerance limits. There are only 3 types of
+calculations that can be made: simple, replicate, and nested. The simple
+calculation each pair of observations (x and y) are
+<em>independent</em>; meaning that each pair represents one
+subject/participant. Sometimes there are multiple measurements taken
+within subjects when comparing two measurements tools. In some cases the
+true underlying value will not be expected to vary (i.e., replicates or
+“reps”), or multiple measurements may be taken within an individual
+<em>and</em> these values are expected to vary (i.e., nested).</p>
+<p>The <code>agreement_limit</code> function, unlike the other agreement
+functions in the package (i.e., <code>agree_test</code>,
+<code>agree_reps</code>, and <code>agree_nest</code>), allows users to
+make any of the three calculations all in one function. Further,
+<code>agreement_limit</code> assumes you are only interested in the
+outermost confindence interval of the limits of agreement and therefore
+one-tailed confidence intervals are only calculated for the LoA.</p>
+<div class="section level3">
+<h3 id="arguments-influencing-the-loa-calculations">Arguments Influencing the LoA Calculations<a class="anchor" aria-label="anchor" href="#arguments-influencing-the-loa-calculations"></a>
+</h3>
+<p>Users of the this function have a number of options with the
+arguments provided in the <code>agreement_limit</code> function. The
+only required arguments are <code>x</code>, <code>y</code>, and
+<code>data</code> which dictate the data frame, and the columns that
+contain the 2 measurements. The <code>id</code> argument, when
+specified, identifies the column that contains the subject identifier.
+This is only necessary if it is a replicate or nested design. The type
+of design is dictated by <code>data_type</code> argument. Additionally,
+the <code>loa_calc</code> function dictates how the limits of agreement
+are calculated. Users have the option of computing <span class="citation">Bland and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span> or MOVER <span class="citation">(<a href="#ref-zou2011" role="doc-biblioref">Zou
+2011</a>; <a href="#ref-donner2012closed" role="doc-biblioref">Donner
+and Zou 2012</a>)</span> limits of agreement (calculations detailed
+below). I strongly recommend utilizing the MOVER limits of agreement
+over the Bland-Altman limits <span class="citation">(<a href="#ref-zou2011" role="doc-biblioref">Zou 2011</a>; <a href="#ref-donner2012closed" role="doc-biblioref">Donner and Zou
+2012</a>)</span>.</p>
+</div>
 <div class="section level3">
 <h3 id="simple-agreement">Simple Agreement<a class="anchor" aria-label="anchor" href="#simple-agreement"></a>
 </h3>
@@ -276,144 +337,306 @@ tolerance limit (modified by the <code>tol_level</code> argument;
 measure (e.g., <code>x</code>) and another (e.g., <code>y</code>). In
 this scenario each pair of observations (x and y) are
 <em>independent</em>; meaning that each pair represents one
-subject/participant.</p>
+subject/participant that is uncorrelated with other pairs.</p>
 <p>The data for the two measurements are put into the <code>x</code> and
-<code>y</code> arguments. If there is a hypothesized limit of agreement
-then this can be set with the <code>delta</code> argument (this is
-optional). Next, the limit of agreement can be set with the
-<code>agree.level</code> and the confidence level (<span class="math inline">\(1-\alpha\)</span>). Once those are set the
-analysis can be run. Please note, this package has pre-loaded data from
-the Zou 2013 paper (i.e., <code>data(reps)</code>). While data does not
-conform the assumptions of the test it can be used to test out many of
-the functions in this package. Since there isn’t an <em>a priori</em>
-hypothesis I will not declare a <code>delta</code> argument, but I will
-estimate the 95% confidence intervals for 80% limits of agreement.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
-                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
-                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>We can then print the general results. These results include the
-general parameters of the analysis up top, then the results of the Shieh
-exact test for agreement (no conclusion is included due to the lack of a
-<code>delta</code> argument being set). Then the limits of agreement,
-with confidence limits, are included. Lastly, Lin’s Concordance
-Correlation Coefficient, another measure of agreement, is also
-included.</p>
+<code>y</code> arguments.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
-<span class="co">#&gt; Limit of Agreement = 80%</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Shieh Results -###</span>
-<span class="co">#&gt; Exact 90% C.I.  [-1.512, 2.3887]</span>
-<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
-<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Bias        0.4383  -0.1669   1.0436     0.95</span>
-<span class="co">#&gt; Lower LoA  -1.1214  -1.8037  -0.4391     0.90</span>
-<span class="co">#&gt; Upper LoA   1.9980   1.3157   2.6803     0.90</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span>
-<span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span></code></pre></div>
-<p>Next, we can use the generic <code>plot</code> function to produce
-visualizations of agreement. This includes the Bland-Altman plot
-(<code>type = 1</code>) and a line-of-identity plot
-(<code>type = 2</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-5-1.png" width="576"></p>
+<code class="sourceCode R"><span><span class="co"># Calc. LoA</span></span>
+<span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>,</span>
+<span>                     x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                     y <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span>
+<span><span class="co"># print</span></span>
+<span><span class="va">a1</span></span>
+<span><span class="co">#&gt; MOVER Limits of Agreement (LoA)</span></span>
+<span><span class="co">#&gt; 95% LoA @ 5% Alpha-Level</span></span>
+<span><span class="co">#&gt; Independent Data Points</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
+<span><span class="co">#&gt;  0.4383 [-0.1669, 1.0436]    -1.947     2.824 [-3.0117, 3.8884]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; SD of Differences = 1.217</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="calculation-steps">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps"></a>
+</h4>
+<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> and <span class="citation">Bland
+and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>.</p>
+<p><strong>LoA</strong></p>
+<p><span class="math display">\[
+LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
+\]</span></p>
+<p>wherein <span class="math inline">\(z_{1-(1-agree)/2}\)</span> is the
+value of the normal distribution at the given agreement level (default
+is 95%), <span class="math inline">\(\bar d\)</span> is the mean of the
+differences, and <span class="math inline">\(S_d\)</span> is the
+standard deviations of the differences.</p>
+<p><strong>Confidence Interval</strong></p>
+<ol style="list-style-type: decimal">
+<li>Calculate variance of LoA</li>
+</ol>
+<p><span class="math display">\[
+S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_{1-(1-agree)/2}}{2
+\cdot(N-1)} }
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Calculate Left Moving Estimator</li>
+</ol>
+<p><strong>Bland-Altman Method</strong></p>
+<p><span class="math display">\[
+LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
+\]</span> <strong>MOVER Method</strong> sd_delta * sqrt(confq2^2/k +
+agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2) <span class="math display">\[
+LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot
+(\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Calculate Confidence Interval</li>
+</ol>
+<p><span class="math display">\[
+Lower \space LoA \space C.I. = Lower \space LoA - LME
+\]</span></p>
+<p><span class="math display">\[
+Upper \space LoA \space C.I. = Upper \space LoA + LME
+\]</span></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="repeated-measures-agreement">Repeated Measures Agreement<a class="anchor" aria-label="anchor" href="#repeated-measures-agreement"></a>
-</h2>
+<div class="section level3">
+<h3 id="repeated-measures-agreement">Repeated Measures Agreement<a class="anchor" aria-label="anchor" href="#repeated-measures-agreement"></a>
+</h3>
 <p>In many cases there are multiple measurements taken within subjects
 when comparing two measurements tools. In some cases the true underlying
-value will not be expected to vary (i.e., replicates;
-<code>agree_reps</code>), or multiple measurements may be taken within
-an individual <em>and</em> these values are expected to vary (i.e.,
-nested design; <code>agree_nest</code>).</p>
-<p>The confidence limits on the limits of agreement are based on the
-“MOVER” method described in detail by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, both
-functions operate similarly to <code>agree_test</code>; the only
-difference being that the data has to be provided as a
-<code>data.frame</code> in R.</p>
+value will not be expected to vary (i.e.,
+<code>data_type = "reps"</code>), or multiple measurements may be taken
+within an individual <em>and</em> these values are expected to vary
+(i.e., <code>data_type = "nest"</code>).</p>
+</div>
 <div class="section level3">
-<h3 id="agree_reps">
-<code>agree_reps</code><a class="anchor" aria-label="anchor" href="#agree_reps"></a>
+<h3 id="replicates">Replicates<a class="anchor" aria-label="anchor" href="#replicates"></a>
 </h3>
-<p>This function is for cases where the underlying values do
-<em>not</em> vary within subjects. This can be considered cases where
+<p>This limit of agreement type is for cases where the underlying values
+do <em>not</em> vary within subjects. This can be considered cases where
 replicate measure may be taken. For example, a researcher may want to
 compare the performance of two ELISA assays where measurements are taken
 in duplicate/triplicate.</p>
-<p>So, for this function you will have to provide the data frame object
-with the <code>data</code> argument and the names of the columns
-containing the first (<code>x</code> argument) and second
-(<code>y</code> argument) must then be provided. An additional column
-indicating the subject identifier (<code>id</code>) must also be
-provided. Again, if there is a hypothesized agreement limit then this
-could be provided with the <code>delta</code> argument.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_reps.html">agree_reps</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
-                y <span class="op">=</span> <span class="st">"y"</span>,
-                id <span class="op">=</span> <span class="st">"id"</span>,
-                data <span class="op">=</span> <span class="va">reps</span>,
-                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>The results can then be printed and plotted.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span>
-<span class="co">#&gt; Limit of Agreement = 80%</span>
-<span class="co">#&gt; Replicate Data Points (true value does not vary)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
-<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Bias        0.7152  -0.6667   2.0971     0.95</span>
-<span class="co">#&gt; Lower LoA  -1.2117  -4.7970   0.1054     0.90</span>
-<span class="co">#&gt; Upper LoA   2.6421   1.3250   6.2274     0.90</span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
+<p>So, you will have to provide the data frame object with the
+<code>data</code> argument and the names of the columns containing the
+first (<code>x</code> argument) and second (<code>y</code> argument)
+must then be provided. An additional column indicating the subject
+identifier (<code>id</code>) must also be provided. Again, if there is a
+hypothesized agreement limit then this could be provided with the
+<code>delta</code> argument.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>                data <span class="op">=</span> <span class="va">reps</span>,</span>
+<span>                data_type <span class="op">=</span> <span class="st">"reps"</span>,</span>
+<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">a2</span></span>
+<span><span class="co">#&gt; MOVER Limits of Agreement (LoA)</span></span>
+<span><span class="co">#&gt; 80% LoA @ 5% Alpha-Level</span></span>
+<span><span class="co">#&gt; Data with Replicates</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA           LoA CI</span></span>
+<span><span class="co">#&gt;  0.7152 [-1.5287, 2.9591]    -1.212     2.642 [-4.797, 6.2274]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; SD of Differences = 1.5036</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="calculative-steps">Calculative Steps<a class="anchor" aria-label="anchor" href="#calculative-steps"></a>
+</h4>
+<ol style="list-style-type: decimal">
+<li>Compute mean and variance</li>
+</ol>
+<p><span class="math display">\[
+\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
+\]</span> <span class="math display">\[
+\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
+\]</span></p>
+<p><span class="math display">\[
+s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Compute pooled estimate of within subject error</li>
+</ol>
+<p><span class="math display">\[
+s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Compute pooled estimate of between subject error</li>
+</ol>
+<p><span class="math display">\[
+s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
+\]</span></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Compute the harmonic mean of the replicate size</li>
+</ol>
+<p><span class="math display">\[
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+\]</span></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Compute SD of the difference</li>
+</ol>
+<p><span class="math display">\[
+s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
+\]</span></p>
+<ol start="6" style="list-style-type: decimal">
+<li>Calculate LME</li>
+</ol>
+<p><strong>MOVER Method</strong></p>
+<p><span class="math display">\[
+u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
+n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
+N-n)}})]^2}
+\]</span></p>
+<p><span class="math display">\[
+LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
+(\sqrt{u}-\sqrt{s^2_d} )^2}
+\]</span></p>
+<p><strong>Bland-Atlman Method</strong></p>
+<p>$$ S_{LoA}^2 = + ( + (1-)^2 + (1-)^2 )</p>
+<p>$$</p>
+<p><span class="math display">\[
+LME = z_{1-\alpha} \cdot S_{LoA}
+\]</span></p>
+<ol start="7" style="list-style-type: decimal">
+<li>Calculate LoA</li>
+</ol>
+<p><span class="math display">\[
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+\]</span></p>
+<p><span class="math display">\[
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+\]</span></p>
+<ol start="8" style="list-style-type: decimal">
+<li>Calculate LoA CI</li>
+</ol>
+<p><span class="math display">\[
+Lower \space CI = LoA_{lower} - LME
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = LoA_{upper} + LME
+\]</span></p>
+</div>
 </div>
 <div class="section level3">
-<h3 id="agree_nest">
-<code>agree_nest</code><a class="anchor" aria-label="anchor" href="#agree_nest"></a>
+<h3 id="nested">Nested<a class="anchor" aria-label="anchor" href="#nested"></a>
 </h3>
-<p>This function is for cases where the underlying values may vary
-within subjects. This can be considered cases where there are distinct
-pairs of data wherein data is collected in different times/conditions
-within each subject. An example would be measuring blood pressure on two
-different devices on many people at different time points/days.</p>
-<p>The function works almost identically to <code>agree_reps</code> but
-the underlying calculations are different</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_nest.html">agree_nest</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
-                y <span class="op">=</span> <span class="st">"y"</span>,
-                id <span class="op">=</span> <span class="st">"id"</span>,
-                data <span class="op">=</span> <span class="va">reps</span>,
-                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></code></pre></div>
-<p>The printed results (and plots) are very similar to
-<code>agree_reps</code>. However, the CCC result now has a warning
-because the calculation in this scenario may not be entirely appropriate
-given the nature of the data.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a3</span><span class="op">)</span>
-<span class="co">#&gt; Limit of Agreement = 80%</span>
-<span class="co">#&gt; Nested Data Points (true value may vary)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
-<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Bias        0.7101  -0.6824   2.1026     0.95</span>
-<span class="co">#&gt; Lower LoA  -1.1626  -4.8172   0.1811     0.90</span>
-<span class="co">#&gt; Upper LoA   2.5828   1.2390   6.2374     0.90</span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a3</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
+<p>This is for cases where the underlying values may vary within
+subjects. This can be considered cases where there are distinct pairs of
+data wherein data is collected in different times/conditions within each
+subject. An example would be measuring blood pressure on two different
+devices on many people at different time points/days. The method
+utilized in <code>agreement_limit</code> is similar to, but not the
+exact same as those described by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, the
+results should be approximately the same as <code>agree_nest</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>                data <span class="op">=</span> <span class="va">reps</span>,</span>
+<span>                data_type <span class="op">=</span> <span class="st">"nest"</span>,</span>
+<span>                loa_calc <span class="op">=</span> <span class="st">"mover"</span>,</span>
+<span>                agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
+<span><span class="va">a3</span></span>
+<span><span class="co">#&gt; MOVER Limits of Agreement (LoA)</span></span>
+<span><span class="co">#&gt; 95% LoA @ 5% Alpha-Level</span></span>
+<span><span class="co">#&gt; Nested Data</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
+<span><span class="co">#&gt;  0.7046 [-1.5572, 2.9664]    -2.153     3.562 [-7.4979, 8.9071]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; SD of Differences = 1.4581</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="calculation-steps-1">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps-1"></a>
+</h4>
+<ol style="list-style-type: decimal">
+<li>Model</li>
+</ol>
+<p>A linear mixed model (detailed below) is fit to estimate the bias
+(mean difference) and variance components (within and between subject
+variance).</p>
+<p><span class="math display">\[
+\begin{aligned}
+  \operatorname{difference}_{i}  &amp;\sim N \left(\alpha_{j[i]},
+\sigma^2 \right) \\
+    \alpha_{j}  &amp;\sim N \left(\mu_{\alpha_{j}},
+\sigma^2_{\alpha_{j}} \right)
+    \text{, for subject j = 1,} \dots \text{,J}
+\end{aligned}
+\]</span> 2. Extract Components</p>
+<p>The two variance components, (<span class="math inline">\(s_b^2\)</span> and <span class="math inline">\(s_w^2\)</span> for <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\sigma_{\alpha_j}^2\)</span>), are estimated from
+the model. The sum of both (<span class="math inline">\(s_{total}^2\)</span>) is the total variance, and
+grand intercept represents the bias (mean difference, <span class="math inline">\(\bar d\)</span>).</p>
+<p>The harmonic mean is also calculated.</p>
+<p><span class="math display">\[
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Compute LME</li>
+</ol>
+<p><strong>MOVER Method</strong></p>
+<p><span class="math display">\[
+u_1 =   (s_b^2 \cdot ((n-1)/(\chi^2_{\alpha,n-1})-1))^2
+\]</span></p>
+<p><span class="math display">\[
+u_2 = ((1-1/m_h) \cdot s_w^2 \cdot ((N-n)/( \chi^2_{\alpha,N-n} -1))^2
+\]</span></p>
+<p><span class="math display">\[
+u = s_{total}^2 + \sqrt{u_1 + u_2}
+\]</span></p>
+<p><span class="math display">\[
+LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
+\cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+\]</span></p>
+<p><strong>Bland-Altman Method</strong></p>
+<p><span class="math display">\[
+S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot
+((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
+\]</span> <span class="math display">\[
+LME =
+\]</span></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Calculate LoA</li>
+</ol>
+<p><span class="math display">\[
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+\]</span></p>
+<p><span class="math display">\[
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+\]</span></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Calculate LoA CI</li>
+</ol>
+<p><span class="math display">\[
+Lower \space CI = LoA_{lower} - LME
+\]</span></p>
+<p><span class="math display">\[
+Upper \space CI = LoA_{upper} + LME
+\]</span></p>
 </div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="how-to-test-a-hypothesis">How to Test a Hypothesis<a class="anchor" aria-label="anchor" href="#how-to-test-a-hypothesis"></a>
+</h2>
+<p>Unlike the “test” functions, <code>agreement_limits</code> and
+<code>tolerance_limits</code> do not test a hypothesis agreement, but
+only estimate the limits. It is up to the user to determine if the
+limits are within a maximal allowable difference. However, the results a
+maximal allowable difference can be visualized against the
+tolerance/agreement limits using the <code>delta</code> argument for the
+<code>plot</code> method.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
+<span>  y <span class="op">=</span> <span class="st">"teso_pre"</span>, <span class="co"># Second measure</span></span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>, <span class="co"># Subject ID</span></span>
+<span>  condition <span class="op">=</span> <span class="st">"tod"</span>, <span class="co"># Identify condition that may affect differences</span></span>
+<span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res1</span>, delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span> <span class="co"># Set maximal allowable difference to .25 units</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="checking-assumptions">Checking Assumptions<a class="anchor" aria-label="anchor" href="#checking-assumptions"></a>
@@ -432,13 +655,21 @@ checks.</p>
 <div class="section level3">
 <h3 id="an-example">An Example<a class="anchor" aria-label="anchor" href="#an-example"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
-                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
-                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
-
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test_agree</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                           data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_agree</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                           data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -458,37 +689,33 @@ proportional bias adjusted model is utilized. However, you should be
 careful with interpreting the hypothesis tests in these cases because
 the results are likely bogus for the extreme ends of the measurement. In
 any case, plots and checks of the data should always be inspected.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
-                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
-                prop_bias <span class="op">=</span> <span class="cn">TRUE</span>,
-                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
-<span class="co">#&gt; prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
-<span class="co">#&gt; Limit of Agreement = 80%</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ###- Shieh Results -###</span>
-<span class="co">#&gt; Exact 90% C.I.  [-1.2551, 2.1318]</span>
-<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
-<span class="co">#&gt; Warning: hypothesis test likely bogus with proportional bias.</span>
-<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
-<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
-<span class="co">#&gt; Bias        0.4383 -0.08968   0.9663     0.95</span>
-<span class="co">#&gt; Lower LoA  -0.9159 -1.51049  -0.3213     0.90</span>
-<span class="co">#&gt; Upper LoA   1.7926  1.19801   2.3872     0.90</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; LoA at average of both measures. Please check plot.</span>
-<span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span>
-<span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span>
-
-<span class="co"># See effect of proportional bias on limits</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># Confirm its effects in proportional bias check plot (should be horizontal now)</span>
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-2.png" width="700"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                           data <span class="op">=</span> <span class="va">reps</span>,</span>
+<span>                           prop_bias <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Average of Both Methods    Bias           Bias CI Prediction Interval</span></span>
+<span><span class="co">#&gt;                    3.905 -0.4670 [-1.3842, 0.4502]   [-2.8876, 1.9537]</span></span>
+<span><span class="co">#&gt;                    5.240  0.3513 [-0.1816, 0.8842]    [-1.9513, 2.654]</span></span>
+<span><span class="co">#&gt;                    7.395  1.6723  [0.5218, 2.8228]    [-0.846, 4.1906]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-3.6396, 2.7057]</span></span>
+<span><span class="co">#&gt;  [-2.6667, 3.3694]</span></span>
+<span><span class="co">#&gt;  [-1.6284, 4.9729]</span></span>
+<span></span>
+<span><span class="co"># See effect of proportional bias on limits</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Confirm its effects in proportional bias check plot (should be horizontal now)</span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-2.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>
@@ -497,43 +724,43 @@ any case, plots and checks of the data should always be inspected.</p>
 mean difference visualization may be less than ideal. In order to change
 the plots from showing the individual data points we can modify the
 <code>geom</code> argument.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="va">diff</span></span>
+<span></span>
+<span><span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>,</span>
+<span>                y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df</span>,</span>
+<span>                     x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>                     y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                     agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-3.png" width="700"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span>
-<span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>
-<span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>
-<span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="va">diff</span>
-
-<span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>,
-                y <span class="op">=</span> <span class="va">y</span><span class="op">)</span>
-
-<span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df</span>,
-                     x <span class="op">=</span> <span class="st">"x"</span>,
-                     y <span class="op">=</span> <span class="st">"y"</span>,
-                     agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
-     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-4.png" width="700"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
-     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-2.png" width="700"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
-     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-3.png" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
-     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-4.png" width="700"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
-     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-5.png" width="700"></p>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-5.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -549,11 +776,26 @@ Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https:
 Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2):
 135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
 </div>
+<div id="ref-donner2012closed" class="csl-entry">
+Donner, Allan, and GY Zou. 2012. <span>“Closed-Form Confidence Intervals
+for Functions of the Normal Mean and Standard Deviation.”</span>
+<em>Statistical Methods in Medical Research</em> 21 (4): 347–59.
+</div>
 <div id="ref-francq2020tolerate" class="csl-entry">
 Francq, Bernard G, Marion Berger, and Charles Boachie. 2020. <span>“To
 Tolerate or to Agree: A Tutorial on Tolerance Intervals in Method
 Comparison Studies with BivRegBLS r Package.”</span> <em>Statistics in
 Medicine</em> 39 (28): 4334–49.
+</div>
+<div id="ref-lmertest" class="csl-entry">
+Kuznetsova, Alexandra, Per B Brockhoff, and Rune HB Christensen. 2017.
+<span>“lmerTest Package: Tests in Linear Mixed Effects Models.”</span>
+<em>Journal of Statistical Software</em> 82: 1–26.
+</div>
+<div id="ref-satterthwaite1946" class="csl-entry">
+Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
+Estimates of Variance Components.”</span> <em>Biometrics Bulletin</em> 2
+(6): 110–14.
 </div>
 <div id="ref-zou2011" class="csl-entry">
 Zou, GY. 2011. <span>“Confidence Interval Estimation for the
@@ -591,7 +833,7 @@ Models in S and S-PLUS”, Springer, esp. pp. 100, 461.<a href="#fnref1" class
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
