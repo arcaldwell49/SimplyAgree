@@ -145,7 +145,9 @@ I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altm
 
 ## Simple Agreement
 
-In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). In this scenario each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant that is uncorrelated with other pairs.
+In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). 
+In this scenario each pair of observations (x and y) are *independent*;
+meaning that each pair represents one subject/participant that is uncorrelated with other pairs.
 
 The data for the two measurements are put into the `x` and `y` arguments. 
 
@@ -210,13 +212,19 @@ $$
 
 ## Repeated Measures Agreement
 
-In many cases there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., `data_type = "reps"`), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., `data_type = "nest"`).
+In many cases there are multiple measurements taken within subjects when comparing two measurements tools.
+In some cases the true underlying value will not be expected to vary (i.e., `data_type = "reps"`),
+or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., `data_type = "nest"`).
 
 ## Replicates
 
-This limit of agreement type is for cases where the underlying values do *not* vary within subjects. This can be considered cases where replicate measure may be taken. For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
+This limit of agreement type is for cases where the underlying values do *not* vary within subjects.
+This can be considered cases where replicate measure may be taken. 
+For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
 
-So, you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. An additional column indicating the subject identifier (`id`) must also be provided. Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
+So, you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. 
+An additional column indicating the subject identifier (`id`) must also be provided. 
+Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
 
 ```{r}
 a2 = agreement_limit(x = "x",
@@ -280,6 +288,7 @@ $$
 
 **MOVER Method**
 
+
 $$
 u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
 $$
@@ -305,6 +314,7 @@ $$
 
 
 7. Calculate LoA
+
 
 $$
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
@@ -472,7 +482,10 @@ check(test_tol)
 
 As the check plots for `a1` show, proportional bias can sometimes occur. In these cases @bland1999 recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
 
-For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots and checks of the data should always be inspected.
+For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. 
+When this is set to TRUE, then the proportional bias adjusted model is utilized. 
+However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. 
+In any case, plots and checks of the data should always be inspected.
 
 ```{r}
 
@@ -487,6 +500,25 @@ plot(test_tol)
 
 # Confirm its effects in proportional bias check plot (should be horizontal now)
 check(test_tol)
+```
+
+# Log transformation
+
+Sometimes a log transformation may be a useful way of "normalizing" the data.
+Most often this is done when the error is proportional to the mean.
+The interpretation is also easy because the differences (when back transformed) can be interpreted as ratios.
+The log transformation (natural base) can be accomplished with the `log_tf` argument.
+
+```{r}
+tolerance_limit(
+  data = temps,
+  log_tf = TRUE,
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
 ```
 
 

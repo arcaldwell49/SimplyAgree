@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-04-16</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-04-17</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -129,10 +129,10 @@ are R packages, such as the <code>tolerance</code> R package available
 on CRAN, that are entirely dedicated to calculating tolerance limits. It
 is important to note that tolerance is not limited to the normal
 distribution and can be applied to other distributions (please see the
-tolerance package for more details). However, in agreement studies
-typically seen in medicine, tolerance limits may be a more accurate way
-of determining whether two measurements adequately close to one
-another.</p>
+tolerance package by <span class="citation">Young (<a href="#ref-young2010tolerance" role="doc-biblioref">2010</a>)</span> for
+more details). However, in agreement studies typically seen in medicine,
+tolerance limits may be a more accurate way of determining whether two
+measurements adequately close to one another.</p>
 <p>To quote <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span>:</p>
 <blockquote>
 <p>In terms of terminology, tolerance means, in this context, that some
@@ -383,8 +383,8 @@ S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_{1-(1-agree)/2}}{2
 <p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
 LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
-\]</span> <strong>MOVER Method</strong> sd_delta * sqrt(confq2^2/k +
-agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2) <span class="math display">\[
+\]</span> <strong>MOVER Method</strong></p>
+<p><span class="math display">\[
 LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot
 (\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
 \]</span></p>
@@ -718,13 +718,39 @@ any case, plots and checks of the data should always be inspected.</p>
 <p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-2.png" width="700"></p>
 </div>
 <div class="section level2">
+<h2 id="log-transformation">Log transformation<a class="anchor" aria-label="anchor" href="#log-transformation"></a>
+</h2>
+<p>Sometimes a log transformation may be a useful way of “normalizing”
+the data. Most often this is done when the error is proportional to the
+mean. The interpretation is also easy because the differences (when back
+transformed) can be interpreted as ratios. The log transformation
+(natural base) can be accomplished with the <code>log_tf</code>
+argument.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>  log_tf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
+<span>  y <span class="op">=</span> <span class="st">"teso_pre"</span>, <span class="co"># Second measure</span></span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>, <span class="co"># Subject ID</span></span>
+<span>  condition <span class="op">=</span> <span class="st">"tod"</span>, <span class="co"># Identify condition that may affect differences</span></span>
+<span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Ratio: x/y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068]    [0.9921, 1.0165] [0.9865, 1.0222]</span></span>
+<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088]    [0.9913, 1.0213]  [0.981, 1.0321]</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>
 </h2>
 <p>Sometimes there may be a lot of data and individual points of data on
 mean difference visualization may be less than ideal. In order to change
 the plots from showing the individual data points we can modify the
 <code>geom</code> argument.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -740,27 +766,27 @@ the plots from showing the individual data points we can modify the
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-3.png" width="700"></p>
+<span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-2.png" width="700"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-4.png" width="700"></p>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-3.png" width="700"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-4.png" width="700"></p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-5.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-11-5.png" width="700"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -796,6 +822,11 @@ Kuznetsova, Alexandra, Per B Brockhoff, and Rune HB Christensen. 2017.
 Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
 Estimates of Variance Components.”</span> <em>Biometrics Bulletin</em> 2
 (6): 110–14.
+</div>
+<div id="ref-young2010tolerance" class="csl-entry">
+Young, Derek S. 2010. <span>“Tolerance: An r Package for Estimating
+Tolerance Intervals.”</span> <em>Journal of Statistical Software</em>
+36: 1–39.
 </div>
 <div id="ref-zou2011" class="csl-entry">
 Zou, GY. 2011. <span>“Confidence Interval Estimation for the
