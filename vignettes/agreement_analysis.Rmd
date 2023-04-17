@@ -299,12 +299,11 @@ LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sq
 $$
 
 
-**Bland-Atlman Method**
+**Bland-Altman Method**
 
 
 $$
- S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x - n} +  (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
- 
+ S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x - n} + (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
 $$
 
 

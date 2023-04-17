@@ -646,8 +646,6 @@ are no longer symmetric around the bias estimate.</p>
 <span>              delta <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>              prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in agree_np(x = "x", y = "y", data = reps, delta = 2, prop_bias =</span></span>
-<span><span class="co">#&gt; FALSE, : Evidence of proportional bias. Consider setting prop_bias to TRUE.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
 <span><span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span></span>
@@ -658,9 +656,9 @@ are no longer symmetric around the bias estimate.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA    -0.89  -1.3602  -0.4198     0.90</span></span>
-<span><span class="co">#&gt; Bias          0.04  -0.5967   0.6767     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA     2.45   1.4170   3.4830     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA    -0.89  -1.3958  -0.3842     0.90</span></span>
+<span><span class="co">#&gt; Bias          0.04  -0.5463   0.6263     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA     2.45   1.2714   3.6286     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
@@ -684,15 +682,15 @@ agreement does not.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7516  -0.8279     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6419  -0.2668     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5463   1.2421     0.90</span></span>
-<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3889  -0.0721     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6687   0.5239     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.5275   2.5075     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.8567   2.0905     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.9458   3.0755     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.3087   9.4409     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6870  -0.8925     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6323  -0.2764     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6579   1.1305     0.90</span></span>
+<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3300  -0.1310     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6732   0.5285     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.6176   2.5976     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -3.0947   2.3285     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8257   3.1957     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.1922   9.5575     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
