@@ -200,7 +200,8 @@ plot.tolerance_delta <- function(x,
           "upper.PL",
           "lower.TL",
           "upper.TL"
-        )
+        ),
+        exp
       )
     df$delta = exp(df$delta)
   }
