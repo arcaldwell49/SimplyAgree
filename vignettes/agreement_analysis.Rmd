@@ -408,7 +408,7 @@ $$
 S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot ((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
 $$
 $$
-LME = 
+LME = z_{1-\alpha} \cdot S_{LoA}
 $$
 
 4. Calculate LoA
