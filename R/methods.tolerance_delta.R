@@ -285,21 +285,48 @@ plot.tolerance_delta <- function(x,
                 "%")
   if(call2$prop_bias){
 
+  if(geom == "geom_bin2d" | geom == "geom_density_2d" | geom == "stat_density_2d"){
+    bland_alt.plot = bland_alt.plot +
+      geom_ribbon(inherit.aes = FALSE,
+                  alpha = .2,
+                  data = df_loa2,
+                  aes(y=estimate,
+                      ymin = lower.ci,
+                      ymax = upper.ci,
+                      x=x,
+                      group = text,
+                      #fill=as.numeric(text,ordered = TRUE)
+                  )) +
+      # scale_fill_viridis_d(option = "C", end = .8)+
+      geom_line(inherit.aes = FALSE,
+        data = df_loa2,
+        size = 1.25,
+        aes(y=estimate,
+            x=x,
+            color=text)) +
+      scale_color_viridis_d(option = "C", end = .8)
+  } else {
+    bland_alt.plot = bland_alt.plot +
+      geom_ribbon(inherit.aes = FALSE,
+                  alpha = .2,
+                  data = df_loa2,
+                  aes(y=estimate,
+                      ymin = lower.ci,
+                      ymax = upper.ci,
+                      x=x,
+                      group = text,
+                      fill=text
+                  )) +
+      scale_fill_viridis_d(option = "C", end = .8)+
+      geom_line(inherit.aes = FALSE,
+        data = df_loa2,
+        aes(y=estimate,
+            x=x,
+            color=text)) +
+      scale_color_viridis_d(option = "C", end = .8)
+  }
 
-  bland_alt.plot = bland_alt.plot +
-    geom_ribbon(inherit.aes = FALSE,
-                alpha = .2,
-                data = df_loa2,
-                aes(y=estimate,
-                    ymin = lower.ci,
-                    ymax = upper.ci,
-                    x=x,
-                    fill=text)) +
-    geom_line(inherit.aes = FALSE,
-              data = df_loa2,
-              aes(y=estimate,
-                  x=x,
-                  color=text))
+
   } else {
     df_loa2$x = scalemin
     bland_alt.plot = bland_alt.plot +
@@ -312,12 +339,13 @@ plot.tolerance_delta <- function(x,
                         color = text),
                       #width = .03*(scalemax-scalemin),
                       position = pd2,
-                      inherit.aes = FALSE)
+                      inherit.aes = FALSE)+
+      scale_color_viridis_d(option = "C", end = .8)
   }
 
   bland_alt.plot = bland_alt.plot  +
-    scale_color_viridis_d(option = "C", end = .8) +
-    scale_fill_viridis_d(option = "C", end = .8) +
+    #scale_color_viridis_d(option = "C", end = .8) +
+    #scale_fill_viridis_d(option = "C", end = .8) +
     labs(x = paste0("Average of ", x_name ," & ", y_name),
          y = ifelse(call2$log,
                     paste0("Ratio of Methods (x/y)"),

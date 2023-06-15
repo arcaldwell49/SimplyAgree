@@ -102,12 +102,30 @@ test_that("check methods",{
   test1 = tolerance_limit(data = temps2,
                           x = "x",
                           y = "y")
-  agreement_limit(data = temps2,
-                  x = "x",
-                  y = "y")
+
   print(test1)
   check(test1)
-  plot(test1)
+  plot(test1,
+       delta = 2)
+  plot(test1, geom =  "geom_bin2d")
+  plot(test1, geom =  "geom_density_2d")
+  plot(test1, geom =  "geom_density_2d_filled")
+  plot(test1, geom =  "stat_density_2d")
+
+  test1p = tolerance_limit(data = temps2,
+                          x = "x",
+                          y = "y",
+                          prop_bias =TRUE)
+
+  print(test1p)
+  check(test1p)
+  plot(test1p,
+       delta = 2)
+  plot(test1p, geom =  "geom_bin2d")
+  plot(test1p, geom =  "geom_density_2d")
+  plot(test1p, geom =  "geom_density_2d_filled")
+  plot(test1p, geom =  "stat_density_2d")
+
 
 
   test2 = tolerance_limit(data = temps2,
