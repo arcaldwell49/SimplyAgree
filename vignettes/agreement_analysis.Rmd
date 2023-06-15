@@ -66,7 +66,7 @@ tolerance_limit(
 
 ## Calculative Approach
 
-Overall, the model is fit using the `gls` function, and I would suggest reading book by Pinheiro and Bates which details the function^[Pinheiro, J.C., and Bates, D.M. (2000) "Mixed-Effects Models in S and S-PLUS", Springer, esp. pp. 100, 461.]. This function is different than the linear, or linear mixed, models that are utilized in calculating limits of agreement because it accommodates correlated errors and/or unequal variances.
+Overall, the model is fit using the `gls` function, and, for those interested, I would suggest reading book by Pinheiro and Bates which details the function^[Pinheiro, J.C., and Bates, D.M. (2000) "Mixed-Effects Models in S and S-PLUS", Springer, pp. 100, 461.]. This function is different than the linear, or linear mixed, models that are utilized in calculating limits of agreement because it accommodates correlated errors and/or unequal variances.
 
 ### Arguments Influencing the Model
 
@@ -86,15 +86,16 @@ $$
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 $$
 
-**NOTE**: the degrees of freedom (df) are calculated using approximation of @satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
+**NOTE**: the degrees of freedom (df) are calculated using an approximation of @satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
 
 ### Tolerance 
 
 The type of tolerance limit calculation can be set using the `tol_method` argument with options including "approx" and "perc".
 Tolerance limits are calculated either through the "Beta expectation" approximation (`tol_method = "approx"`) detailed by @francq2020tolerate or through a parametric bootstrap method (`tol_method = "perc"`). 
 The bootstrap methods re-samples from the model and, after a certain number of replicates (default is 1999), calculates the bounds the prediction interval based on the quantiles of the replicates for the lower and upper limit.
-The bootstrap method is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes.
+This is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes for even small data sets.
 The approximation is the default only because it is substantially quicker.
+Users should be aware that the bootstrap method will likely be more accurate and provide smaller (i.e., more forgiving) tolerance limits.
 
 The approximate tolerance limits based on the work of @francq2020tolerate are calculated as the following:
 
@@ -122,17 +123,17 @@ test1
 
 # Agreement
 
-The agreement limits calculations in `SimplyAgree` are a tad more constrained that tolerance limits.
+The agreement limit calculations in `SimplyAgree` are a tad more constrained the tolerance limit.
 There are only 3 types of calculations that can be made: simple, replicate, and nested.
 The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
 Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
 
 The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all in one function.
-Further, `agreement_limit` assumes you are only interested in the outermost confidence interval of the limits of agreement and therefore one-tailed confidence intervals are only calculated for the LoA.
+Further, `agreement_limit` assumes you are only interested in the outermost confidence interval of the limits of agreement and therefore one-tailed confidence intervals are only calculated for the LoA (i.e., there is no `TOST` argument).
 
 ## Arguments Influencing the LoA Calculations
 
-Users of the this function have a number of options with the arguments provided in the `agreement_limit` function. 
+Users of the this function have a number of options. 
 The only required arguments are `x`, `y`, and `data` which dictate the data frame, 
 and the columns that contain the 2 measurements. 
 The `id` argument, when specified, identifies the column that contains the subject identifier. 
@@ -140,7 +141,7 @@ This is only necessary if it is a replicate or nested design.
 The type of design is dictated by `data_type` argument.
 Additionally, the `loa_calc` function dictates how the limits of agreement are calculated.
 Users have the option of computing @bland1999 or MOVER [@zou2011; @donner2012closed] limits of agreement (calculations detailed below).
-I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altman limits [@zou2011; @donner2012closed].
+I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altman limits [@zou2011; @donner2012closed] as it is the more conservative of the two options.
 
 
 ## Simple Agreement
@@ -224,7 +225,7 @@ For example, a researcher may want to compare the performance of two ELISA assay
 
 So, you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. 
 An additional column indicating the subject identifier (`id`) must also be provided. 
-Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
+
 
 ```{r}
 a2 = agreement_limit(x = "x",
@@ -232,7 +233,7 @@ a2 = agreement_limit(x = "x",
                 id = "id",
                 data = reps,
                 data_type = "reps",
-                agree.level = .8)
+                agree.level = .8) 
 
 a2
 ```
@@ -340,7 +341,7 @@ $$
 
 ## Nested
 
-This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days. The method utilized in `agreement_limit` is similar to, but not the exact same as those described by @zou2011. However, the results should be approximately the same as `agree_nest`.
+This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days. The method utilized in `agreement_limit` is similar to, but not the exact same as those described by @zou2011. However, the results should be *approximately* the same as `agree_nest` and should provide estimates that are very close to those described by @zou2011.
 
 
 ```{r}
