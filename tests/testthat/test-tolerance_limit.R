@@ -18,6 +18,13 @@ test_that("tolerance_limit returns a tolerance_delta class", {
                   "tolerance_delta")
 
   expect_s3_class(tolerance_limit(data = temps2,
+                                  x = "x",
+                                  y = "y",
+                                  tol_method = "perc",
+                                  replicates = 20),
+                  "tolerance_delta")
+
+  expect_s3_class(tolerance_limit(data = temps2,
                                       x = "x",
                                       y = "y",
                                       keep_model = FALSE),
@@ -88,6 +95,7 @@ test_that("tolerance_limit returns a tolerance_delta class", {
 
 
 
+
 })
 
 test_that("check methods",{
@@ -112,6 +120,8 @@ test_that("check methods",{
   plot(test1, geom =  "geom_density_2d_filled")
   plot(test1, geom =  "stat_density_2d")
 
+  expect_error(plot(test1, geom =  "geom_bar"))
+
   test1p = tolerance_limit(data = temps2,
                           x = "x",
                           y = "y",
@@ -121,6 +131,8 @@ test_that("check methods",{
   check(test1p)
   plot(test1p,
        delta = 2)
+  plot(test1p,
+       delta = c(-1,2))
   plot(test1p, geom =  "geom_bin2d")
   plot(test1p, geom =  "geom_density_2d")
   plot(test1p, geom =  "geom_density_2d_filled")
@@ -194,6 +206,63 @@ test_that("check methods",{
   print(test7)
   check(test7)
   plot(test7)
+
+  test8 = tolerance_limit(data = temps2,
+                          x = "x",
+                          y = "y",
+                          id = "id",
+                          condition = "condition",
+                          log_tf = TRUE,
+                          prop_bias = TRUE)
+
+  testthat::expect_identical(class(test8), "tolerance_delta")
+  print(test8)
+  check(test8)
+  plot(test8)
+
+  test9 = tolerance_limit(data = temps2,
+                          x = "x",
+                          y = "y",
+                          id = "id",
+                          condition = "condition",
+                          log_tf = TRUE,
+                          prop_bias = TRUE,
+                          tol_method = "perc",
+                          replicates = 20,
+                          )
+
+  testthat::expect_identical(class(test8), "tolerance_delta")
+  print(test9)
+  check(test9)
+  plot(test9)
+
+  test10 = tolerance_limit(data = temps2,
+                          x = "x",
+                          y = "y",
+                          id = "id",
+                         # condition = "condition",
+                          log_tf = TRUE,
+                          prop_bias = TRUE,
+                          tol_method = "perc",
+                          replicates = 20,
+  )
+
+  testthat::expect_identical(class(test10), "tolerance_delta")
+  print(test10)
+  check(test10)
+  plot(test10)
+
+  x = rnorm(5500)
+  z = rnorm(5500,sd=.2)
+  y = x+z
+
+  df1 = data.frame(x,y,z)
+
+  test_big = tolerance_limit(data = df1,
+                          x = "x",
+                          y = "y")
+
+  check(test_big)
 
 })
 

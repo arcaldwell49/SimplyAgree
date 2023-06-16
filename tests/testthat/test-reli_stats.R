@@ -32,6 +32,15 @@ testthat::test_that("Simple Use Run Through", {
                        header=TRUE,
                        row.names=1))
 
+  expect_error(agree_coef(data = ratermat2,
+                          wide = TRUE,
+                          weighted = TRUE))
+
+  expect_error(agree_coef(data = ratermat2,
+             wide = FALSE,
+             weighted = TRUE,
+             col.names = c("Rater1", "Rater2", "Rater3", "Rater4")))
+
   irr1w = agree_coef(data = ratermat2,
                     wide = TRUE,
                     weighted = TRUE,

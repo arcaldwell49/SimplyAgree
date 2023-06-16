@@ -15,6 +15,13 @@ testthat::test_that("examples from Zou", {
                               data_type = "reps",
                               alpha = .025,
                               prop_bias = FALSE)
+  reps_test_new2  = agreement_limit(x="x",y="y",
+                                   id = "id",
+                                   data = reps,
+                                   data_type = "reps",
+                                   alpha = .025,
+                                   prop_bias = TRUE)
+  print(rep_test_new2)
   testthat::expect_equal(round(reps_test_new$loa$bias,2),
                          round(reps_test$loa$estimate[1],2),
                          tolerance = .01)

@@ -14,7 +14,7 @@
 #' @param time A column naming/numbering the time point. Only necessary if the data is from time series collection.
 #' @param pred_level Prediction level for the prediction interval. Default is 95%.
 #' @param tol_level Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95%.
-#' @param tol_method Method for calculating the tolerance interval.
+#' @param tol_method Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.
@@ -253,8 +253,10 @@ tolerance_limit = function(data,
 gls_emm_delta = function(model,
                          temp_frame,
                          avg_vals){
-  if("avg" %in% paste0(nlme::getCovariateFormula(model))){
-    if("condition" %in% paste0(nlme::getCovariateFormula(model))){
+  # "avg" %in% paste0(nlme::getCovariateFormula(model))
+
+  if(grepl("avg", paste0(nlme::getCovariateFormula(model))[2])){
+    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
 
       res_emm = emmeans(ref_grid(model,
                                  at = list(avg = avg_vals),
@@ -272,7 +274,7 @@ gls_emm_delta = function(model,
     }
 
   } else {
-    if("condition" %in% paste0(nlme::getCovariateFormula(model))){
+    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
       res_emm = emmeans(model,
                         ~ condition ,
                         mode = "satterthwaite",
@@ -324,8 +326,8 @@ boot_delta_gls = function(model,
     res_df = rbind(res_df,emm_df1)
   }
 
-  if("avg" %in% paste0(nlme::getCovariateFormula(model))){
-    if("condition" %in% paste0(nlme::getCovariateFormula(model))){
+  if(grepl("avg",paste0(nlme::getCovariateFormula(model))[2])){
+    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
       sum_res_df = res_df %>%
         group_by(avg, condition) %>%
         summarize(
@@ -348,7 +350,7 @@ boot_delta_gls = function(model,
     }
 
   } else {
-    if("condition" %in% paste0(nlme::getCovariateFormula(model))){
+    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
       sum_res_df = res_df %>%
         group_by(condition) %>%
         summarize(

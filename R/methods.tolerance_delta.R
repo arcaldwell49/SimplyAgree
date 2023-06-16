@@ -273,8 +273,6 @@ plot.tolerance_delta <- function(x,
                       contour_var = "ndensity",
                       colour = "black",) +
       scale_fill_distiller(palette = "Blues", direction = 1)
-  }  else {
-    stop("geom option not supported")
   }
 
   cap1 = paste0("Prediction Interval = ",

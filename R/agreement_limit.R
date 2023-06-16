@@ -333,7 +333,7 @@ calc_loa_reps = function(df,
     d_bar = base::mean(df2$d, na.rm = TRUE)
     d_var = sigma(model)^2
     between_variance = d_var
-    total_variance = d_var + (1-1/mxh_l)*sxw2 + (1-1/myh_l)*syw2
+    total_variance = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
 
   } else{
     form1 = as.formula(d ~ 1 )

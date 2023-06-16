@@ -24,6 +24,11 @@ testthat::test_that("examples from Zou", {
                          data = reps2,
                          data_type = "nest",
                          alpha = .025)
+  expect_error(agreement_limit(x="x",y="y",
+                               #id = "id",
+                               data = reps2,
+                               data_type = "nest",
+                               alpha = .025))
   nest_test_new2 = agreement_limit(x="x",y="y",
                                   id = "id",
                                   data = reps2,
@@ -101,6 +106,13 @@ testthat::test_that("examples from Zou", {
   ptest = plot(nest_test2)
   ptest = plot(nest_test2_new)
   ptest = plot(nest_test_new)
+
+  nest_test3_ccc = agree_nest(x="x",y="y",
+                          id = "id",
+                          data = reps2,
+                          TOST = FALSE,
+                          prop_bias = TRUE,
+                          ccc = FALSE)
 
   nest_test3 = agree_nest(x="x",y="y",
                           id = "id",

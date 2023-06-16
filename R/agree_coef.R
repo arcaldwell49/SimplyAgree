@@ -45,9 +45,7 @@ agree_coef = function(wide = TRUE,
     x.df <- data.frame(x.s, subs = rep(paste("S", 1:n.obs, sep = ""),
                                        nj))
   } else {
-    if(is.null(measure) || is.null(item) ||is.null(id)){
-      stop("Must provide measure, item, and id column names if wide = FALSE")
-    }
+
     x.df = x %>%
       select(all_of(measure),all_of(item),all_of(id))
   }
