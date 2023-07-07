@@ -78,6 +78,19 @@ testthat::test_that("Simple Use Run Through", {
 
   test1 = reli_stats(data = dat,
                      wide = TRUE,
+                     se_type = "ICC1",
+                     col.names = c("J1", "J2", "J3", "J4"))
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
+                     cv_calc = "SEM",
+                     col.names = c("J1", "J2", "J3", "J4"))
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
+                     cv_calc = "residuals",
+                     col.names = c("J1", "J2", "J3", "J4"))
+
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
                      col.names = c("J1", "J2", "J3", "J4"))
 
   test1_aov = reli_aov(data = dat,
@@ -316,6 +329,35 @@ testthat::test_that("Simple Use Run Through", {
                          item = "fam_trial",
                          id = "id",
                          weighted = TRUE)
+
+  ### increase coverage calcs ----
+
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     cv_calc = "SEM",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     cv_calc = "residuals",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     se_type = "ICC2",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+
 
 
 })

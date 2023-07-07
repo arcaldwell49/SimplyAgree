@@ -205,8 +205,8 @@ testthat::test_that("examples from Zou", {
            smooth_method = "lm")
   p = plot(nest_test3, type = 1,
            smooth_method = "loess")
-  p = plot(nest_test3, type = 1,
-           smooth_method = "gam")
+  expect_error(plot(nest_test3, type = 1,
+           smooth_method = "gam"))
   p = plot(nest_test3, type = 1)
   p = plot(nest_test3, type = 2)
 

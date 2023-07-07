@@ -183,8 +183,10 @@ simple_ba_plot = function(x,
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
-          gam1 = mgcv::gam(data = df,
-                           delta ~ s(mean, bs = "tp") + s(id, bs="re"))
+
+          stop("gam is not supported for agree_reps or agree_nest at this time")
+          #gam1 = mgcv::gam(data = df,
+          #                 delta ~ s(mean, bs = "tp") + s(id, bs="re"))
         }
 
         df2 = data.frame(mean = seq(min(df$mean, na.rm=TRUE),

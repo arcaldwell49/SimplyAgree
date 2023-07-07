@@ -298,7 +298,7 @@ plot.tolerance_delta <- function(x,
       # scale_fill_viridis_d(option = "C", end = .8)+
       geom_line(inherit.aes = FALSE,
         data = df_loa2,
-        size = 1.25,
+        linewidth = 1.25,
         aes(y=estimate,
             x=x,
             color=text)) +

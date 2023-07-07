@@ -194,12 +194,12 @@ calc_loa_simple = function(df,
   conf2 = conf.level
 
   k <- nrow(df)
-  yb <- mean(df$y)
-  sy2 <- var(df$y) * (k - 1) / k
-  sd1 <- sd(df$y)
-  xb <- mean(df$x)
-  sx2 <- var(df$x) * (k - 1) / k
-  sd2 <- sd(df$x)
+  yb <- mean(df$y, na.rm = TRUE)
+  sy2 <- var(df$y, na.rm = TRUE) * (k - 1) / k
+  sd1 <- sd(df$y, na.rm = TRUE)
+  xb <- mean(df$x, na.rm = TRUE)
+  sx2 <- var(df$x, na.rm = TRUE) * (k - 1) / k
+  sd2 <- sd(df$x, na.rm = TRUE)
   r <- cor(df$x, df$y)
   sl <- r * sd1 / sd2
   sxy <- r * sqrt(sx2 * sy2)
@@ -220,9 +220,9 @@ calc_loa_simple = function(df,
     bias_values = ref_grid(model,
                            at = list(
                              avg = c(
-                               min(df$avg),
-                               mean(df$avg),
-                               max(df$avg)
+                               min(df$avg, na.rm = TRUE),
+                               mean(df$avg, na.rm = TRUE),
+                               max(df$avg, na.rm = TRUE)
                              )
                            )) %>%
       emmeans(~avg) %>%
@@ -318,9 +318,9 @@ calc_loa_reps = function(df,
     bias_values = ref_grid(model,
                            at = list(
                              avg = c(
-                               min(df$avg),
-                               mean(df$avg),
-                               max(df$avg)
+                               min(df$avg,na.rm=TRUE),
+                               mean(df$avg,na.rm=TRUE),
+                               max(df$avg,na.rm=TRUE)
                              )
                            )) %>%
       emmeans(~avg) %>%
@@ -481,9 +481,9 @@ calc_loa_nest = function(df,
     bias_values = ref_grid(model,
                            at = list(
                              avg = c(
-                               min(df$avg),
-                               mean(df$avg),
-                               max(df$avg)
+                               min(df$avg, na.rm = TRUE),
+                               mean(df$avg, na.rm = TRUE),
+                               max(df$avg, na.rm = TRUE)
                              )
                            )) %>%
       emmeans(~avg, lmer.df = "satterthwaite") %>%

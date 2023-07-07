@@ -40,7 +40,7 @@ tolerance_limit(
 
 \item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95\%.}
 
-\item{tol_method}{Method for calculating the tolerance interval.}
+\item{tol_method}{Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.}
 
 \item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.}
 

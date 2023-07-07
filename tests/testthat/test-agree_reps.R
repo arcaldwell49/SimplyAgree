@@ -21,7 +21,7 @@ testthat::test_that("examples from Zou", {
                                    data_type = "reps",
                                    alpha = .025,
                                    prop_bias = TRUE)
-  print(rep_test_new2)
+  print(reps_test_new2)
   testthat::expect_equal(round(reps_test_new$loa$bias,2),
                          round(reps_test$loa$estimate[1],2),
                          tolerance = .01)
@@ -121,17 +121,17 @@ testthat::test_that("examples from Zou", {
            smooth_method = "lm")
   p = plot(reps_test, type = 1,
            smooth_method = "loess")
-  p = plot(reps_test, type = 1,
-           smooth_method = "gam")
+  expect_error(plot(reps_test, type = 1,
+           smooth_method = "gam"))
   p = plot(reps_test, type = 1,
            smooth_method = "lm",
            smooth_se = FALSE)
   p = plot(reps_test, type = 1,
            smooth_method = "loess",
            smooth_se = FALSE)
-  p = plot(reps_test, type = 1,
+  expect_error(plot(reps_test, type = 1,
            smooth_method = "gam",
-           smooth_se = FALSE)
+           smooth_se = FALSE))
   p = plot(reps_test, type = 2)
   c1 = check(reps_test)$p_norm
   c2 = check(reps_test)$p_het
