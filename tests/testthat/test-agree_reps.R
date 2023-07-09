@@ -176,4 +176,9 @@ testthat::test_that("examples from Zou", {
 
   testthat::expect_equivalent(test_jmv$blandtab$asDF$upperci,
                               reps_test$loa$upper.ci)
+
+  reps_test = agree_reps(x="x",y="y",
+                         id = "id",
+                         data = reps,
+                         ccc = FALSE)
 })

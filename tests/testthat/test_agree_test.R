@@ -180,3 +180,29 @@ testthat::test_that("Simple Use Run Through", {
 
 
 })
+
+
+testthat::test_that("Added plotting coverage",{
+
+  data("reps")
+  data("ba1986")
+  agree1 = agree_test(x = reps$x,
+                      y = reps$y,
+                      delta = 2.5,
+                      TOST = FALSE,
+                      prop_bias = TRUE)
+  testthat::expect_equal(class(agree1), "simple_agree")
+
+  checker = check(agree1)
+  p1 = plot(agree1)
+  p2 = plot(agree1,
+            geom = "geom_bin2d")
+  p3 = plot(agree1,
+            geom = "geom_density_2d")
+  p4 = plot(agree1,
+            geom = "geom_density_2d_filled")
+  p5 = plot(agree1,
+            geom = "stat_density_2d")
+
+
+})

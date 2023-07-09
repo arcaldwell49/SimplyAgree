@@ -33,6 +33,8 @@ testthat::test_that("basic runs", {
                               tolerance = 0.001)
   pr_test = print(test_bca)
   p = plot(test_bca)
+
+
   test_perc = suppressWarnings(loa_mixed(
     diff = "diff",
     condition = "trial_condition",

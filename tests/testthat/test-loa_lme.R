@@ -42,13 +42,13 @@ testthat::test_that("basic runs", {
                   replicates = 10,
                   prop_bias = FALSE))
 
-  test5 = (loa_lme(diff = "diff",
+  test5 =loa_lme(diff = "diff",
                   avg = "avg",
                   condition = "condition",
                   id = "id",
                   data = df,
                   replicates = 10,
-                  het_var = TRUE))
+                  het_var = TRUE)
 
   test6 = (loa_lme(diff = "diff",
                   avg = "avg",
@@ -59,6 +59,15 @@ testthat::test_that("basic runs", {
                   het_var = TRUE,
                   prop_bias = TRUE))
 
+  test7 =loa_lme(diff = "diff",
+                 avg = "avg",
+                 condition = "condition",
+                 id = "id",
+                 data = df,
+                 replicates = 10,
+                 het_var = TRUE,
+                 prop_bias = TRUE)
+
   testprint = print(test6)
   testplot = plot(test6)
   testplot = plot(test5)
@@ -67,4 +76,60 @@ testthat::test_that("basic runs", {
   check1 = check(test1)
   check2 = check(test6)
 
+  testplot = plot(test6,
+                  smooth_method = "lm")
+  testplot = plot(test5,
+                  smooth_method = "lm")
+  testplot= plot(test3,
+                 smooth_method = "lm")
+  testplot = plot(test1,
+                  smooth_method = "lm")
+
+  testplot = plot(test6,
+                  smooth_method = "loess")
+  testplot = plot(test5,
+                  smooth_method = "loess")
+  testplot= plot(test3,
+                 smooth_method = "loess")
+  testplot = plot(test1,
+                  smooth_method = "loess")
+
+
+  testplot = plot(test6,
+                  geom = "geom_bin2d")
+  testplot = plot(test5,
+                  geom = "geom_bin2d")
+  testplot= plot(test3,
+                 geom = "geom_bin2d")
+  testplot = plot(test1,
+                  geom = "geom_bin2d")
+
+  testplot = plot(test6,
+                  geom = "geom_density_2d")
+  testplot = plot(test5,
+                  geom = "geom_density_2d")
+  testplot= plot(test3,
+                 geom = "geom_density_2d")
+  testplot = plot(test1,
+                  geom = "geom_density_2d")
+
+
+  testplot = plot(test6,
+                  geom = "geom_density_2d_filled")
+  testplot = plot(test5,
+                  geom = "geom_density_2d_filled")
+  testplot= plot(test3,
+                 geom = "geom_density_2d_filled")
+  testplot = plot(test1,
+                  geom = "geom_density_2d_filled")
+
+
+  testplot = plot(test6,
+                  geom = "stat_density_2d")
+  testplot = plot(test5,
+                  geom = "stat_density_2d")
+  testplot= plot(test3,
+                 geom = "stat_density_2d")
+  testplot = plot(test1,
+                  geom = "stat_density_2d")
 })
