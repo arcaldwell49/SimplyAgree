@@ -26,7 +26,7 @@
 
 \item{...}{further arguments passed through, see description of return value
 for details.
-\code{\link{tolerance_delta_gls}}.}
+\code{\link{tolerance_delta}}.}
 
 \item{geom}{String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".}
 

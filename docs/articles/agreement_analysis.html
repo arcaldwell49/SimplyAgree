@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-04-17</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-07-09</h4>
       
       
       <div class="hidden name"><code>agreement_analysis.Rmd</code></div>
@@ -114,26 +114,26 @@ concepts.</p>
 <div class="section level2">
 <h2 id="agree-or-tolerate">Agree or Tolerate?<a class="anchor" aria-label="anchor" href="#agree-or-tolerate"></a>
 </h2>
-<p><span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span>
-pose this question in a paper published in <em>Statistics in
-Medicine</em>. Traditionally, those working in medicine or physiology
-have defaulted to calculating some form of “limits of agreement” that
-<span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> once recommended. The
-recommendation by <span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> was only an
-approximation, and that has undergone many modifications <span class="citation">(<a href="#ref-bland1999" role="doc-biblioref">Bland
-and Altman 1999</a>; <a href="#ref-zou2011" role="doc-biblioref">Zou
-2011</a>)</span> to improve the accuracy of the agreement interval and
-their associated confidence intervals. Meanwhile, the field of
-industrial statistics has focused on calculating tolerance limits. There
-are R packages, such as the <code>tolerance</code> R package available
-on CRAN, that are entirely dedicated to calculating tolerance limits. It
-is important to note that tolerance is not limited to the normal
-distribution and can be applied to other distributions (please see the
-tolerance package by <span class="citation">Young (<a href="#ref-young2010tolerance" role="doc-biblioref">2010</a>)</span> for
-more details). However, in agreement studies typically seen in medicine,
-tolerance limits may be a more accurate way of determining whether two
+<p><span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> pose this question in a
+paper published in <em>Statistics in Medicine</em>. Traditionally, those
+working in medicine or physiology have defaulted to calculating some
+form of “limits of agreement” that <span class="citation">Bland and
+Altman (<a href="#ref-bland1986">1986</a>)</span> recommended in their
+seminal paper. The recommendation by <span class="citation">Bland and
+Altman (<a href="#ref-bland1986">1986</a>)</span> was only an
+approximation, and that has undergone many modifications <span class="citation">(e.g., <a href="#ref-bland1999">Bland and Altman
+1999</a>; <a href="#ref-zou2011">Zou 2011</a>)</span> to improve the
+accuracy of the agreement interval and their associated confidence
+intervals. Meanwhile, the field of industrial statistics has focused on
+calculating tolerance limits. There are R packages, such as the
+<code>tolerance</code> R package available on CRAN, that are entirely
+dedicated to calculating tolerance limits. It is important to note that
+tolerance is not limited to the normal distribution and can be applied
+to other distributions (please see the tolerance package by <span class="citation">Young (<a href="#ref-young2010tolerance">2010</a>)</span> for more details).
+However, in the agreement studies typically seen in medicine, tolerance
+limits may be a more accurate way of determining whether two
 measurements adequately close to one another.</p>
-<p>To quote <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span>:</p>
+<p>To quote <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
 <blockquote>
 <p>In terms of terminology, tolerance means, in this context, that some
 difference between the methods is tolerated (the measurements are still
@@ -143,7 +143,7 @@ and therefore more appropriate than the agreement interval.</p>
 <p>In this package, tolerance limits refer to the “tolerance” associated
 with the prediction interval for the difference between 2 measurements.
 The calculative approach (detailed much further below) involves
-calculated the prediction interval for the difference between two
+calculating the prediction interval for the difference between two
 methods (i.e., an estimate of an interval in which a future observation
 will fall, with a certain probability, given what has already been
 observed) and then calculating the confidence in the interval (i.e.,
@@ -152,21 +152,24 @@ tolerance limits, we are calculating the interval in which 95% of future
 observations (prediction) with only a 5% probability (1-tolerance) the
 “true” prediction interval limits are greater/less than the upper/lower
 tolerance limits.</p>
-<p>Personally, I find tolerance limits more attractive for 2 reasons: 1)
-the coverage of the prediction intervals and their tolerance limits is
-often better than confidence intervals for agreement limits, and 2) the
-interpretation of the tolerance limits is much clearer. For a greater
-discussion of this topic, please see the manuscript by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span> and
-their R package <code>BivRegBLS</code>.</p>
+<p>Personally, I find the use of prediction intervals and tolerance
+limits more attractive for 2 reasons: 1) the coverage of the prediction
+intervals and their tolerance limits is often better than confidence
+intervals for agreement limits, and 2) the interpretation of the
+tolerance limits is much clearer. For a greater discussion of this
+topic, please see the manuscript by <span class="citation">Francq,
+Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>
+and check out their R package <code>BivRegBLS</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="tolerance">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance"></a>
 </h2>
 <p>In <code>SimplyAgree</code> we utilize a generalized least square
-(GLS) to estimate the tolerance limits. The function uses the
-<code>gls</code> function from the <code>nlme</code> R package to build
-the model. This allows a <em>very</em> flexible approach for estimating
-prediction intervals and tolerance limits.</p>
+(GLS) model to estimate the prediction interval and tolerance limits.
+The function uses the <code>gls</code> function from the
+<code>nlme</code> R package to build the model. This allows a
+<em>very</em> flexible approach for estimating prediction intervals and
+tolerance limits.</p>
 <p>We can use the <code>tolerance_limits</code> function demonstrate the
 basic calculations. In this example (below), we use the
 <code>temps</code> data set to measure the differences between
@@ -191,32 +194,32 @@ correlation.</p>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
-<p>Overall, the model is fit using the <code>gls</code> function, and I
-would suggest reading book by Pinheiro and Bates which details the
-function<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. This function is different than the
+<p>Overall, the model is fit using the <code>gls</code> function, and,
+for those interested, I would suggest reading book by Pinheiro and Bates
+which details the function<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. This function is different than the
 linear, or linear mixed, models that are utilized in calculating limits
 of agreement because it accommodates correlated errors and/or unequal
 variances.</p>
 <div class="section level4">
 <h4 id="arguments-influencing-the-model">Arguments Influencing the Model<a class="anchor" aria-label="anchor" href="#arguments-influencing-the-model"></a>
 </h4>
-<p>Users of the this function have a number of options with the
-arguments provided in the <code>tolerance_limit</code> function. The
-only required arguments are <code>x</code>, <code>y</code>, and
-<code>data</code> which dictate the data frame, and the columns that
-contain the 2 measurements. The <code>id</code> argument, when
-specified, identifies the column that contains the subject identifier or
-some time of nesting within which the data should be correlated to some
-degree. The <code>time</code>, argument is utilized when the data come
-from a repeated measures or time series data, and indicates the order of
-the data points. The <code>condition</code> argument identifies some
-factor within a data frame that may effect the mean difference (and
-variance) of the differences between the 2 measurements. The
-<code>cor_type</code> argument can also be utilized to specific 1 of 3
-possible correlation structure types. Lastly, savvy users can specify a
-particular variance or correlation structure using the
-<code>weights</code> and <code>correlation</code> arguments which
-directly alter the model being fit using <code>gls</code>.</p>
+<p>There are a number of options with the arguments provided in the
+<code>tolerance_limit</code> function. The only required arguments are
+<code>x</code>, <code>y</code>, and <code>data</code> which dictate the
+data frame, and the columns that contain the 2 measurements. The
+<code>id</code> argument, when specified, identifies the column that
+contains the subject identifier or some time of nesting within which the
+data should be correlated to some degree. The <code>time</code>,
+argument is utilized when the data come from a repeated measures or time
+series data, and indicates the order of the data points. The
+<code>condition</code> argument identifies some factor within a data
+frame that may effect the mean difference (and variance) of the
+differences between the 2 measurements. The <code>cor_type</code>
+argument can also be utilized to specific 1 of 3 possible correlation
+structure types. Lastly, savvy users can specify a particular variance
+or correlation structure using the <code>weights</code> and
+<code>correlation</code> arguments which directly alter the model being
+fit using <code>gls</code>.</p>
 </div>
 <div class="section level4">
 <h4 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
@@ -235,9 +238,8 @@ calculated with following:</p>
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 \]</span></p>
 <p><strong>NOTE</strong>: the degrees of freedom (df) are calculated
-using approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946" role="doc-biblioref">1946</a>)</span> (see
-<span class="citation">Kuznetsova, Brockhoff, and Christensen (<a href="#ref-lmertest" role="doc-biblioref">2017</a>)</span> for an
-explanation of this implementation in R).</p>
+using an approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946">1946</a>)</span> (see <span class="citation">Kuznetsova, Brockhoff, and Christensen (<a href="#ref-lmertest">2017</a>)</span> for an explanation of this
+implementation in R).</p>
 </div>
 <div class="section level4">
 <h4 id="tolerance-1">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance-1"></a>
@@ -246,18 +248,19 @@ explanation of this implementation in R).</p>
 <code>tol_method</code> argument with options including “approx” and
 “perc”. Tolerance limits are calculated either through the “Beta
 expectation” approximation (<code>tol_method = "approx"</code>) detailed
-by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span> or
-through a parametric bootstrap method
-(<code>tol_method = "perc"</code>). The bootstrap methods re-samples
-from the model and, after a certain number of replicates (default is
-1999), calculates the bounds the prediction interval based on the
-quantiles of the replicates for the lower and upper limit. The bootstrap
-method is preferred for its accuracy and power, but is
+by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> or through a parametric
+bootstrap method (<code>tol_method = "perc"</code>). The bootstrap
+methods re-samples from the model and, after a certain number of
+replicates (default is 1999), calculates the bounds the prediction
+interval based on the quantiles of the replicates for the lower and
+upper limit. This is preferred for its accuracy and power, but is
 <em>extremely</em> slow which may involve computations lasting greater
-than 2 minutes. The approximation is the default only because it is
-substantially quicker.</p>
-<p>The approximate tolerance limits based on the work of <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate" role="doc-biblioref">2020</a>)</span> are
-calculated as the following:</p>
+than 2 minutes for even small data sets. The approximation is the
+default only because it is substantially quicker. Users should be aware
+that the bootstrap method will likely be more accurate and provide
+smaller (i.e., more forgiving) tolerance limits.</p>
+<p>The approximate tolerance limits based on the work of <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> are calculated as the
+following:</p>
 <p><span class="math display">\[
 TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot
 \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
@@ -294,8 +297,8 @@ controlling for time of day (<code>tod</code>).</p>
 <div class="section level2">
 <h2 id="agreement">Agreement<a class="anchor" aria-label="anchor" href="#agreement"></a>
 </h2>
-<p>The agreement limits calculations in <code>SimplyAgree</code> are a
-tad more constrained that tolerance limits. There are only 3 types of
+<p>The agreement limit calculations in <code>SimplyAgree</code> are a
+tad more constrained the tolerance limit. There are only 3 types of
 calculations that can be made: simple, replicate, and nested. The simple
 calculation each pair of observations (x and y) are
 <em>independent</em>; meaning that each pair represents one
@@ -309,26 +312,24 @@ functions in the package (i.e., <code>agree_test</code>,
 <code>agree_reps</code>, and <code>agree_nest</code>), allows users to
 make any of the three calculations all in one function. Further,
 <code>agreement_limit</code> assumes you are only interested in the
-outermost confindence interval of the limits of agreement and therefore
-one-tailed confidence intervals are only calculated for the LoA.</p>
+outermost confidence interval of the limits of agreement and therefore
+one-tailed confidence intervals are only calculated for the LoA (i.e.,
+there is no <code>TOST</code> argument).</p>
 <div class="section level3">
 <h3 id="arguments-influencing-the-loa-calculations">Arguments Influencing the LoA Calculations<a class="anchor" aria-label="anchor" href="#arguments-influencing-the-loa-calculations"></a>
 </h3>
-<p>Users of the this function have a number of options with the
-arguments provided in the <code>agreement_limit</code> function. The
-only required arguments are <code>x</code>, <code>y</code>, and
+<p>Users of the this function have a number of options. The only
+required arguments are <code>x</code>, <code>y</code>, and
 <code>data</code> which dictate the data frame, and the columns that
 contain the 2 measurements. The <code>id</code> argument, when
 specified, identifies the column that contains the subject identifier.
 This is only necessary if it is a replicate or nested design. The type
 of design is dictated by <code>data_type</code> argument. Additionally,
 the <code>loa_calc</code> function dictates how the limits of agreement
-are calculated. Users have the option of computing <span class="citation">Bland and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span> or MOVER <span class="citation">(<a href="#ref-zou2011" role="doc-biblioref">Zou
-2011</a>; <a href="#ref-donner2012closed" role="doc-biblioref">Donner
-and Zou 2012</a>)</span> limits of agreement (calculations detailed
-below). I strongly recommend utilizing the MOVER limits of agreement
-over the Bland-Altman limits <span class="citation">(<a href="#ref-zou2011" role="doc-biblioref">Zou 2011</a>; <a href="#ref-donner2012closed" role="doc-biblioref">Donner and Zou
-2012</a>)</span>.</p>
+are calculated. Users have the option of computing <span class="citation">Bland and Altman (<a href="#ref-bland1999">1999</a>)</span> or MOVER <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>; <a href="#ref-donner2012closed">Donner and Zou 2012</a>)</span> limits of
+agreement (calculations detailed below). I strongly recommend utilizing
+the MOVER limits of agreement over the Bland-Altman limits <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>; <a href="#ref-donner2012closed">Donner and Zou 2012</a>)</span> as it is
+the more conservative of the two options.</p>
 </div>
 <div class="section level3">
 <h3 id="simple-agreement">Simple Agreement<a class="anchor" aria-label="anchor" href="#simple-agreement"></a>
@@ -358,8 +359,8 @@ subject/participant that is uncorrelated with other pairs.</p>
 <div class="section level4">
 <h4 id="calculation-steps">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps"></a>
 </h4>
-<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> and <span class="citation">Bland
-and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>.</p>
+<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986">1986</a>)</span> and <span class="citation">Bland
+and Altman (<a href="#ref-bland1999">1999</a>)</span>.</p>
 <p><strong>LoA</strong></p>
 <p><span class="math display">\[
 LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
@@ -421,16 +422,14 @@ in duplicate/triplicate.</p>
 <code>data</code> argument and the names of the columns containing the
 first (<code>x</code> argument) and second (<code>y</code> argument)
 must then be provided. An additional column indicating the subject
-identifier (<code>id</code>) must also be provided. Again, if there is a
-hypothesized agreement limit then this could be provided with the
-<code>delta</code> argument.</p>
+identifier (<code>id</code>) must also be provided.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
 <span>                data <span class="op">=</span> <span class="va">reps</span>,</span>
 <span>                data_type <span class="op">=</span> <span class="st">"reps"</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
+<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">a2</span></span>
 <span><span class="co">#&gt; MOVER Limits of Agreement (LoA)</span></span>
@@ -492,7 +491,7 @@ N-n)}})]^2}
 LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
 (\sqrt{u}-\sqrt{s^2_d} )^2}
 \]</span></p>
-<p><strong>Bland-Atlman Method</strong></p>
+<p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
 S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot
 (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x -
@@ -530,8 +529,9 @@ data wherein data is collected in different times/conditions within each
 subject. An example would be measuring blood pressure on two different
 devices on many people at different time points/days. The method
 utilized in <code>agreement_limit</code> is similar to, but not the
-exact same as those described by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, the
-results should be approximately the same as <code>agree_nest</code>.</p>
+exact same as those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>. However, the results should be
+<em>approximately</em> the same as <code>agree_nest</code> and should
+provide estimates that are very close to those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
@@ -596,7 +596,7 @@ LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
 S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot
 ((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
 \]</span> <span class="math display">\[
-LME =
+LME = z_{1-\alpha} \cdot S_{LoA}
 \]</span></p>
 <ol start="4" style="list-style-type: decimal">
 <li>Calculate LoA</li>
@@ -680,11 +680,10 @@ checks.</p>
 </h2>
 <p>As the check plots for <code>a1</code> show, proportional bias can
 sometimes occur. In these cases <span class="citation">Bland and Altman
-(<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>
-recommended adjusting the bias and LoA for the proportional bias. This
-is simply done by include a slope for the average of both measurements
-(i.e, using an intercept + slope model rather than intercept only
-model).</p>
+(<a href="#ref-bland1999">1999</a>)</span> recommended adjusting the
+bias and LoA for the proportional bias. This is simply done by include a
+slope for the average of both measurements (i.e, using an intercept +
+slope model rather than intercept only model).</p>
 <p>For either <code>agreement_limit</code> or
 <code>tolerance_limit</code> functions, this can be accomplished with
 the <code>prop_bias</code> argument. When this is set to TRUE, then the
@@ -843,7 +842,7 @@ Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
 <hr>
 <ol>
 <li id="fn1"><p>Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects
-Models in S and S-PLUS”, Springer, esp. pp. 100, 461.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+Models in S and S-PLUS”, Springer, pp. 100, 461.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>No test is included for proportional bias for
 <code>tolerance_limit</code> results at this time.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 </ol>

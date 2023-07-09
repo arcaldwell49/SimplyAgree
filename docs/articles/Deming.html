@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-04-17</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-07-09</h4>
       
       
       <div class="hidden name"><code>Deming.Rmd</code></div>
@@ -111,11 +111,12 @@ paired measurements (X &amp; Y) of the same underlying value (e.g., two
 assays of the same analyte).</p>
 <p>Deming regression is one of the simplest forms of of EIV models
 promoted by <a href="https://en.wikipedia.org/wiki/W._Edwards_Deming" class="external-link">W.
-Edwards Deming</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The first to detail the method were <span class="citation">Adcock (<a href="#ref-adcock1878" role="doc-biblioref">1878</a>)</span> followed by <span class="citation">Kummell (<a href="#ref-kummell1879" role="doc-biblioref">1879</a>)</span> and <span class="citation">Koopmans (<a href="#ref-koopmans1936" role="doc-biblioref">1936</a>)</span>. The name comes from the
-popularity of Deming’s book <span class="citation">(<a href="#ref-deming1943" role="doc-biblioref">Deming 1943</a>)</span>, and
+Edwards Deming</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The first to detail the method were <span class="citation">Adcock (<a href="#ref-adcock1878">1878</a>)</span>
+followed by <span class="citation">Kummell (<a href="#ref-kummell1879">1879</a>)</span> and <span class="citation">Koopmans (<a href="#ref-koopmans1936">1936</a>)</span>.
+The name comes from the popularity of Deming’s book <span class="citation">(<a href="#ref-deming1943">Deming 1943</a>)</span>, and
 within the field of clinical chemistry, the procedure was simply
 referred to as “Deming regression” (e.g., <span class="citation">Linnet
-(<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>)</p>
+(<a href="#ref-linnet1990">1990</a>)</span>)</p>
 </div>
 <div class="section level2">
 <h2 id="code-demostration">Code Demostration<a class="anchor" aria-label="anchor" href="#code-demostration"></a>
@@ -262,7 +263,7 @@ and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
 <p>In some cases the variance of X and Y may increase proportional to
 the true value of the measure. In these cases, it may be prudent to use
 “weighted” Deming regression models. The weights used in
-<code>SimplyAgree</code> are the same as those suggested by <span class="citation">Linnet (<a href="#ref-linnet1993" role="doc-biblioref">1993</a>)</span>.</p>
+<code>SimplyAgree</code> are the same as those suggested by <span class="citation">Linnet (<a href="#ref-linnet1993">1993</a>)</span>.</p>
 <p><span class="math display">\[
 \hat w_i = \frac{1}{ [ \frac{x_i + \lambda \cdot y_i}{1 + \lambda}]^2}
 \]</span></p>
@@ -304,7 +305,7 @@ then be estimated with the following equation.</p>
 <p><span class="math display">\[
 b_0 = \bar y_w - b_1 \cdot \bar x_w
 \]</span> The standard errors of b1 and b0 are both estimated using a
-jackknife method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990" role="doc-biblioref">1990</a>)</span>).</p>
+jackknife method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990">1990</a>)</span>).</p>
 </div>
 </div>
 <div class="section level2">

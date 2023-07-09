@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-04-17</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-07-09</h4>
       
       
       <div class="hidden name"><code>agree_tests.Rmd</code></div>
@@ -192,7 +192,7 @@ visualizations of agreement. This includes the Bland-Altman plot
 <h4 id="shiehs-test">Shieh’s test<a class="anchor" aria-label="anchor" href="#shiehs-test"></a>
 </h4>
 <p>The hypothesis test procedure is based on the “exact” approach
-details by <span class="citation">Shieh (<a href="#ref-shieh2019" role="doc-biblioref">2019</a>)</span>. In this procedure the null
+details by <span class="citation">Shieh (<a href="#ref-shieh2019">2019</a>)</span>. In this procedure the null
 hypothesis (not acceptable agreement) is rejected if the extreme lower
 bound and upper bound are within the proposed agreement limits. The
 agreement limits (<span class="math inline">\(\hat\theta_{EL} \space and
@@ -211,8 +211,8 @@ critical value (which requires a specialized function within
 <div class="section level4">
 <h4 id="limits-of-agreement">Limits of Agreement<a class="anchor" aria-label="anchor" href="#limits-of-agreement"></a>
 </h4>
-<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986" role="doc-biblioref">1986</a>)</span> and <span class="citation">Bland
-and Altman (<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>.</p>
+<p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986">1986</a>)</span> and <span class="citation">Bland
+and Altman (<a href="#ref-bland1999">1999</a>)</span>.</p>
 <p><strong>LoA</strong></p>
 <p><span class="math display">\[
 LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
@@ -238,8 +238,7 @@ TRUE then equation is altered slightly with the critical t (<span class="math in
 <div class="section level4">
 <h4 id="concordance-correlation-coefficient">Concordance Correlation Coefficient<a class="anchor" aria-label="anchor" href="#concordance-correlation-coefficient"></a>
 </h4>
-<p>The CCC was calculated as outlined by <span class="citation">Lin (<a href="#ref-lin1989" role="doc-biblioref">1989</a>)</span> (with later
-corrections).</p>
+<p>The CCC was calculated as outlined by <span class="citation">Lin (<a href="#ref-lin1989">1989</a>)</span> (with later corrections).</p>
 <p><span class="math display">\[
 \hat\rho_c = \frac{2 \cdot s_{xy}} {s_x^2 + s_y^2+(\bar x-\bar y)^2}
 \]</span> where <span class="math inline">\(s_{xy}\)</span> is the
@@ -259,10 +258,9 @@ value will not be expected to vary (i.e., replicates;
 an individual <em>and</em> these values are expected to vary (i.e.,
 nested design; <code>agree_nest</code>).</p>
 <p>The confidence limits on the limits of agreement are based on the
-“MOVER” method described in detail by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>. However, both
-functions operate similarly to <code>agree_test</code>; the only
-difference being that the data has to be provided as a
-<code>data.frame</code> in R.</p>
+“MOVER” method described in detail by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>. However, both functions operate
+similarly to <code>agree_test</code>; the only difference being that the
+data has to be provided as a <code>data.frame</code> in R.</p>
 <div class="section level3">
 <h3 id="agree_reps">
 <code>agree_reps</code><a class="anchor" aria-label="anchor" href="#agree_reps"></a>
@@ -357,7 +355,7 @@ given the nature of the data.</p>
 <code>agree_nest</code><a class="anchor" aria-label="anchor" href="#calculations-for-agree_reps-agree_nest"></a>
 </h3>
 <p>All the calculations for the limits of agreement in these two
-functions can be found in the article by <span class="citation">Zou (<a href="#ref-zou2011" role="doc-biblioref">2011</a>)</span>.</p>
+functions can be found in the article by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="agree_nest-loa">
@@ -546,7 +544,8 @@ Upper \space CI = LoA_{upper} + LME
 <p>The CCC calculations are derived from the <code>cccUst</code>
 function of the <code>cccrm</code> R package. The mathematics for this
 CCC calculation can be found in the work of <span class="citation">King,
-Chinchilli, and Carrasco (<a href="#ref-king2007" role="doc-biblioref">2007</a>)</span> and <span class="citation">Carrasco, King, and Chinchilli (<a href="#ref-carrasco2009" role="doc-biblioref">2009</a>)</span>.</p>
+Chinchilli, and Carrasco (<a href="#ref-king2007">2007</a>)</span> and
+<span class="citation">Carrasco, King, and Chinchilli (<a href="#ref-carrasco2009">2009</a>)</span>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -577,11 +576,10 @@ the residuals plot.</p>
 </h2>
 <p>As the check plots for <code>a1</code> show, proportional bias can
 sometimes occur. In these cases <span class="citation">Bland and Altman
-(<a href="#ref-bland1999" role="doc-biblioref">1999</a>)</span>
-recommended adjusting the bias and LoA for the proportional bias. This
-is simply done by include a slope for the average of both measurements
-(i.e, using an intercept + slope model rather than intercept only
-model).</p>
+(<a href="#ref-bland1999">1999</a>)</span> recommended adjusting the
+bias and LoA for the proportional bias. This is simply done by include a
+slope for the average of both measurements (i.e, using an intercept +
+slope model rather than intercept only model).</p>
 <p>For any of the “agree” functions, this can be accomplished with the
 <code>prop_bias</code> argument. When this is set to TRUE, then the
 proportional bias adjusted model is utilized. However, you should be
@@ -621,16 +619,16 @@ any case, plots of the data should always be inspected</p>
 non-parametric alternative may be useful. The <code>agree_np</code>
 function is the non-parametric alternative for the
 <code>SimpleAgree</code> R package, and is largely based on the
-recommendations of Bland &amp; Altman <span class="citation">(<a href="#ref-bland1999" role="doc-biblioref">Bland and Altman 1999</a>,
-pg. 157)</span>.</p>
+recommendations of Bland &amp; Altman <span class="citation">(<a href="#ref-bland1999">Bland and Altman 1999</a>, pg. 157)</span>.</p>
 <p>The function performs two tests:</p>
 <ol style="list-style-type: decimal">
 <li>A binomial test on whether or not the observed differences are
 within the maximal allowable differences bounds (<code>delta</code>
 argument).</li>
 <li>Quantile regression, derived from the <code>quantreg</code> package
-<span class="citation">(<a href="#ref-quantreg" role="doc-biblioref">Koenker 2020</a>)</span>, two estimate the median
-and 95% limits of agreement. If the default agreement levels are used
+<span class="citation">(<a href="#ref-quantreg">Koenker
+2020</a>)</span>, two estimate the median and 95% limits of agreement.
+If the default agreement levels are used
 (<code>agree.level = .95</code>) then the 0.025, 0.5 (median), and 0.975
 quantiles are estimated.</li>
 </ol>
@@ -646,6 +644,8 @@ are no longer symmetric around the bias estimate.</p>
 <span>              delta <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>              prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in agree_np(x = "x", y = "y", data = reps, delta = 2, prop_bias =</span></span>
+<span><span class="co">#&gt; FALSE, : Evidence of proportional bias. Consider setting prop_bias to TRUE.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
 <span><span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span></span>
@@ -656,9 +656,9 @@ are no longer symmetric around the bias estimate.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA    -0.89  -1.3958  -0.3842     0.90</span></span>
-<span><span class="co">#&gt; Bias          0.04  -0.5463   0.6263     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA     2.45   1.2714   3.6286     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA    -0.89  -1.3686  -0.4114     0.90</span></span>
+<span><span class="co">#&gt; Bias          0.04  -0.6321   0.7121     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA     2.45   1.4668   3.4332     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
@@ -682,15 +682,15 @@ agreement does not.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6870  -0.8925     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6323  -0.2764     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6579   1.1305     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6876  -0.8919     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6328  -0.2759     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6164   1.1719     0.90</span></span>
 <span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3300  -0.1310     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6732   0.5285     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.6176   2.5976     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -3.0947   2.3285     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8257   3.1957     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.1922   9.5575     0.90</span></span>
+<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.5882   0.4434     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.5216   2.5016     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -3.0485   2.2823     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8121   3.2092     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.1677   9.5820     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
@@ -781,7 +781,7 @@ added one function, with hopefully more in the future, to aid in the
 power analysis for simple agreement studies. The current function is
 <code>blandPowerCurve</code> which constructs a “curve” of power across
 sample sizes, agreement levels, and confidence levels. This is based on
-the work of <span class="citation">Lu et al. (<a href="#ref-lu2016" role="doc-biblioref">2016</a>)</span>.</p>
+the work of <span class="citation">Lu et al. (<a href="#ref-lu2016">2016</a>)</span>.</p>
 <p>For this function the user must define the hypothesized limits of
 agreement (<code>delta</code>), mean difference between methods
 (<code>mu</code>), and the standard deviation of the difference scores

@@ -7,7 +7,7 @@
 #' @param digits The number of digits to print.
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{tolerance_delta_gls}}.
+#'   \code{\link{tolerance_delta}}.
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the tolerance limits.}
@@ -454,7 +454,7 @@ check.tolerance_delta <- function(x) {
 
   rstan_norm = sort(resid(mod_check, type = "normalized"), na.last = NA)
   dat_norm <- na.omit(data.frame(y = rstan_norm))
-  p_norm = SimplyAgree:::plot_qq(
+  p_norm = plot_qq(
     x = dat_norm
   ) +
     labs(caption = paste0("Normality", " \n",
@@ -473,7 +473,7 @@ check.tolerance_delta <- function(x) {
 
   dat2 = data.frame(resid = residuals(mod_check),
                     mean = na.omit(dat$mean))
-  p_bias = SimplyAgree:::plot_bias(dat2) +
+  p_bias = plot_bias(dat2) +
     theme(
       panel.background = element_rect(fill='transparent'), #transparent panel bg
       plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg

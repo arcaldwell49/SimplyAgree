@@ -52,11 +52,11 @@ Returns single simple_agree class object with the results of the agreement analy
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 
-Development on \code{agree_reps()} is complete, and for new code we recommend
+Development on \code{agree_nest()} is complete, and for new code we recommend
 switching to \code{agreement_limit()}, which is easier to use, has more features,
 and still under active development.
 
-`agree_nest`` produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
+\code{agree_nest} produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
 }
 \examples{
 data('reps')
