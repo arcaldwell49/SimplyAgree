@@ -7,7 +7,7 @@
 #' @param digits The number of digits to print.
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{tolerance_delta}}.
+#'   \code{\link{tolerance_limit}}.
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the tolerance limits.}
