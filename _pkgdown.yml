@@ -26,6 +26,17 @@ reference:
   - loa-methods
   - tolerance_delta-methods
 
+- title: "Reliability"
+  contents:
+  - reli_stats
+  - reli_aov
+  - simple_reli-methods
+
+- title: "Deming Regression"
+  contents:
+  - dem_reg
+  - simple_eiv-methods
+
 - title: "Agreement Tests"
 
 - subtitle: "Simple"
@@ -42,23 +53,12 @@ reference:
   - loa_lme
   - loa_mermod-methods
 
-- subtitle: "Deming Regression"
-  contents:
-  - dem_reg
-  - simple_eiv-methods
-
 - title: "Power"
   desc: >
     Fucntions for power calculations
   contents:
   - blandPowerCurve
   - powerCurve-methods
-
-- title: "Reliability"
-  contents:
-  - reli_stats
-  - reli_aov
-  - simple_reli-methods
 
 - title: "Data"
   contents:

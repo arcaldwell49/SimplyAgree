@@ -48,7 +48,13 @@ Returns single loa class object with the results of the agreement analysis.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-A function for calculating for limits of agreement. Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
+A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
+Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
+}
+\details{
+The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Atlman (1986 & 1999).
+The \code{loa_calc} allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (\code{loa_calc = "blandaltman"}),
+or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (\code{loa_calc = "mover"}).
 }
 \examples{
 data('reps')

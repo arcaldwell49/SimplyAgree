@@ -1,7 +1,7 @@
 ---
 title: "Re-analysis of an Agreement Study"
 output: rmarkdown::html_vignette
-bibliography: ref.bib
+bibliography: refs.bib
 vignette: >
   %\VignetteIndexEntry{Re-analysis of an Agreement Study}
   %\VignetteEncoding{UTF-8}

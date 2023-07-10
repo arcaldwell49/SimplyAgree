@@ -3,7 +3,8 @@
 #' @description
 #' `r lifecycle::badge('maturing')`
 #'
-#' A function for calculating for limits of agreement. Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
+#' A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
+#' Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
 #' @param x Name of column with first measurement
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier. Default is "id" if no entry is provided.
@@ -18,6 +19,9 @@
 #'
 #'   - `loa`: A data frame containing the Limits of Agreement.
 #'   - `call`:The matched call.
+#' @details The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Atlman (1986 & 1999).
+#' The `loa_calc` allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (`loa_calc = "blandaltman"`),
+#' or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (`loa_calc = "mover"`).
 #'
 #' @examples
 #' data('reps')

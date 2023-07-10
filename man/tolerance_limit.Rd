@@ -57,7 +57,7 @@ tolerance_limit(
 \item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 999.}
 }
 \value{
-Returns single `tolerance_delta`` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
+Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 \itemize{
 \item \code{limits}: A data frame containing the prediction/tolerance limits.
 \item \code{model}: The GLS model; NULL if keep_model set to FALSE.
@@ -67,18 +67,24 @@ Returns single `tolerance_delta`` class object with the results of the agreement
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-A function for calculating tolerance limits for the difference between two measurements.
+A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
 See \code{vignette("agreement_analysis")} for more details.
 }
 \details{
 The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
 When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
-However, these are only an approximation and overly conservative.
+However, these are only an approximation and conservative.
 Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
 }
 \examples{
 data('reps')
+
+# Simple
+tolerance_limit(x = "x", y ="y", data = reps)
+
+# Nested
+tolerance_limit(x = "x", y ="y", data = reps, id = "id")
 
 }
 \references{

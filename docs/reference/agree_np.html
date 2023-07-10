@@ -34,13 +34,13 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -73,17 +73,17 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">agree_np</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">y</span>,</span>
-<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">data</span>,</span>
-<span>  delta <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  TOST <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">agree_np</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">y</span>,
+  id <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">data</span>,
+  delta <span class="op">=</span> <span class="cn">NULL</span>,
+  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
+  TOST <span class="op">=</span> <span class="cn">TRUE</span>,
+  agree.level <span class="op">=</span> <span class="fl">0.95</span>,
+  conf.level <span class="op">=</span> <span class="fl">0.95</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -143,9 +143,8 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">agree_np</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, id <span class="op">=</span> <span class="st">"id"</span>, data <span class="op">=</span> <span class="va">reps</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Evidence of proportional bias. Consider setting prop_bias to TRUE.</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">agree_np</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, id <span class="op">=</span> <span class="st">"id"</span>, data <span class="op">=</span> <span class="va">reps</span>, delta <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Limit of Agreement = 95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Binomial proportions test and quantile regression for LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -155,9 +154,9 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           Estimate Lower CI Upper CI CI Level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Lower LoA    -1.12  -1.4265  -0.8135     0.90</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bias          0.04  -0.6277   0.7077     0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Upper LoA     2.97   2.2085   3.7315     0.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Lower LoA    -1.12  -1.4391  -0.8009     0.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bias          0.04  -0.6429   0.7229     0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Upper LoA     2.97   2.2349   3.7051     0.90</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
@@ -173,7 +172,7 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

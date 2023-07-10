@@ -2,32 +2,32 @@
 #'
 #' @description `r lifecycle::badge('maturing')`
 #'
-#' A function for calculating tolerance limits for the difference between two measurements.
+#' A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 #' This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
 #' See `vignette("agreement_analysis")` for more details.
 #'
 #' @param data A data frame containing the variables.
-#' @param x Name of the variable for the first measurement.
-#' @param y Name of the variable for the second measurement.
-#' @param id Name of the variable for the subject ID.
-#' @param condition Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
-#' @param time A column naming/numbering the time point. Only necessary if the data is from time series collection.
+#' @param x Name of the column for the first measurement.
+#' @param y Name of the column for the second measurement.
+#' @param id Name of the column for the subject ID.
+#' @param condition Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.
+#' @param time Name of the column indicating the time points. Only necessary if the data is from time series or repeated measures collection.
 #' @param pred_level Prediction level for the prediction interval. Default is 95%.
 #' @param tol_level Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95%.
 #' @param tol_method Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.
-#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL
+#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.
 #' @param weights an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
 #' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
 #' @inheritParams loa_lme
 #' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
 #' When `tol_method` is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
-#' However, these are only an approximation and overly conservative.
+#' However, these are only an approximation and conservative.
 #' Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (`tol_method = "perc"`).
 #'
-#' @return Returns single `tolerance_delta`` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
+#' @return Returns single `tolerance_delta` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
 #'   - `limits`: A data frame containing the prediction/tolerance limits.
 #'   - `model`: The GLS model; NULL if keep_model set to FALSE.
@@ -35,9 +35,15 @@
 #' @examples
 #' data('reps')
 #'
+#' # Simple
+#' tolerance_limit(x = "x", y ="y", data = reps)
+#'
+#' # Nested
+#' tolerance_limit(x = "x", y ="y", data = reps, id = "id")
+#'
 #' @references
 #'
-#' Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in medicine, 35(14), 2328-2358.
+#' Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in mMdicine, 35(14), 2328-2358.
 #'
 #' Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.
 #'
