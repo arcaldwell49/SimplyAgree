@@ -2,8 +2,8 @@
 
 # SimplyAgree 0.2.0
 
-- Add universal tolerance limits function
-- Add universal agreement limits function
+- Add universal tolerance limits function: `tolerance_limit`
+- Add universal agreement limits function: `agreement_limit`
 
 # SimplyAgree 0.1.5
 
