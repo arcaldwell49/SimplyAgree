@@ -123,7 +123,7 @@ test1
 
 # Agreement
 
-The agreement limit calculations in `SimplyAgree` are a tad more constrained the tolerance limit.
+The agreement limit calculations in `SimplyAgree` are a tad more constrained than the tolerance limit.
 There are only 3 types of calculations that can be made: simple, replicate, and nested.
 The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
 Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
