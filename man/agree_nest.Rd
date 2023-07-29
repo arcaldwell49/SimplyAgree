@@ -13,7 +13,8 @@ agree_nest(
   agree.level = 0.95,
   conf.level = 0.95,
   TOST = TRUE,
-  prop_bias = FALSE
+  prop_bias = FALSE,
+  ccc = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ agree_nest(
 \item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
 
 \item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
+
+\item{ccc}{Calculate concordance correlation coefficient.}
 }
 \value{
 Returns single simple_agree class object with the results of the agreement analysis.

@@ -13,7 +13,8 @@ agree_reps(
   agree.level = 0.95,
   conf.level = 0.95,
   prop_bias = FALSE,
-  TOST = TRUE
+  TOST = TRUE,
+  ccc = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ agree_reps(
 \item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 
 \item{TOST}{Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.}
+
+\item{ccc}{Calculate concordance correlation coefficient.}
 }
 \value{
 Returns single list with the results of the agreement analysis.

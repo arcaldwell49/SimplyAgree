@@ -9,7 +9,7 @@
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
-#'
+#' @param ccc Calculate concordance correlation coefficient.
 #' @return Returns single simple_agree class object with the results of the agreement analysis.
 #'
 #' \describe{
@@ -47,7 +47,8 @@ agree_nest <- function(x,
                        agree.level = .95,
                        conf.level = .95,
                        TOST = TRUE,
-                       prop_bias = FALSE){
+                       prop_bias = FALSE,
+                       ccc = TRUE){
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree_l = 1 - (1 - agree.level) / 2
@@ -79,6 +80,7 @@ agree_nest <- function(x,
                  names_to = "method",
                  values_to = "measure")
 
+  if(ccc){
   ccc_nest = cccUst(dataset = df_long,
                     ry = "measure",
                     rmet = "method",
@@ -88,6 +90,12 @@ agree_nest <- function(x,
                       lower.ci = ccc_nest[2],
                       upper.ci = ccc_nest[3],
                       SE = ccc_nest[4])
+  } else{
+    ccc.xy = data.frame(est.ccc = NA,
+                        lower.ci = NA,
+                        upper.ci = NA,
+                        SE = NA)
+  }
   df_lmer = df %>%
     mutate(mean = (x+y)/2,
            delta = x - y)

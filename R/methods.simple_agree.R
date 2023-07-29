@@ -74,6 +74,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     if(get_call(x$call$prop_bias) == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
+    if(is.na(x$ccc.xy$est.ccc)){
     cat("###- Concordance Correlation Coefficient* (CCC) -###")
     cat("\n")
     cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*get_call(x$call$conf.level),
@@ -81,6 +82,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("*Estimated via U-statistics")
     cat("\n")
+    }
   } else if(as.character(x$call[1]) == "agree_nest" | as.character(x$call[1]) == "SimplyAgree::agree_nest"){
     cat("Limit of Agreement = ", get_call(x$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
@@ -99,6 +101,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     if(get_call(x$call$prop_bias) == TRUE) {cat("LoA at average of both measures. Please check plot.")
       cat("\n")}
+    if(is.na(x$ccc.xy$est.ccc)){
     cat("###- Concordance Correlation Coefficient (CCC) -###")
     cat("\n")
     cat("CCC: ",round(x$ccc.xy$est.ccc,4),", ",100*get_call(x$call$conf.level),
@@ -106,6 +109,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("*Estimated via U-statistics; may be biased")
     cat("\n")
+    }
   } else if(as.character(x$call[1]) == "agree_np" | as.character(x$call[1]) == "SimplyAgree::agree_np"){
     cat("Limit of Agreement = ", get_call(x$call$agree.level)*100, "%",  sep = "")
     #cat("\n")
