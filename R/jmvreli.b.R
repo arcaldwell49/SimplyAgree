@@ -10,7 +10,7 @@ jmvreliClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if(length(self$options$get("vars")) >= 2){
 
             variables <- self$options$get("vars")
-            dataset <- select(self$data, variables)
+            dataset <- select(self$data, all_of(variables))
             icctab <- self$results$icctab
             vartab <- self$results$vartab
             plot <- self$results$plots

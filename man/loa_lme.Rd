@@ -43,18 +43,18 @@ loa_lme(
 }
 \value{
 Returns single list with the results of the agreement analysis.
-
-\describe{
-  \item{\code{"var_comp"}}{Table of variance components}
-  \item{\code{"loa"}}{A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
-  \item{\code{"call"}}{The matched call.}
+\itemize{
+\item \code{var_comp}: Table of variance components
+\item \code{loa}: A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.
+\item \code{call}: The matched call.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
+The package author recommends using \code{tolerance_limit} as an alternative to this function.
 }
-\section{References}{
-
-Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
+\references{
+Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. \url{https://doi.org/10.1371/journal.pone.0168321}
 }
-

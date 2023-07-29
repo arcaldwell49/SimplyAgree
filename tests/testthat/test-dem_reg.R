@@ -11,6 +11,12 @@ testthat::test_that("Compare to NCSS 303-26", {
                 data = df1,
                 weighted = FALSE,
                 error.ratio = 4)
+  dm_u = dem_reg('x',
+                 'y',
+                 data = df1,
+                 weighted = FALSE,
+                 error.ratio = 4,
+                 keep_data = TRUE)
   dm_u_jam = jmvdeming(data = df1,
                        method1 = 'x',
                        method2 = 'y')

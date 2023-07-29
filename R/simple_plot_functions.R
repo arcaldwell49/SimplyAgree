@@ -183,18 +183,20 @@ simple_ba_plot = function(x,
           gam1 = mgcv::gam(data = df,
                            delta ~ s(mean))
         } else {
-          gam1 = mgcv::gam(data = df,
-                           delta ~ s(mean, bs = "tp") + s(id, bs="re"))
+
+          stop("gam is not supported for agree_reps or agree_nest at this time")
+          #gam1 = mgcv::gam(data = df,
+          #                 delta ~ s(mean, bs = "tp") + s(id, bs="re"))
         }
 
         df2 = data.frame(mean = seq(min(df$mean, na.rm=TRUE),
                                         max(df$mean, na.rm=TRUE),
                                         length.out = 100))
-        df2 = as.data.frame(ggeffects::ggemmeans(gam1, "mean"))
+        df2 =  suppressWarnings({as.data.frame(ggeffects::ggemmeans(gam1, "mean"))})
 
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
-            geom_ribbon(#inherit.aes = FALSE,
+            geom_ribbon(inherit.aes = FALSE,
                         data = df2,
                         alpha = .2,
                         aes(x=x, ymin=conf.low,ymax=conf.high))
@@ -219,10 +221,10 @@ simple_ba_plot = function(x,
                    delta ~ mean)
         }
 
-        df2 = as.data.frame(ggeffects::ggemmeans(lm1, "mean"))
+        df2 = suppressWarnings({as.data.frame(ggeffects::ggemmeans(lm1, "mean"))})
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
-            geom_ribbon(#inherit.aes = FALSE,
+            geom_ribbon(inherit.aes = FALSE,
                         data = df2,
                         alpha = .2,
                         aes(x=x, ymin=conf.low,ymax=conf.high))
@@ -243,7 +245,7 @@ simple_ba_plot = function(x,
           level = conf.level,
           alpha = 0.2,
           formula = y ~ x,
-          size = 0.8,
+          linewidth = 0.8,
           colour = "#3aaf85"
         )
     }
@@ -271,7 +273,7 @@ bias_ba_plot = function(x,
     colnames(df) = c("y","x")
   }
 
-  agree.level = all_of(x$call$agree.level)
+  agree.level = x$call$agree.level
 
   agree.l = 1 - (1 - agree.level) / 2
   agree.u = (1 - agree.level) / 2
@@ -435,7 +437,7 @@ bias_ba_plot = function(x,
       theme(legend.position = "left",
             legend.title = element_blank())
     if(!is.null(x$call$delta)) {
-      delta = all_of(x$call$delta)
+      delta = x$call$delta
       df_delta = data.frame(y1 = c(delta, -1*delta))
       bland_alt.plot = bland_alt.plot +
         geom_hline(data = df_delta,
@@ -503,8 +505,8 @@ bias_ba_plot = function(x,
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())
-    if(!is.null(all_of(x$call$delta))) {
-      delta = all_of(x$call$delta)
+    if(!is.null(x$call$delta)) {
+      delta = x$call$delta
       df_delta = data.frame(y1 = c(delta, -1*delta))
       bland_alt.plot = bland_alt.plot +
         geom_hline(data = df_delta,
@@ -520,3 +522,4 @@ bias_ba_plot = function(x,
   return(bland_alt.plot)
 
 }
+

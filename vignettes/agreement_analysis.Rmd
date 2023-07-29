@@ -1,5 +1,5 @@
 ---
-title: "Agreement Analysis"
+title: "Agreement & Tolerance Limits"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
@@ -9,7 +9,7 @@ output:
 bibliography: refs.bib
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Agreement Analysis}
+  %\VignetteIndexEntry{Agreement & Tolerance Limits}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -23,258 +23,225 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `SimplyAgree` R package was created to make the process of quantifying measurement agreement, consistency, and reliability. This package expands upon the capabilities of currently available R packages (such as `psych` and `blandr`) by 1) providing support for agreement studies that involve multiple observations (`agree_test` and `agree_reps` functions) 2) provide robust tests of agreement even in simple studies (`shieh_test` output from the `agree_test` function) and 3) a robust set of reliability statistics (`reli_stats` function).
-
-In this vignette I will shortly demonstrate the implementation of each function and *most* of the underlying calculations within each function
+In this vignette I will briefly demonstrate how `SimplyAgree` calculates agreement and tolerance limits. This vignette assumes the reader has some familiarity with "limits of agreement" (Bland-Altman limits) and is familiar with the concept of prediction intervals. Please read the references listed in this vignette *before* going further if you are not familiar with these concepts.
 
 ```{r}
 library(SimplyAgree)
+data(temps)
 ```
 
+# Agree or Tolerate?
 
-# Simple Agreement
+@francq2020tolerate pose this question in a paper published in *Statistics in Medicine*. Traditionally, those working in medicine or physiology have defaulted to calculating some form of "limits of agreement" that @bland1986 recommended in their seminal paper. The recommendation by @bland1986 was only an approximation, and that has undergone many modifications [e.g., @bland1999; @zou2011] to improve the accuracy of the agreement interval and their associated confidence intervals. Meanwhile, the field of industrial statistics has focused on calculating tolerance limits. There are R packages, such as the `tolerance` R package available on CRAN, that are entirely dedicated to calculating tolerance limits. It is important to note that tolerance is not limited to the normal distribution and can be applied to other distributions (please see the tolerance package by @young2010tolerance for more details). However, in the agreement studies typically seen in medicine, tolerance limits may be a more accurate way of determining whether two measurements adequately close to one another.
 
-## `agree_test`
+To quote @francq2020tolerate:
 
-In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). In this scenario each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant. In most cases we have a degree of agreement that we would deem adequate. This may constitute a hypothesis wherein you may believe the agreement between two measurements is within a certain limit (limits of agreement). If this is the goal then the `agree_test` function is what you need to use in this package.
+> In terms of terminology, tolerance means, in this context, that some difference between the methods is tolerated (the measurements are still comparable in practice). Furthermore, the tolerance interval is exact and therefore more appropriate than the agreement interval.
 
-The data for the two measurements are put into the `x` and `y` arguments. If there is a hypothesized limit of agreement then this can be set with the `delta` argument (this is optional). Next, the limit of agreement can be set with the `agree.level` and the confidence level ($1-\alpha$). Once those are set the analysis can be run. Please note, this package has pre-loaded data from the Zou 2013 paper. While data does not conform the assumptions of the test it can be used to test out many of the functions in this package. Since there isn't an *a priori* hypothesis I will not declare a `delta` argument, but I will estimate the 95% confidence intervals for 80% limits of agreement.
+In this package, tolerance limits refer to the "tolerance" associated with the prediction interval for the difference between 2 measurements. The calculative approach (detailed much further below) involves calculating the prediction interval for the difference between two methods (i.e., an estimate of an interval in which a future observation will fall, with a certain probability, given what has already been observed) and then calculating the confidence in the interval (i.e., tolerance). Therefore, if we want a 95% prediction interval with 95% tolerance limits, we are calculating the interval in which 95% of future observations (prediction) with only a 5% probability (1-tolerance) the "true" prediction interval limits are greater/less than the upper/lower tolerance limits.
+
+Personally, I find the use of prediction intervals and tolerance limits more attractive for 2 reasons: 1) the coverage of the prediction intervals and their tolerance limits is often better than confidence intervals for agreement limits, and 2) the interpretation of the tolerance limits is much clearer. For a greater discussion of this topic, please see the manuscript by @francq2020tolerate and check out their R package `BivRegBLS`.
+
+
+# Tolerance
+
+In `SimplyAgree` we utilize a generalized least square (GLS) model to estimate the prediction interval and tolerance limits.
+The function uses the `gls` function from the `nlme` R package to build the model.
+This allows a *very* flexible approach for estimating prediction intervals and tolerance limits.
+
+We can use the `tolerance_limits` function demonstrate the basic calculations.
+In this example (below), we use the `temps` data set to measure the differences between esophageal and rectal temperatures between different times of day (`tod`) and controlling for the intra-subject correlation.
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                agree.level = .8)
+tolerance_limit(
+  data = temps,
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
 ```
 
-We can then print the general results. These results include the general parameters of the analysis up top, then the results of the Shieh exact test for agreement (no conclusion is included due to the lack of a `delta` argument being set). Then the limits of agreement, with confidence limits, are included. Lastly, Lin's Concordance Correlation Coefficient, another measure of agreement, is also included.
+
+## Calculative Approach
+
+Overall, the model is fit using the `gls` function, and, for those interested, I would suggest reading book by Pinheiro and Bates which details the function^[Pinheiro, J.C., and Bates, D.M. (2000) "Mixed-Effects Models in S and S-PLUS", Springer, pp. 100, 461.]. This function is different than the linear, or linear mixed, models that are utilized in calculating limits of agreement because it accommodates correlated errors and/or unequal variances.
+
+### Arguments Influencing the Model
+
+There are a number of options with the arguments provided in the `tolerance_limit` function. The only required arguments are `x`, `y`, and `data` which dictate the data frame, and the columns that contain the 2 measurements. The `id` argument, when specified, identifies the column that contains the subject identifier or some time of nesting within which the data should be correlated to some degree. The `time`, argument is utilized when the data come from a repeated measures or time series data, and indicates the order of the data points. The `condition` argument identifies some factor within a data frame that may effect the mean difference (and variance) of the differences between the 2 measurements. The `cor_type` argument can also be utilized to specific 1 of 3 possible correlation structure types. Lastly, savvy users can specify a particular variance or correlation structure using the `weights` and `correlation` arguments which directly alter the model being fit using `gls`.
+
+### Prediction 
+
+After the model is fit, the marginal means (EMM), and their associated standard errors (SEM), are calculated based on the `gls` fit model using `emmeans`. The standard error of prediction (SEP) for each EMM is then calculated using the SEM and residual standard error from the model (formula below).
+
+$$
+SEP = \sqrt{SEM^2 + S^2_{residual} }
+$$
+
+After the SEP is calculated, the prediction interval can be calculated with following:
+
+$$
+PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
+$$
+
+**NOTE**: the degrees of freedom (df) are calculated using an approximation of @satterthwaite1946 (see @lmertest for an explanation of this implementation in R).
+
+### Tolerance 
+
+The type of tolerance limit calculation can be set using the `tol_method` argument with options including "approx" and "perc".
+Tolerance limits are calculated either through the "Beta expectation" approximation (`tol_method = "approx"`) detailed by @francq2020tolerate or through a parametric bootstrap method (`tol_method = "perc"`). 
+The bootstrap methods re-samples from the model and, after a certain number of replicates (default is 1999), calculates the bounds the prediction interval based on the quantiles of the replicates for the lower and upper limit.
+This is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes for even small data sets.
+The approximation is the default only because it is substantially quicker.
+Users should be aware that the bootstrap method will likely be more accurate and provide smaller (i.e., more forgiving) tolerance limits.
+
+The approximate tolerance limits based on the work of @francq2020tolerate are calculated as the following:
+
+$$
+TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
+$$
+**NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument; `1-pred_level`) whereas $\alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument; `1-tol_level`).
+
+## Example 
+
+In the `temps` data we have different measures of core temperature at varying times of day. 
+Let us assume we want to measure pre-exercise agreement between esophageal and rectal temperature while controlling for time of day (`tod`).
 
 ```{r}
-print(a1)
+test1 = tolerance_limit(data = temps,
+                        x = "teso_pre",
+                        y = "trec_pre",
+                        id = "id",
+                        condition = "tod")
+
+test1
 ```
 
-Next, we can use the generic `plot` function to produce visualizations of agreement. This includes the Bland-Altman plot (`type = 1`) and a line-of-identity plot (`type = 2`).
 
-```{r, fig.width=6, fig.height=6}
-plot(a1, type = 1)
 
-plot(a1, type = 2) 
+# Agreement
+
+The agreement limit calculations in `SimplyAgree` are a tad more constrained than the tolerance limit.
+There are only 3 types of calculations that can be made: simple, replicate, and nested.
+The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
+Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
+
+The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all in one function.
+Further, `agreement_limit` assumes you are only interested in the outermost confidence interval of the limits of agreement and therefore one-tailed confidence intervals are only calculated for the LoA (i.e., there is no `TOST` argument).
+
+## Arguments Influencing the LoA Calculations
+
+Users of the this function have a number of options. 
+The only required arguments are `x`, `y`, and `data` which dictate the data frame, 
+and the columns that contain the 2 measurements. 
+The `id` argument, when specified, identifies the column that contains the subject identifier. 
+This is only necessary if it is a replicate or nested design.
+The type of design is dictated by `data_type` argument.
+Additionally, the `loa_calc` function dictates how the limits of agreement are calculated.
+Users have the option of computing @bland1999 or MOVER [@zou2011; @donner2012closed] limits of agreement (calculations detailed below).
+I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altman limits [@zou2011; @donner2012closed] as it is the more conservative of the two options.
+
+
+## Simple Agreement
+
+In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). 
+In this scenario each pair of observations (x and y) are *independent*;
+meaning that each pair represents one subject/participant that is uncorrelated with other pairs.
+
+The data for the two measurements are put into the `x` and `y` arguments. 
+
+```{r}
+# Calc. LoA
+a1 = agreement_limit(data = reps,
+                     x = "x",
+                     y = "y")
+# print
+a1
 ```
 
-
-## Calculations in `agree_test`
-
-### Shieh's test
-
-The hypothesis test procedure is based on the "exact" approach details by @shieh2019. In this procedure the null hypothesis (not acceptable agreement) is rejected if the extreme lower bound and upper bound are within the proposed agreement limits. The agreement limits ($\hat\theta_{EL} \space and \space \hat\theta_{EU}$) are calculated as the following:
-
-$$
-\hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot \frac{S}{\sqrt{N}}
-$$
-
-wherein $\bar{d}$ is the mean difference between the two methods, $S$ is the standard deviation of the differences, $N$ is the total number of pairs, and $\gamma_{1-\alpha}$ critical value (which requires a specialized function within `R` to estimate).
-
-### Limits of Agreement
+### Calculation Steps
 
 The reported limits of agreement are derived from the work of @bland1986 and @bland1999.
 
-$$
-LoA = \bar{d} \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
-$$
+**LoA**
 
-wherein, $t$ is the critical t-value at the given sample size and confidence level (`conf.level`), $z$ is the value of the normal distribution at the given alpha level (`agree.level`), and $S^2$ is the variance of the difference scores. If `TOST` is set to TRUE then equation is altered slightly with the critical t ($t_{1-\alpha,N-1}$).
-
-### Concordance Correlation Coefficient
-
-The CCC was calculated as outlined by @lin1989 (with later corrections).
 
 $$
-\hat\rho_c = \frac{2 \cdot s_{xy}} {s_x^2 + s_y^2+(\bar x-\bar y)^2}
+LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
 $$
-where $s_{xy}$ is the covariance, $s_x^2$ and $s_y^2$ are the variances of x and y respectively, and $(\bar x-\bar y)$ is the difference in the means of x & y.
 
-# Repeated Measures Agreement
 
-In many cases there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates; `agree_reps`), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested design; `agree_nest`).
+wherein $z_{1-(1-agree)/2}$ is the value of the normal distribution at the given agreement level (default is 95%), $\bar d$ is the mean of the differences, and $S_d$ is the standard deviations of the differences.
 
-The confidence limits on the limits of agreement are based on the "MOVER" method described in detail by @zou2011. However, both functions operate similarly to `agree_test`; the only difference being that the data has to be provided as a `data.frame` in R.
+**Confidence Interval**
 
-## `agree_reps`
+1. Calculate variance of LoA
 
-This function is for cases where the underlying values do *not* vary within subjects. This can be considered cases where replicate measure may be taken. For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
+$$
+S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_{1-(1-agree)/2}}{2 \cdot(N-1)} }
+$$
 
-So, for this function you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. An additional column indicating the subject identifier (`id`) must also be provided. Again, if there is a hypothesized agreement limit then this could be provided with the `delta` argument.
+
+2.  Calculate Left Moving Estimator
+
+**Bland-Altman Method**
+
+$$
+LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
+$$
+**MOVER Method**
+
+
+$$
+LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot (\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
+$$
+
+
+3. Calculate Confidence Interval
+
+$$
+Lower \space LoA \space C.I. = Lower \space LoA - LME
+$$
+
+
+$$
+Upper \space LoA \space C.I. = Upper \space LoA + LME
+$$
+
+
+## Repeated Measures Agreement
+
+In many cases there are multiple measurements taken within subjects when comparing two measurements tools.
+In some cases the true underlying value will not be expected to vary (i.e., `data_type = "reps"`),
+or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., `data_type = "nest"`).
+
+## Replicates
+
+This limit of agreement type is for cases where the underlying values do *not* vary within subjects.
+This can be considered cases where replicate measure may be taken. 
+For example, a researcher may want to compare the performance of two ELISA assays where measurements are taken in duplicate/triplicate.
+
+So, you will have to provide the data frame object with the `data` argument and the names of the columns containing the first (`x` argument) and second (`y` argument) must then be provided. 
+An additional column indicating the subject identifier (`id`) must also be provided. 
+
 
 ```{r}
-a2 = agree_reps(x = "x",
+a2 = agreement_limit(x = "x",
                 y = "y",
                 id = "id",
                 data = reps,
-                agree.level = .8)
+                data_type = "reps",
+                agree.level = .8) 
+
+a2
 ```
 
-The results can then be printed. The printing format is very similar to `agree_test`, but notice that 1) the hypothesis test is based on the limits of agreement (MOVER method), 2) the Concordance Correlation Coefficient is calculated via the U-statistics method, 3) the Shieh TOST results are missing because they cannot be estimated for this type of design.
+### Calculative Steps
 
-```{r}
-print(a2)
-```
-```{r, fig.width=6, fig.height=6}
-plot(a2, type = 1)
+1. Compute mean and variance
 
-plot(a2, type = 2)
-```
-
-## `agree_nest`
-
-This function is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days.
-
-The function works almost identically to `agree_reps` but the underlying calculations are different
-
-
-```{r}
-a3 = agree_nest(x = "x",
-                y = "y",
-                id = "id",
-                data = reps,
-                agree.level = .8)
-```
-
-The printed results (and plots) are very similar to `agree_reps`. However, the CCC result now has a warning because the calculation in this scenario may not be entirely appropriate given the nature of the data.
-
-```{r}
-print(a3)
-```
-```{r, fig.width=6, fig.height=6}
-plot(a3, type = 1)
-
-plot(a3, type = 2)
-```
-
-## Calculations for `agree_reps` & `agree_nest`
-
-All the calculations for the limits of agreement in these two functions can be found in the article by @zou2011.
-
-## `agree_nest` LoA
-
-**Step 1: Calculate Individual Subject Means and Variances**
-
-$$
-\bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
-$$
-$$
-\bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
-$$
-$$
-\bar d_i = \bar x_i - \bar y_i
-$$
-
-$$
-\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
-$$
-
-$$
-s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
-$$
-
-$$
-s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
-$$
-
-$$
-s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
-$$
-
-**Step 2: Compute pooled estimates of within subject errors**
-
-$$
-s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
-$$
-
-$$
-s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
-$$
-
-**Step 3: Compute Harmonic Means of Replicates**
-
-$$
-m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
-$$
-
-$$
-m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
-$$
-**Step 4: Compute the variance of the differences**
-
-$$
-s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
-$$
-**Step 5: Compute MOVER Components**
-
-$$
-S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
-$$
-
-$$
-S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
-$$
-$$
-S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
-$$
-
-$$
-S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
-$$
-$$
-l = s_d^2 - S_1
-$$
-
-$$
-u = s_d^2 + S_1
-$$
-
-$$
-LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
-$$
-
-$$
-RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
-$$
-### LoA
-
-$$
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-$$
-
-$$
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-$$
-
-### Lower LoA CI
-
-$$
-Lower \space CI = LoA_{lower} - LME
-$$
-
-
-$$
-Upper \space CI = LoA_{lower} + RME
-$$
-
-### Upper LoA CI
-
-$$
-Lower \space CI = LoA_{upper} - RME
-$$
-
-
-$$
-Upper \space CI = LoA_{upper} + LME
-$$
-
-## `agree_reps` LoA
-
-### LoA
-
-**Step 1: Compute mean and variance**
 
 $$
 \bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
@@ -286,49 +253,68 @@ $$
 $$
 s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
 $$
-**Step 2: Compute pooled estimate of within subject error**
+
+2. Compute pooled estimate of within subject error
+
 
 $$
 s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
 $$
 
-**Step 3: Compute pooled estimate of between subject error**
+
+3. Compute pooled estimate of between subject error
+
 
 $$
 s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
 $$
 
-**Step 4: Compute the harmonic mean of the replicate size**
+
+4. Compute the harmonic mean of the replicate size
+
 
 $$
 m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 $$
 
-**Step 5: Compute SD of the difference **
+
+5. Compute SD of the difference 
+
 
 $$
 s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
 $$
-**Step 6: Calculate l and u**
 
-$$
-l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-$$
+6. Calculate LME
+
+**MOVER Method**
+
+
 $$
 u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
 $$
-**Step 7: Compute LME and RME**
+
 
 $$
 LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
 $$
 
+
+**Bland-Altman Method**
+
+
 $$
-RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
+ S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot (\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x - n} + (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
 $$
 
 
-### LoA
+$$
+LME = z_{1-\alpha} \cdot S_{LoA}
+$$
+
+
+7. Calculate LoA
+
 
 $$
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
@@ -339,7 +325,9 @@ $$
 LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
 $$
 
-### Lower LoA CI
+
+8. Calculate LoA CI
+
 
 $$
 Lower \space CI = LoA_{lower} - LME
@@ -347,13 +335,97 @@ $$
 
 
 $$
-Upper \space CI = LoA_{lower} + RME
+Upper \space CI = LoA_{upper} + LME
 $$
 
-### Upper LoA CI
+
+## Nested
+
+This is for cases where the underlying values may vary within subjects. This can be considered cases where there are distinct pairs of data wherein data is collected in different times/conditions within each subject. An example would be measuring blood pressure on two different devices on many people at different time points/days. The method utilized in `agreement_limit` is similar to, but not the exact same as those described by @zou2011. However, the results should be *approximately* the same as `agree_nest` and should provide estimates that are very close to those described by @zou2011.
+
+
+```{r}
+a3 = agreement_limit(x = "x",
+                y = "y",
+                id = "id",
+                data = reps,
+                data_type = "nest",
+                loa_calc = "mover",
+                agree.level = .95)
+a3
+```
+
+
+### Calculation Steps
+
+1. Model 
+
+A linear mixed model (detailed below) is fit to estimate the bias (mean difference) and variance components (within and between subject variance).
 
 $$
-Lower \space CI = LoA_{upper} - RME
+\begin{aligned}
+  \operatorname{difference}_{i}  &\sim N \left(\alpha_{j[i]}, \sigma^2 \right) \\
+    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for subject j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+2. Extract Components
+
+The two variance components, ($s_b^2$ and $s_w^2$ for $\sigma^2$ and $\sigma_{\alpha_j}^2$), are estimated from the model. 
+The sum of both ($s_{total}^2$) is the total variance, and grand intercept represents the bias (mean difference, $\bar d$).
+
+The harmonic mean is also calculated.
+
+$$
+m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+$$
+
+3. Compute LME
+
+**MOVER Method**
+
+
+$$
+u_1 =   (s_b^2 \cdot ((n-1)/(\chi^2_{\alpha,n-1})-1))^2
+$$
+
+$$
+u_2 = ((1-1/m_h) \cdot s_w^2 \cdot ((N-n)/( \chi^2_{\alpha,N-n} -1))^2
+$$
+
+$$
+u = s_{total}^2 + \sqrt{u_1 + u_2}
+$$
+
+
+$$
+LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+$$
+
+**Bland-Altman Method**
+
+$$
+S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot ((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
+$$
+$$
+LME = z_{1-\alpha} \cdot S_{LoA}
+$$
+
+4. Calculate LoA
+
+$$
+LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+$$
+
+$$
+LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+$$
+
+
+5. Calculate LoA CI
+
+$$
+Lower \space CI = LoA_{lower} - LME
 $$
 
 
@@ -361,26 +433,48 @@ $$
 Upper \space CI = LoA_{upper} + LME
 $$
 
-## CCC from U-statistics
 
-The CCC calculations are derived from the `cccUst` function of the `cccrm` R package. The mathematics for this CCC calculation can be found in the work of @king2007 and @carrasco2009.
+# How to Test a Hypothesis
+
+Unlike the "test" functions, `agreement_limits` and `tolerance_limits` do not test a hypothesis agreement, but only estimate the limits.
+It is up to the user to determine if the limits are within a maximal allowable difference.
+However, the results a maximal allowable difference can be visualized against the tolerance/agreement limits using the `delta` argument for the `plot` method.
+
+```{r}
+res1 = tolerance_limit(
+  data = temps,
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
+plot(res1, delta = .25) # Set maximal allowable difference to .25 units
+```
+
 
 # Checking Assumptions
 
-The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method.
+The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method for either agreement or tolerance limits.
 
 The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and residuals plot.
 
-All 3 plots will have a statistical test in the bottom right corner. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot.
+All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
 
 ## An Example
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                agree.level = .8)
+test_agree = agreement_limit(x = "x",
+                           y = "y",
+                           data = reps)
 
-check(a1)
+check(test_agree)
+
+test_tol = tolerance_limit(x = "x",
+                           y = "y",
+                           data = reps)
+
+check(test_tol)
 ```
 
 
@@ -388,63 +482,49 @@ check(a1)
 
 As the check plots for `a1` show, proportional bias can sometimes occur. In these cases @bland1999 recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
 
-For any of the "agree" functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots of the data should always be inspected
+For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. 
+When this is set to TRUE, then the proportional bias adjusted model is utilized. 
+However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. 
+In any case, plots and checks of the data should always be inspected.
 
 ```{r}
-a1 = agree_test(x = reps$x,
-                y = reps$y,
-                prop_bias = TRUE,
-                agree.level = .8)
-print(a1)
 
-plot(a1)
+test_tol = tolerance_limit(x = "x",
+                           y = "y",
+                           data = reps,
+                           prop_bias = TRUE)
+print(test_tol)
+
+# See effect of proportional bias on limits
+plot(test_tol)
+
+# Confirm its effects in proportional bias check plot (should be horizontal now)
+check(test_tol)
+```
+
+# Log transformation
+
+Sometimes a log transformation may be a useful way of "normalizing" the data.
+Most often this is done when the error is proportional to the mean.
+The interpretation is also easy because the differences (when back transformed) can be interpreted as ratios.
+The log transformation (natural base) can be accomplished with the `log_tf` argument.
+
+```{r}
+tolerance_limit(
+  data = temps,
+  log_tf = TRUE,
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
 ```
 
 
-# Non-parametric Alternatives
+# Visualizing "Big" Data
 
-When the assumptions of any of the tests above are violated then a non-parametric alternative may be useful. The `agree_np` function is the non-parametric alternative for the `SimpleAgree` R package, and is largely based on the recommendations of Bland & Altman [@bland1999, pg. 157].
-
-The function performs two tests:
-
-1. A binomial test on whether or not the observed differences are within the maximal allowable differences bounds (`delta` argument).
-2. Quantile regression, derived from the `quantreg` package [@quantreg], two estimate the median and 95% limits of agreement. If the default agreement levels are used (`agree.level = .95`) then the 0.025, 0.5 (median), and 0.975 quantiles are estimated.
-
-The function also *requires* the `delta` argument (otherwise the binomial test would be useless). Otherwise, it functions just like the other agreement functions.
-
-In the code demo below, you will notice that the limits of agreement are no longer symmetric around the bias estimate.
-
-```{r}
-a1 = agree_np(x = "x",
-              y = "y",
-              data = reps,
-              delta = 2,
-              prop_bias = FALSE,
-              agree.level = .8)
-print(a1)
-
-plot(a1)
-```
-
-
-We can also perform the same analysis with proportional bias no longer assumed. You can see that the LoA changes but the test for agreement does not.
-
-```{r}
-a1 = agree_np(x = "x",
-              y = "y",
-              data = reps,
-              delta = 2,
-              prop_bias = TRUE,
-              agree.level = .8)
-print(a1)
-
-plot(a1)
-```
-
-
-# "Big" Data
-
-Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom_point` argument.
+Sometimes there may be a lot of data and individual points of data on mean difference visualization may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom` argument.
 
 ```{r}
 set.seed(81346)
@@ -455,9 +535,10 @@ y = x + diff
 df = data.frame(x = x,
                 y = y)
 
-a1 = agree_test(x = df$x,
-                y = df$y,
-                agree.level = .95)
+a1 = agreement_limit(data = df,
+                     x = "x",
+                     y = "y",
+                     agree.level = .95)
 
 plot(a1,
      geom = "geom_point")
@@ -473,58 +554,6 @@ plot(a1,
 
 plot(a1,
      geom = "stat_density_2d")
-```
-
-
-# Mixed Models
-
-In some cases, the agreement calculations involve comparing two methods within individuals within varying conditions. For example, the "recpre_long" data set within this package contains two measurements of rectal temperature in 3 different conditions (where there is a fixed effect of condition). For this particular case we can use bootstrapping to estimate the limits of agreement.
-
-The `loa_lme` function can then calculate the limits of agreement. Like the previous functions, the data set must be set with the `data` argument. The `diff` is the column which contains the difference between the two measurements. The `condition` is the column that indicates the different conditions that the measurements were taken within. The `id` is the column containing the subject/participant identifier. The final two arguments `replicates` and `type` set the requirements for the bootstrapping procedure. **Warning**: This is a computationally heavy procedure and it may take a few seconds to a few minutes to complete depending the number of replicates or if `het_var` is set to TRUE.
-
-```{r,warning=FALSE,eval=FALSE}
-
-recpre_long$avg = (recpre_long$PM + recpre_long$PM)/2
-a4 = loa_lme(data = recpre_long,
-               diff = "diff",
-               avg = "avg",
-               #condition = "trial_condition",
-               id = "id",
-               #plot.xaxis = "AM",
-               replicates = 199,
-               type = "perc")
-```
-
-
-# Power Analysis for Agreement
-
-There are surprisingly few resources for planning a study that attempts to quantify agreement between two methods. Therefore, we have added one function, with hopefully more in the future, to aid in the power analysis for simple agreement studies. The current function is `blandPowerCurve` which constructs a "curve" of power across sample sizes, agreement levels, and confidence levels. This is based on the work of @lu2016.
-
-For this function the user must define the hypothesized limits of agreement (`delta`), mean difference between methods (`mu`), and the standard deviation of the difference scores (`SD`). There is also the option of adjusting the range of sample size (default: `seq(10,100,1)` which is 10 to 100 by 1), the agreement level (default is 95%), and confidence level (default is 95%). The function then produces a data frame of the results. A quick look at the head and we can see that we have low statistical power when the sample size is at the lower end of the range.
-
-```{r}
-power_res <- blandPowerCurve(
-  samplesizes = seq(10, 100, 1),
-  mu = 0.5,
-  SD = 2.5,
-  delta = c(6,7),
-  conf.level = c(.90,.95),
-  agree.level = c(.8,.9)
-)
-
-head(power_res)
-```
-
-We can then find the sample size at which (or closest to which) a desired power level with the `find_n` method for `powerCurve` objects created with the function above.
-
-```{r}
-find_n(power_res, power = .8)
-```
-
-Additionally we can plot the power curve to see how power changes over different levels of `delta`, `agree.level`, and `conf.level`
-
-```{r,fig.width=6, fig.height=6 }
-plot(power_res)
 ```
 
 

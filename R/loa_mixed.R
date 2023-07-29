@@ -1,27 +1,33 @@
 #' Mixed Effects Limits of Agreement
-#' @description This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
+#'
+#' @description
+#' `r lifecycle::badge('deprecated')`
+#'
+#'`loa_mixed()` is outdated, and for new code we recommend
+#' switching to `loa_lme()` or `tolerance_limit`, which are easier to use, have more features,
+#' and are still under active development.
+#'
+#' This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
 #' @param data A data frame containing the variables within the model.
 #' @param diff column name of the data frame that includes the continuous measurement of interest.
 #' @param condition column name indicating different conditions subjects were tested under.
 #' @param id column name indicating the subject/participant identifier
 #' @param plot.xaxis column name indicating what to plot on the x.axis for the Bland-Altman plots. If this argument is missing or set to NULL then no plot will be produced.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement.
-#' @param conf.level the confidence level required. Default is 95\%.
-#' @param agree.level the agreement level required. Default is 95\%.
-#' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 500.
+#' @param conf.level the confidence level required. Default is 95%.
+#' @param agree.level the agreement level required. Default is 95%.
+#' @param replicates 	the number of bootstrap replicates. Passed on to the boot function. Default is 1999.
 #' @param type A character string representing the type of bootstrap confidence intervals. Only "norm", "basic", "bca", and "perc" currently supported. Bias-corrected and accelerated, bca, is the default. See ?boot::boot.ci for more details.
 #' @return Returns single list with the results of the agreement analysis.
 #'
-#' \describe{
-#'   \item{\code{"var_comp"}}{Table of variance components}
-#'   \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
-#'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"bland_alt.plot"}}{Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.}
-#'   \item{\code{"conf.level"}}{Returned as input.}
-#'   \item{\code{"agree.level"}}{Returned as input.}
-#' }
+#'   - `var_comp`: Table of variance components
+#'   - `loa`: a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.
+#'   - `h0_test`: Decision from hypothesis test.
+#'   - `bland_alt.plot`: Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.
+#'   - `conf.level`: Returned as input.
+#'   - `agree.level`: Returned as input.
 #'
-#' @section References:
+#' @references
 #' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
 #' @importFrom stats qnorm as.formula na.omit
 #' @importFrom magrittr %>%

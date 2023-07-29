@@ -117,13 +117,13 @@ simple_mix_plot = function(x,
 
 
           gam1 = mgcv::gam(data = df_plt,
-                           delta ~ s(avg, bs = "tp") + s(id, bs="re"))
+                           diff ~ s(avg, bs = "tp") + s(id, bs="re"))
 
 
         df2 = data.frame(mean = seq(min(df$avg, na.rm=TRUE),
                                     max(df$avg, na.rm=TRUE),
                                     length.out = 100))
-        df2 = as.data.frame(ggeffects::ggemmeans(gam1, "mean"))
+        df2 = as.data.frame(ggeffects::ggemmeans(gam1, "avg"))
 
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
@@ -144,9 +144,9 @@ simple_mix_plot = function(x,
       if (requireNamespace("ggeffects", quietly = TRUE)) {
 
           lm1 = lme4::lmer(data = df_plt,
-                           delta ~ avg + (1|id))
+                           diff ~ avg + (1|id))
 
-        df2 = as.data.frame(ggeffects::ggemmeans(lm1, "mean"))
+        df2 = as.data.frame(ggeffects::ggemmeans(lm1, "avg"))
         if(smooth_se){
           bland_alt.plot = bland_alt.plot +
             geom_ribbon(#inherit.aes = FALSE,
@@ -170,7 +170,7 @@ simple_mix_plot = function(x,
           level = conf.level,
           alpha = 0.2,
           formula = y ~ x,
-          size = 0.8,
+          linewidth = 0.8,
           colour = "#3aaf85"
         )
     }

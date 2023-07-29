@@ -9,6 +9,38 @@ testthat::test_that("examples from Zou", {
                          data = reps,
                          TOST = FALSE)
 
+  reps_test_new  = agreement_limit(x="x",y="y",
+                              id = "id",
+                              data = reps,
+                              data_type = "reps",
+                              alpha = .025,
+                              prop_bias = FALSE)
+  reps_test_new2  = agreement_limit(x="x",y="y",
+                                   id = "id",
+                                   data = reps,
+                                   data_type = "reps",
+                                   alpha = .025,
+                                   prop_bias = TRUE)
+  print(reps_test_new2)
+  testthat::expect_equal(round(reps_test_new$loa$bias,2),
+                         round(reps_test$loa$estimate[1],2),
+                         tolerance = .01)
+  reps_test_newlog  = agreement_limit(x="x",y="y",
+                                   id = "id",
+                                   data = reps,
+                                   data_type = "reps",
+                                   alpha = .025,
+                                   log_tf = TRUE)
+  reps_test_blan = agreement_limit(x="x",y="y",
+                                      id = "id",
+                                      data = reps,
+                                      data_type = "reps",
+                                   loa_calc = "b",
+                                      alpha = .025,
+                                      log_tf = TRUE)
+  print(reps_test_blan)
+  print(reps_test_newlog)
+  print(reps_test_new)
   reps_test2 = agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,
@@ -23,7 +55,29 @@ testthat::test_that("examples from Zou", {
                           delta = 5,
                           prop_bias = TRUE)
   ptest = plot(reps_test2)
+  ptest = plot(reps_test2,
+               delta = 5)
+  ptest = plot(reps_test2,
+               geom = "geom_bin2d")
+  ptest = plot(reps_test2,
+               geom = "geom_density_2d")
+  ptest = plot(reps_test2,
+               geom = "geom_density_2d_filled")
+  ptest = plot(reps_test2,
+               geom = "stat_density_2d")
 
+  print(reps_test3)
+  ptest = plot(reps_test3)
+  ptest = plot(reps_test3,
+               delta = 5)
+  ptest = plot(reps_test3,
+               geom = "geom_bin2d")
+  ptest = plot(reps_test3,
+               geom = "geom_density_2d")
+  ptest = plot(reps_test3,
+               geom = "geom_density_2d_filled")
+  ptest = plot(reps_test3,
+               geom = "stat_density_2d")
 
   testthat::expect_equivalent(reps_test$loa$estimate,
                               c(.7125,-2.23,3.66),
@@ -67,17 +121,17 @@ testthat::test_that("examples from Zou", {
            smooth_method = "lm")
   p = plot(reps_test, type = 1,
            smooth_method = "loess")
-  p = plot(reps_test, type = 1,
-           smooth_method = "gam")
+  expect_error(plot(reps_test, type = 1,
+           smooth_method = "gam"))
   p = plot(reps_test, type = 1,
            smooth_method = "lm",
            smooth_se = FALSE)
   p = plot(reps_test, type = 1,
            smooth_method = "loess",
            smooth_se = FALSE)
-  p = plot(reps_test, type = 1,
+  expect_error(plot(reps_test, type = 1,
            smooth_method = "gam",
-           smooth_se = FALSE)
+           smooth_se = FALSE))
   p = plot(reps_test, type = 2)
   c1 = check(reps_test)$p_norm
   c2 = check(reps_test)$p_het
@@ -122,4 +176,9 @@ testthat::test_that("examples from Zou", {
 
   testthat::expect_equivalent(test_jmv$blandtab$asDF$upperci,
                               reps_test$loa$upper.ci)
+
+  reps_test = agree_reps(x="x",y="y",
+                         id = "id",
+                         data = reps,
+                         ccc = FALSE)
 })

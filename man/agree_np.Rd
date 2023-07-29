@@ -37,22 +37,23 @@ agree_np(
 }
 \value{
 Returns simple_agree object with the results of the agreement analysis.
-
-\describe{
-  \item{\code{"loa"}}{A data frame of the limits of agreement.}
-  \item{\code{"agee"}}{A data frame of the binomial proportion of results in agreement.}
-  \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"qr_mod"}}{The quantile regression model.}
-  \item{\code{"call"}}{The matched call}
-
+\itemize{
+\item \code{loa}: A data frame of the limits of agreement.
+\item \code{agree}: A data frame of the binomial proportion of results in agreement.
+\item \code{h0_test}: Decision from hypothesis test.
+\item \code{qr_mod}: The quantile regression model.
+\item \code{call}: The matched call
 }
 }
 \description{
-agree_np A non-parametric approach to limits of agreement. The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+\code{agree_np} A non-parametric approach to limits of agreement.
+The hypothesis test is based on binomial proportions within the maximal allowable differences, and the limits are calculated with quantile regression.
 }
 \section{References}{
 
-Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. <https://doi.org/10.1177/096228029900800204>
+Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. \url{https://doi.org/10.1177/096228029900800204}
 }
 
 \examples{

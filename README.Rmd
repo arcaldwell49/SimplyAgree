@@ -25,7 +25,7 @@ Please see the package's [website](https://aaroncaldwell.us/SimplyAgree/) for up
 
 # Background
 
-`SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/) module, created to make agreement and reliability analyses easier for the average researcher. The functions within this package include simple tests of agreement (`agree_test`), agreement analysis for nested (`agree_nest`) and replicate data (`agree_reps`), and provide robust analyses of reliability (`reli_stats`). In addition, this package contains a set of functions to help when planning studies looking to assess measurement agreement (`blandPowerCurve`).
+`SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/) module, created to make agreement and reliability analyses easier for the average researcher. The two primary functions are `agreement_limit` and `tolerance_limit` for assessing "agreement" between two methods. Reliability can be assessed via the `reli_stats`, or `reli_aov`, function. In addition, `blandPowerCurve` could be utilized for power analysis purposes for studies of agreement.
 
 ## Installing SimplyAgree
 
@@ -61,6 +61,10 @@ contributing to this project, you agree to abide by its terms.
 # References
 
 The functions in this package are largely based on the following works:
+
+Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. *Statistics in Medicine*, 39(28), 4334-4349. <https://doi.org/10.1002/sim.8709>
+
+Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. *Statistics in Medicine*, 38(30), 5603-5622. <https://doi.org/10.1002/sim.8386>
 
 Lin L (1989). A concordance correlation coefficient to evaluate reproducibility. *Biometrics* 45: 255 - 268. <https://doi.org/10.2307/2532051>
 

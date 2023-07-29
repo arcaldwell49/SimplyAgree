@@ -95,5 +95,20 @@ testthat::test_that("basic runs", {
                               .900,
                               tolerance = 0.001)
 
+  # issue on github
+  powerCurve <- blandPowerCurve(
+    samplesizes = seq(2, 200, 1),
+    mu = 0.001167,
+    SD = 0.001129,
+    delta = 0.004,
+    conf.level = 0.95,
+    agree.level = 0.95
+  )
+  found_n <- find_n(powerCurve, power = 0.80)
+  n <- found_n[["N"]]
+  power <- found_n[["power"]]
+
+  print(c(n, power))  # [1] 79.0000000  0.8022956
+
 
 })

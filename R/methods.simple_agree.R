@@ -212,14 +212,13 @@ check.simple_agree <- function(x) {
   }
   df$mean = (df$x + df$y)/2
   df$delta = df$x - df$y
-  if(x$call$prop_bias == TRUE){
+  if(x$call$prop_bias){
     form_lm1 = as.formula(delta ~ mean)
     form_lmer1 = as.formula(delta ~ mean + (1|id))
   } else {
     form_lm1 = as.formula(delta ~ 1)
     form_lmer1 = as.formula(delta ~ 1 + (1|id))
   }
-
 
   dat = df
   ## Heteroskedasticity -------

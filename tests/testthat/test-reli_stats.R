@@ -32,6 +32,15 @@ testthat::test_that("Simple Use Run Through", {
                        header=TRUE,
                        row.names=1))
 
+  expect_error(agree_coef(data = ratermat2,
+                          wide = TRUE,
+                          weighted = TRUE))
+
+  expect_error(agree_coef(data = ratermat2,
+             wide = FALSE,
+             weighted = TRUE,
+             col.names = c("Rater1", "Rater2", "Rater3", "Rater4")))
+
   irr1w = agree_coef(data = ratermat2,
                     wide = TRUE,
                     weighted = TRUE,
@@ -66,6 +75,19 @@ testthat::test_that("Simple Use Run Through", {
   rownames(sf) <- paste("S", 1:6, sep = "")
   #sf  #example from Shrout and Fleiss (1979)
   dat = as.data.frame(sf)
+
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
+                     se_type = "ICC1",
+                     col.names = c("J1", "J2", "J3", "J4"))
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
+                     cv_calc = "SEM",
+                     col.names = c("J1", "J2", "J3", "J4"))
+  test1 = reli_stats(data = dat,
+                     wide = TRUE,
+                     cv_calc = "residuals",
+                     col.names = c("J1", "J2", "J3", "J4"))
 
   test1 = reli_stats(data = dat,
                      wide = TRUE,
@@ -307,6 +329,35 @@ testthat::test_that("Simple Use Run Through", {
                          item = "fam_trial",
                          id = "id",
                          weighted = TRUE)
+
+  ### increase coverage calcs ----
+
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     cv_calc = "SEM",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     cv_calc = "residuals",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+
+  test3 = reli_stats(data = df,
+                     measure = "va",
+                     item = "it",
+                     id = "id",
+                     se_type = "ICC2",
+                     other_ci = TRUE,
+                     type = "perc",
+                     replicates = 59)
+
 
 
 })

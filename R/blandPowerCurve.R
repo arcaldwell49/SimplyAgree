@@ -1,14 +1,17 @@
 #' Estimate power curve for Bland-Altman limits of agreement
-#' @description This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+#'
+#' @description
+#' This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+#'
 #' @param samplesizes vector of samples sizes at which to estimate power.
 #' @param mu mean of differences
 #' @param SD standard deviation of differences
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement. More than one delta can be provided.
-#' @param conf.level the confidence level(s) required. Default is 95\%. More than one confidence level can be provided.
-#' @param agree.level the agreement level(s) required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95. More than one confidence level can be provided.
+#' @param conf.level the confidence level(s) required. Default is 95%. More than one confidence level can be provided.
+#' @param agree.level the agreement level(s) required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95. More than one confidence level can be provided.
 
 #' @return A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
-#' @section references:
+#' @references
 #' Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
 #' @examples
 #' \donttest{

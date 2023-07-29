@@ -26,9 +26,9 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
-  \item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
-  \item{\code{check}}{Returns plots of the optimized residuals.}
+\item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
+\item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
+\item{\code{check}}{Returns plots of the optimized residuals.}
 }
 }
 \description{

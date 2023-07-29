@@ -1,30 +1,39 @@
 #' Tests for Absolute Agreement
-#' @description The agree_test function calculates a variety of agreement statistics. The hypothesis test of agreement is calculated by the method described by Shieh (2019). Bland-Altman limits of agreement, and confidence intervals, are also provided (Bland & Altman 1999; Bland & Altman 1986).
+#'
+#' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on `agree_test()` is complete, and for new code we recommend
+#' switching to `agreement_limit()`, which is easier to use, has more features,
+#' and still under active development.
+#'
+#' The agree_test function calculates a variety of agreement statistics. The hypothesis test of agreement is calculated by the method described by Shieh (2019). Bland-Altman limits of agreement, and confidence intervals, are also provided (Bland & Altman 1999; Bland & Altman 1986).
 #' In addition, the concordance correlation coefficient (CCC; Lin 1989) is additional part of the output.
+#'
 #' @param x Vector with first measurement
 #' @param y Vector with second measurement
-#' @param conf.level the confidence level required. Default is 95\%.
-#' @param agree.level the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.
+#' @param conf.level the confidence level required. Default is 95%.
+#' @param agree.level the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.
 #' @param delta The threshold below which methods agree/can be considered equivalent, can be in any units. Often referred to as the "Equivalence Bound for Agreement" or "Maximal Allowable Difference".
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param TOST Logical indicator (TRUE/FALSE) of whether to use two one-tailed tests for the limits of agreement. Default is TRUE.
+#'
 #' @return Returns single list with the results of the agreement analysis.
 #'
-#' \describe{
-#'   \item{\code{"shieh_test"}}{The TOST hypothesis test as described by Shieh.}
-#'   \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals.}
-#'   \item{\code{"s.shift"}}{Scale shift from x to y.}
-#'   \item{\code{"l.shift"}}{Location shift from x to y.}
-#'   \item{\code{"bias"}}{a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.}
-#'   \item{\code{"loa"}}{Data frame containing the limits of agreement calculations}
-#'   \item{\code{"h0_test"}}{Decision from hypothesis test.}
-#'   \item{\code{"call"}}{the matched call}
-#' }
+#'   - `shieh_test`: The TOST hypothesis test as described by Shieh.
+#'   - `ccc.xy`: Lin's concordance correlation coefficient and confidence intervals.
+#'   - `s.shift`: Scale shift from x to y.
+#'   - `l.shift`: Location shift from x to y.
+#'   - `bias`: a bias correction factor that measures how far the best-fit line deviates from a line at 45 degrees. No deviation from the 45 degree line occurs when bias = 1. See Lin 1989, page 258.
+#'   - `loa`: Data frame containing the limits of agreement calculations
+#'   - `h0_test`: Decision from hypothesis test.
+#'   - `call`: the matched call
+#'
 #' @examples
 #' data('reps')
 #' agree_test(x=reps$x, y=reps$y, delta = 2)
 #'
-#' @section References:
+#' @references
 #' Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation, Statistics in Biopharmaceutical Research, <https://doi.org/10.1080/19466315.2019.1677495>
 #'
 #' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. Statistical methods in medical research, 8(2), 135-160.
@@ -139,17 +148,17 @@ agree_test <- function(x,
   lm_mod = list(call = list(formula = as.formula(y~x)))
   call2 = match.call()
   if(is.null(call2$agree.level)){
-    call2$agree.level = all_of(agree.level)
+    call2$agree.level = agree.level
   }
 
   if(is.null(call2$conf.level)){
-    call2$conf.level = all_of(conf.level)
+    call2$conf.level = conf.level
   }
   if(is.null(call2$TOST)){
-    call2$TOST = all_of(TOST)
+    call2$TOST = TOST
   }
   if(is.null(call2$prop_bias)){
-    call2$prop_bias = all_of(prop_bias)
+    call2$prop_bias = prop_bias
   }
   call2$lm_mod = lm_mod
 

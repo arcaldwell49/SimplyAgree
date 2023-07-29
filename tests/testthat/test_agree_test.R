@@ -3,6 +3,7 @@ context("agree_test")
 
 testthat::test_that("Simple Use Run Through", {
   data("reps")
+  data("ba1986")
   agree1 = agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
@@ -35,6 +36,43 @@ testthat::test_that("Simple Use Run Through", {
                       delta = 2.5,
                       TOST = FALSE)
 
+  agree2_new = agreement_limit(x = "x",
+                               y = "y",
+                               data = reps,
+                               loa_calc = "b")
+
+  agree2_new2 = agreement_limit(x = "x",
+                               y = "y",
+                               data = reps,
+                               loa_calc = "m")
+  agree2_new3 = agreement_limit(y = "wright1",
+                                x = "mini1",
+                                data = ba1986,
+                                loa_calc = "m",
+                                alpha = .025)
+  agree2_new4 = agreement_limit(x = "wright1",
+                                y = "mini1",
+                                data = ba1986,
+                                prop_bias = TRUE,
+                                alpha = .025,
+                                loa_calc = "m")
+
+  agree2_bland = agreement_limit(x = "wright1",
+                                y = "mini1",
+                                data = ba1986,
+                                prop_bias = FALSE,
+                                alpha = .025,
+                                loa_calc = "b")
+  testthat::expect_gt(agree2_new2$loa$lme,agree2_new$loa$lme)
+  testthat::expect_equal(round(agree2_new3$loa$upper_loa_ci,0), 122)
+  testthat::expect_equal(round(agree2_bland$loa$upper_loa_ci,0), 109)
+
+  ch1_new = check(agree2_bland)
+  testthat::expect_equivalent(c(agree2$loa$estimate),
+                              c(agree2_new$loa$bias,
+                                agree2_new$loa$lower_loa,
+                                agree2_new$loa$upper_loa))
+
   p1 = plot(agree2,
             geom = "geom_point")
 
@@ -47,7 +85,22 @@ testthat::test_that("Simple Use Run Through", {
   p1 = plot(agree2,
             geom = "geom_density_2d_filled")
 
-  p1 = plot(agree2,
+  p1 = plot(agree2_new,
+            geom = "stat_density_2d")
+
+  p1 = plot(agree2_new,
+            geom = "geom_point")
+
+  p1 = plot(agree2_new,
+            geom = "geom_bin2d")
+
+  p1 = plot(agree2_new,
+            geom = "geom_density_2d")
+
+  p1 = plot(agree2_new,
+            geom = "geom_density_2d_filled")
+
+  p1 = plot(agree2_new,
             geom = "stat_density_2d")
 
   jmvagree1 = jmvagree(data = reps,
@@ -88,13 +141,13 @@ testthat::test_that("Simple Use Run Through", {
                               jmvagree1$blandtab$asDF$estimate)
 
   testthat::expect_equivalent(agree2$loa$lower.ci[2:3],
-                              c(-2.810938, 1.959760),
+                              c(-3.001158,  1.769540),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$lower.ci,
                               jmvagree1$blandtab$asDF$lowerci)
 
   testthat::expect_equivalent(agree2$loa$upper.ci[2:3],
-                              c(-1.083094, 3.687604),
+                              c(-0.8928731,  3.8778249),
                               tolerance = 0.01)
   testthat::expect_equivalent(agree1$loa$upper.ci,
                               jmvagree1$blandtab$asDF$upperci)
@@ -124,6 +177,32 @@ testthat::test_that("Simple Use Run Through", {
   testthat::expect_equal(agree3$h0_test,
                         "No Hypothesis Test")
 
+
+
+})
+
+
+testthat::test_that("Added plotting coverage",{
+
+  data("reps")
+  data("ba1986")
+  agree1 = agree_test(x = reps$x,
+                      y = reps$y,
+                      delta = 2.5,
+                      TOST = FALSE,
+                      prop_bias = TRUE)
+  testthat::expect_equal(class(agree1), "simple_agree")
+
+  checker = check(agree1)
+  p1 = plot(agree1)
+  p2 = plot(agree1,
+            geom = "geom_bin2d")
+  p3 = plot(agree1,
+            geom = "geom_density_2d")
+  p4 = plot(agree1,
+            geom = "geom_density_2d_filled")
+  p5 = plot(agree1,
+            geom = "stat_density_2d")
 
 
 })

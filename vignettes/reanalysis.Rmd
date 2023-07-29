@@ -1,7 +1,7 @@
 ---
 title: "Re-analysis of an Agreement Study"
 output: rmarkdown::html_vignette
-bibliography: ref.bib
+bibliography: refs.bib
 vignette: >
   %\VignetteIndexEntry{Re-analysis of an Agreement Study}
   %\VignetteEncoding{UTF-8}
@@ -33,13 +33,13 @@ df_temps = temps
 
 In the study by @ravanelli2020change, they attempted to estimate the effect of varying the time of day (AM or PM) on the measurement of thermoregulatory variables (e.g., rectal and esophageal temperature). In total, participants completed 6 separate trials wherein these variables were measured. While this is a robust study of these variables the analyses focused on ANOVAs and t-tests to determine whether or not the time-of-day (AM or PM). This poses a problem because 1) they were trying to test for equivalence and 2) this is a study of *agreement* not *differences* (See @Lin1989). Due to the latter point, the use of t-test or ANOVAs (F-tests) is rather inappropriate since they provide an answer to different, albeit related, question.
 
-Instead, the authors could test their hypotheses by using tools that  estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, between the tools included in `SimplyAgree`^[ @cccrm is another package to check out] I believe we can get closer to the right answer.
+Instead, the authors could test their hypotheses by using tools that estimate the absolute *agreement* between the AM and PM sessions within each condition. This is rather complicated because we have multiple measurement within each participant. However, with the tools included in `SimplyAgree`^[ @cccrm is another package to check out] I believe we can get closer to the right answer.
 
-In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the `cccrm` package please see the work by @carrasco2003, @carrasco2009, and @carrasco2013. The `loa_lme` function was inspired by the work of @Parker2016 which documented how to implement multi-level models and bootstrapping to estimate the limits of agreement. 
+In order to understand the underlying processes of these functions and procedures I highly recommend reading the statistical literature that documents methods within these functions. For the `cccrm` package please see the work by @carrasco2003, @carrasco2009, and @carrasco2013. The `tolerance_limit` function was inspired by the work of @francq2020tolerate which documented how to implement tolerance limits to measure agreement. 
 
 # Concordance
 
-An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. It is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa).
+An easy approach to measuring agreement between 2 conditions or measurement tools is through the concordance correlation coefficient (CCC). The CCC essentially provides a single coefficient (values between 0 and 1) that provides an estimate to how closely one measurement is to another. It is a type of intraclass correlation coefficient that takes into account the mean difference between two measurements. In other words, if we were to draw a line of identity on a graph and plot two measurements (X & Y), the closer those points are to the line of identity the higher the CCC (and vice versa). Please see the `cccrm` package for more details.
 
 ```{r, fig.cap="Example of the Line of Identity"}
 qplot(1,1) + geom_abline(intercept = 0, slope = 1)
@@ -171,92 +171,103 @@ p_eso.post
 p_eso.delta
 ```
 
-# Limits of Agreement
+# Tolerance Limits to Assess Agreement
 
-The `loa_lme` function can be used to calculate the "limits of agreement". Typically the 95% Limits of Agreement are calculated which provide the difference between two measuring systems for 95% of future measurements pairs. In order to do that we will need the data in a "wide" format where each measurement (in this case AM and PM) are their own column and then we can calculate a column that is the difference score. Once we have the data in this "wide" format, we can then use the `loa_lme` function to calculate the average difference (mean bias) and the variance (which determines the limits of agreement).
-
-```{r, echo=FALSE}
-rec.post_loa = readr::read_rds("rec_post_loa.rds")
-rec.delta_loa = readr::read_rds("rec_delta_loa.rds")
-
-eso.post_loa = readr::read_rds("eso_post_loa.rds")
-eso.delta_loa = readr::read_rds("eso_delta_loa.rds")
-
-```
+The `tolerance_limit` function can be used to calculate the "tolerance limits". Typically a 95% prediction interval is calculated which provides the predicted difference between two measuring systems for 95% of future measurements pairs. However, we have to account for sampling error so we also need to estimate the confidence in the prediction intervals, and therefore we calculate the tolerance limits. So, when we have 95% tolerance limits for a 95% prediction interval, we can conclude that there is only a 5% probability (1-tolerance) that our tolerance limits do not contain the *true* prediction interval/limit.
 
 ## Rectal Temperature
 
-So we will calculate the limits of agreement using the `loa_lme` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% limits of agreement with 95% confidence intervals, and I will use percentile bootstrap confidence intervals.
+So we will calculate the tolerance using the `loa_lme` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% prediction intervals with 95% tolerance limits, and I will use percentile bootstrap confidence intervals.
 
-```{r, eval=FALSE}
-rec.post_loa = SimplyAgree::loa_lme(diff = "diff",
-                                    condition = "trial_condition",
-                                    id = "id",
-                                    avg = "Average",
-                                    data = df_rec.post,
-                                    conf.level = .95,
-                                    agree.level = .95,
-                                    replicates = 199,
-                                    type = "perc")
+```{r recpost}
+# note: more accurate tolerance limits are given by tol_method = "perc"
+rec.post_tol = tolerance_limit(
+  data = df_rec.post,
+  x = "PM",
+  y = "AM",
+  id = "id",
+  condition = "trial_condition"
+)
+
+
 ```
 
-When we create a table of the limits of agreement (LoA), at least for Trec post exercise, are providing the same conclusion (poor agreement).
+When we print a table of the tolerance limits, at least for Trec post exercise, are providing the same conclusion (poor agreement).
 
 ```{r}
-knitr::kable(rec.post_loa$loa,
-             caption = "LoA: Trec Post Exercise")
+print(rec.post_tol)
 ```
 
-Furthermore, we can visualize the results with a typical Bland-Altman plot of the LoA.
+Furthermore, we can visualize the results with a Bland-Altman style plot of the tolerance.
+Notice, despite the tighter cluster in the 3rd condition, the prediction/tolerance limits are wider.
+This is a curious result, but if we inspect the results further (`rec.post_tol$emmeans`) we can see the degrees of freedom for this condition are horribly low.
 
-```{r, fig.cap="Limits of Agreement for Trec Post Exercise",fig.width=7,fig.height=5}
-plot(rec.post_loa)
+```{r, fig.cap="Tolerance Limits for Trec Post Exercise",fig.width=7,fig.height=5}
+plot(rec.post_tol)
 ```
 
-Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at LoA. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.
+Now, when we look at the Delta values for Trec we find that there is much closer agreement (maybe even acceptable agreement) when we look at tolerance limits. However, we cannot say that the average difference would be less than 0.25 which may not be acceptable for some researchers.
 
 ```{r}
-knitr::kable(rec.delta_loa$loa,
-             caption = "LoA: Delta Trec")
+
+rec.delta_tol = tolerance_limit(
+  x = "PM",
+  y = "AM",
+  condition = "trial_condition",
+  id = "id",
+  data = df_rec.delta
+)
+  
+rec.delta_tol
 ```
 
-```{r, fig.cap="Limits of Agreement for Delta Trec",fig.width=7,fig.height=5}
-plot(rec.delta_loa)
+```{r, fig.cap="Tolerance Limits for Delta Trec",fig.width=7,fig.height=5}
+
+# Plot Maximal Allowable Difference with delta argument
+plot(rec.delta_tol,
+     delta = .25)
 ```
 
 ## Esophageal Temperature
 
 We can repeat the process for esophageal temperature. Overall, the results are fairly similar, and while there is better agreement on the delta (change scores), it is still fairly difficult to determine that there is "good" agreement between the AM and PM measurements.
 
-```{r, eval=FALSE}
-eso.post_loa = SimplyAgree::loa_mixed(diff = "diff",
-                                     condition = "trial_condition",
-                                     id = "id",
-                                     data = df_eso.post,
-                                     conf.level = .95,
-                                     agree.level = .95,
-                                     replicates = 199,
-                                     type = "bca")
+```{r}
+
+eso.post_tol = tolerance_limit(
+  x = "AM",
+  y = "PM",
+  condition = "trial_condition",
+  id = "id",
+  data = df_eso.post
+)
+
+eso.delta_tol = tolerance_limit(
+  x = "AM",
+  y = "PM",
+  condition = "trial_condition",
+  id = "id",
+  data = df_eso.delta
+)
 ```
 
 ```{r}
-knitr::kable(eso.post_loa$loa,
-             caption = "LoA: Teso Post Exercise")
+eso.post_tol
 ```
 
 
 ```{r, fig.cap="Limits of Agreement for Teso Post Exercise",fig.width=7,fig.height=5}
-plot(eso.post_loa)
+plot(eso.post_tol)
 ```
 
 
 ```{r}
-knitr::kable(eso.delta_loa$loa,
-             caption = "LoA: Delta Teso")
+eso.delta_tol
 ```
 
 ```{r, fig.cap="Limits of Agreement for Delta Teso",fig.width=7,fig.height=5}
-plot(eso.delta_loa)
+plot(eso.delta_tol,
+     delta = .25)
 ```
 
 

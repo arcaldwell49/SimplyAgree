@@ -114,7 +114,7 @@ check.simple_eiv <- function(x) {
     geom_point() +
     geom_smooth(se = TRUE,
                 method = "loess",
-                size = .8,
+                linewidth = .8,
                 color ="#3aaf85",
                 formula = y~x) +
     labs(y = "|Optimized Residuals|",

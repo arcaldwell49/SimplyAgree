@@ -6,7 +6,7 @@
 #' @param data Data frame with all data.
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
-#' @param conf.level the confidence level required. Default is 95\%.
+#' @param conf.level the confidence level required. Default is 95%.
 #' @param weighted Logical value (TRUE or FALSE) indicating whether to weight the responses. If TRUE (default is FALSE) then quadratic weights are utilized. This option should be set to TRUE for ordinal or continuous responses.
 #'
 #' @return Returns single data frame of inter-rater reliability coefficients.
@@ -14,7 +14,7 @@
 #' data('reps')
 #' agree_coef(data = reps, wide = TRUE, col.names = c("x","y"), weighted = TRUE)
 #'
-#' @section References:
+#' @references
 #' Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater Reliability,” 4th Edition. Advanced Analytics, LLC.
 #' Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
 #' @importFrom stats reshape
@@ -45,9 +45,7 @@ agree_coef = function(wide = TRUE,
     x.df <- data.frame(x.s, subs = rep(paste("S", 1:n.obs, sep = ""),
                                        nj))
   } else {
-    if(is.null(measure) || is.null(item) ||is.null(id)){
-      stop("Must provide measure, item, and id column names if wide = FALSE")
-    }
+
     x.df = x %>%
       select(all_of(measure),all_of(item),all_of(id))
   }

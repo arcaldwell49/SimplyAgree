@@ -8,16 +8,16 @@
 \format{
 A data frame with 60 rows and 10 variables:
 \describe{
-  \item{id}{Subject identifier}
-  \item{trial_num}{order in which the experimental trial was completed}
-  \item{trial_condition}{Environmental condition and metabolic heat production}
-  \item{tod}{Time of Day}
-  \item{trec_pre}{Rectal temperature before the beginning of the trial}
-  \item{trec_post}{Rectal temperature at the end of the trial}
-  \item{trec_delta}{Change in rectal temperature}
-  \item{teso_pre}{Esophageal temperature before the beginning of the trial}
-  \item{teso_post}{Esophageal temperature at the end of the trial}
-  \item{teso_delta}{Change in esophageal temperature}
+\item{id}{Subject identifier}
+\item{trial_num}{order in which the experimental trial was completed}
+\item{trial_condition}{Environmental condition and metabolic heat production}
+\item{tod}{Time of Day}
+\item{trec_pre}{Rectal temperature before the beginning of the trial}
+\item{trec_post}{Rectal temperature at the end of the trial}
+\item{trec_delta}{Change in rectal temperature}
+\item{teso_pre}{Esophageal temperature before the beginning of the trial}
+\item{teso_post}{Esophageal temperature at the end of the trial}
+\item{teso_delta}{Change in esophageal temperature}
 
 }
 

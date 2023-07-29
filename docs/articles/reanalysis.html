@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -55,10 +55,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/agreement_analysis.html">Agreement Analysis</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agree_tests.html">Agreement Tests</a>
+    </li>
+    <li>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -96,14 +99,14 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></span>
-<span><span class="co">#library(tidyverse)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span></span>
-<span><span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
+<span class="co">#library(tidyverse)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span>
+<span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></code></pre></div>
 <div class="section level2">
 <h2 id="re-analysis-of-a-previous-study-of-agreement">Re-analysis of a Previous Study of Agreement<a class="anchor" aria-label="anchor" href="#re-analysis-of-a-previous-study-of-agreement"></a>
 </h2>
@@ -122,7 +125,7 @@ provide an answer to different, albeit related, question.</p>
 <p>Instead, the authors could test their hypotheses by using tools that
 estimate the absolute <em>agreement</em> between the AM and PM sessions
 within each condition. This is rather complicated because we have
-multiple measurement within each participant. However, between the tools
+multiple measurement within each participant. However, with the tools
 included in <code>SimplyAgree</code><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> I believe we can get closer to the right
 answer.</p>
 <p>In order to understand the underlying processes of these functions
@@ -130,9 +133,8 @@ and procedures I highly recommend reading the statistical literature
 that documents methods within these functions. For the
 <code>cccrm</code> package please see the work by <span class="citation">Josep L. Carrasco and Jover (2003)</span>, <span class="citation">Josep L. Carrasco, King, and Chinchilli (2009)</span>,
 and <span class="citation">Josep L. Carrasco et al. (2013)</span>. The
-<code>loa_lme</code> function was inspired by the work of <span class="citation">Parker et al. (2016)</span> which documented how to
-implement multi-level models and bootstrapping to estimate the limits of
-agreement.</p>
+<code>tolerance_limit</code> function was inspired by the work of <span class="citation">Francq, Berger, and Boachie (2020)</span> which
+documented how to implement tolerance limits to measure agreement.</p>
 </div>
 <div class="section level2">
 <h2 id="concordance">Concordance<a class="anchor" aria-label="anchor" href="#concordance"></a>
@@ -145,10 +147,11 @@ another. It is a type of intraclass correlation coefficient that takes
 into account the mean difference between two measurements. In other
 words, if we were to draw a line of identity on a graph and plot two
 measurements (X &amp; Y), the closer those points are to the line of
-identity the higher the CCC (and vice versa).</p>
+identity the higher the CCC (and vice versa). Please see the
+<code>cccrm</code> package for more details.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+<span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" alt="Example of the Line of Identity" width="700"><p class="caption">
 Example of the Line of Identity
@@ -166,8 +169,8 @@ plot we can see there is clear bias in the raw post exercise values
 (higher in the PM), but even when “correcting for baseline differences”
 by calculating the differences scores we can see a higher degree of
 disagreement between the two conditions.</p>
-<pre><code><span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span></code></pre>
+<pre><code><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltsrec-1.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
@@ -183,7 +186,7 @@ Concordance Plots of Rectal Temperature
 <div class="section level2">
 <h2 id="esophageal-temperature">Esophageal Temperature<a class="anchor" aria-label="anchor" href="#esophageal-temperature"></a>
 </h2>
-<pre><code><span><span class="co">#&gt; Warning: Removed 3 rows containing missing values (`geom_line()`).</span></span></code></pre>
+<pre><code><span class="co">#&gt; Warning: Removed 3 rows containing missing values (`geom_line()`).</span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltseso-1.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
@@ -196,275 +199,94 @@ Concordance Plots of Esophageal Temperature
 </div>
 </div>
 <div class="section level2">
-<h2 id="limits-of-agreement">Limits of Agreement<a class="anchor" aria-label="anchor" href="#limits-of-agreement"></a>
+<h2 id="tolerance-limits-to-assess-agreement">Tolerance Limits to Assess Agreement<a class="anchor" aria-label="anchor" href="#tolerance-limits-to-assess-agreement"></a>
 </h2>
-<p>The <code>loa_lme</code> function can be used to calculate the
-“limits of agreement”. Typically the 95% Limits of Agreement are
-calculated which provide the difference between two measuring systems
-for 95% of future measurements pairs. In order to do that we will need
-the data in a “wide” format where each measurement (in this case AM and
-PM) are their own column and then we can calculate a column that is the
-difference score. Once we have the data in this “wide” format, we can
-then use the <code>loa_lme</code> function to calculate the average
-difference (mean bias) and the variance (which determines the limits of
-agreement).</p>
+<p>The <code>tolerance_limit</code> function can be used to calculate
+the “tolerance limits”. Typically a 95% prediction interval is
+calculated which provides the predicted difference between two measuring
+systems for 95% of future measurements pairs. However, we have to
+account for sampling error so we also need to estimate the confidence in
+the prediction intervals, and therefore we calculate the tolerance
+limits. So, when we have 95% tolerance limits for a 95% prediction
+interval, we can conclude that there is only a 5% probability
+(1-tolerance) that our tolerance limits do not contain the <em>true</em>
+prediction interval/limit.</p>
 <div class="section level3">
 <h3 id="rectal-temperature-1">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature-1"></a>
 </h3>
-<p>So we will calculate the limits of agreement using the
-<code>loa_lme</code> function. We will need to identify the columns with
-the right information using the <code>diff</code>, <code>avg</code>,
+<p>So we will calculate the tolerance using the <code>loa_lme</code>
+function. We will need to identify the columns with the right
+information using the <code>diff</code>, <code>avg</code>,
 <code>condition</code>, and <code>id</code> arguments. We then select
 the right data set using the <code>data</code> argument. Lastly, we
 specify the specifics of the conditions for how the limits are
-calculated. For this specific analysis I decided to calculate 95% limits
-of agreement with 95% confidence intervals, and I will use percentile
-bootstrap confidence intervals.</p>
+calculated. For this specific analysis I decided to calculate 95%
+prediction intervals with 95% tolerance limits, and I will use
+percentile bootstrap confidence intervals.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rec.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
-<span>                                    condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
-<span>                                    id <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>                                    avg <span class="op">=</span> <span class="st">"Average"</span>,</span>
-<span>                                    data <span class="op">=</span> <span class="va">df_rec.post</span>,</span>
-<span>                                    conf.level <span class="op">=</span> <span class="fl">.95</span>,</span>
-<span>                                    agree.level <span class="op">=</span> <span class="fl">.95</span>,</span>
-<span>                                    replicates <span class="op">=</span> <span class="fl">199</span>,</span>
-<span>                                    type <span class="op">=</span> <span class="st">"perc"</span><span class="op">)</span></span></code></pre></div>
-<p>When we create a table of the limits of agreement (LoA), at least for
-Trec post exercise, are providing the same conclusion (poor
-agreement).</p>
+<code class="sourceCode R"><span class="co"># note: more accurate tolerance limits are given by tol_method = "perc"</span>
+<span class="va">rec.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
+  data <span class="op">=</span> <span class="va">df_rec.post</span>,
+  x <span class="op">=</span> <span class="st">"PM"</span>,
+  y <span class="op">=</span> <span class="st">"AM"</span>,
+  id <span class="op">=</span> <span class="st">"id"</span>,
+  condition <span class="op">=</span> <span class="st">"trial_condition"</span>
+<span class="op">)</span></code></pre></div>
+<p>When we print a table of the tolerance limits, at least for Trec post
+exercise, are providing the same conclusion (poor agreement).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
-<span>             caption <span class="op">=</span> <span class="st">"LoA: Trec Post Exercise"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>LoA: Trec Post Exercise</caption>
-<colgroup>
-<col width="13%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">term</th>
-<th align="left">condition</th>
-<th align="right">estimate</th>
-<th align="right">bias</th>
-<th align="right">se</th>
-<th align="right">lower.ci</th>
-<th align="right">upper.ci</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.2550000</td>
-<td align="right">-0.0114061</td>
-<td align="right">0.0707957</td>
-<td align="right">0.1058965</td>
-<td align="right">0.3750531</td>
-</tr>
-<tr class="even">
-<td align="left">Bias</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.2540000</td>
-<td align="right">0.0044150</td>
-<td align="right">0.0724833</td>
-<td align="right">0.1071222</td>
-<td align="right">0.4044288</td>
-</tr>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.1810000</td>
-<td align="right">-0.0084558</td>
-<td align="right">0.0708715</td>
-<td align="right">0.0263866</td>
-<td align="right">0.3118697</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">-0.1708766</td>
-<td align="right">-0.0129563</td>
-<td align="right">0.0919009</td>
-<td align="right">-0.3746394</td>
-<td align="right">0.0005661</td>
-</tr>
-<tr class="odd">
-<td align="left">Lower LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">-0.1718766</td>
-<td align="right">0.0028648</td>
-<td align="right">0.0943708</td>
-<td align="right">-0.3478418</td>
-<td align="right">0.0107792</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.2448766</td>
-<td align="right">-0.0100059</td>
-<td align="right">0.0875189</td>
-<td align="right">-0.4389267</td>
-<td align="right">-0.0866145</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.6808766</td>
-<td align="right">-0.0098559</td>
-<td align="right">0.0911554</td>
-<td align="right">0.4887056</td>
-<td align="right">0.8675360</td>
-</tr>
-<tr class="even">
-<td align="left">Upper LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.6798766</td>
-<td align="right">0.0059652</td>
-<td align="right">0.0912843</td>
-<td align="right">0.5129644</td>
-<td align="right">0.8784498</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.6068766</td>
-<td align="right">-0.0069056</td>
-<td align="right">0.0954830</td>
-<td align="right">0.3783011</td>
-<td align="right">0.7849023</td>
-</tr>
-</tbody>
-</table>
-<p>Furthermore, we can visualize the results with a typical Bland-Altman
-plot of the LoA.</p>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span>
+<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
+<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3244, 0.8344] [-0.5242, 1.0342]</span>
+<span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3143, 0.8223] [-0.4976, 1.0056]</span>
+<span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7105, 1.0725] [-1.4742, 1.8362]</span></code></pre></div>
+<p>Furthermore, we can visualize the results with a Bland-Altman style
+plot of the tolerance. Notice, despite the tighter cluster in the 3rd
+condition, the prediction/tolerance limits are wider. This is a curious
+result, but if we inspect the results further
+(<code>rec.post_tol$emmeans</code>) we can see the degrees of freedom
+for this condition are horribly low.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_loa</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" alt="Limits of Agreement for Trec Post Exercise" width="672"><p class="caption">
-Limits of Agreement for Trec Post Exercise
+<img src="reanalysis_files/figure-html/unnamed-chunk-4-1.png" alt="Tolerance Limits for Trec Post Exercise" width="672"><p class="caption">
+Tolerance Limits for Trec Post Exercise
 </p>
 </div>
 <p>Now, when we look at the Delta values for Trec we find that there is
 much closer agreement (maybe even acceptable agreement) when we look at
-LoA. However, we cannot say that the average difference would be less
-than 0.25 which may not be acceptable for some researchers.</p>
+tolerance limits. However, we cannot say that the average difference
+would be less than 0.25 which may not be acceptable for some
+researchers.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
-<span>             caption <span class="op">=</span> <span class="st">"LoA: Delta Trec"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>LoA: Delta Trec</caption>
-<colgroup>
-<col width="13%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">term</th>
-<th align="left">condition</th>
-<th align="right">estimate</th>
-<th align="right">bias</th>
-<th align="right">se</th>
-<th align="right">lower.ci</th>
-<th align="right">upper.ci</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">23C/5.5</td>
-<td align="right">-0.0190000</td>
-<td align="right">-0.0011451</td>
-<td align="right">0.0396377</td>
-<td align="right">-0.0949281</td>
-<td align="right">0.0630221</td>
-</tr>
-<tr class="even">
-<td align="left">Bias</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.0150000</td>
-<td align="right">-0.0014430</td>
-<td align="right">0.0372452</td>
-<td align="right">-0.0497428</td>
-<td align="right">0.0910483</td>
-</tr>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.0590000</td>
-<td align="right">0.0000772</td>
-<td align="right">0.0391803</td>
-<td align="right">-0.1331558</td>
-<td align="right">0.0159793</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">-0.2532956</td>
-<td align="right">0.0015001</td>
-<td align="right">0.0533380</td>
-<td align="right">-0.3570648</td>
-<td align="right">-0.1638991</td>
-</tr>
-<tr class="odd">
-<td align="left">Lower LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">-0.2192956</td>
-<td align="right">0.0012022</td>
-<td align="right">0.0479123</td>
-<td align="right">-0.3048820</td>
-<td align="right">-0.1172316</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.2932956</td>
-<td align="right">0.0027224</td>
-<td align="right">0.0534793</td>
-<td align="right">-0.3946780</td>
-<td align="right">-0.1885677</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.2152956</td>
-<td align="right">-0.0037903</td>
-<td align="right">0.0510084</td>
-<td align="right">0.1028572</td>
-<td align="right">0.3286267</td>
-</tr>
-<tr class="even">
-<td align="left">Upper LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.2492956</td>
-<td align="right">-0.0040881</td>
-<td align="right">0.0527573</td>
-<td align="right">0.1473752</td>
-<td align="right">0.3507382</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.1752956</td>
-<td align="right">-0.0025680</td>
-<td align="right">0.0501465</td>
-<td align="right">0.0733961</td>
-<td align="right">0.2711665</td>
-</tr>
-</tbody>
-</table>
+<code class="sourceCode R">
+<span class="va">rec.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
+  x <span class="op">=</span> <span class="st">"PM"</span>,
+  y <span class="op">=</span> <span class="st">"AM"</span>,
+  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
+  id <span class="op">=</span> <span class="st">"id"</span>,
+  data <span class="op">=</span> <span class="va">df_rec.delta</span>
+<span class="op">)</span>
+  
+<span class="va">rec.delta_tol</span>
+<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
+<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2346, 0.1966] [-0.3467, 0.3087]</span>
+<span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]</span>
+<span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]</span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_loa</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="co"># Plot Maximal Allowable Difference with delta argument</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_tol</span>,
+     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-8-1.png" alt="Limits of Agreement for Delta Trec" width="672"><p class="caption">
-Limits of Agreement for Delta Trec
+<img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" alt="Tolerance Limits for Delta Trec" width="672"><p class="caption">
+Tolerance Limits for Delta Trec
 </p>
 </div>
 </div>
@@ -476,239 +298,52 @@ results are fairly similar, and while there is better agreement on the
 delta (change scores), it is still fairly difficult to determine that
 there is “good” agreement between the AM and PM measurements.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eso.post_loa</span> <span class="op">=</span> <span class="fu">SimplyAgree</span><span class="fu">::</span><span class="fu"><a href="../reference/loa_mixed.html">loa_mixed</a></span><span class="op">(</span>diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
-<span>                                     condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
-<span>                                     id <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>                                     data <span class="op">=</span> <span class="va">df_eso.post</span>,</span>
-<span>                                     conf.level <span class="op">=</span> <span class="fl">.95</span>,</span>
-<span>                                     agree.level <span class="op">=</span> <span class="fl">.95</span>,</span>
-<span>                                     replicates <span class="op">=</span> <span class="fl">199</span>,</span>
-<span>                                     type <span class="op">=</span> <span class="st">"bca"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="va">eso.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
+  x <span class="op">=</span> <span class="st">"AM"</span>,
+  y <span class="op">=</span> <span class="st">"PM"</span>,
+  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
+  id <span class="op">=</span> <span class="st">"id"</span>,
+  data <span class="op">=</span> <span class="va">df_eso.post</span>
+<span class="op">)</span>
+
+<span class="va">eso.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
+  x <span class="op">=</span> <span class="st">"AM"</span>,
+  y <span class="op">=</span> <span class="st">"PM"</span>,
+  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
+  id <span class="op">=</span> <span class="st">"id"</span>,
+  data <span class="op">=</span> <span class="va">df_eso.delta</span>
+<span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
-<span>             caption <span class="op">=</span> <span class="st">"LoA: Teso Post Exercise"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>LoA: Teso Post Exercise</caption>
-<colgroup>
-<col width="13%">
-<col width="13%">
-<col width="13%">
-<col width="15%">
-<col width="13%">
-<col width="15%">
-<col width="13%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">term</th>
-<th align="left">condition</th>
-<th align="right">estimate</th>
-<th align="right">bias</th>
-<th align="right">se</th>
-<th align="right">lower.ci</th>
-<th align="right">upper.ci</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.180000</td>
-<td align="right">0.0054383</td>
-<td align="right">0.0414297</td>
-<td align="right">0.1018153</td>
-<td align="right">0.2727195</td>
-</tr>
-<tr class="even">
-<td align="left">Bias</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.212000</td>
-<td align="right">0.0003411</td>
-<td align="right">0.0409850</td>
-<td align="right">0.1225349</td>
-<td align="right">0.2781630</td>
-</tr>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.146000</td>
-<td align="right">0.0067433</td>
-<td align="right">0.0411734</td>
-<td align="right">0.0699717</td>
-<td align="right">0.2437454</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">-0.078867</td>
-<td align="right">0.0087499</td>
-<td align="right">0.0577083</td>
-<td align="right">-0.1882852</td>
-<td align="right">0.0362440</td>
-</tr>
-<tr class="odd">
-<td align="left">Lower LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">-0.046867</td>
-<td align="right">0.0036528</td>
-<td align="right">0.0562961</td>
-<td align="right">-0.1450997</td>
-<td align="right">0.0710961</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.112867</td>
-<td align="right">0.0100549</td>
-<td align="right">0.0533235</td>
-<td align="right">-0.2205322</td>
-<td align="right">0.0096297</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.438867</td>
-<td align="right">0.0021267</td>
-<td align="right">0.0519004</td>
-<td align="right">0.3284062</td>
-<td align="right">0.5399114</td>
-</tr>
-<tr class="even">
-<td align="left">Upper LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.470867</td>
-<td align="right">-0.0029705</td>
-<td align="right">0.0527384</td>
-<td align="right">0.3570791</td>
-<td align="right">0.5748910</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.404867</td>
-<td align="right">0.0034317</td>
-<td align="right">0.0560191</td>
-<td align="right">0.3054799</td>
-<td align="right">0.5188644</td>
-</tr>
-</tbody>
-</table>
+<code class="sourceCode R"><span class="va">eso.post_tol</span>
+<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
+<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="co">#&gt;    23C/5.5 -0.180 [-0.2562, -0.1038]   [-0.4327, 0.0727] [-0.5545, 0.1945]</span>
+<span class="co">#&gt;    33C/5.5 -0.212 [-0.3288, -0.0952]   [-0.4597, 0.0357] [-0.5397, 0.1157]</span>
+<span class="co">#&gt;    33C/7.5 -0.146 [-0.2301, -0.0619]   [-0.4163, 0.1243] [-0.5686, 0.2766]</span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_loa</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-9-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Teso Post Exercise
 </p>
 </div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">$</span><span class="va">loa</span>,</span>
-<span>             caption <span class="op">=</span> <span class="st">"LoA: Delta Teso"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>LoA: Delta Teso</caption>
-<colgroup>
-<col width="13%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-<col width="13%">
-<col width="14%">
-<col width="14%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">term</th>
-<th align="left">condition</th>
-<th align="right">estimate</th>
-<th align="right">bias</th>
-<th align="right">se</th>
-<th align="right">lower.ci</th>
-<th align="right">upper.ci</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.0200000</td>
-<td align="right">-0.0032266</td>
-<td align="right">0.0346942</td>
-<td align="right">-0.0528344</td>
-<td align="right">0.0930582</td>
-</tr>
-<tr class="even">
-<td align="left">Bias</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.0050000</td>
-<td align="right">-0.0009160</td>
-<td align="right">0.0346594</td>
-<td align="right">-0.0687195</td>
-<td align="right">0.0839039</td>
-</tr>
-<tr class="odd">
-<td align="left">Bias</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.0170000</td>
-<td align="right">-0.0026115</td>
-<td align="right">0.0345165</td>
-<td align="right">-0.0870805</td>
-<td align="right">0.0516728</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">-0.1992475</td>
-<td align="right">-0.0007217</td>
-<td align="right">0.0467556</td>
-<td align="right">-0.2940191</td>
-<td align="right">-0.1094022</td>
-</tr>
-<tr class="odd">
-<td align="left">Lower LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">-0.2142475</td>
-<td align="right">0.0015889</td>
-<td align="right">0.0452052</td>
-<td align="right">-0.2997399</td>
-<td align="right">-0.1297578</td>
-</tr>
-<tr class="even">
-<td align="left">Lower LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">-0.2362475</td>
-<td align="right">-0.0001066</td>
-<td align="right">0.0480083</td>
-<td align="right">-0.3370631</td>
-<td align="right">-0.1477120</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">23C/5.5</td>
-<td align="right">0.2392475</td>
-<td align="right">-0.0057314</td>
-<td align="right">0.0474541</td>
-<td align="right">0.1312817</td>
-<td align="right">0.3429716</td>
-</tr>
-<tr class="even">
-<td align="left">Upper LoA</td>
-<td align="left">33C/5.5</td>
-<td align="right">0.2242475</td>
-<td align="right">-0.0034208</td>
-<td align="right">0.0488839</td>
-<td align="right">0.1350650</td>
-<td align="right">0.3297975</td>
-</tr>
-<tr class="odd">
-<td align="left">Upper LoA</td>
-<td align="left">33C/7.5</td>
-<td align="right">0.2022475</td>
-<td align="right">-0.0051163</td>
-<td align="right">0.0459192</td>
-<td align="right">0.1140479</td>
-<td align="right">0.2865703</td>
-</tr>
-</tbody>
-</table>
+<code class="sourceCode R"><span class="va">eso.delta_tol</span>
+<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
+<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]</span>
+<span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.1858, 0.1758] [-0.2459, 0.2359]</span>
+<span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]</span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_loa</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,
+     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-13-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
 Limits of Agreement for Delta Teso
 </p>
 </div>
@@ -741,18 +376,15 @@ Concordance Correlation Coefficient for Repeated Measures Using
 <span>SAS</span> and r.”</span> <em>Computer Methods and Programs in
 Biomedicine</em> 109 (3): 293–304. <a href="https://doi.org/10.1016/j.cmpb.2012.09.002" class="external-link">https://doi.org/10.1016/j.cmpb.2012.09.002</a>.
 </div>
+<div id="ref-francq2020tolerate" class="csl-entry">
+Francq, Bernard G, Marion Berger, and Charles Boachie. 2020. <span>“To
+Tolerate or to Agree: A Tutorial on Tolerance Intervals in Method
+Comparison Studies with BivRegBLS r Package.”</span> <em>Statistics in
+Medicine</em> 39 (28): 4334–49.
+</div>
 <div id="ref-Lin1989" class="csl-entry">
 Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient
 to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051" class="external-link">https://doi.org/10.2307/2532051</a>.
-</div>
-<div id="ref-Parker2016" class="csl-entry">
-Parker, Richard A., Christopher J. Weir, Noah Rubio, Roberto Rabinovich,
-Hilary Pinnock, Janet Hanley, Lucy McCloughan, et al. 2016.
-<span>“Application of Mixed Effects Limits of Agreement in the Presence
-of Multiple Sources of Variability: Exemplar from the Comparison of
-Several Devices to Measure Respiratory Rate in <span>COPD</span>
-Patients.”</span> Edited by Hong-Long (James) Ji. <em><span>PLOS</span>
-<span>ONE</span></em> 11 (12): e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link">https://doi.org/10.1371/journal.pone.0168321</a>.
 </div>
 <div id="ref-ravanelli2020change" class="csl-entry">
 Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core
@@ -788,7 +420,7 @@ Martinez (2020)</span> is another package to check out<a href="#fnref1" class="f
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

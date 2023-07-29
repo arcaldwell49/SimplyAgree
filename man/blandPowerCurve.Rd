@@ -32,11 +32,6 @@ A dataframe is returned containing the power analysis results. The results can t
 \description{
 This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
 }
-\section{references}{
-
-Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <https://doi.org/10.1515/ijb-2015-0039>
-}
-
 \examples{
 \donttest{
 powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
@@ -52,4 +47,7 @@ find_n(powerCurve, power = .8)
 }
 # If the desired power is not found then
 ## Sample size range must be expanded
+}
+\references{
+Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), \url{https://doi.org/10.1515/ijb-2015-0039}
 }

@@ -20,7 +20,7 @@ agree_reps(
 \arguments{
 \item{x}{Name of column with first measurement}
 
-\item{y}{Name of other column with first measurement}
+\item{y}{Name of other column with the other measurement to compare to the first.}
 
 \item{id}{Column with subject identifier}
 
@@ -40,22 +40,29 @@ agree_reps(
 }
 \value{
 Returns single list with the results of the agreement analysis.
-
-\describe{
-  \item{\code{"loa"}}{a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.}
-  \item{\code{"h0_test"}}{Decision from hypothesis test.}
-  \item{\code{"ccc.xy"}}{Lin's concordance correlation coefficient and confidence intervals using U-statistics.}
-  \item{\code{"call"}}{The matched call.}
-  \item{\code{"var_comp"}}{Table of Variance Components.}
-  \item{\code{"class"}}{The type of simple_agree analysis.}
-
+\itemize{
+\item \code{loa}: a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.
+\item \code{h0_test}: Decision from hypothesis test.
+\item \code{ccc.xy}: Lin's concordance correlation coefficient and confidence intervals using U-statistics.
+\item \code{call}: The matched call.
+\item \code{var_comp}: Table of Variance Components.
+\item \code{class}: The type of simple_agree analysis.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
+Development on \code{agree_reps()} is complete, and for new code we recommend
+switching to \code{agreement_limit()}, which is easier to use, has more features,
+and still under active development.
+
 agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean does not vary within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
 }
-\section{References}{
-
+\examples{
+data('reps')
+agree_reps(x = "x", y = "y", id = "id", data = reps, delta = 2)
+}
+\references{
 Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
 
 King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. Statistics in Medicine, 20, 2131:2147.
@@ -63,9 +70,4 @@ King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coeff
 King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.
 
 Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
-}
-
-\examples{
-data('reps')
-agree_reps(x = "x", y = "y", id = "id", data = reps, delta = 2)
 }
