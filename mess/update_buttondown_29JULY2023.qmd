@@ -1,0 +1,71 @@
+---
+title: "SimplyAgree Update: v0.2.0"
+author: "Aaron R. Caldwell"
+format: md
+---
+
+# Welcome to version 0.2.0 (July 2023)
+
+I am happy to announce that an early release of the SimplyAgree. As always, detailed documentation of the package can be
+found the [website](https://aaroncaldwell.us/SimplyAgree/). This update mainly about two new functions: `tolerance_limit` and `agreement_limit`.
+
+# Rationale
+
+I have never really liked that agreement limits are calculated from 3 different functions so I have created 1 function, `agreement_limit`, to calculate the 3 main types of agreement limits included in the package. Additionally, users will have the option of using Bland-Altman style confidence limits or Zou's MOVER confidence limits.
+
+The tolerance limits are inspired the recent work of Francq^[Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.]. The tolerance limit is essentially a confidence limit on a prediction interval of the difference scores. While the concept might *sound* confusing the average user can just consider the prediction interval to be an equivalent of the agreement limit and the tolerance limit to be the equivalent of the confidence limits for agreement limits. This is advantageous for 2 reasons:
+
+1. Tolerance and prediction intervals often have better coverage
+2. Tolerance limits can be directly calculated from the estimated marginal means from a generalized least squares (GLS) model and are therefore more flexible
+
+
+# Agreement Limits
+
+The agreement limits function is very simliar to the other "agree" functions in the package.
+
+```{r agree, warning=FALSE, message=FALSE}
+library(SimplyAgree)
+data('reps')
+
+# Simple
+agreement_limit(x = "x", y ="y", data = reps)
+
+# Replicates
+agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "rep")
+
+# Nested
+agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")
+```
+# Tolerance Limit
+
+The tolerance limit function operates in a similar fashion. The only difference is that it cannot handle data with replicates explicitly.
+
+
+```{r tolerate, warning=FALSE, message=FALSE}
+data('reps')
+
+# Simple
+tolerance_limit(x = "x", y ="y", data = reps)
+
+# Nested
+tolerance_limit(x = "x", y ="y", data = reps, id = "id")
+```
+
+
+# Concluding Remarks
+
+It has taken about half of this year to get tolerance limits into the package. 
+I believe this function will greatly improve the ease of calculating agreement/tolerance limits.
+Just like the other agree functions there is a `check` and `plot` functions/methods so you can check your assumptions and plot your data.
+
+If you have
+any questions, concerns, or have suggestions please feel free to reach
+out. I have a “Contact Me” form on my
+[website](https://aaroncaldwell.us/#contact), and feel free to
+send a message at any time. I would appreciate any feedback.
+
+I hope you all enjoy the new SimplyAgree!
+
+Cheers everyone,
+
+AC
