@@ -32,13 +32,13 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -69,26 +69,26 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for simple_agree</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for simple_agree</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  type <span class="op">=</span> <span class="fl">1</span>,
-  x_name <span class="op">=</span> <span class="st">"x"</span>,
-  y_name <span class="op">=</span> <span class="st">"y"</span>,
-  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geom_point"</span>, <span class="st">"geom_bin2d"</span>, <span class="st">"geom_density_2d"</span>, <span class="st">"geom_density_2d_filled"</span>,
-    <span class="st">"stat_density_2d"</span><span class="op">)</span>,
-  smooth_method <span class="op">=</span> <span class="cn">NULL</span>,
-  smooth_se <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">check</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-
-<span class="co"># S3 method for simple_agree</span>
-<span class="fu">check</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for simple_agree</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for simple_agree</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  type <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  x_name <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>  y_name <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>  geom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geom_point"</span>, <span class="st">"geom_bin2d"</span>, <span class="st">"geom_density_2d"</span>, <span class="st">"geom_density_2d_filled"</span>,</span>
+<span>    <span class="st">"stat_density_2d"</span><span class="op">)</span>,</span>
+<span>  smooth_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  smooth_se <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">check</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for simple_agree</span></span>
+<span><span class="fu">check</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -138,7 +138,7 @@ for details.
 <dd><p>Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)</p></dd>
 
 <dt><code>check</code></dt>
-<dd><p>Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.</p></dd>
+<dd><p>Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.</p></dd>
 
 
 </dl></div>
@@ -155,7 +155,7 @@ for details.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

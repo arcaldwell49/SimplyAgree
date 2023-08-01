@@ -12,7 +12,7 @@
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the tolerance limits.}
 #'   \item{\code{plot}}{Returns a plot of the tolerance limits.}
-#'   \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+#'   \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
 #' }
 #'
 #' @name tolerance_delta-methods
@@ -402,7 +402,7 @@ check.tolerance_delta <- function(x) {
 
   dat = model.frame(x$call$lm_mod)
   colnames(dat) = c("y","x","id","mean","delta","condition","time")
-  ## Heteroskedasticity -------
+  ## heteroskedasticity -------
 
   #stan_res = residuals(x$model, type = "pearson")
   #df_het = x$model$dims[["N"]] - x$model$dims[["p"]]

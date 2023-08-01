@@ -31,7 +31,7 @@ Error-in-variables (EIV) models are useful tools to account for measurement erro
 Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990)
 
 
-# Code Demostration
+# Code Demonstration
 
 ## Simple Deming Regression
 

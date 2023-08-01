@@ -72,7 +72,7 @@ Returns single list with the results of the agreement analysis.
 \item \code{cv}: Coefficient of Variation
 \item \code{SEM}: List with Standard MSE of Measurement estimate (est)
 \item \code{SEE}: List with Standard MSE of the Estimate estimate (est)
-\item \code{SEP}: List with Standard MSE of Predicitions (est)
+\item \code{SEP}: List with Standard MSE of Predictions (est)
 \item \code{call}: the matched call
 }
 }

@@ -55,13 +55,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -99,14 +99,14 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-<span class="co">#library(tidyverse)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span>
-<span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></span>
+<span><span class="co">#library(tidyverse)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"temps"</span><span class="op">)</span></span>
+<span><span class="va">df_temps</span> <span class="op">=</span> <span class="va">temps</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="re-analysis-of-a-previous-study-of-agreement">Re-analysis of a Previous Study of Agreement<a class="anchor" aria-label="anchor" href="#re-analysis-of-a-previous-study-of-agreement"></a>
 </h2>
@@ -150,8 +150,11 @@ measurements (X &amp; Y), the closer those points are to the line of
 identity the higher the CCC (and vice versa). Please see the
 <code>cccrm</code> package for more details.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
-<span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" alt="Example of the Line of Identity" width="700"><p class="caption">
 Example of the Line of Identity
@@ -169,8 +172,11 @@ plot we can see there is clear bias in the raw post exercise values
 (higher in the PM), but even when “correcting for baseline differences”
 by calculating the differences scores we can see a higher degree of
 disagreement between the two conditions.</p>
-<pre><code><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span>
-<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltsrec-1.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
@@ -186,7 +192,7 @@ Concordance Plots of Rectal Temperature
 <div class="section level2">
 <h2 id="esophageal-temperature">Esophageal Temperature<a class="anchor" aria-label="anchor" href="#esophageal-temperature"></a>
 </h2>
-<pre><code><span class="co">#&gt; Warning: Removed 3 rows containing missing values (`geom_line()`).</span></code></pre>
+<pre><code><span><span class="co">#&gt; Warning: Removed 3 rows containing missing values (`geom_line()`).</span></span></code></pre>
 <div class="figure">
 <img src="reanalysis_files/figure-html/pltseso-1.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
@@ -224,25 +230,25 @@ calculated. For this specific analysis I decided to calculate 95%
 prediction intervals with 95% tolerance limits, and I will use
 percentile bootstrap confidence intervals.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># note: more accurate tolerance limits are given by tol_method = "perc"</span>
-<span class="va">rec.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
-  data <span class="op">=</span> <span class="va">df_rec.post</span>,
-  x <span class="op">=</span> <span class="st">"PM"</span>,
-  y <span class="op">=</span> <span class="st">"AM"</span>,
-  id <span class="op">=</span> <span class="st">"id"</span>,
-  condition <span class="op">=</span> <span class="st">"trial_condition"</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># note: more accurate tolerance limits are given by tol_method = "perc"</span></span>
+<span><span class="va">rec.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">df_rec.post</span>,</span>
+<span>  x <span class="op">=</span> <span class="st">"PM"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"AM"</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"trial_condition"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>When we print a table of the tolerance limits, at least for Trec post
 exercise, are providing the same conclusion (poor agreement).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span>
-<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
-<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span>
-<span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3244, 0.8344] [-0.5242, 1.0342]</span>
-<span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3143, 0.8223] [-0.4976, 1.0056]</span>
-<span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7105, 1.0725] [-1.4742, 1.8362]</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3244, 0.8344] [-0.5242, 1.0342]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3143, 0.8223] [-0.4976, 1.0056]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7105, 1.0725] [-1.4742, 1.8362]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -250,7 +256,7 @@ result, but if we inspect the results further
 (<code>rec.post_tol$emmeans</code>) we can see the degrees of freedom
 for this condition are horribly low.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-4-1.png" alt="Tolerance Limits for Trec Post Exercise" width="672"><p class="caption">
 Tolerance Limits for Trec Post Exercise
@@ -262,28 +268,28 @@ tolerance limits. However, we cannot say that the average difference
 would be less than 0.25 which may not be acceptable for some
 researchers.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="va">rec.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="st">"PM"</span>,
-  y <span class="op">=</span> <span class="st">"AM"</span>,
-  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
-  id <span class="op">=</span> <span class="st">"id"</span>,
-  data <span class="op">=</span> <span class="va">df_rec.delta</span>
-<span class="op">)</span>
-  
-<span class="va">rec.delta_tol</span>
-<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
-<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span>
-<span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2346, 0.1966] [-0.3467, 0.3087]</span>
-<span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]</span>
-<span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]</span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="va">rec.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="st">"PM"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"AM"</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">df_rec.delta</span></span>
+<span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="va">rec.delta_tol</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2346, 0.1966] [-0.3467, 0.3087]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># Plot Maximal Allowable Difference with delta argument</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_tol</span>,
-     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_tol</span>,</span>
+<span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" alt="Tolerance Limits for Delta Trec" width="672"><p class="caption">
 Tolerance Limits for Delta Trec
@@ -298,50 +304,50 @@ results are fairly similar, and while there is better agreement on the
 delta (change scores), it is still fairly difficult to determine that
 there is “good” agreement between the AM and PM measurements.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="va">eso.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="st">"AM"</span>,
-  y <span class="op">=</span> <span class="st">"PM"</span>,
-  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
-  id <span class="op">=</span> <span class="st">"id"</span>,
-  data <span class="op">=</span> <span class="va">df_eso.post</span>
-<span class="op">)</span>
-
-<span class="va">eso.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="st">"AM"</span>,
-  y <span class="op">=</span> <span class="st">"PM"</span>,
-  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,
-  id <span class="op">=</span> <span class="st">"id"</span>,
-  data <span class="op">=</span> <span class="va">df_eso.delta</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="va">eso.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="st">"AM"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"PM"</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">df_eso.post</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">eso.delta_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="st">"AM"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"PM"</span>,</span>
+<span>  condition <span class="op">=</span> <span class="st">"trial_condition"</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">df_eso.delta</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">eso.post_tol</span>
-<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
-<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span>
-<span class="co">#&gt;    23C/5.5 -0.180 [-0.2562, -0.1038]   [-0.4327, 0.0727] [-0.5545, 0.1945]</span>
-<span class="co">#&gt;    33C/5.5 -0.212 [-0.3288, -0.0952]   [-0.4597, 0.0357] [-0.5397, 0.1157]</span>
-<span class="co">#&gt;    33C/7.5 -0.146 [-0.2301, -0.0619]   [-0.4163, 0.1243] [-0.5686, 0.2766]</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eso.post_tol</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2562, -0.1038]   [-0.4327, 0.0727] [-0.5545, 0.1945]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3288, -0.0952]   [-0.4597, 0.0357] [-0.5397, 0.1157]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2301, -0.0619]   [-0.4163, 0.1243] [-0.5686, 0.2766]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-9-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Teso Post Exercise
 </p>
 </div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">eso.delta_tol</span>
-<span class="co">#&gt; Agreement between Measures (Difference: x-y)</span>
-<span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span>
-<span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]</span>
-<span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.1858, 0.1758] [-0.2459, 0.2359]</span>
-<span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eso.delta_tol</span></span>
+<span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
+<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.1858, 0.1758] [-0.2459, 0.2359]</span></span>
+<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,
-     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,</span>
+<span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
 Limits of Agreement for Delta Teso
@@ -420,7 +426,7 @@ Martinez (2020)</span> is another package to check out<a href="#fnref1" class="f
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

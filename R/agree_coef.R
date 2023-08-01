@@ -1,4 +1,4 @@
-#' @title Agreeement Coefficents
+#' @title Agreement Coefficents
 #' @description
 #' `r lifecycle::badge('maturing')`
 #'

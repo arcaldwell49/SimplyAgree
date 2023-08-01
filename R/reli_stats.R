@@ -60,7 +60,7 @@
 #'   - `cv`: Coefficient of Variation
 #'   - `SEM`: List with Standard MSE of Measurement estimate (est)
 #'   - `SEE`: List with Standard MSE of the Estimate estimate (est)
-#'   - `SEP`: List with Standard MSE of Predicitions (est)
+#'   - `SEP`: List with Standard MSE of Predictions (est)
 #'   - `call`: the matched call
 
 #' @examples

@@ -4,19 +4,13 @@
     <loc>/404.html</loc>
   </url>
   <url>
-    <loc>/CODE_OF_CONDUCT.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Deming.html</loc>
+    <loc>/articles/agreement_analysis.html</loc>
   </url>
   <url>
     <loc>/articles/agree_tests.html</loc>
   </url>
   <url>
-    <loc>/articles/agreement_analysis.html</loc>
+    <loc>/articles/Deming.html</loc>
   </url>
   <url>
     <loc>/articles/index.html</loc>
@@ -34,16 +28,22 @@
     <loc>/authors.html</loc>
   </url>
   <url>
+    <loc>/CODE_OF_CONDUCT.html</loc>
+  </url>
+  <url>
     <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/LICENSE.html</loc>
   </url>
   <url>
     <loc>/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/Data.html</loc>
+    <loc>/reference/agreement_limit.html</loc>
   </url>
   <url>
-    <loc>/reference/SimplyAgree-package.html</loc>
+    <loc>/reference/agreetest.html</loc>
   </url>
   <url>
     <loc>/reference/agree_coef.html</loc>
@@ -61,13 +61,10 @@
     <loc>/reference/agree_test.html</loc>
   </url>
   <url>
-    <loc>/reference/agreement_limit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/agreetest.html</loc>
-  </url>
-  <url>
     <loc>/reference/blandPowerCurve.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Data.html</loc>
   </url>
   <url>
     <loc>/reference/dem_reg.html</loc>
@@ -116,6 +113,9 @@
   </url>
   <url>
     <loc>/reference/simple_reli-methods.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SimplyAgree-package.html</loc>
   </url>
   <url>
     <loc>/reference/temps.html</loc>

@@ -11,7 +11,7 @@
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-#'   \item{\code{check}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+#'   \item{\code{check}}{Returns 2 plots, p_norm and p_het, testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
 #' }
 #'
 #' @name simple_agree-methods
@@ -221,7 +221,7 @@ check.simple_agree <- function(x) {
   }
 
   dat = df
-  ## Heteroskedasticity -------
+  ## heteroskedasticity -------
   mod_check = if (as.character(x$call[1]) != "agree_test" && as.character(x$call[1]) != "SimplyAgree::agree_test") {
     lme4::lmer(data = dat,
                form_lmer1)

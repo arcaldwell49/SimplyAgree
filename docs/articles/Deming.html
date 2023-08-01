@@ -55,13 +55,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -119,44 +119,44 @@ referred to as “Deming regression” (e.g., <span class="citation">Linnet
 (<a href="#ref-linnet1990">1990</a>)</span>)</p>
 </div>
 <div class="section level2">
-<h2 id="code-demostration">Code Demostration<a class="anchor" aria-label="anchor" href="#code-demostration"></a>
+<h2 id="code-demonstration">Code Demonstration<a class="anchor" aria-label="anchor" href="#code-demonstration"></a>
 </h2>
 <div class="section level3">
 <h3 id="simple-deming-regression">Simple Deming Regression<a class="anchor" aria-label="anchor" href="#simple-deming-regression"></a>
 </h3>
 <p>We can start by creating some fake data to work with.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span>
-
-<span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">8.3</span>, <span class="fl">10.5</span>, <span class="fl">9</span>, <span class="fl">5.1</span>, <span class="fl">8.2</span>, <span class="fl">10.2</span>, <span class="fl">10.3</span>, <span class="fl">7.1</span>, <span class="fl">5.9</span><span class="op">)</span>,
-  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">8.3</span>, <span class="fl">10.5</span>, <span class="fl">9</span>, <span class="fl">5.1</span>, <span class="fl">8.2</span>, <span class="fl">10.2</span>, <span class="fl">10.3</span>, <span class="fl">7.1</span>, <span class="fl">5.9</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Also, we will assume, based on historical data, that the measurement
 error ratio is equal to 4.</p>
 <p>The data can be run through the <code>dem_reg</code> function and the
 results printed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dem1</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
-               y <span class="op">=</span> <span class="st">"y"</span>,
-               data <span class="op">=</span> <span class="va">dat</span>,
-               error.ratio <span class="op">=</span> <span class="fl">4</span>,
-               weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="va">dem1</span>
-<span class="co">#&gt; Deming Regression with 95% C.I.</span>
-<span class="co">#&gt;               coef      bias     se df lower.ci upper.ci        t p.value</span>
-<span class="co">#&gt; Intercept -0.08974 -0.044938 1.7220  8  -4.0607    3.881 -0.05212  0.9597</span>
-<span class="co">#&gt; Slope      1.00119  0.003529 0.1872  8   0.5696    1.433  0.00638  0.9951</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">dem1</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>               y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>               data <span class="op">=</span> <span class="va">dat</span>,</span>
+<span>               error.ratio <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>               weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">dem1</span></span>
+<span><span class="co">#&gt; Deming Regression with 95% C.I.</span></span>
+<span><span class="co">#&gt;               coef      bias     se df lower.ci upper.ci        t p.value</span></span>
+<span><span class="co">#&gt; Intercept -0.08974 -0.044938 1.7220  8  -4.0607    3.881 -0.05212  0.9597</span></span>
+<span><span class="co">#&gt; Slope      1.00119  0.003529 0.1872  8   0.5696    1.433  0.00638  0.9951</span></span></code></pre></div>
 <p>The resulting regression line can then be plotted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 <p>The assumptions of the Deming regression model, primarily normality
 and homogeneity of variance, can then be check with the
 <code>check</code> method for Deming regression results. Both plots
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 </div>
 <div class="section level3">
@@ -165,55 +165,55 @@ appear to be fine with regards to the assumptions.</p>
 <p>For this example, I will rely upon the “ferritin” data from the
 <code>deming</code> R package.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span>
-<span class="co">#&gt;   id period old.lot new.lot</span>
-<span class="co">#&gt; 1  1      1       1       1</span>
-<span class="co">#&gt; 2  2      1       3       3</span>
-<span class="co">#&gt; 3  3      1      10       9</span>
-<span class="co">#&gt; 4  4      1      13      11</span>
-<span class="co">#&gt; 5  5      1      13      12</span>
-<span class="co">#&gt; 6  6      1      15      13</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id period old.lot new.lot</span></span>
+<span><span class="co">#&gt; 1  1      1       1       1</span></span>
+<span><span class="co">#&gt; 2  2      1       3       3</span></span>
+<span><span class="co">#&gt; 3  3      1      10       9</span></span>
+<span><span class="co">#&gt; 4  4      1      13      11</span></span>
+<span><span class="co">#&gt; 5  5      1      13      12</span></span>
+<span><span class="co">#&gt; 6  6      1      15      13</span></span></code></pre></div>
 <p>Let me demonstrate the problem with using simple Deming regression
 when the weights are helpful. When we look at the two plots below, we
 can see there is severe problem with using the “un-weighted” model.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="st">"new.lot"</span>,
-  y <span class="op">=</span> <span class="st">"old.lot"</span>,
-  data <span class="op">=</span> <span class="va">ferritin</span>,
-  weighted <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-<span class="va">dem2</span>
-<span class="co">#&gt; Deming Regression with 95% C.I.</span>
-<span class="co">#&gt;             coef      bias      se  df lower.ci upper.ci      t p.value</span>
-<span class="co">#&gt; Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821</span>
-<span class="co">#&gt; Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949</span>
-
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="st">"new.lot"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"old.lot"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
+<span>  weighted <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">dem2</span></span>
+<span><span class="co">#&gt; Deming Regression with 95% C.I.</span></span>
+<span><span class="co">#&gt;             coef      bias      se  df lower.ci upper.ci      t p.value</span></span>
+<span><span class="co">#&gt; Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821</span></span>
+<span><span class="co">#&gt; Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="st">"new.lot"</span>,
-  y <span class="op">=</span> <span class="st">"old.lot"</span>,
-  data <span class="op">=</span> <span class="va">ferritin</span>,
-  weighted <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-<span class="va">dem2</span>
-<span class="co">#&gt; Weighted Deming Regression with 95% C.I.</span>
-<span class="co">#&gt;               coef       bias       se  df lower.ci upper.ci       t   p.value</span>
-<span class="co">#&gt; Intercept -0.02616  0.0065148 0.033219 160 -0.09176  0.03945 -0.7874 4.322e-01</span>
-<span class="co">#&gt; Slope      1.03052 -0.0001929 0.006262 160  1.01815  1.04288  4.8729 2.626e-06</span>
-
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="st">"new.lot"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"old.lot"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
+<span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">dem2</span></span>
+<span><span class="co">#&gt; Weighted Deming Regression with 95% C.I.</span></span>
+<span><span class="co">#&gt;               coef       bias       se  df lower.ci upper.ci       t   p.value</span></span>
+<span><span class="co">#&gt; Intercept -0.02616  0.0065148 0.033219 160 -0.09176  0.03945 -0.7874 4.322e-01</span></span>
+<span><span class="co">#&gt; Slope      1.03052 -0.0001929 0.006262 160  1.01815  1.04288  4.8729 2.626e-06</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
 </div>
 </div>
@@ -367,7 +367,7 @@ work and books<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

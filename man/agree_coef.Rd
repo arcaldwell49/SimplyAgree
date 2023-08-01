@@ -2,7 +2,7 @@
 % Please edit documentation in R/agree_coef.R
 \name{agree_coef}
 \alias{agree_coef}
-\title{Agreeement Coefficents}
+\title{Agreement Coefficents}
 \usage{
 agree_coef(
   wide = TRUE,
