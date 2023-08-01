@@ -51,6 +51,19 @@ tolerance_limit(x = "x", y ="y", data = reps)
 tolerance_limit(x = "x", y ="y", data = reps, id = "id")
 ```
 
+# Log transformation
+
+Additionally, users can set the argument `log_tf` to TRUE, and this will log-transform the raw data. 
+This can be advantageous in situations where the error is proportional to the mean (heteroscedascity).
+The interpretation is slightly different since the data is on the log-scale. 
+When back transformed the differences between the two measures is on the ratio scale (e.g., x/y versus x-y).
+
+```{r}
+tolerance_limit(x = "x", y ="y", 
+                data = reps, id = "id",
+                log_tf = TRUE)
+```
+
 
 # Concluding Remarks
 

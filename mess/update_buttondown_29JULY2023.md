@@ -108,11 +108,37 @@ tolerance_limit(x = "x", y ="y", data = reps, id = "id")
        Bias           Bias CI Prediction Interval   Tolerance Limits
      0.7046 [-1.5571, 2.9663]   [-4.4686, 5.8778] [-8.6099, 10.0191]
 
+# Log transformation
+
+Additionally, users can set the argument `log_tf` to TRUE, and this will
+log-transform the raw data. This can be advantageous in situations where
+the error is proportional to the mean (heteroscedascity). The
+interpretation is slightly different since the data is on the log-scale.
+When back transformed the differences between the two measures is on the
+ratio scale (e.g., x/y versus x-y).
+
+``` r
+tolerance_limit(x = "x", y ="y", 
+                data = reps, id = "id",
+                log_tf = TRUE)
+```
+
+    Agreement between Measures (Ratio: x/y)
+    95% Prediction Interval with 95% Tolerance Limits
+
+      Bias          Bias CI Prediction Interval Tolerance Limits
+     1.117 [0.7251, 1.7202]    [0.4162, 2.9969] [0.1888, 6.6065]
+
 # Concluding Remarks
 
 It has taken about half of this year to get tolerance limits into the
-package. If you have any questions, concerns, or have suggestions please
-feel free to reach out. I have a “Contact Me” form on my
+package. I believe this function will greatly improve the ease of
+calculating agreement/tolerance limits. Just like the other agree
+functions there is a `check` and `plot` functions/methods so you can
+check your assumptions and plot your data.
+
+If you have any questions, concerns, or have suggestions please feel
+free to reach out. I have a “Contact Me” form on my
 [website](https://aaroncaldwell.us/#contact), and feel free to send a
 message at any time. I would appreciate any feedback.
 
