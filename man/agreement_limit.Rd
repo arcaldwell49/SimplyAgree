@@ -2,7 +2,7 @@
 % Please edit documentation in R/agreement_limit.R
 \name{agreement_limit}
 \alias{agreement_limit}
-\title{Calculate the Limits of Agreement}
+\title{Limits of Agreement}
 \usage{
 agreement_limit(
   x,

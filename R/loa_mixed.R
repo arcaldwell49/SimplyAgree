@@ -1,4 +1,4 @@
-#' Mixed Effects Limits of Agreement
+#' @title Mixed Effects Limits of Agreement
 #'
 #' @description
 #' `r lifecycle::badge('deprecated')`
@@ -50,6 +50,7 @@ loa_mixed = function(diff,
                      agree.level = .95,
                      replicates = 1999,
                      type = "bca"){
+  lifecycle::deprecate_warn("0.2.0", "loa_mixed()", "loa_lme()")
   if (conf.level >= 1 || conf.level <= 0) {
     stop("conf.level must be a value between 0 and 1")
   }

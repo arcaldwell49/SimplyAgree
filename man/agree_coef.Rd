@@ -36,6 +36,8 @@ agree_coef(
 Returns single data frame of inter-rater reliability coefficients.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
 agree_coef produces inter-rater reliability or "agreement coefficients" as described by Gwet.
 }
 \examples{

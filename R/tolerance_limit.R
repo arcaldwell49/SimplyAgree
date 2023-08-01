@@ -1,10 +1,10 @@
-#' Tolerance Limits from an Agreement Study
+#' @title Tolerance Limits from an Agreement Study
 #'
 #' @description `r lifecycle::badge('maturing')`
 #'
 #' A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 #' This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
-#' See `vignette("agreement_analysis")` for more details.
+#' See vignettes for more details.
 #'
 #' @param data A data frame containing the variables.
 #' @param x Name of the column for the first measurement.

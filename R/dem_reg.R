@@ -1,4 +1,4 @@
-#' Deming Regression
+#' @title Deming Regression
 #' @description
 #' `r lifecycle::badge('stable')`
 #'

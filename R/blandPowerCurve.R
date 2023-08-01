@@ -1,6 +1,7 @@
-#' Estimate power curve for Bland-Altman limits of agreement
+#' @title Power Curve for Bland-Altman Limits of Agreement
 #'
 #' @description
+#' `r lifecycle::badge('maturing')`
 #' This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
 #'
 #' @param samplesizes vector of samples sizes at which to estimate power.

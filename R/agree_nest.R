@@ -56,7 +56,7 @@ agree_nest <- function(x,
                        TOST = TRUE,
                        prop_bias = FALSE,
                        ccc = TRUE){
-
+  lifecycle::deprecate_soft("0.2.0", "agree_nest()", "agreement_limit()")
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree_l = 1 - (1 - agree.level) / 2
   agree_u = (1 - agree.level) / 2

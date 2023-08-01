@@ -53,6 +53,7 @@ agree_test <- function(x,
                        agree.level = .95,
                        TOST = TRUE,
                        prop_bias = FALSE) {
+  lifecycle::deprecate_soft("0.2.0", "agree_test()", "agreement_limit()")
   est <- lower.ci <- upper.ci <- NULL
   if (agree.level >= 1 || agree.level <= 0) {
 

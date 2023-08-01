@@ -1,4 +1,4 @@
-#' Reliability Statistics
+#' @title Reliability Statistics
 #'
 #' @description
 #'

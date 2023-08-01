@@ -1,4 +1,4 @@
-#' Calculate the Limits of Agreement
+#' @title Limits of Agreement
 #'
 #' @description
 #' `r lifecycle::badge('maturing')`
