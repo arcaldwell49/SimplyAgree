@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette I will briefly demonstrate how `SimplyAgree` calculates agreement and tolerance limits. This vignette assumes the reader has some familiarity with "limits of agreement" (Bland-Altman limits) and is familiar with the concept of prediction intervals. Please read the references listed in this vignette *before* going further if you are not familiar with these concepts.
+In this vignette I will briefly demonstrate how `SimplyAgree` calculates agreement and tolerance limits. This vignette assumes the reader has some familiarity with "limits of agreement" (Bland-Altman limits) and is familiar with the concept of prediction intervals. Please read the references listed in this vignette *before* going further if you are not familiar with both concepts.
 
 ```{r}
 library(SimplyAgree)
@@ -32,7 +32,7 @@ data(temps)
 
 # Agree or Tolerate?
 
-@francq2020tolerate pose this question in a paper published in *Statistics in Medicine*. Traditionally, those working in medicine or physiology have defaulted to calculating some form of "limits of agreement" that @bland1986 recommended in their seminal paper. The recommendation by @bland1986 was only an approximation, and that has undergone many modifications [e.g., @bland1999; @zou2011] to improve the accuracy of the agreement interval and their associated confidence intervals. Meanwhile, the field of industrial statistics has focused on calculating tolerance limits. There are R packages, such as the `tolerance` R package available on CRAN, that are entirely dedicated to calculating tolerance limits. It is important to note that tolerance is not limited to the normal distribution and can be applied to other distributions (please see the tolerance package by @young2010tolerance for more details). However, in the agreement studies typically seen in medicine, tolerance limits may be a more accurate way of determining whether two measurements adequately close to one another.
+@francq2020tolerate pose this question in a paper published in *Statistics in Medicine*. Traditionally, those working in medicine or physiology have defaulted to calculating some form of "limits of agreement" that @bland1986 recommended in their seminal paper. The recommendation by @bland1986 was only an approximation, and that has undergone many modifications [e.g., @bland1999; @zou2011] to improve the accuracy of the agreement interval and their associated confidence intervals. Meanwhile, the field of industrial statistics has focused on calculating tolerance limits. There are R packages, such as the `tolerance` R package available on CRAN, that are entirely dedicated to calculating tolerance limits. It is important to note that tolerance is not limited to the normal distribution and can be applied to other distributions (please see the tolerance package by @young2010tolerance for more details). However, in the agreement studies typically seen in medicine, tolerance limits may be a more accurate way of determining whether two measurements are adequately close to one another.
 
 To quote @francq2020tolerate:
 
@@ -74,7 +74,7 @@ There are a number of options with the arguments provided in the `tolerance_limi
 
 ### Prediction 
 
-After the model is fit, the marginal means (EMM), and their associated standard errors (SEM), are calculated based on the `gls` fit model using `emmeans`. The standard error of prediction (SEP) for each EMM is then calculated using the SEM and residual standard error from the model (formula below).
+After the model is fit, the estimated marginal means (EMM), and their associated standard errors (SEM), are calculated based on the `gls` fit model using `emmeans`. The standard error of prediction (SEP) for each EMM is then calculated using the SEM and residual standard error from the model (formula below).
 
 $$
 SEP = \sqrt{SEM^2 + S^2_{residual} }
@@ -128,7 +128,7 @@ There are only 3 types of calculations that can be made: simple, replicate, and 
 The simple calculation each pair of observations (x and y) are *independent*; meaning that each pair represents one subject/participant.
 Sometimes there are multiple measurements taken within subjects when comparing two measurements tools. In some cases the true underlying value will not be expected to vary (i.e., replicates or "reps"), or multiple measurements may be taken within an individual *and* these values are expected to vary (i.e., nested).
 
-The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all in one function.
+The `agreement_limit` function, unlike the other agreement functions in the package (i.e., `agree_test`, `agree_reps`, and `agree_nest`), allows users to make any of the three calculations all-in-one function.
 Further, `agreement_limit` assumes you are only interested in the outermost confidence interval of the limits of agreement and therefore one-tailed confidence intervals are only calculated for the LoA (i.e., there is no `TOST` argument).
 
 ## Arguments Influencing the LoA Calculations
@@ -148,7 +148,7 @@ I strongly recommend utilizing the MOVER limits of agreement over the Bland-Altm
 
 In the simplest scenario, a study may be conducted to compare one measure (e.g., `x`) and another (e.g., `y`). 
 In this scenario each pair of observations (x and y) are *independent*;
-meaning that each pair represents one subject/participant that is uncorrelated with other pairs.
+that means that each pair represents one subject/participant that is uncorrelated with other pairs.
 
 The data for the two measurements are put into the `x` and `y` arguments. 
 
@@ -457,7 +457,7 @@ plot(res1, delta = .25) # Set maximal allowable difference to .25 units
 
 The assumptions of normality, heteroscedasticity, and proportional bias can all be checked using the `check` method for either agreement or tolerance limits.
 
-The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and residuals plot.
+The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and proportional bias plot.
 
 All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
 
@@ -465,8 +465,8 @@ All 3 plots will have a statistical test in the bottom right corner^[No test is 
 
 ```{r}
 test_agree = agreement_limit(x = "x",
-                           y = "y",
-                           data = reps)
+                             y = "y",
+                             data = reps)
 
 check(test_agree)
 
@@ -484,8 +484,7 @@ As the check plots for `a1` show, proportional bias can sometimes occur. In thes
 
 For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. 
 When this is set to TRUE, then the proportional bias adjusted model is utilized. 
-However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. 
-In any case, plots and checks of the data should always be inspected.
+Plots and checks of the data should always be inspected.
 
 ```{r}
 
@@ -512,7 +511,7 @@ The log transformation (natural base) can be accomplished with the `log_tf` argu
 ```{r}
 tolerance_limit(
   data = temps,
-  log_tf = TRUE,
+  log_tf = TRUE, # natural log transformation of responses
   x = "trec_pre", # First measure
   y = "teso_pre", # Second measure
   id = "id", # Subject ID
