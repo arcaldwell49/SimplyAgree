@@ -12,6 +12,7 @@ Reliability and agreement analyses often have limited software support. Therefor
 Useful links:
 \itemize{
   \item \url{https://aaroncaldwell.us/SimplyAgree/}
+  \item Report bugs at \url{https://github.com/arcaldwell49/SimplyAgree/issues}
 }
 
 }

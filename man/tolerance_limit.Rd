@@ -26,15 +26,15 @@ tolerance_limit(
 \arguments{
 \item{data}{A data frame containing the variables.}
 
-\item{x}{Name of the variable for the first measurement.}
+\item{x}{Name of the column for the first measurement.}
 
-\item{y}{Name of the variable for the second measurement.}
+\item{y}{Name of the column for the second measurement.}
 
-\item{id}{Name of the variable for the subject ID.}
+\item{id}{Name of the column for the subject ID.}
 
-\item{condition}{Column name indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
+\item{condition}{Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
 
-\item{time}{A column naming/numbering the time point. Only necessary if the data is from time series collection.}
+\item{time}{Name of the column indicating the time points. Only necessary if the data is from time series or repeated measures collection.}
 
 \item{pred_level}{Prediction level for the prediction interval. Default is 95\%.}
 
@@ -48,7 +48,7 @@ tolerance_limit(
 
 \item{cor_type}{The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.}
 
-\item{correlation}{an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL}
+\item{correlation}{an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.}
 
 \item{weights}{an optional varFunc object or one-sided formula describing the within-group heteroscedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.}
 
@@ -88,7 +88,7 @@ tolerance_limit(x = "x", y ="y", data = reps, id = "id")
 
 }
 \references{
-Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in medicine, 35(14), 2328-2358.
+Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in mMdicine, 35(14), 2328-2358.
 
 Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.
 
