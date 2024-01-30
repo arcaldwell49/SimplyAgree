@@ -2,7 +2,7 @@
 % Please edit documentation in R/agree_coef.R
 \name{agree_coef}
 \alias{agree_coef}
-\title{Agreeement Coefficents}
+\title{Agreement Coefficents}
 \usage{
 agree_coef(
   wide = TRUE,
@@ -36,6 +36,8 @@ agree_coef(
 Returns single data frame of inter-rater reliability coefficients.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
 agree_coef produces inter-rater reliability or "agreement coefficients" as described by Gwet.
 }
 \examples{

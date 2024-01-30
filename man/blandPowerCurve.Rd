@@ -2,7 +2,7 @@
 % Please edit documentation in R/blandPowerCurve.R
 \name{blandPowerCurve}
 \alias{blandPowerCurve}
-\title{Estimate power curve for Bland-Altman limits of agreement}
+\title{Power Curve for Bland-Altman Limits of Agreement}
 \usage{
 blandPowerCurve(
   samplesizes = seq(10, 100, 1),
@@ -30,6 +30,7 @@ blandPowerCurve(
 A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
 }
 \examples{

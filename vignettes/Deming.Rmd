@@ -28,10 +28,10 @@ knitr::opts_chunk$set(
 
 Error-in-variables (EIV) models are useful tools to account for measurement error in the independent variable. For studies of agreement, this is particularly useful where there are paired measurements of the paired measurements (X & Y) of the same underlying value (e.g., two assays of the same analyte).
 
-Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990)
+Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990). 
 
 
-# Code Demostration
+# Code Demonstration
 
 ## Simple Deming Regression
 
@@ -137,14 +137,16 @@ First, the intercept is equal to zero
 $$
 H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 $$
-Second, that the slope is equal to one
+
+Second, that the slope is equal to one.
+
 $$
 H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 $$
 
 ## Measurement Error
 
-A deming regression model also assumes the measurement error ($\sigma^2$) ratio is constant.
+A Deming regression model also assumes the measurement error ($\sigma^2$) ratio is constant.
 
 $$
 \lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta} 

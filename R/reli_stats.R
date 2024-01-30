@@ -1,4 +1,4 @@
-#' Reliability Statistics
+#' @title Reliability Statistics
 #'
 #' @description
 #'
@@ -8,10 +8,10 @@
 #' This includes intraclass correlation coefficients, the coefficient of variation,
 #'  and the standard MSE of measurement.
 #'
-#' @param measure Name of column containing the measurement of interest
-#' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)
-#' @param id Column with subject identifier
-#' @param data Data frame with all data
+#' @param measure Name of column containing the measurement of interest.
+#' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.).
+#' @param id Column with subject identifier.
+#' @param data Data frame with all data.
 #' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
 #' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
 #' @param conf.level the confidence level required. Default is 95%.
@@ -60,7 +60,7 @@
 #'   - `cv`: Coefficient of Variation
 #'   - `SEM`: List with Standard MSE of Measurement estimate (est)
 #'   - `SEE`: List with Standard MSE of the Estimate estimate (est)
-#'   - `SEP`: List with Standard MSE of Predicitions (est)
+#'   - `SEP`: List with Standard MSE of Predictions (est)
 #'   - `call`: the matched call
 
 #' @examples

@@ -36,13 +36,13 @@ reli_aov(
 )
 }
 \arguments{
-\item{measure}{Name of column containing the measurement of interest}
+\item{measure}{Name of column containing the measurement of interest.}
 
-\item{item}{Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.)}
+\item{item}{Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.).}
 
-\item{id}{Column with subject identifier}
+\item{id}{Column with subject identifier.}
 
-\item{data}{Data frame with all data}
+\item{data}{Data frame with all data.}
 
 \item{wide}{Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.}
 
@@ -72,7 +72,7 @@ Returns single list with the results of the agreement analysis.
 \item \code{cv}: Coefficient of Variation
 \item \code{SEM}: List with Standard MSE of Measurement estimate (est)
 \item \code{SEE}: List with Standard MSE of the Estimate estimate (est)
-\item \code{SEP}: List with Standard MSE of Predicitions (est)
+\item \code{SEP}: List with Standard MSE of Predictions (est)
 \item \code{call}: the matched call
 }
 }

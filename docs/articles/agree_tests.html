@@ -55,13 +55,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2023-07-29</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2023-09-25</h4>
       
       
       <div class="hidden name"><code>agree_tests.Rmd</code></div>
@@ -117,7 +117,7 @@ recommend using the <code>agreement_limit</code> function over these
 older functions with the exception of <code>agree_np</code> which
 provides non-parametric agreement limits.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/" class="external-link">SimplyAgree</a></span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="simple-agreement">Simple Agreement<a class="anchor" aria-label="anchor" href="#simple-agreement"></a>
 </h2>
@@ -147,9 +147,11 @@ Since there isn’t an <em>a priori</em> hypothesis I will not declare a
 <code>delta</code> argument, but I will estimate the 95% confidence
 intervals for 80% limits of agreement.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,</span>
-<span>                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
+                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
+                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; Warning: `agree_test()` was deprecated in SimplyAgree 0.2.0.</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `agreement_limit()` instead.</span></code></pre></div>
 <p>We can then print the general results. These results include the
 general parameters of the analysis up top, then the results of the Shieh
 exact test for agreement (no conclusion is included due to the lack of a
@@ -158,31 +160,31 @@ with confidence limits, are included. Lastly, Lin’s Concordance
 Correlation Coefficient, another measure of agreement, is also
 included.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Shieh Results -###</span></span>
-<span><span class="co">#&gt; Exact 90% C.I.  [-1.512, 2.3887]</span></span>
-<span><span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Bias        0.4383  -0.1669   1.0436     0.95</span></span>
-<span><span class="co">#&gt; Lower LoA  -1.1214  -1.8037  -0.4391     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA   1.9980   1.3157   2.6803     0.90</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span></span>
-<span><span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Shieh Results -###</span>
+<span class="co">#&gt; Exact 90% C.I.  [-1.512, 2.3887]</span>
+<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Bias        0.4383  -0.1669   1.0436     0.95</span>
+<span class="co">#&gt; Lower LoA  -1.1214  -1.8037  -0.4391     0.90</span>
+<span class="co">#&gt; Upper LoA   1.9980   1.3157   2.6803     0.90</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span>
+<span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span></code></pre></div>
 <p>Next, we can use the generic <code>plot</code> function to produce
 visualizations of agreement. This includes the Bland-Altman plot
 (<code>type = 1</code>) and a line-of-identity plot
 (<code>type = 2</code>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-4-1.png" width="576"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> </span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> </code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-4-2.png" width="576"></p>
 </div>
 <div class="section level3">
@@ -278,11 +280,13 @@ indicating the subject identifier (<code>id</code>) must also be
 provided. Again, if there is a hypothesized agreement limit then this
 could be provided with the <code>delta</code> argument.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_reps.html">agree_reps</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
-<span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>                data <span class="op">=</span> <span class="va">reps</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_reps.html">agree_reps</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
+                y <span class="op">=</span> <span class="st">"y"</span>,
+                id <span class="op">=</span> <span class="st">"id"</span>,
+                data <span class="op">=</span> <span class="va">reps</span>,
+                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; Warning: `agree_reps()` was deprecated in SimplyAgree 0.2.0.</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `agreement_limit()` instead.</span></code></pre></div>
 <p>The results can then be printed. The printing format is very similar
 to <code>agree_test</code>, but notice that 1) the hypothesis test is
 based on the limits of agreement (MOVER method), 2) the Concordance
@@ -290,23 +294,23 @@ Correlation Coefficient is calculated via the U-statistics method, 3)
 the Shieh TOST results are missing because they cannot be estimated for
 this type of design.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; Replicate Data Points (true value does not vary)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Bias        0.7152  -0.6667   2.0971     0.95</span></span>
-<span><span class="co">#&gt; Lower LoA  -1.2117  -4.7970   0.1054     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA   2.6421   1.3250   6.2274     0.90</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a2</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; Replicate Data Points (true value does not vary)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Bias        0.7152  -0.6667   2.0971     0.95</span>
+<span class="co">#&gt; Lower LoA  -1.2117  -4.7970   0.1054     0.90</span>
+<span class="co">#&gt; Upper LoA   2.6421   1.3250   6.2274     0.90</span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a2</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a2</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a2</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a2</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-7-2.png" width="576"></p>
 </div>
 <div class="section level3">
@@ -321,33 +325,35 @@ different devices on many people at different time points/days.</p>
 <p>The function works almost identically to <code>agree_reps</code> but
 the underlying calculations are different</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_nest.html">agree_nest</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
-<span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>                data <span class="op">=</span> <span class="va">reps</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_nest.html">agree_nest</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
+                y <span class="op">=</span> <span class="st">"y"</span>,
+                id <span class="op">=</span> <span class="st">"id"</span>,
+                data <span class="op">=</span> <span class="va">reps</span>,
+                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; Warning: `agree_nest()` was deprecated in SimplyAgree 0.2.0.</span>
+<span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `agreement_limit()` instead.</span></code></pre></div>
 <p>The printed results (and plots) are very similar to
 <code>agree_reps</code>. However, the CCC result now has a warning
 because the calculation in this scenario may not be entirely appropriate
 given the nature of the data.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; Nested Data Points (true value may vary)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Bias        0.7101  -0.6824   2.1026     0.95</span></span>
-<span><span class="co">#&gt; Lower LoA  -1.1626  -4.8172   0.1811     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA   2.5828   1.2390   6.2374     0.90</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a3</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; Nested Data Points (true value may vary)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Bias        0.7101  -0.6824   2.1026     0.95</span>
+<span class="co">#&gt; Lower LoA  -1.1626  -4.8172   0.1811     0.90</span>
+<span class="co">#&gt; Upper LoA   2.5828   1.2390   6.2374     0.90</span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a3</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a3</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a3</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a3</span>, type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-10-2.png" width="576"></p>
 </div>
 <div class="section level3">
@@ -563,11 +569,11 @@ the residuals plot.</p>
 <h3 id="an-example">An Example<a class="anchor" aria-label="anchor" href="#an-example"></a>
 </h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,</span>
-<span>                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
+                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
+                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+
+<span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
 </div>
 </div>
@@ -587,29 +593,29 @@ careful with interpreting the hypothesis tests in these cases because
 the results are likely bogus for the extreme ends of the measurement. In
 any case, plots of the data should always be inspected</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,</span>
-<span>                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,</span>
-<span>                prop_bias <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span><span class="co">#&gt; prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Shieh Results -###</span></span>
-<span><span class="co">#&gt; Exact 90% C.I.  [-1.2551, 2.1318]</span></span>
-<span><span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span></span>
-<span><span class="co">#&gt; Warning: hypothesis test likely bogus with proportional bias.</span></span>
-<span><span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Bias        0.4383 -0.08968   0.9663     0.95</span></span>
-<span><span class="co">#&gt; Lower LoA  -0.9159 -1.51049  -0.3213     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA   1.7926  1.19801   2.3872     0.90</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; LoA at average of both measures. Please check plot.</span></span>
-<span><span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span></span>
-<span><span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,
+                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,
+                prop_bias <span class="op">=</span> <span class="cn">TRUE</span>,
+                agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; prop_bias set to TRUE. Hypothesis test may be bogus. Check plots.</span>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Shieh Results -###</span>
+<span class="co">#&gt; Exact 90% C.I.  [-1.2551, 2.1318]</span>
+<span class="co">#&gt; Hypothesis Test: No Hypothesis Test</span>
+<span class="co">#&gt; Warning: hypothesis test likely bogus with proportional bias.</span>
+<span class="co">#&gt; ###- Bland-Altman Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Bias        0.4383 -0.08968   0.9663     0.95</span>
+<span class="co">#&gt; Lower LoA  -0.9159 -1.51049  -0.3213     0.90</span>
+<span class="co">#&gt; Upper LoA   1.7926  1.19801   2.3872     0.90</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; LoA at average of both measures. Please check plot.</span>
+<span class="co">#&gt; ###- Concordance Correlation Coefficient (CCC) -###</span>
+<span class="co">#&gt; CCC: 0.4791, 95% C.I. [0.1276, 0.7237]</span>
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -638,59 +644,59 @@ just like the other agreement functions.</p>
 <p>In the code demo below, you will notice that the limits of agreement
 are no longer symmetric around the bias estimate.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
-<span>              y <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>              data <span class="op">=</span> <span class="va">reps</span>,</span>
-<span>              delta <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>              prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;            agreement lower.ci upper.ci</span></span>
-<span><span class="co">#&gt; % within 2    0.8333   0.5914   0.9453</span></span>
-<span><span class="co">#&gt; Hypothesis Test: don't reject h0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA    -0.89   -1.365  -0.4151     0.90</span></span>
-<span><span class="co">#&gt; Bias          0.04   -0.570   0.6500     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA     2.45    1.431   3.4686     0.90</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
+              y <span class="op">=</span> <span class="st">"y"</span>,
+              data <span class="op">=</span> <span class="va">reps</span>,
+              delta <span class="op">=</span> <span class="fl">2</span>,
+              prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
+              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;            agreement lower.ci upper.ci</span>
+<span class="co">#&gt; % within 2    0.8333   0.5914   0.9453</span>
+<span class="co">#&gt; Hypothesis Test: don't reject h0</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Lower LoA    -0.89  -1.3656  -0.4144     0.90</span>
+<span class="co">#&gt; Bias          0.04  -0.5121   0.5921     0.95</span>
+<span class="co">#&gt; Upper LoA     2.45   1.4451   3.4549     0.90</span>
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
 <p>We can also perform the same analysis with proportional bias no
 longer assumed. You can see that the LoA changes but the test for
 agreement does not.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
-<span>              y <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>              data <span class="op">=</span> <span class="va">reps</span>,</span>
-<span>              delta <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>              prop_bias <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Limit of Agreement = 80%</span></span>
-<span><span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;            agreement lower.ci upper.ci</span></span>
-<span><span class="co">#&gt; % within 2    0.8333   0.5914   0.9453</span></span>
-<span><span class="co">#&gt; Hypothesis Test: don't reject h0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
-<span><span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6926  -0.8869     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6398  -0.2689     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6439   1.1444     0.90</span></span>
-<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3349  -0.1262     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6989   0.5542     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.5499   2.5299     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.8759   2.1096     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.9031   3.1183     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.2931   9.4566     0.90</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_np.html">agree_np</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,
+              y <span class="op">=</span> <span class="st">"y"</span>,
+              data <span class="op">=</span> <span class="va">reps</span>,
+              delta <span class="op">=</span> <span class="fl">2</span>,
+              prop_bias <span class="op">=</span> <span class="cn">TRUE</span>,
+              agree.level <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span>
+<span class="co">#&gt; Limit of Agreement = 80%</span>
+<span class="co">#&gt; Binomial proportions test and quantile regression for LoA</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;            agreement lower.ci upper.ci</span>
+<span class="co">#&gt; % within 2    0.8333   0.5914   0.9453</span>
+<span class="co">#&gt; Hypothesis Test: don't reject h0</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span>
+<span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span>
+<span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.6985  -0.8810     0.90</span>
+<span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6290  -0.2797     0.90</span>
+<span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.5726   1.2158     0.90</span>
+<span class="co">#&gt; Bias @ 3.9       -0.73052  -1.3365  -0.1245     0.95</span>
+<span class="co">#&gt; Bias @ 5.24      -0.07238  -0.6160   0.4712     0.95</span>
+<span class="co">#&gt; Bias @ 7.4        0.99000  -0.5850   2.5650     0.95</span>
+<span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -3.0022   2.2360     0.90</span>
+<span class="co">#&gt; Upper LoA @ 5.24  2.01069   0.8102   3.2111     0.90</span>
+<span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.2844   9.4653     0.90</span>
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -701,40 +707,40 @@ Bland-Altman plot may be less than ideal. In order to change the plots
 from showing the individual data points we can modify the
 <code>geom_point</code> argument.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="va">diff</span></span>
-<span></span>
-<span><span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>,</span>
-<span>                y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">x</span>,</span>
-<span>                y <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">y</span>,</span>
-<span>                agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span>
+<span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>
+<span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="va">diff</span>
+
+<span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>,
+                y <span class="op">=</span> <span class="va">y</span><span class="op">)</span>
+
+<span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">x</span>,
+                y <span class="op">=</span> <span class="va">df</span><span class="op">$</span><span class="va">y</span>,
+                agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
+     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
+     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-15-2.png" width="700"></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
+     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-15-3.png" width="700"></p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
+     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-15-4.png" width="700"></p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,
+     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-15-5.png" width="700"></p>
 </div>
 <div class="section level2">
@@ -759,16 +765,16 @@ This is a computationally heavy procedure and it may take a few seconds
 to a few minutes to complete depending the number of replicates or if
 <code>het_var</code> is set to TRUE.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">recpre_long</span><span class="op">$</span><span class="va">avg</span> <span class="op">=</span> <span class="op">(</span><span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span> <span class="op">+</span> <span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span></span>
-<span><span class="va">a4</span> <span class="op">=</span> <span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">recpre_long</span>,</span>
-<span>               diff <span class="op">=</span> <span class="st">"diff"</span>,</span>
-<span>               avg <span class="op">=</span> <span class="st">"avg"</span>,</span>
-<span>               <span class="co">#condition = "trial_condition",</span></span>
-<span>               id <span class="op">=</span> <span class="st">"id"</span>,</span>
-<span>               <span class="co">#plot.xaxis = "AM",</span></span>
-<span>               replicates <span class="op">=</span> <span class="fl">199</span>,</span>
-<span>               type <span class="op">=</span> <span class="st">"perc"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R">
+<span class="va">recpre_long</span><span class="op">$</span><span class="va">avg</span> <span class="op">=</span> <span class="op">(</span><span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span> <span class="op">+</span> <span class="va">recpre_long</span><span class="op">$</span><span class="va">PM</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span>
+<span class="va">a4</span> <span class="op">=</span> <span class="fu"><a href="../reference/loa_lme.html">loa_lme</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">recpre_long</span>,
+               diff <span class="op">=</span> <span class="st">"diff"</span>,
+               avg <span class="op">=</span> <span class="st">"avg"</span>,
+               <span class="co">#condition = "trial_condition",</span>
+               id <span class="op">=</span> <span class="st">"id"</span>,
+               <span class="co">#plot.xaxis = "AM",</span>
+               replicates <span class="op">=</span> <span class="fl">199</span>,
+               type <span class="op">=</span> <span class="st">"perc"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="power-analysis-for-agreement">Power Analysis for Agreement<a class="anchor" aria-label="anchor" href="#power-analysis-for-agreement"></a>
@@ -790,44 +796,44 @@ is 95%). The function then produces a data frame of the results. A quick
 look at the head and we can see that we have low statistical power when
 the sample size is at the lower end of the range.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">power_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blandPowerCurve.html">blandPowerCurve</a></span><span class="op">(</span></span>
-<span>  samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  mu <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  SD <span class="op">=</span> <span class="fl">2.5</span>,</span>
-<span>  delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">7</span><span class="op">)</span>,</span>
-<span>  conf.level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.90</span>,<span class="fl">.95</span><span class="op">)</span>,</span>
-<span>  agree.level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.8</span>,<span class="fl">.9</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    N  mu  SD delta     power agree.level conf.level</span></span>
-<span><span class="co">#&gt; 1 10 0.5 2.5     6 0.4870252         0.8        0.9</span></span>
-<span><span class="co">#&gt; 2 11 0.5 2.5     6 0.5624800         0.8        0.9</span></span>
-<span><span class="co">#&gt; 3 12 0.5 2.5     6 0.6262736         0.8        0.9</span></span>
-<span><span class="co">#&gt; 4 13 0.5 2.5     6 0.6802613         0.8        0.9</span></span>
-<span><span class="co">#&gt; 5 14 0.5 2.5     6 0.7260286         0.8        0.9</span></span>
-<span><span class="co">#&gt; 6 15 0.5 2.5     6 0.7649104         0.8        0.9</span></span></code></pre></div>
+<code class="sourceCode R"><span class="va">power_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blandPowerCurve.html">blandPowerCurve</a></span><span class="op">(</span>
+  samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,
+  mu <span class="op">=</span> <span class="fl">0.5</span>,
+  SD <span class="op">=</span> <span class="fl">2.5</span>,
+  delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>,<span class="fl">7</span><span class="op">)</span>,
+  conf.level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.90</span>,<span class="fl">.95</span><span class="op">)</span>,
+  agree.level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.8</span>,<span class="fl">.9</span><span class="op">)</span>
+<span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span>
+<span class="co">#&gt;    N  mu  SD delta     power agree.level conf.level</span>
+<span class="co">#&gt; 1 10 0.5 2.5     6 0.4870252         0.8        0.9</span>
+<span class="co">#&gt; 2 11 0.5 2.5     6 0.5624800         0.8        0.9</span>
+<span class="co">#&gt; 3 12 0.5 2.5     6 0.6262736         0.8        0.9</span>
+<span class="co">#&gt; 4 13 0.5 2.5     6 0.6802613         0.8        0.9</span>
+<span class="co">#&gt; 5 14 0.5 2.5     6 0.7260286         0.8        0.9</span>
+<span class="co">#&gt; 6 15 0.5 2.5     6 0.7649104         0.8        0.9</span></code></pre></div>
 <p>We can then find the sample size at which (or closest to which) a
 desired power level with the <code>find_n</code> method for
 <code>powerCurve</code> objects created with the function above.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">power_res</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 5</span></span></span>
-<span><span class="co">#&gt;   delta conf.level agree.level power     N</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     6       0.9          0.8 0.798    16</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     6       0.9          0.9 0.802    50</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     6       0.95         0.8 0.798    20</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     6       0.95         0.9 0.802    63</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     7       0.9          0.8 0.847    10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     7       0.9          0.9 0.800    19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7       0.95         0.8 0.775    11</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     7       0.95         0.9 0.806    24</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../reference/powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">power_res</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 5</span></span>
+<span class="co">#&gt;   delta conf.level agree.level power     N</span>
+<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     6       0.9          0.8 0.798    16</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     6       0.9          0.9 0.802    50</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     6       0.95         0.8 0.798    20</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     6       0.95         0.9 0.802    63</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     7       0.9          0.8 0.847    10</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     7       0.9          0.9 0.800    19</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7       0.95         0.8 0.775    11</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     7       0.95         0.9 0.806    24</span></code></pre></div>
 <p>Additionally we can plot the power curve to see how power changes
 over different levels of <code>delta</code>, <code>agree.level</code>,
 and <code>conf.level</code></p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">power_res</span><span class="op">)</span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-19-1.png" width="576"></p>
 </div>
 <div class="section level2">
@@ -901,7 +907,7 @@ Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

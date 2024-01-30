@@ -1,4 +1,4 @@
-#' Nonparametric Test for Limits of Agreement
+#' @title Nonparametric Test for Limits of Agreement
 #'
 #' @description
 #'

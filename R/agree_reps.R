@@ -48,6 +48,7 @@ agree_reps <- function(x,
                        prop_bias = FALSE,
                        TOST = TRUE,
                        ccc = TRUE){
+  lifecycle::deprecate_soft("0.2.0", "agree_reps()", "agreement_limit()")
 
   agreeq = qnorm(1 - (1 - agree.level) / 2)
   agree.l = 1 - (1 - agree.level) / 2
