@@ -50,5 +50,6 @@ find_n(powerCurve, power = .8)
 ## Sample size range must be expanded
 }
 \references{
-Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), \url{https://doi.org/10.1515/ijb-2015-0039}
+Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2),
+\doi{10.1515/ijb-2015-0039}
 }

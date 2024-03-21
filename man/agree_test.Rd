@@ -58,7 +58,9 @@ agree_test(x=reps$x, y=reps$y, delta = 2)
 
 }
 \references{
-Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation, Statistics in Biopharmaceutical Research, \url{https://doi.org/10.1080/19466315.2019.1677495}
+Shieh (2019). Assessing Agreement Between Two Methods of Quantitative Measurements: Exact Test Procedure and Sample Size Calculation,
+Statistics in Biopharmaceutical Research,
+\doi{10.1080/19466315.2019.1677495}
 
 Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. Statistical methods in medical research, 8(2), 135-160.
 

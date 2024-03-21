@@ -24,7 +24,10 @@
 #'   - `call`: The matched call.
 #'
 #' @references
-#' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. <https://doi.org/10.1371/journal.pone.0168321>
+#' Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016).
+#' "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients".
+#' PLOS One, 11(12), e0168321.
+#' \doi{10.1371/journal.pone.0168321}
 #' @importFrom stats qnorm as.formula na.omit coef df predict rnorm runif
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select rename

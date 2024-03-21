@@ -53,7 +53,9 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 }
 \section{References}{
 
-Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. \url{https://doi.org/10.1177/096228029900800204}
+Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160).
+SAGE Publications.
+\doi{10.1177/096228029900800204}
 }
 
 \examples{

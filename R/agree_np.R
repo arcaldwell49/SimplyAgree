@@ -29,7 +29,9 @@
 #' data('reps')
 #' agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #' @section References:
-#' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160). SAGE Publications. <https://doi.org/10.1177/096228029900800204>
+#' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method comparison studies. In Statistical Methods in Medical Research (Vol. 8, Issue 2, pp. 135–160).
+#' SAGE Publications.
+#' \doi{10.1177/096228029900800204}
 #' @importFrom stats binom.test binomial confint glm median setNames quantile
 #' @import quantreg
 #' @importFrom tidyselect all_of
