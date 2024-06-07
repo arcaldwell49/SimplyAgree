@@ -7,9 +7,19 @@ simple_loa_plot = function(x,
   colnames(df) = c("y","x","id","mean","delta")
 
   df_loa = x$loa
-  if(x$call$log){
-    df_loa = exp(df_loa)
-    df$delta = exp(df$delta)
+  if(x$call$log_tf){
+    if(x$call$log_tf_display == "ratio"){
+      df_loa = df_loa  %>% mutate_if(is.numeric,exp)
+      df$delta = exp(df$delta)
+    }
+
+    if(x$call$log_tf_display == "sympercent"){
+      df_loa = df_loa  %>% mutate_if(is.numeric,~100*.)
+      df$delta = 100*(df$delta)
+    }
+
+    df$x = exp(df$x)
+    df$y = exp(df$y)
   }
   scalemin = min(c(min(df$x, na.rm = TRUE),min(df$y, na.rm = TRUE)))
   scalemax = max(c(max(df$x, na.rm = TRUE),max(df$y, na.rm = TRUE)))
@@ -91,8 +101,10 @@ simple_loa_plot = function(x,
                     position = pd2,
                     inherit.aes = FALSE)+
     labs(x = paste0("Average of ", x_lab ," & ", y_lab),
-         y = ifelse(call2$log,
-                    paste0("Ratio of Methods (x/y)"),
+         y = ifelse(call2$log_tf,
+                    ifelse(call2$log_tf_display == "ratio",
+                           paste0("Ratio of Methods (x/y)"),
+                           paste0("Sympercent Difference between Methods (s%)")),
                     paste0("Difference between Methods (x - y)")),
          caption = cap1,
          color = "") +
@@ -129,7 +141,7 @@ bias_loa_plot = function(x,
   df = model.frame(x$call$lm_mod)
   colnames(df) = c("y","x","id","mean","delta")
   df_loa = x$loa
-  if(x$call$log){
+  if(x$call$log_tf){
     df_loa = exp(df_loa)
     df$delta = exp(df$delta)
   }
@@ -215,7 +227,7 @@ bias_loa_plot = function(x,
       scale_color_viridis_d(option = "C", end = .8) +
       scale_fill_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
-           y = ifelse(call2$log,
+           y = ifelse(call2$log_tf,
                       paste0("Ratio of Methods (x/y)"),
                       paste0("Difference between Methods (x - y)")),
            caption = cap1,

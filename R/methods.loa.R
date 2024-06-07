@@ -41,7 +41,14 @@ print.loa <- function(x,
            lower_loa_ci,
            upper_loa_ci)
   if(call2$log_tf){
-    pr_table = pr_table %>% mutate_if(is.numeric,exp)
+    if(call2$log_tf_display == "ratio"){
+      pr_table = pr_table %>% mutate_if(is.numeric,exp)
+    }
+
+    if(call2$log_tf_display == "sympercent"){
+      pr_table = pr_table %>% mutate_if(is.numeric,~100*.)
+    }
+
     if(call2$prop_bias){
       pr_table = pr_table %>%
         mutate(avg = log(avg))
@@ -96,6 +103,15 @@ print.loa <- function(x,
            "Bland-Altman"),
     " Limits of Agreement (LoA)"
   )
+  if(x$call$log_tf){
+    if(x$call$log_tf_display == "ratio"){
+      title1 = paste0(title1, " of the Ratio (x/y)")
+    }
+
+    if(x$call$log_tf_display == "sympercent"){
+      title1 = paste0(title1, " of the Sympercent Difference (s%)")
+    }
+  }
   subtitle1 = paste0(
     x$call$agree.level*100,
     "% LoA @ ",
@@ -114,7 +130,10 @@ print.loa <- function(x,
   var_print = switch(ifelse(call2$log_tf,"log","norm"),
                      "log" = paste0(
                        "Coefficient of Variation (%) = ",
-                       round((exp(x$loa$sd_delta[1])-1)*100,digits=digits)
+                       ifelse(call2$log_tf_display == "ratio",
+                       round((exp(x$loa$sd_delta[1])-1)*100,digits=digits),
+                       round(((x$loa$sd_delta[1]))*100,digits=digits)
+                       )
                      ),
                      "norm" =  paste0(
                        "SD of Differences = ",

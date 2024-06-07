@@ -67,10 +67,12 @@ agreement_limit = function(x,
                            agree.level = 0.95,
                            alpha = 0.05,
                            prop_bias = FALSE,
-                           log_tf = FALSE){
+                           log_tf = FALSE,
+                           log_tf_display = c("ratio","sympercent")){
   data_type = match.arg(data_type)
   loa_calc = match.arg(loa_calc)
   conf.level = 1- alpha
+  log_tf_display = match.arg(log_tf_display)
 
   call2 = match.call()
   call2$data_type = data_type
@@ -81,6 +83,7 @@ agreement_limit = function(x,
   call2$id = id
   call2$prop_bias  = prop_bias
   call2$log_tf = log_tf
+  call2$log_tf_display = log_tf_display
 
   df = loa_data_org(
     data = data,
