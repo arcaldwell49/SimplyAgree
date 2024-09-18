@@ -520,7 +520,7 @@ tolerance_limit(
 )
 ```
 
-If you prefer to interpret the differences as a percentage difference, you can do this by setting the `log_tf_display` argument to "sympercent". This stands for the "symmetric percentage difference" which is the log transformed differences between the measures ($s\% = log(x)-log(y)$) and it roughly corresponds to the percentage difference between the two paired measures.
+If you prefer to interpret the differences as a percentage difference, you can do this by setting the `log_tf_display` argument to "sympercent". This stands for the "symmetric percentage difference" which is the log transformed differences between the measures, $s\% = (log(x)-log(y) ) \cdot 100\% = log(x/y) \cdot 100\%$, and can be interpreted as a percentage difference between the two paired measures.
 
 ```{r}
 tolerance_limit(

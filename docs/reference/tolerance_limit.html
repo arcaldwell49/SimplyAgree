@@ -20,7 +20,7 @@ See vignettes for more details."><meta property="og:image" content="/images/stic
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -35,13 +35,13 @@ See vignettes for more details."><meta property="og:image" content="/images/stic
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -53,7 +53,13 @@ See vignettes for more details."><meta property="og:image" content="/images/stic
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/arcaldwell49/SimplyAgree/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -63,7 +69,7 @@ See vignettes for more details."><meta property="og:image" content="/images/stic
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Tolerance Limits from an Agreement Study</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/R/tolerance_limit.R" class="external-link"><code>R/tolerance_limit.R</code></a></small>
     <div class="hidden name"><code>tolerance_limit.Rd</code></div>
     </div>
 
@@ -75,24 +81,25 @@ See vignettes for more details.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tolerance_limit</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">x</span>,
-  <span class="va">y</span>,
-  id <span class="op">=</span> <span class="cn">NULL</span>,
-  condition <span class="op">=</span> <span class="cn">NULL</span>,
-  time <span class="op">=</span> <span class="cn">NULL</span>,
-  pred_level <span class="op">=</span> <span class="fl">0.95</span>,
-  tol_level <span class="op">=</span> <span class="fl">0.95</span>,
-  tol_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"approx"</span>, <span class="st">"perc"</span><span class="op">)</span>,
-  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
-  log_tf <span class="op">=</span> <span class="cn">FALSE</span>,
-  cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sym"</span>, <span class="st">"car1"</span>, <span class="st">"ar1"</span>, <span class="st">"none"</span><span class="op">)</span>,
-  correlation <span class="op">=</span> <span class="cn">NULL</span>,
-  weights <span class="op">=</span> <span class="cn">NULL</span>,
-  keep_model <span class="op">=</span> <span class="cn">TRUE</span>,
-  replicates <span class="op">=</span> <span class="fl">999</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tolerance_limit</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">y</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  condition <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pred_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  tol_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  tol_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"approx"</span>, <span class="st">"perc"</span><span class="op">)</span>,</span>
+<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  log_tf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  log_tf_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ratio"</span>, <span class="st">"sympercent"</span><span class="op">)</span>,</span>
+<span>  cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sym"</span>, <span class="st">"car1"</span>, <span class="st">"ar1"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  correlation <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  replicates <span class="op">=</span> <span class="fl">999</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -141,6 +148,10 @@ See vignettes for more details.</p>
 <dd><p>Calculate limits of agreement using log-transformed data.</p></dd>
 
 
+<dt>log_tf_display</dt>
+<dd><p>The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".</p></dd>
+
+
 <dt>cor_type</dt>
 <dd><p>The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.</p></dd>
 
@@ -185,10 +196,10 @@ Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approac
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Simple</span></span>
-<span class="r-in"><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simple</span></span></span>
+<span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95% Prediction Interval with 95% Tolerance Limits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -196,17 +207,17 @@ Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approac
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.4383 [-0.1669, 1.0436]   [-2.1998, 3.0764] [-2.993, 3.8697]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Nested</span></span>
-<span class="r-in"><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Nested</span></span></span>
+<span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95% Prediction Interval with 95% Tolerance Limits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval   Tolerance Limits</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5571, 2.9663]   [-4.4686, 5.8778] [-8.6099, 10.0191]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5572, 2.9664]   [-4.4687, 5.8779] [-8.6103, 10.0195]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

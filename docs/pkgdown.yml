@@ -1,11 +1,11 @@
-pandoc: 3.1.1
+pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  Deming: Deming.html
-  agree_tests: agree_tests.html
   agreement_analysis: agreement_analysis.html
+  agree_tests: agree_tests.html
+  Deming: Deming.html
   reanalysis: reanalysis.html
   reliability_analysis: reliability_analysis.html
-last_built: 2023-09-25T11:19Z
+last_built: 2024-09-18T18:08Z
 
