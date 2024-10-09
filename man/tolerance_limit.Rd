@@ -16,6 +16,7 @@ tolerance_limit(
   tol_method = c("approx", "perc"),
   prop_bias = FALSE,
   log_tf = FALSE,
+  log_tf_display = c("ratio", "sympercent"),
   cor_type = c("sym", "car1", "ar1", "none"),
   correlation = NULL,
   weights = NULL,
@@ -45,6 +46,8 @@ tolerance_limit(
 \item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.}
 
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
+
+\item{log_tf_display}{The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".}
 
 \item{cor_type}{The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.}
 

@@ -520,6 +520,21 @@ tolerance_limit(
 )
 ```
 
+If you prefer to interpret the differences as a percentage difference, you can do this by setting the `log_tf_display` argument to "sympercent". This stands for the "symmetric percentage difference" which is the log transformed differences between the measures, $s\% = (log(x)-log(y) ) \cdot 100\% = log(x/y) \cdot 100\%$, and can be interpreted as a percentage difference between the two paired measures.
+
+```{r}
+tolerance_limit(
+  data = temps,
+  log_tf = TRUE, # natural log transformation of responses
+  log_tf_display = "sympercent", # display results as sympercent
+  x = "trec_pre", # First measure
+  y = "teso_pre", # Second measure
+  id = "id", # Subject ID
+  condition = "tod", # Identify condition that may affect differences
+  cor_type = "sym" # Set correlation structure as Compound Symmetry
+)
+```
+
 
 # Visualizing "Big" Data
 

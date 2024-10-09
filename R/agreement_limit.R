@@ -13,6 +13,7 @@
 #' @param prop_bias Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.
 #' @param alpha The alpha-level for confidence levels.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
+#' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
 #' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).
 #' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
 #' @return Returns single loa class object with the results of the agreement analysis.
@@ -67,10 +68,12 @@ agreement_limit = function(x,
                            agree.level = 0.95,
                            alpha = 0.05,
                            prop_bias = FALSE,
-                           log_tf = FALSE){
+                           log_tf = FALSE,
+                           log_tf_display = c("ratio","sympercent")){
   data_type = match.arg(data_type)
   loa_calc = match.arg(loa_calc)
   conf.level = 1- alpha
+  log_tf_display = match.arg(log_tf_display)
 
   call2 = match.call()
   call2$data_type = data_type
@@ -81,6 +84,7 @@ agreement_limit = function(x,
   call2$id = id
   call2$prop_bias  = prop_bias
   call2$log_tf = log_tf
+  call2$log_tf_display = log_tf_display
 
   df = loa_data_org(
     data = data,

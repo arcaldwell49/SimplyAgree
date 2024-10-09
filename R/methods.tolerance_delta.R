@@ -44,16 +44,32 @@ print.tolerance_delta <- function(x,
            lower.TL,
            upper.TL)
   if(call2$log_tf){
-    pr_table = pr_table %>%
-      mutate_at(c(
-        "bias",
-        "lower.CL",
-        "upper.CL",
-        "lower.PL",
-        "upper.PL",
-        "lower.TL",
-        "upper.TL"
-      ),exp)
+    if(call2$log_tf_display == "ratio") {
+      pr_table = pr_table %>%
+        mutate_at(c(
+          "bias",
+          "lower.CL",
+          "upper.CL",
+          "lower.PL",
+          "upper.PL",
+          "lower.TL",
+          "upper.TL"
+        ),exp)
+    }
+
+    if(call2$log_tf_display == "sympercent") {
+      pr_table = pr_table %>%
+        mutate_at(c(
+          "bias",
+          "lower.CL",
+          "upper.CL",
+          "lower.PL",
+          "upper.PL",
+          "lower.TL",
+          "upper.TL"
+        ),~100*.)
+    }
+
 
   }
 
@@ -140,7 +156,14 @@ print.tolerance_delta <- function(x,
   )
 
   if(call2$log_tf){
-    title1 = "Agreement between Measures (Ratio: x/y)"
+    if(call2$log_tf_display == "ratio"){
+      title1 = "Agreement between Measures (Ratio: x/y)"
+    }
+
+    if(call2$log_tf_display == "sympercent"){
+      title1 = "Sympercent Difference between Methods (s%)"
+    }
+
   }
   #var_print = switch(ifelse(call2$log_tf,"log","norm"),
   #                   "log" = paste0(
@@ -189,21 +212,46 @@ plot.tolerance_delta <- function(x,
   df = model.frame(x$call$lm_mod)
   colnames(df) = c("y","x","id","mean","delta","condition","time")
   df_loa = x$limits
-  if(x$call$log){
-    df_loa = df_loa %>%
-      mutate_at(
-        c(
-          "bias",
-          "lower.CL",
-          "upper.CL",
-          "lower.PL",
-          "upper.PL",
-          "lower.TL",
-          "upper.TL"
-        ),
-        exp
-      )
-    df$delta = exp(df$delta)
+
+  if(call2$log_tf){
+    if(call2$log_tf_display == "ratio"){
+      df_loa = df_loa %>%
+        mutate_at(
+          c(
+            "bias",
+            "lower.CL",
+            "upper.CL",
+            "lower.PL",
+            "upper.PL",
+            "lower.TL",
+            "upper.TL"
+          ),
+          exp
+        )
+      df$delta = exp(df$delta)
+      df$x = exp(df$x)
+      df$y = exp(df$y)
+    }
+
+    if(call2$log_tf_display == "sympercent"){
+      df_loa = df_loa %>%
+        mutate_at(
+          c(
+            "bias",
+            "lower.CL",
+            "upper.CL",
+            "lower.PL",
+            "upper.PL",
+            "lower.TL",
+            "upper.TL"
+          ),
+          ~100*.
+        )
+      df$delta = 100*(df$delta)
+      df$x = exp(df$x)
+      df$y = exp(df$y)
+    }
+
   }
   scalemin = min(c(min(df$x, na.rm = TRUE),min(df$y, na.rm = TRUE)))
   scalemax = max(c(max(df$x, na.rm = TRUE),max(df$y, na.rm = TRUE)))
@@ -345,8 +393,10 @@ plot.tolerance_delta <- function(x,
     #scale_color_viridis_d(option = "C", end = .8) +
     #scale_fill_viridis_d(option = "C", end = .8) +
     labs(x = paste0("Average of ", x_name ," & ", y_name),
-         y = ifelse(call2$log,
-                    paste0("Ratio of Methods (x/y)"),
+         y = ifelse(call2$log_tf,
+                    ifelse(call2$log_tf_display == "ratio",
+                           paste0("Ratio of Methods (x/y)"),
+                           paste0("Sympercent Difference between Methods (s%)")),
                     paste0("Difference between Methods (x - y)")),
          caption = cap1,
          guides = "") +

@@ -18,7 +18,7 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -33,13 +33,13 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -51,7 +51,13 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/arcaldwell49/SimplyAgree/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -61,7 +67,7 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Agreement Coefficents</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/R/agree_coef.R" class="external-link"><code>R/agree_coef.R</code></a></small>
     <div class="hidden name"><code>agree_coef.Rd</code></div>
     </div>
 
@@ -71,16 +77,16 @@ agree_coef produces inter-rater reliability or "agreement coefficients" as descr
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">agree_coef</span><span class="op">(</span>
-  wide <span class="op">=</span> <span class="cn">TRUE</span>,
-  col.names <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">measure</span>,
-  <span class="va">item</span>,
-  <span class="va">id</span>,
-  <span class="va">data</span>,
-  weighted <span class="op">=</span> <span class="cn">FALSE</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">agree_coef</span><span class="op">(</span></span>
+<span>  wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  col.names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">measure</span>,</span>
+<span>  <span class="va">item</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  weighted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -131,14 +137,14 @@ Gwet, K. L. (2008). “Computing inter-rater reliability and its variance in the
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">agree_coef</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">agree_coef</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              est         se   lower.ci  upper.ci</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Percent Agreement      0.9131459 0.07673687 0.75253380 1.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Gwet's AC2             0.5073626 0.18354840 0.12319136 0.8915338</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fleiss' Kappa          0.5255860 0.17484095 0.15963973 0.8915324</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Kririppendorff's Alpha 0.4771011 0.19501219 0.06566137 0.8885409</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

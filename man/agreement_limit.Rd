@@ -14,7 +14,8 @@ agreement_limit(
   agree.level = 0.95,
   alpha = 0.05,
   prop_bias = FALSE,
-  log_tf = FALSE
+  log_tf = FALSE,
+  log_tf_display = c("ratio", "sympercent")
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ agreement_limit(
 \item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
 
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
+
+\item{log_tf_display}{The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".}
 }
 \value{
 Returns single loa class object with the results of the agreement analysis.

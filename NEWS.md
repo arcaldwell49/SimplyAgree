@@ -1,5 +1,9 @@
 # NEWS
 
+# SimplyAgree 0.2.1
+
+- Add sympercent options for log transformed results in `tolerance_limit` and `agreement_limit`
+
 # SimplyAgree 0.2.0
 
 - Add universal tolerance limits function: `tolerance_limit`

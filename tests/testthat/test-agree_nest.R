@@ -43,12 +43,26 @@ testthat::test_that("examples from Zou", {
                                   data = reps2,
                                   data_type = "nest",
                                   log_tf =TRUE)
+
+  nest_test_newlog2 = agreement_limit(x="x",y="y",
+                                     id = "id",
+                                     data = reps2,
+                                     data_type = "nest",
+                                     log_tf =TRUE,
+                                     log_tf_display = "sym")
   nest_test_bland = agreement_limit(x="x",y="y",
                                      id = "id",
                                      data = reps2,
                                      data_type = "nest",
                                      log_tf =TRUE,
                                     loa_calc = "b")
+  nest_test_bland1 = agreement_limit(x="x",y="y",
+                                    id = "id",
+                                    data = reps2,
+                                    data_type = "nest",
+                                    log_tf =TRUE,
+                                    loa_calc = "b",
+                                    log_tf_display = "sym")
   print(nest_test_bland)
   agree_test_newlog = agreement_limit(x="x",y="y",
                                      id = "id",

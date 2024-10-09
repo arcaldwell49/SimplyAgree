@@ -17,6 +17,7 @@
 #' @param tol_method Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
+#' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
 #' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.
 #' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.
 #' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
@@ -68,6 +69,7 @@ tolerance_limit = function(data,
                                tol_method = c("approx","perc"),
                                prop_bias = FALSE,
                                log_tf = FALSE,
+                           log_tf_display = c("ratio", "sympercent"),
                                cor_type = c("sym", "car1", "ar1", "none"),
                                correlation = NULL,
                                weights = NULL,
@@ -78,6 +80,7 @@ tolerance_limit = function(data,
   # match args -----
   cor_type = match.arg(cor_type)
   tol_method = match.arg(tol_method)
+  log_tf_display = match.arg(log_tf_display)
   # set call ----
   call2 = match.call()
   call2$id = id
@@ -89,7 +92,7 @@ tolerance_limit = function(data,
   call2$cor_type = cor_type
   call2$correlation = correlation
   call2$weights = weights
-
+  call2$log_tf_display = log_tf_display
   # organize data -----
   temp_frame = data[c(x,y,id,condition,time)]
   names(temp_frame)[names(temp_frame) == x] <- "x"

@@ -19,7 +19,7 @@ The package author recommends using tolerance_limit as an alternative to this fu
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -34,13 +34,13 @@ The package author recommends using tolerance_limit as an alternative to this fu
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -52,7 +52,13 @@ The package author recommends using tolerance_limit as an alternative to this fu
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/arcaldwell49/SimplyAgree/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -62,7 +68,7 @@ The package author recommends using tolerance_limit as an alternative to this fu
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Limits of Agreement with Linear Mixed Effects</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/R/loa_lme.R" class="external-link"><code>R/loa_lme.R</code></a></small>
     <div class="hidden name"><code>loa_lme.Rd</code></div>
     </div>
 
@@ -73,19 +79,19 @@ The package author recommends using <code>tolerance_limit</code> as an alternati
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">loa_lme</span><span class="op">(</span>
-  <span class="va">diff</span>,
-  <span class="va">avg</span>,
-  condition <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">id</span>,
-  <span class="va">data</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  agree.level <span class="op">=</span> <span class="fl">0.95</span>,
-  replicates <span class="op">=</span> <span class="fl">999</span>,
-  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,
-  het_var <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loa_lme</span><span class="op">(</span></span>
+<span>  <span class="va">diff</span>,</span>
+<span>  <span class="va">avg</span>,</span>
+<span>  condition <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"perc"</span>, <span class="st">"norm"</span>, <span class="st">"basic"</span><span class="op">)</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  replicates <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  het_var <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -144,7 +150,10 @@ The package author recommends using <code>tolerance_limit</code> as an alternati
 </ul></div>
     <div id="references">
     <h2>References</h2>
-    <p>Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &amp; McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". PLOS One, 11(12), e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link">https://doi.org/10.1371/journal.pone.0168321</a></p>
+    <p>Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &amp; McKinstry, B. (2016).
+"Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients".
+PLOS One, 11(12), e0168321.
+<a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link">doi:10.1371/journal.pone.0168321</a></p>
     </div>
 
   </div>

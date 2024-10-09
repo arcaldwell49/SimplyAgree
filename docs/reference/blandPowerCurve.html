@@ -18,7 +18,7 @@ This function calculates the power for the Bland-Altman method under varying par
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">SimplyAgree</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -33,13 +33,13 @@ This function calculates the power for the Bland-Altman method under varying par
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/Deming.html">Deming Regression</a>
+      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
     </li>
     <li>
       <a href="../articles/agree_tests.html">Agreement Tests</a>
     </li>
     <li>
-      <a href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a>
+      <a href="../articles/Deming.html">Deming Regression</a>
     </li>
     <li>
       <a href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a>
@@ -51,7 +51,13 @@ This function calculates the power for the Bland-Altman method under varying par
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/arcaldwell49/SimplyAgree/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -61,7 +67,7 @@ This function calculates the power for the Bland-Altman method under varying par
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Power Curve for Bland-Altman Limits of Agreement</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/R/blandPowerCurve.R" class="external-link"><code>R/blandPowerCurve.R</code></a></small>
     <div class="hidden name"><code>blandPowerCurve.Rd</code></div>
     </div>
 
@@ -71,14 +77,14 @@ This function calculates the power for the Bland-Altman method under varying par
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">blandPowerCurve</span><span class="op">(</span>
-  samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,
-  mu <span class="op">=</span> <span class="fl">0</span>,
-  <span class="va">SD</span>,
-  <span class="va">delta</span>,
-  conf.level <span class="op">=</span> <span class="fl">0.95</span>,
-  agree.level <span class="op">=</span> <span class="fl">0.95</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">blandPowerCurve</span><span class="op">(</span></span>
+<span>  samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  mu <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">SD</span>,</span>
+<span>  <span class="va">delta</span>,</span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -115,30 +121,31 @@ This function calculates the power for the Bland-Altman method under varying par
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2), <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link">https://doi.org/10.1515/ijb-2015-0039</a></p>
+    <p>Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. The international journal of biostatistics, 12(2),
+<a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link">doi:10.1515/ijb-2015-0039</a></p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="va">powerCurve</span> <span class="op">&lt;-</span> <span class="fu">blandPowerCurve</span><span class="op">(</span>samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">200</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span class="r-in">mu <span class="op">=</span> <span class="fl">0</span>,</span>
-<span class="r-in">SD <span class="op">=</span> <span class="fl">3.3</span>,</span>
-<span class="r-in">delta <span class="op">=</span> <span class="fl">8</span>,</span>
-<span class="r-in">conf.level <span class="op">=</span> <span class="fl">.95</span>,</span>
-<span class="r-in">agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># Plot the power curve</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">powerCurve</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">powerCurve</span> <span class="op">&lt;-</span> <span class="fu">blandPowerCurve</span><span class="op">(</span>samplesizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">200</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>mu <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>SD <span class="op">=</span> <span class="fl">3.3</span>,</span></span>
+<span class="r-in"><span>delta <span class="op">=</span> <span class="fl">8</span>,</span></span>
+<span class="r-in"><span>conf.level <span class="op">=</span> <span class="fl">.95</span>,</span></span>
+<span class="r-in"><span>agree.level <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Plot the power curve</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">powerCurve</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="blandPowerCurve-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span class="co"># Find at what N power of .8 is achieved</span></span>
-<span class="r-in"><span class="fu"><a href="powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">powerCurve</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># Find at what N power of .8 is achieved</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">powerCurve</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   delta conf.level agree.level power     N</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     8       0.95        0.95 0.800   145</span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"><span class="co"># If the desired power is not found then</span></span>
-<span class="r-in"><span class="co">## Sample size range must be expanded</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># If the desired power is not found then</span></span></span>
+<span class="r-in"><span><span class="co">## Sample size range must be expanded</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -92,6 +92,15 @@ test_that("tolerance_limit returns a tolerance_delta class", {
                                       prop_bias = TRUE),
                   "tolerance_delta")
 
+  expect_s3_class(tolerance_limit(data = temps2,
+                                  x = "x",
+                                  y = "y",
+                                  id = "id",
+                                  log_tf = TRUE,
+                                  log_tf_display = "sym"),
+                  "tolerance_delta")
+
+
 
 
 
@@ -206,6 +215,19 @@ test_that("check methods",{
   print(test7)
   check(test7)
   plot(test7)
+
+  test7_b = tolerance_limit(data = temps2,
+                          x = "x",
+                          y = "y",
+                          id = "id",
+                          log_tf = TRUE,
+                          log_tf_display = "sym",
+                          prop_bias = TRUE)
+
+  testthat::expect_identical(class(test7_b), "tolerance_delta")
+  print(test7_b)
+  check(test7_b)
+  plot(test7_b)
 
   test8 = tolerance_limit(data = temps2,
                           x = "x",
