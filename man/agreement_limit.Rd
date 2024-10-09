@@ -15,7 +15,9 @@ agreement_limit(
   alpha = 0.05,
   prop_bias = FALSE,
   log_tf = FALSE,
-  log_tf_display = c("ratio", "sympercent")
+  log_tf_display = c("ratio", "sympercent"),
+  lmer_df = c("satterthwaite", "asymptotic"),
+  lmer_limit = 3000
 )
 }
 \arguments{
@@ -40,6 +42,10 @@ agreement_limit(
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
 
 \item{log_tf_display}{The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".}
+
+\item{lmer_df}{Degrees of freedom method, only matters for if data_type is "nest". Default is "satterthwaite". The "asymptotic" method is faster but more liberal.}
+
+\item{lmer_limit}{Sample size limit for degrees of freedom method. If number of observations exceeds this limit, then the "asymptotic" method is utilized.}
 }
 \value{
 Returns single loa class object with the results of the agreement analysis.
