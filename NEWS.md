@@ -3,6 +3,9 @@
 # SimplyAgree 0.2.1
 
 - Add sympercent options for log transformed results in `tolerance_limit` and `agreement_limit`
+- Add argument to `agreement_limit` to allow of asymptotic confidence intervals to avoid errors related `emmeans` calculations
+  - Only a problem for "big" data with > 1000 observations
+- Small edit to `reli_stats` documentation
 
 # SimplyAgree 0.2.0
 

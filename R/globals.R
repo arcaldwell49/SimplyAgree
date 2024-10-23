@@ -71,4 +71,5 @@ utils::globalVariables(c("boot_bias",
                          "SEM", "SEP",
                          "Tolerance Limits", "replicates",
                          "upper.PL", "upper.TL",
-                         "lower.PL", "lower.TL"))
+                         "lower.PL", "lower.TL",
+                         "asymp.LCL","asymp.UCL"))
