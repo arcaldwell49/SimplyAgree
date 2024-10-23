@@ -90,7 +90,9 @@ Please note that the package developer recommends reporting/using tolerance limi
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  log_tf_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ratio"</span>, <span class="st">"sympercent"</span><span class="op">)</span></span>
+<span>  log_tf_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ratio"</span>, <span class="st">"sympercent"</span><span class="op">)</span>,</span>
+<span>  lmer_df <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"satterthwaite"</span>, <span class="st">"asymptotic"</span><span class="op">)</span>,</span>
+<span>  lmer_limit <span class="op">=</span> <span class="fl">3000</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -138,6 +140,14 @@ Please note that the package developer recommends reporting/using tolerance limi
 
 <dt>log_tf_display</dt>
 <dd><p>The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".</p></dd>
+
+
+<dt>lmer_df</dt>
+<dd><p>Degrees of freedom method, only matters for if data_type is "nest". Default is "satterthwaite". The "asymptotic" method is faster but more liberal.</p></dd>
+
+
+<dt>lmer_limit</dt>
+<dd><p>Sample size limit for degrees of freedom method. If number of observations exceeds this limit, then the "asymptotic" method is utilized.</p></dd>
 
 </dl></div>
     <div id="value">

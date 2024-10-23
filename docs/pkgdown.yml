@@ -1,4 +1,4 @@
-pandoc: 3.1.11
+pandoc: '3.2'
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
@@ -7,5 +7,5 @@ articles:
   Deming: Deming.html
   reanalysis: reanalysis.html
   reliability_analysis: reliability_analysis.html
-last_built: 2024-09-18T18:08Z
+last_built: 2024-10-23T23:23Z
 
