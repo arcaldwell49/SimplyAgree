@@ -165,3 +165,10 @@ reli_data_org = function(
 
   return(x.df)
 }
+
+
+# Notes -----
+
+## CV -----
+###
+### Methods: MSE, residuals... log transformed approach? Or should that be added as an option for SE calcs?
