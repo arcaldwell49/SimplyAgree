@@ -11,6 +11,7 @@ icc_lmer = function(
   conf_type = c("Fdist", "perc", "norm", "basic"),
   replicates = 1999){
   icc_type = match.arg(icc_type, several.ok = FALSE)
+  conf_type = match.arg(conf_type)
   alpha = 1-conf.level
   # Organize Data ----
   x.df = reli_data_org(
@@ -171,7 +172,8 @@ icc_aov = function(
     icc_type = c("ICC3","ICC1","ICC2","ICC1k","ICC2k","ICC3k"),
     conf_type = c("Fdist", "perc", "norm", "basic"),
     replicates = 1999){
-  icc_type = match.arg(icc_type, several.ok = FALSE)
+  conf_type = match.arg(conf_type)
+  icc_type = match.arg(icc_type)
   alpha = 1-conf.level
   # Organize Data ----
   x.df = reli_data_org(
@@ -312,7 +314,7 @@ icc_aov = function(
                   names_prefix = "item_")
 
     boot_function <- function(data, indices,
-                              icc_type = icc_type) {
+                              icc_type) {
       d <- data[indices, ] # allows boot to select sample
       d$id = 1:nrow(d)
       x.df = d %>%
@@ -322,14 +324,15 @@ icc_aov = function(
         mutate(id = factor(id),
                items = factor(items))
       icc_aov(data = x.df,
-              id = id,
-              items = items,
-              measure = values,
+              id = "id",
+              item = "items",
+              measure = "values",
               icc_type = icc_type,
               conf_type = "Fdist")$icc
     }
 
-    boo2 = boot::boot(wide_df, boot_function,  R = replicates)
+    boo2 = boot::boot(wide_df, boot_function,  R = replicates,
+                      icc_type = icc_type)
 
     res_other = tidy_boot(boo2,
                           conf.int = TRUE,
