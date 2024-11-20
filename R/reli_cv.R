@@ -9,7 +9,7 @@ reli_cv_lmer = function(
     col.names = NULL,
     conf.level = .95,
     icc_type = c("ICC3","ICC1","ICC2","ICC1k","ICC2k","ICC3k"),
-    conf_type = c("Fdist", "perc", "norm", "basic"),
+    conf_type = c("chisq", "perc", "norm", "basic"),
     replicates = 1999){
   icc_type = match.arg(icc_type, several.ok = FALSE)
 conf_type = match.arg(conf_type)
