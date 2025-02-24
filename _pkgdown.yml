@@ -4,6 +4,7 @@ home:
 
 
 template:
+  math-rendering: mathjax
   opengraph:
     image:
       src: images/sticker.png
