@@ -64,7 +64,7 @@ plot(a1, type = 2)
 
 ### Shieh's test
 
-The hypothesis test procedure is based on the "exact" approach details by @shieh2019. In this procedure the null hypothesis (not acceptable agreement) is rejected if the extreme lower bound and upper bound are within the proposed agreement limits. The agreement limits, $ \hat \theta_{EL}$ and $ \hat \theta_{EU} $ respectively, are calculated as the following:
+The hypothesis test procedure is based on the "exact" approach details by @shieh2019. In this procedure the null hypothesis (not acceptable agreement) is rejected if the extreme lower bound and upper bound are within the proposed agreement limits. The agreement limits, $\hat\theta_{EL}$ and $\hat\theta_{EU}$ respectively, are calculated as the following:
 
 $$
 \hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot \frac{S}{\sqrt{N}}
