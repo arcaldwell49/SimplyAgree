@@ -227,54 +227,57 @@ missing data are dropped when using <code>reli_aov</code>.</p>
 </h3>
 <p>The linear mixed model used for the calculations is specified as the
 following:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mo>∼</mo><mspace width="0.222em"></mspace><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>j</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>k</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right) 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>j</mi></msub><mo>∼</mo><mspace width="0.222em"></mspace><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><msub><mi>α</mi><mi>j</mi></msub></msub><mo>,</mo><msubsup><mi>σ</mi><msub><mi>α</mi><mi>j</mi></msub><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mtext mathvariant="normal">, for id j = 1,</mtext><mi>…</mi><mtext mathvariant="normal">,J</mtext></mrow><annotation encoding="application/x-tex">
-    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
-    \text{, for id j = 1,} \dots \text{,J} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>k</mi></msub><mo>∼</mo><mspace width="0.222em"></mspace><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><msub><mi>α</mi><mi>k</mi></msub></msub><mo>,</mo><msubsup><mi>σ</mi><msub><mi>α</mi><mi>k</mi></msub><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mtext mathvariant="normal">, for items k = 1,</mtext><mi>…</mi><mtext mathvariant="normal">,K</mtext></mrow><annotation encoding="application/x-tex">
-    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}} \right)
+<p><span class="math display">\[
+  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right)
+\]</span></p>
+<p><span class="math display">\[
+    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}}
+\right)
+    \text{, for id j = 1,} \dots \text{,J}
+\]</span></p>
+<p><span class="math display">\[
+    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}}
+\right)
     \text{, for items k = 1,} \dots \text{,K}
-</annotation></semantics></math></p>
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="components-of-variance">Components of Variance<a class="anchor" aria-label="anchor" href="#components-of-variance"></a>
 </h3>
 <p><strong>Mean Squared Error (MSE)</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>S</mi><mi>E</mi><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 MSE = \sigma^2
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Variance Between Subjects</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>=</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><msubsup><mi>σ</mi><mrow><mi>α</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 MSB = n_k \cdot \sigma^2_{\alpha j} + \sigma^2
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Variance Between Items/Judges</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>S</mi><mi>J</mi><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><msubsup><mi>σ</mi><msub><mi>α</mi><mi>k</mi></msub><mn>2</mn></msubsup><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 MSJ = n_{j} \cdot \sigma^2_{\alpha_{k}} + \sigma^2
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Variance Within Subjects/Participants</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>S</mi><mi>W</mi><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup><mo>+</mo><msubsup><mi>σ</mi><msub><mi>α</mi><mi>k</mi></msub><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 MSW = \sigma^2 + \sigma^2_{\alpha_{k}}
-</annotation></semantics></math></p>
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="intraclass-correlation-coefficients">Intraclass Correlation Coefficients<a class="anchor" aria-label="anchor" href="#intraclass-correlation-coefficients"></a>
 </h3>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW} 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo>+</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mi>S</mi><mi>J</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msup><mi>n</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ - MSE) \cdot n^{-1}} 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><mi>C</mi><msub><mo stretchy="false" form="prefix">(</mo><mrow><mn>3</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>E</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
+ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW}
+\]</span> <span class="math display">\[
+ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ -
+MSE) \cdot n^{-1}}
+\]</span> <span class="math display">\[
 ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 ICC_{(1,k)} = \frac{MSB - MSW}{MSB}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mi>S</mi><mi>J</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>n</mi><mi>j</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>3</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
-</annotation></semantics></math></p>
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="icc-confidence-intervals">ICC Confidence Intervals<a class="anchor" aria-label="anchor" href="#icc-confidence-intervals"></a>
@@ -282,167 +285,176 @@ ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
 <div class="section level4">
 <h4 id="icc11">ICC(1,1)<a class="anchor" aria-label="anchor" href="#icc11"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>W</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-F =  \frac{MSB}{MSW} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>n</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
-df_{n} = n_j - 1 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>d</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
+F =  \frac{MSB}{MSW}
+\]</span></p>
+<p><span class="math display">\[
+df_{n} = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
 df_{d} = n_j \cdot (n_k - 1)
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc21">ICC(2,1)<a class="anchor" aria-label="anchor" href="#icc21"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>J</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-F =  \frac{MSJ}{MSE} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>n</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mi>j</mi><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>⋅</mo><mi>F</mi><mo>+</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F + n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})]^2 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>d</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>n</mi><mi>k</mi><mn>2</mn></msubsup><mo>⋅</mo><mi>I</mi><mi>C</mi><msubsup><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mi>F</mi><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot (1 +
-                                                         (n_k - 1) \cdot ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>=</mo><mfrac><mrow><mi>v</mi><mi>n</mi></mrow><mrow><mi>v</mi><mi>d</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-  v = \frac{vn}{vd} 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+<p><span class="math display">\[
+F =  \frac{MSJ}{MSE}
+\]</span></p>
+<p><span class="math display">\[
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F +
+n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) -
+n_k \cdot ICC_{(2,1)})]^2
+\]</span></p>
+<p><span class="math display">\[
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot
+(1 +
+                                                         (n_k - 1) \cdot
+ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2
+\]</span> <span class="math display">\[
+  v = \frac{vn}{vd}
+\]</span></p>
+<p><span class="math display">\[
   F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
   F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
   Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot
 (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot
 MSB)}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
   Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot
 MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc31">ICC(3,1)<a class="anchor" aria-label="anchor" href="#icc31"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>J</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-F =  \frac{MSJ}{MSE} 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>n</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
-df_{n} = n_j - 1 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>d</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-df_{d} = (n_j-1) \cdot (n_k - 1) 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+<p><span class="math display">\[
+F =  \frac{MSJ}{MSE}
+\]</span> <span class="math display">\[
+df_{n} = n_j - 1
+\]</span> <span class="math display">\[
+df_{d} = (n_j-1) \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
 F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})}
-$$</span>
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mn>3</mn><mi>L</mi><mo>&lt;</mo><mo>−</mo><mi>F</mi><mn>31</mn><mi>/</mi><mi>q</mi><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>a</mi><mi>l</mi><mi>p</mi><mi>h</mi><mi>a</mi><mo>,</mo><mi>d</mi><mi>f</mi><mn>21</mn><mi>n</mi><mo>,</mo><mi>d</mi><mi>f</mi><mn>21</mn><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-F3L &lt;- F31/qf(1 - alpha, df21n, df21d) 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mn>3</mn><mi>U</mi><mo>&lt;</mo><mo>−</mo><mi>F</mi><mn>31</mn><mo>*</mo><mi>q</mi><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>a</mi><mi>l</mi><mi>p</mi><mi>h</mi><mi>a</mi><mo>,</mo><mi>d</mi><mi>f</mi><mn>21</mn><mi>d</mi><mo>,</mo><mi>d</mi><mi>f</mi><mn>21</mn><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-F3U &lt;- F31 * qf(1 - alpha, df21d, df21n) 
-</annotation></semantics></math><span class="math display">$$
+\]</span> <span class="math display">\[
+F3L &lt;- F31/qf(1 - alpha, df21n, df21d)
+\]</span> <span class="math display">\[
+F3U &lt;- F31 * qf(1 - alpha, df21d, df21n)
+\]</span> <span class="math display">\[
 Lower \space CI = (F3L - 1)/(F3L + n_k - 1)
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc1k">ICC(1,k)<a class="anchor" aria-label="anchor" href="#icc1k"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-F =  \frac{MSB - MSW}{MSB} 
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>n</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
-df_{n} = n_j - 1 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>d</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-df_{d} = n_j \cdot (n_k - 1) 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+<p><span class="math display">\[
+F =  \frac{MSB - MSW}{MSB}
+\]</span> <span class="math display">\[
+df_{n} = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
+df_{d} = n_j \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
 F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Lower \space CI = 1-\frac{1}{F_L}
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 Upper \space CI = 1-\frac{1}{F_U}
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc2k">ICC(2,k)<a class="anchor" aria-label="anchor" href="#icc2k"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><mi>M</mi><mi>S</mi><mi>W</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-F =  \frac{MSB - MSW}{MSB} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>n</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mi>j</mi><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo>⋅</mo><mi>F</mi><mo>+</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F + n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})]^2
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>d</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>n</mi><mi>k</mi><mn>2</mn></msubsup><mo>⋅</mo><mi>I</mi><mi>C</mi><msubsup><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mi>F</mi><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo>,</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot (1 +
-                                                         (n_k - 1) \cdot ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>=</mo><mfrac><mrow><mi>v</mi><mi>n</mi></mrow><mrow><mi>v</mi><mi>d</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-v = \frac{vn}{vd} 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+<p><span class="math display">\[
+F =  \frac{MSB - MSW}{MSB}
+\]</span></p>
+<p><span class="math display">\[
+vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F +
+n_j \cdot
+                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) -
+n_k \cdot ICC_{(2,k)})]^2
+\]</span></p>
+<p><span class="math display">\[
+  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot
+(1 +
+                                                         (n_k - 1) \cdot
+ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2
+\]</span></p>
+<p><span class="math display">\[
+v = \frac{vn}{vd}
+\]</span></p>
+<p><span class="math display">\[
 F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
-$$</span></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mn>3</mn><mo>=</mo><mfrac><mrow><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mi>S</mi><mi>B</mi><mo>−</mo><msub><mi>F</mi><mi>U</mi></msub><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>F</mi><mi>U</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>J</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><msub><mi>n</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mn>3</mn><mo>=</mo><mfrac><mrow><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mi>S</mi><mi>B</mi><mo>⋅</mo><msub><mi>F</mi><mi>L</mi></msub><mo>−</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>J</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>⋅</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><msub><mi>n</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>E</mi><mo>+</mo><msub><mi>n</mi><mi>j</mi></msub><mo>⋅</mo><msub><mi>F</mi><mi>L</mi></msub><mo>⋅</mo><mi>M</mi><mi>S</mi><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)} 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
+L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ +
+(n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)}
+\]</span></p>
+<p><span class="math display">\[
+U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot
+n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
+\]</span></p>
+<p><span class="math display">\[
 Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="icc3k">ICC(3,k)<a class="anchor" aria-label="anchor" href="#icc3k"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mi>M</mi><mi>S</mi><mi>B</mi></mrow><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 F = \frac{MSB}{MSE}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>n</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
-df_n = n_j - 1 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>d</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>j</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mi>k</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-df_d = (n_j - 1) \cdot (n_k - 1) 
-</annotation></semantics></math></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
+df_n = n_j - 1
+\]</span></p>
+<p><span class="math display">\[
+df_d = (n_j - 1) \cdot (n_k - 1)
+\]</span></p>
+<p><span class="math display">\[
 F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Lower \space CI = 1-\frac{1}{F_L}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = 1-\frac{1}{F_U}
-$$</span></p>
+\]</span></p>
 </div>
 </div>
 <div class="section level3">
@@ -452,23 +464,21 @@ $$</span></p>
 estimate (SEE), and standard error of prediction (SEP) are all estimated
 with the following calculations.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
 <p>The default SEM calculation is the following:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>E</mi><mi>M</mi><mo>=</mo><msqrt><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-SEM = \sqrt{MSE} 
-</annotation></semantics></math> Alternatively, the SEM can be
-calculated as the following and the ICC is determined through the
-<code>se_type</code> argument:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>E</mi><mi>M</mi><mo>=</mo><msqrt><mfrac><mrow><mi>S</mi><msub><mi>S</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi></mrow></msub></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></msqrt><mo>⋅</mo><msqrt><mrow><mn>1</mn><mo>−</mo><mi>I</mi><mi>C</mi><mi>C</mi></mrow></msqrt></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
+SEM = \sqrt{MSE}
+\]</span> Alternatively, the SEM can be calculated as the following and
+the ICC is determined through the <code>se_type</code> argument:</p>
+<p><span class="math display">\[
 SEM = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC}
-</annotation></semantics></math> The other measures default to using the
-following equations. The default is to use
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>C</mi><mrow><mn>3</mn><mo>,</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">ICC_{3,1}</annotation></semantics></math>,
+\]</span> The other measures default to using the following equations.
+The default is to use <span class="math inline">\(ICC_{3,1}\)</span>,
 but can be modified with the <code>se_type</code> argument.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>E</mi><mi>E</mi><mo>=</mo><msqrt><mfrac><mrow><mi>S</mi><msub><mi>S</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi></mrow></msub></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></msqrt><mo>⋅</mo><msqrt><mrow><mi>I</mi><mi>C</mi><mi>C</mi><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>I</mi><mi>C</mi><mi>C</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-SEE = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>E</mi><mi>P</mi><mo>=</mo><msqrt><mfrac><mrow><mi>S</mi><msub><mi>S</mi><mrow><mi>t</mi><mi>o</mi><mi>t</mi><mi>a</mi><mi>l</mi></mrow></msub></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></msqrt><mo>⋅</mo><msqrt><mrow><mn>1</mn><mo>−</mo><mi>I</mi><mi>C</mi><msup><mi>C</mi><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-SEP = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC^2} 
-</annotation></semantics></math></p>
+<p><span class="math display">\[
+SEE = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)}
+\]</span></p>
+<p><span class="math display">\[
+SEP = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC^2}
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="coefficient-of-variation">Coefficient of Variation<a class="anchor" aria-label="anchor" href="#coefficient-of-variation"></a>
@@ -478,22 +488,23 @@ I highly recommend reporting the default version of CV.</p>
 <ol style="list-style-type: decimal">
 <li>From the MSE (default)</li>
 </ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>V</mi><mo>=</mo><mfrac><msqrt><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow></msqrt><mover><mi>y</mi><mo accent="true">‾</mo></mover></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 CV = \frac{ \sqrt{MSE} }{ \bar y}
-</annotation></semantics></math></p>
+\]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>From the SEM<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>
 </li>
 </ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>V</mi><mo>=</mo><mfrac><mrow><mi>S</mi><mi>E</mi><mi>M</mi></mrow><mover><mi>y</mi><mo accent="true">‾</mo></mover></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 CV = \frac{SEM}{ \bar y}
-</annotation></semantics></math></p>
+\]</span></p>
 <ol start="3" style="list-style-type: decimal">
 <li>From the model residuals (most liberal)</li>
 </ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>V</mi><mo>=</mo><mfrac><msqrt><mfrac><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover><mi>y</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><msub><mi>N</mi><mrow><mi>o</mi><mi>b</mi><mi>s</mi></mrow></msub></mfrac></msqrt><mover><mi>y</mi><mo accent="true">‾</mo></mover></mfrac></mrow><annotation encoding="application/x-tex">
-CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{ \bar y}
-</annotation></semantics></math></p>
+<p><span class="math display">\[
+CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
+\bar y}
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="other-confidence-intervals">Other Confidence Intervals<a class="anchor" aria-label="anchor" href="#other-confidence-intervals"></a>
@@ -508,23 +519,23 @@ utilizes the chi-square distribution to <em>approximate</em> confidence
 intervals for these measurements. The accuracy of these estimates is
 likely variable, and is probably poor for small samples.</p>
 <p>For the CV, the calculation is as follows:</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI =
 \frac{CV}{\sqrt{(\frac{\chi^2_{1-\alpha/2}}{df_{error}+1}-1) \cdot CV^2
 \cdot \frac{\chi^2_{1-\alpha/2}}{df_{error}}}}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI =
 \frac{CV}{\sqrt{(\frac{\chi^2_{\alpha/2}}{df_{error}+1}-1) \cdot CV^2
 \cdot \frac{\chi^2_{\alpha/2}}{df_{error}}}}
-$$</span> For the variance based measures (s) the calculation is as
+\]</span> For the variance based measures (s) the calculation is as
 follows:</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{1-\alpha/2}}}
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{\alpha/2}}}
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="bootstrap">Bootstrap<a class="anchor" aria-label="anchor" href="#bootstrap"></a>
@@ -652,8 +663,7 @@ the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span>
 <li id="fn1"><p>The paper by Weir also appears to heavily rely on the
 work of <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979">1979</a>)</span> and <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996">1996</a>)</span><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>This section was previously incorrect. The variance
-calculation used to utilize
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
+calculation used to utilize <span class="math inline">\(n_j\)</span>
 instead of N.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 <li id="fn3"><p>Also called “%SEM” in some texts. Equivalent to MSE if
 the <code>se_type</code> is set to “MSE”<a href="#fnref3" class="footnote-back">↩︎</a></p></li>

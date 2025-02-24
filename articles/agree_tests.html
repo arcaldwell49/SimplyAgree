@@ -140,14 +140,13 @@ package.</p>
 <code>y</code> arguments. If there is a hypothesized limit of agreement
 then this can be set with the <code>delta</code> argument (this is
 optional). Next, the limit of agreement can be set with the
-<code>agree.level</code> and the confidence level
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow><annotation encoding="application/x-tex">1-\alpha</annotation></semantics></math>).
-Once those are set the analysis can be run. Please note, this package
-has pre-loaded data from the Zou 2013 paper. While data does not conform
-the assumptions of the test it can be used to test out many of the
-functions in this package. Since there isn’t an <em>a priori</em>
-hypothesis I will not declare a <code>delta</code> argument, but I will
-estimate the 95% confidence intervals for 80% limits of agreement.</p>
+<code>agree.level</code> and the confidence level (<span class="math inline">\(1-\alpha\)</span>). Once those are set the
+analysis can be run. Please note, this package has pre-loaded data from
+the Zou 2013 paper. While data does not conform the assumptions of the
+test it can be used to test out many of the functions in this package.
+Since there isn’t an <em>a priori</em> hypothesis I will not declare a
+<code>delta</code> argument, but I will estimate the 95% confidence
+intervals for 80% limits of agreement.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agree_test.html">agree_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">x</span>,</span>
 <span>                y <span class="op">=</span> <span class="va">reps</span><span class="op">$</span><span class="va">y</span>,</span>
@@ -204,17 +203,14 @@ hypothesis (not acceptable agreement) is rejected if the extreme lower
 bound and upper bound are within the proposed agreement limits. The
 agreement limits ($ <em>{EL} and </em>{EU} $) are calculated as the
 following:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mi>E</mi><mi>L</mi><mo>,</mo><mi>E</mi><mi>U</mi></mrow></msub><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>±</mo><msub><mi>γ</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></msub><mo>⋅</mo><mfrac><mi>S</mi><msqrt><mi>N</mi></msqrt></mfrac></mrow><annotation encoding="application/x-tex">
-\hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot \frac{S}{\sqrt{N}}
-</annotation></semantics></math></p>
-<p>wherein
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>d</mi><mo accent="true">‾</mo></mover><annotation encoding="application/x-tex">\bar{d}</annotation></semantics></math>
-is the mean difference between the two methods,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
-is the standard deviation of the differences,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-is the total number of pairs, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></msub><annotation encoding="application/x-tex">\gamma_{1-\alpha}</annotation></semantics></math>
+<p><span class="math display">\[
+\hat\theta_{EL,EU} = \bar{d} \pm \gamma_{1-\alpha}\cdot
+\frac{S}{\sqrt{N}}
+\]</span></p>
+<p>wherein <span class="math inline">\(\bar{d}\)</span> is the mean
+difference between the two methods, <span class="math inline">\(S\)</span> is the standard deviation of the
+differences, <span class="math inline">\(N\)</span> is the total number
+of pairs, and <span class="math inline">\(\gamma_{1-\alpha}\)</span>
 critical value (which requires a specialized function within
 <code>R</code> to estimate).</p>
 </div>
@@ -224,46 +220,36 @@ critical value (which requires a specialized function within
 <p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986">1986</a>)</span> and <span class="citation">Bland
 and Altman (<a href="#ref-bland1999">1999</a>)</span>.</p>
 <p><strong>LoA</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><mi>A</mi><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>±</mo><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>a</mi><mi>g</mi><mi>r</mi><mi>e</mi><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msub><mi>S</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
-</annotation></semantics></math> wherein
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>a</mi><mi>g</mi><mi>r</mi><mi>e</mi><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow></msub><annotation encoding="application/x-tex">z_{1-(1-agree)/2}</annotation></semantics></math>
+\]</span> wherein <span class="math inline">\(z_{1-(1-agree)/2}\)</span>
 is the value of the normal distribution at the given agreement level
-(default is 95%),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>d</mi><mo accent="true">‾</mo></mover><annotation encoding="application/x-tex">\bar d</annotation></semantics></math>
-is the mean of the differences, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mi>d</mi></msub><annotation encoding="application/x-tex">S_d</annotation></semantics></math>
-is the standard deviations of the differences.</p>
+(default is 95%), <span class="math inline">\(\bar d\)</span> is the
+mean of the differences, and <span class="math inline">\(S_d\)</span> is
+the standard deviations of the differences.</p>
 <p><strong>Confidence Interval</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><msub><mi>A</mi><mrow><mi>C</mi><mi>.</mi><mi>I</mi><mi>.</mi></mrow></msub><mo>=</mo><mi>L</mi><mi>o</mi><mi>A</mi><mo>±</mo><msub><mi>t</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mi>/</mi><mn>2</mn><mo>,</mo><mi>N</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>⋅</mo><msqrt><mrow><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><mo>+</mo><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mi>/</mi><mn>2</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><mn>2</mn><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo stretchy="true" form="postfix">]</mo></mrow><mo>⋅</mo><msup><mi>S</mi><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-LoA_{C.I.} = LoA \pm t_{1-\alpha/2,N-1} \cdot \sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)} \right] \cdot S^2}
-</annotation></semantics></math></p>
-<p>wherein,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-is the critical t-value at the given sample size and confidence level
-(<code>conf.level</code>),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
-is the value of the normal distribution at the given alpha level
-(<code>agree.level</code>), and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>S</mi><mn>2</mn></msup><annotation encoding="application/x-tex">S^2</annotation></semantics></math>
+<p><span class="math display">\[
+LoA_{C.I.} = LoA \pm t_{1-\alpha/2,N-1} \cdot
+\sqrt{\left[\frac{1}{N}+\frac{(z_{1-\alpha/2})^{2}}{2 \cdot (N-1)}
+\right] \cdot S^2}
+\]</span></p>
+<p>wherein, <span class="math inline">\(t\)</span> is the critical
+t-value at the given sample size and confidence level
+(<code>conf.level</code>), <span class="math inline">\(z\)</span> is the
+value of the normal distribution at the given alpha level
+(<code>agree.level</code>), and <span class="math inline">\(S^2\)</span>
 is the variance of the difference scores. If <code>TOST</code> is set to
-TRUE then equation is altered slightly with the critical t
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>N</mi><mo>−</mo><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">t_{1-\alpha,N-1}</annotation></semantics></math>).</p>
+TRUE then equation is altered slightly with the critical t (<span class="math inline">\(t_{1-\alpha,N-1}\)</span>).</p>
 </div>
 <div class="section level4">
 <h4 id="concordance-correlation-coefficient">Concordance Correlation Coefficient<a class="anchor" aria-label="anchor" href="#concordance-correlation-coefficient"></a>
 </h4>
 <p>The CCC was calculated as outlined by <span class="citation">Lin (<a href="#ref-lin1989">1989</a>)</span> (with later corrections).</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>ρ</mi><mo accent="true">̂</mo></mover><mi>c</mi></msub><mo>=</mo><mfrac><mrow><mn>2</mn><mo>⋅</mo><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mrow><mrow><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>x</mi><mo accent="true">‾</mo></mover><mo>−</mo><mover><mi>y</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 \hat\rho_c = \frac{2 \cdot s_{xy}} {s_x^2 + s_y^2+(\bar x-\bar y)^2}
-</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><annotation encoding="application/x-tex">s_{xy}</annotation></semantics></math>
-is the covariance,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">s_x^2</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">s_y^2</annotation></semantics></math>
-are the variances of x and y respectively, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>x</mi><mo accent="true">‾</mo></mover><mo>−</mo><mover><mi>y</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\bar x-\bar y)</annotation></semantics></math>
+\]</span> where <span class="math inline">\(s_{xy}\)</span> is the
+covariance, <span class="math inline">\(s_x^2\)</span> and <span class="math inline">\(s_y^2\)</span> are the variances of x and y
+respectively, and <span class="math inline">\((\bar x-\bar y)\)</span>
 is the difference in the means of x &amp; y.</p>
 </div>
 </div>
@@ -393,92 +379,96 @@ functions can be found in the article by <span class="citation">Zou (<a href="#r
 </h3>
 <p><strong>Step 1: Calculate Individual Subject Means and
 Variances</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub></mfrac><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub></msubsup><msub><mi>x</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 \bar x_i = \frac{1}{n_{xi}} \Sigma_{j=1}^{n_{xi}} x_{ij}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub></mfrac><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub></msubsup><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 \bar y_i = \frac{1}{n_{yi}} \Sigma_{j=1}^{n_{yi}} y_{ij}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>d</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 \bar d_i = \bar x_i - \bar y_i
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><msub><mi>d</mi><mi>i</mi></msub><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">
-\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n} 
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mrow><mi>x</mi><mi>i</mi></mrow><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub></msubsup><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mrow><mi>x</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
+\bar d = \Sigma_{i=1}^{n}\frac{d_i}{n}
+\]</span></p>
+<p><span class="math display">\[
 s_{xi}^2 = \Sigma_{j=1}^{n_{xi}} \frac{(x_{xj}- \bar x_i)^2}{n_{xi}-1}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mrow><mi>y</mi><mi>i</mi></mrow><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub></msubsup><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 s_{yi}^2 = \Sigma_{j=1}^{n_{yi}} \frac{(y_{ij}- \bar y_i)^2}{n_{yi}-1}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mover><mi>d</mi><mo accent="true">‾</mo></mover><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>d</mi><mi>i</mi></msub><mo>−</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 s_{\bar d}^2 = \Sigma_{j=1}^{n} \frac{(d_{i}- \bar d)^2}{n-1}
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Step 2: Compute pooled estimates of within subject
 errors</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mrow><mi>x</mi><mi>w</mi></mrow><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub><mo>−</mo><mn>1</mn></mrow><mrow><msub><mi>N</mi><mi>x</mi></msub><mo>−</mo><mn>1</mn></mrow></mfrac><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>x</mi><mi>i</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 s^2_{xw} = \Sigma_{i=1}^{n} [\frac{n_{xi} -1}{N_x -1} \cdot s^2_{xi}]
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mrow><mi>y</mi><mi>w</mi></mrow><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub><mo>−</mo><mn>1</mn></mrow><mrow><msub><mi>N</mi><mi>y</mi></msub><mo>−</mo><mn>1</mn></mrow></mfrac><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>y</mi><mi>i</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 s^2_{yw} = \Sigma_{i=1}^{n} [\frac{n_{yi} -1}{N_y -1} \cdot s^2_{yi}]
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Step 3: Compute Harmonic Means of Replicates</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mrow><mi>x</mi><mi>h</mi></mrow></msub><mo>=</mo><mfrac><mi>n</mi><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><mn>1</mn><msub><mi>n</mi><mrow><mi>x</mi><mi>i</mi></mrow></msub></mfrac></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 m_{xh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{xi}}}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mrow><mi>y</mi><mi>h</mi></mrow></msub><mo>=</mo><mfrac><mi>n</mi><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><mn>1</mn><msub><mi>n</mi><mrow><mi>y</mi><mi>i</mi></mrow></msub></mfrac></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 m_{yh} = \frac{n}{\Sigma_{i=1}^n \frac{1}{n_{yi}}}
-</annotation></semantics></math><strong>Step 4: Compute the variance of
-the differences</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>s</mi><mover><mi>d</mi><mo accent="true">‾</mo></mover><mn>2</mn></msubsup><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><mn>1</mn><msub><mi>m</mi><mrow><mi>x</mi><mi>h</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>x</mi><mi>w</mi></mrow><mn>2</mn></msubsup><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><mn>1</mn><msub><mi>m</mi><mrow><mi>y</mi><mi>h</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>y</mi><mi>w</mi></mrow><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
-s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} + (1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
-</annotation></semantics></math><strong>Step 5: Compute MOVER
-Components</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>11</mn></msub><mo>=</mo><msubsup><mi>s</mi><mover><mi>d</mi><mo accent="true">‾</mo></mover><mn>2</mn></msubsup><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\]</span> <strong>Step 4: Compute the variance of the
+differences</strong></p>
+<p><span class="math display">\[
+s^2_d = s^2_{\bar d} + (1+\frac{1}{m_{xh}}) \cdot s^2_{xw} +
+(1+\frac{1}{m_{yh}}) \cdot s^2_{yw}
+\]</span> <strong>Step 5: Compute MOVER Components</strong></p>
+<p><span class="math display">\[
 S_{11} = s_{\bar d}^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>12</mn></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><msub><mi>m</mi><mrow><mi>x</mi><mi>h</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><msub><mi>N</mi><mi>x</mi></msub><mo>−</mo><mi>n</mi></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><msub><mi>N</mi><mi>x</mi></msub><mo>−</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>x</mi><mi>w</mi></mrow><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
-S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha, N_x-n)}}) \cdot s^2_{xw}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>13</mn></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><msub><mi>m</mi><mrow><mi>y</mi><mi>h</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><msub><mi>N</mi><mi>y</mi></msub><mo>−</mo><mi>n</mi></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><msub><mi>N</mi><mi>y</mi></msub><mo>−</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>y</mi><mi>w</mi></mrow><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
-S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha, N_y-n)}}) \cdot s^2_{yw}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mn>1</mn></msub><mo>=</mo><msqrt><mrow><msubsup><mi>S</mi><mn>11</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>S</mi><mn>12</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>S</mi><mn>13</mn><mn>2</mn></msubsup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
+S_{12} = (1-\frac{1}{m_{xh}}) \cdot (1 - \frac{N_x-n}{\chi^2_{(1-\alpha,
+N_x-n)}}) \cdot s^2_{xw}
+\]</span> <span class="math display">\[
+S_{13} = (1-\frac{1}{m_{yh}}) \cdot (1 - \frac{N_y-n}{\chi^2_{(1-\alpha,
+N_y-n)}}) \cdot s^2_{yw}
+\]</span></p>
+<p><span class="math display">\[
 S_1 = \sqrt{S_{11}^2 +S_{12}^2 +S_{13}^2}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>−</mo><msub><mi>S</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 l = s_d^2 - S_1
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>=</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>+</mo><msub><mi>S</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 u = s_d^2 + S_1
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>M</mi><mi>E</mi><mo>=</mo><msqrt><mrow><mfrac><mrow><msubsup><mi>z</mi><mi>α</mi><mn>2</mn></msubsup><mo>⋅</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></mrow><mi>n</mi></mfrac><mo>+</mo><msubsup><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msqrt><mi>u</mi></msqrt><mo>−</mo><msqrt><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{u} - \sqrt{s^2_d})^2}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi>M</mi><mi>E</mi><mo>=</mo><msqrt><mrow><mfrac><mrow><msubsup><mi>z</mi><mi>α</mi><mn>2</mn></msubsup><mo>⋅</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></mrow><mi>n</mi></mfrac><mo>+</mo><msubsup><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msqrt><mi>l</mi></msqrt><mo>−</mo><msqrt><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2} \cdot(\sqrt{l} - \sqrt{s^2_d})^2}
-</annotation></semantics></math> ### LoA</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><msub><mi>A</mi><mrow><mi>l</mi><mi>o</mi><mi>w</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>−</mo><msub><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msub><mi>s</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
+LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
+\cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+\]</span></p>
+<p><span class="math display">\[
+RME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
+\cdot(\sqrt{l} - \sqrt{s^2_d})^2}
+\]</span> ### LoA</p>
+<p><span class="math display">\[
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><msub><mi>A</mi><mrow><mi>u</mi><mi>p</mi><mi>p</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>+</mo><msub><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msub><mi>s</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-</annotation></semantics></math></p>
+\]</span></p>
 <div class="section level4">
 <h4 id="lower-loa-ci">Lower LoA CI<a class="anchor" aria-label="anchor" href="#lower-loa-ci"></a>
 </h4>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI = LoA_{lower} - LME
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = LoA_{lower} + RME
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="upper-loa-ci">Upper LoA CI<a class="anchor" aria-label="anchor" href="#upper-loa-ci"></a>
 </h4>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI = LoA_{upper} - RME
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = LoA_{upper} + LME
-$$</span></p>
+\]</span></p>
 </div>
 </div>
 <div class="section level3">
@@ -489,75 +479,79 @@ $$</span></p>
 <h4 id="loa">LoA<a class="anchor" aria-label="anchor" href="#loa"></a>
 </h4>
 <p><strong>Step 1: Compute mean and variance</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>d</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></msubsup><mfrac><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>n</mi><mi>i</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 \bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><msub><mi>d</mi><mi>i</mi></msub><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span> <span class="math display">\[
 \bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mi>i</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></msubsup><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>d</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><msub><mi>n</mi><mi>i</mi></msub><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
-</annotation></semantics></math><strong>Step 2: Compute pooled estimate
-of within subject error</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mrow><mi>d</mi><mi>w</mi></mrow><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><msub><mi>n</mi><mi>i</mi></msub><mo>−</mo><mn>1</mn></mrow><mrow><mi>N</mi><mo>−</mo><mi>n</mi></mrow></mfrac><mo>⋅</mo><msubsup><mi>s</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+\]</span> <strong>Step 2: Compute pooled estimate of within subject
+error</strong></p>
+<p><span class="math display">\[
 s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Step 3: Compute pooled estimate of between subject
 error</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mi>b</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>d</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>−</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Step 4: Compute the harmonic mean of the replicate
 size</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>h</mi></msub><mo>=</mo><mfrac><mi>n</mi><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><msubsup><mi>m</mi><mi>i</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
-</annotation></semantics></math></p>
+\]</span></p>
 <p><strong>Step 5: Compute SD of the difference </strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>=</mo><msubsup><mi>s</mi><mi>b</mi><mn>2</mn></msubsup><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msubsup><mi>m</mi><mi>h</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><msubsup><mi>s</mi><mrow><mi>d</mi><mi>w</mi></mrow><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
-</annotation></semantics></math><strong>Step 6: Calculate l and
-u</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>−</mo><msqrt><mrow><msup><mrow><mo stretchy="true" form="prefix">[</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msubsup><mi>m</mi><mi>h</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mi>n</mi></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>N</mi><mo>−</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-</annotation></semantics></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>=</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>+</mo><msqrt><mrow><msup><mrow><mo stretchy="true" form="prefix">[</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msubsup><mi>m</mi><mi>h</mi><mrow><mo>−</mo><mn>1</mn></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mi>n</mi></mrow><msubsup><mi>χ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo>,</mo><mi>N</mi><mo>−</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msubsup></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha, n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha, N-n)}})]^2}
-</annotation></semantics></math><strong>Step 7: Compute LME and
-RME</strong></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>M</mi><mi>E</mi><mo>=</mo><msqrt><mrow><mfrac><mrow><msub><mi>z</mi><mi>α</mi></msub><mo>⋅</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></mrow><mi>n</mi></mfrac><mo>+</mo><msubsup><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msqrt><mi>u</mi></msqrt><mo>−</mo><msqrt><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{u}-\sqrt{s^2_d} )^2}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi>M</mi><mi>E</mi><mo>=</mo><msqrt><mrow><mfrac><mrow><msub><mi>z</mi><mi>α</mi></msub><mo>⋅</mo><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></mrow><mi>n</mi></mfrac><mo>+</mo><msubsup><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow><mn>2</mn></msubsup><mo>⋅</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msqrt><mi>l</mi></msqrt><mo>−</mo><msqrt><msubsup><mi>s</mi><mi>d</mi><mn>2</mn></msubsup></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">
-RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot (\sqrt{l}-\sqrt{s^2_d} )^2}
-</annotation></semantics></math></p>
+\]</span> <strong>Step 6: Calculate l and u</strong></p>
+<p><span class="math display">\[
+l = s_d^2 - \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
+n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
+N-n)}})]^2}
+\]</span> <span class="math display">\[
+u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
+n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
+N-n)}})]^2}
+\]</span> <strong>Step 7: Compute LME and RME</strong></p>
+<p><span class="math display">\[
+LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
+(\sqrt{u}-\sqrt{s^2_d} )^2}
+\]</span></p>
+<p><span class="math display">\[
+RME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
+(\sqrt{l}-\sqrt{s^2_d} )^2}
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="loa-1">LoA<a class="anchor" aria-label="anchor" href="#loa-1"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><msub><mi>A</mi><mrow><mi>l</mi><mi>o</mi><mi>w</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>−</mo><msub><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msub><mi>s</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi>o</mi><msub><mi>A</mi><mrow><mi>u</mi><mi>p</mi><mi>p</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mover><mi>d</mi><mo accent="true">‾</mo></mover><mo>+</mo><msub><mi>z</mi><mrow><mi>β</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msub><mi>s</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
-</annotation></semantics></math></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="lower-loa-ci-1">Lower LoA CI<a class="anchor" aria-label="anchor" href="#lower-loa-ci-1"></a>
 </h4>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI = LoA_{lower} - LME
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = LoA_{lower} + RME
-$$</span></p>
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="upper-loa-ci-1">Upper LoA CI<a class="anchor" aria-label="anchor" href="#upper-loa-ci-1"></a>
 </h4>
-<p><span class="math display">$$
+<p><span class="math display">\[
 Lower \space CI = LoA_{upper} - RME
-$$</span></p>
-<p><span class="math display">$$
+\]</span></p>
+<p><span class="math display">\[
 Upper \space CI = LoA_{upper} + LME
-$$</span></p>
+\]</span></p>
 </div>
 </div>
 <div class="section level3">

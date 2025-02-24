@@ -221,49 +221,44 @@ TRUE.</p>
 <div class="section level2">
 <h2 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h2>
-<p>Deming regression assumes paired measures (<span class="math inline">$x_i, \space  y_i$</span>) are each measured with
+<p>Deming regression assumes paired measures (<span class="math inline">\(x_i, \space  y_i\)</span>) are each measured with
 error.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><msub><mi>X</mi><mi>i</mi></msub><mo>+</mo><msub><mi>ϵ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 x_i = X_i + \epsilon_i
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>+</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p><span class="math display">\[
 y_i = Y_i + \delta_i
-</annotation></semantics></math> We can then measure the relationship
-between the two variables with the following model.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mo>⋅</mo><msub><mover><mi>X</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span> We can then measure the relationship between the two variables
+with the following model.</p>
+<p><span class="math display">\[
 \hat Y_i = \beta_0 + \beta_1 \cdot \hat X_i
-</annotation></semantics></math> Traditionally there are 2 null
-hypotheses</p>
+\]</span> Traditionally there are 2 null hypotheses</p>
 <p>First, the intercept is equal to zero</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
-$$</span></p>
+\]</span></p>
 <p>Second, that the slope is equal to one.</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
-$$</span></p>
+\]</span></p>
 <div class="section level3">
 <h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h3>
-<p>A Deming regression model also assumes the measurement error
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>σ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math>)
-ratio is constant.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mfrac><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><msubsup><mi>σ</mi><mi>δ</mi><mn>2</mn></msubsup></mfrac></mrow><annotation encoding="application/x-tex">
-\lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta} 
-</annotation></semantics></math> In <code>SimplyAgree</code>, the error
-ratio can be set with the <code>error.ratio</code> argument. It defaults
-to 1, but can be changed by the user. If replicate measures are taken,
-then the user can use the <code>id</code> argument to indicate which
-measures belong to which subject/participant. The measurement error, and
-the error ratio, will then be estimated from the data itself.</p>
-<p>If the data was not measured in replicate then the error ratio
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>)
-can be estimated from the coefficient of variation (if that data is
-available) and the mean of x and y (<span class="math inline">$\bar x,
-\space \bar y$</span>).</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>C</mi><msub><mi>V</mi><mi>y</mi></msub><mo>⋅</mo><mover><mi>y</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>C</mi><msub><mi>V</mi><mi>x</mi></msub><mo>⋅</mo><mover><mi>x</mi><mo accent="true">‾</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">
+<p>A Deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant.</p>
+<p><span class="math display">\[
+\lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta}
+\]</span> In <code>SimplyAgree</code>, the error ratio can be set with
+the <code>error.ratio</code> argument. It defaults to 1, but can be
+changed by the user. If replicate measures are taken, then the user can
+use the <code>id</code> argument to indicate which measures belong to
+which subject/participant. The measurement error, and the error ratio,
+will then be estimated from the data itself.</p>
+<p>If the data was not measured in replicate then the error ratio (<span class="math inline">\(\lambda\)</span>) can be estimated from the
+coefficient of variation (if that data is available) and the mean of x
+and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
+<p><span class="math display">\[
 \lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2}
-</annotation></semantics></math></p>
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="weights">Weights<a class="anchor" aria-label="anchor" href="#weights"></a>
@@ -272,47 +267,48 @@ available) and the mean of x and y (<span class="math inline">$\bar x,
 the true value of the measure. In these cases, it may be prudent to use
 “weighted” Deming regression models. The weights used in
 <code>SimplyAgree</code> are the same as those suggested by <span class="citation">Linnet (<a href="#ref-linnet1993">1993</a>)</span>.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>w</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><mn>1</mn><msup><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><mi>λ</mi><mo>⋅</mo><msub><mi>y</mi><mi>i</mi></msub></mrow><mrow><mn>1</mn><mo>+</mo><mi>λ</mi></mrow></mfrac><mo stretchy="true" form="postfix">]</mo></mrow><mn>2</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">\[
 \hat w_i = \frac{1}{ [ \frac{x_i + \lambda \cdot y_i}{1 + \lambda}]^2}
-</annotation></semantics></math></p>
+\]</span></p>
 <p>Weights can also be provided through the <code>weights</code>
 argument. If weighted Deming regression is not selected
 (<code>weighted = FALSE</code>), the weights for each observation is
 equal to 1.</p>
 <p>The estimated mean of X and Y are then estimated as the
 following.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>w</mi></msub><mo>=</mo><mfrac><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msub><mover><mi>w</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>⋅</mo><msub><mi>x</mi><mi>i</mi></msub></mrow><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msub><mover><mi>w</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-\bar x_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot x_i}{\Sigma^{N}_{i=1} \hat w_i}
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>w</mi></msub><mo>=</mo><mfrac><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msub><mover><mi>w</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>⋅</mo><msub><mi>y</mi><mi>i</mi></msub></mrow><mrow><msubsup><mi>Σ</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msub><mover><mi>w</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-\bar y_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot y_i}{\Sigma^{N}_{i=1} \hat w_i}
-</annotation></semantics></math></p>
+<p><span class="math display">\[
+\bar x_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot x_i}{\Sigma^{N}_{i=1}
+\hat w_i}
+\]</span></p>
+<p><span class="math display">\[
+\bar y_w =  \frac{\Sigma^{N}_{i=1} \hat w_i \cdot y_i}{\Sigma^{N}_{i=1}
+\hat w_i}
+\]</span></p>
 </div>
 <div class="section level3">
 <h3 id="estimating-the-slope-and-interept">Estimating the Slope and Interept<a class="anchor" aria-label="anchor" href="#estimating-the-slope-and-interept"></a>
 </h3>
-<p>First, there are 3 components (<span class="math inline">$v_x, \space
-v_y, \space cov_{xy}$</span>)</p>
-<p><span class="math display">$$
+<p>First, there are 3 components (<span class="math inline">\(v_x,
+\space v_y, \space cov_{xy}\)</span>)</p>
+<p><span class="math display">\[
 v_x = \Sigma_{i=1}^N \space \hat w_i \cdot (x_i- \bar x_w)^2
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 v_y = \Sigma_{i=1}^N \space \hat w_i \cdot (y_i- \bar y_w)^2
-$$</span> <span class="math display">$$
+\]</span> <span class="math display">\[
 cov_{xy} = \Sigma_{i=1}^N \space \hat w_i \cdot  (x_i- \bar x_w) \cdot
 (y_i- \bar y_w)
-$$</span></p>
-<p>The slope
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>1</mn></msub><annotation encoding="application/x-tex">b_1</annotation></semantics></math>)
-can then be estimated with the following equation.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo>⋅</mo><msub><mi>v</mi><mi>y</mi></msub><mo>−</mo><msub><mi>v</mi><mi>x</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msqrt><mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>v</mi><mi>x</mi></msub><mo>−</mo><mi>λ</mi><mo>⋅</mo><msub><mi>v</mi><mi>y</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mn>4</mn><mo>⋅</mo><mi>λ</mi><mo>⋅</mo><mi>c</mi><mi>o</mi><msubsup><mi>v</mi><mrow><mi>x</mi><mi>y</mi></mrow><mn>2</mn></msubsup></mrow></msqrt></mrow><mrow><mn>2</mn><mo>⋅</mo><mi>λ</mi><mo>⋅</mo><mi>c</mi><mi>o</mi><msub><mi>v</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-b_1 = \frac{(\lambda \cdot v_y - v_x) + \sqrt{(v_x-\lambda \cdot v_y)^2 + 4 \cdot \lambda \cdot cov_{xy}^2}}{2 \cdot \lambda \cdot cov_{xy}}
-</annotation></semantics></math> The intercept
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>0</mn></msub><annotation encoding="application/x-tex">b_0</annotation></semantics></math>)
-can then be estimated with the following equation.</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mn>0</mn></msub><mo>=</mo><msub><mover><mi>y</mi><mo accent="true">‾</mo></mover><mi>w</mi></msub><mo>−</mo><msub><mi>b</mi><mn>1</mn></msub><mo>⋅</mo><msub><mover><mi>x</mi><mo accent="true">‾</mo></mover><mi>w</mi></msub></mrow><annotation encoding="application/x-tex">
+\]</span></p>
+<p>The slope (<span class="math inline">\(b_1\)</span>) can then be
+estimated with the following equation.</p>
+<p><span class="math display">\[
+b_1 = \frac{(\lambda \cdot v_y - v_x) + \sqrt{(v_x-\lambda \cdot v_y)^2
++ 4 \cdot \lambda \cdot cov_{xy}^2}}{2 \cdot \lambda \cdot cov_{xy}}
+\]</span> The intercept (<span class="math inline">\(b_0\)</span>) can
+then be estimated with the following equation.</p>
+<p><span class="math display">\[
 b_0 = \bar y_w - b_1 \cdot \bar x_w
-</annotation></semantics></math> The standard errors of b1 and b0 are
-both estimated using a jackknife method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990">1990</a>)</span>).</p>
+\]</span> The standard errors of b1 and b0 are both estimated using a
+jackknife method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990">1990</a>)</span>).</p>
 </div>
 </div>
 <div class="section level2">
