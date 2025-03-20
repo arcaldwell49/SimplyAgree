@@ -575,8 +575,14 @@ reli_aov = function(measure,
         MSE <- stats[3,3]
         SEM = sqrt(MSE)
         sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-        SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-        SEP = sd_tots*sqrt(1-ICC3^2)
+        if(se_type == "MSE"){
+          ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
+          SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+          SEP = sd_tots*sqrt(1-ICC3^2)
+        } else {
+          SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
+          SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
+        }
 
         mw <- mean(x.df$values, na.rm = TRUE)
         if(cv_calc == "residuals"){
