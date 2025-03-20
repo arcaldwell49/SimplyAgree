@@ -552,7 +552,8 @@ reli_aov = function(measure,
                     names_prefix = "item_")
 
       boot_function <- function(data, indices,
-                                cv_calc = "MSE") {
+                                cv_calc = cv_calc,
+                                se_type = se_type) {
         d <- data[indices, ] # allows boot to select sample
         d$id = 1:nrow(d)
 
@@ -565,18 +566,93 @@ reli_aov = function(measure,
 
         n_id <- length(unique(x.df$id))
         n_items <- length(unique(x.df$items))
+        n_obs = nrow(x.df)
 
         aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
         s.aov <- summary(aov.x)
+
         stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
         MSB <- stats[3,1]
         MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
         MSJ <- stats[3,2]
         MSE <- stats[3,3]
-        SEM = sqrt(MSE)
-        sd_tots = sqrt(sum(stats[2,])/(n_id-1))
-        SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-        SEP = sd_tots*sqrt(1-ICC3^2)
+
+        # Calculate ICCs-----
+        ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
+        ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
+                                                                      MSE)/n_id)
+        ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
+        ICC_1_k <- (MSB - MSW)/(MSB)
+        ICC_2_k <- (MSB - MSE)/(MSB + (MSJ - MSE)/n_id)
+        ICC_3_k <- (MSB - MSE)/MSB
+        F11 <- MSB/MSW
+        df11n <- n_id - 1
+        df11d <- n_id * (n_items - 1)
+        p11 <- -expm1(pf(F11, df11n, df11d, log.p = TRUE))
+        F21 <- MSB/MSE
+        df21n <- n_id - 1
+        df21d <- (n_id - 1) * (n_items - 1)
+        p21 <- -expm1(pf(F21, df21n, df21d, log.p = TRUE))
+        F31 <- F21
+        results <- data.frame(matrix(NA, ncol = 6, nrow = 6))
+        colnames(results) <- c("model","measures","type", "icc","lower.ci", "upper.ci")
+
+        results$model = c("one-way random","two-way random", "two-way fixed",
+                          "one-way random","two-way random", "two-way fixed")
+        results$measures = c("Agreement", "Agreement", "Consistency",
+                             "Avg. Agreement", "Avg. Agreement", "Avg. Consistency")
+        results$type = c("ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k")
+        results$icc = c(ICC1,ICC2,ICC3,ICC_1_k,ICC_2_k,ICC_3_k)
+
+        # F-tests ------
+        F1L <- F11/qf(1 - alpha, df11n, df11d)
+        F1U <- F11 * qf(1 - alpha, df11d, df11n)
+        L1 <- (F1L - 1)/(F1L + (n_items - 1))
+        U1 <- (F1U - 1)/(F1U + n_items - 1)
+        F3L <- F31/qf(1 - alpha, df21n, df21d)
+        F3U <- F31 * qf(1 - alpha, df21d, df21n)
+        results[1, 5] <- L1
+        results[1, 6] <- U1
+        results[3, 5] <- (F3L - 1)/(F3L + n_items - 1)
+        results[3, 6] <- (F3U - 1)/(F3U + n_items - 1)
+        results[4, 5] <- 1 - 1/F1L
+        results[4, 6] <- 1 - 1/F1U
+        results[6, 5] <- 1 - 1/F3L
+        results[6, 6] <- 1 - 1/F3U
+        Fj <- MSJ/MSE
+        vn <- (n_items - 1) * (n_id - 1) * ((n_items * ICC2 * Fj + n_id *
+                                               (1 + (n_items - 1) * ICC2) - n_items * ICC2))^2
+        vd <- (n_id - 1) * n_items^2 * ICC2^2 * Fj^2 + (n_id * (1 +
+                                                                  (n_items - 1) * ICC2) - n_items * ICC2)^2
+        v <- vn/vd
+        F3U <- qf(1 - alpha, n_id - 1, v)
+        F3L <- qf(1 - alpha, v, n_id - 1)
+        L3 <- n_id * (MSB - F3U * MSE)/(F3U * (n_items * MSJ + (n_items *
+                                                                  n_id - n_items - n_id) * MSE) + n_id * MSB)
+        results[2, 5] <- L3
+        U3 <- n_id * (F3L * MSB - MSE)/(n_items * MSJ + (n_items * n_id -
+                                                           n_items - n_id) * MSE + n_id * F3L * MSB)
+        results[2, 6] <- U3
+        L3k <- L3 * n_items/(1 + L3 * (n_items - 1))
+        U3k <- U3 * n_items/(1 + U3 * (n_items - 1))
+        results[5, 5] <- L3k
+        results[5, 6] <- U3k
+
+        sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
+        if(se_type == "MSE"){
+          SEM = sqrt(MSE)
+        } else{
+          SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
+        }
+
+        if(se_type == "MSE"){
+          ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
+          SEE = sd_tots*sqrt(ICC3*(1-ICC3))
+          SEP = sd_tots*sqrt(1-ICC3^2)
+        } else {
+          SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
+          SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
+        }
 
         mw <- mean(x.df$values, na.rm = TRUE)
         if(cv_calc == "residuals"){
@@ -599,7 +675,9 @@ reli_aov = function(measure,
         return(res)
       }
 
-      boo2 = boot::boot(wide_df, boot_function,  R = replicates)
+      boo2 = boot::boot(wide_df, boot_function,  R = replicates,
+                        cv_calc = cv_calc,
+                        se_type = se_type)
 
       res_other = tidy_boot(boo2,
                             conf.int = TRUE,
