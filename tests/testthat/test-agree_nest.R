@@ -35,6 +35,13 @@ testthat::test_that("examples from Zou", {
                                   data_type = "nest",
                                   alpha = .025,
                                   prop_bias = TRUE)
+  nest_test_new_asym = agreement_limit(x="x",y="y",
+                                   id = "id",
+                                   data = reps2,
+                                   data_type = "nest",
+                                   alpha = .025,
+                                   prop_bias = TRUE,
+                                   lmer_df = "a")
   testthat::expect_equal(nest_test_new$loa$bias,0.7234979,
                          tolerance = .0001)
   ch1 = check(nest_test_new)
@@ -42,7 +49,7 @@ testthat::test_that("examples from Zou", {
                                   id = "id",
                                   data = reps2,
                                   data_type = "nest",
-                                  log_tf =TRUE)
+                                  log_tf = TRUE)
 
   nest_test_newlog2 = agreement_limit(x="x",y="y",
                                      id = "id",

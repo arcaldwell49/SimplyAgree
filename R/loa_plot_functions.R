@@ -231,7 +231,7 @@ bias_loa_plot = function(x,
                       paste0("Ratio of Methods (x/y)"),
                       paste0("Difference between Methods (x - y)")),
            caption = cap1,
-           guides = "") +
+           dictionary = list(text = "")) +
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())

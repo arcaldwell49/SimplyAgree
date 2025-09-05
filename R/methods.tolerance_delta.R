@@ -399,7 +399,7 @@ plot.tolerance_delta <- function(x,
                            paste0("Sympercent Difference between Methods (s%)")),
                     paste0("Difference between Methods (x - y)")),
          caption = cap1,
-         guides = "") +
+         dictionary = list(text = "")) +
     theme_bw() +
     theme(legend.position = "left",
           legend.title = element_blank())
