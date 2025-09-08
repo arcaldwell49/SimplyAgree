@@ -517,8 +517,8 @@ calc_loa_nest = function(df,
                                  mean(df$avg, na.rm = TRUE),
                                  max(df$avg, na.rm = TRUE)
                                )
-                             )) %>%
-        emmeans(~avg, lmer.df = "satterthwaite",
+                             ), lmer.df = "satterthwaite") %>%
+        emmeans(~avg,
                 lmerTest.limit = lmer_limit) %>%
         as.data.frame() %>%
         rename(bias = emmean) %>%
@@ -533,8 +533,8 @@ calc_loa_nest = function(df,
                                  mean(df$avg, na.rm = TRUE),
                                  max(df$avg, na.rm = TRUE)
                                )
-                             )) %>%
-        emmeans(~avg, lmer.df = "asymptotic") %>%
+                             ), lmer.df = "asymptotic") %>%
+        emmeans(~avg) %>%
         as.data.frame() %>%
         rename(bias = emmean) %>%
         select(avg, bias, SE, df, asymp.LCL, asymp.UCL) %>%

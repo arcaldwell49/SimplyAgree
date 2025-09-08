@@ -366,7 +366,7 @@ bias_ba_plot = function(x,
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
            caption = cap1,
-           guides = "") +
+           dictionary = list(text = "")) +
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())
@@ -432,7 +432,7 @@ bias_ba_plot = function(x,
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
            caption = cap1,
-           guides = "") +
+           dictionary = list(text = "")) +
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())
@@ -501,7 +501,7 @@ bias_ba_plot = function(x,
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = paste0("Difference between Methods ",x_name ," & ", y_name),
            caption = cap1,
-           guides = "") +
+           dictionary = list(text = "")) +
       theme_bw() +
       theme(legend.position = "left",
             legend.title = element_blank())
