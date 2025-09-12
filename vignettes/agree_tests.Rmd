@@ -466,7 +466,7 @@ df = data.frame(x = x,
 
 a1 = agree_test(x = df$x,
                 y = df$y,
-                # prop_bias =TRUE,
+                #prop_bias =TRUE,
                 agree.level = .95)
 
 plot(a1, 

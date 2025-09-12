@@ -218,14 +218,14 @@ bias_loa_plot = function(x,
                     ymin = lower.ci,
                     ymax = upper.ci,
                     x=x,
-                    fill=text)) +
+                    group=text)) +
       geom_line(inherit.aes = FALSE,
                 data = df_loa2,
                 aes(y=estimate,
                     x=x,
                     color=text)) +
       scale_color_viridis_d(option = "C", end = .8) +
-      scale_fill_viridis_d(option = "C", end = .8) +
+      #scale_fill_viridis_d(option = "C", end = .8) +
       labs(x = paste0("Average of ", x_name ," & ", y_name),
            y = ifelse(call2$log_tf,
                       paste0("Ratio of Methods (x/y)"),

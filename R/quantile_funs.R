@@ -56,7 +56,7 @@ get_qemm = function(quan_mod,
   df_coef_lloa = data.frame(at = quan_emm_lloa$mean,
                             estimate = quan_emm_lloa$emmean,
                             lower.ci = quan_emm_lloa$lower.CL,
-                            upper.ci = quan_emm_lloa$upper.CL,
+                            upper.ci = quan_emm_lloa$emmean,
                             text = "Lower LoA")
 
   ref_uloa = ref_grid(quan_mod, se = "boot",
@@ -68,7 +68,7 @@ get_qemm = function(quan_mod,
                                                 ~ mean), level = conf.level))
   df_coef_uloa = data.frame(at = quan_emm_uloa$mean,
                             estimate = quan_emm_uloa$emmean,
-                            lower.ci = quan_emm_uloa$lower.CL,
+                            lower.ci = quan_emm_uloa$emmean,
                             upper.ci = quan_emm_uloa$upper.CL,
                             text = "Upper LoA")
 
