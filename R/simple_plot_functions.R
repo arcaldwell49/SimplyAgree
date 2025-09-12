@@ -273,10 +273,6 @@ bias_ba_plot = function(x,
     colnames(df) = c("y","x")
   }
 
-  # if(geom == "stat_density_2d" |
-  #    geom == "geom_bin2d"){
-  #   stop("Cannot use stat_density_2d or geom_bin2d when prop_bias is TRUE.")
-  # }
 
   agree.level = x$call$agree.level
 
