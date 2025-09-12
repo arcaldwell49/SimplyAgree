@@ -447,6 +447,7 @@ a1 = agree_np(x = "x",
 print(a1)
 
 plot(a1)
+
 ```
 
 
@@ -465,12 +466,13 @@ df = data.frame(x = x,
 
 a1 = agree_test(x = df$x,
                 y = df$y,
+                # prop_bias =TRUE,
                 agree.level = .95)
 
-plot(a1,
+plot(a1, 
      geom = "geom_point")
 
-plot(a1,
+plot(a1, 
      geom = "geom_bin2d")
 
 plot(a1,
