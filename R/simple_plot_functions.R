@@ -437,7 +437,7 @@ bias_ba_plot = function(x,
                         contour = TRUE,
                         aes(fill = after_stat(level)),
                         contour_var = "ndensity",
-                        colour = "black",) +
+                        colour = "black") +
         scale_fill_distiller(palette = "Blues", direction = 1)
     }  else {
       stop("geom option not supported")
