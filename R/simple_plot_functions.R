@@ -458,7 +458,6 @@ bias_ba_plot = function(x,
       } else {
         bland_alt.plot = bland_alt.plot +
           geom_ribbon(data = emm,
-                      #inherit.aes = FALSE,
                       alpha = .2,
                       aes(y=estimate,
                           ymax=upper.ci,
