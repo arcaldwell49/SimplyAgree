@@ -273,6 +273,7 @@ bias_ba_plot = function(x,
     colnames(df) = c("y","x")
   }
 
+
   agree.level = x$call$agree.level
 
   agree.l = 1 - (1 - agree.level) / 2
@@ -328,16 +329,30 @@ bias_ba_plot = function(x,
     }
 
     if(smooth_se == TRUE) {
+      if(geom == "stat_density_2d" |
+         geom == "geom_bin2d"){
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      inherit.aes = FALSE,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          group = text))
+      } else {
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      #inherit.aes = FALSE,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          fill=text)) +
+          scale_fill_viridis_d(option = "C", end = .8)
+      }
 
-    bland_alt.plot = bland_alt.plot +
-      geom_ribbon(data = emm,
-                  alpha = .2,
-                  aes(y=estimate,
-                      ymax=upper.ci,
-                      ymin=lower.ci,
-                      x= at,
-                      fill=text)) +
-      scale_fill_viridis_d(option = "C", end = .8)
     }
 
     if(x$call$TOST){
@@ -391,20 +406,62 @@ bias_ba_plot = function(x,
                      TOST = get_call(x$call$TOST),
                      var_comp = x$var_comp)
 
-    bland_alt.plot = ggplot(df,
-                            aes(x=mean,
-                                y=delta)) +
-      geom_point()
-    if(smooth_se == TRUE){
-    bland_alt.plot = bland_alt.plot +
-      geom_ribbon(data = emm,
-                  alpha = .2,
-                  aes(y=estimate,
-                      ymax=upper.ci,
-                      ymin=lower.ci,
-                      x= at,
-                      fill=text)) +
-      scale_fill_viridis_d(option = "C", end = .8)
+
+    if(geom == "geom_point"){
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_point(na.rm = TRUE)
+    }  else if(geom == "geom_bin2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_bin2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d_filled") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d_filled(na.rm = TRUE,
+                               alpha = 0.5,
+                               contour_var = "ndensity")
+    } else if(geom == "stat_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        stat_density_2d(na.rm = TRUE,
+                        geom = "polygon",
+                        contour = TRUE,
+                        aes(fill = after_stat(level)),
+                        contour_var = "ndensity",
+                        colour = "black") +
+        scale_fill_distiller(palette = "Blues", direction = 1)
+    }  else {
+      stop("geom option not supported")
+    }
+
+    if(smooth_se == TRUE) {
+      if(geom == "stat_density_2d" |
+         geom == "geom_bin2d"){
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      inherit.aes = FALSE,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          group = text))
+      } else {
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          fill=text)) +
+          scale_fill_viridis_d(option = "C", end = .8)
+      }
     }
 
     if(x$call$TOST){
@@ -460,20 +517,61 @@ bias_ba_plot = function(x,
                     TOST = x$call$TOST,
                     var_comp = x$var_comp)
 
-    bland_alt.plot = ggplot(df,
-                            aes(x=mean,
-                                y=delta)) +
-      geom_point()
-    if(smooth_se == TRUE){
-      bland_alt.plot = bland_alt.plot +
-        geom_ribbon(data = emm,
-                    alpha = .2,
-                    aes(y=estimate,
-                        ymax=upper.ci,
-                        ymin=lower.ci,
-                        x= at,
-                        fill=text)) +
-        scale_fill_viridis_d(option = "C", end = .8)
+    if(geom == "geom_point"){
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_point(na.rm = TRUE)
+    }  else if(geom == "geom_bin2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_bin2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d(na.rm = TRUE)
+    } else if(geom == "geom_density_2d_filled") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        geom_density_2d_filled(na.rm = TRUE,
+                               alpha = 0.5,
+                               contour_var = "ndensity")
+    } else if(geom == "stat_density_2d") {
+      bland_alt.plot = ggplot(df,
+                              aes(x = mean, y = delta)) +
+        stat_density_2d(na.rm = TRUE,
+                        geom = "polygon",
+                        contour = TRUE,
+                        aes(fill = after_stat(level)),
+                        contour_var = "ndensity",
+                        colour = "black") +
+        scale_fill_distiller(palette = "Blues", direction = 1)
+    }  else {
+      stop("geom option not supported")
+    }
+
+    if(smooth_se == TRUE) {
+      if(geom == "stat_density_2d" |
+         geom == "geom_bin2d"){
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      inherit.aes = FALSE,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          group = text))
+      } else {
+        bland_alt.plot = bland_alt.plot +
+          geom_ribbon(data = emm,
+                      alpha = .2,
+                      aes(y=estimate,
+                          ymax=upper.ci,
+                          ymin=lower.ci,
+                          x= at,
+                          fill=text)) +
+          scale_fill_viridis_d(option = "C", end = .8)
+      }
     }
 
     if(x$call$TOST){
