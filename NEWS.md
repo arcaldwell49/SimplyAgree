@@ -1,5 +1,11 @@
 # NEWS
 
+# SimplyAgree 0.3.0
+
+- Add ehanced support for Deming regression.
+  - New function `deming_reli` for reliability analysis using Deming regression.
+  - Updated `dem_reg` function to include options for confidence intervals and plotting.
+
 # SimplyAgree 0.2.2
 
 - Small fixes to errors related to plotting and df for lmer based results.
