@@ -79,6 +79,7 @@
 #' )
 #' }
 #' @importFrom scales percent_format
+#' @importFrom stats rbeta
 #' @export
 
 deming_power_sim <- function(n_sims = 1000,
