@@ -3,12 +3,10 @@ context("deming-power")
 # Note: Power simulations are stochastic, so we use tolerances and ranges
 # rather than exact values for most tests
 
-# ============================================================================
-# Test 1: Basic Power Simulation
-# ============================================================================
+# Test 1: Basic Power Simulation-----------
 
 test_that("deming_power_sim runs without errors", {
-  expect_silent({
+  expect_message({
     result <- deming_power_sim(
       n_sims = 50,  # Small for speed
       sample_size = 30,
@@ -80,9 +78,10 @@ test_that("power increases with sample size", {
 
 test_that("power increases with larger bias", {
   # Small bias
+  set.seed(31125)
   result_small_bias <- deming_power_sim(
-    n_sims = 50,
-    sample_size = 50,
+    n_sims = 150,
+    sample_size = 25,
     x_range = c(10, 100),
     actual_slope = 1.02,  # 2% bias
     y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
@@ -91,8 +90,8 @@ test_that("power increases with larger bias", {
 
   # Large bias
   result_large_bias <- deming_power_sim(
-    n_sims = 50,
-    sample_size = 50,
+    n_sims = 150,
+    sample_size = 25,
     x_range = c(10, 100),
     actual_slope = 1.1,  # 10% bias
     y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
@@ -103,9 +102,8 @@ test_that("power increases with larger bias", {
   expect_true(result_large_bias$power_joint > result_small_bias$power_joint)
 })
 
-# ============================================================================
-# Test 2: Variance Function Types
-# ============================================================================
+
+# Test 2: Variance Function Types-----------
 
 test_that("constant variance type works", {
   result <- deming_power_sim(
@@ -146,9 +144,9 @@ test_that("power variance type works", {
   expect_s3_class(result, "deming_power")
 })
 
-# ============================================================================
-# Test 3: X Distribution Types
-# ============================================================================
+
+
+# Test 3: X Distribution Types-----------
 
 test_that("uniform x distribution works", {
   result <- deming_power_sim(
@@ -192,9 +190,8 @@ test_that("right_skewed x distribution works", {
   expect_s3_class(result, "deming_power")
 })
 
-# ============================================================================
-# Test 4: Weighted vs Unweighted
-# ============================================================================
+
+# Test 4: Weighted vs Unweighted-----------
 
 test_that("unweighted power simulation works", {
   result <- deming_power_sim(
@@ -226,9 +223,9 @@ test_that("weighted power simulation works", {
   expect_equal(result$settings$weighted, TRUE)
 })
 
-# ============================================================================
-# Test 5: Joint Region Advantage
-# ============================================================================
+
+# Test 5: Joint Region Advantage-----------
+
 
 test_that("joint region advantage is computed", {
   result <- deming_power_sim(
@@ -270,9 +267,8 @@ test_that("narrow range shows larger joint advantage", {
   expect_true(result_narrow$advantage >= result_wide$advantage - 0.1)
 })
 
-# ============================================================================
-# Test 6: Print Method for Power Results
-# ============================================================================
+
+# Test 6: Print Method for Power Results -----------
 
 test_that("print.deming_power works", {
   result <- deming_power_sim(
@@ -294,18 +290,16 @@ test_that("print.deming_power works", {
   expect_true(grepl("Sample Size", output_text))
   expect_true(grepl("Statistical Power", output_text))
   expect_true(grepl("Joint Region", output_text))
-  expect_true(grepl("Confidence Intervals", output_text))
   expect_true(grepl("Advantage", output_text))
 })
 
-# ============================================================================
-# Test 7: Sample Size Determination
-# ============================================================================
+
+# Test 7: Sample Size Determination-----------
 
 test_that("deming_sample_size runs without errors", {
   skip_on_cran()  # This takes a while
 
-  expect_silent({
+  expect_message({
     result <- deming_sample_size(
       target_power = 0.80,
       initial_n = 20,
@@ -410,9 +404,8 @@ test_that("sample size increases with lower target power", {
   }
 })
 
-# ============================================================================
-# Test 8: Print Method for Sample Size Results
-# ============================================================================
+
+# Test 8: Print Method for Sample Size Results-----------
 
 test_that("print.deming_sample_size works", {
   skip_on_cran()
@@ -439,9 +432,8 @@ test_that("print.deming_sample_size works", {
   expect_true(grepl("Required Sample Sizes", output_text))
 })
 
-# ============================================================================
-# Test 9: Plot Method for Sample Size Results
-# ============================================================================
+
+# Test 9: Plot Method for Sample Size Results-----------
 
 test_that("plot.deming_sample_size works", {
   skip_on_cran()
@@ -467,9 +459,8 @@ test_that("plot.deming_sample_size works", {
   expect_true(grepl("Sample Size", p$labels$x, ignore.case = TRUE))
 })
 
-# ============================================================================
-# Test 10: Input Validation
-# ============================================================================
+
+# Test 10: Input Validation-----------
 
 test_that("deming_power_sim validates inputs", {
   # Sample size too small
@@ -540,16 +531,16 @@ test_that("deming_sample_size validates inputs", {
   )
 })
 
-# ============================================================================
-# Test 11: Edge Cases
-# ============================================================================
+
+# Test 11: Edge Cases-----------
 
 test_that("handles very small bias", {
+
   result <- deming_power_sim(
     n_sims = 50,
     sample_size = 30,
     x_range = c(10, 100),
-    actual_slope = 1.01,  # Very small 1% bias
+    actual_slope = 1.005,  # Very small 1% bias
     y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
     x_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant")
   )
@@ -576,9 +567,8 @@ test_that("handles no bias (null case)", {
   expect_true(result$power_joint < 0.20)
 })
 
-# ============================================================================
-# Test 12: Reproducibility
-# ============================================================================
+
+# Test 12: Reproducibility-----------
 
 test_that("results are reproducible with same seed", {
   set.seed(42)

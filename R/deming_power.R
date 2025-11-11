@@ -1,6 +1,9 @@
 #' Power Analysis for Deming Regression
 #'
 #' @description
+#'
+#' `r lifecycle::badge('experimental')`
+#'
 #' Functions for conducting power analysis and sample size determination for Deming regression
 #' in method comparison studies. These functions help determine the sample size needed to
 #' detect specified biases (proportional and/or constant) between two measurement methods.
@@ -97,7 +100,7 @@ deming_power_sim <- function(n_sims = 1000,
 
   # Input validation
   if (sample_size < 3) stop("sample_size must be at least 3")
-  if (n_sims < 100) warning("n_sims < 100 may produce unstable power estimates")
+  if (n_sims < 100) message("n_sims < 100 may produce unstable power estimates")
   if (length(x_range) != 2) stop("x_range must be vector of length 2")
   if (x_range[2] <= x_range[1]) stop("x_range[2] must be greater than x_range[1]")
 
@@ -487,7 +490,7 @@ plot.deming_sample_size <- function(x, ...) {
   )
 
   p <- ggplot(df_long, aes(x = n, y = power, color = method)) +
-    geom_line(size = 1) +
+    geom_line(linewidth = 1) +
     geom_point() +
     geom_hline(yintercept = x$target_power,
                linetype = "dashed",

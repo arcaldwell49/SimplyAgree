@@ -74,6 +74,19 @@ dem_reg <- function(x,
   call2$conf.level = conf.level
   call2$id = id
 
+  # Error checking for conf.level
+  if (!is.numeric(conf.level) || length(conf.level) != 1) {
+    stop("conf.level must be a single numeric value")
+  }
+
+  if (is.na(conf.level)) {
+    stop("conf.level cannot be NA")
+  }
+
+  if (conf.level <= 0 || conf.level >= 1) {
+    stop("conf.level must be between 0 and 1 (exclusive)")
+  }
+
   conf2 =  1-(1 - conf.level) / 2
   if(!is.null(id)){
     df = data %>%

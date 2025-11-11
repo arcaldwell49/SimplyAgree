@@ -57,6 +57,8 @@ A list of class "deming_power" containing:
 \item{advantage}{Difference in power between joint region and CIs}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Functions for conducting power analysis and sample size determination for Deming regression
 in method comparison studies. These functions help determine the sample size needed to
 detect specified biases (proportional and/or constant) between two measurement methods.

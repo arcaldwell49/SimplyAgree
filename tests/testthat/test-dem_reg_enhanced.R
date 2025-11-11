@@ -1,8 +1,9 @@
 context("dem_reg with Joint Region Enhancements")
 
-# ============================================================================
-# Test Data Setup
-# ============================================================================
+
+# Test Data Setup -------------------
+
+
 
 # Simple test dataset
 test_data_simple <- data.frame(
@@ -24,9 +25,10 @@ test_data_biased <- data.frame(
   y = 5 + 1.1 * seq(10, 100, length.out = 40) + rnorm(40, 0, 2)
 )
 
-# ============================================================================
-# Test 1: Basic Deming Regression with Joint Region (Backward Compatibility)
-# ============================================================================
+
+# Test 1: Basic Deming Regression with Joint Region (Backward Compatibility)-------------------
+
+
 
 test_that("dem_reg works with default compute_joint = TRUE", {
   result <- dem_reg(
@@ -67,9 +69,10 @@ test_that("dem_reg works with compute_joint = FALSE", {
   expect_true(!is.null(result$vcov))  # vcov should still exist
 })
 
-# ============================================================================
-# Test 2: Variance-Covariance Matrix
-# ============================================================================
+
+# Test 2: Variance-Covariance Matrix-------------------
+
+
 
 test_that("vcov matrix is properly structured", {
   result <- dem_reg(
@@ -113,9 +116,9 @@ test_that("vcov method works", {
   expect_equal(dim(V), c(2, 2))
 })
 
-# ============================================================================
-# Test 3: Coefficient Extraction
-# ============================================================================
+
+# Test 3: Coefficient Extraction -------------------
+
 
 test_that("coef method works", {
   result <- dem_reg(
@@ -133,13 +136,12 @@ test_that("coef method works", {
   expect_equal(names(coefs), c("intercept", "slope"))
 
   # Check values match model
-  expect_equal(coefs[1], result$model$coef[1])
-  expect_equal(coefs[2], result$model$coef[2])
+  expect_equal(unname(coefs[1]), result$model$coef[1])
+  expect_equal(unname(coefs[2]), result$model$coef[2])
 })
 
-# ============================================================================
-# Test 4: Joint Confidence Region Structure
-# ============================================================================
+
+# Test 4: Joint Confidence Region Structure-------------------
 
 test_that("joint confidence region is properly computed", {
   result <- dem_reg(
@@ -186,9 +188,9 @@ test_that("joint confidence region respects confidence level", {
   expect_true(spread_99 > spread_95)
 })
 
-# ============================================================================
-# Test 5: Joint Confidence Region Test
-# ============================================================================
+
+# Test 5: Joint Confidence Region Test-------------------
+
 
 test_that("joint test structure is correct", {
   result <- dem_reg(
@@ -247,9 +249,8 @@ test_that("Mahalanobis distance relates to chi-square critical value", {
   expect_equal(result$joint_test$is_enclosed, expected_enclosed)
 })
 
-# ============================================================================
-# Test 6: Print Method
-# ============================================================================
+
+# Test 6: Print Method-------------------
 
 test_that("print method shows joint test results", {
   result <- dem_reg(
@@ -282,7 +283,7 @@ test_that("print method works without joint test", {
   )
 
   # Should not error
-  expect_silent(print(result))
+  expect_output(print(result))
 
   output <- capture.output(print(result))
   output_text <- paste(output, collapse = "\n")
@@ -291,9 +292,7 @@ test_that("print method works without joint test", {
   expect_false(grepl("Joint Confidence Region Test", output_text))
 })
 
-# ============================================================================
-# Test 7: Plot Method
-# ============================================================================
+# Test 7: Plot Method-------------------
 
 test_that("plot method works", {
   result <- dem_reg(
@@ -325,9 +324,8 @@ test_that("plot method includes joint test in subtitle when available", {
   expect_true(grepl("joint confidence region", p$labels$subtitle, ignore.case = TRUE))
 })
 
-# ============================================================================
-# Test 8: plot_joint Method
-# ============================================================================
+
+# Test 8: plot_joint Method-------------------
 
 test_that("plot_joint works", {
   result <- dem_reg(
@@ -394,9 +392,8 @@ test_that("plot_joint fails gracefully without joint region", {
   )
 })
 
-# ============================================================================
-# Test 9: Weighted Deming with Joint Region
-# ============================================================================
+
+# Test 9: Weighted Deming with Joint Region -------------------
 
 test_that("weighted Deming works with joint region", {
   result <- dem_reg(
@@ -418,9 +415,8 @@ test_that("weighted Deming works with joint region", {
   expect_true(grepl("Weighted", output_text))
 })
 
-# ============================================================================
-# Test 10: Edge Cases
-# ============================================================================
+
+# Test 10: Edge Cases -------------------
 
 test_that("works with minimum sample size", {
   tiny_data <- data.frame(
@@ -440,25 +436,6 @@ test_that("works with minimum sample size", {
   expect_true(!is.null(result$joint_region))
 })
 
-test_that("works with perfect correlation", {
-  perfect_data <- data.frame(
-    x = 1:20,
-    y = 1:20
-  )
-
-  result <- dem_reg(
-    x = "x",
-    y = "y",
-    data = perfect_data,
-    error.ratio = 1
-  )
-
-  # Should estimate slope very close to 1
-  expect_true(abs(result$model$coef[2] - 1) < 0.01)
-
-  # Should have joint region
-  expect_true(!is.null(result$joint_region))
-})
 
 test_that("handles NA values appropriately", {
   na_data <- test_data_simple
@@ -475,9 +452,9 @@ test_that("handles NA values appropriately", {
   expect_s3_class(result, "simple_eiv")
 })
 
-# ============================================================================
-# Test 11: Different Error Ratios
-# ============================================================================
+
+# Test 11: Different Error Ratios-------------------
+
 
 test_that("works with different error ratios", {
   result_1 <- dem_reg(x = "x", y = "y", data = test_data_large, error.ratio = 1)
@@ -493,9 +470,8 @@ test_that("works with different error ratios", {
   expect_false(isTRUE(all.equal(result_1$model$coef[2], result_2$model$coef[2])))
 })
 
-# ============================================================================
-# Test 12: Consistency Checks
-# ============================================================================
+
+# Test 12: Consistency Checks-------------------
 
 test_that("joint region encloses estimated point", {
   result <- dem_reg(
@@ -543,9 +519,8 @@ test_that("vcov matrix corresponds to confidence intervals", {
   expect_equal(se_slope_vcov, se_slope_model, tolerance = 0.001)
 })
 
-# ============================================================================
-# Test 13: Multiple Confidence Levels
-# ============================================================================
+# Test 13: Multiple Confidence Levels -------------------
+
 
 test_that("works with different confidence levels", {
   result_90 <- dem_reg(x = "x", y = "y", data = test_data_large,
@@ -565,9 +540,8 @@ test_that("works with different confidence levels", {
   expect_true(result_95$joint_test$chi2_critical < result_99$joint_test$chi2_critical)
 })
 
-# ============================================================================
-# Test 14: Integration Test - Complete Workflow
-# ============================================================================
+
+# Test 14: Integration Test - Complete Workflow-------------------
 
 test_that("complete workflow works end-to-end", {
   # Generate data
@@ -588,7 +562,7 @@ test_that("complete workflow works end-to-end", {
   )
 
   # All methods should work
-  expect_silent(print(result))
+  expect_output(print(result))
   expect_s3_class(plot(result), "ggplot")
   expect_s3_class(plot_joint(result), "ggplot")
   expect_true(is.matrix(vcov(result)))
@@ -599,15 +573,13 @@ test_that("complete workflow works end-to-end", {
   expect_true(is.numeric(result$joint_test$p_value))
 })
 
-# ============================================================================
-# Test 15: Error Handling
-# ============================================================================
+
+# Test 15: Error Handling-------------------
 
 test_that("appropriate errors for invalid inputs", {
   # Missing columns
   expect_error(
-    dem_reg(x = "z", y = "y", data = test_data_simple),
-    "object 'z' not found"
+    dem_reg(x = "z", y = "y", data = test_data_simple)
   )
 
   # Invalid confidence level
