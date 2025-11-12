@@ -4,7 +4,7 @@
 #' Computes sample size, power, or other parameters for the exact method of
 #' assessing agreement between two measurement methods, as described in
 #' Shieh (2019). This method tests whether the central portion of paired
-#' differences falls within specified bounds.
+#' differences falls within specified bounds. This roughly equates to the power for tolerance limits.
 #'
 #' @param n Number of subject pairs (sample size)
 #' @param delta Maximum allowable difference bound (half-width of tolerance interval)
