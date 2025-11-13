@@ -333,9 +333,9 @@ deming_sample_size <- function(target_power = 0.90,
 }
 
 
-# ============================================================================
-# Helper Functions (Internal)
-# ============================================================================
+
+# Helper Functions (Internal) ---------
+
 
 
 .generate_deming_data <- function(n, x_range, x_dist, true_slope, true_intercept,
@@ -412,9 +412,8 @@ deming_sample_size <- function(target_power = 0.90,
 }
 
 
-# ============================================================================
-# S3 Methods for deming_power and deming_sample_size objects
-# ============================================================================
+
+# S3 Methods for deming_power and deming_sample_size objects -------------
 
 #' @export
 print.deming_power <- function(x, ...) {
