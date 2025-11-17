@@ -1,0 +1,380 @@
+---
+title: "Power Analysis and Sample Size Determination for Agreement Studies"
+author: "Aaron R. Caldwell"
+date: "Last Updated: `r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 1
+vignette: >
+  %\VignetteIndexEntry{Power Analysis and Sample Size Determination for Agreement Studies}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+# Introduction
+
+This vignette provides comprehensive guidance on power analysis and sample size determination for method comparison and agreement studies using the `SimplyAgree` package.
+
+## Available Methods
+
+`SimplyAgree` implements four approaches to power/sample size calculations:
+
+1. **`power_agreement_exact()`** - Exact agreement test [@shieh2019]
+2. **`blandPowerCurve()`** - Bland-Altman power curves [@lu2016]
+3. **`agree_expected_half()`** - Expected half-width criterion (Jan & Shieh, 2018)
+4. **`agree_assurance()`** - Assurance probability criterion (Jan & Shieh, 2018)
+
+```{r load}
+library(SimplyAgree)
+```
+
+# Understanding the Approaches
+
+## Hypothesis Testing vs. Estimation
+
+The methods divide into two categories:
+
+**Hypothesis Testing** (binary decision):
+
+- `power_agreement_exact()` - Tests if central proportion is within the maximal allowable difference
+- `blandPowerCurve()` - Tests if confidence intervals fall within the maximal allowable difference
+
+**Estimation** (quantifying precision):
+
+- `agree_expected_half()` - Controls average CI half-width
+- `agree_assurance()` - Controls probability of achieving target CI half-width
+
+# Method 1: Exact Agreement Test
+
+## Overview
+
+Tests whether the central P* proportion of paired differences falls within the maximal allowable difference [-δ, δ].
+
+**Hypotheses:**
+
+- H₀: Methods disagree (central portion extends beyond bounds)
+- H₁: Methods agree (central portion within bounds)
+
+## Usage
+
+```{r exact_usage, eval=FALSE}
+power_agreement_exact(
+  n = NULL,           # Sample size
+  delta = NULL,       # Tolerance bound
+  mu = 0,            # Mean of differences
+  sigma = NULL,       # SD of differences
+  p0_star = 0.95,    # Central proportion (tolerance coverage)
+  power = NULL,       # Target power
+  alpha = 0.05       # Significance level
+)
+```
+
+Specify **exactly three** of: n, delta, power, sigma.
+
+## Example: Sample Size Calculation
+
+```{r exact_ex1, eval=TRUE}
+# Blood pressure device comparison
+result <- power_agreement_exact(
+  delta = 7,          # ±7 mmHg tolerance
+  mu = 0.5,          # Expected bias
+  sigma = 2.5,       # Expected SD
+  p0_star = 0.95,    # 95% must be within bounds
+  power = 0.80,      # 80% power
+  alpha = 0.05
+)
+print(result)
+```
+
+
+# Method 2: Bland-Altman Power Curves
+
+## Overview
+
+Calculates power curves using approximate Bland-Altman confidence intervals. Useful for exploring power across sample sizes.
+
+## Usage
+
+```{r bland_usage, eval=FALSE}
+blandPowerCurve(
+  samplesizes = seq(10, 100, 1),  # Range of sample sizes
+  mu = 0,                          # Mean difference
+  SD,                              # SD of differences
+  delta,                           # Tolerance bound(s)
+  conf.level = 0.95,              # CI confidence level
+  agree.level = 0.95               # LOA agreement level
+)
+```
+
+## Example: Power Curve
+
+```{r bland_ex1, eval=TRUE}
+# Generate power curve
+pc <- blandPowerCurve(
+  samplesizes = seq(10, 200, 1),
+  mu = 0,
+  SD = 3.3,
+  delta = 8,
+  conf.level = 0.95,
+  agree.level = 0.95
+)
+
+# Plot
+plot(pc, type = 1)
+
+# Find n for 80% power
+find_n(pc, power = 0.8)
+```
+
+
+# Method 3: Expected Half-Width
+
+## Overview
+
+Determines sample size to ensure **average** CI half-width ≤ δ across hypothetical repeated studies.
+
+## Usage
+
+```{r expected_usage, eval=FALSE}
+agree_expected_half(
+  conf.level = 0.95,    # CI confidence level
+  delta = NULL,         # Target expected half-width
+  pstar = 0.95,        # Central proportion
+  sigma = 1,           # SD of differences
+  n = NULL             # Sample size
+)
+```
+
+Specify **either** n OR delta.
+
+## Example: Sample Size for Precision
+
+```{r expected_ex1, eval=TRUE}
+# Want E[H] ≤ 2.5σ
+result <- agree_expected_half(
+  conf.level = 0.95,
+  delta = 2.5,         # As multiple of sigma
+  pstar = 0.95,
+  sigma = 1            # Standardized
+)
+print(result)
+```
+
+
+# Method 4: Assurance Probability
+
+## Overview
+
+Determines sample size to ensure **probability** that CI half-width ≤ ω is at least (1-γ).
+
+Stronger guarantee than expected half-width --- ensures specific probability of achieving target precision.
+
+## Usage
+
+```{r assurance_usage, eval=FALSE}
+agree_assurance(
+  conf.level = 0.95,     # CI confidence level
+  assurance = 0.90,      # Target assurance probability
+  omega = NULL,          # Target half-width bound
+  pstar = 0.95,         # Central proportion
+  sigma = 1,            # SD of differences
+  n = NULL              # Sample size
+)
+```
+
+Specify **either** n OR omega.
+
+## Example: Sample Size with Guarantee
+
+```{r assurance_ex1}
+# Want 90% probability that H ≤ 2.5σ
+result <- agree_assurance(
+  conf.level = 0.95,
+  assurance = 0.90,    # 90% probability
+  omega = 2.5,         # Target bound
+  pstar = 0.95,
+  sigma = 1
+)
+print(result)
+```
+
+
+# Decision Guide for the Method
+
+```
+Research Goal?
+│
+├─ Hypothesis Testing → 
+│   └─ Need exact Type I error control → Power for Agreement
+│
+└─ Precision Estimation →
+    ├─ Average precision sufficient → Expected Half-Width
+    └─ Need probabilistic guarantee → Assurance Probability
+```
+
+# Handling Clustered/Nested Data
+
+## The Problem
+
+Many studies have **clustered** data where there are multiple measurements per subject or natural groupings (e.g., repeated measures, multi-center studies). Note, the advice here only applies to clustering but not to situations where replicate measures are taken within a measurement occasion (e.g., multiple measures at the same time point wherein any variation would only represent measurement error). 
+
+Standard formulas assume independence^[Implications of which are discussed by @bland2003cluster among many others]. Ignoring clustering can leads to studies that lack precision. To my knowledge, there is no well developed methods for accounting for clustering in agreement studies, so we use a common approximation from survey sampling and multilevel modeling: the **design effect**. 
+
+## My Best Approximation: Design Effect
+
+The design effect (DEFF) quantifies loss of efficiency due to clustering:
+
+$$\text{DEFF} = 1 + (m - 1) \times \text{ICC}$$
+
+where:
+
+- m = observations per cluster
+- ICC = intraclass correlation coefficient
+- $n_{ESS}$ = effective sample size
+
+**Effect on sample size:**
+$$n_{\text{ESS}} = n_{\text{independent}} \times \text{DEFF}$$
+
+## Understanding ICC
+
+ICC = proportion of variance between clusters:
+
+$$\text{ICC} = \frac{\sigma^2_{\text{between}}}{\sigma^2_{\text{between}} + \sigma^2_{\text{within}}}$$
+
+
+## Application Workflow
+
+1. Calculate independent sample size (using power function)
+2. Determine m (observations per cluster)
+3. Estimate ICC (from pilot data, literature, or theory)
+4. Calculate DEFF = 1 + (m-1)×ICC
+5. Inflate: n_total = n_indep × DEFF
+6. Calculate clusters: K = ⌈n_total / m⌉
+
+## Example: Repeated Measures Design
+
+```{r cluster_ex1, eval=TRUE}
+# Step 1: Independent sample size
+result <- power_agreement_exact(
+  delta = 7, mu = 0.5, sigma = 2.5,
+  p0_star = 0.95, power = 0.80, alpha = 0.05
+)
+n_indep <- result$n
+cat("Independent pairs needed:", n_indep, "\n")
+
+# Step 2: Apply design effect
+m <- 3  # 3 measurements per participant
+ICC <- 0.15  # from pilot or literature
+DEFF <- 1 + (m - 1) * ICC
+cat("Design effect:", round(DEFF, 3), "\n")
+
+# Step 3: Calculate participants needed
+n_ess <- ceiling(n_indep * DEFF)
+K <- ceiling(n_ess / m)
+cat("Total observations:", n_ess, "\n")
+cat("Participants needed:", K, "\n")
+```
+
+**Result**: Instead of 34 independent pairs, need ~12 participants with 3 measurements each (36 total observations).
+
+## Impact of ICC
+
+```{r cluster_ex2, eval=TRUE}
+# Compare different ICC values
+n_indep <- 50
+m <- 4
+
+ICC_values <- c(0, 0.05, 0.10, 0.15, 0.20)
+for (ICC in ICC_values) {
+  DEFF <- 1 + (m - 1) * ICC
+  K <- ceiling(ceiling(n_indep * DEFF) / m)
+  cat(sprintf("ICC = %.2f: Need %d participants\n", ICC, K))
+}
+```
+
+## When Design Effect Works Well
+
+✓ **Good situations:**
+- Balanced designs (equal cluster sizes)
+- Moderate ICC (0.01 - 0.30)
+- Sufficient clusters (K ≥ 20)
+- Simple two-level hierarchy
+
+✗ **Problematic:**
+- Highly unbalanced clusters
+- Very high ICC (> 0.4)
+- Small number of clusters (K < 10)
+- Complex correlation structures
+- Multiple levels of nesting
+
+For complex designs, consider simulation-based power analysis or consult a statistician.
+
+## Complete Example with Clustering
+
+```{r cluster_complete, eval=TRUE}
+# Study parameters
+sigma <- 3.3
+delta <- 7
+m <- 4  # measurements per participant
+ICC <- 0.15
+dropout <- 0.20
+
+# Step 1: Independent sample size
+result <- power_agreement_exact(
+  delta = delta, mu = 0, sigma = sigma,
+  p0_star = 0.95, power = 0.80, alpha = 0.05
+)
+
+# Step 2: Account for clustering
+DEFF <- 1 + (m - 1) * ICC
+n_total <- ceiling(result$n * DEFF)
+K_pre <- ceiling(n_total / m)
+
+# Step 3: Account for dropout
+K_final <- ceiling(K_pre / (1 - dropout))
+
+# Summary
+cat("═══ SAMPLE SIZE SUMMARY ═══\n")
+cat("Independent pairs:", result$n, "\n")
+cat("Design effect:", round(DEFF, 3), "\n")
+cat("Participants (no dropout):", K_pre, "\n")
+cat("Participants to recruit:", K_final, "\n")
+cat("Total measurements:", K_final * m, "\n")
+```
+
+# Practical Recommendations
+
+## Planning Checklist
+
+- [ ] Define research question (hypothesis test vs. estimation)
+- [ ] Choose appropriate power method
+- [ ] Obtain pilot estimates (σ, ICC if clustered)
+- [ ] Calculate independent sample size
+- [ ] Adjust for clustering (if applicable)
+- [ ] Adjust for dropout
+- [ ] Conduct sensitivity analyses
+- [ ] Document all assumptions and sources
+- [ ] Pre-register before data collection
+
+## Conservative Planning
+
+When uncertain:
+- Use **upper range** of plausible σ estimates
+- Use **upper range** of plausible ICC estimates
+- Build in **10-20% buffer** beyond calculated n
+- Conduct **sensitivity analyses** for key parameters
+
+
+# References
+
+

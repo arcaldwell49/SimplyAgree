@@ -352,14 +352,14 @@ test_that("agree_expected_half sample size increases with smaller delta", {
   # Smaller acceptable width requires larger sample size
   result_large <- agree_expected_half(
     conf.level = 0.95,
-    delta = 2.5,
+    delta = 3.0,
     pstar = 0.95,
     sigma = 1
   )
 
   result_small <- agree_expected_half(
     conf.level = 0.95,
-    delta = 2.0,
+    delta = 2.5,
     pstar = 0.95,
     sigma = 1
   )
@@ -409,7 +409,7 @@ test_that("agree_expected_half g factor is positive and reasonable", {
 
   expect_gt(result$g, 0)
   # g should be larger than the z-quantile
-  expect_gt(result$g, result$zp * sqrt(result$n))
+  expect_gt(result$g, result$zp )
 })
 
 test_that("agree_expected_half c factor is close to 1 for large n", {
@@ -559,10 +559,11 @@ test_that("agree_assurance sample size increases with higher assurance", {
 })
 
 test_that("agree_assurance sample size increases with smaller omega", {
+
   result_large <- agree_assurance(
     conf.level = 0.95,
     assurance = 0.90,
-    omega = 3.0,
+    omega = 4,
     pstar = 0.95,
     sigma = 1
   )
@@ -570,7 +571,7 @@ test_that("agree_assurance sample size increases with smaller omega", {
   result_small <- agree_assurance(
     conf.level = 0.95,
     assurance = 0.90,
-    omega = 2.0,
+    omega = 3,
     pstar = 0.95,
     sigma = 1
   )

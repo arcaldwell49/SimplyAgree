@@ -166,7 +166,7 @@ agree_assurance <- function(conf.level = 0.95,
       sigma = sigma,
       g = g_final,
       zp = zp,
-      method = "Sample size for Bland-Altman range of agreement (Assurance Probability)"
+      method = "Assurance probability & sample size for Limits of Agreement"
     ),
     class = "power.htest"
   )

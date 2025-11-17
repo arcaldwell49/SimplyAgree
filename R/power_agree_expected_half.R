@@ -156,7 +156,7 @@ agree_expected_half <- function(conf.level = 0.95,
       g = g_final,
       c = c_final,
       zp = zp,
-      method = "Sample size for Bland-Altman range of agreement (Expected Half-Width)"
+      method = "Expected half-width and sample size for limits of agreement"
     ),
     class = "power.htest"
   )

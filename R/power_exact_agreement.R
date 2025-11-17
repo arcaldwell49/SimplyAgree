@@ -18,7 +18,7 @@
 #' This function implements the exact agreement test procedure of Shieh (2019)
 #' for method comparison studies. The test evaluates whether the central
 #' proportion of the distribution of paired differences lies within the
-#' interval [-delta, delta].
+#' interval \[-delta, delta\].
 #'
 #' The null hypothesis is: H0: theta_(1-p) <= -delta or delta <= theta_p
 #' The alternative is: H1: -delta < theta_(1-p) and theta_p < delta
@@ -33,7 +33,7 @@
 #'
 #' The parameter `p0_star` represents the tolerance coverage proportion,
 #' i.e., the proportion of the population that must fall within the specified
-#' bounds [-delta, delta] under the null hypothesis. This is conceptually
+#' bounds \[-delta, delta\] under the null hypothesis. This is conceptually
 #' related to tolerance intervals, but formulated as a
 #' hypothesis test rather than an estimation problem.
 #'
