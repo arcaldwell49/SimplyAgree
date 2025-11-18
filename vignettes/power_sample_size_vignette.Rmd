@@ -2,6 +2,8 @@
 title: "Power Analysis and Sample Size Determination for Agreement Studies"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
+bibliography: refs.bib
+link-citations: true
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -31,8 +33,8 @@ This vignette provides comprehensive guidance on power analysis and sample size 
 
 1. **`power_agreement_exact()`** - Exact agreement test [@shieh2019]
 2. **`blandPowerCurve()`** - Bland-Altman power curves [@lu2016]
-3. **`agree_expected_half()`** - Expected half-width criterion (Jan & Shieh, 2018)
-4. **`agree_assurance()`** - Assurance probability criterion (Jan & Shieh, 2018)
+3. **`agree_expected_half()`** - Expected half-width criterion [@JanShieh2018]
+4. **`agree_assurance()`** - Assurance probability criterion [@JanShieh2018]
 
 ```{r load}
 library(SimplyAgree)
@@ -46,13 +48,13 @@ The methods divide into two categories:
 
 **Hypothesis Testing** (binary decision):
 
-- `power_agreement_exact()` - Tests if central proportion is within the maximal allowable difference
-- `blandPowerCurve()` - Tests if confidence intervals fall within the maximal allowable difference
+- `power_agreement_exact()` - Tests if central proportion, essentially tolerance intevals, are within the maximal allowable difference
+- `blandPowerCurve()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
 
 **Estimation** (quantifying precision):
 
-- `agree_expected_half()` - Controls average CI half-width
-- `agree_assurance()` - Controls probability of achieving target CI half-width
+- `agree_expected_half()` - Controls average CI half-width of limits of agreement
+- `agree_assurance()` - Controls probability of achieving target CI half-width of limits of agreement
 
 # Method 1: Exact Agreement Test
 
@@ -228,7 +230,7 @@ Research Goal?
 
 Many studies have **clustered** data where there are multiple measurements per subject or natural groupings (e.g., repeated measures, multi-center studies). Note, the advice here only applies to clustering but not to situations where replicate measures are taken within a measurement occasion (e.g., multiple measures at the same time point wherein any variation would only represent measurement error). 
 
-Standard formulas assume independence^[Implications of which are discussed by @bland2003cluster among many others]. Ignoring clustering can leads to studies that lack precision. To my knowledge, there is no well developed methods for accounting for clustering in agreement studies, so we use a common approximation from survey sampling and multilevel modeling: the **design effect**. 
+Standard formulas assume independence^[Implications of which are discussed by @bland2003cluster among many others]. Ignoring clustering can leads to studies that lack precision. To my knowledge, there is no well developed methods for accounting for clustering in sample size calculations for agreement studies, so we use a common approximation from survey sampling and multilevel modeling: the **design effect**. 
 
 ## My Best Approximation: Design Effect
 
@@ -285,7 +287,7 @@ cat("Total observations:", n_ess, "\n")
 cat("Participants needed:", K, "\n")
 ```
 
-**Result**: Instead of 34 independent pairs, need ~12 participants with 3 measurements each (36 total observations).
+**Result**: Instead of 34 independent pairs, need ~15 participants (45 total observations).
 
 ## Impact of ICC
 
@@ -305,19 +307,21 @@ for (ICC in ICC_values) {
 ## When Design Effect Works Well
 
 ✓ **Good situations:**
+
 - Balanced designs (equal cluster sizes)
 - Moderate ICC (0.01 - 0.30)
-- Sufficient clusters (K ≥ 20)
+- Sufficient clusters (K ≥ 10)
 - Simple two-level hierarchy
 
 ✗ **Problematic:**
+
 - Highly unbalanced clusters
 - Very high ICC (> 0.4)
 - Small number of clusters (K < 10)
 - Complex correlation structures
 - Multiple levels of nesting
 
-For complex designs, consider simulation-based power analysis or consult a statistician.
+For complex designs, consider simulation-based power analysis and consult a statistician.
 
 ## Complete Example with Clustering
 
@@ -358,7 +362,7 @@ cat("Total measurements:", K_final * m, "\n")
 
 - [ ] Define research question (hypothesis test vs. estimation)
 - [ ] Choose appropriate power method
-- [ ] Obtain pilot estimates (σ, ICC if clustered)
+- [ ] If possible, obtain pilot estimates (σ, ICC if clustered)
 - [ ] Calculate independent sample size
 - [ ] Adjust for clustering (if applicable)
 - [ ] Adjust for dropout
@@ -369,10 +373,11 @@ cat("Total measurements:", K_final * m, "\n")
 ## Conservative Planning
 
 When uncertain:
+
 - Use **upper range** of plausible σ estimates
 - Use **upper range** of plausible ICC estimates
-- Build in **10-20% buffer** beyond calculated n
-- Conduct **sensitivity analyses** for key parameters
+- Build in **10-20% buffer** beyond calculated required sample size
+- Conduct **sensitivity analyses** for key parameters (σ, ICC, etc)
 
 
 # References

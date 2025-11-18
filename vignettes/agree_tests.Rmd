@@ -506,36 +506,5 @@ a4 = loa_lme(data = recpre_long,
 ```
 
 
-# Power Analysis for Agreement
-
-There are surprisingly few resources for planning a study that attempts to quantify agreement between two methods. Therefore, we have added one function, with hopefully more in the future, to aid in the power analysis for simple agreement studies. The current function is `blandPowerCurve` which constructs a "curve" of power across sample sizes, agreement levels, and confidence levels. This is based on the work of @lu2016.
-
-For this function the user must define the hypothesized limits of agreement (`delta`), mean difference between methods (`mu`), and the standard deviation of the difference scores (`SD`). There is also the option of adjusting the range of sample size (default: `seq(10,100,1)` which is 10 to 100 by 1), the agreement level (default is 95%), and confidence level (default is 95%). The function then produces a data frame of the results. A quick look at the head and we can see that we have low statistical power when the sample size is at the lower end of the range.
-
-```{r}
-power_res <- blandPowerCurve(
-  samplesizes = seq(10, 100, 1),
-  mu = 0.5,
-  SD = 2.5,
-  delta = c(6,7),
-  conf.level = c(.90,.95),
-  agree.level = c(.8,.9)
-)
-
-head(power_res)
-```
-
-We can then find the sample size at which (or closest to which) a desired power level with the `find_n` method for `powerCurve` objects created with the function above.
-
-```{r}
-find_n(power_res, power = .8)
-```
-
-Additionally we can plot the power curve to see how power changes over different levels of `delta`, `agree.level`, and `conf.level`
-
-```{r,fig.width=6, fig.height=6 }
-plot(power_res)
-```
-
 
 # References
