@@ -2,16 +2,17 @@ home:
   title: SimplyAgree R package
   description: An R package for agreement and reliability estimation
 
+url: https://aaroncaldwell.us/SimplyAgree
 
 template:
+  bootstrap: 5
   math-rendering: mathjax
+  light-switch: true
+  bootswatch: materia
   opengraph:
     image:
       src: images/sticker.png
       alt: "SimplyAgree logo"
-    twitter:
-      creator: "@exphysstudent"
-      card: summary_large_image
 
 reference:
 
@@ -60,6 +61,11 @@ reference:
   contents:
   - blandPowerCurve
   - powerCurve-methods
+  - agree_assurance
+  - agree_expected_half
+  - power_agreement_exact
+  - deming_power
+  - deming_sample_size
 
 - title: "Data"
   contents:
@@ -68,7 +74,7 @@ reference:
 
 - title: "jamovi functions"
   desc: >
-    Functions intended for jamovi; suggested to do not use in R
+    Functions intended for jamovi; suggested that you do not use in R
   contents:
   - jmvagree
   - jmvagreemulti

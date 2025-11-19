@@ -1,5 +1,3 @@
-# Globals
-
 utils::globalVariables(c("boot_bias",
                          "boot_within_sd",
                          "boot_between_sd",
@@ -72,4 +70,7 @@ utils::globalVariables(c("boot_bias",
                          "Tolerance Limits", "replicates",
                          "upper.PL", "upper.TL",
                          "lower.PL", "lower.TL",
-                         "asymp.LCL","asymp.UCL"))
+                         "asymp.LCL","asymp.UCL",
+                         "method", "slope", "intercept",
+                         "xmin", "xmax", "ymin", "ymax",
+                         "rbeta"))

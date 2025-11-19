@@ -5,13 +5,31 @@
 \alias{print.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
+\alias{plot_joint}
+\alias{plot_joint.simple_eiv}
+\alias{vcov.simple_eiv}
+\alias{coef.simple_eiv}
 \title{Methods for simple_eiv objects}
 \usage{
 \method{print}{simple_eiv}(x, ...)
 
-\method{plot}{simple_eiv}(x, x_name = "x", y_name = "y", ...)
+\method{plot}{simple_eiv}(x, x_name = "x", y_name = "y", show_joint = TRUE, ...)
 
 \method{check}{simple_eiv}(x)
+
+plot_joint(object, ...)
+
+\method{plot_joint}{simple_eiv}(
+  object,
+  ideal_slope = 1,
+  ideal_intercept = 0,
+  show_intervals = TRUE,
+  ...
+)
+
+\method{vcov}{simple_eiv}(object, ...)
+
+\method{coef}{simple_eiv}(object, ...)
 }
 \arguments{
 \item{x}{object of class \code{simple_eiv} from the dem_reg function.}
@@ -23,12 +41,23 @@ for details.
 \item{x_name}{Name/label for x values (first measurement)}
 
 \item{y_name}{Name/label for y values (second measurement)}
+
+\item{show_joint}{Logical. If TRUE and joint region computed, shows joint region status in subtitle.}
+
+\item{object}{object of class \code{simple_eiv} for plot_joint method}
+
+\item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
+
+\item{ideal_intercept}{The hypothesized intercept value to test against (default = 0)}
+
+\item{show_intervals}{Logical. If TRUE, shows individual confidence intervals as well.}
 }
 \value{
 \describe{
 \item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
 \item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
 \item{\code{check}}{Returns plots of the optimized residuals.}
+\item{\code{plot_joint}}{Returns a plot of the joint confidence region in parameter space.}
 }
 }
 \description{
