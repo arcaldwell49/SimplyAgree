@@ -103,7 +103,7 @@ print(result)
 
 ## Overview
 
-Calculates power curves using approximate Bland-Altman confidence intervals. Useful for exploring power across sample sizes.
+Calculates power curves using approximate Bland-Altman confidence intervals using the method of @lu2016 (which is approximate). Useful for exploring power across sample sizes.
 
 ## Usage
 

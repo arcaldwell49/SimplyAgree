@@ -135,6 +135,79 @@ test_that("power_agreement_exact computes sample size correctly (Shieh 2019 vali
 
   expect_equal(result$n, 14)
   expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  # More
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.5,
+    p0_star = 0.95,
+    power = 0.80,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 34)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.6,
+    p0_star = 0.95,
+    power = 0.80,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 45)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.7,
+    p0_star = 0.95,
+    power = 0.80,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 62)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.5,
+    p0_star = 0.95,
+    power = 0.90,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 48)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.6,
+    p0_star = 0.95,
+    power = 0.90,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 64)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
+
+  result <- power_agreement_exact(
+    delta = 7,
+    mu = 0.5,
+    sigma = 2.7,
+    p0_star = 0.95,
+    power = 0.90,
+    alpha = 0.05
+  )
+
+  expect_equal(result$n, 90)
+  expect_gte(result$power, 0.80)  # Should achieve at least target power
 })
 
 test_that("power_agreement_exact sample size increases with power", {
@@ -346,6 +419,86 @@ test_that("agree_expected_half computes sample size correctly (Jan & Shieh 2018 
 
   expect_equal(result$n, 52)
   expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.2,
+    pstar = 0.9,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 42)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.2,
+    pstar = 0.95,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 219)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.3,
+    pstar = 0.9,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 32)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.3,
+    pstar = 0.95,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 116)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.4,
+    pstar = 0.9,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 26)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.4,
+    pstar = 0.95,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 74)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.5,
+    pstar = 0.9,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 21)
+  expect_lte(result$actual.delta, result$target.delta)
+
+  result <- agree_expected_half(
+    conf.level = 0.95,
+    delta = 2.5,
+    pstar = 0.95,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 52)
+  expect_lte(result$actual.delta, result$target.delta)
 })
 
 test_that("agree_expected_half sample size increases with smaller delta", {
@@ -515,6 +668,18 @@ test_that("agree_assurance computes sample size correctly (Jan & Shieh 2018 vali
   )
 
   expect_equal(result$n, 115)
+  expect_gte(result$actual.assurance, result$assurance)
+
+  # Example from Jan & Shieh (2018)  page 251
+  result <- agree_assurance(
+    conf.level = 0.95,
+    assurance = 0.90,
+    omega = 2.25,
+    pstar = 0.95,
+    sigma = 1
+  )
+
+  expect_equal(result$n, 354)
   expect_gte(result$actual.assurance, result$assurance)
 })
 

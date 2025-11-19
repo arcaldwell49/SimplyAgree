@@ -1,6 +1,9 @@
-#' Power Analysis for Exact Agreement/Tolerance Test
+#' Power Calculation for Exact Agreement/Tolerance Test
 #'
 #' @description
+#'
+#' `r lifecycle::badge('maturing')`
+#'
 #' Computes sample size, power, or other parameters for the exact method of
 #' assessing agreement between two measurement methods, as described in
 #' Shieh (2019). This method tests whether the central portion of paired
@@ -13,6 +16,7 @@
 #' @param p0_star The coverage proportion (content) of the tolerance interval. Central proportion under null hypothesis (default = 0.95)
 #' @param power Target power (probability of rejecting false null)
 #' @param alpha Significance level (Type I error rate, default = 0.05, Confidence level = 1-alpha)
+#' @param max_iter Maximum iterations for gamma computation (default = 1000)
 #'
 #' @details
 #' This function implements the exact agreement test procedure of Shieh (2019)
@@ -80,7 +84,8 @@ power_agreement_exact <- function(n = NULL,
                                   sigma = NULL,
                                   p0_star = 0.95,
                                   power = NULL,
-                                  alpha = 0.05) {
+                                  alpha = 0.05,
+                                  max_iter = 1000) {
 
   # Check that exactly one parameter is NULL
   n_nulls <- sum(sapply(list(n, delta, power, sigma), is.null))
@@ -113,7 +118,8 @@ power_agreement_exact <- function(n = NULL,
   z_p <- qnorm(p)
 
   # Helper function to compute critical value gamma
-  compute_gamma <- function(n, p, z_p, alpha, numint = 1000) {
+  compute_gamma <- function(n, p, z_p, alpha, numint = 1000,
+                              max_iter = 1000) {
     df <- n - 1
 
     # Set up numerical integration
@@ -129,7 +135,7 @@ power_agreement_exact <- function(n = NULL,
     gam_l <- 0
     gam_u <- 100
     tol <- 1e-8
-    max_iter <- 1000
+    #max_iter <- 1000
     iter <- 0
 
     repeat {
@@ -144,7 +150,7 @@ power_agreement_exact <- function(n = NULL,
 
       if (abs(d_alpha) < tol && d_alpha > 0) break
       if (iter > max_iter) {
-        warning("Maximum iterations reached in gamma computation")
+        message("Maximum iterations reached in gamma computation")
         break
       }
 
@@ -159,7 +165,8 @@ power_agreement_exact <- function(n = NULL,
   }
 
   # Helper function to compute power
-  compute_power <- function(n, delta, mu, sigma, p, z_p, alpha, numint = 1000) {
+  compute_power <- function(n, delta, mu, sigma, p, z_p, alpha, numint = 1000,
+                            max_iter = 1000) {
     df <- n - 1
     std <- sqrt(sigma^2 / n)
     l <- -delta
@@ -175,7 +182,7 @@ power_agreement_exact <- function(n = NULL,
     wcpdf <- (intl / 3) * coevec * dchisq(cvec, df)
 
     # Compute gamma
-    gam <- compute_gamma(n, p, z_p, alpha, numint)
+    gam <- compute_gamma(n, p, z_p, alpha, numint, max_iter)
 
     # Compute power
     hel <- (l - mu) / std + gam * sqrt(cvec / df)
@@ -198,7 +205,7 @@ power_agreement_exact <- function(n = NULL,
   # Solve for the missing parameter
   if (is.null(power)) {
     # Calculate power
-    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha)
+    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha, max_iter = max_iter)
     power <- result$power
     gamma <- result$gamma
     p1_star <- calc_p1_star(delta, mu, sigma)
@@ -210,7 +217,7 @@ power_agreement_exact <- function(n = NULL,
 
     while (n_high - n_low > 1) {
       n_mid <- floor((n_low + n_high) / 2)
-      result <- compute_power(n_mid, delta, mu, sigma, p, z_p, alpha)
+      result <- compute_power(n_mid, delta, mu, sigma, p, z_p, alpha, max_iter = max_iter)
 
       if (result$power < power) {
         n_low <- n_mid
@@ -220,7 +227,7 @@ power_agreement_exact <- function(n = NULL,
     }
 
     n <- n_high
-    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha)
+    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha, max_iter = max_iter)
     power <- result$power
     gamma <- result$gamma
     p1_star <- calc_p1_star(delta, mu, sigma)
@@ -233,7 +240,7 @@ power_agreement_exact <- function(n = NULL,
 
     while (delta_high - delta_low > tol) {
       delta_mid <- (delta_low + delta_high) / 2
-      result <- compute_power(n, delta_mid, mu, sigma, p, z_p, alpha)
+      result <- compute_power(n, delta_mid, mu, sigma, p, z_p, alpha, max_iter = max_iter)
 
       if (result$power < power) {
         delta_low <- delta_mid
@@ -243,7 +250,7 @@ power_agreement_exact <- function(n = NULL,
     }
 
     delta <- delta_high
-    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha)
+    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha, max_iter = max_iter)
     power <- result$power
     gamma <- result$gamma
     p1_star <- calc_p1_star(delta, mu, sigma)
@@ -256,7 +263,7 @@ power_agreement_exact <- function(n = NULL,
 
     while (sigma_high - sigma_low > tol) {
       sigma_mid <- (sigma_low + sigma_high) / 2
-      result <- compute_power(n, delta, mu, sigma_mid, p, z_p, alpha)
+      result <- compute_power(n, delta, mu, sigma_mid, p, z_p, alpha, max_iter = max_iter)
 
       if (result$power < power) {
         sigma_high <- sigma_mid
@@ -266,7 +273,7 @@ power_agreement_exact <- function(n = NULL,
     }
 
     sigma <- sigma_low
-    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha)
+    result <- compute_power(n, delta, mu, sigma, p, z_p, alpha, max_iter = max_iter)
     power <- result$power
     gamma <- result$gamma
     p1_star <- calc_p1_star(delta, mu, sigma)

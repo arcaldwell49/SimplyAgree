@@ -2,7 +2,7 @@
 % Please edit documentation in R/power_exact_agreement.R
 \name{power_agreement_exact}
 \alias{power_agreement_exact}
-\title{Power Analysis for Exact Agreement/Tolerance Test}
+\title{Power Calculation for Exact Agreement/Tolerance Test}
 \usage{
 power_agreement_exact(
   n = NULL,
@@ -11,7 +11,8 @@ power_agreement_exact(
   sigma = NULL,
   p0_star = 0.95,
   power = NULL,
-  alpha = 0.05
+  alpha = 0.05,
+  max_iter = 1000
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ power_agreement_exact(
 \item{power}{Target power (probability of rejecting false null)}
 
 \item{alpha}{Significance level (Type I error rate, default = 0.05, Confidence level = 1-alpha)}
+
+\item{max_iter}{Maximum iterations for gamma computation (default = 1000)}
 }
 \value{
 An object of class "power.htest", a list with components:
@@ -44,6 +47,8 @@ An object of class "power.htest", a list with components:
 \item{note}{Additional notes}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
 Computes sample size, power, or other parameters for the exact method of
 assessing agreement between two measurement methods, as described in
 Shieh (2019). This method tests whether the central portion of paired

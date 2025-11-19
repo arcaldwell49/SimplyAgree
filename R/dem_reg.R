@@ -22,7 +22,7 @@
 #' Deming regression, also known as error-in-variable regression, is useful in situations where both X & Y are measured with error.
 #' The use of Deming regression is beneficial when comparing to methods for measuring the same continuous variable.
 #'
-#' Currently, the dem_reg function covers simple Deming regression and weighted Deming regression.
+#' Currently, the `dem_reg` function covers simple Deming regression and weighted Deming regression.
 #' Weighted Deming regression can be used by setting the weighted argument to TRUE.
 #' The weights can be provided by the user or can be calculated within function.
 #'
@@ -31,7 +31,7 @@
 #' When the replicates are not available in the data,
 #' then the ratio of error variances (y/x) can be provided with the error.ratio argument.
 #'
-#' When compute_joint = TRUE, the function computes the joint (slope, intercept) confidence region
+#' When `compute_joint = TRUE`, the function computes the joint (slope, intercept) confidence region
 #' based on the chi-square distribution with 2 degrees of freedom. This elliptical region accounts
 #' for the correlation between slope and intercept estimates and can provide improved power for
 #' detecting deviations from (null) hypothesized values (e.g., slope = 1, intercept = 0).

@@ -5,6 +5,7 @@
 - Add ehanced support for Deming regression.
   - New function `deming_reli` for reliability analysis using Deming regression.
   - Updated `dem_reg` function to include options for confidence intervals and plotting.
+- Added more power and sample size determination functions for limits of agreement.
 
 # SimplyAgree 0.2.2
 

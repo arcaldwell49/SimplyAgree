@@ -1,11 +1,14 @@
-pandoc: '3.2'
-pkgdown: 2.0.7
+pandoc: 3.6.3
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  agreement_analysis: agreement_analysis.html
   agree_tests: agree_tests.html
+  agreement_analysis: agreement_analysis.html
   Deming: Deming.html
+  power_sample_size_vignette: power_sample_size_vignette.html
   reanalysis: reanalysis.html
   reliability_analysis: reliability_analysis.html
-last_built: 2024-10-23T23:23Z
-
+last_built: 2025-11-19T17:56Z
+urls:
+  reference: https://aaroncaldwell.us/SimplyAgree/reference
+  article: https://aaroncaldwell.us/SimplyAgree/articles

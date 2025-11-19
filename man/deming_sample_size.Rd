@@ -39,6 +39,8 @@ A list of class "deming_sample_size" containing:
 \item{reduction_pct}{Percentage reduction}
 }
 \description{
+#' \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Automatically determines the minimum sample size needed to achieve target statistical
 power for detecting specified bias in method comparison studies using Deming regression.
 }

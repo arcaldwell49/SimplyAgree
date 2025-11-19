@@ -155,13 +155,13 @@ Before conducting a method comparison study, it's crucial to determine the appro
 
 Let's determine the power to detect 5% proportional bias with N=50:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # Define error characteristics (from validation studies)
 y_errors <- list(beta1 = 0.5, beta2 = 0.05, J = 2, type = "power")
 x_errors <- list(beta1 = 0.4, beta2 = 0.04, J = 2, type = "power")
 
 power_result <- deming_power_sim(
-  n_sims = 1000,
+  n_sims = 100,
   sample_size = 50,
   x_range = c(20, 200),
   actual_slope = 1.05,  # 5% proportional bias
@@ -182,12 +182,12 @@ The joint confidence region provides **13.3 percentage points higher power** tha
 
 The `deming_sample_size()` function automatically finds the minimum N needed:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 sample_size_result <- deming_sample_size(
   target_power = 0.90,  # Want 90% power
   initial_n = 30,
   max_n = 200,
-  n_sims = 500,
+  n_sims = 100,
   x_range = c(20, 200),
   actual_slope = 1.05,
   ideal_slope = 1.0,
@@ -224,7 +224,7 @@ The power advantage of joint regions is most pronounced when:
 
 The variance parameters should come from validation data:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # From replicate measurements at different concentrations
 concentrations <- c(10, 25, 50, 100, 200)
 cv_percent <- c(8.5, 6.2, 5.1, 4.8, 5.2)
@@ -241,7 +241,7 @@ y_var_params <- list(
 
 ### Effect of Measurement Range
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # Narrow range (2:1 ratio) - HIGH correlation
 narrow_power <- deming_power_sim(
   sample_size = 50,
@@ -269,7 +269,7 @@ wide_power$advantage
 
 Here's a complete workflow for planning a method comparison study:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # Step 1: Define study parameters from prior knowledge
 x_range <- c(20, 200)  # Analyte measurement range
 bias_to_detect <- 1.03  # Want to detect 3% bias
@@ -281,9 +281,9 @@ x_errors <- list(beta1 = 0.4, beta2 = 0.04, J = 2, type = "power")
 # Step 2: Determine required sample size
 sample_plan <- deming_sample_size(
   target_power = 0.90,
-  initial_n = 30,
+  initial_n = 65,
   max_n = 200,
-  n_sims = 1000,  # Use 1000+ for final determination
+  n_sims = 100,  # Use 1000+ for final determination
   x_range = x_range,
   actual_slope = bias_to_detect,
   ideal_slope = 1.0,
@@ -348,6 +348,7 @@ $$
 $$
 
 Where:
+
 - $\hat{\beta}$ = estimated parameters $(\hat{\beta}_0, \hat{\beta}_1)$
 - $\beta_0$ = hypothesized parameters (e.g., $(0, 1)$ for identity)
 - $V$ = variance-covariance matrix
