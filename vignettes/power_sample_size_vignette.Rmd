@@ -348,7 +348,6 @@ K_pre <- ceiling(n_total / m)
 K_final <- ceiling(K_pre / (1 - dropout))
 
 # Summary
-cat("═══ SAMPLE SIZE SUMMARY ═══\n")
 cat("Independent pairs:", result$n, "\n")
 cat("Design effect:", round(DEFF, 3), "\n")
 cat("Participants (no dropout):", K_pre, "\n")
