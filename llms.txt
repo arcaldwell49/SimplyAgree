@@ -1,0 +1,345 @@
+# SimplyAgree R Package
+
+![](https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png)
+
+*Artwork courtesy of Chelsea Parlett Pelleriti*
+
+Please see the package’s
+[website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes,
+and other details about the package.
+
+# Background
+
+`SimplyAgree` is an R package, and [jamovi](https://www.jamovi.org/)
+module, designed to simplify agreement and reliability analyses for
+researchers. The package implements rigorous statistical methods for
+method comparison studies, providing both classical and modern
+approaches to assessing measurement agreement.
+
+## Core Functionality
+
+The package provides two primary approaches for assessing agreement
+between measurement methods:
+
+### 1. Limits of Agreement: `agreement_limit()`
+
+The
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+function implements Bland-Altman style limits of agreement analysis.
+This approach:
+
+- Computes confidence intervals for the range of agreement between two
+  methods
+- Supports both simple and nested/repeated measures designs
+- Implements exact procedures based on Shieh (2019) and Jan & Shieh
+  2018. 
+- Handles design effects for clustered data
+- Provides multiple interval estimation methods (exact, MOVER, Zou’s
+  method)
+
+This is the preferred function when you want to describe what proportion
+of differences fall within specified bounds or when making inferences
+about the central region of the paired-difference distribution.
+
+### 2. Tolerance Intervals: `tolerance_limit()`
+
+The
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+function creates statistical tolerance intervals that:
+
+- Construct intervals expected to contain a specified proportion of
+  future observations
+- Implement exact equal-tailed tolerance intervals
+- Support confidence intervals for ranges of percentiles
+- Handle both simple and complex study designs
+- Provide sample size and power calculations
+
+Tolerance intervals are most appropriate when making simultaneous
+inferences about pairs of percentile limits or when you need
+prediction-oriented intervals for future measurements.
+
+## Additional Features
+
+Beyond the two core functions, `SimplyAgree` provides:
+
+- **Reliability Analysis**:
+  [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  and
+  [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  functions for comprehensive reliability assessment
+- **Agreement Testing**: Exact hypothesis tests for declaring
+  measurement agreement (based on Shieh, 2019)
+- **Power Analysis**: `power_exact_agreement()` and related functions
+  for sample size determination in agreement studies
+- **Visualization**: Built-in plotting capabilities for Bland-Altman
+  plots and related visualizations
+- **Flexible Design Support**: Handles simple, nested, and repeated
+  measures designs with appropriate variance adjustments
+
+## Installing SimplyAgree
+
+You can install the most up-to-date version of `SimplyAgree` from
+[GitHub](https://github.com/arcaldwell49/SimplyAgree) with:
+
+``` r
+devtools::install_github("arcaldwell49/SimplyAgree")
+```
+
+## Quick Start Example
+
+``` r
+library(SimplyAgree)
+
+# Load example data
+data(temps)
+
+# Limits of agreement analysis
+agree_results <- agreement_limit(x = "method1", 
+                                  y = "method2", 
+                                  data = temps,
+                                  agree.level = 0.95)
+
+# Tolerance interval analysis  
+tol_results <- tolerance_limit(x = "method1",
+                                y = "method2", 
+                                data = temps,
+                                prop = 0.95)
+
+# Reliability analysis
+reli_results <- reli_stats(data = temps,
+                           wide = TRUE)
+```
+
+# Contributing
+
+We are happy to receive bug reports, suggestions, questions, and (most
+of all) contributions to fix problems and add features. Pull Requests
+for contributions are encouraged.
+
+Here are some simple ways in which you can contribute (in the increasing
+order of commitment):
+
+- Read and correct any inconsistencies in the documentation
+- Raise issues about bugs or wanted features
+- Review code
+- Add new functionality
+
+## Code of Conduct
+
+Please note that the SimplyAgree project is released with a [Contributor
+Code of
+Conduct](https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html). By
+contributing to this project, you agree to abide by its terms.
+
+# References
+
+The functions in this package are largely based on the following works:
+
+Bland, J. M., & Altman, D. G. (1986). Statistical methods for assessing
+agreement between two methods of clinical measurement. *The Lancet*,
+327(8476), 307-310. <https://doi.org/10.1016/S0140-6736(86)90837-8>
+
+Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
+comparison studies. *Statistical Methods in Medical Research*, 8(2),
+135-160. <https://doi.org/10.1177/096228029900800204>
+
+Carrasco, JL, et al. (2013). Estimation of the concordance correlation
+coefficient for repeated measures using SAS and R. *Computer Methods and
+Programs in Biomedicine*, 109, 293-304.
+<https://doi.org/10.1016/j.cmpb.2012.09.002>
+
+Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to
+agree: A tutorial on tolerance intervals in method comparison studies
+with BivRegBLS R Package. *Statistics in Medicine*, 39(28), 4334-4349.
+<https://doi.org/10.1002/sim.8709>
+
+Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and
+tolerance in linear mixed models. *Statistics in Medicine*, 38(30),
+5603-5622. <https://doi.org/10.1002/sim.8386>
+
+Jan, S. L., & Shieh, G. (2018). The Bland-Altman range of agreement:
+Exact interval procedure and sample size determination. *Computers in
+Biology and Medicine*, 100, 247-252.
+<https://doi.org/10.1016/j.compbiomed.2018.06.020>
+
+King, TS and Chinchilli, VM. (2001). A generalized concordance
+correlation coefficient for continuous and categorical data. *Statistics
+in Medicine*, 20, 2131-2147. <https://doi.org/10.1002/sim.845>
+
+King, TS, Chinchilli, VM, and Carrasco, JL. (2007). A repeated measures
+concordance correlation coefficient. *Statistics in Medicine*, 26,
+3095-3113. <https://doi.org/10.1002/sim.2778>
+
+Lin, L. I. (1989). A concordance correlation coefficient to evaluate
+reproducibility. *Biometrics*, 45(1), 255-268.
+<https://doi.org/10.2307/2532051>
+
+Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between
+Two Methods of Measurement by Bland-Altman Method. *The International
+Journal of Biostatistics*, 12(2).
+<https://doi.org/10.1515/ijb-2015-0039>
+
+Parker, R. A., et al. (2016). Application of mixed effects limits of
+agreement in the presence of multiple sources of variability: exemplar
+from the comparison of several devices to measure respiratory rate in
+COPD patients. *PloS One*, 11(12), e0168321.
+<https://doi.org/10.1371/journal.pone.0168321>
+
+Shieh, G. (2019). Assessing agreement between two methods of
+quantitative measurements: Exact test procedure and sample size
+calculation. *Statistics in Biopharmaceutical Research*, 12(3), 352-359.
+<https://doi.org/10.1080/19466315.2019.1677495>
+
+Weir, J. P. (2005). Quantifying test-retest reliability using the
+intraclass correlation coefficient and the SEM. *The Journal of Strength
+& Conditioning Research*, 19(1), 231-240.
+<https://doi.org/10.1519/15184.1>
+
+Zou, G. Y. (2013). Confidence interval estimation for the Bland-Altman
+limits of agreement with multiple observations per individual.
+*Statistical Methods in Medical Research*, 22(6), 630-642.
+<https://doi.org/10.1177/0962280211402548>
+
+# Package index
+
+## Tolerance & Agreement
+
+### Limits Calculations
+
+- [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+  **\[maturing\]** : Tolerance Limits from an Agreement Study
+- [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+  **\[maturing\]** : Limits of Agreement
+
+### Methods
+
+- [`print(`*`<loa>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa-methods.md)
+  [`plot(`*`<loa>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa-methods.md)
+  [`check(`*`<loa>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa-methods.md)
+  : Methods for loa objects
+- [`print(`*`<tolerance_delta>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_delta-methods.md)
+  [`plot(`*`<tolerance_delta>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_delta-methods.md)
+  [`check(`*`<tolerance_delta>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_delta-methods.md)
+  : Methods for tolerance_delta objects
+
+## Reliability
+
+- [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  **\[stable\]** : Reliability Statistics
+- [`print(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
+  [`plot(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
+  [`check(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
+  : Methods for simple_reli objects
+
+## Deming Regression
+
+- [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
+  **\[stable\]** : Deming Regression
+- [`print(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`plot(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`check(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`vcov(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`coef(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  : Methods for simple_eiv objects
+
+## Agreement Tests
+
+### Simple
+
+- [`agree_test()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_test.md)
+  **\[superseded\]** : Tests for Absolute Agreement
+- [`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md)
+  **\[superseded\]** : Tests for Absolute Agreement with Nested Data
+- [`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md)
+  **\[superseded\]** : Tests for Absolute Agreement with Replicates
+- [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  **\[stable\]** : Nonparametric Test for Limits of Agreement
+- [`agree_coef()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_coef.md)
+  **\[maturing\]** : Agreement Coefficents
+- [`print(`*`<simple_agree>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  [`plot(`*`<simple_agree>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  : Methods for simple_agree objects
+
+### Mixed
+
+- [`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
+  **\[stable\]** : Limits of Agreement with Linear Mixed Effects
+- [`print(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  [`plot(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  [`check(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  : Methods for loa_mermod objects
+
+## Power
+
+Fucntions for power calculations
+
+- [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+  **\[maturing\]** : Power Curve for Bland-Altman Limits of Agreement
+- [`find_n()`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
+  [`plot(`*`<powerCurve>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
+  : Methods for powerCurve objects
+- [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+  **\[maturing\]** : Assurance Probability for Limits of Agreement
+- [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)
+  **\[maturing\]** : Sample Size for Limits of Agreement Using Expected
+  Half-Width
+- [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+  **\[maturing\]** : Power Calculation for Exact Agreement/Tolerance
+  Test
+- [`deming_power_sim()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_power.md)
+  **\[experimental\]** : Simulate Deming Regression Power
+- [`deming_sample_size()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_sample_size.md)
+  **\[experimental\]** : Determine Required Sample Size for Deming
+  Regression
+
+## Data
+
+- [`reps`](https://aaroncaldwell.us/SimplyAgree/reference/Data.md)
+  [`ba1986`](https://aaroncaldwell.us/SimplyAgree/reference/Data.md) :
+  reps
+- [`temps`](https://aaroncaldwell.us/SimplyAgree/reference/temps.md)
+  [`recpre_long`](https://aaroncaldwell.us/SimplyAgree/reference/temps.md)
+  : Data
+
+## jamovi functions
+
+Functions intended for jamovi; suggested that you do not use in R
+
+- [`jmvagree()`](https://aaroncaldwell.us/SimplyAgree/reference/jmvagree.md)
+  : Simple Agreement Analysis
+- [`jmvagreemulti()`](https://aaroncaldwell.us/SimplyAgree/reference/jmvagreemulti.md)
+  : Nested/Replicate Data Agreement Analysis
+- [`jmvdeming()`](https://aaroncaldwell.us/SimplyAgree/reference/jmvdeming.md)
+  : Deming Regression
+- [`jmvreli()`](https://aaroncaldwell.us/SimplyAgree/reference/jmvreli.md)
+  : Reliability Analysis
+
+## Defunct Functions
+
+Old functions that are no longer maintained; use with caution
+
+- [`loa_mixed()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed.md)
+  **\[deprecated\]** : Mixed Effects Limits of Agreement
+- [`print(`*`<loa_mixed_bs>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed_bs-methods.md)
+  [`plot(`*`<loa_mixed_bs>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed_bs-methods.md)
+  : Methods for loa_mixed_bs objects
+
+# Articles
+
+### All vignettes
+
+- [Agreement
+  Tests](https://aaroncaldwell.us/SimplyAgree/articles/agree_tests.md):
+- [Agreement & Tolerance
+  Limits](https://aaroncaldwell.us/SimplyAgree/articles/agreement_analysis.md):
+- [Deming
+  Regression](https://aaroncaldwell.us/SimplyAgree/articles/Deming.md):
+- [Power Analysis and Sample Size Determination for Agreement
+  Studies](https://aaroncaldwell.us/SimplyAgree/articles/power_sample_size_vignette.md):
+- [Re-analysis of an Agreement
+  Study](https://aaroncaldwell.us/SimplyAgree/articles/reanalysis.md):
+- [Reliability
+  Analysis](https://aaroncaldwell.us/SimplyAgree/articles/reliability_analysis.md):
