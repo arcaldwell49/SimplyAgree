@@ -6,16 +6,19 @@
 #'
 #' A function for fitting a straight line to two-dimensional data (i.e., X and Y) that are measured with error.
 #'
-#' @param x Name of column with first measurement.
-#' @param y Name of other column with the other measurement to compare to the first.
-#' @param id Column with subject identifier.
+#' @param formula A formula of the form `y ~ x` specifying the model. If provided, takes precedence over `x` and `y` arguments.
 #' @param data Data frame with all data.
+#' @param id Column with subject identifier (optional).
+#' @param x Name of column with first measurement (deprecated in favor of formula interface).
+#' @param y Name of other column with the other measurement to compare to the first (deprecated in favor of formula interface).
 #' @param conf.level The confidence level required. Default is 95%.
 #' @param weighted Logical indicator (TRUE/FALSE) for whether to use weighted Deming regression. Default is FALSE.
 #' @param weights an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
-#' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE. Users may wish to set to FALSE if data is especially large.
+#' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.
 #' @param compute_joint Logical indicator (TRUE/FALSE). If TRUE, joint confidence region is computed. Default is TRUE.
+#' @param ... Additional arguments (currently unused).
+#'
 #' @details
 #'
 #' This function provides a Deming regression analysis wherein the sum of distances in both x and y direction is minimized.
@@ -36,15 +39,46 @@
 #' for the correlation between slope and intercept estimates and can provide improved power for
 #' detecting deviations from (null) hypothesized values (e.g., slope = 1, intercept = 0).
 #'
-#' @returns
-#' The function returns a simple_eiv (eiv meaning "error in variables") object.
+#' @section Interface Change:
+#' The `x` and `y` arguments are deprecated. Please use the `formula` interface instead:
+#' \itemize{
+#'   \item Old: `dem_reg(x = "x_var", y = "y_var", data = df)`
+#'   \item New: `dem_reg(y_var ~ x_var, data = df)`
+#' }
 #'
-#'   - `call`: The matched call.
-#'   - `model`: Data frame presenting the results from the Deming regression analysis.
-#'   - `resamples`: List containing resamples from jacknife procedure.
+#' @returns
+#' The function returns a simple_eiv (eiv meaning "error in variables") object with the following components:
+#'
+#'   - `coefficients`: Named vector of coefficients (intercept and slope).
+#'   - `residuals`: Optimized residuals from the fitted model.
+#'   - `fitted.values`: Estimated true Y values (Y-hat).
+#'   - `model_table`: Data frame presenting the full results from the Deming regression analysis.
 #'   - `vcov`: Variance-covariance matrix for slope and intercept.
+#'   - `df.residual`: Residual degrees of freedom.
+#'   - `call`: The matched call.
+#'   - `terms`: The terms object used.
+#'   - `xlevels`: (Only for models with factors) levels of factors.
+#'   - `model`: The model frame.
+#'   - `x_vals`: Original x values used in fitting.
+#'   - `y_vals`: Original y values used in fitting.
+#'   - `x_hat`: Estimated true X values.
+#'   - `y_hat`: Estimated true Y values.
+#'   - `error.ratio`: Error ratio used in fitting.
+#'   - `weighted`: Whether weighted regression was used.
+#'   - `weights`: Weights used in fitting.
+#'   - `conf.level`: Confidence level used.
+#'   - `resamples`: List containing resamples from jacknife procedure (if keep_data = TRUE).
 #'   - `joint_region`: Joint confidence region ellipse coordinates (if compute_joint = TRUE).
 #'   - `joint_test`: Test of whether ideal point is enclosed by joint region.
+#'
+#' @examples
+#' \dontrun{
+#' # New formula interface (recommended)
+#' model <- dem_reg(y ~ x, data = mydata)
+#'
+#' # Old interface (still works with deprecation warning)
+#' model <- dem_reg(x = "x", y = "y", data = mydata)
+#' }
 #'
 #' @references
 #' Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.
@@ -53,26 +87,26 @@
 #'
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of parametric regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
 #'
-#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp
+#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp model.frame model.matrix model.response terms delete.response
 #' @importFrom graphics text
 #' @import ggplot2
 #' @export
-#'
 
-dem_reg <- function(x,
-                    y,
-                    id = NULL,
+dem_reg <- function(formula = NULL,
                     data,
+                    id = NULL,
+                    x = NULL,
+                    y = NULL,
                     conf.level = .95,
                     weighted = FALSE,
                     weights = NULL,
                     error.ratio = 1,
                     keep_data = FALSE,
-                    compute_joint = TRUE){
-  call2 = match.call()
-  call2$weighted = weighted
-  call2$conf.level = conf.level
-  call2$id = id
+                    compute_joint = TRUE,
+                    ...) {
+
+  # Capture the call
+  call2 <- match.call()
 
   # Error checking for conf.level
   if (!is.numeric(conf.level) || length(conf.level) != 1) {
@@ -87,29 +121,65 @@ dem_reg <- function(x,
     stop("conf.level must be between 0 and 1 (exclusive)")
   }
 
-  conf2 =  1-(1 - conf.level) / 2
-  if(!is.null(id)){
-    df = data %>%
-      select(all_of(id),all_of(x),all_of(y)) %>%
-      rename(id = all_of(id),
-             x = all_of(x),
-             y = all_of(y)) %>%
-      select(id,x,y)
-  } else {
-    df = data %>%
-      select(all_of(x),all_of(y)) %>%
-      rename(x = all_of(x),
-             y = all_of(y)) %>%
-      select(x,y)
+  conf2 <- 1 - (1 - conf.level) / 2
+
+  # Determine which interface is being used
+  using_formula <- !is.null(formula)
+  using_xy <- !is.null(x) && !is.null(y)
+
+  if (!using_formula && !using_xy) {
+    stop("Either 'formula' or both 'x' and 'y' must be provided")
   }
 
-  if(is.null(id)){
-    df3 = df %>% drop_na()
-  } else {
-    df2 = df %>%
+  if (using_formula && using_xy) {
+    warning("Both 'formula' and 'x'/'y' provided. Using 'formula' interface.")
+    using_xy <- FALSE
+  }
+
+  # Handle old interface with deprecation warning
+  if (using_xy) {
+    warning(
+      "The 'x' and 'y' arguments are deprecated and will be removed in a future version.\n",
+      "Please use the formula interface instead: dem_reg(", y, " ~ ", x, ", data = ...)\n",
+      "See ?dem_reg for details.",
+      call. = FALSE
+    )
+
+    # Convert old interface to formula
+    formula <- as.formula(paste(y, "~", x))
+    call2$formula <- formula
+    call2$x <- NULL
+    call2$y <- NULL
+  }
+
+  # Extract model frame and terms
+  mf <- model.frame(formula, data = data, na.action = na.omit)
+  mt <- attr(mf, "terms")
+
+  # Extract y and x from formula
+  y_vals <- model.response(mf, "numeric")
+  x_vals <- model.matrix(mt, mf)[, -1, drop = TRUE]  # Remove intercept column
+
+  # Store variable names
+  y_name <- names(mf)[1]
+  x_name <- names(mf)[2]
+
+  # Handle id if provided
+  if (!is.null(id)) {
+    # id can be either a column name (string) or the actual values
+    if (is.character(id) && length(id) == 1) {
+      id_vals <- data[[id]]
+    } else {
+      id_vals <- id
+    }
+
+    df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
+    df <- df[complete.cases(df), ]
+
+    df2 <- df %>%
       group_by(id) %>%
-      mutate(mean_y = mean(y, na.rm =TRUE),
-             mean_x = mean(x, na.rm =TRUE),
+      mutate(mean_y = mean(y, na.rm = TRUE),
+             mean_x = mean(x, na.rm = TRUE),
              n_x = sum(!is.na(x)),
              n_y = sum(!is.na(y))) %>%
       ungroup() %>%
@@ -117,7 +187,8 @@ dem_reg <- function(x,
              diff_y2 = diff_y^2,
              diff_x = x - mean_x,
              diff_x2 = diff_x^2)
-    df3 = df2 %>%
+
+    df3 <- df2 %>%
       group_by(id) %>%
       summarize(n_x = mean(n_x),
                 x = mean(x, na.rm = TRUE),
@@ -128,64 +199,77 @@ dem_reg <- function(x,
                 .groups = 'drop') %>%
       drop_na()
 
-    var_x = sum(df3$sum_num_x) / sum(df3$n_x-1)
-    var_y = sum(df3$sum_num_y) / sum(df3$n_y-1)
+    var_x <- sum(df3$sum_num_x) / sum(df3$n_x - 1)
+    var_y <- sum(df3$sum_num_y) / sum(df3$n_y - 1)
 
-    error.ratio = var_x/var_y
-  }
-
-  if(weighted == FALSE){
-    w_i = rep(1,nrow(df3))
-  } else if(!is.null(weights)){
-    w_i = weights
+    error.ratio <- var_x / var_y
   } else {
-    w_i = 1/((df3$x+error.ratio*df3$y)/(1+error.ratio))^2
+    df3 <- data.frame(x = x_vals, y = y_vals)
+    df3 <- df3[complete.cases(df3), ]
   }
 
-  res = jack_dem(df3$x, df3$y,
-                 w_i = w_i,
-                 error.ratio = error.ratio)
+  # Compute weights
+  if (weighted == FALSE) {
+    w_i <- rep(1, nrow(df3))
+  } else if (!is.null(weights)) {
+    w_i <- weights
+  } else {
+    w_i <- 1 / ((df3$x + error.ratio * df3$y) / (1 + error.ratio))^2
+  }
+
+  # Fit the model
+  res <- jack_dem(df3$x, df3$y,
+                  w_i = w_i,
+                  error.ratio = error.ratio)
 
   # Always keep jacks temporarily for vcov computation
-  jacks_temp = res$jacks
+  jacks_temp <- res$jacks
 
   if (keep_data == TRUE) {
-    jacks = res$jacks
-    call2$weights = w_i
-  } else{
-    jacks = NULL
-    call2$weights = w_i
+    jacks <- res$jacks
+  } else {
+    jacks <- NULL
   }
-  res = res$df
-  confq = qt(conf2, nrow(df3)-2)
-  res$df = nrow(df3)-2
-  res$lower.ci = res$coef-confq*res$se
-  res$upper.ci = res$coef+confq*res$se
-  #res$ci.level = conf.level
-  res$t = 0
-  res$t[1] = res$coef[1]/res$se[1]
-  res$t[2] = (res$coef[2] - 1)/res$se[2]
-  res$p.value = 2*pt(abs(res$t), res$df, lower.tail=FALSE)
-  call2$error.ratio = error.ratio
 
-  lm_mod = list(call = list(formula = as.formula(df3$y~df3$x)))
-  call2$lm_mod = lm_mod
+  res <- res$df
+  confq <- qt(conf2, nrow(df3) - 2)
+  res$df <- nrow(df3) - 2
+  res$lower.ci <- res$coef - confq * res$se
+  res$upper.ci <- res$coef + confq * res$se
+  res$t <- 0
+  res$t[1] <- res$coef[1] / res$se[1]
+  res$t[2] <- (res$coef[2] - 1) / res$se[2]
+  res$p.value <- 2 * pt(abs(res$t), res$df, lower.tail = FALSE)
 
-  # Compute variance-covariance matrix using temporary jacks
-  # Compute correlation from jackknife samples
+  # Compute fitted values and residuals
+  b0 <- res$coef[1]
+  b1 <- res$coef[2]
+
+  # Compute d_i (raw y residuals)
+  d_i <- df3$y - (b0 + b1 * df3$x)
+
+  # Compute estimated true values (from NCSS documentation page 5)
+  x_hat <- df3$x + (error.ratio * b1 * d_i) / (1 + error.ratio * b1^2)
+  y_hat <- df3$y - d_i / (1 + error.ratio * b1^2)
+
+  # Compute residuals (from NCSS documentation page 10)
+  res_x <- df3$x - x_hat
+  res_y <- df3$y - y_hat
+  d_sign <- ifelse(d_i >= 0, 1, -1)
+  opt_res <- d_sign * sqrt(w_i * res_x^2 + w_i * error.ratio * res_y^2)
+
+  # Compute variance-covariance matrix using jackknife
   if (!is.null(jacks_temp) && length(jacks_temp) >= 2) {
     jack_cor <- cor(jacks_temp[[1]], jacks_temp[[2]])
   } else {
-    # Fallback: estimate correlation from data structure
-    # For Deming regression, slope and intercept are typically negatively correlated
-    # Estimate based on x-range
+    # Fallback correlation estimate
     x_range_ratio <- max(df3$x) / min(df3$x)
     if (x_range_ratio < 5) {
-      jack_cor <- -0.95  # Narrow range: high negative correlation
+      jack_cor <- -0.95
     } else if (x_range_ratio < 20) {
-      jack_cor <- -0.70  # Medium range: moderate negative correlation
+      jack_cor <- -0.70
     } else {
-      jack_cor <- -0.30  # Wide range: low negative correlation
+      jack_cor <- -0.30
     }
   }
 
@@ -193,7 +277,7 @@ dem_reg <- function(x,
     c(res$se[1]^2, res$se[1] * res$se[2] * jack_cor,
       res$se[1] * res$se[2] * jack_cor, res$se[2]^2),
     nrow = 2, ncol = 2,
-    dimnames = list(c("intercept", "slope"), c("intercept", "slope"))
+    dimnames = list(c("(Intercept)", x_name), c("(Intercept)", x_name))
   )
 
   # Compute joint confidence region if requested
@@ -201,7 +285,6 @@ dem_reg <- function(x,
   joint_test <- NULL
 
   if (compute_joint) {
-    # Generate ellipse coordinates
     joint_region <- .compute_joint_region(
       intercept = res$coef[1],
       slope = res$coef[2],
@@ -210,7 +293,6 @@ dem_reg <- function(x,
       n_points = 100
     )
 
-    # Test if ideal point (slope=1, intercept=0) is enclosed
     joint_test <- .test_joint_enclosure(
       intercept = res$coef[1],
       slope = res$coef[2],
@@ -221,13 +303,35 @@ dem_reg <- function(x,
     )
   }
 
-  return(structure(list(model = res,
-                        resamples = jacks,
-                        vcov = vcov_matrix,
-                        joint_region = joint_region,
-                        joint_test = joint_test,
-                        call = call2),
-                   class = "simple_eiv"))
+  # Create coefficients vector with names
+  coefs <- setNames(c(b0, b1), c("(Intercept)", x_name))
+
+  # Create the return object with lm-like structure
+  structure(
+    list(
+      coefficients = coefs,
+      residuals = opt_res,
+      fitted.values = y_hat,
+      model_table = res,
+      vcov = vcov_matrix,
+      df.residual = nrow(df3) - 2,
+      call = call2,
+      terms = mt,
+      model = mf,
+      x_vals = df3$x,
+      y_vals = df3$y,
+      x_hat = x_hat,
+      y_hat = y_hat,
+      error.ratio = error.ratio,
+      weighted = weighted,
+      weights = w_i,
+      conf.level = conf.level,
+      resamples = jacks,
+      joint_region = joint_region,
+      joint_test = joint_test
+    ),
+    class = "simple_eiv"
+  )
 }
 
 
@@ -256,7 +360,6 @@ dem_reg <- function(x,
 
   return(as.data.frame(ellipse))
 }
-
 
 
 .test_joint_enclosure <- function(intercept, slope, vcov,

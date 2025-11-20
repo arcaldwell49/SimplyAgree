@@ -61,8 +61,7 @@ Also, we will assume, based on historical data, that the measurement error ratio
 The data can be run through the `dem_reg` function and the results printed. Note that the output now includes a joint confidence region test.
 
 ```{r}
-dem1 = dem_reg(x = "x",
-               y = "y",
+dem1 = dem_reg(y ~ x,
                data = dat,
                error.ratio = 4,
                weighted = FALSE)
@@ -72,7 +71,7 @@ dem1
 The resulting regression line can then be plotted. The subtitle now indicates whether the identity line is enclosed by the joint confidence region.
 
 ```{r}
-plot(dem1)
+plot(dem1, interval = "confidence")
 ```
 
 ## Visualizing the Joint Confidence Region
@@ -117,8 +116,7 @@ Let me demonstrate the problem with using simple Deming regression when the weig
 
 ```{r}
 dem2 = dem_reg(
-  x = "new.lot",
-  y = "old.lot",
+  old.lot ~ new.lot,
   data = ferritin,
   weighted = FALSE
 )

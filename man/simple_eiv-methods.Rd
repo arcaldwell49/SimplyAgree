@@ -3,17 +3,34 @@
 \name{simple_eiv-methods}
 \alias{simple_eiv-methods}
 \alias{print.simple_eiv}
+\alias{summary.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
 \alias{plot_joint}
 \alias{plot_joint.simple_eiv}
 \alias{vcov.simple_eiv}
 \alias{coef.simple_eiv}
+\alias{fitted.simple_eiv}
+\alias{residuals.simple_eiv}
+\alias{formula.simple_eiv}
+\alias{model.frame.simple_eiv}
+\alias{predict.simple_eiv}
 \title{Methods for simple_eiv objects}
 \usage{
 \method{print}{simple_eiv}(x, ...)
 
-\method{plot}{simple_eiv}(x, x_name = "x", y_name = "y", show_joint = TRUE, ...)
+\method{summary}{simple_eiv}(object, ...)
+
+\method{plot}{simple_eiv}(
+  x,
+  x_name = NULL,
+  y_name = NULL,
+  show_joint = TRUE,
+  interval = c("none", "confidence", "prediction"),
+  level = NULL,
+  n_points = 100,
+  ...
+)
 
 \method{check}{simple_eiv}(x)
 
@@ -30,13 +47,29 @@ plot_joint(object, ...)
 \method{vcov}{simple_eiv}(object, ...)
 
 \method{coef}{simple_eiv}(object, ...)
+
+\method{fitted}{simple_eiv}(object, type = c("y", "x", "both"), ...)
+
+\method{residuals}{simple_eiv}(object, type = c("optimized", "x", "y", "raw_y"), ...)
+
+\method{formula}{simple_eiv}(x, ...)
+
+\method{model.frame}{simple_eiv}(formula, ...)
+
+\method{predict}{simple_eiv}(
+  object,
+  newdata = NULL,
+  interval = c("none", "confidence", "prediction"),
+  level = NULL,
+  se.fit = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{object of class \code{simple_eiv} from the dem_reg function.}
+\item{...}{further arguments passed through, see description of return value
+for details.}
 
-\item{...}{further arguments passed through, see description of return value.
-for details.
-\code{\link{agree_test}}.}
+\item{object, x}{object of class \code{simple_eiv} from the dem_reg function.}
 
 \item{x_name}{Name/label for x values (first measurement)}
 
@@ -44,13 +77,26 @@ for details.
 
 \item{show_joint}{Logical. If TRUE and joint region computed, shows joint region status in subtitle.}
 
-\item{object}{object of class \code{simple_eiv} for plot_joint method}
+\item{interval}{Type of interval calculation. Can be "none" (default), "confidence", or "prediction".}
+
+\item{level}{Confidence level for intervals (default uses the model's conf.level).}
+
+\item{n_points}{Number of points to use for computing the interval bands (default = 100).}
 
 \item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
 
 \item{ideal_intercept}{The hypothesized intercept value to test against (default = 0)}
 
 \item{show_intervals}{Logical. If TRUE, shows individual confidence intervals as well.}
+
+\item{type}{Type of residuals to return. Options are "optimized" (default), "x", "y", or "raw_y".}
+
+\item{newdata}{An optional data frame containing values of X at which to predict.
+If omitted, the fitted values are returned.}
+
+\item{se.fit}{Logical. If TRUE, standard errors of predictions are returned.}
+
+\item{object}{object of class \code{simple_eiv} for plot_joint method}
 }
 \value{
 \describe{
@@ -58,6 +104,13 @@ for details.
 \item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
 \item{\code{check}}{Returns plots of the optimized residuals.}
 \item{\code{plot_joint}}{Returns a plot of the joint confidence region in parameter space.}
+\item{\code{predict}}{Predicts Y values for new X values with optional intervals.}
+\item{\code{fitted}}{Extracts fitted values (estimated true Y values).}
+\item{\code{residuals}}{Extracts residuals (optimized residuals).}
+\item{\code{coef}}{Extracts model coefficients.}
+\item{\code{vcov}}{Extracts variance-covariance matrix.}
+\item{\code{formula}}{Extracts model formula.}
+\item{\code{model.frame}}{Extracts the model frame.}
 }
 }
 \description{

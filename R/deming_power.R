@@ -133,8 +133,7 @@ deming_power_sim <- function(n_sims = 1000,
     # Fit Deming regression
     tryCatch({
       fit <- dem_reg(
-        x = "x",
-        y = "y",
+        formula = y ~ x,  # UPDATED: Use formula interface
         data = sim_data,
         weighted = weighted,
         error.ratio = error.ratio,
@@ -144,8 +143,8 @@ deming_power_sim <- function(n_sims = 1000,
       )
 
       # Test with confidence intervals
-      slope_ci <- c(fit$model$lower.ci[2], fit$model$upper.ci[2])
-      int_ci <- c(fit$model$lower.ci[1], fit$model$upper.ci[1])
+      slope_ci <- c(fit$model_table$lower.ci[2], fit$model_table$upper.ci[2])  # UPDATED: model_table
+      int_ci <- c(fit$model_table$lower.ci[1], fit$model_table$upper.ci[1])    # UPDATED: model_table
 
       slope_detected[i] <- !(ideal_slope >= slope_ci[1] && ideal_slope <= slope_ci[2])
       intercept_detected[i] <- !(ideal_intercept >= int_ci[1] && ideal_intercept <= int_ci[2])
