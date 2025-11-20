@@ -1,19 +1,19 @@
 #' Methods for simple_eiv objects
 #'
-#' Methods defined for objects returned from the error-in-variables models (e.g., dem_reg).
+#' Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
 #'
-#' @param object,x object of class \code{simple_eiv} from the dem_reg function.
-#' @param ... further arguments passed through, see description of return value
-#'   for details.
+#' @param object,x object of class \code{simple_eiv} from dem_reg or pb_reg function.
+#' @param ... further arguments passed through.
 #' @return
 #' \describe{
-#'   \item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
-#'   \item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
-#'   \item{\code{check}}{Returns plots of the optimized residuals.}
-#'   \item{\code{plot_joint}}{Returns a plot of the joint confidence region in parameter space.}
-#'   \item{\code{predict}}{Predicts Y values for new X values with optional intervals.}
-#'   \item{\code{fitted}}{Extracts fitted values (estimated true Y values).}
-#'   \item{\code{residuals}}{Extracts residuals (optimized residuals).}
+#'   \item{\code{print}}{Prints short summary of the EIV regression model.}
+#'   \item{\code{summary}}{Prints detailed summary.}
+#'   \item{\code{plot}}{Returns a plot of the regression line and data.}
+#'   \item{\code{check}}{Returns plots of residuals.}
+#'   \item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
+#'   \item{\code{predict}}{Predicts Y values for new X values.}
+#'   \item{\code{fitted}}{Extracts fitted values.}
+#'   \item{\code{residuals}}{Extracts residuals.}
 #'   \item{\code{coef}}{Extracts model coefficients.}
 #'   \item{\code{vcov}}{Extracts variance-covariance matrix.}
 #'   \item{\code{formula}}{Extracts model formula.}
@@ -22,37 +22,52 @@
 #'
 #' @name simple_eiv-methods
 
-
-### methods for simple_eiv objects
-
 #' @rdname simple_eiv-methods
 #' @method print simple_eiv
 #' @export
 
 print.simple_eiv <- function(x, ...) {
-  if (x$weighted == TRUE) {
+  # Determine method type
+  is_passing_bablok <- !is.null(x$method) && x$method == "passing-bablok"
+
+  if (is_passing_bablok) {
+    header <- paste0("Passing-Bablok Regression with ", x$conf.level * 100, "% C.I.")
+  } else if (!is.null(x$weighted) && x$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", x$conf.level * 100, "% C.I.")
   } else {
     header <- paste0("Deming Regression with ", x$conf.level * 100, "% C.I.")
   }
-  cat(header)
-  cat("\n")
-  cat("\n")
+
+  cat(header, "\n\n")
   cat("Call:\n")
   print(x$call)
-  cat("\n")
-  cat("Coefficients:\n")
+  cat("\nCoefficients:\n")
   print(x$coefficients, digits = 4)
   cat("\n")
 
-  # Add joint region test results if available
-  if (!is.null(x$joint_test)) {
+  # Passing-Bablok specific tests
+  if (is_passing_bablok) {
+    if (!is.null(x$kendall_test)) {
+      cat("Kendall's Tau Test (H0: tau = 0):\n")
+      cat(sprintf("  Tau:       %.4f\n", x$kendall_test$tau))
+      cat(sprintf("  p-value:   %.4f\n", x$kendall_test$p_value))
+      cat("\n")
+    }
+
+    if (!is.null(x$cusum_test)) {
+      cat("CUSUM Linearity Test:\n")
+      cat(sprintf("  Test stat: %.4f\n", x$cusum_test$test_statistic))
+      cat(sprintf("  Linear:    %s\n", ifelse(x$cusum_test$linear, "Yes", "No")))
+      cat("\n")
+    }
+  }
+
+  # Deming joint region test
+  if (!is_passing_bablok && !is.null(x$joint_test)) {
     cat("Joint Confidence Region Test (H0: slope=1, intercept=0):\n")
-    cat(sprintf("  Mahalanobis distance: %.4f\n", x$joint_test$mahalanobis_distance))
-    cat(sprintf("  Chi-square critical:  %.4f\n", x$joint_test$chi2_critical))
-    cat(sprintf("  Identity enclosed:    %s\n",
-                ifelse(x$joint_test$is_enclosed, "Yes", "No")))
-    cat(sprintf("  p-value:             %.4f\n", x$joint_test$p_value))
+    cat(sprintf("  Identity enclosed: %s (p = %.4f)\n",
+                ifelse(x$joint_test$is_enclosed, "Yes", "No"),
+                x$joint_test$p_value))
   }
 
   invisible(x)
@@ -63,14 +78,18 @@ print.simple_eiv <- function(x, ...) {
 #' @export
 
 summary.simple_eiv <- function(object, ...) {
-  if (object$weighted == TRUE) {
+  # Determine method type
+  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+
+  if (is_passing_bablok) {
+    header <- paste0("Passing-Bablok Regression with ", object$conf.level * 100, "% C.I.")
+  } else if (!is.null(object$weighted) && object$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", object$conf.level * 100, "% C.I.")
   } else {
     header <- paste0("Deming Regression with ", object$conf.level * 100, "% C.I.")
   }
 
-  cat(header)
-  cat("\n\n")
+  cat(header, "\n\n")
   cat("Call:\n")
   print(object$call)
   cat("\n")
@@ -85,124 +104,128 @@ summary.simple_eiv <- function(object, ...) {
 
   cat(sprintf("Residual standard error: %.4f on %d degrees of freedom\n",
               sd(object$residuals), object$df.residual))
-  cat(sprintf("Error variance ratio (lambda): %.4f\n", object$error.ratio))
 
-  if (!is.null(object$joint_test)) {
+  # Method-specific output
+  if (!is_passing_bablok && !is.null(object$error.ratio)) {
+    cat(sprintf("Error variance ratio (lambda): %.4f\n", object$error.ratio))
+  }
+
+  # Passing-Bablok specific tests
+  if (is_passing_bablok) {
+    cat("\n")
+    if (!is.null(object$kendall_test)) {
+      cat("Kendall's Tau Test (H0: tau = 0):\n")
+      cat(sprintf("  Tau: %.4f (95%% CI: [%.4f, %.4f])\n",
+                  object$kendall_test$tau,
+                  object$kendall_test$lower,
+                  object$kendall_test$upper))
+      cat(sprintf("  Z:   %.4f, p = %.4f\n",
+                  object$kendall_test$z_statistic,
+                  object$kendall_test$p_value))
+    }
+
+    if (!is.null(object$cusum_test)) {
+      cat("\n")
+      cat("CUSUM Linearity Test:\n")
+      cat(sprintf("  Test stat: %.4f, p ≈ %.3f\n",
+                  object$cusum_test$test_statistic,
+                  object$cusum_test$p_value))
+      cat(sprintf("  Linear:    %s\n", ifelse(object$cusum_test$linear, "Yes", "No")))
+    }
+  }
+
+  # Deming joint test
+  if (!is_passing_bablok && !is.null(object$joint_test)) {
     cat("\n")
     cat("Joint Confidence Region Test (H0: slope=1, intercept=0):\n")
     cat(sprintf("  Mahalanobis distance: %.4f\n", object$joint_test$mahalanobis_distance))
     cat(sprintf("  Chi-square critical:  %.4f\n", object$joint_test$chi2_critical))
     cat(sprintf("  Identity enclosed:    %s\n",
                 ifelse(object$joint_test$is_enclosed, "Yes", "No")))
-    cat(sprintf("  p-value:             %.4f\n", x$joint_test$p_value))
+    cat(sprintf("  p-value:             %.4f\n", object$joint_test$p_value))
   }
 
   invisible(object)
 }
+}
 
-#' @rdname simple_eiv-methods
-#' @method plot simple_eiv
-#' @param x_name Name/label for x values (first measurement)
-#' @param y_name Name/label for y values (second measurement)
-#' @param show_joint Logical. If TRUE and joint region computed, shows joint region status in subtitle.
-#' @param interval Type of interval to display. Can be "none" (default), "confidence", or "prediction".
-#' @param level Confidence/prediction level for intervals (default uses the model's conf.level).
-#' @param n_points Number of points to use for computing the interval bands (default = 100).
-#' @import ggplot2
-#' @importFrom patchwork plot_annotation
-#' @export
+if (is.null(x_name)) {
+  x_name <- names(x$model)[2]
+}
+if (is.null(y_name)) {
+  y_name <- names(x$model)[1]
+}
 
-plot.simple_eiv <- function(x,
-                            x_name = NULL,
-                            y_name = NULL,
-                            interval = c("none", "confidence", "prediction"),
-                            level = NULL,
-                            n_points = 100,
-                            ...) {
+df <- data.frame(x = x$x_vals, y = x$y_vals)
+scalemin <- min(c(df$x, df$y), na.rm = TRUE)
+scalemax <- max(c(df$x, df$y), na.rm = TRUE)
 
-  interval <- match.arg(interval)
+slp <- x$coefficients[2]
+int <- x$coefficients[1]
+tmp.lm <- data.frame(the_int = int, the_slope = slp)
 
-  if (is.null(level)) {
-    level <- x$conf.level
-  }
+# Create subtitle with joint test result if available
+# removed: too busy and have plot_joint now
 
-  if (is.null(x_name)) {
-    x_name <- names(x$model)[2]
-  }
-  if (is.null(y_name)) {
-    y_name <- names(x$model)[1]
-  }
+# Base plot
+p1 <- ggplot(df, aes(x = x, y = y)) +
+  geom_point(na.rm = TRUE) +
+  geom_abline(intercept = 0,
+              slope = 1,
+              linetype = "solid",
+              color = "black") +
+  geom_abline(
+    data = tmp.lm,
+    aes(intercept = the_int, slope = the_slope),
+    linetype = "dashed",
+    color = "red"
+  )
 
-  df <- data.frame(x = x$x_vals, y = x$y_vals)
-  scalemin <- min(c(df$x, df$y), na.rm = TRUE)
-  scalemax <- max(c(df$x, df$y), na.rm = TRUE)
+# Add confidence or prediction bands if requested
+if (interval != "none") {
+  # Create sequence of x values for smooth bands
+  x_seq <- seq(scalemin, scalemax, length.out = n_points)
+  newdata <- data.frame(x = x_seq)
+  names(newdata) <- x_name
 
-  slp <- x$coefficients[2]
-  int <- x$coefficients[1]
-  tmp.lm <- data.frame(the_int = int, the_slope = slp)
+  # Compute intervals
+  pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
 
-  # Create subtitle with joint test result if available
-  # removed: too busy and have plot_joint now
+  # Create data frame for ribbon
+  band_df <- data.frame(
+    x = x_seq,
+    fit = pred_result$fit,
+    lwr = pred_result$lwr,
+    upr = pred_result$upr
+  )
 
-  # Base plot
-  p1 <- ggplot(df, aes(x = x, y = y)) +
-    geom_point(na.rm = TRUE) +
-    geom_abline(intercept = 0,
-                slope = 1,
-                linetype = "solid",
-                color = "black") +
-    geom_abline(
-      data = tmp.lm,
-      aes(intercept = the_int, slope = the_slope),
-      linetype = "dashed",
-      color = "red"
-    )
-
-  # Add confidence or prediction bands if requested
-  if (interval != "none") {
-    # Create sequence of x values for smooth bands
-    x_seq <- seq(scalemin, scalemax, length.out = n_points)
-    newdata <- data.frame(x = x_seq)
-    names(newdata) <- x_name
-
-    # Compute intervals
-    pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
-
-    # Create data frame for ribbon
-    band_df <- data.frame(
-      x = x_seq,
-      fit = pred_result$fit,
-      lwr = pred_result$lwr,
-      upr = pred_result$upr
-    )
-
-    # Add ribbon to plot
-    interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
-    p1 <- p1 +
-      geom_ribbon(data = band_df,
-                  aes(x = x, ymin = lwr, ymax = upr),
-                  fill = "red",
-                  alpha = 0.2,
-                  inherit.aes = FALSE) +
-      labs(caption = sprintf("%.0f%% %s interval shown",
-                             level * 100,
-                             interval_label))
-
-    scalemin = min(band_df$lwr, na.rm = TRUE)
-    scalemax = max(band_df$upr, na.rm = TRUE)
-  }
-
-  # Finalize plot
+  # Add ribbon to plot
+  interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
   p1 <- p1 +
-    xlab(paste0("Method: ", x_name)) +
-    xlim(scalemin, scalemax) +
-    ylim(scalemin, scalemax) +
-    ylab(paste0("Method: ", y_name)) +
-    #labs(subtitle = subtitle_text) +
-    coord_fixed(ratio = 1 / 1) +
-    theme_bw()
+    geom_ribbon(data = band_df,
+                aes(x = x, ymin = lwr, ymax = upr),
+                fill = "red",
+                alpha = 0.2,
+                inherit.aes = FALSE) +
+    labs(caption = sprintf("%.0f%% %s interval shown",
+                           level * 100,
+                           interval_label))
 
-  return(p1)
+  scalemin = min(band_df$lwr, na.rm = TRUE)
+  scalemax = max(band_df$upr, na.rm = TRUE)
+}
+
+# Finalize plot
+p1 <- p1 +
+  xlab(paste0("Method: ", x_name)) +
+  xlim(scalemin, scalemax) +
+  ylim(scalemin, scalemax) +
+  ylab(paste0("Method: ", y_name)) +
+  #labs(subtitle = subtitle_text) +
+  coord_fixed(ratio = 1 / 1) +
+  theme_bw()
+
+return(p1)
 }
 
 #' @rdname simple_eiv-methods
@@ -210,6 +233,14 @@ plot.simple_eiv <- function(x,
 #' @export
 
 check.simple_eiv <- function(x) {
+
+  # Check if Passing-Bablok
+  is_passing_bablok <- !is.null(x$method) && x$method == "passing-bablok"
+
+  if (is_passing_bablok) {
+    message("Diagnostic plots are not currently available for Passing-Bablok regression.")
+    return(invisible(NULL))
+  }
 
   b0 <- x$coefficients[1]
   b1 <- x$coefficients[2]
@@ -391,6 +422,14 @@ plot_joint.simple_eiv <- function(object,
 #' @export
 
 vcov.simple_eiv <- function(object, ...) {
+  # Check if Passing-Bablok
+  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+
+  if (is_passing_bablok) {
+    message("Variance-covariance matrix not available for Passing-Bablok regression (no jackknife method implemented).")
+    return(NULL)
+  }
+
   if (is.null(object$vcov)) {
     stop("Variance-covariance matrix not available. Re-run dem_reg().")
   }
@@ -415,6 +454,13 @@ coef.simple_eiv <- function(object, ...) {
 fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
   type <- match.arg(type)
 
+  # Check if Passing-Bablok
+  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+
+  if (is_passing_bablok && type %in% c("x", "both")) {
+    stop("Estimated true X values (x_hat) are not available for Passing-Bablok regression. Use type = 'y' for fitted Y values.")
+  }
+
   switch(type,
          y = object$fitted.values,
          x = object$x_hat,
@@ -429,6 +475,17 @@ fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
 
 residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"), ...) {
   type <- match.arg(type)
+
+  # Check if Passing-Bablok
+  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+
+  if (is_passing_bablok && type == "optimized") {
+    stop("Optimized residuals are not available for Passing-Bablok regression. Use type = 'raw_y' for simple residuals.")
+  }
+
+  if (is_passing_bablok && type %in% c("x", "y")) {
+    stop("X and Y residuals are not available for Passing-Bablok regression (no x_hat/y_hat). Use type = 'raw_y'.")
+  }
 
   b0 <- object$coefficients[1]
   b1 <- object$coefficients[2]
@@ -472,6 +529,13 @@ predict.simple_eiv <- function(object,
                                level = NULL,
                                se.fit = FALSE,
                                ...) {
+
+  # Check if Passing-Bablok
+  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+
+  if (is_passing_bablok && (interval != "none" || se.fit)) {
+    stop("Confidence intervals and standard errors are not available for Passing-Bablok regression. Only point predictions are supported.")
+  }
 
   interval <- match.arg(interval)
 
@@ -584,4 +648,46 @@ predict.simple_eiv <- function(object,
   } else {
     return(result)
   }
+}
+
+# internal -----
+#
+## Deming ----
+calc_dem = function(X,Y, w_i, error.ratio){
+  x_w = sum(w_i*X)/sum(w_i)
+  y_w = sum(w_i*Y)/sum(w_i)
+  p_w = sum(w_i * (X - x_w)*(Y - y_w))
+  u_w = sum(w_i * (X - x_w)^2)
+  q_w = sum(w_i * (Y - y_w)^2)
+  b1_w <- ((error.ratio * q_w - u_w) + sqrt((u_w - error.ratio * q_w)^2 +
+                                              4 * error.ratio * p_w^2))/(2 * error.ratio * p_w)
+  b0_w <- y_w- b1_w * x_w
+  return(list(b0 = b0_w, b1 = b1_w))
+}
+jack_dem = function(X,Y, w_i, error.ratio){
+  len <- length(X)
+  u <- list()
+  for (i in 1:len) {
+    u <- append(u,list(calc_dem(X[-i], Y[-i], w_i[-i],
+                                error.ratio)))
+  }
+  b0 = rep(0,length(u))
+  b1 = rep(0,length(u))
+  for (j in 1:length(u)){
+    b0[j] = u[[j]]$b0
+    b1[j] = u[[j]]$b1
+  }
+  theta_b0 <- calc_dem(X,Y, w_i, error.ratio)$b0
+  theta_b1 <- calc_dem(X,Y, w_i, error.ratio)$b1
+  b0_bias <- (len - 1) * (mean(b0) - theta_b0)
+  b1_bias <- (len - 1) * (mean(b1) - theta_b1)
+  b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
+  b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
+  res = data.frame(row.names = c("Intercept","Slope"),
+                   coef = c(theta_b0, theta_b1),
+                   bias = c(b0_bias, b1_bias),
+                   se = c(b0_se, b1_se))
+  return(list(df = res,
+              jacks = list(b0 = b0,
+                           b1 = b1)))
 }

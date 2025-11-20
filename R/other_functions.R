@@ -398,45 +398,7 @@ check_reli = function(x){
   return(all_checks)
 }
 
-# Deming ----
-calc_dem = function(X,Y, w_i, error.ratio){
-  x_w = sum(w_i*X)/sum(w_i)
-  y_w = sum(w_i*Y)/sum(w_i)
-  p_w = sum(w_i * (X - x_w)*(Y - y_w))
-  u_w = sum(w_i * (X - x_w)^2)
-  q_w = sum(w_i * (Y - y_w)^2)
-  b1_w <- ((error.ratio * q_w - u_w) + sqrt((u_w - error.ratio * q_w)^2 +
-                                              4 * error.ratio * p_w^2))/(2 * error.ratio * p_w)
-  b0_w <- y_w- b1_w * x_w
-  return(list(b0 = b0_w, b1 = b1_w))
-}
-jack_dem = function(X,Y, w_i, error.ratio){
-  len <- length(X)
-  u <- list()
-  for (i in 1:len) {
-    u <- append(u,list(calc_dem(X[-i], Y[-i], w_i[-i],
-                                error.ratio)))
-  }
-  b0 = rep(0,length(u))
-  b1 = rep(0,length(u))
-  for (j in 1:length(u)){
-    b0[j] = u[[j]]$b0
-    b1[j] = u[[j]]$b1
-  }
-  theta_b0 <- calc_dem(X,Y, w_i, error.ratio)$b0
-  theta_b1 <- calc_dem(X,Y, w_i, error.ratio)$b1
-  b0_bias <- (len - 1) * (mean(b0) - theta_b0)
-  b1_bias <- (len - 1) * (mean(b1) - theta_b1)
-  b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
-  b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
-  res = data.frame(row.names = c("Intercept","Slope"),
-                   coef = c(theta_b0, theta_b1),
-                   bias = c(b0_bias, b1_bias),
-                   se = c(b0_se, b1_se))
-  return(list(df = res,
-              jacks = list(b0 = b0,
-                           b1 = b1)))
-}
+
 
 
 # LoA prop bias -----
