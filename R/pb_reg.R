@@ -39,7 +39,7 @@
 #'   - `residuals`: Residuals from the fitted model.
 #'   - `fitted.values`: Predicted Y values.
 #'   - `model_table`: Data frame presenting the full results from the Passing-Bablok regression.
-#'   - `vcov`: Variance-covariance matrix for slope and intercept. NULL for Passing-Bablok.
+#'   - `vcov`: Variance-covariance matrix for slope and intercept.
 #'   - `df.residual`: Residual degrees of freedom.
 #'   - `call`: The matched call.
 #'   - `terms`: The terms object used.
@@ -144,22 +144,12 @@ pb_reg <- function(formula,
   y_fitted <- b0 + b1 * x_vals
   residuals <- y_vals - y_fitted
 
-  # Compute variance-covariance matrix from confidence intervals
-  # Using the width of CI to estimate SE
+  # Compute standard errors from confidence intervals for model table
   alpha <- 1 - conf.level
   z_crit <- qnorm(1 - alpha/2)
 
   se_slope <- (pb_result$slope_upper - pb_result$slope_lower) / (2 * z_crit)
   se_intercept <- (pb_result$intercept_upper - pb_result$intercept_lower) / (2 * z_crit)
-
-  # For Passing-Bablok, no method?
-
-  # vcov_matrix <- matrix(
-  #   c(se_intercept^2, se_intercept * se_slope * rho_est,
-  #     se_intercept * se_slope * rho_est, se_slope^2),
-  #   nrow = 2, ncol = 2,
-  #   dimnames = list(c("(Intercept)", x_name), c("(Intercept)", x_name))
-  # )
 
   # Create model table
   model_table <- data.frame(
@@ -189,7 +179,7 @@ pb_reg <- function(formula,
       residuals = residuals,
       fitted.values = y_fitted,
       model_table = model_table,
-      vcov = NULL,
+      vcov = NULL,  # Not available for Passing-Bablok
       df.residual = n - 2,
       call = call2,
       terms = mt,
