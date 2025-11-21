@@ -28,10 +28,10 @@
 
 print.simple_eiv <- function(x, ...) {
   # Determine method type
-  is_passing_bablok <- !is.null(x$method) && x$method == "passing-bablok"
+  is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
   if (is_passing_bablok) {
-    header <- paste0("Passing-Bablok Regression with ", x$conf.level * 100, "% C.I.")
+    header <- paste0(x$method, " with ", x$conf.level * 100, "% C.I.")
   } else if (!is.null(x$weighted) && x$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", x$conf.level * 100, "% C.I.")
   } else {
@@ -79,10 +79,10 @@ print.simple_eiv <- function(x, ...) {
 
 summary.simple_eiv <- function(object, ...) {
   # Determine method type
-  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
 
   if (is_passing_bablok) {
-    header <- paste0("Passing-Bablok Regression with ", object$conf.level * 100, "% C.I.")
+    header <- paste0(object$method, " with ", object$conf.level * 100, "% C.I.")
   } else if (!is.null(object$weighted) && object$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", object$conf.level * 100, "% C.I.")
   } else {
@@ -105,8 +105,8 @@ summary.simple_eiv <- function(object, ...) {
   cat(sprintf("Residual standard error: %.4f on %d degrees of freedom\n",
               sd(object$residuals), object$df.residual))
 
-  # Method-specific output
-  if (!is_passing_bablok && !is.null(object$error.ratio)) {
+  # Error ratio output
+  if (!is.null(object$error.ratio)) {
     cat(sprintf("Error variance ratio (lambda): %.4f\n", object$error.ratio))
   }
 
@@ -132,6 +132,12 @@ summary.simple_eiv <- function(object, ...) {
                   object$cusum_test$p_value))
       cat(sprintf("  Linear:    %s\n", ifelse(object$cusum_test$linear, "Yes", "No")))
     }
+
+    # Bootstrap info
+    if (!is.null(object$nboot) && object$nboot > 0) {
+      cat("\n")
+      cat(sprintf("Bootstrap CIs based on %d resamples\n", object$nboot))
+    }
   }
 
   # Deming joint test
@@ -147,85 +153,111 @@ summary.simple_eiv <- function(object, ...) {
 
   invisible(object)
 }
-}
 
-if (is.null(x_name)) {
-  x_name <- names(x$model)[2]
-}
-if (is.null(y_name)) {
-  y_name <- names(x$model)[1]
-}
+#' @rdname simple_eiv-methods
+#' @param x_name Name for x-axis label (optional).
+#' @param y_name Name for y-axis label (optional).
+#' @param interval Type of interval to display. Options are "none" (default), "confidence", or "prediction".
+#' @param level Confidence level for intervals (default uses the model's conf.level).
+#' @param n_points Number of points to use for drawing smooth interval bands (default = 100).
+#' @method plot simple_eiv
+#' @importFrom patchwork plot_annotation
+#' @export
 
-df <- data.frame(x = x$x_vals, y = x$y_vals)
-scalemin <- min(c(df$x, df$y), na.rm = TRUE)
-scalemax <- max(c(df$x, df$y), na.rm = TRUE)
+plot.simple_eiv <- function(x,
+                            x_name = NULL,
+                            y_name = NULL,
+                            interval = c("none", "confidence"),
+                            level = NULL,
+                            n_points = 100,
+                            ...) {
 
-slp <- x$coefficients[2]
-int <- x$coefficients[1]
-tmp.lm <- data.frame(the_int = int, the_slope = slp)
+  interval <- match.arg(interval)
 
-# Create subtitle with joint test result if available
-# removed: too busy and have plot_joint now
+  if (is.null(level)) {
+    level <- x$conf.level
+  }
 
-# Base plot
-p1 <- ggplot(df, aes(x = x, y = y)) +
-  geom_point(na.rm = TRUE) +
-  geom_abline(intercept = 0,
-              slope = 1,
-              linetype = "solid",
-              color = "black") +
-  geom_abline(
-    data = tmp.lm,
-    aes(intercept = the_int, slope = the_slope),
-    linetype = "dashed",
-    color = "red"
-  )
+  if (is.null(x_name)) {
+    x_name <- names(x$model)[2]
+  }
+  if (is.null(y_name)) {
+    y_name <- names(x$model)[1]
+  }
 
-# Add confidence or prediction bands if requested
-if (interval != "none") {
-  # Create sequence of x values for smooth bands
-  x_seq <- seq(scalemin, scalemax, length.out = n_points)
-  newdata <- data.frame(x = x_seq)
-  names(newdata) <- x_name
+  df <- data.frame(x = x$x_vals, y = x$y_vals)
+  scalemin <- min(c(df$x, df$y), na.rm = TRUE)
+  scalemax <- max(c(df$x, df$y), na.rm = TRUE)
 
-  # Compute intervals
-  pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
+  slp <- x$coefficients[2]
+  int <- x$coefficients[1]
+  tmp.lm <- data.frame(the_int = int, the_slope = slp)
 
-  # Create data frame for ribbon
-  band_df <- data.frame(
-    x = x_seq,
-    fit = pred_result$fit,
-    lwr = pred_result$lwr,
-    upr = pred_result$upr
-  )
+  # Base plot
+  p1 <- ggplot(df, aes(x = x, y = y)) +
+    geom_point(na.rm = TRUE) +
+    geom_abline(intercept = 0,
+                slope = 1,
+                linetype = "solid",
+                color = "black") +
+    geom_abline(
+      data = tmp.lm,
+      aes(intercept = the_int, slope = the_slope),
+      linetype = "dashed",
+      color = "red"
+    )
 
-  # Add ribbon to plot
-  interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
+  # Add confidence or prediction bands if requested
+  if (interval != "none") {
+    # Check if method supports intervals
+    is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
+
+    if (is_passing_bablok) {
+      warning("Confidence/prediction intervals are not available for Passing-Bablok regression. Showing point estimates only.")
+    } else {
+      # Create sequence of x values for smooth bands
+      x_seq <- seq(scalemin, scalemax, length.out = n_points)
+      newdata <- data.frame(x = x_seq)
+      names(newdata) <- x_name
+
+      # Compute intervals
+      pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
+
+      # Create data frame for ribbon
+      band_df <- data.frame(
+        x = x_seq,
+        fit = pred_result$fit,
+        lwr = pred_result$lwr,
+        upr = pred_result$upr
+      )
+
+      # Add ribbon to plot
+      interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
+      p1 <- p1 +
+        geom_ribbon(data = band_df,
+                    aes(x = x, ymin = lwr, ymax = upr),
+                    fill = "red",
+                    alpha = 0.2,
+                    inherit.aes = FALSE) +
+        labs(caption = sprintf("%.0f%% %s interval shown",
+                               level * 100,
+                               interval_label))
+
+      scalemin = min(band_df$lwr, na.rm = TRUE)
+      scalemax = max(band_df$upr, na.rm = TRUE)
+    }
+  }
+
+  # Finalize plot
   p1 <- p1 +
-    geom_ribbon(data = band_df,
-                aes(x = x, ymin = lwr, ymax = upr),
-                fill = "red",
-                alpha = 0.2,
-                inherit.aes = FALSE) +
-    labs(caption = sprintf("%.0f%% %s interval shown",
-                           level * 100,
-                           interval_label))
+    xlab(paste0("Method: ", x_name)) +
+    xlim(scalemin, scalemax) +
+    ylim(scalemin, scalemax) +
+    ylab(paste0("Method: ", y_name)) +
+    coord_fixed(ratio = 1 / 1) +
+    theme_bw()
 
-  scalemin = min(band_df$lwr, na.rm = TRUE)
-  scalemax = max(band_df$upr, na.rm = TRUE)
-}
-
-# Finalize plot
-p1 <- p1 +
-  xlab(paste0("Method: ", x_name)) +
-  xlim(scalemin, scalemax) +
-  ylim(scalemin, scalemax) +
-  ylab(paste0("Method: ", y_name)) +
-  #labs(subtitle = subtitle_text) +
-  coord_fixed(ratio = 1 / 1) +
-  theme_bw()
-
-return(p1)
+  return(p1)
 }
 
 #' @rdname simple_eiv-methods
@@ -234,97 +266,86 @@ return(p1)
 
 check.simple_eiv <- function(x) {
 
-  # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(x$method) && x$method == "passing-bablok"
+  df = model.frame(x)
+  colnames(df) = c("y", "x")
+  b0 = x$model_table$coef[1]
+  b1 = x$model_table$coef[2]
+  w_i = x$weights
+  error.ratio = x$error.ratio
+  d_i = df$y - (b0+b1*df$x)
+  x_hat = df$x + (error.ratio*b1*d_i)/(1+error.ratio*b1^2)
+  y_hat = df$y - (d_i)/(1+error.ratio*b1^2)
+  res_x = df$x - x_hat
+  res_y = df$y - y_hat
+  d_sign = ifelse(d_i >= 0, 1, -1)
+  opt_res = d_sign * sqrt(w_i*res_x^2 + w_i * error.ratio * res_y^2)
+  avg_both = ((x_hat + y_hat )/ 2)
 
-  if (is_passing_bablok) {
-    message("Diagnostic plots are not currently available for Passing-Bablok regression.")
-    return(invisible(NULL))
-  }
-
-  b0 <- x$coefficients[1]
-  b1 <- x$coefficients[2]
-  w_i <- x$weights
-  error.ratio <- x$error.ratio
-
-  df_x <- x$x_vals
-  df_y <- x$y_vals
-  x_hat <- x$x_hat
-  y_hat <- x$y_hat
-
-  d_i <- df_y - (b0 + b1 * df_x)
-  res_x <- df_x - x_hat
-  res_y <- df_y - y_hat
-  d_sign <- ifelse(d_i >= 0, 1, -1)
-  opt_res <- d_sign * sqrt(w_i * res_x^2 + w_i * error.ratio * res_y^2)
-  avg_both <- ((x_hat + y_hat) / 2)
-
-  mod <- lm(opt_res / d_sign ~ avg_both)
+  mod <- lm(opt_res/d_sign ~ avg_both)
 
   SS <- anova(mod)$"Sum Sq"
   RegSS <- sum(SS) - SS[length(SS)]
   Chisq <- RegSS / 2
   ### Breusch-Pagan Test
   p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
-  df1 <- data.frame(x = avg_both,
-                    y = opt_res / d_sign)
-  p1 <- ggplot(df1,
-               aes(x = x,
-                   y = y)) +
+  df1 = data.frame(x = avg_both,
+                   y = opt_res/d_sign)
+  p1 = ggplot(df1,
+              aes(x=x,
+                  y=y)) +
     geom_point() +
     geom_smooth(se = TRUE,
                 method = "loess",
                 linewidth = .8,
-                color = "#3aaf85",
-                formula = y ~ x) +
+                color ="#3aaf85",
+                formula = y~x) +
     labs(y = "|Optimized Residuals|",
          x = "Average of Both Estimated Values",
          title = "Homogeneity of Residuals",
          subtitle = "Reference line should be flat and horizontal",
          caption = paste0("Heteroskedasticity", " \n",
                           "Breusch-Pagan Test: p = ",
-                          signif(p_val_het, 4))) +
+                          signif(p_val_het,4))) +
     theme_bw() +
     theme(
-      panel.background = element_rect(fill = 'transparent'),
-      plot.background = element_rect(fill = 'transparent', color = NA),
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.background = element_rect(fill = 'transparent'),
-      legend.box.background = element_rect(fill = 'transparent')
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
     )
 
   dat_norm <- na.omit(data.frame(y = opt_res))
-  norm_test <- shapiro.test(opt_res)
-  norm_text <- "Shapiro-Wilk Test"
-  p2 <- plot_qq(x = dat_norm) +
+  norm_test = shapiro.test(opt_res)
+  norm_text = "Shapiro-Wilk Test"
+  p2 = plot_qq(x = dat_norm) +
     labs(caption = paste0("Normality", " \n",
                           norm_text, ": p = ",
-                          signif(norm_test$p.value, 4))) +
+                          signif(norm_test$p.value,4)))+
     theme(
-      panel.background = element_rect(fill = 'transparent'),
-      plot.background = element_rect(fill = 'transparent', color = NA),
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.background = element_rect(fill = 'transparent'),
-      legend.box.background = element_rect(fill = 'transparent')
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
     )
   wrap_plots(p2, p1, ncol = 2) & plot_annotation(
     theme = theme(
-      panel.background = element_rect(fill = 'transparent'),
-      plot.background = element_rect(fill = 'transparent', color = NA),
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.background = element_rect(fill = 'transparent'),
-      legend.box.background = element_rect(fill = 'transparent')
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
     ))
 }
-
 
 #' @rdname simple_eiv-methods
 #' @export
 
-plot_joint <- function(object, ...) {
+plot_joint <- function(x, ...) {
   UseMethod("plot_joint")
 }
 
@@ -369,7 +390,7 @@ plot_joint.simple_eiv <- function(object,
     geom_path(data = object$joint_region,
               aes(x = slope, y = intercept),
               color = "red",
-              size = 1.2) +
+              linewidth = 1.2) +
     # Estimated point
     geom_point(aes(x = est_slope, y = est_intercept),
                size = 3,
@@ -422,20 +443,12 @@ plot_joint.simple_eiv <- function(object,
 #' @export
 
 vcov.simple_eiv <- function(object, ...) {
-  # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
-
-  if (is_passing_bablok) {
-    message("Variance-covariance matrix not available for Passing-Bablok regression (no jackknife method implemented).")
-    return(NULL)
-  }
-
   if (is.null(object$vcov)) {
-    stop("Variance-covariance matrix not available. Re-run dem_reg().")
+    warning("Variance-covariance matrix not available for this model.")
+    return(NULL)
   }
   return(object$vcov)
 }
-
 
 #' @rdname simple_eiv-methods
 #' @method coef simple_eiv
@@ -455,7 +468,7 @@ fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
   type <- match.arg(type)
 
   # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
 
   if (is_passing_bablok && type %in% c("x", "both")) {
     stop("Estimated true X values (x_hat) are not available for Passing-Bablok regression. Use type = 'y' for fitted Y values.")
@@ -477,10 +490,11 @@ residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"
   type <- match.arg(type)
 
   # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
 
   if (is_passing_bablok && type == "optimized") {
-    stop("Optimized residuals are not available for Passing-Bablok regression. Use type = 'raw_y' for simple residuals.")
+    # Return raw_y residuals for PB
+    type <- "raw_y"
   }
 
   if (is_passing_bablok && type %in% c("x", "y")) {
@@ -518,20 +532,20 @@ model.frame.simple_eiv <- function(formula, ...) {
 #' @method predict simple_eiv
 #' @param newdata An optional data frame containing values of X at which to predict.
 #'   If omitted, the fitted values are returned.
-#' @param interval Type of interval calculation. Can be "none" (default), "confidence", or "prediction".
+#' @param interval Type of interval calculation. Can be "none" (default), or "confidence"
 #' @param level Confidence level for intervals (default uses the model's conf.level).
 #' @param se.fit Logical. If TRUE, standard errors of predictions are returned.
 #' @export
 
 predict.simple_eiv <- function(object,
                                newdata = NULL,
-                               interval = c("none", "confidence", "prediction"),
+                               interval = c("none", "confidence"),
                                level = NULL,
                                se.fit = FALSE,
                                ...) {
 
   # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(object$method) && object$method == "passing-bablok"
+  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
 
   if (is_passing_bablok && (interval != "none" || se.fit)) {
     stop("Confidence intervals and standard errors are not available for Passing-Bablok regression. Only point predictions are supported.")
@@ -572,8 +586,10 @@ predict.simple_eiv <- function(object,
     return(y_pred)
   }
 
+  # For Passing-Bablok, we already returned above
+  # Below is Deming regression only
+
   # Calculate standard errors using jackknife
-  # This requires re-running jackknife for each prediction point
   n <- length(object$x_vals)
 
   # Function to compute prediction for a single X value using jackknife
@@ -630,14 +646,6 @@ predict.simple_eiv <- function(object,
     # Confidence interval for mean response
     lwr <- y_pred - t_crit * se_pred
     upr <- y_pred + t_crit * se_pred
-  } else if (interval == "prediction") {
-    # Prediction interval for new observation
-    # For Deming regression, prediction interval must account for measurement error
-    # Using error variance from the model
-    error_var_y <- object$error.ratio * (sd(object$x_vals)^2 + sd(object$y_vals)^2) / (1 + object$error.ratio)
-    se_pred_interval <- sqrt(se_pred^2 + error_var_y)
-    lwr <- y_pred - t_crit * se_pred_interval
-    upr <- y_pred + t_crit * se_pred_interval
   }
 
   # Return results
@@ -664,30 +672,52 @@ calc_dem = function(X,Y, w_i, error.ratio){
   b0_w <- y_w- b1_w * x_w
   return(list(b0 = b0_w, b1 = b1_w))
 }
-jack_dem = function(X,Y, w_i, error.ratio){
+jack_dem = function(X, Y, w_i, error.ratio) {
   len <- length(X)
   u <- list()
   for (i in 1:len) {
-    u <- append(u,list(calc_dem(X[-i], Y[-i], w_i[-i],
-                                error.ratio)))
+    u <- append(u, list(calc_dem(X[-i], Y[-i], w_i[-i], error.ratio)))
   }
-  b0 = rep(0,length(u))
-  b1 = rep(0,length(u))
-  for (j in 1:length(u)){
+  b0 = rep(0, length(u))
+  b1 = rep(0, length(u))
+  for (j in 1:length(u)) {
     b0[j] = u[[j]]$b0
     b1[j] = u[[j]]$b1
   }
-  theta_b0 <- calc_dem(X,Y, w_i, error.ratio)$b0
-  theta_b1 <- calc_dem(X,Y, w_i, error.ratio)$b1
+
+  theta_b0 <- calc_dem(X, Y, w_i, error.ratio)$b0
+  theta_b1 <- calc_dem(X, Y, w_i, error.ratio)$b1
+
   b0_bias <- (len - 1) * (mean(b0) - theta_b0)
   b1_bias <- (len - 1) * (mean(b1) - theta_b1)
+
   b0_se <- sqrt(((len - 1)/len) * sum((b0 - mean(b0))^2))
   b1_se <- sqrt(((len - 1)/len) * sum((b1 - mean(b1))^2))
-  res = data.frame(row.names = c("Intercept","Slope"),
-                   coef = c(theta_b0, theta_b1),
-                   bias = c(b0_bias, b1_bias),
-                   se = c(b0_se, b1_se))
-  return(list(df = res,
-              jacks = list(b0 = b0,
-                           b1 = b1)))
+
+  # Compute variance-covariance matrix
+  # The jackknife vcov should match the SE values:
+  # vcov[i,i] = SE[i]^2
+  # vcov[i,j] = cor(b0, b1) * SE[i] * SE[j]
+  jack_cor <- cor(b0, b1)
+
+  vcov_matrix <- matrix(
+    c(b0_se^2, b0_se * b1_se * jack_cor,
+      b0_se * b1_se * jack_cor, b1_se^2),
+    nrow = 2, ncol = 2,
+    dimnames = list(c("Intercept", "Slope"),
+                    c("Intercept", "Slope"))
+  )
+
+  res = data.frame(
+    row.names = c("Intercept", "Slope"),
+    coef = c(theta_b0, theta_b1),
+    bias = c(b0_bias, b1_bias),
+    se = c(b0_se, b1_se)
+  )
+
+  return(list(
+    df = res,
+    jacks = list(b0 = b0, b1 = b1),
+    vcov = vcov_matrix
+  ))
 }

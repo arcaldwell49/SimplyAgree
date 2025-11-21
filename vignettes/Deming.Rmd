@@ -56,14 +56,14 @@ dat = data.frame(
 )
 ```
 
-Also, we will assume, based on historical data, that the measurement error ratio is equal to 4.
+Also, we will assume, based on historical data, that the measurement error ratio is equal to 2.
 
 The data can be run through the `dem_reg` function and the results printed. Note that the output now includes a joint confidence region test.
 
 ```{r}
 dem1 = dem_reg(y ~ x,
                data = dat,
-               error.ratio = 4,
+               error.ratio = 2,
                weighted = FALSE)
 dem1
 ```

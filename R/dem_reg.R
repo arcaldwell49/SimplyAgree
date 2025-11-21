@@ -222,6 +222,15 @@ dem_reg <- function(formula = NULL,
                   w_i = w_i,
                   error.ratio = error.ratio)
 
+  # Extract vcov matrix from jack_dem (it computes it correctly there)
+  vcov_matrix <- res$vcov
+
+  # Ensure proper dimnames match the formula terms
+  if (!is.null(vcov_matrix)) {
+    dimnames(vcov_matrix) <- list(c("(Intercept)", x_name),
+                                  c("(Intercept)", x_name))
+  }
+
   # Always keep jacks temporarily for vcov computation
   jacks_temp <- res$jacks
 
@@ -258,27 +267,7 @@ dem_reg <- function(formula = NULL,
   d_sign <- ifelse(d_i >= 0, 1, -1)
   opt_res <- d_sign * sqrt(w_i * res_x^2 + w_i * error.ratio * res_y^2)
 
-  # Compute variance-covariance matrix using jackknife
-  if (!is.null(jacks_temp) && length(jacks_temp) >= 2) {
-    jack_cor <- cor(jacks_temp[[1]], jacks_temp[[2]])
-  } else {
-    # Fallback correlation estimate
-    x_range_ratio <- max(df3$x) / min(df3$x)
-    if (x_range_ratio < 5) {
-      jack_cor <- -0.95
-    } else if (x_range_ratio < 20) {
-      jack_cor <- -0.70
-    } else {
-      jack_cor <- -0.30
-    }
-  }
-
-  vcov_matrix <- matrix(
-    c(res$se[1]^2, res$se[1] * res$se[2] * jack_cor,
-      res$se[1] * res$se[2] * jack_cor, res$se[2]^2),
-    nrow = 2, ncol = 2,
-    dimnames = list(c("(Intercept)", x_name), c("(Intercept)", x_name))
-  )
+  # vcov_matrix was already computed by jack_dem and extracted above
 
   # Compute joint confidence region if requested
   joint_region <- NULL
@@ -337,13 +326,36 @@ dem_reg <- function(formula = NULL,
 
 .compute_joint_region <- function(intercept, slope, vcov, conf.level = 0.95, n_points = 100) {
 
+  # Check for invalid vcov matrix
+  if (any(!is.finite(vcov))) {
+    warning("Cannot compute joint confidence region: variance-covariance matrix contains non-finite values")
+    return(NULL)
+  }
+
   # Chi-square critical value for 2 df
   chi2_crit <- qchisq(conf.level, df = 2)
 
-  # Eigendecomposition of covariance matrix
-  eig <- eigen(vcov)
+  # Eigendecomposition of covariance matrix with error handling
+  eig <- tryCatch(
+    eigen(vcov),
+    error = function(e) {
+      warning("Cannot compute joint confidence region: ", e$message)
+      return(NULL)
+    }
+  )
+
+  if (is.null(eig)) {
+    return(NULL)
+  }
+
   lambda <- eig$values
   v <- eig$vectors
+
+  # Check for negative eigenvalues (indicates non-positive definite matrix)
+  if (any(lambda < 0)) {
+    warning("Cannot compute joint confidence region: covariance matrix is not positive definite")
+    return(NULL)
+  }
 
   # Generate circle
   theta <- seq(0, 2 * pi, length.out = n_points)
@@ -366,13 +378,31 @@ dem_reg <- function(formula = NULL,
                                   ideal_intercept, ideal_slope,
                                   conf.level = 0.95) {
 
+  # Check for invalid vcov matrix
+  if (any(!is.finite(vcov))) {
+    warning("Cannot perform joint test: variance-covariance matrix contains non-finite values")
+    return(NULL)
+  }
+
   # Test point
   point <- c(ideal_intercept, ideal_slope)
   center <- c(intercept, slope)
 
-  # Mahalanobis distance
+  # Mahalanobis distance with error handling
   diff <- point - center
-  vcov_inv <- solve(vcov)
+
+  vcov_inv <- tryCatch(
+    solve(vcov),
+    error = function(e) {
+      warning("Cannot perform joint test: ", e$message)
+      return(NULL)
+    }
+  )
+
+  if (is.null(vcov_inv)) {
+    return(NULL)
+  }
+
   mahal_dist <- as.numeric(t(diff) %*% vcov_inv %*% diff)
 
   # Chi-square critical value

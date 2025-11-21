@@ -25,8 +25,7 @@
   x,
   x_name = NULL,
   y_name = NULL,
-  show_joint = TRUE,
-  interval = c("none", "confidence", "prediction"),
+  interval = c("none", "confidence"),
   level = NULL,
   n_points = 100,
   ...
@@ -34,7 +33,7 @@
 
 \method{check}{simple_eiv}(x)
 
-plot_joint(object, ...)
+plot_joint(x, ...)
 
 \method{plot_joint}{simple_eiv}(
   object,
@@ -59,29 +58,26 @@ plot_joint(object, ...)
 \method{predict}{simple_eiv}(
   object,
   newdata = NULL,
-  interval = c("none", "confidence", "prediction"),
+  interval = c("none", "confidence"),
   level = NULL,
   se.fit = FALSE,
   ...
 )
 }
 \arguments{
-\item{...}{further arguments passed through, see description of return value
-for details.}
+\item{...}{further arguments passed through.}
 
-\item{object, x}{object of class \code{simple_eiv} from the dem_reg function.}
+\item{object, x}{object of class \code{simple_eiv} from dem_reg or pb_reg function.}
 
-\item{x_name}{Name/label for x values (first measurement)}
+\item{x_name}{Name for x-axis label (optional).}
 
-\item{y_name}{Name/label for y values (second measurement)}
+\item{y_name}{Name for y-axis label (optional).}
 
-\item{show_joint}{Logical. If TRUE and joint region computed, shows joint region status in subtitle.}
-
-\item{interval}{Type of interval calculation. Can be "none" (default), "confidence", or "prediction".}
+\item{interval}{Type of interval calculation. Can be "none" (default), or "confidence"}
 
 \item{level}{Confidence level for intervals (default uses the model's conf.level).}
 
-\item{n_points}{Number of points to use for computing the interval bands (default = 100).}
+\item{n_points}{Number of points to use for drawing smooth interval bands (default = 100).}
 
 \item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
 
@@ -100,13 +96,14 @@ If omitted, the fitted values are returned.}
 }
 \value{
 \describe{
-\item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
-\item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
-\item{\code{check}}{Returns plots of the optimized residuals.}
-\item{\code{plot_joint}}{Returns a plot of the joint confidence region in parameter space.}
-\item{\code{predict}}{Predicts Y values for new X values with optional intervals.}
-\item{\code{fitted}}{Extracts fitted values (estimated true Y values).}
-\item{\code{residuals}}{Extracts residuals (optimized residuals).}
+\item{\code{print}}{Prints short summary of the EIV regression model.}
+\item{\code{summary}}{Prints detailed summary.}
+\item{\code{plot}}{Returns a plot of the regression line and data.}
+\item{\code{check}}{Returns plots of residuals.}
+\item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
+\item{\code{predict}}{Predicts Y values for new X values.}
+\item{\code{fitted}}{Extracts fitted values.}
+\item{\code{residuals}}{Extracts residuals.}
 \item{\code{coef}}{Extracts model coefficients.}
 \item{\code{vcov}}{Extracts variance-covariance matrix.}
 \item{\code{formula}}{Extracts model formula.}
@@ -114,5 +111,5 @@ If omitted, the fitted values are returned.}
 }
 }
 \description{
-Methods defined for objects returned from the error-in-variables models (e.g., dem_reg).
+Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
 }
