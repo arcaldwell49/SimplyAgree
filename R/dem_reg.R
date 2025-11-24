@@ -107,6 +107,10 @@ dem_reg <- function(formula = NULL,
 
   # Capture the call
   call2 <- match.call()
+  call2 = match.call()
+  call2$weighted = weighted
+  call2$conf.level = conf.level
+  call2$id = id
 
   # Error checking for conf.level
   if (!is.numeric(conf.level) || length(conf.level) != 1) {
@@ -138,27 +142,24 @@ dem_reg <- function(formula = NULL,
 
   # Handle old interface with deprecation warning
   if (using_xy) {
-    warning(
-      "The 'x' and 'y' arguments are deprecated and will be removed in a future version.\n",
-      "Please use the formula interface instead: dem_reg(", y, " ~ ", x, ", data = ...)\n",
-      "See ?dem_reg for details.",
-      call. = FALSE
-    )
+
 
     # Convert old interface to formula
     formula <- as.formula(paste(y, "~", x))
-    call2$formula <- formula
-    call2$x <- NULL
-    call2$y <- NULL
-  }
 
+
+  }
+  if (!is.null(id)) {
+    formula <- update(formula, ~ . + id)
+  }
+  call2$formula <- formula
   # Extract model frame and terms
-  mf <- model.frame(formula, data = data, na.action = na.omit)
+  mf <- model.frame(formula, data = data, na.action = na.pass)
   mt <- attr(mf, "terms")
 
   # Extract y and x from formula
   y_vals <- model.response(mf, "numeric")
-  x_vals <- model.matrix(mt, mf)[, -1, drop = TRUE]  # Remove intercept column
+  x_vals <- mf[[2]]  # Remove intercept column
 
   # Store variable names
   y_name <- names(mf)[1]
@@ -167,11 +168,9 @@ dem_reg <- function(formula = NULL,
   # Handle id if provided
   if (!is.null(id)) {
     # id can be either a column name (string) or the actual values
-    if (is.character(id) && length(id) == 1) {
-      id_vals <- data[[id]]
-    } else {
-      id_vals <- id
-    }
+
+    id_vals <- mf[[3]]
+
 
     df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
     df <- df[complete.cases(df), ]
@@ -299,20 +298,20 @@ dem_reg <- function(formula = NULL,
   structure(
     list(
       coefficients = coefs,
-      residuals = opt_res,
-      fitted.values = y_hat,
+     # residuals = opt_res,
+     # fitted.values = y_hat,
       model_table = res,
       vcov = vcov_matrix,
       df.residual = nrow(df3) - 2,
       call = call2,
       terms = mt,
-      model = mf,
-      x_vals = df3$x,
-      y_vals = df3$y,
-      x_hat = x_hat,
-      y_hat = y_hat,
+      # model = mf,
+      # x_vals = df3$x,
+      # y_vals = df3$y,
+      # x_hat = x_hat,
+      # y_hat = y_hat,
       error.ratio = error.ratio,
-      weighted = weighted,
+      #weighted = weighted,
       weights = w_i,
       conf.level = conf.level,
       resamples = jacks,
@@ -416,4 +415,55 @@ dem_reg <- function(formula = NULL,
     is_enclosed = is_enclosed,
     p_value = 1 - pchisq(mahal_dist, df = 2)
   )
+}
+
+.get_simple_eiv_data <- function(object) {
+  if (!inherits(object, "simple_eiv")) {
+    stop("Object must be of class 'simple_eiv'")
+  }
+
+  mf <- model.frame(object, na.action = na.pass)
+  mt <- attr(mf, "terms")
+
+  # Extract y and x from formula
+  # model.response gets column 1 (y)
+  y_vals <- model.response(mf, "numeric")
+
+  # mf[[2]] gets column 2 (x) directly from model frame, not model matrix
+  x_vals <- mf[[2]]
+
+  if (ncol(mf) == 3) {
+    # id can be either a column name (string) or the actual values
+
+    id_vals <- mf[[3]]
+
+
+    df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
+    df <- df[complete.cases(df), ]
+
+    df2 <- df %>%
+      group_by(id) %>%
+      mutate(mean_y = mean(y, na.rm = TRUE),
+             mean_x = mean(x, na.rm = TRUE),
+             n_x = sum(!is.na(x)),
+             n_y = sum(!is.na(y))) %>%
+      ungroup() %>%
+      mutate(diff_y = y - mean_y,
+             diff_y2 = diff_y^2,
+             diff_x = x - mean_x,
+             diff_x2 = diff_x^2)
+
+    df3 <- df2 %>%
+      group_by(id) %>%
+      summarize(x = mean(x, na.rm = TRUE),
+                y = mean(y, na.rm = TRUE),
+                .groups = 'drop') %>%
+      drop_na()
+
+
+  } else {
+    df3 <- data.frame(x = x_vals, y = y_vals)
+    df3 <- df3[complete.cases(df3), ]
+  }
+  return(df3)
 }

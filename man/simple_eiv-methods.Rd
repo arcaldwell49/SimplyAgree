@@ -3,6 +3,8 @@
 \name{simple_eiv-methods}
 \alias{simple_eiv-methods}
 \alias{print.simple_eiv}
+\alias{formula.simple_eiv}
+\alias{model.frame.simple_eiv}
 \alias{summary.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
@@ -12,12 +14,14 @@
 \alias{coef.simple_eiv}
 \alias{fitted.simple_eiv}
 \alias{residuals.simple_eiv}
-\alias{formula.simple_eiv}
-\alias{model.frame.simple_eiv}
 \alias{predict.simple_eiv}
 \title{Methods for simple_eiv objects}
 \usage{
 \method{print}{simple_eiv}(x, ...)
+
+\method{formula}{simple_eiv}(x, ...)
+
+\method{model.frame}{simple_eiv}(formula, na.action = na.pass, ...)
 
 \method{summary}{simple_eiv}(object, ...)
 
@@ -50,10 +54,6 @@ plot_joint(x, ...)
 \method{fitted}{simple_eiv}(object, type = c("y", "x", "both"), ...)
 
 \method{residuals}{simple_eiv}(object, type = c("optimized", "x", "y", "raw_y"), ...)
-
-\method{formula}{simple_eiv}(x, ...)
-
-\method{model.frame}{simple_eiv}(formula, ...)
 
 \method{predict}{simple_eiv}(
   object,
@@ -106,8 +106,6 @@ If omitted, the fitted values are returned.}
 \item{\code{residuals}}{Extracts residuals.}
 \item{\code{coef}}{Extracts model coefficients.}
 \item{\code{vcov}}{Extracts variance-covariance matrix.}
-\item{\code{formula}}{Extracts model formula.}
-\item{\code{model.frame}}{Extracts the model frame.}
 }
 }
 \description{
