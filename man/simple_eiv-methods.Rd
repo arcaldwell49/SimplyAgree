@@ -44,6 +44,7 @@ plot_joint(x, ...)
   ideal_slope = 1,
   ideal_intercept = 0,
   show_intervals = TRUE,
+  n_points = 100,
   ...
 )
 
@@ -77,7 +78,7 @@ plot_joint(x, ...)
 
 \item{level}{Confidence level for intervals (default uses the model's conf.level).}
 
-\item{n_points}{Number of points to use for drawing smooth interval bands (default = 100).}
+\item{n_points}{Number of points to use for drawing the joint confidence region (default = 100).}
 
 \item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
 

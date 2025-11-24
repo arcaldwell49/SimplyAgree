@@ -235,9 +235,6 @@ plot.simple_eiv <- function(x,
     # Check if method supports intervals
     is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
-    if (is_passing_bablok) {
-      warning("Confidence/prediction intervals are not available for Passing-Bablok regression. Showing point estimates only.")
-    } else {
       # Create sequence of x values for smooth bands
       x_seq <- seq(scalemin, scalemax, length.out = n_points)
       newdata <- data.frame(x = x_seq)
@@ -268,7 +265,7 @@ plot.simple_eiv <- function(x,
 
       scalemin = min(band_df$lwr, na.rm = TRUE)
       scalemax = max(band_df$upr, na.rm = TRUE)
-    }
+
   }
 
   # Finalize plot
@@ -382,16 +379,16 @@ plot_joint <- function(x, ...) {
 #' @param ideal_slope The hypothesized slope value to test against (default = 1)
 #' @param ideal_intercept The hypothesized intercept value to test against (default = 0)
 #' @param show_intervals Logical. If TRUE, shows individual confidence intervals as well.
+#' @param n_points Number of points to use for drawing the joint confidence region (default = 100).
 #' @export
 plot_joint.simple_eiv <- function(object,
                                   ideal_slope = 1,
                                   ideal_intercept = 0,
                                   show_intervals = TRUE,
+                                  n_points = 100,
                                   ...) {
 
-  if (is.null(object$joint_region)) {
-    stop("Joint confidence region not computed. Re-run dem_reg() with compute_joint = TRUE")
-  }
+
 
   # Get estimates
   est_slope <- object$coefficients[2]
@@ -409,6 +406,14 @@ plot_joint.simple_eiv <- function(object,
     ideal_intercept = ideal_intercept,
     ideal_slope = ideal_slope,
     conf.level = object$conf.level
+  )
+
+  joint_region <- .compute_joint_region(
+    intercept = est_intercept,
+    slope = est_slope,
+    vcov = vcov(object),
+    conf.level = conf.level,
+    n_points = n_points
   )
 
   # Create base plot
@@ -576,24 +581,14 @@ residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"
 #' @param level Confidence level for intervals (default uses the model's conf.level).
 #' @param se.fit Logical. If TRUE, standard errors of predictions are returned.
 #' @export
-
 predict.simple_eiv <- function(object,
                                newdata = NULL,
                                interval = c("none", "confidence"),
                                level = NULL,
                                se.fit = FALSE,
                                ...) {
-  # Check if Passing-Bablok
-  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
-  if (is_passing_bablok && (interval != "none" || se.fit)) {
-    stop("Confidence intervals and standard errors are not available for Passing-Bablok regression. Only point predictions are supported.")
-  }
 
-    x_name <- attr(object$terms, "term.labels")[1]
-
-
-    resp_var <- attr(object$terms, "variables")[[2]]
-    y_name <- deparse(resp_var)
+  x_name <- attr(object$terms, "term.labels")[1]
 
   interval <- match.arg(interval)
 
@@ -601,20 +596,25 @@ predict.simple_eiv <- function(object,
     level <- object$conf.level
   }
 
+  # Check if vcov is available
+  has_vcov <- !is.null(object$vcov) && all(!is.na(object$vcov))
+
+  # Check if intervals requested but vcov unavailable
+  if (!has_vcov && (interval != "none" || se.fit)) {
+    stop("Variance-covariance matrix not available. Cannot compute standard errors or confidence intervals.")
+  }
+
   # Get coefficients
   b0 <- object$coefficients[1]
   b1 <- object$coefficients[2]
 
-  # Always get the original data for jackknife calculations
+  # Always get the original data
   df3 <- .get_simple_eiv_data(object)
 
   # Determine X values for prediction
   if (is.null(newdata)) {
     x_pred <- df3$x
   } else {
-    # Extract X from newdata
-
-
     if (is.data.frame(newdata)) {
       if (!x_name %in% names(newdata)) {
         stop(paste0("Variable '", x_name, "' not found in newdata"))
@@ -633,54 +633,13 @@ predict.simple_eiv <- function(object,
     return(y_pred)
   }
 
-  # For Passing-Bablok, we already returned above
-  # Below is Deming regression only
+  # Compute standard errors using vcov
+  # SE of prediction at x is: sqrt(Var(b0) + x^2*Var(b1) + 2*x*Cov(b0,b1))
+  var_b0 <- object$vcov[1, 1]
+  var_b1 <- object$vcov[2, 2]
+  cov_b0_b1 <- object$vcov[1, 2]
 
-  # Get original data and weights for jackknife
-  n <- nrow(df3)
-  w_i <- object$weights
-
-  # Check weights length matches data
-  if (length(w_i) != n) {
-    stop("Weights length does not match data length")
-  }
-
-  # Function to compute prediction for a single X value using jackknife
-  compute_pred_se <- function(x_new) {
-    pred_jack <- numeric(n)
-
-    for (i in 1:n) {
-      # Fit model without observation i
-      x_sub <- df3$x[-i]
-      y_sub <- df3$y[-i]
-      w_sub <- w_i[-i]
-
-      res_sub <- calc_dem(x_sub, y_sub,
-                          w_i = w_sub,
-                          error.ratio = object$error.ratio)
-
-      b0_i <- res_sub$b0
-      b1_i <- res_sub$b1
-      pred_jack[i] <- b0_i + b1_i * x_new
-    }
-
-    # Full prediction
-    pred_full <- b0 + b1 * x_new
-
-    # Jackknife pseudovariates
-    pred_pseudo <- n * pred_full - (n - 1) * pred_jack
-
-    # Jackknife SE
-    pred_se <- sqrt(sum((pred_pseudo - mean(pred_pseudo))^2) / (n * (n - 1)))
-
-    return(list(pred = pred_full, se = pred_se))
-  }
-
-  # Compute for all prediction points
-  pred_results <- lapply(x_pred, compute_pred_se)
-
-  y_pred <- sapply(pred_results, function(r) r$pred)
-  se_pred <- sapply(pred_results, function(r) r$se)
+  se_pred <- sqrt(var_b0 + x_pred^2 * var_b1 + 2 * x_pred * cov_b0_b1)
 
   # Prepare output based on options
   if (interval == "none") {
@@ -804,7 +763,7 @@ joint_test.simple_eiv <- function(object,
   }
 
   # Build htest object
-  dname <- formula(object$terms)
+  dname <- deparse(formula(object$terms))
 
   # Format null hypothesis string for method description
   method_string <- sprintf(
@@ -833,7 +792,7 @@ joint_test.simple_eiv <- function(object,
       conf.int = NULL,
       estimate = estimate,
       null.value = null.value,
-      alternative = "true intercept and slope are not equal to the hypothesized values",
+      alternative = "true intercept and slope are not equal to the null values",
       method = method_string,
       data.name = dname
     ),

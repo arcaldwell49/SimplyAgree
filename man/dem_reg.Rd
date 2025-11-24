@@ -15,7 +15,6 @@ dem_reg(
   weights = NULL,
   error.ratio = 1,
   keep_data = FALSE,
-  compute_joint = TRUE,
   ...
 )
 }
@@ -39,8 +38,6 @@ dem_reg(
 \item{error.ratio}{Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.}
 
 \item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.}
-
-\item{compute_joint}{Logical indicator (TRUE/FALSE). If TRUE, joint confidence region is computed. Default is TRUE.}
 
 \item{...}{Additional arguments (currently unused).}
 }
@@ -66,8 +63,6 @@ The function returns a simple_eiv (eiv meaning "error in variables") object with
 \item \code{weights}: Weights used in fitting.
 \item \code{conf.level}: Confidence level used.
 \item \code{resamples}: List containing resamples from jacknife procedure (if keep_data = TRUE).
-\item \code{joint_region}: Joint confidence region ellipse coordinates (if compute_joint = TRUE).
-\item \code{joint_test}: Test of whether ideal point is enclosed by joint region.
 }
 }
 \description{
@@ -88,11 +83,6 @@ If the data are measured in replicates, then the measurement error can be direct
 This can be accomplished by indicating the subject identifier with the id argument.
 When the replicates are not available in the data,
 then the ratio of error variances (y/x) can be provided with the error.ratio argument.
-
-When \code{compute_joint = TRUE}, the function computes the joint (slope, intercept) confidence region
-based on the chi-square distribution with 2 degrees of freedom. This elliptical region accounts
-for the correlation between slope and intercept estimates and can provide improved power for
-detecting deviations from (null) hypothesized values (e.g., slope = 1, intercept = 0).
 }
 \section{Interface Change}{
 

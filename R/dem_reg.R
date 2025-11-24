@@ -16,7 +16,6 @@
 #' @param weights an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
 #' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.
-#' @param compute_joint Logical indicator (TRUE/FALSE). If TRUE, joint confidence region is computed. Default is TRUE.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @details
@@ -34,10 +33,6 @@
 #' When the replicates are not available in the data,
 #' then the ratio of error variances (y/x) can be provided with the error.ratio argument.
 #'
-#' When `compute_joint = TRUE`, the function computes the joint (slope, intercept) confidence region
-#' based on the chi-square distribution with 2 degrees of freedom. This elliptical region accounts
-#' for the correlation between slope and intercept estimates and can provide improved power for
-#' detecting deviations from (null) hypothesized values (e.g., slope = 1, intercept = 0).
 #'
 #' @section Interface Change:
 #' The `x` and `y` arguments are deprecated. Please use the `formula` interface instead:
@@ -68,8 +63,6 @@
 #'   - `weights`: Weights used in fitting.
 #'   - `conf.level`: Confidence level used.
 #'   - `resamples`: List containing resamples from jacknife procedure (if keep_data = TRUE).
-#'   - `joint_region`: Joint confidence region ellipse coordinates (if compute_joint = TRUE).
-#'   - `joint_test`: Test of whether ideal point is enclosed by joint region.
 #'
 #' @examples
 #' \dontrun{
@@ -102,7 +95,6 @@ dem_reg <- function(formula = NULL,
                     weights = NULL,
                     error.ratio = 1,
                     keep_data = FALSE,
-                    compute_joint = TRUE,
                     ...) {
 
   # Capture the call
@@ -272,24 +264,6 @@ dem_reg <- function(formula = NULL,
   joint_region <- NULL
   joint_test <- NULL
 
-  if (compute_joint) {
-    joint_region <- .compute_joint_region(
-      intercept = res$coef[1],
-      slope = res$coef[2],
-      vcov = vcov_matrix,
-      conf.level = conf.level,
-      n_points = 100
-    )
-
-    joint_test <- .test_joint_enclosure(
-      intercept = res$coef[1],
-      slope = res$coef[2],
-      vcov = vcov_matrix,
-      ideal_intercept = 0,
-      ideal_slope = 1,
-      conf.level = conf.level
-    )
-  }
 
   # Create coefficients vector with names
   coefs <- setNames(c(b0, b1), c("(Intercept)", x_name))
