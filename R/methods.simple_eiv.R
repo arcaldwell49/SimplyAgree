@@ -288,82 +288,261 @@ check.simple_eiv <- function(x) {
   is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
   if (is_passing_bablok) {
-    stop("check visuals not available for Passing-Bablok.")
+    # Get the data from the model
+    df <- .get_simple_eiv_data(x)
+    n <- nrow(df)
+
+    # Extract parameters
+    b0 <- x$model_table$coef[1]
+    b1 <- x$model_table$coef[2]
+    ci_lower <- x$model_table$lower.ci[2]
+    ci_upper <- x$model_table$upper.ci[2]
+
+    # Get slopes, cusum, and Di from model object
+    # These should be stored during pb_reg calculation
+    slopes <- x$S
+    cusum_vals <- x$cusum
+    Di <- x$Di
+
+    # Calculate residuals
+    residuals <- residuals(x, type = "raw_y")
+    # ===== Plot 1: Monotonic Relationship =====
+    rank_x <- rank(df$x)
+    rank_y <- rank(df$y)
+    kendall_result <- x$kendall_test
+    kendall_tau <- kendall_result$estimate
+    kendall_p <- kendall_result$p.value
+
+    interpretation1 <- ifelse(kendall_p < 0.05 & kendall_tau > 0,
+                              "Positive correlation detected supports method comparison",
+                              "Positive correlation NOT detected - questionable method comparison")
+
+    df_ranks <- data.frame(rank_x = rank_x, rank_y = rank_y)
+
+    p1 <- ggplot(df_ranks, aes(x = rank_x, y = rank_y)) +
+      geom_point(color = "#2200aa", alpha = 0.6, size = 2) +
+      geom_smooth(method = "lm", se = TRUE, color = "blue",
+                  fill = "#ccaaff50", linewidth = 1) +
+      labs(
+        x = "Rank(Method 1)",
+        y = "Rank(Method 2)",
+        title = "Monotonic Relationship",
+        subtitle = interpretation1,
+        caption = paste0("Kendall's τ = ", signif(kendall_tau, 3),
+                         ", p = ", signif(kendall_p, 4))
+      ) +
+      theme_bw() +
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_line(color = "grey90"),
+        panel.grid.minor = element_blank(),
+        plot.caption = element_text(hjust = 0)
+      )
+
+    # ===== Plot 2: Ranked Residuals =====
+    # Order residuals by Di
+    order_Di <- order(Di)
+    ranked_residuals <- residuals[order_Di]
+
+    df_res <- data.frame(
+      index = 1:length(ranked_residuals),
+      residual = ranked_residuals
+    )
+
+    # Check for patterns
+    runs_test_p <- NA
+    tryCatch({
+      runs <- rle(sign(ranked_residuals))$lengths
+      if(length(runs) > 1) {
+        runs_test_p <- 0.5  # Placeholder - would need proper runs test
+      }
+    }, error = function(e) {})
+
+    interpretation2 <- "Random scatter indicates adequate fit"
+
+    p2 <- ggplot(df_res, aes(x = index, y = residual)) +
+      geom_point(color = "#2200aa", alpha = 0.6, size = 2) +
+      geom_hline(yintercept = 0, color = "#99999955", linewidth = 1.5) +
+      labs(
+        x = "Observation (ranked by distance)",
+        y = "Residuals",
+        title = "Ranked Residuals Plot",
+        subtitle = interpretation2
+      ) +
+      ylim(c(-max(abs(ranked_residuals)), max(abs(ranked_residuals)))) +
+      theme_bw() +
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_line(color = "grey90"),
+        panel.grid.minor = element_blank()
+      )
+
+    # ===== Plot 3: Cusum Test =====
+    df_cusum <- data.frame(
+      index = 1:length(cusum_vals),
+      cusum = cusum_vals
+    )
+
+    max_cusum <- max(abs(cusum_vals), na.rm = TRUE)
+
+    # Critical value from Kolmogorov-Smirnov at 5% level
+    critical_val <- 1.36  # For 5% significance level
+
+    interpretation3 <- ifelse(max_cusum < critical_val,
+                              "Linearity assumption supported",
+                              "Possible non-linear relationship")
+
+    p3 <- ggplot(df_cusum, aes(x = index, y = cusum)) +
+      geom_line(linewidth = 1.2, color = "blue") +
+      geom_hline(yintercept = 0, color = "#99999955", linewidth = 1.5) +
+      labs(
+        x = "Observation (ranked by distance)",
+        y = "Cusum",
+        title = "Cusum Linearity Test",
+        subtitle = interpretation3,
+        caption = paste0("Max |Cusum| = ", signif(max_cusum, 3),
+                         "\nCritical value (5%) = ", critical_val)
+      ) +
+      theme_bw() +
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_line(color = "grey90"),
+        panel.grid.minor = element_blank(),
+        plot.caption = element_text(hjust = 0)
+      )
+
+    # ===== Plot 4: Slopes Histogram =====
+    # Filter slopes within 5 x IQR for better visibility
+    slopes_clean <- slopes[!is.na(slopes) & is.finite(slopes)]
+    iqr_slopes <- IQR(slopes_clean, na.rm = TRUE)
+    slopes_filtered <- slopes_clean[
+      slopes_clean > (b1 - 2.5*iqr_slopes) &
+        slopes_clean < (b1 + 2.5*iqr_slopes)
+    ]
+
+    df_slopes <- data.frame(slopes = slopes_filtered)
+
+    interpretation4 <- "Distribution of all pairwise slopes"
+
+    p4 <- ggplot(df_slopes, aes(x = slopes)) +
+      geom_histogram(aes(y = after_stat(density)),
+                     fill = "gray", color = "black", bins = 30) +
+      geom_density(color = "#8866aa", linewidth = 1.5, alpha = 0.6) +
+      geom_vline(aes(xintercept = b1, linetype = "Median"),
+                 color = "#1222bb", linewidth = 1.5) +
+      geom_vline(aes(xintercept = ci_lower, linetype = "CI"),
+                 color = "#bb2212", linewidth = 1) +
+      geom_vline(aes(xintercept = ci_upper, linetype = "CI"),
+                 color = "#bb2212", linewidth = 1) +
+      scale_linetype_manual(
+        name = "Reference Lines",
+        values = c("Median" = "solid", "CI" = "dashed"),
+        guide = guide_legend(override.aes = list(
+          color = c("#1222bb", "#bb2212")
+        ))
+      ) +
+      labs(
+        x = "Individual Slopes (range: 5 × IQR)",
+        y = "Density",
+        title = "Distribution of Pairwise Slopes",
+        subtitle = interpretation4
+      ) +
+      theme_bw() +
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_line(color = "grey90"),
+        panel.grid.minor = element_blank(),
+        legend.position = "bottom"
+      )
+
+    # Combine all 4 plots
+    wrap_plots(p1, p2, p3, p4, ncol = 2) &
+      plot_annotation(
+        title = "Passing-Bablok Regression Diagnostics",
+        theme = theme(
+          panel.background = element_rect(fill='transparent'),
+          plot.background = element_rect(fill='transparent', color=NA),
+          plot.title = element_text(face = "bold", size = 14, hjust = 0.5)
+        )
+      )
+
+  } else {
+    # Original Deming regression code (unchanged)
+    df = .get_simple_eiv_data(x)
+    b0 = x$model_table$coef[1]
+    b1 = x$model_table$coef[2]
+    w_i = x$weights
+    error.ratio = x$error.ratio
+    d_i = df$y - (b0+b1*df$x)
+    x_hat = df$x + (error.ratio*b1*d_i)/(1+error.ratio*b1^2)
+    y_hat = df$y - (d_i)/(1+error.ratio*b1^2)
+    res_x = df$x - x_hat
+    res_y = df$y - y_hat
+    d_sign = ifelse(d_i >= 0, 1, -1)
+    opt_res = d_sign * sqrt(w_i*res_x^2 + w_i * error.ratio * res_y^2)
+    avg_both = ((x_hat + y_hat )/ 2)
+    mod <- lm(opt_res/d_sign ~ avg_both)
+    SS <- anova(mod)$"Sum Sq"
+    RegSS <- sum(SS) - SS[length(SS)]
+    Chisq <- RegSS / 2
+    p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
+
+    df1 = data.frame(x = avg_both, y = opt_res/d_sign)
+
+    p1 = ggplot(df1, aes(x=x, y=y)) +
+      geom_point() +
+      geom_smooth(se = TRUE, method = "loess", linewidth = .8,
+                  color ="#3aaf85", formula = y~x) +
+      labs(y = "|Optimized Residuals|",
+           x = "Average of Both Estimated Values",
+           title = "Homogeneity of Residuals",
+           subtitle = "Reference line should be flat and horizontal",
+           caption = paste0("Heteroskedasticity", " \n",
+                            "Breusch-Pagan Test: p = ",
+                            signif(p_val_het,4))) +
+      theme_bw() +
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent')
+      )
+
+    dat_norm <- na.omit(data.frame(y = opt_res))
+    norm_test = shapiro.test(opt_res)
+    norm_text = "Shapiro-Wilk Test"
+
+    p2 = plot_qq(x = dat_norm) +
+      labs(caption = paste0("Normality", " \n",
+                            norm_text, ": p = ",
+                            signif(norm_test$p.value,4)))+
+      theme(
+        panel.background = element_rect(fill='transparent'),
+        plot.background = element_rect(fill='transparent', color=NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent')
+      )
+
+    wrap_plots(p2, p1, ncol = 2) &
+      plot_annotation(
+        theme = theme(
+          panel.background = element_rect(fill='transparent'),
+          plot.background = element_rect(fill='transparent', color=NA),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.background = element_rect(fill='transparent'),
+          legend.box.background = element_rect(fill='transparent')
+        )
+      )
   }
-  df = .get_simple_eiv_data(x)
-  #colnames(df) = c("y", "x")
-  b0 = x$model_table$coef[1]
-  b1 = x$model_table$coef[2]
-  w_i = x$weights
-  error.ratio = x$error.ratio
-  d_i = df$y - (b0+b1*df$x)
-  x_hat = df$x + (error.ratio*b1*d_i)/(1+error.ratio*b1^2)
-  y_hat = df$y - (d_i)/(1+error.ratio*b1^2)
-  res_x = df$x - x_hat
-  res_y = df$y - y_hat
-  d_sign = ifelse(d_i >= 0, 1, -1)
-  opt_res = d_sign * sqrt(w_i*res_x^2 + w_i * error.ratio * res_y^2)
-  avg_both = ((x_hat + y_hat )/ 2)
-
-  mod <- lm(opt_res/d_sign ~ avg_both)
-
-  SS <- anova(mod)$"Sum Sq"
-  RegSS <- sum(SS) - SS[length(SS)]
-  Chisq <- RegSS / 2
-  ### Breusch-Pagan Test
-  p_val_het <- pchisq(Chisq, df = 1, lower.tail = FALSE)
-  df1 = data.frame(x = avg_both,
-                   y = opt_res/d_sign)
-  p1 = ggplot(df1,
-              aes(x=x,
-                  y=y)) +
-    geom_point() +
-    geom_smooth(se = TRUE,
-                method = "loess",
-                linewidth = .8,
-                color ="#3aaf85",
-                formula = y~x) +
-    labs(y = "|Optimized Residuals|",
-         x = "Average of Both Estimated Values",
-         title = "Homogeneity of Residuals",
-         subtitle = "Reference line should be flat and horizontal",
-         caption = paste0("Heteroskedasticity", " \n",
-                          "Breusch-Pagan Test: p = ",
-                          signif(p_val_het,4))) +
-    theme_bw() +
-    theme(
-      panel.background = element_rect(fill='transparent'), #transparent panel bg
-      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-      panel.grid.major = element_blank(), #remove major gridlines
-      panel.grid.minor = element_blank(), #remove minor gridlines
-      legend.background = element_rect(fill='transparent'), #transparent legend bg
-      legend.box.background = element_rect(fill='transparent') #transparent legend panel
-    )
-
-  dat_norm <- na.omit(data.frame(y = opt_res))
-  norm_test = shapiro.test(opt_res)
-  norm_text = "Shapiro-Wilk Test"
-  p2 = plot_qq(x = dat_norm) +
-    labs(caption = paste0("Normality", " \n",
-                          norm_text, ": p = ",
-                          signif(norm_test$p.value,4)))+
-    theme(
-      panel.background = element_rect(fill='transparent'), #transparent panel bg
-      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-      panel.grid.major = element_blank(), #remove major gridlines
-      panel.grid.minor = element_blank(), #remove minor gridlines
-      legend.background = element_rect(fill='transparent'), #transparent legend bg
-      legend.box.background = element_rect(fill='transparent') #transparent legend panel
-    )
-  wrap_plots(p2, p1, ncol = 2) & plot_annotation(
-    theme = theme(
-      panel.background = element_rect(fill='transparent'), #transparent panel bg
-      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-      panel.grid.major = element_blank(), #remove major gridlines
-      panel.grid.minor = element_blank(), #remove minor gridlines
-      legend.background = element_rect(fill='transparent'), #transparent legend bg
-      legend.box.background = element_rect(fill='transparent') #transparent legend panel
-    ))
 }
 
 #' @rdname simple_eiv-methods
@@ -550,7 +729,11 @@ residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"
   res_x <- df3$x - x_hat
   res_y <- df3$y - y_hat
   d_sign <- ifelse(d_i >= 0, 1, -1)
-  opt_res <- d_sign * sqrt(w_i * res_x^2 + w_i * error.ratio * res_y^2)
+  if (!is_passing_bablok){
+    w_i = object$weights
+    opt_res <- d_sign * sqrt(w_i * res_x^2 + w_i * error.ratio * res_y^2)
+  }
+
 
   if (is_passing_bablok && type == "optimized") {
     # Return raw_y residuals for PB

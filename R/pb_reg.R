@@ -155,7 +155,7 @@
 #'   regression procedure for method transformation. Journal of Clinical Chemistry
 #'   and Clinical Biochemistry, 26, 783-790.
 #'
-#' @importFrom stats ks.test cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
+#' @importFrom stats cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
 #' @importFrom tidyr drop_na
 #' @export
@@ -405,6 +405,7 @@ pb_reg <- function(formula,
       method_num = method_num,
       kendall_test = kendall_result,
       cusum_test = cusum_result,
+      slopes = pb_result$theta,
       n_slopes = pb_result$n_slopes,
       ci_slopes = if(keep_data) pb_result$ci_slopes else NULL,
       slopes_data = if(keep_data) pb_result$slopes else NULL,
@@ -638,7 +639,8 @@ pb_reg <- function(formula,
     slope_upper = slope_upper,
     n_slopes = N,
     n_used = N_theta,
-    ci_slopes = ci_slopes
+    ci_slopes = ci_slopes,
+    theta = theta
   ))
 }
 
@@ -808,7 +810,10 @@ pb_reg <- function(formula,
     method = "Passing-Bablok (1983) CUSUM test for linearity",
     data.name = data_name,
     parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
-    alternative = "two.sided"
+    alternative = "two.sided",
+    cumsum = cusum,
+    max_cusum = max_cusum,
+    Di = D
   )
 
   class(result) <- "htest"
