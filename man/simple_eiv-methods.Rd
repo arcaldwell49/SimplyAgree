@@ -91,7 +91,9 @@ plot_joint(x, ...)
 \item{newdata}{An optional data frame containing values of X at which to predict.
 If omitted, the fitted values are returned.}
 
-\item{se.fit}{Logical. If TRUE, standard errors of predictions are returned.}
+\item{se.fit}{Logical. If TRUE, standard errors of predictions are returned.
+Note: For Passing-Bablok regression without bootstrap, standard errors are not
+available and this argument is ignored with a warning.}
 
 \item{object}{object of class \code{simple_eiv} for plot_joint method}
 }

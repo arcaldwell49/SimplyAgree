@@ -580,6 +580,8 @@ residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"
 #' @param interval Type of interval calculation. Can be "none" (default), or "confidence"
 #' @param level Confidence level for intervals (default uses the model's conf.level).
 #' @param se.fit Logical. If TRUE, standard errors of predictions are returned.
+#'   Note: For Passing-Bablok regression without bootstrap, standard errors are not
+#'   available and this argument is ignored with a warning.
 #' @export
 predict.simple_eiv <- function(object,
                                newdata = NULL,
@@ -596,19 +598,22 @@ predict.simple_eiv <- function(object,
     level <- object$conf.level
   }
 
-  # Check if vcov is available
-  has_vcov <- !is.null(object$vcov) && all(!is.na(object$vcov))
+  # Check if this is a Passing-Bablok model
+  is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
 
-  # Check if intervals requested but vcov unavailable
-  if (!has_vcov && (interval != "none" || se.fit)) {
-    stop("Variance-covariance matrix not available. Cannot compute standard errors or confidence intervals.")
-  }
+  # Check if vcov is available (from bootstrap)
+  has_vcov <- !is.null(object$vcov) && all(is.finite(object$vcov))
+
+  # Check if analytical PB CI data is available (stored CI slopes)
+  has_pb_ci_data <- is_passing_bablok &&
+    !is.null(object$ci_slopes) &&
+    length(object$ci_slopes) > 0
 
   # Get coefficients
   b0 <- object$coefficients[1]
   b1 <- object$coefficients[2]
 
-  # Always get the original data
+  # Get original data
   df3 <- .get_simple_eiv_data(object)
 
   # Determine X values for prediction
@@ -633,6 +638,33 @@ predict.simple_eiv <- function(object,
     return(y_pred)
   }
 
+  # Determine which CI method to use
+  if (has_vcov) {
+    # Use vcov-based method (works for both Deming and bootstrapped PB)
+    result <- .predict_vcov_method(object, x_pred, y_pred, interval, level, se.fit)
+  } else if (has_pb_ci_data) {
+    # Use MethComp-style analytical method for Passing-Bablok
+    if (se.fit) {
+      warning("Standard errors not available for Passing-Bablok regression without bootstrap. ",
+              "Ignoring se.fit = TRUE.")
+    }
+    result <- .predict_pb_analytical(object, x_pred, y_pred, interval, level, df3)
+  } else {
+    # No method available
+    stop("Cannot compute confidence intervals. ",
+         "For Passing-Bablok regression, either use bootstrap (replicates > 0) ",
+         "or ensure analytical CI data is available.")
+  }
+
+  return(result)
+}
+
+
+#' Prediction using variance-covariance matrix
+#' @keywords internal
+#' @noRd
+.predict_vcov_method <- function(object, x_pred, y_pred, interval, level, se.fit) {
+
   # Compute standard errors using vcov
   # SE of prediction at x is: sqrt(Var(b0) + x^2*Var(b1) + 2*x*Cov(b0,b1))
   var_b0 <- object$vcov[1, 1]
@@ -654,10 +686,8 @@ predict.simple_eiv <- function(object,
   alpha <- 1 - level
   t_crit <- qt(1 - alpha / 2, df = object$df.residual)
 
-  if (interval == "confidence") {
-    lwr <- y_pred - t_crit * se_pred
-    upr <- y_pred + t_crit * se_pred
-  }
+  lwr <- y_pred - t_crit * se_pred
+  upr <- y_pred + t_crit * se_pred
 
   # Return results
   result <- data.frame(fit = y_pred, lwr = lwr, upr = upr)
@@ -668,6 +698,62 @@ predict.simple_eiv <- function(object,
     return(result)
   }
 }
+
+
+#' Prediction using MethComp-style analytical method for Passing-Bablok
+#'
+#' This method computes confidence intervals by enumerating all regression lines
+#' within the joint confidence region for the slope, following the approach used
+#' in the MethComp package (predict.PBreg).
+#'
+#' For each slope within the CI bounds, the corresponding intercept is computed
+#' as median(y - slope * x). The prediction CI at each new x value is then the
+#' envelope (min, max) of all possible predicted values across these slope-intercept
+#' pairs.
+#'
+#' @keywords internal
+#' @noRd
+.predict_pb_analytical <- function(object, x_pred, y_pred, interval, level, df3) {
+
+  if (interval == "none") {
+    return(y_pred)
+  }
+
+  # Extract the slopes within the CI bounds
+  ci_slopes <- object$ci_slopes
+
+  # Get original data for computing intercepts
+  x_orig <- df3$x
+  y_orig <- df3$y
+
+  # For each slope in the CI range, compute the corresponding intercept
+  # Intercept = median(y - slope * x) for each slope
+  intercepts <- vapply(ci_slopes, function(s) {
+    median(y_orig - s * x_orig)
+  }, numeric(1))
+
+  # Initialize output
+  n_pred <- length(x_pred)
+  result <- data.frame(
+    fit = numeric(n_pred),
+    lwr = numeric(n_pred),
+    upr = numeric(n_pred)
+  )
+
+  # For each prediction point, compute the envelope of all possible y values
+  for (i in seq_len(n_pred)) {
+    # Compute y = intercept + slope * x for all slope-intercept pairs
+    y_envelope <- intercepts + ci_slopes * x_pred[i]
+
+    # Following MethComp: fit is median, lwr is min, upr is max
+    result$fit[i] <- median(y_envelope, na.rm = TRUE)
+    result$lwr[i] <- min(y_envelope, na.rm = TRUE)
+    result$upr[i] <- max(y_envelope, na.rm = TRUE)
+  }
+
+  return(result)
+}
+
 
 
 #' Joint Confidence Region Test for Method Agreement

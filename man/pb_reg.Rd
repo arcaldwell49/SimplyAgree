@@ -13,7 +13,7 @@ pb_reg(
   weights = NULL,
   error.ratio = 1,
   replicates = 0,
-  keep_data = FALSE,
+  keep_data = TRUE,
   ...
 )
 }

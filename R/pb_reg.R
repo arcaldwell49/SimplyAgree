@@ -155,7 +155,7 @@
 #'   regression procedure for method transformation. Journal of Clinical Chemistry
 #'   and Clinical Biochemistry, 26, 783-790.
 #'
-#' @importFrom stats cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
+#' @importFrom stats ks.test cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
 #' @importFrom tidyr drop_na
 #' @export
@@ -168,7 +168,7 @@ pb_reg <- function(formula,
                    weights = NULL,
                    error.ratio = 1,
                    replicates = 0,
-                   keep_data = FALSE,
+                   keep_data = TRUE,
                    ...) {
 
   # Capture the call
@@ -327,10 +327,6 @@ pb_reg <- function(formula,
   # Test linearity using CUSUM test
   cusum_result <- .test_cusum_linearity(x_vals, y_vals, b0, b1)
 
-  if (!cusum_result$linear) {
-    warning("CUSUM test suggests non-linearity (p-value = ",
-            round(cusum_result$p_value, 3), ")")
-  }
 
   # Compute fitted values and residuals
   y_fitted <- b0 + b1 * x_vals
@@ -410,8 +406,9 @@ pb_reg <- function(formula,
       kendall_test = kendall_result,
       cusum_test = cusum_result,
       n_slopes = pb_result$n_slopes,
+      ci_slopes = if(keep_data) pb_result$ci_slopes else NULL,
       slopes_data = if(keep_data) pb_result$slopes else NULL,
-      boot = boot_result$boot_obj,
+      boot = if(keep_data) boot_result$boot_obj else NULL,
       replicates = replicates
     ),
     class = "simple_eiv"
@@ -461,174 +458,148 @@ pb_reg <- function(formula,
 #' Compute Passing-Bablok regression coefficients
 #' @keywords internal
 #' @noRd
+
 .passing_bablok_fit <- function(x, y, method = 1, conf.level = 0.95,
                                 pair_weights = NULL, case_weights = NULL) {
 
   n <- length(x)
   eps <- sqrt(.Machine$double.eps)
 
-  # Compute all pairwise slopes
-  slopes <- numeric()
-  weights <- numeric()
-  K <- 0  # Counter for slopes less than -1
-
-  pair_idx <- 0
-  for (i in 1:(n-1)) {
-    for (j in (i+1):n) {
-      pair_idx <- pair_idx + 1
-
-      dx <- x[j] - x[i]
-      dy <- y[j] - y[i]
-
-      # Skip if both differences are near zero (uninformative)
-      if (abs(dx) < eps && abs(dy) < eps) {
-        next
-      }
-
-      # Get weight for this pair
-      if (!is.null(pair_weights)) {
-        wt <- pair_weights[pair_idx]
-      } else if (!is.null(case_weights)) {
-        # Product of case weights
-        wt <- sqrt(case_weights[i] * case_weights[j])
-      } else {
-        wt <- 1
-      }
-
-      # Handle vertical differences
-      if (abs(dx) < eps) {
-        if (dy > 0) {
-          slopes <- c(slopes, 1e10)  # Very large positive
-        } else if (dy < 0) {
-          slopes <- c(slopes, -1e10)  # Very large negative
-        } else {
-          next  # Both zero, skip
-        }
-        weights <- c(weights, wt)
-        next
-      }
-
-      # Compute slope
-      s <- dy / dx
-
-      # For method-specific handling
-      if (method == 1) {
-        # Original PB: exclude slopes exactly equal to -1
-        if (abs(s - (-1)) < eps) {
-          next
-        }
-      }
-
-      # Count slopes less than -1 (needed for all methods)
-      if (s < -1) {
-        K <- K + 1
-      }
-
-      slopes <- c(slopes, s)
-      weights <- c(weights, wt)
-    }
+  # Helper function for pairwise differences (vectorized)
+  pdiff <- function(v, fun = `-`) {
+    n <- length(v)
+    indx1 <- rep(1:(n - 1), (n - 1):1)
+    indx2 <- unlist(lapply(2:n, function(i) i:n))
+    as.vector(fun(v[indx2], v[indx1]))
   }
 
-  # Remove extreme values for median computation but keep track
-  finite_idx <- abs(slopes) < 1e9
-  finite_slopes <- slopes[finite_idx]
-  finite_weights <- weights[finite_idx]
-  N <- length(finite_slopes)
+  # Compute all pairwise differences
+  xx <- pdiff(x)
+  yy <- pdiff(y)
 
+  # Compute weights
+  if (!is.null(pair_weights)) {
+    ww <- pair_weights
+  } else if (!is.null(case_weights)) {
+    ww <- pdiff(case_weights, `*`)
+  } else {
+    ww <- rep(1, length(xx))
+  }
+  weighted <- !all(ww == ww[1])
+
+  # Remove uninformative pairs (both differences near zero)
+  uninformative <- (abs(xx) < eps & abs(yy) < eps)
+  if (any(uninformative)) {
+    xx <- xx[!uninformative]
+    yy <- yy[!uninformative]
+    ww <- ww[!uninformative]
+  }
+
+  N <- length(xx)
   if (N == 0) {
     stop("No valid slopes could be computed")
   }
 
+  # Convert to polar coordinates (angles)
+  # theta ranges from -pi/2 to pi/2
+  theta <- atan(yy / xx)
+
   # Method-specific transformations
   if (method == 1) {
-    # Original PB: convert to angles, shift by pi/4
-    theta <- atan(finite_slopes)
+    # Original Passing-Bablok (1983): symmetric around 45-degree line
+    # Shift angles below -pi/4 by pi (this handles the K correction)
     theta <- ifelse(theta < -pi/4, theta + pi, theta)
-
-    # Points on -45 degree line should be excluded
-    keep <- abs(finite_slopes + 1) > eps
-    theta <- theta[keep]
-    finite_weights <- finite_weights[keep]
+    # Exclude pairs on the -45 degree line (slope = -1)
+    keep <- abs(xx + yy) > eps
 
   } else if (method == 2) {
-    # PB method 2: scale-invariant
-    theta <- atan(finite_slopes)
-
+    # Passing-Bablok method 2 (1984): scale-invariant
     # Find median angle of negative slopes
-    below <- theta < 0
+    below <- (theta < 0 & abs(xx) > eps)
     if (any(below)) {
-      if (all(finite_weights == 1)) {
-        m <- median(theta[below])
+      if (weighted) {
+        m <- .weighted_median(theta[below], ww[below])
       } else {
-        m <- .weighted_median(theta[below], finite_weights[below])
+        m <- median(theta[below])
       }
     } else {
-      m <- -0.1  # Dummy value if no negative slopes
+      m <- -1  # Dummy value for rare case of monotone data
     }
-
-    # Shift angles
+    # Shift angles below m by pi
     theta <- ifelse(theta < m, theta + pi, theta)
+    # Exclude pairs on the reference line
+    keep <- abs(xx * cos(m) + yy * sin(m)) > eps
 
-    # Exclude points on the reference line
-    keep <- abs(finite_slopes * cos(m) + sin(m)) > eps
-    theta <- theta[keep]
-    finite_weights <- finite_weights[keep]
-
-  } else if (method == 3) {
-    # PB method 3: scissors estimator
-    theta <- atan(finite_slopes)
+  } else {
+    # Method 3: Scissors estimator (1988)
     theta <- abs(theta)
-    # No exclusions needed for method 3
+    keep <- rep(TRUE, length(theta))
   }
 
-  # Compute weighted or unweighted median
-  if (all(finite_weights == 1)) {
-    # Unweighted case
-    sorted_theta <- sort(theta)
-    N_theta <- length(sorted_theta)
+  # Apply exclusions
+  theta <- theta[keep]
+  ww <- ww[keep]
+  N_theta <- length(theta)
 
-    # Shifted median for original method
-    if (method == 1) {
-      median_idx <- ceiling(N_theta / 2) + K
-      median_idx <- max(1, min(N_theta, median_idx))
+  if (N_theta == 0) {
+    stop("No valid slopes remain after filtering")
+  }
+
+  # Initialize ci_slopes as NULL (will be populated for unweighted case)
+  ci_slopes <- NULL
+
+  # Compute slope as (weighted) median of angles
+  if (!weighted) {
+    b1 <- tan(median(theta))
+
+    # Analytical confidence intervals (Theil-Sen style)
+    if (conf.level > 0) {
+      alpha <- 1 - conf.level
+      z_alpha <- qnorm(1 - alpha / 2)
+
+      # Variance adjustment for ties
+      v <- sqrt(n * (n - 1) * (2 * n + 5) / 18)
+      tiecount <- as.vector(table(x))
+      v <- v - sum(tiecount * (tiecount - 1) * (2 * tiecount + 5)) / 18
+
+      dist <- ceiling(v * z_alpha / 2)
+
+      # Sort theta for CI computation
+      sorted_theta <- sort(theta)
+
+      # Interpolate to get CI bounds
+      ci_theta <- approx(
+        x = seq_along(sorted_theta) - 0.5,
+        y = sorted_theta,
+        xout = N_theta / 2 + c(-dist, dist)
+      )$y
+
+      slope_lower <- tan(ci_theta[1])
+      slope_upper <- tan(ci_theta[2])
+
+      # Compute M1 and M2 indices for CI slopes (MethComp approach)
+      M1 <- round((N_theta - z_alpha * sqrt((n * (n - 1) * (2 * n + 5)) / 18)) / 2, 0)
+      M2 <- N_theta - M1 + 1
+
+      # Ensure indices are within bounds
+      M1 <- max(1, M1)
+      M2 <- min(N_theta, M2)
+
+      # Extract slopes within CI bounds for prediction intervals
+      ci_slopes <- tan(sorted_theta[M1:M2])
+
     } else {
-      median_idx <- ceiling(N_theta / 2)
+      slope_lower <- NA
+      slope_upper <- NA
     }
-
-    b1 <- tan(sorted_theta[median_idx])
-
-    # Confidence intervals - analytical
-    alpha <- 1 - conf.level
-    z_alpha <- qnorm(1 - alpha/2)
-    C_alpha <- z_alpha * sqrt(n * (n - 1) * (2*n + 5) / 18)
-
-    M1 <- floor((N_theta - C_alpha) / 2)
-    M2 <- N_theta - M1 + 1
-
-    M1 <- max(1, M1)
-    M2 <- min(N_theta, M2)
-
-    if (method == 1) {
-      M1_shifted <- M1 + K
-      M2_shifted <- M2 + K
-      M1_shifted <- max(1, min(N_theta, M1_shifted))
-      M2_shifted <- max(1, min(N_theta, M2_shifted))
-    } else {
-      M1_shifted <- M1
-      M2_shifted <- M2
-    }
-
-    slope_lower <- tan(sorted_theta[M1_shifted])
-    slope_upper <- tan(sorted_theta[M2_shifted])
 
   } else {
     # Weighted case
-    b1 <- tan(.weighted_median(theta, finite_weights))
+    b1 <- tan(.weighted_median(theta, ww))
 
-    # For weighted case, CI should use bootstrap
-    # Use approximate CI here
-    slope_lower <- b1 * 0.9
-    slope_upper <- b1 * 1.1
+    # For weighted case, analytical CI not well-defined; use bootstrap
+    slope_lower <- NA
+    slope_upper <- NA
   }
 
   # Compute intercept as (weighted) median of (y - b1*x)
@@ -640,16 +611,22 @@ pb_reg <- function(formula,
     b0 <- .weighted_median(intercepts, case_weights)
   }
 
-  # CI for intercept
-  intercepts_lower <- y - slope_upper * x
-  intercepts_upper <- y - slope_lower * x
 
-  if (is.null(case_weights) || all(case_weights == 1)) {
-    intercept_lower <- median(intercepts_lower)
-    intercept_upper <- median(intercepts_upper)
+  # CI for intercept (derived from slope CI)
+  if (!is.na(slope_lower) && !is.na(slope_upper)) {
+    intercepts_lower <- y - slope_upper * x
+    intercepts_upper <- y - slope_lower * x
+
+    if (is.null(case_weights) || all(case_weights == 1)) {
+      intercept_lower <- median(intercepts_lower)
+      intercept_upper <- median(intercepts_upper)
+    } else {
+      intercept_lower <- .weighted_median(intercepts_lower, case_weights)
+      intercept_upper <- .weighted_median(intercepts_upper, case_weights)
+    }
   } else {
-    intercept_lower <- .weighted_median(intercepts_lower, case_weights)
-    intercept_upper <- .weighted_median(intercepts_upper, case_weights)
+    intercept_lower <- NA
+    intercept_upper <- NA
   }
 
   return(list(
@@ -660,7 +637,8 @@ pb_reg <- function(formula,
     slope_lower = slope_lower,
     slope_upper = slope_upper,
     n_slopes = N,
-    slopes = finite_slopes
+    n_used = N_theta,
+    ci_slopes = ci_slopes
   ))
 }
 
@@ -770,73 +748,12 @@ pb_reg <- function(formula,
 }
 
 
-#' Test for high positive correlation using Kendall's tau
-#' @keywords internal
-#' @noRd
-.test_kendall_tau <- function(x, y, conf.level = 0.95) {
 
-  n <- length(x)
-
-  # Compute Kendall's tau
-  concordant <- 0
-  discordant <- 0
-  ties_x <- 0
-  ties_y <- 0
-  ties_both <- 0
-
-  for (i in 1:(n-1)) {
-    for (j in (i+1):n) {
-      sign_x <- sign(x[j] - x[i])
-      sign_y <- sign(y[j] - y[i])
-
-      if (sign_x == 0 && sign_y == 0) {
-        ties_both <- ties_both + 1
-      } else if (sign_x == 0) {
-        ties_x <- ties_x + 1
-      } else if (sign_y == 0) {
-        ties_y <- ties_y + 1
-      } else if (sign_x * sign_y > 0) {
-        concordant <- concordant + 1
-      } else {
-        discordant <- discordant + 1
-      }
-    }
-  }
-
-  n0 <- n * (n - 1) / 2
-  n1 <- ties_x
-  n2 <- ties_y
-
-  tau <- (concordant - discordant) / sqrt((n0 - n1) * (n0 - n2))
-
-  # Test statistic with tie correction
-  var_tau <- (2 * (2*n + 5)) / (9 * n * (n - 1))
-  z_stat <- tau / sqrt(var_tau)
-  p_value <- 2 * pnorm(abs(z_stat), lower.tail = FALSE)
-
-  # Confidence interval
-  alpha <- 1 - conf.level
-  z_crit <- qnorm(1 - alpha/2)
-  tau_lower <- tau - z_crit * sqrt(var_tau)
-  tau_upper <- tau + z_crit * sqrt(var_tau)
-
-  return(list(
-    tau = tau,
-    z_statistic = z_stat,
-    p_value = p_value,
-    lower = tau_lower,
-    upper = tau_upper,
-    significant = p_value < (1 - conf.level)
-  ))
-}
-
-
-#' Test linearity using CUSUM test
 #' @keywords internal
 #' @noRd
 .test_cusum_linearity <- function(x, y, b0, b1) {
-
   n <- length(x)
+  data_name <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
 
   # Compute residuals
   fitted <- b0 + b1 * x
@@ -845,27 +762,32 @@ pb_reg <- function(formula,
   # Count residuals above and below line
   n_pos <- sum(resid > 0)
   n_neg <- sum(resid < 0)
+  n_zero <- sum(resid == 0)
 
+  # Handle degenerate cases
   if (n_pos == 0 || n_neg == 0) {
-    # All points on one side
-    return(list(
-      max_cusum = 0,
-      test_statistic = 0,
-      p_value = 1,
-      linear = TRUE
-    ))
+    result <- list(
+      statistic = c(H = 0),
+      p.value = 1,
+      method = "Passing-Bablok CUSUM test for linearity",
+      data.name = data_name,
+      parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
+      alternative = "two.sided"
+    )
+    class(result) <- "htest"
+    return(result)
   }
 
-  # Assign scores
+  # Assign weighted scores (Passing & Bablok 1983, Section 5, Appendix 4)
   r <- numeric(n)
   r[resid > 0] <- sqrt(n_neg / n_pos)
   r[resid < 0] <- -sqrt(n_pos / n_neg)
   r[resid == 0] <- 0
 
-  # Compute distance scores (projection onto line perpendicular to regression)
+  # Compute distance scores (projection perpendicular to regression line)
   D <- (y + x / b1 - b0) / sqrt(1 + 1 / b1^2)
 
-  # Sort by distance
+  # Sort scores by distance along the line
   order_idx <- order(D)
   r_sorted <- r[order_idx]
 
@@ -873,40 +795,50 @@ pb_reg <- function(formula,
   cusum <- cumsum(r_sorted)
   max_cusum <- max(abs(cusum))
 
-  # Test statistic
-  H <- max_cusum / sqrt(n_pos + 1)
+  # Test statistic H (normalized by sqrt(n_neg + 1))
+  H <- max_cusum / sqrt(n_neg + 1)
 
-  # Improved p-value calculation using polynomial approximation
-  # Based on Kolmogorov-Smirnov distribution
-  p_value <- .cusum_pvalue(H)
+  # P-value using Kolmogorov distribution
+  p_value <- .kolmogorov_pvalue(H)
 
-  return(list(
-    max_cusum = max_cusum,
-    test_statistic = H,
-    p_value = p_value,
-    linear = H < 1.36  # 5% critical value
-  ))
+  # Construct htest object
+  result <- list(
+    statistic = c(H = H),
+    p.value = p_value,
+    method = "Passing-Bablok (1983) CUSUM test for linearity",
+    data.name = data_name,
+    parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
+    alternative = "two.sided"
+  )
+
+  class(result) <- "htest"
+  return(result)
 }
 
-
-#' Calculate p-value for CUSUM test statistic
+#' Calculate p-value for CUSUM test using Kolmogorov distribution
+#'
+#' Uses the standard series expansion for the Kolmogorov distribution
+#' survival function: P(K > x) = 2 * sum_{k=1}^{inf} (-1)^{k-1} * exp(-2*k^2*x^2)
+#'
+#' @param H CUSUM test statistic
+#' @return P-value
+#'
 #' @keywords internal
 #' @noRd
-.cusum_pvalue <- function(H) {
-  # Polynomial approximation for Kolmogorov-Smirnov distribution
-  # Based on critical values: 1.36 (0.05), 1.63 (0.01)
+.kolmogorov_pvalue <- function(H) {
+  if (H <= 0) return(1)
+  if (H >= 3) return(0)  # Essentially zero probability
 
-  if (H < 0.6) {
-    return(1.0)
-  } else if (H < 1.0) {
-    return(1 - 0.3 * (H - 0.6))
-  } else if (H < 1.36) {
-    return(0.88 - 1.7 * (H - 1.0))
-  } else if (H < 1.63) {
-    return(0.05 - 0.04 * (H - 1.36) / 0.27)
-  } else if (H < 2.0) {
-    return(0.01 - 0.009 * (H - 1.63) / 0.37)
-  } else {
-    return(0.001)
-  }
+  # Series expansion (typically converges quickly)
+  max_terms <- 100
+  j <- seq_len(max_terms)
+
+  # Compute series
+  terms <- (-1)^(j - 1) * exp(-2 * j^2 * H^2)
+  p_value <- 2 * sum(terms)
+
+  # Ensure valid probability
+  p_value <- max(0, min(1, p_value))
+
+  return(p_value)
 }
