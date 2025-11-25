@@ -46,16 +46,16 @@ print.simple_eiv <- function(x, ...) {
   # Passing-Bablok specific tests
   if (is_passing_bablok) {
     if (!is.null(x$kendall_test)) {
-      cat("Kendall's Tau Test (H0: tau = 0):\n")
-      cat(sprintf("  Tau:       %.4f\n", x$kendall_test$tau))
-      cat(sprintf("  p-value:   %.4f\n", x$kendall_test$p_value))
+      cat("Kendall's Tau (H0: tau <= 0):\n")
+      cat(sprintf("  tau:       %.4f\n", x$kendall_test$estimate))
+      cat(sprintf("  p-value:   %.4f\n", x$kendall_test$p.value))
       cat("\n")
     }
 
     if (!is.null(x$cusum_test)) {
       cat("CUSUM Linearity Test:\n")
       cat(sprintf("  Test stat: %.4f\n", x$cusum_test$test_statistic))
-      cat(sprintf("  Linear:    %s\n", ifelse(x$cusum_test$linear, "Yes", "No")))
+      cat(sprintf("  p-value:   %.4f\n", x$cusum_test$p_value))
       cat("\n")
     }
   }
@@ -419,7 +419,7 @@ plot_joint.simple_eiv <- function(object,
   # Create base plot
   p <- ggplot() +
     # Joint confidence region (ellipse)
-    geom_path(data = object$joint_region,
+    geom_path(data = joint_region,
               aes(x = slope, y = intercept),
               color = "red",
               linewidth = 1.2) +

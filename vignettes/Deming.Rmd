@@ -120,7 +120,11 @@ dem2 = dem_reg(
   data = ferritin,
   weighted = FALSE
 )
-dem2
+summary(dem2)
+
+plot(dem2)
+
+plot_joint(dem2)
 
 check(dem2)
 ```
@@ -134,14 +138,16 @@ dem3 = dem_reg(
   data = ferritin,
   weighted = TRUE
 )
-dem3
+summary(dem3)
 
 plot(dem3)
+
+plot_joint(dem3)
 
 check(dem3)
 ```
 
-Notice the joint confidence region test now shows different results. The weighted model provides a better fit.
+The weighted model provides a better fit.
 
 
 # Theoretical Details

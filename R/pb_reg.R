@@ -155,7 +155,7 @@
 #'   regression procedure for method transformation. Journal of Clinical Chemistry
 #'   and Clinical Biochemistry, 26, 783-790.
 #'
-#' @importFrom stats pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
+#' @importFrom stats cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
 #' @importFrom tidyr drop_na
 #' @export
@@ -305,10 +305,15 @@ pb_reg <- function(formula,
   }
 
   # Test for high positive correlation using Kendall's tau
-  kendall_result <- .test_kendall_tau(x_vals, y_vals, conf.level)
+  kendall_result <- cor.test(x_vals, y_vals,
+                             method = "kendall",
+                             alternative = "greater",
+                             exact = FALSE,
+                             continuity = TRUE,
+                             conf.level = conf.level)
 
-  if (kendall_result$tau <= 0) {
-    warning("Kendall's tau is not positive. Passing-Bablok regression requires positive correlation.")
+  if (kendall_result$p.value >= (1-conf.level)) {
+    message("Kendall's tau is not significantly positive. Passing-Bablok regression requires positive correlation.")
   }
 
   # Compute Passing-Bablok estimates
@@ -387,16 +392,16 @@ pb_reg <- function(formula,
   result <- structure(
     list(
       coefficients = coefs,
-      residuals = residuals,
-      fitted.values = y_fitted,
+      #residuals = residuals,
+      #fitted.values = y_fitted,
       model_table = model_table,
       vcov = vcov_mat,
       df.residual = n - 2,
       call = call2,
       terms = mt,
-      model = mf,
-      x_vals = x_vals,
-      y_vals = y_vals,
+      #model = mf,
+      #x_vals = x_vals,
+      #y_vals = y_vals,
       weights = if (!all(wts == 1)) wts else NULL,
       error.ratio = error.ratio,
       conf.level = conf.level,
