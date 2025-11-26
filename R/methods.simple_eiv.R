@@ -424,8 +424,6 @@ check.simple_eiv <- function(x) {
 
     df_slopes <- data.frame(slopes = slopes_filtered)
 
-    interpretation4 <- "Distribution of all pairwise slopes"
-
     p4 <- ggplot(df_slopes, aes(x = slopes)) +
       geom_histogram(aes(y = after_stat(density)),
                      fill = "gray", color = "black", bins = 30) +
@@ -446,8 +444,7 @@ check.simple_eiv <- function(x) {
       labs(
         x = "Individual Slopes (range: 5 × IQR)",
         y = "Density",
-        title = "Distribution of Pairwise Slopes",
-        subtitle = interpretation4
+        title = "Distribution of Pairwise Slopes"
       ) +
       theme_bw() +
       theme(
