@@ -292,6 +292,12 @@ check.simple_eiv <- function(x) {
     df <- .get_simple_eiv_data(x)
     n <- nrow(df)
 
+    x_name <- attr(x$terms, "term.labels")[1]
+
+
+    resp_var <- attr(x$terms, "variables")[[2]]
+    y_name <- deparse(resp_var)
+
     # Extract parameters
     b0 <- x$model_table$coef[1]
     b1 <- x$model_table$coef[2]
@@ -300,9 +306,9 @@ check.simple_eiv <- function(x) {
 
     # Get slopes, cusum, and Di from model object
     # These should be stored during pb_reg calculation
-    slopes <- x$S
-    cusum_vals <- x$cusum
-    Di <- x$Di
+    slopes <- x$slopes
+    cusum_vals <- x$cusum_test$cumsum
+    Di <- x$cusum_test$Di
 
     # Calculate residuals
     residuals <- residuals(x, type = "raw_y")
@@ -313,9 +319,7 @@ check.simple_eiv <- function(x) {
     kendall_tau <- kendall_result$estimate
     kendall_p <- kendall_result$p.value
 
-    interpretation1 <- ifelse(kendall_p < 0.05 & kendall_tau > 0,
-                              "Positive correlation detected supports method comparison",
-                              "Positive correlation NOT detected - questionable method comparison")
+    interpretation1 <- paste0("Positive correlation should be present for method comparison")
 
     df_ranks <- data.frame(rank_x = rank_x, rank_y = rank_y)
 
@@ -328,7 +332,7 @@ check.simple_eiv <- function(x) {
         y = "Rank(Method 2)",
         title = "Monotonic Relationship",
         subtitle = interpretation1,
-        caption = paste0("Kendall's τ = ", signif(kendall_tau, 3),
+        caption = paste0("Kendall's tau = ", signif(kendall_tau, 3),
                          ", p = ", signif(kendall_p, 4))
       ) +
       theme_bw() +
@@ -350,16 +354,9 @@ check.simple_eiv <- function(x) {
       residual = ranked_residuals
     )
 
-    # Check for patterns
-    runs_test_p <- NA
-    tryCatch({
-      runs <- rle(sign(ranked_residuals))$lengths
-      if(length(runs) > 1) {
-        runs_test_p <- 0.5  # Placeholder - would need proper runs test
-      }
-    }, error = function(e) {})
 
-    interpretation2 <- "Random scatter indicates adequate fit"
+
+    interpretation2 <- "Residuals should have random scatter around zero"
 
     p2 <- ggplot(df_res, aes(x = index, y = residual)) +
       geom_point(color = "#2200aa", alpha = 0.6, size = 2) +
@@ -390,20 +387,22 @@ check.simple_eiv <- function(x) {
     # Critical value from Kolmogorov-Smirnov at 5% level
     critical_val <- 1.36  # For 5% significance level
 
-    interpretation3 <- ifelse(max_cusum < critical_val,
-                              "Linearity assumption supported",
-                              "Possible non-linear relationship")
+    interpretation3 <- paste0("Trend line should be within the CUSUM limits (dashed lines)")
 
     p3 <- ggplot(df_cusum, aes(x = index, y = cusum)) +
+      geom_hline(yintercept = x$cusum_test$cusum_limit,
+                 linetype = "dashed", alpha = 0.5) +
+      geom_hline(yintercept = -1*x$cusum_test$cusum_limit,
+                 linetype = "dashed", alpha = 0.5) +
       geom_line(linewidth = 1.2, color = "blue") +
       geom_hline(yintercept = 0, color = "#99999955", linewidth = 1.5) +
       labs(
         x = "Observation (ranked by distance)",
-        y = "Cusum",
-        title = "Cusum Linearity Test",
+        y = "CUSUM",
+        title = "CUSUM Linearity Test",
         subtitle = interpretation3,
-        caption = paste0("Max |Cusum| = ", signif(max_cusum, 3),
-                         "\nCritical value (5%) = ", critical_val)
+        caption = paste0("H = ", signif(x$cusum_test$statistic, 4),
+                         ", p = ", signif(x$cusum_test$p.value, 4))
       ) +
       theme_bw() +
       theme(

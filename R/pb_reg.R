@@ -155,7 +155,7 @@
 #'   regression procedure for method transformation. Journal of Clinical Chemistry
 #'   and Clinical Biochemistry, 26, 783-790.
 #'
-#' @importFrom stats cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
+#' @importFrom stats qsmirnov cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
 #' @importFrom tidyr drop_na
 #' @export
@@ -325,7 +325,8 @@ pb_reg <- function(formula,
   b1 <- pb_result$slope
 
   # Test linearity using CUSUM test
-  cusum_result <- .test_cusum_linearity(x_vals, y_vals, b0, b1)
+  cusum_result <- .test_cusum_linearity(x_vals, y_vals, b0, b1,
+                                        conf.level = 0.95)
 
 
   # Compute fitted values and residuals
@@ -753,7 +754,7 @@ pb_reg <- function(formula,
 
 #' @keywords internal
 #' @noRd
-.test_cusum_linearity <- function(x, y, b0, b1) {
+.test_cusum_linearity <- function(x, y, b0, b1, conf.level = 0.95) {
   n <- length(x)
   data_name <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
 
@@ -774,7 +775,11 @@ pb_reg <- function(formula,
       method = "Passing-Bablok CUSUM test for linearity",
       data.name = data_name,
       parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
-      alternative = "two.sided"
+      alternative = "two.sided",
+      conf.level = conf.level,
+      cumsum = numeric(0),
+      cusum_lower = NA_real_,
+      cusum_upper = NA_real_
     )
     class(result) <- "htest"
     return(result)
@@ -798,10 +803,36 @@ pb_reg <- function(formula,
   max_cusum <- max(abs(cusum))
 
   # Test statistic H (normalized by sqrt(n_neg + 1))
+  # From Passing & Bablok (1983), Appendix Section 4
   H <- max_cusum / sqrt(n_neg + 1)
 
-  # P-value using Kolmogorov distribution
-  p_value <- .kolmogorov_pvalue(H)
+  # P-value using Smirnov distribution (two-sample KS test)
+  # The test compares the distribution of positive vs negative scores
+  # The relationship: H = T * sqrt(l*L/(l+L)) where T is the Smirnov statistic
+  # Convert H back to Smirnov scale
+  T <- H * sqrt((n_pos + n_neg) / (n_pos * n_neg))
+
+  p_value <- psmirnov(T,
+                      sizes = c(n_pos, n_neg),
+                      alternative = "two.sided",
+                      lower.tail = FALSE)
+
+  # Compute confidence limits for CUSUM
+  alpha <- 1 - conf.level
+
+  # Get critical value from Smirnov distribution
+  T_critical <- qsmirnov(1 - alpha,
+                         sizes = c(n_pos, n_neg),
+                         alternative = "two.sided")
+
+  # Convert back to H scale
+  h_critical <- T_critical * sqrt((n_pos * n_neg) / (n_pos + n_neg))
+
+  # Confidence limits (constant horizontal lines)
+  # From Passing & Bablok (1983): P(max|cusum(i)| < h_γ * sqrt(L+1)) = 1 - γ
+  conf_limit <- h_critical * sqrt(n_neg + 1)
+  cusum_lower <- -conf_limit
+  cusum_upper <- conf_limit
 
   # Construct htest object
   result <- list(
@@ -811,12 +842,15 @@ pb_reg <- function(formula,
     data.name = data_name,
     parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
     alternative = "two.sided",
+    conf.level = conf.level,
     cumsum = cusum,
     max_cusum = max_cusum,
-    Di = D
+    Di = D,
+    cusum_limit = cusum_upper,
+    h_critical = h_critical
   )
-
   class(result) <- "htest"
+
   return(result)
 }
 
