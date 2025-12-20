@@ -1,5 +1,5 @@
 ---
-title: "Deming Regression"
+title: "Error-in-Variables Regression"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
@@ -9,7 +9,7 @@ output:
 bibliography: refs.bib
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Deming Regression}
+  %\VignetteIndexEntry{Error-in-Variables Regression}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
