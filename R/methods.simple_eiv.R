@@ -319,13 +319,15 @@ check.simple_eiv <- function(x) {
     kendall_tau <- kendall_result$estimate
     kendall_p <- kendall_result$p.value
 
-    interpretation1 <- paste0("Positive correlation should be present for method comparison")
+    interpretation1 <- paste0("Positive correlation should be present")
 
     df_ranks <- data.frame(rank_x = rank_x, rank_y = rank_y)
 
     p1 <- ggplot(df_ranks, aes(x = rank_x, y = rank_y)) +
       geom_point(color = "#2200aa", alpha = 0.6, size = 2) +
-      geom_smooth(method = "lm", se = TRUE, color = "blue",
+      geom_smooth(method = "lm", se = TRUE,
+                  formula = 'y ~ x',
+                  color = "blue",
                   fill = "#ccaaff50", linewidth = 1) +
       labs(
         x = "Rank(Method 1)",
@@ -387,7 +389,7 @@ check.simple_eiv <- function(x) {
     # Critical value from Kolmogorov-Smirnov at 5% level
     critical_val <- 1.36  # For 5% significance level
 
-    interpretation3 <- paste0("Trend line should be within the CUSUM limits (dashed lines)")
+    interpretation3 <- paste0("Trend line should be within the dashed lines")
 
     p3 <- ggplot(df_cusum, aes(x = index, y = cusum)) +
       geom_hline(yintercept = x$cusum_test$cusum_limit,
@@ -435,10 +437,10 @@ check.simple_eiv <- function(x) {
       geom_vline(aes(xintercept = ci_upper, linetype = "CI"),
                  color = "#bb2212", linewidth = 1) +
       scale_linetype_manual(
-        name = "Reference Lines",
+        name = "",
         values = c("Median" = "solid", "CI" = "dashed"),
         guide = guide_legend(override.aes = list(
-          color = c("#1222bb", "#bb2212")
+          color = c("#bb2212","#1222bb" )
         ))
       ) +
       labs(
@@ -452,17 +454,17 @@ check.simple_eiv <- function(x) {
         plot.background = element_rect(fill='transparent', color=NA),
         panel.grid.major = element_line(color = "grey90"),
         panel.grid.minor = element_blank(),
-        legend.position = "bottom"
+        legend.position = "right"
       )
 
     # Combine all 4 plots
     wrap_plots(p1, p2, p3, p4, ncol = 2) &
       plot_annotation(
-        title = "Passing-Bablok Regression Diagnostics",
+        #title = "Passing-Bablok Regression Diagnostics",
         theme = theme(
           panel.background = element_rect(fill='transparent'),
           plot.background = element_rect(fill='transparent', color=NA),
-          plot.title = element_text(face = "bold", size = 14, hjust = 0.5)
+          #plot.title = element_text(face = "bold", size = 14, hjust = 0.5)
         )
       )
 
@@ -568,7 +570,7 @@ plot_joint.simple_eiv <- function(object,
   # Get estimates
   est_slope <- object$coefficients[2]
   est_intercept <- object$coefficients[1]
-
+  conf.level <- object$conf.level
   # Get confidence intervals
   ci_slope <- c(object$model_table$lower.ci[2], object$model_table$upper.ci[2])
   ci_intercept <- c(object$model_table$lower.ci[1], object$model_table$upper.ci[1])

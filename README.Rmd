@@ -1,5 +1,4 @@
 ---
-title: "SimplyAgree R Package"
 output: github_document
 ---
 
@@ -9,7 +8,7 @@ library(SimplyAgree)
 ```
 
 
-<img src="https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png" width="150" height="150" />
+# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
@@ -18,7 +17,6 @@ library(SimplyAgree)
 [![Codecov test coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://app.codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
 [![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
 [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
-[![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Please see the package's [website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes, and other details about the package.
@@ -61,6 +59,7 @@ Beyond the two core functions, `SimplyAgree` provides:
 
 - **Reliability Analysis**: `reli_stats()` and `reli_aov()` functions for comprehensive reliability assessment
 - **Power Analysis**: `power_exact_agreement()` and related functions for sample size determination in agreement studies
+- **Error-in-Variables**: supports "Deming" and "Passing-Bablok" regression methods for method comparison
 - **Visualization**: Built-in plotting capabilities for Bland-Altman plots and related visualizations
 - **Flexible Design Support**: Handles simple, nested, and repeated measures designs with appropriate variance adjustments
 

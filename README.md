@@ -1,7 +1,5 @@
-SimplyAgree R Package
-================
 
-<img src="https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png" width="150" height="150" />
+# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
@@ -72,10 +70,10 @@ Beyond the two core functions, `SimplyAgree` provides:
 
 - **Reliability Analysis**: `reli_stats()` and `reli_aov()` functions
   for comprehensive reliability assessment
-- **Agreement Testing**: Exact hypothesis tests for declaring
-  measurement agreement (based on Shieh, 2019)
 - **Power Analysis**: `power_exact_agreement()` and related functions
   for sample size determination in agreement studies
+- **Error-in-Variables**: supports “Deming” and “Passing-Bablok”
+  regression methods for method comparison
 - **Visualization**: Built-in plotting capabilities for Bland-Altman
   plots and related visualizations
 - **Flexible Design Support**: Handles simple, nested, and repeated
