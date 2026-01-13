@@ -2,7 +2,7 @@
 #'
 #' @description
 #'
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' A robust, nonparametric method for fitting a straight line to two-dimensional data
 #' where both variables (X and Y) are measured with error. Particularly useful for
@@ -155,7 +155,7 @@
 #'   regression procedure for method transformation. Journal of Clinical Chemistry
 #'   and Clinical Biochemistry, 26, 783-790.
 #'
-#' @importFrom stats qsmirnov cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
+#' @importFrom stats rbinom psmirnov na.pass density approx IQR qsmirnov cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
 #' @importFrom tidyr drop_na
 #' @export

@@ -1,6 +1,6 @@
 #' Methods for simple_eiv objects
 #'
-#' Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
+#' Methods defined for objects returned from error-in-variables models (e.g., `dem_reg`, `pb_reg`).
 #'
 #' @param object,x object of class \code{simple_eiv} from dem_reg or pb_reg function.
 #' @param ... further arguments passed through.
@@ -147,7 +147,7 @@ summary.simple_eiv <- function(object, ...) {
     if (!is.null(object$cusum_test)) {
       cat("\n")
       cat("CUSUM Linearity Test:\n")
-      cat(sprintf("  Test stat: %.4f, p ≈ %.3f\n",
+      cat(sprintf("  Test stat: %.4f, p ~= %.3f\n",
                   object$cusum_test$test_statistic,
                   object$cusum_test$p_value))
       cat(sprintf("  Linear:    %s\n", ifelse(object$cusum_test$linear, "Yes", "No")))
@@ -551,21 +551,19 @@ plot_joint <- function(x, ...) {
 }
 
 #' @rdname simple_eiv-methods
-#' @param object object of class \code{simple_eiv} for plot_joint method
 #' @method plot_joint simple_eiv
 #' @param ideal_slope The hypothesized slope value to test against (default = 1)
 #' @param ideal_intercept The hypothesized intercept value to test against (default = 0)
 #' @param show_intervals Logical. If TRUE, shows individual confidence intervals as well.
 #' @param n_points Number of points to use for drawing the joint confidence region (default = 100).
 #' @export
-plot_joint.simple_eiv <- function(object,
+plot_joint.simple_eiv <- function(x,
                                   ideal_slope = 1,
                                   ideal_intercept = 0,
                                   show_intervals = TRUE,
                                   n_points = 100,
                                   ...) {
-
-
+  object <- x
 
   # Get estimates
   est_slope <- object$coefficients[2]
@@ -682,6 +680,10 @@ fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
   b1 <- object$coefficients[2]
 
   error.ratio = object$error.ratio
+
+  # Compute d_i (raw y residuals) - needed for true value estimation
+  d_i <- df3$y - (b0 + b1 * df3$x)
+
   # Compute estimated true values (from NCSS documentation page 5)
   x_hat <- df3$x + (error.ratio * b1 * d_i) / (1 + error.ratio * b1^2)
   y_hat <- df3$y - d_i / (1 + error.ratio * b1^2)

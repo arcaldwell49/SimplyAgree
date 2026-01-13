@@ -75,7 +75,7 @@ The function returns a simple_eiv object with the following components:
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 A robust, nonparametric method for fitting a straight line to two-dimensional data
 where both variables (X and Y) are measured with error. Particularly useful for

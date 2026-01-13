@@ -80,7 +80,7 @@
 #'
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of parametric regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
 #'
-#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp model.frame model.matrix model.response terms delete.response
+#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp model.frame model.matrix model.response terms delete.response na.pass
 #' @importFrom graphics text
 #' @import ggplot2
 #' @export

@@ -112,5 +112,5 @@ available and this argument is ignored with a warning.}
 }
 }
 \description{
-Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
+Methods defined for objects returned from error-in-variables models (e.g., \code{dem_reg}, \code{pb_reg}).
 }
