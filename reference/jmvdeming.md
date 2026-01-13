@@ -52,15 +52,15 @@ jmvdeming(
 
 - weighted:
 
-  `TRUE` or `FALSE`
+  `TRUE` or `FALSE` (default), use weighted Deming regression
 
 - xlabel:
 
-  The label for the x-axis
+  The label for the x-axis (default: "Method: 1")
 
 - ylabel:
 
-  The label for the y-axis
+  The label for the y-axis (default: "Method: 2")
 
 ## Value
 

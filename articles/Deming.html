@@ -79,7 +79,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2025-11-19</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -179,7 +179,7 @@ indicates whether the identity line is enclosed by the joint confidence
 region.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
@@ -196,10 +196,10 @@ of the confidence region in parameter space:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">SimplyAgree</span> package.</span></span>
 <span><span class="co">#&gt;   Please report the issue at</span></span>
 <span><span class="co">#&gt;   <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/arcaldwell49/SimplyAgree/issues&gt;</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 <p>This plot shows: - The <strong>red ellipse</strong>: Joint confidence
 region - The <strong>blue rectangle</strong>: Traditional confidence
 intervals - The <strong>black dot</strong>: Estimated (intercept, slope)
@@ -217,7 +217,7 @@ and homogeneity of variance, can then be checked with the
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -262,7 +262,7 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span><span class="co">#&gt;   p-value:             0.0037</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -287,11 +287,11 @@ TRUE.</p>
 <span><span class="co">#&gt;   p-value:             0.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-2.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-8-2.png" class="r-plt" alt="" width="700"></p>
 <p>Notice the joint confidence region test now shows different results.
 The weighted model provides a better fit.</p>
 </div>
@@ -533,7 +533,7 @@ study:</p>
 <span><span class="co">#&gt; Sample Size Reduction:  90 (53%)</span></span>
 <span><span class="co">#&gt; You can save 90 participants using joint confidence regions!</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_plan</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Step 4: Collect data with recommended N</span></span>

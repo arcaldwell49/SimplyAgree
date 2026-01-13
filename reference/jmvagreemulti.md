@@ -57,7 +57,7 @@ jmvagreemulti(
 
 - CCC:
 
-  `TRUE` or `FALSE` (default), produce CCC table
+  `TRUE` (default) or `FALSE`, produce CCC table
 
 - valEq:
 
@@ -73,15 +73,17 @@ jmvagreemulti(
 
 - prop_bias:
 
-  `TRUE` or `FALSE`
+  `TRUE` or `FALSE` (default), proportional bias
 
 - xlabel:
 
-  The label for the x-axis on the BA plot
+  The label for the x-axis on the BA plot (default: "Average of Both
+  Methods")
 
 - ylabel:
 
-  The label for the y-axis on the BA plot
+  The label for the y-axis on the BA plot (default: "Difference between
+  Methods")
 
 ## Value
 

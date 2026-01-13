@@ -52,11 +52,11 @@ jmvagree(
 
 - CCC:
 
-  `TRUE` or `FALSE` (default), produce CCC table
+  `TRUE` (default) or `FALSE`, produce CCC table
 
 - plotbland:
 
-  `TRUE` or `FALSE` (default), for Bland-Altman plot
+  `TRUE` (default) or `FALSE`, for Bland-Altman plot
 
 - plotcon:
 
@@ -68,15 +68,17 @@ jmvagree(
 
 - prop_bias:
 
-  `TRUE` or `FALSE`
+  `TRUE` or `FALSE` (default), proportional bias
 
 - xlabel:
 
-  The label for the x-axis on the BA plot
+  The label for the x-axis on the BA plot (default: "Average of Both
+  Methods")
 
 - ylabel:
 
-  The label for the y-axis on the BA plot
+  The label for the y-axis on the BA plot (default: "Difference between
+  Methods")
 
 ## Value
 

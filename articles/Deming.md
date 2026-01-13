@@ -111,7 +111,7 @@ plot_joint(dem1,
 #> ℹ The deprecated feature was likely used in the SimplyAgree package.
 #>   Please report the issue at
 #>   <https://github.com/arcaldwell49/SimplyAgree/issues>.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```

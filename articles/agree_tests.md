@@ -49,7 +49,7 @@ a1 = agree_test(x = reps$x,
                 agree.level = .8)
 #> Warning: `agree_test()` was deprecated in SimplyAgree 0.2.0.
 #> ℹ Please use `agreement_limit()` instead.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```
@@ -188,7 +188,7 @@ a2 = agree_reps(x = "x",
                 agree.level = .8)
 #> Warning: `agree_reps()` was deprecated in SimplyAgree 0.2.0.
 #> ℹ Please use `agreement_limit()` instead.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```
@@ -246,7 +246,7 @@ a3 = agree_nest(x = "x",
                 agree.level = .8)
 #> Warning: `agree_nest()` was deprecated in SimplyAgree 0.2.0.
 #> ℹ Please use `agreement_limit()` instead.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```
