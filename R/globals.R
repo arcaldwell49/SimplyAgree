@@ -73,4 +73,5 @@ utils::globalVariables(c("boot_bias",
                          "asymp.LCL","asymp.UCL",
                          "method", "slope", "intercept",
                          "xmin", "xmax", "ymin", "ymax",
-                         "rbeta"))
+                         "rbeta",
+                         "id"))
