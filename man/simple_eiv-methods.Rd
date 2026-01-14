@@ -40,7 +40,7 @@
 plot_joint(x, ...)
 
 \method{plot_joint}{simple_eiv}(
-  object,
+  x,
   ideal_slope = 1,
   ideal_intercept = 0,
   show_intervals = TRUE,
@@ -94,8 +94,6 @@ If omitted, the fitted values are returned.}
 \item{se.fit}{Logical. If TRUE, standard errors of predictions are returned.
 Note: For Passing-Bablok regression without bootstrap, standard errors are not
 available and this argument is ignored with a warning.}
-
-\item{object}{object of class \code{simple_eiv} for plot_joint method}
 }
 \value{
 \describe{

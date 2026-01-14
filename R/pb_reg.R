@@ -410,7 +410,7 @@ pb_reg <- function(formula,
       n_slopes = pb_result$n_slopes,
       ci_slopes = if(keep_data) pb_result$ci_slopes else NULL,
       slopes_data = if(keep_data) pb_result$slopes else NULL,
-      boot = if(keep_data) boot_result$boot_obj else NULL,
+      boot = boot = if(keep_data && !is.null(boot_result)) boot_result$boot_obj else NULL,
       replicates = replicates
     ),
     class = "simple_eiv"
@@ -713,7 +713,7 @@ pb_reg <- function(formula,
 
     # Fit Passing-Bablok to bootstrap sample
     tryCatch({
-      fit_boot <- .passing_bablok_fit(x_boot, y_boot, method, conf = 0,
+      fit_boot <- .passing_bablok_fit(x_boot, y_boot, method, conf.level = 0,
                                       pair_weights_boot, case_weights = wts)
       boot_coefs[b, ] <- c(fit_boot$intercept, fit_boot$slope)
     }, error = function(e) {

@@ -1,0 +1,141 @@
+══ Building ══════════════════════════════════════════════════════════════════════════════════════════════════
+Setting env vars:
+• CFLAGS    : -Wall -pedantic
+• CXXFLAGS  : -Wall -pedantic
+• CXX11FLAGS: -Wall -pedantic
+• CXX14FLAGS: -Wall -pedantic
+• CXX17FLAGS: -Wall -pedantic
+• CXX20FLAGS: -Wall -pedantic
+── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────
+      ✔  checking for file 'C:\Users\caldwellaaron\Documents\GitHub\SimplyAgree/DESCRIPTION' (1.2s)
+      ─  preparing 'SimplyAgree': (16.3s)
+✔  checking DESCRIPTION meta-information
+      ─  installing the package to build vignettes
+         creating vignettes ...     creating vignettes ...   ✔  creating vignettes (53.2s)
+      ─  checking for LF line-endings in source and make files and shell scripts (7.3s)
+      ─  checking for empty or unneeded directories
+  Removed empty directory      Removed empty directory 'SimplyAgree/inst/i18n'
+      ─  building 'SimplyAgree_0.3.0.tar.gz' (900ms)
+     
+══ Checking ══════════════════════════════════════════════════════════════════════════════════════════════════
+Setting env vars:
+• _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
+• _R_CHECK_CRAN_INCOMING_                      : FALSE
+• _R_CHECK_FORCE_SUGGESTS_                     : FALSE
+• _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
+• NOT_CRAN                                     : true
+── R CMD check ───────────────────────────────────────────────────────────────────────────────────────────────
+-\    |  ─  using log directory 'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpmEdhte/file3ed431c17118/SimplyAgree.Rcheck' (480ms)
+─  using R version 4.5.1 (2025-06-13 ucrt)
+─  using platform: x86_64-w64-mingw32
+─  R was compiled by
+       gcc.exe (GCC) 14.2.0
+       GNU Fortran (GCC) 14.2.0
+─  running under: Windows 11 x64 (build 22631)
+─  using session charset: UTF-8
+/-\|    /  ─  using options '--no-manual --as-cran' (755ms)
+   checking for file 'SimplyAgree/DESCRIPTION' ...-  ✔  checking for file 'SimplyAgree/DESCRIPTION'
+─  checking extension type ... Package
+─  this is package 'SimplyAgree' version '0.3.0'
+─  package encoding: UTF-8
+   checking package namespace information ...\     checking package namespace information ... |  ✔  checking package namespace information
+   checking package dependencies .../-\|/-\|/-\|/-\|/     checking package dependencies ... -  ─  checking package dependencies ... INFO (3.5s)
+   Package suggested but not available for checking: 'covr'
+   checking if this is a source package ...\     checking if this is a source package ... |  ✔  checking if this is a source package
+✔  checking if there is a namespace
+/-    \     checking for executable files ...|/-\|/-\|/-\|/-\|     checking for executable files ... /  ✔  checking for executable files (3.7s)
+   checking for hidden files and directories ...-     checking for hidden files and directories ... \  ✔  checking for hidden files and directories
+   checking for portable file names ...|     checking for portable file names ... /  ✔  checking for portable file names
+-    \     checking whether package 'SimplyAgree' can be installed ...|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking whether package 'SimplyAgree' can be installed ... [20s]-     checking whether package 'SimplyAgree' can be installed ... [20s] \  ─  checking whether package 'SimplyAgree' can be installed ... [20s] OK (20.5s)
+   checking installed package size ...|/     checking installed package size ... -  ✔  checking installed package size
+\|    /  ✔  checking package directory
+   checking for future file timestamps ...-\|/     checking for future file timestamps ... -  ✔  checking for future file timestamps (755ms)
+   checking 'build' directory ...\  ✔  checking 'build' directory
+   checking DESCRIPTION meta-information ...|/-\|/-\     checking DESCRIPTION meta-information ... |  ✔  checking DESCRIPTION meta-information (1.5s)
+N  checking top-level files
+   Non-standard files/directories found at top level:
+     'Rplot.png' 'Rplot01.png'
+/     checking for left-over files ...-     checking for left-over files ... \  ✔  checking for left-over files
+   checking index information ...|/-     checking index information ... \  ✔  checking index information (454ms)
+   checking package subdirectories ...|/-\|/-\     checking package subdirectories ... |  ✔  checking package subdirectories (1.5s)
+   checking code files for non-ASCII characters .../-     checking code files for non-ASCII characters ... \  W  checking code files for non-ASCII characters (338ms)
+   Found the following file with non-ASCII characters:
+     R/methods.simple_eiv.R
+|     Portable packages must use only ASCII characters in their R code and
+   NAMESPACE directives, except perhaps in comments.
+   Use \uxxxx escapes for other characters.
+   Function 'tools::showNonASCIIfile' can help in finding non-ASCII
+   characters in files.
+   checking R files for syntax errors .../-     checking R files for syntax errors ... \  ✔  checking R files for syntax errors (336ms)
+   checking whether the package can be loaded ...|/-\|/-\|/-\|     checking whether the package can be loaded ... /  ✔  checking whether the package can be loaded (2.5s)
+   checking whether the package can be loaded with stated dependencies ...-\|/-\|/-\|     checking whether the package can be loaded with stated dependencies ... /  ✔  checking whether the package can be loaded with stated dependencies (2.2s)
+   checking whether the package can be unloaded cleanly ...-\|/-\|/-\|     checking whether the package can be unloaded cleanly ... /  ✔  checking whether the package can be unloaded cleanly (2.2s)
+   checking whether the namespace can be loaded with stated dependencies ...-\|/-\|/-\|     checking whether the namespace can be loaded with stated dependencies ... /  ✔  checking whether the namespace can be loaded with stated dependencies (2.2s)
+   checking whether the namespace can be unloaded cleanly ...-\|/-\|/-\|/     checking whether the namespace can be unloaded cleanly ... -  ✔  checking whether the namespace can be unloaded cleanly (2.4s)
+\|/-\|/-\|/-    \     checking dependencies in R code ...|/-\|/-\|/-\     checking dependencies in R code ... |  ✔  checking dependencies in R code (5.1s)
+   checking S3 generic/method consistency .../-\|/-\|/-\|/-     checking S3 generic/method consistency ... \  ✔  checking S3 generic/method consistency (2.8s)
+   checking replacement functions ...|/-\|/-\|/-     checking replacement functions ... \  ✔  checking replacement functions (2.2s)
+   checking foreign function calls ...|/-\|/-\|/-\|/-\|/-     checking foreign function calls ... \  ✔  checking foreign function calls (3.9s)
+   checking R code for possible problems ...|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking R code for possible problems ... [27s]|  ─  checking R code for possible problems ... [27s] NOTE (26.6s)
+   .bootstrap_pb: warning in .passing_bablok_fit(x_boot, y_boot, method,
+     conf = 0, pair_weights_boot, case_weights = wts): partial argument
+     match of 'conf' to 'conf.level'
+   checking Rd files .../-\|/     checking Rd files ... -  ✔  checking Rd files (880ms)
+   checking Rd metadata ...\     checking Rd metadata ... |  ✔  checking Rd metadata
+   checking Rd line widths .../-\     checking Rd line widths ... |  ✔  checking Rd line widths (444ms)
+   checking Rd cross-references .../-\|/     checking Rd cross-references ... -  ✔  checking Rd cross-references (884ms)
+   checking for missing documentation entries ...\|/-\|/-\|/-\     checking for missing documentation entries ... |  ✔  checking for missing documentation entries (2.7s)
+   checking for code/documentation mismatches .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking for code/documentation mismatches ... -  ✔  checking for code/documentation mismatches (6.8s)
+   checking Rd \usage sections ...\|     checking Rd \usage sections ... /  W  checking Rd \usage sections (408ms)
+   Undocumented arguments in Rd file 'simple_eiv-methods.Rd'
+     'formula' 'na.action'
+   
+-     Functions with \usage entries need to have the appropriate \alias
+   entries, and all their arguments documented.
+   The \usage entries must correspond to syntactically valid R code.
+   See chapter 'Writing R documentation files' in the 'Writing R
+   Extensions' manual.
+\|/-\|/-\|/-\|    /     checking Rd contents ...-\     checking Rd contents ... |  ✔  checking Rd contents (3.2s)
+   checking for unstated dependencies in examples .../-\     checking for unstated dependencies in examples ... |  ✔  checking for unstated dependencies in examples (452ms)
+   checking contents of 'data' directory .../     checking contents of 'data' directory ... -  ✔  checking contents of 'data' directory
+   checking data for non-ASCII characters ...\|     checking data for non-ASCII characters ... /  ✔  checking data for non-ASCII characters (352ms)
+-  ✔  checking LazyData
+   checking data for ASCII and uncompressed saves ...\|     checking data for ASCII and uncompressed saves ... /  ✔  checking data for ASCII and uncompressed saves (343ms)
+-    \     checking installed files from 'inst/doc' ...|/     checking installed files from 'inst/doc' ... -  ✔  checking installed files from 'inst/doc' (415ms)
+   checking files in 'vignettes' ...\|     checking files in 'vignettes' ... /  ✔  checking files in 'vignettes' (415ms)
+   checking examples ...-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking examples ... |  ✔  checking examples (7.8s)
+   checking examples with --run-donttest .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-     checking examples with --run-donttest ... \  ✔  checking examples with --run-donttest (8.7s)
+   checking for unstated dependencies in 'tests' ...|/     checking for unstated dependencies in 'tests' ... -  ✔  checking for unstated dependencies in 'tests'
+   checking tests ...\|  ─  checking tests (348ms)
+/     Running 'testthat.R'-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-  \    [154s]|  /     Running the tests in 'tests/testthat.R' failed.
+-     Last 13 lines of output:
+     `expected`: TRUE
+     ── Error ('test-dem_reg_enhanced.R:566:3'): complete workflow works end-to-end ──
+     Error in `eval(call$data, parent.frame())`: object 'workflow_data' not found
+     Backtrace:
+         ▆
+      1. ├─testthat::expect_s3_class(plot(result), "ggplot") at test-dem_reg_enhanced.R:566:3
+      2. │ └─testthat::quasi_label(enquo(object), arg = "object")
+      3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+      4. ├─base::plot(result)
+      5. └─SimplyAgree:::plot.simple_eiv(result)
+      6.   └─SimplyAgree:::.get_simple_eiv_data(x)
+     
+     [ FAIL 43 | WARN 11 | SKIP 0 | PASS 374 ]
+     Error: Test failures
+     Execution halted
+\    |     checking for unstated dependencies in vignettes .../-\|     checking for unstated dependencies in vignettes ... /  ✔  checking for unstated dependencies in vignettes (758ms)
+   checking package vignettes ...-\     checking package vignettes ... |  ✔  checking package vignettes
+   checking re-building of vignette outputs .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-     checking re-building of vignette outputs ... [52s]\     checking re-building of vignette outputs ... [52s] |  ─  checking re-building of vignette outputs ... [52s] OK (52.2s)
+✔  checking for non-standard things in the check directory
+   checking for detritus in the temp directory .../  ✔  checking for detritus in the temp directory
+   
+   See
+     'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpmEdhte/file3ed431c17118/SimplyAgree.Rcheck/00check.log'
+   for details.
+   
+-\|/-\     ERROR: Unknown command "TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpIfFMfW/file44f4602954c". Did you mean command "create"?
+|  Warning in system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=",  :/     Warning in system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=",  :
+     running command '"quarto" TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpIfFMfW/file44f4602954c -V' had status 1
+-\|/-\|      
+

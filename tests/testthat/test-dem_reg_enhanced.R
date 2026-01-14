@@ -41,7 +41,7 @@ test_that("dem_reg works with default compute_joint = TRUE", {
 
   # Check structure
   expect_s3_class(result, "simple_eiv")
-  expect_true("model" %in% names(result))
+  expect_true("model_table" %in% names(result))
   expect_true("call" %in% names(result))
   expect_true("vcov" %in% names(result))
   expect_true("joint_region" %in% names(result))
@@ -88,8 +88,8 @@ test_that("vcov matrix is properly structured", {
   expect_equal(dim(V), c(2, 2))
 
   # Check names
-  expect_equal(rownames(V), c("intercept", "slope"))
-  expect_equal(colnames(V), c("intercept", "slope"))
+  expect_equal(rownames(V), c("(Intercept)", "x"))
+  expect_equal(colnames(V), c("(Intercept)", "x"))
 
   # Check symmetry
   expect_equal(V[1, 2], V[2, 1])
@@ -133,7 +133,7 @@ test_that("coef method works", {
   # Check structure
   expect_true(is.numeric(coefs))
   expect_equal(length(coefs), 2)
-  expect_equal(names(coefs), c("intercept", "slope"))
+  expect_equal(names(coefs), c("(Intercept)", "x"))
 
   # Check values match model
   expect_equal(unname(coefs[1]), result$model$coef[1])
@@ -156,7 +156,7 @@ test_that("joint confidence region is properly computed", {
   expect_true(!is.null(result$joint_region))
   expect_true(is.data.frame(result$joint_region))
   expect_equal(ncol(result$joint_region), 2)
-  expect_true(all(c("intercept", "slope") %in% names(result$joint_region)))
+  expect_true(all(c("(Intercept)", "x") %in% names(result$joint_region)))
   expect_true(nrow(result$joint_region) > 50)  # Should have ~100 points
 
   # Check that ellipse points vary (not all the same)
@@ -340,8 +340,8 @@ test_that("plot_joint works", {
   expect_s3_class(p, "ggplot")
 
   # Check key labels
-  expect_equal(p$labels$x, "Slope")
-  expect_equal(p$labels$y, "Intercept")
+  expect_equal(p$labels$x, "x")
+  expect_equal(p$labels$y, "(Intercept)")
   expect_true(grepl("Joint Confidence Region", p$labels$title))
 })
 

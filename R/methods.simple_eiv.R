@@ -81,6 +81,8 @@ formula.simple_eiv <- function(x, ...) {
 
 #' @rdname simple_eiv-methods
 #' @method model.frame simple_eiv
+#' @param formula A simple_eiv object (for model.frame method)
+#' @param na.action Function for handling NA values (default: na.pass)
 #' @export
 
 model.frame.simple_eiv <- function(formula, na.action = na.pass, ...) {
@@ -133,25 +135,23 @@ summary.simple_eiv <- function(object, ...) {
   # Passing-Bablok specific tests
   if (is_passing_bablok) {
     cat("\n")
-    if (!is.null(object$kendall_test)) {
-      cat("Kendall's Tau Test (H0: tau = 0):\n")
-      cat(sprintf("  Tau: %.4f (95%% CI: [%.4f, %.4f])\n",
-                  object$kendall_test$tau,
-                  object$kendall_test$lower,
-                  object$kendall_test$upper))
-      cat(sprintf("  Z:   %.4f, p = %.4f\n",
-                  object$kendall_test$z_statistic,
-                  object$kendall_test$p_value))
-    }
+   # if (!is.null(object$kendall_test)) {
+    #  cat("Kendall's Tau Test (H0: tau = 0):\n")
+    #  cat(sprintf("  Tau: %.4f \n",
+    #              object$kendall_test$estimate))
+    #  cat(sprintf("  Z:   %.4f, p = %.4f\n",
+    #              object$kendall_test$statistic,
+    #              object$kendall_test$p.value))
+    #}
 
-    if (!is.null(object$cusum_test)) {
-      cat("\n")
-      cat("CUSUM Linearity Test:\n")
-      cat(sprintf("  Test stat: %.4f, p ~= %.3f\n",
-                  object$cusum_test$test_statistic,
-                  object$cusum_test$p_value))
-      cat(sprintf("  Linear:    %s\n", ifelse(object$cusum_test$linear, "Yes", "No")))
-    }
+    #if (!is.null(object$cusum_test)) {
+    #  cat("\n")
+    #  cat("CUSUM Linearity Test:\n")
+    #  cat(sprintf("  Test stat: %.4f, p ~= %.3f\n",
+    #              object$cusum_test$statistic,
+    #              object$cusum_test$p.value))
+    #  cat(sprintf("  Linear:    %s\n", ifelse(object$cusum_test$linear, "Yes", "No")))
+    #}
 
     # Bootstrap info
     if (!is.null(object$nboot) && object$nboot > 0) {
@@ -444,7 +444,7 @@ check.simple_eiv <- function(x) {
         ))
       ) +
       labs(
-        x = "Individual Slopes (range: 5 × IQR)",
+        x = "Individual Slopes (range: 5 * IQR)",
         y = "Density",
         title = "Distribution of Pairwise Slopes"
       ) +

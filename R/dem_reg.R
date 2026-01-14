@@ -98,7 +98,6 @@ dem_reg <- function(formula = NULL,
                     ...) {
 
   # Capture the call
-  call2 <- match.call()
   call2 = match.call()
   call2$weighted = weighted
   call2$conf.level = conf.level
@@ -260,9 +259,7 @@ dem_reg <- function(formula = NULL,
 
   # vcov_matrix was already computed by jack_dem and extracted above
 
-  # Compute joint confidence region if requested
-  joint_region <- NULL
-  joint_test <- NULL
+
 
 
   # Create coefficients vector with names
@@ -288,9 +285,7 @@ dem_reg <- function(formula = NULL,
       #weighted = weighted,
       weights = w_i,
       conf.level = conf.level,
-      resamples = jacks,
-      joint_region = joint_region,
-      joint_test = joint_test
+      resamples = jacks
     ),
     class = "simple_eiv"
   )
