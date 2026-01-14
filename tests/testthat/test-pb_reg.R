@@ -351,20 +351,20 @@ test_that("pb_reg works with small sample size", {
 test_that("pb_reg handles perfect correlation", {
   perfect <- data.frame(x = 1:20, y = 2 + 3 * (1:20))
 
-  result <- pb_reg(y ~ x, data = perfect)
+  result <- pb_reg(y ~ x, data = perfect, replicates = 199)
 
   expect_s3_class(result, "simple_eiv")
-  expect_equal(result$coefficients["slope"], c(slope = 3), tolerance = 0.001)
-  expect_equal(result$coefficients["(Intercept)"], c(intercept = 2), tolerance = 0.001)
+  expect_equal(result$coefficients["x"], c(x = 3), tolerance = 0.001)
+  expect_equal(result$coefficients["(Intercept)"], c("(Intercept)" = 2), tolerance = 0.001)
 })
 
 test_that("pb_reg handles identity relationship", {
   identity_data <- data.frame(x = 1:30, y = 1:30)
 
-  result <- pb_reg(y ~ x, data = identity_data)
+  result <- pb_reg(y ~ x, data = identity_data, replicates = 199)
 
-  expect_equal(result$coefficients["slope"], c(slope = 1), tolerance = 0.001)
-  expect_equal(result$coefficients["(Intercept)"], c(intercept = 0), tolerance = 0.001)
+  expect_equal(result$coefficients["x"], c(x = 1), tolerance = 0.001)
+  expect_equal(result$coefficients["(Intercept)"], c("(Intercept)" = 0), tolerance = 0.001)
 })
 
 test_that("pb_reg handles ties in data", {
@@ -375,19 +375,20 @@ test_that("pb_reg handles ties in data", {
           6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 9.1, 9.2, 10.1, 10.2)
   )
 
-  result <- pb_reg(y ~ x, data = tied_data)
+  result <- pb_reg(y ~ x, data = tied_data, replicates = 199)
 
   expect_s3_class(result, "simple_eiv")
 })
 
 test_that("pb_reg handles data with some identical pairs", {
+
   # Some (x, y) pairs are identical
   data_with_identical <- data.frame(
     x = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3),
     y = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1.1, 2.1, 3.1)
   )
 
-  result <- pb_reg(y ~ x, data = data_with_identical)
+  result <- pb_reg(y ~ x, data = data_with_identical, replicates = 199)
 
   expect_s3_class(result, "simple_eiv")
 })
@@ -396,7 +397,7 @@ test_that("pb_reg handles data with some identical pairs", {
 # Output Structure Tests ---------------
 
 test_that("pb_reg output structure is correct", {
-  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1)
+  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 99)
 
   # Check required components
   expect_true("coefficients" %in% names(result))
@@ -417,11 +418,11 @@ test_that("pb_reg output structure is correct", {
   # Check model_table structure
   expect_true(is.data.frame(result$model_table) || is.matrix(result$model_table))
   expect_equal(nrow(result$model_table), 2)
-  expect_true(all(c("estimate", "lower.ci", "upper.ci") %in% colnames(result$model_table)))
+  expect_true(all(c("coef", "lower.ci", "upper.ci") %in% colnames(result$model_table)))
 })
 
 test_that("pb_reg slopes information is correct", {
-  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1)
+  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 99)
 
   n <- nrow(ncss_pb1)
   max_slopes <- n * (n - 1) / 2  # Maximum possible slopes

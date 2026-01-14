@@ -764,16 +764,13 @@ pb_reg <- function(formula,
 .test_cusum_linearity <- function(x, y, b0, b1, conf.level = 0.95) {
   n <- length(x)
   data_name <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
-
   # Compute residuals
   fitted <- b0 + b1 * x
   resid <- y - fitted
-
   # Count residuals above and below line
   n_pos <- sum(resid > 0)
   n_neg <- sum(resid < 0)
   n_zero <- sum(resid == 0)
-
   # Handle degenerate cases
   if (n_pos == 0 || n_neg == 0) {
     result <- list(
@@ -797,55 +794,79 @@ pb_reg <- function(formula,
   r[resid > 0] <- sqrt(n_neg / n_pos)
   r[resid < 0] <- -sqrt(n_pos / n_neg)
   r[resid == 0] <- 0
-
   # Compute distance scores (projection perpendicular to regression line)
   D <- (y + x / b1 - b0) / sqrt(1 + 1 / b1^2)
-
   # Sort scores by distance along the line
   order_idx <- order(D)
   r_sorted <- r[order_idx]
-
   # Compute CUSUM
   cusum <- cumsum(r_sorted)
   max_cusum <- max(abs(cusum))
-
   # Test statistic H (normalized by sqrt(n_neg + 1))
   # From Passing & Bablok (1983), Appendix Section 4
   H <- max_cusum / sqrt(n_neg + 1)
+
+  # Handle edge case where n_pos or n_neg is too small for qsmirnov
+  if (n_pos < 2 || n_neg < 2) {
+    result <- list(
+      statistic = c(H = H),
+      p.value = NA_real_,
+      method = "Passing-Bablok CUSUM test for linearity",
+      data.name = data_name,
+      parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
+      alternative = "two.sided",
+      conf.level = conf.level,
+      cumsum = cusum,
+      max_cusum = max_cusum,
+      Di = D,
+      cusum_limit = NA_real_,
+      h_critical = NA_real_,
+      cusum_lower = NA_real_,
+      cusum_upper = NA_real_
+    )
+    class(result) <- "htest"
+    return(result)
+  }
 
   # P-value using Smirnov distribution (two-sample KS test)
   # The test compares the distribution of positive vs negative scores
   # The relationship: H = T * sqrt(l*L/(l+L)) where T is the Smirnov statistic
   # Convert H back to Smirnov scale
   T <- H * sqrt((n_pos + n_neg) / (n_pos * n_neg))
-
   p_value <- psmirnov(T,
                       sizes = c(n_pos, n_neg),
                       alternative = "two.sided",
                       lower.tail = FALSE)
-
   # Compute confidence limits for CUSUM
   alpha <- 1 - conf.level
+  # Get critical value from Smirnov distribution (with fallback for edge cases)
+  T_critical <- tryCatch(
+    qsmirnov(1 - alpha, sizes = c(n_pos, n_neg), alternative = "two.sided"),
+    warning = function(w) NA_real_,
+    error = function(e) NA_real_
+  )
 
-  # Get critical value from Smirnov distribution
-  T_critical <- qsmirnov(1 - alpha,
-                         sizes = c(n_pos, n_neg),
-                         alternative = "two.sided")
-
-  # Convert back to H scale
-  h_critical <- T_critical * sqrt((n_pos * n_neg) / (n_pos + n_neg))
-
-  # Confidence limits (constant horizontal lines)
-  # From Passing & Bablok (1983): P(max|cusum(i)| < h_γ * sqrt(L+1)) = 1 - γ
-  conf_limit <- h_critical * sqrt(n_neg + 1)
-  cusum_lower <- -conf_limit
-  cusum_upper <- conf_limit
+  # Compute h_critical and confidence limits, handling NA from tryCatch
+  if (is.na(T_critical) || !is.finite(T_critical)) {
+    h_critical <- NA_real_
+    conf_limit <- NA_real_
+    cusum_lower <- NA_real_
+    cusum_upper <- NA_real_
+  } else {
+    # Convert back to H scale
+    h_critical <- T_critical * sqrt((n_pos * n_neg) / (n_pos + n_neg))
+    # Confidence limits (constant horizontal lines)
+    # From Passing & Bablok (1983): P(max|cusum(i)| < h_γ * sqrt(L+1)) = 1 - γ
+    conf_limit <- h_critical * sqrt(n_neg + 1)
+    cusum_lower <- -conf_limit
+    cusum_upper <- conf_limit
+  }
 
   # Construct htest object
   result <- list(
     statistic = c(H = H),
     p.value = p_value,
-    method = "Passing-Bablok (1983) CUSUM test for linearity",
+    method = "Passing-Bablok CUSUM test for linearity",
     data.name = data_name,
     parameter = c(n_pos = n_pos, n_neg = n_neg, n_zero = n_zero),
     alternative = "two.sided",
@@ -857,7 +878,6 @@ pb_reg <- function(formula,
     h_critical = h_critical
   )
   class(result) <- "htest"
-
   return(result)
 }
 
