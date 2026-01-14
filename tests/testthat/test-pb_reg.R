@@ -446,10 +446,10 @@ test_that("pb_reg model_table values are consistent", {
                ignore_attr = TRUE)
 
   # Lower should be less than estimate, which should be less than upper
-  expect_lt(mt["(Intercept)", "lower.ci"], mt["(Intercept)", "estimate"])
-  expect_lt(mt["(Intercept)", "estimate"], mt["(Intercept)", "upper.ci"])
-  expect_lt(mt["slope", "lower.ci"], mt["slope", "estimate"])
-  expect_lt(mt["slope", "estimate"], mt["slope", "upper.ci"])
+  expect_lt(mt["(Intercept)", "lower.ci"], mt["(Intercept)", "coef"])
+  expect_lt(mt["(Intercept)", "coef"], mt["(Intercept)", "upper.ci"])
+  expect_lt(mt["slope", "lower.ci"], mt["slope", "coef"])
+  expect_lt(mt["slope", "coef"], mt["slope", "upper.ci"])
 })
 
 
