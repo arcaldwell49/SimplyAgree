@@ -54,8 +54,8 @@ print.simple_eiv <- function(x, ...) {
 
     if (!is.null(x$cusum_test)) {
       cat("CUSUM Linearity Test:\n")
-      cat(sprintf("  Test stat: %.4f\n", x$cusum_test$test_statistic))
-      cat(sprintf("  p-value:   %.4f\n", x$cusum_test$p_value))
+      cat(sprintf("  Test stat: %.4f\n", x$cusum_test$statistic))
+      cat(sprintf("  p-value:   %.4f\n", x$cusum_test$p.value))
       cat("\n")
     }
   }

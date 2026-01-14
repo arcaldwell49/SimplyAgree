@@ -268,6 +268,13 @@ pb_reg <- function(formula,
   if (!is.null(weights)) {
     # Note: when id is provided, weights should correspond to original data rows
     # Here we just use provided weights or default to 1
+    if (length(weights) != nrow(df3)) {
+      stop("Length of 'weights' (", length(weights),
+           ") must equal number of observations (", nrow(df3), ")")
+    }
+    if (any(weights < 0)) {
+      stop("'weights' must be non-negative")
+    }
     if (!is.null(id)) {
       # For replicate data, we already have df3 with averaged values
       # Weights would need to be pre-aggregated by user or set to 1
@@ -410,7 +417,7 @@ pb_reg <- function(formula,
       n_slopes = pb_result$n_slopes,
       ci_slopes = if(keep_data) pb_result$ci_slopes else NULL,
       slopes_data = if(keep_data) pb_result$slopes else NULL,
-      boot = boot = if(keep_data && !is.null(boot_result)) boot_result$boot_obj else NULL,
+      boot =  if(keep_data && !is.null(boot_result)) boot_result$boot_obj else NULL,
       replicates = replicates
     ),
     class = "simple_eiv"

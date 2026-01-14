@@ -68,6 +68,10 @@ plot_joint(x, ...)
 \arguments{
 \item{...}{further arguments passed through.}
 
+\item{formula}{A simple_eiv object (for model.frame method)}
+
+\item{na.action}{Function for handling NA values (default: na.pass)}
+
 \item{object, x}{object of class \code{simple_eiv} from dem_reg or pb_reg function.}
 
 \item{x_name}{Name for x-axis label (optional).}

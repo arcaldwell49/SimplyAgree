@@ -108,6 +108,10 @@ dem_reg <- function(formula = NULL,
     stop("conf.level must be a single numeric value")
   }
 
+  if (!is.numeric(error.ratio) || length(error.ratio) != 1 || error.ratio <= 0) {
+    stop("error.ratio must be a single numeric value that is positive.")
+  }
+
   if (is.na(conf.level)) {
     stop("conf.level cannot be NA")
   }
@@ -124,6 +128,13 @@ dem_reg <- function(formula = NULL,
 
   if (!using_formula && !using_xy) {
     stop("Either 'formula' or both 'x' and 'y' must be provided")
+  }
+
+  # Deprecation warning for old x/y interface
+  if (!is.null(x) || !is.null(y)) {
+    warning("The 'x' and 'y' arguments are deprecated. ",
+            "Please use the formula interface instead: dem_reg(y ~ x, data = ...)",
+            call. = FALSE)
   }
 
   if (using_formula && using_xy) {
@@ -197,7 +208,16 @@ dem_reg <- function(formula = NULL,
     df3 <- data.frame(x = x_vals, y = y_vals)
     df3 <- df3[complete.cases(df3), ]
   }
-
+  # Validate weights if provided
+  if (!is.null(weights)) {
+    if (length(weights) != nrow(df3)) {
+      stop("Length of 'weights' (", length(weights),
+           ") must equal number of observations (", nrow(df3), ")")
+    }
+    if (any(weights < 0)) {
+      stop("'weights' must be non-negative")
+    }
+  }
   # Compute weights
   if (weighted == FALSE) {
     w_i <- rep(1, nrow(df3))
