@@ -96,7 +96,7 @@ testthat::test_that("examples from Zou", {
     data = reps
   ))
 
-  reps_test3 = suppressWarnings(agree_reps(
+  reps_test3 = suppressWarnings({agree_reps(
     x = "x",
     y = "y",
     delta = 2.5,
@@ -104,7 +104,7 @@ testthat::test_that("examples from Zou", {
     data = reps,
     agree.level = .8,
     conf.level = .75
-  ))
+  )})
 
   reps_test4 = suppressWarnings(agree_reps(
     x = "x",

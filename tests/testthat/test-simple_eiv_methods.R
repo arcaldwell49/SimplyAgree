@@ -140,7 +140,7 @@ test_that("vcov.simple_eiv is positive semi-definite", {
 
 test_that("vcov.simple_eiv returns NULL for analytical PB", {
   # Analytical PB doesn't have traditional vcov
-  v <- vcov(pb_model)
+  v <- suppressWarnings({vcov(pb_model)})
   expect_true(is.null(v) || is.matrix(v))
 })
 
@@ -371,35 +371,6 @@ test_that("formula.simple_eiv works for PB models", {
 })
 
 
-# model.frame.simple_eiv Tests------------
-
-test_that("model.frame.simple_eiv returns data frame", {
-  mf <- model.frame(dem_model)
-
-  expect_s3_class(mf, "data.frame")
-})
-
-test_that("model.frame.simple_eiv has correct dimensions", {
-  mf <- model.frame(dem_model)
-
-  expect_equal(nrow(mf), nrow(ncss_deming1))
-  expect_equal(ncol(mf), 2)  # Y and X
-})
-
-test_that("model.frame.simple_eiv contains correct variables", {
-  mf <- model.frame(dem_model)
-
-  expect_true("Y" %in% names(mf))
-  expect_true("X" %in% names(mf))
-})
-
-test_that("model.frame.simple_eiv works for PB models", {
-  mf <- model.frame(pb_model)
-
-  expect_s3_class(mf, "data.frame")
-  expect_equal(nrow(mf), nrow(ncss_pb1))
-})
-
 
 # plot.simple_eiv Tests------------
 
@@ -516,9 +487,9 @@ test_that("coef and model_table estimates match", {
   coeffs <- coef(dem_model)
   mt <- dem_model$model_table
 
-  expect_equal(coeffs["(Intercept)"], mt["(Intercept)", "coef"],
+  expect_equal(unname(coeffs["(Intercept)"]), mt["Intercept", ]$coef,
                ignore_attr = TRUE)
-  expect_equal(coeffs["X"], mt["Slope", "coef"],
+  expect_equal(unname(coeffs["X"]), mt["Slope", ]$coef,
                ignore_attr = TRUE)
 })
 

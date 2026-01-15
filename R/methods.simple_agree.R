@@ -43,7 +43,7 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("Hypothesis Test: ",x$shieh_test$h0_test, sep = "")
   cat("\n")
-  if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+  if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
   cat("\n")
   cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
@@ -63,7 +63,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("Replicate Data Points (true value does not vary)")
     cat("\n")
-    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
@@ -90,7 +90,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("Nested Data Points (true value may vary)")
     cat("\n")
-    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")

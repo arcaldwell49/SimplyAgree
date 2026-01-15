@@ -25,29 +25,29 @@ testthat::test_that("Compare to NCSS 303-26", {
                        plotcheck = TRUE,
                        weighted = TRUE)
   dm_u_jam2
-  expect_equivalent(round(dm_u$model$coef,4),
+  expect_equivalent(round(dm_u$model_table$coef,4),
                     c(-0.0897, 1.0012))
 
-  expect_equivalent(round(dm_u$model$se,4),
+  expect_equivalent(round(dm_u$model_table$se,4),
                     c(1.7220, 0.1872))
   p1 = plot(dm_u)
   c1 = check(dm_u)
 
-  dm_w = dem_reg(x = 'x',
+  dm_w = suppressWarnings({dem_reg(x = 'x',
                   y = 'y',
                   data = df1,
                   weighted = TRUE,
-                 error.ratio = 4)
+                 error.ratio = 4)})
 
   dm_w = dem_reg(y ~ x,
                  data = df1,
                  weighted = TRUE,
                  error.ratio = 4)
 
-  expect_equivalent(round(dm_w$model$coef,4),
+  expect_equivalent(round(dm_w$model_table$coef,4),
                     c(-0.3251, 1.0309))
 
-  expect_equivalent(round(dm_w$model$se,3),
+  expect_equivalent(round(dm_w$model_table$se,3),
                     c(1.961, 0.219))
 
   p1 = plot(dm_w)
@@ -60,20 +60,17 @@ testthat::test_that("Simple Run Through with Nested", {
   data('reps')
 
   dm1 = dem_reg(data = reps,
-                x = "x",
-                y = "y",
+                formula = y~ x,
                 weighted = TRUE,
                 id = "id")
 
   dm2 = dem_reg(data = reps,
-                x = "x",
-                y = "y",
+                formula = y~ x,
                 weighted = FALSE,
                 id = "id")
 
-  expect_warning( dem_reg(data = reps,
-                        x = "x",
-                        y = "y",
+  expect_error( dem_reg(data = reps,
+                          formula = y~ x,
                         weighted = TRUE,
                         weights = c(1,2),
                         id = "id"))

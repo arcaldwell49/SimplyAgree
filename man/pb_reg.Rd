@@ -13,6 +13,7 @@ pb_reg(
   weights = NULL,
   error.ratio = 1,
   replicates = 0,
+  model = TRUE,
   keep_data = TRUE,
   ...
 )
@@ -43,6 +44,11 @@ This argument is ignored if subject identifiers are provided via \code{id}.}
 \item{replicates}{Number of bootstrap iterations for confidence intervals. If 0 (default),
 analytical confidence intervals are used. Bootstrap is recommended for weighted
 data and 'invariant' or 'scissors' methods.}
+
+\item{model}{Logical. If TRUE (default), the model frame is stored in the returned object.
+This is needed for methods like \code{plot()}, \code{fitted()}, \code{residuals()}, and \code{predict()} to work
+without supplying \code{data}. If FALSE, the model frame is not stored (saves memory for large datasets),
+but these methods will require a \code{data} argument.}
 
 \item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, intermediate calculations
 are returned; default is FALSE.}

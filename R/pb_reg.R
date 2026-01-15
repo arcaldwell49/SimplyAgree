@@ -26,6 +26,10 @@
 #' @param replicates Number of bootstrap iterations for confidence intervals. If 0 (default),
 #'   analytical confidence intervals are used. Bootstrap is recommended for weighted
 #'   data and 'invariant' or 'scissors' methods.
+#' @param model Logical. If TRUE (default), the model frame is stored in the returned object.
+#'   This is needed for methods like `plot()`, `fitted()`, `residuals()`, and `predict()` to work
+#'   without supplying `data`. If FALSE, the model frame is not stored (saves memory for large datasets),
+#'   but these methods will require a `data` argument.
 #' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, intermediate calculations
 #'   are returned; default is FALSE.
 #' @param ... Additional arguments (currently unused).
@@ -168,6 +172,7 @@ pb_reg <- function(formula,
                    weights = NULL,
                    error.ratio = 1,
                    replicates = 0,
+                   model = TRUE,
                    keep_data = TRUE,
                    ...) {
 
@@ -403,9 +408,7 @@ pb_reg <- function(formula,
       df.residual = n - 2,
       call = call2,
       terms = mt,
-      #model = mf,
-      #x_vals = x_vals,
-      #y_vals = y_vals,
+      model = if (model) df3 else NULL,
       weights = if (!all(wts == 1)) wts else NULL,
       error.ratio = error.ratio,
       conf.level = conf.level,

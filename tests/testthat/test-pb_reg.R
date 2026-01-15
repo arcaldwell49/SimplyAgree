@@ -513,7 +513,7 @@ test_that("pb_reg scissors method is approximately scale-invariant", {
 # Method Comparison Hypothesis Testing ---------------
 
 test_that("pb_reg supports method comparison testing via CI", {
-  result <- supressWarnings({pb_reg(Method2 ~ Method1, data = ncss_pb1)})
+  result <- suppressWarnings({pb_reg(Method2 ~ Method1, data = ncss_pb1)})
   mt <- result$model_table
 
   # Get rows by term name for robustness

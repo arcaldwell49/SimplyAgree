@@ -15,6 +15,10 @@
 #' @param weighted Logical indicator (TRUE/FALSE) for whether to use weighted Deming regression. Default is FALSE.
 #' @param weights an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
 #' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
+#' @param model Logical. If TRUE (default), the model frame is stored in the returned object.
+#'   This is needed for methods like `plot()`, `fitted()`, `residuals()`, and `predict()` to work
+#'   without supplying `data`. If FALSE, the model frame is not stored (saves memory for large datasets),
+#'   but these methods will require a `data` argument.
 #' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.
 #' @param ... Additional arguments (currently unused).
 #'
@@ -94,6 +98,7 @@ dem_reg <- function(formula = NULL,
                     weighted = FALSE,
                     weights = NULL,
                     error.ratio = 1,
+                    model = TRUE,
                     keep_data = FALSE,
                     ...) {
 
@@ -296,11 +301,7 @@ dem_reg <- function(formula = NULL,
       df.residual = nrow(df3) - 2,
       call = call2,
       terms = mt,
-      # model = mf,
-      # x_vals = df3$x,
-      # y_vals = df3$y,
-      # x_hat = x_hat,
-      # y_hat = y_hat,
+      model = if (model) df3 else NULL,
       error.ratio = error.ratio,
       #weighted = weighted,
       weights = w_i,

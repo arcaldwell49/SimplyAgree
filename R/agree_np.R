@@ -125,9 +125,11 @@ agree_np <- function(x,
   glm_mod = glm(cbind(success,failure) ~ 1,
                 data = df_glm,
                 family = binomial)
-  glm_emm = as.data.frame(confint(emmeans(glm_mod, ~1,
-                                          type = "response"),
-                                  level = conf.level))
+  glm_emm = as.data.frame(confint(
+    suppressWarnings(emmeans(glm_mod, ~1,
+                             type = "response",
+                             data = df_glm)),
+    level = conf.level))
   df_agree = data.frame(agreement = glm_emm$prob,
                         lower.ci = glm_emm$asymp.LCL,
                         upper.ci = glm_emm$asymp.UCL,

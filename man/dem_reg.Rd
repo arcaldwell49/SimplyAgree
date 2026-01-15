@@ -14,6 +14,7 @@ dem_reg(
   weighted = FALSE,
   weights = NULL,
   error.ratio = 1,
+  model = TRUE,
   keep_data = FALSE,
   ...
 )
@@ -36,6 +37,11 @@ dem_reg(
 \item{weights}{an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.}
 
 \item{error.ratio}{Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.}
+
+\item{model}{Logical. If TRUE (default), the model frame is stored in the returned object.
+This is needed for methods like \code{plot()}, \code{fitted()}, \code{residuals()}, and \code{predict()} to work
+without supplying \code{data}. If FALSE, the model frame is not stored (saves memory for large datasets),
+but these methods will require a \code{data} argument.}
 
 \item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.}
 
