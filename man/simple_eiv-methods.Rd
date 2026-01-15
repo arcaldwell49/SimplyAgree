@@ -6,6 +6,7 @@
 \alias{formula.simple_eiv}
 \alias{model.frame.simple_eiv}
 \alias{summary.simple_eiv}
+\alias{confint.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
 \alias{plot_joint}
@@ -24,6 +25,8 @@
 \method{model.frame}{simple_eiv}(formula, na.action = na.pass, ...)
 
 \method{summary}{simple_eiv}(object, ...)
+
+\method{confint}{simple_eiv}(object, parm, level = NULL, ...)
 
 \method{plot}{simple_eiv}(
   x,
@@ -74,13 +77,16 @@ plot_joint(x, ...)
 
 \item{object, x}{object of class \code{simple_eiv} from dem_reg or pb_reg function.}
 
+\item{parm}{A specification of which parameters are to be given confidence intervals,
+either a vector of numbers or a vector of names. If missing, all parameters are considered.}
+
+\item{level}{Confidence level for intervals (default uses the model's conf.level).}
+
 \item{x_name}{Name for x-axis label (optional).}
 
 \item{y_name}{Name for y-axis label (optional).}
 
 \item{interval}{Type of interval calculation. Can be "none" (default), or "confidence"}
-
-\item{level}{Confidence level for intervals (default uses the model's conf.level).}
 
 \item{n_points}{Number of points to use for drawing the joint confidence region (default = 100).}
 

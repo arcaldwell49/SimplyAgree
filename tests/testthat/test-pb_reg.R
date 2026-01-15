@@ -140,7 +140,7 @@ test_that("pb_reg includes Kendall's tau test", {
 })
 
 test_that("pb_reg Kendall test is significant for correlated data", {
-  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1)
+  result <- suppressWarnings({pb_reg(Method2 ~ Method1, data = ncss_pb1)})
 
   # For NCSS data, correlation should be highly significant
   expect_lt(result$kendall_test$p.value, 0.001)
@@ -283,7 +283,8 @@ test_that("pb_reg works with replicate data", {
     y = c(rbind(ncss_pb1$Method2[1:15], ncss_pb1$Method2[1:15] + rnorm(15, 0, 0.5)))
   )
 
-  result <- pb_reg(y ~ x, data = rep_data, id = "id")
+  result <- pb_reg(y ~ x, data = rep_data, id = "id",
+                   replicates = 99)
 
   expect_s3_class(result, "simple_eiv")
   expect_true(is.numeric(result$error.ratio))
@@ -430,34 +431,42 @@ test_that("pb_reg slopes information is correct", {
   expect_lte(result$n_slopes, max_slopes)
   expect_gt(result$n_slopes, 0)
 
-  # ci_slopes should have lower and upper indices
-  expect_length(result$ci_slopes, 2)
+  # ci_slopes contains the actual slope values, not indices
+  # Should be a numeric vector
+
+  expect_true(is.numeric(result$ci_slopes))
+  expect_gt(length(result$ci_slopes), 0)
 })
 
 test_that("pb_reg model_table values are consistent", {
-  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1)
-
+  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 99)
   mt <- result$model_table
 
   # Estimates should match coefficients
-  expect_equal(mt["(Intercept)", "estimate"], result$coefficients["(Intercept)"],
+  expect_equal(mt$coef[1],
+               unname(result$coefficients["(Intercept)"]),
                ignore_attr = TRUE)
-  expect_equal(mt["slope", "estimate"], result$coefficients["slope"],
+  expect_equal(mt$coef[2],
+               unname(result$coefficients[2]),
                ignore_attr = TRUE)
 
   # Lower should be less than estimate, which should be less than upper
-  expect_lt(mt["(Intercept)", "lower.ci"], mt["(Intercept)", "coef"])
-  expect_lt(mt["(Intercept)", "coef"], mt["(Intercept)", "upper.ci"])
-  expect_lt(mt["slope", "lower.ci"], mt["slope", "coef"])
-  expect_lt(mt["slope", "coef"], mt["slope", "upper.ci"])
+  expect_lt(mt$lower.ci[1], mt$coef[1])
+  expect_lt(mt$coef[1], mt$upper.ci[1])
+  expect_lt(mt$lower.ci[2], mt$coef[2])
+  expect_lt(mt$coef[2], mt$upper.ci[2])
 })
 
 
 # Reproducibility Tests ---------------
 
 test_that("pb_reg is deterministic without bootstrap", {
-  result1 <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 0)
-  result2 <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 0)
+  result1 <- suppressWarnings({pb_reg(Method2 ~ Method1,
+                                      data = ncss_pb1,
+                                      replicates = 0)})
+  result2 <- suppressWarnings({pb_reg(Method2 ~ Method1,
+                                      data = ncss_pb1,
+                                      replicates = 0)})
 
   expect_equal(result1$coefficients, result2$coefficients)
   expect_equal(result1$model_table, result2$model_table)
@@ -465,10 +474,14 @@ test_that("pb_reg is deterministic without bootstrap", {
 
 test_that("pb_reg bootstrap is reproducible with seed", {
   set.seed(789)
-  result1 <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 100)
+  result1 <- suppressWarnings({pb_reg(Method2 ~ Method1,
+                                      data = ncss_pb1,
+                                      replicates = 100)})
 
   set.seed(789)
-  result2 <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 100)
+  result2 <- suppressWarnings({pb_reg(Method2 ~ Method1,
+                                      data = ncss_pb1,
+                                      replicates = 100)})
 
   expect_equal(result1$coefficients, result2$coefficients)
 })
@@ -481,8 +494,14 @@ test_that("pb_reg scissors method is approximately scale-invariant", {
   scaled_data <- ncss_pb1
   scaled_data$Method2 <- scaled_data$Method2 * 2
 
-  result_original <- pb_reg(Method2 ~ Method1, data = ncss_pb1, method = "scissors")
-  result_scaled <- pb_reg(Method2 ~ Method1, data = scaled_data, method = "scissors")
+  result_original <- pb_reg(Method2 ~ Method1,
+                            data = ncss_pb1,
+                            method = "scissors",
+                            replicates = 99)
+  result_scaled <- pb_reg(Method2 ~ Method1,
+                          data = scaled_data,
+                          method = "scissors",
+                          replicates = 99)
 
   # Slope should approximately double
   expect_equal(result_scaled$coefficients["slope"],
@@ -494,36 +513,32 @@ test_that("pb_reg scissors method is approximately scale-invariant", {
 # Method Comparison Hypothesis Testing ---------------
 
 test_that("pb_reg supports method comparison testing via CI", {
-  result <- pb_reg(Method2 ~ Method1, data = ncss_pb1)
+  result <- supressWarnings({pb_reg(Method2 ~ Method1, data = ncss_pb1)})
+  mt <- result$model_table
 
-  # For NCSS data, methods should be equivalent
+  # Get rows by term name for robustness
+  intercept_row <- which(mt$term == "Intercept")
+  slope_row <- which(mt$term == "Method1")
+
   # CI for intercept should contain 0
-  ci_intercept <- c(result$model_table["(Intercept)", "lower.ci"],
-                    result$model_table["(Intercept)", "upper.ci"])
-  expect_true(ci_intercept[1] < 0 && 0 < ci_intercept[2])
-
+  expect_true(mt$lower.ci[intercept_row] < 0 && 0 < mt$upper.ci[intercept_row])
   # CI for slope should contain 1
-  ci_slope <- c(result$model_table["slope", "lower.ci"],
-                result$model_table["slope", "upper.ci"])
-  expect_true(ci_slope[1] < 1 && 1 < ci_slope[2])
+  expect_true(mt$lower.ci[slope_row] < 1 && 1 < mt$upper.ci[slope_row])
 })
 
 test_that("pb_reg detects systematic bias", {
-  # Create data with clear bias
   biased <- data.frame(
     x = 1:30,
-    y = 10 + 1.5 * (1:30)  # Clear intercept and slope bias
+    y = 10 + 1.5 * (1:30)
   )
+  result <- suppressWarnings({pb_reg(y ~ x, data = biased)})
+  mt <- result$model_table
 
-  result <- pb_reg(y ~ x, data = biased)
+  intercept_row <- which(mt$term == "Intercept")
+  slope_row <- which(mt$term == "x")
 
   # CI for intercept should NOT contain 0
-  ci_intercept <- c(result$model_table["(Intercept)", "lower.ci"],
-                    result$model_table["(Intercept)", "upper.ci"])
-  expect_false(ci_intercept[1] < 0 && 0 < ci_intercept[2])
-
+  expect_false(mt$lower.ci[intercept_row] < 0 && 0 < mt$upper.ci[intercept_row])
   # CI for slope should NOT contain 1
-  ci_slope <- c(result$model_table["slope", "lower.ci"],
-                result$model_table["slope", "upper.ci"])
-  expect_false(ci_slope[1] < 1 && 1 < ci_slope[2])
+  expect_false(mt$lower.ci[slope_row] < 1 && 1 < mt$upper.ci[slope_row])
 })

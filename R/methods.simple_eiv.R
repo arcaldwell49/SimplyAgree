@@ -176,6 +176,53 @@ summary.simple_eiv <- function(object, ...) {
 }
 
 #' @rdname simple_eiv-methods
+#' @param parm A specification of which parameters are to be given confidence intervals,
+#'   either a vector of numbers or a vector of names. If missing, all parameters are considered.
+#' @param level The confidence level required, but only the model's conf.level will be accepted currently.
+#' @method confint simple_eiv
+#' @export
+
+confint.simple_eiv <- function(object, parm, level = NULL, ...) {
+
+
+  # Use model's confidence level if not specified
+  if (is.null(level)) {
+    level <- object$conf.level
+  }
+
+  # Check if requested level matches the stored level
+  if (!is.null(object$conf.level) && abs(level - object$conf.level) > 1e-10) {
+    message(sprintf(
+      "Requested level (%.1f%%) differs from model's stored level (%.1f%%). Using stored CIs.",
+      level * 100, object$conf.level * 100
+    ))
+  }
+
+  # Extract confidence intervals from model_table
+  cf <- object$coefficients
+  pnames <- names(cf)
+
+  # Build CI matrix from model_table
+  ci <- cbind(object$model_table$lower.ci, object$model_table$upper.ci)
+  rownames(ci) <- pnames
+
+  # Column names based on level
+  a <- (1 - level) / 2
+  pct <- paste(format(100 * c(a, 1 - a), trim = TRUE, scientific = FALSE, digits = 3), "%")
+  colnames(ci) <- pct
+
+
+  # Subset if parm is specified
+  if (missing(parm)) {
+    parm <- pnames
+  } else if (is.numeric(parm)) {
+    parm <- pnames[parm]
+  }
+
+  ci[parm, , drop = FALSE]
+}
+
+#' @rdname simple_eiv-methods
 #' @param x_name Name for x-axis label (optional).
 #' @param y_name Name for y-axis label (optional).
 #' @param interval Type of interval to display. Options are "none" (default), "confidence", or "prediction".

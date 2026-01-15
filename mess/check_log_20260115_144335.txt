@@ -1,0 +1,109 @@
+══ Building ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Setting env vars:
+• CFLAGS    : -Wall -pedantic
+• CXXFLAGS  : -Wall -pedantic
+• CXX11FLAGS: -Wall -pedantic
+• CXX14FLAGS: -Wall -pedantic
+• CXX17FLAGS: -Wall -pedantic
+• CXX20FLAGS: -Wall -pedantic
+── R CMD build ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      ✔  checking for file 'C:\Users\caldwellaaron\Documents\GitHub\SimplyAgree/DESCRIPTION' (383ms)
+      ─  preparing 'SimplyAgree': (15.7s)
+   checking DESCRIPTION meta-information ...     checking DESCRIPTION meta-information ...   ✔  checking DESCRIPTION meta-information
+      ─  installing the package to build vignettes
+         creating vignettes ...
+Bland-Altman Limits of Agreement (LoA) of the Ratio (x/y)
+95% LoA @ 5% Alpha-Level
+Log-transformed Nested Data
+
+  Bias          Bias CI Lower LoA Upper LoA           LoA CI
+ 1.121 [0.7263, 1.7288]    0.6486     1.936 [0.4303, 2.9177]
+
+Coefficient of Variation (%) = 32.1799
+MOVER Limits of Agreement (LoA)
+95% LoA @ 2.5% Alpha-Level
+Nested Data
+
+ Average of Both Methods   Bias           Bias CI Lower LoA Upper LoA             LoA CI
+                   3.905 0.6195 [-1.5484, 2.7873]    -2.231     3.470 [-9.7791, 11.0181]
+                   5.465 0.7228 [-1.6216, 3.0673]    -2.128     3.573 [-9.6758, 11.1214]
+                   7.395 0.8506 [-1.3205, 3.0218]    -2.000     3.701  [-9.548, 11.2492]
+
+SD of Differences = 1.4543
+MOVER Limits of Agreement (LoA) of the Ratio (x/y)
+95% LoA @ 5% Alpha-Level
+Log-transformed Nested Data
+
+  Bias          Bias CI Lower LoA Upper LoA           LoA CI
+ 1.121 [0.7263, 1.7288]    0.6486     1.936 [0.2315, 5.4244]
+
+Coefficient of Variation (%) = 32.1799
+Limit of Agreement = 95%
+Nested Data Points (true value may vary)
+
+Hypothesis Test: don't reject h0
+
+###- Bland-Altman Limits of Agreement (LoA) -###
+          Estimate Lower CI Upper CI CI Level
+Bias        0.7255  -0.6694   2.1204     0.95
+Lower LoA  -2.1404  -7.5748  -0.5891     0.90
+Upper LoA   3.5915   2.0402   9.0259     0.90
+
+Limit of Agreement = 95%
+Nested Data Points (true value may vary)
+
+Hypothesis Test: don't reject h0
+
+###- Bland-Altman Limits of Agreement (LoA) -###
+          Estimate Lower CI Upper CI CI Level
+Bias        0.7255  -0.6694   2.1204     0.95
+Lower LoA  -2.1404  -7.5748  -0.5891     0.90
+Upper LoA   3.5915   2.0402   9.0259     0.90
+
+Limit of Agreement = 95%
+Nested Data Points (true value may vary)
+
+Hypothesis Test: don't reject h0
+
+###- Bland-Altman Limits of Agreement (LoA) -###
+          Estimate Lower CI Upper CI CI Level
+Bias        0.7255  -0.6694   2.1204     0.95
+Lower LoA  -2.1404  -7.5748  -0.5891     0.90
+Upper LoA   3.5915   2.0402   9.0259     0.90
+
+Limit of Agreement = 80%
+Nested Data Points (true value may vary)
+
+Hypothesis Test: reject h0
+
+###- Bland-Altman Limits of Agreement (LoA) -###
+          Estimate Lower CI Upper CI CI Level
+Bias        0.7255 -0.09316   1.5442     0.75
+Lower LoA  -1.1484 -2.28235  -0.6037     0.50
+Upper LoA   2.5995  2.05481   3.7334     0.50
+
+Limit of Agreement = 80%
+Nested Data Points (true value may vary)
+
+Hypothesis Test: reject h0
+
+###- Bland-Altman Limits of Agreement (LoA) -###
+          Estimate Lower CI Upper CI CI Level
+Bias        0.7255 -0.09316   1.5442     0.75
+Lower LoA  -1.1484 -2.28235  -0.6037     0.50
+Upper LoA   2.5995  2.05481   3.7334     0.50
+
+── Warning: examples from Zou ──────────────────────────────────────────────────────────────────────────────────────────────
+`agree_nest()` was deprecated in SimplyAgree 0.2.0.
+ℹ Please use `agreement_limit()` instead.
+Backtrace:
+    ▆
+ 1. └─SimplyAgree::agree_nest(...)
+
+── Warning: example from error message ─────────────────────────────────────────────────────────────────────────────────────
+`agree_reps()` was deprecated in SimplyAgree 0.2.0.
+ℹ Please use `agreement_limit()` instead.
+Backtrace:
+    ▆
+ 1. └─SimplyAgree::agree_reps(...)
+

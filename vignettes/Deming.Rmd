@@ -31,7 +31,7 @@ Deming regression is one of the simplest forms of of EIV models promoted by [W. 
 
 # Joint Confidence Regions
 
-A key enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
+A key, but currently experimental, enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
 
 Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
 
