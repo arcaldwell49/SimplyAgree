@@ -653,7 +653,7 @@ test_that("deming_sample_size validates initial_n", {
 })
 
 test_that("deming_sample_size runs and finds required N", {
-  skip_on_cran()
+  #skip_on_cran()
 
   # Use parameters where target is achievable quickly
   result <- deming_sample_size(
@@ -678,7 +678,7 @@ test_that("deming_sample_size runs and finds required N", {
 })
 
 test_that("deming_sample_size warns when target not achieved", {
-  skip_on_cran()
+  #skip_on_cran()
 
   # Use parameters where target is NOT achievable within max_n
   expect_warning(
@@ -705,7 +705,7 @@ test_that("deming_sample_size warns when target not achieved", {
 # Test print.deming_sample_size ----------------------------------------------
 
 test_that("print.deming_sample_size works with achieved targets", {
-  skip_on_cran()
+  #skip_on_cran()
 
   result <- deming_sample_size(
     target_power = 0.60,
@@ -748,7 +748,7 @@ test_that("print.deming_sample_size works when targets not achieved", {
 # Test plot.deming_sample_size -----------------------------------------------
 
 test_that("plot.deming_sample_size creates ggplot object", {
-  skip_on_cran()
+  #skip_on_cran()
 
   result <- deming_sample_size(
     target_power = 0.60,
