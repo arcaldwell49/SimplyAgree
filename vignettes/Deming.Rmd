@@ -1,5 +1,5 @@
 ---
-title: "Error-in-Variables Regression"
+title: "Errors-in-Variables Regression"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
@@ -31,7 +31,7 @@ Deming regression is one of the simplest forms of of EIV models promoted by [W. 
 
 # Joint Confidence Regions
 
-A key, but currently experimental, enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
+A key enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
 
 Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
 
@@ -68,7 +68,7 @@ dem1 = dem_reg(y ~ x,
 dem1
 ```
 
-The resulting regression line can then be plotted. The subtitle now indicates whether the identity line is enclosed by the joint confidence region.
+The resulting regression line can then be plotted. 
 
 ```{r}
 plot(dem1, interval = "confidence")
@@ -76,7 +76,7 @@ plot(dem1, interval = "confidence")
 
 ## Visualizing the Joint Confidence Region
 
-A new plotting method `plot_joint()` allows visualization of the confidence region in parameter space:
+The `plot_joint()` function allows visualization of the confidence region in parameter space:
 
 ```{r}
 plot_joint(dem1, 
@@ -86,12 +86,23 @@ plot_joint(dem1,
 ```
 
 This plot shows:
+
 - The **red ellipse**: Joint confidence region
 - The **blue rectangle**: Traditional confidence intervals
 - The **black dot**: Estimated (intercept, slope)
 - The **green/red X**: Ideal point (whether enclosed or not)
 
 Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
+
+## Joint Hypothesis Test
+
+The `joint_test()` function provides a formal hypothesis test for whether the identity line (slope = 1, intercept = 0) falls within the joint confidence region:
+
+```{r}
+joint_test(dem1)
+```
+
+This returns an `htest` object with the Mahalanobis distance (chi-squared statistic) and p-value.
 
 ## Model Diagnostics
 
@@ -100,6 +111,10 @@ The assumptions of the Deming regression model, primarily normality and homogene
 ```{r}
 check(dem1)
 ```
+
+## Fitted Values and Residuals
+
+After fitting a Deming regression model, you can extract the estimated true values and residuals. The `fitted()` function returns the estimated true Y values, accounting for measurement error. The `residuals()` function returns the optimized residuals by default, which correspond to the perpendicular distances from each point to the regression line.
 
 # Weighted Deming Regression
 
@@ -133,8 +148,7 @@ Now, let us see what happens when `weighted` is set to TRUE.
 
 ```{r}
 dem3 = dem_reg(
-  x = "new.lot",
-  y = "old.lot",
+  old.lot ~ new.lot,
   data = ferritin,
   weighted = TRUE
 )
@@ -148,6 +162,83 @@ check(dem3)
 ```
 
 The weighted model provides a better fit.
+
+# Passing-Bablok Regression
+
+Passing-Bablok regression is a robust, nonparametric alternative to Deming regression for method comparison studies [@passing1983]. Unlike Deming regression, it makes no assumptions about the distribution of the measurement errors. The method estimates the slope as the shifted median of all pairwise slopes between data points, which makes it resistant to outliers.
+
+## When to Use Passing-Bablok
+
+Passing-Bablok regression is particularly useful when:
+
+- Both X and Y are measured with error
+- You want a robust method not sensitive to outliers
+- The relationship is assumed to be linear
+- X and Y are highly positively correlated
+
+## Basic Usage
+
+The `pb_reg()` function implements three variants of Passing-Bablok regression:
+
+- **"scissors"** (default): Most robust, scale-invariant method from @bablok1988
+- **"symmetric"**: Original method from @passing1983
+- **"invariant"**: Scale-invariant method from @passing1984
+
+```{r}
+# Create example data
+pb_data <- data.frame(
+  method1 = c(69.3, 27.1, 61.3, 50.8, 34.4, 92.3, 57.5, 45.5, 33.3, 60.9,
+              56.3, 49.9, 89.7, 28.9, 96.3, 76.6, 83.2, 79.4, 51.7, 32.5,
+              99.1, 14.2, 84.1, 48.8, 61.5, 84.9, 93.2, 73.8, 62.1, 98.6),
+  method2 = c(69.1, 26.7, 61.4, 51.2, 34.7, 88.5, 57.9, 45.1, 33.4, 60.8,
+              66.5, 48.2, 88.3, 29.3, 96.4, 77.1, 82.7, 78.9, 51.6, 28.8,
+              98.4, 12.7, 83.6, 47.3, 61.2, 84.6, 92.1, 73.4, 61.9, 98.6)
+)
+
+# Fit Passing-Bablok regression
+pb1 <- pb_reg(method2 ~ method1, data = pb_data)
+pb1
+```
+
+## Summary and Plots
+
+The summary provides details about the regression coefficients and diagnostic tests:
+
+```{r}
+summary(pb1)
+```
+
+The `plot()` method displays the regression line with data:
+
+```{r}
+plot(pb1)
+```
+
+## Model Diagnostics
+
+The `check()` method provides diagnostic plots specific to Passing-Bablok regression, including the CUSUM linearity test and Kendall's tau correlation:
+ 
+```{r}
+check(pb1)
+```
+
+## Bootstrap Confidence Intervals
+
+For more robust inference, especially with the "invariant" or "scissors" methods, bootstrap confidence intervals are recommended:
+
+```{r}
+pb2 <- pb_reg(method2 ~ method1, 
+              data = pb_data, 
+              replicates = 999)
+summary(pb2)
+```
+
+When bootstrap is used, the joint confidence region and `joint_test()` function become available:
+
+```{r}
+plot_joint(pb2)
+joint_test(pb2)
+```
 
 
 # Theoretical Details

@@ -46,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -141,7 +141,7 @@ measurements (X &amp; Y), the closer those points are to the line of
 identity the higher the CCC (and vice versa). Please see the
 <code>cccrm</code> package for more details.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>

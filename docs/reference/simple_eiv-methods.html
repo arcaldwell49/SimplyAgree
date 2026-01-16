@@ -26,7 +26,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -54,7 +54,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p>Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).</p>
+    <p>Methods defined for objects returned from error-in-variables models (e.g., <code>dem_reg</code>, <code>pb_reg</code>).</p>
     </div>
 
     <div class="section level2">
@@ -66,10 +66,13 @@
 <span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/model.frame.html" class="external-link">model.frame</a></span><span class="op">(</span><span class="va">formula</span>, na.action <span class="op">=</span> <span class="va">na.pass</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/model.frame.html" class="external-link">model.frame</a></span><span class="op">(</span><span class="va">formula</span>, data <span class="op">=</span> <span class="cn">NULL</span>, na.action <span class="op">=</span> <span class="va">na.pass</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'simple_eiv'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">parm</span>, level <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -79,17 +82,18 @@
 <span>  interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"confidence"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_points <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
-<span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span>, data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">plot_joint</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu">plot_joint</span><span class="op">(</span></span>
-<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">x</span>,</span>
 <span>  ideal_slope <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  show_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -104,10 +108,10 @@
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x"</span>, <span class="st">"both"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x"</span>, <span class="st">"both"</span><span class="op">)</span>, data <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"optimized"</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"raw_y"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">object</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"optimized"</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"raw_y"</span><span class="op">)</span>, data <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span></span>
@@ -116,6 +120,7 @@
 <span>  interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"confidence"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  se.fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -128,8 +133,30 @@
 <dd><p>further arguments passed through.</p></dd>
 
 
+<dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
+<dd><p>A simple_eiv object (for model.frame method)</p></dd>
+
+
+<dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>Optional data frame. Required if model was fitted with <code>model = FALSE</code>
+and <code>newdata</code> is NULL.</p></dd>
+
+
+<dt id="arg-na-action">na.action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>Function for handling NA values (default: na.pass)</p></dd>
+
+
 <dt id="arg-object-x">object, x<a class="anchor" aria-label="anchor" href="#arg-object-x"></a></dt>
 <dd><p>object of class <code>simple_eiv</code> from dem_reg or pb_reg function.</p></dd>
+
+
+<dt id="arg-parm">parm<a class="anchor" aria-label="anchor" href="#arg-parm"></a></dt>
+<dd><p>A specification of which parameters are to be given confidence intervals,
+either a vector of numbers or a vector of names. If missing, all parameters are considered.</p></dd>
+
+
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
+<dd><p>Confidence level for intervals (default uses the model's conf.level).</p></dd>
 
 
 <dt id="arg-x-name">x_name<a class="anchor" aria-label="anchor" href="#arg-x-name"></a></dt>
@@ -142,10 +169,6 @@
 
 <dt id="arg-interval">interval<a class="anchor" aria-label="anchor" href="#arg-interval"></a></dt>
 <dd><p>Type of interval calculation. Can be "none" (default), or "confidence"</p></dd>
-
-
-<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Confidence level for intervals (default uses the model's conf.level).</p></dd>
 
 
 <dt id="arg-n-points">n_points<a class="anchor" aria-label="anchor" href="#arg-n-points"></a></dt>
@@ -177,10 +200,6 @@ If omitted, the fitted values are returned.</p></dd>
 <dd><p>Logical. If TRUE, standard errors of predictions are returned.
 Note: For Passing-Bablok regression without bootstrap, standard errors are not
 available and this argument is ignored with a warning.</p></dd>
-
-
-<dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>object of class <code>simple_eiv</code> for plot_joint method</p></dd>
 
 </dl></div>
     <div class="section level2">

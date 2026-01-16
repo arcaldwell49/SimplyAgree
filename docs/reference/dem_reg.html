@@ -28,7 +28,7 @@ A function for fitting a straight line to two-dimensional data (i.e., X and Y) t
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -72,6 +72,7 @@ A function for fitting a straight line to two-dimensional data (i.e., X and Y) t
 <span>  weighted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  error.ratio <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  keep_data <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -115,6 +116,13 @@ A function for fitting a straight line to two-dimensional data (i.e., X and Y) t
 
 <dt id="arg-error-ratio">error.ratio<a class="anchor" aria-label="anchor" href="#arg-error-ratio"></a></dt>
 <dd><p>Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.</p></dd>
+
+
+<dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
+<dd><p>Logical. If TRUE (default), the model frame is stored in the returned object.
+This is needed for methods like <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>, <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code>, and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> to work
+without supplying <code>data</code>. If FALSE, the model frame is not stored (saves memory for large datasets),
+but these methods will require a <code>data</code> argument.</p></dd>
 
 
 <dt id="arg-keep-data">keep_data<a class="anchor" aria-label="anchor" href="#arg-keep-data"></a></dt>

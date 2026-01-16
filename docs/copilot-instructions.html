@@ -26,7 +26,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -77,10 +77,10 @@
 <p><strong>CRITICAL:</strong> Always run these commands in order:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Install from GitHub (development version)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"arcaldwell49/SimplyAgree"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"arcaldwell49/SimplyAgree"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Or for local development, from package root:</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="building-the-package">Building the Package<a class="anchor" aria-label="anchor" href="#building-the-package"></a></h3>
@@ -90,16 +90,16 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2. Update documentation from roxygen comments</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 3. Check the package (runs tests and validation)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 4. Build the package</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/build.html" class="external-link">build</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/build.html" class="external-link">build</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 5. Install locally</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Using RStudio:</strong> The project is configured with <code>BuildType: Package</code> and <code>PackageUseDevtools: Yes</code> in <code>SimplyAgree.Rproj</code>. Use: - Ctrl/Cmd + Shift + B to build - Ctrl/Cmd + Shift + E to check - Ctrl/Cmd + Shift + D to document</p>
 </div>
 <div class="section level3">
@@ -107,12 +107,12 @@
 <p><strong>Running Tests:</strong></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run all tests</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Or using testthat directly</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://testthat.r-lib.org" class="external-link">testthat</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">test_check</a></span><span class="op">(</span><span class="st">"SimplyAgree"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/testthat/man/test_package.html" class="external-link">test_check</a></span><span class="op">(</span><span class="st">"SimplyAgree"</span><span class="op">)</span></span></code></pre></div>
 <p>Tests are located in <code>tests/testthat/</code> and use the testthat framework. Test files follow the pattern <code>test-*.R</code>.</p>
 </div>
 <div class="section level3">
@@ -120,13 +120,13 @@
 <p><strong>Generating Documentation:</strong></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Update function documentation</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Build package website (pkgdown)</span></span>
-<span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">build_site</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pkgdown/man/build_site.html" class="external-link">build_site</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Build vignettes</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/build_vignettes.html" class="external-link">build_vignettes</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/devtools/man/build_vignettes.html" class="external-link">build_vignettes</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Configuration: <code>_pkgdown.yml</code> controls website structure (though file fetch failed, it exists in root).</p>
 </div>
 </div>
@@ -217,9 +217,9 @@
 <span><span class="co">#' @param x Parameter description</span></span>
 <span><span class="co">#' @export</span></span></code></pre></div>
 </li>
-<li><p><strong>Run <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code></strong> to update NAMESPACE and man pages</p></li>
+<li><p><strong>Run <code><a href="https://rdrr.io/pkg/devtools/man/document.html" class="external-link">devtools::document()</a></code></strong> to update NAMESPACE and man pages</p></li>
 <li><p><strong>Add tests</strong> in <code>tests/testthat/test-yourfunction.R</code></p></li>
-<li><p><strong>Run <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code></strong> to validate</p></li>
+<li><p><strong>Run <code><a href="https://rdrr.io/pkg/devtools/man/check.html" class="external-link">devtools::check()</a></code></strong> to validate</p></li>
 </ol></div>
 <div class="section level3">
 <h3 id="modifying-existing-functions">Modifying Existing Functions<a class="anchor" aria-label="anchor" href="#modifying-existing-functions"></a></h3>
@@ -227,13 +227,13 @@
 <strong>Update function code</strong> in relevant <code>R/*.R</code> file</li>
 <li>
 <strong>Update roxygen documentation</strong> if parameters/behavior change</li>
-<li><strong>Run <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code></strong></li>
+<li><strong>Run <code><a href="https://rdrr.io/pkg/devtools/man/document.html" class="external-link">devtools::document()</a></code></strong></li>
 <li>
 <strong>Update or add tests</strong> covering the change</li>
 <li>
-<strong>Run <code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code></strong> to ensure tests pass</li>
+<strong>Run <code><a href="https://rdrr.io/pkg/devtools/man/test.html" class="external-link">devtools::test()</a></code></strong> to ensure tests pass</li>
 <li>
-<strong>Run <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code></strong> - must pass with no errors, warnings, or notes</li>
+<strong>Run <code><a href="https://rdrr.io/pkg/devtools/man/check.html" class="external-link">devtools::check()</a></code></strong> - must pass with no errors, warnings, or notes</li>
 <li>
 <strong>Update vignettes</strong> if user-facing behavior changed</li>
 </ol></div>
@@ -241,19 +241,19 @@
 <h3 id="common-issues-and-solutions">Common Issues and Solutions<a class="anchor" aria-label="anchor" href="#common-issues-and-solutions"></a></h3>
 <p><strong>Matrix Package Dependency:</strong> - The Matrix package is critical and must be explicitly available - CI workflows specifically include <code>Matrix</code> in <code>extra-packages</code> - If you encounter Matrix-related errors, ensure it’s installed: <code>install.packages("Matrix")</code></p>
 <p><strong>NAMESPACE Conflicts:</strong> - NAMESPACE is auto-generated by roxygen2 - Never edit NAMESPACE directly - Use roxygen2 tags: <code>@export</code>, <code>@importFrom</code>, <code>@import</code></p>
-<p><strong>Test Failures:</strong> - Tests use <code>testthat</code> framework with <code><a href="https://testthat.r-lib.org/reference/context.html" class="external-link">context()</a></code> and <code><a href="https://testthat.r-lib.org/reference/test_that.html" class="external-link">test_that()</a></code> - Many tests include <code><a href="https://testthat.r-lib.org/reference/expect_equivalent.html" class="external-link">expect_equivalent()</a></code>, <code><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error()</a></code>, <code><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_message()</a></code>, <code><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_warning()</a></code> - Some tests use tolerance for numerical comparisons: <code>tolerance = 0.01</code> - Power simulation tests use small <code>n_sims</code> for speed and have stochastic results</p>
-<p><strong>Documentation:</strong> - README.md is generated from README.Rmd - edit the .Rmd file - Always knit README.Rmd after changes: <code><a href="https://devtools.r-lib.org/reference/build_rmd.html" class="external-link">devtools::build_readme()</a></code> - Vignettes contain cached results (.rds files) for computationally intensive examples</p>
+<p><strong>Test Failures:</strong> - Tests use <code>testthat</code> framework with <code><a href="https://rdrr.io/pkg/testthat/man/context.html" class="external-link">context()</a></code> and <code><a href="https://rdrr.io/pkg/testthat/man/test_that.html" class="external-link">test_that()</a></code> - Many tests include <code><a href="https://rdrr.io/pkg/testthat/man/expect_equivalent.html" class="external-link">expect_equivalent()</a></code>, <code><a href="https://rdrr.io/pkg/testthat/man/expect_error.html" class="external-link">expect_error()</a></code>, <code><a href="https://rdrr.io/pkg/testthat/man/expect_error.html" class="external-link">expect_message()</a></code>, <code><a href="https://rdrr.io/pkg/testthat/man/expect_error.html" class="external-link">expect_warning()</a></code> - Some tests use tolerance for numerical comparisons: <code>tolerance = 0.01</code> - Power simulation tests use small <code>n_sims</code> for speed and have stochastic results</p>
+<p><strong>Documentation:</strong> - README.md is generated from README.Rmd - edit the .Rmd file - Always knit README.Rmd after changes: <code><a href="https://rdrr.io/pkg/devtools/man/build_rmd.html" class="external-link">devtools::build_readme()</a></code> - Vignettes contain cached results (.rds files) for computationally intensive examples</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="validation-checklist">Validation Checklist<a class="anchor" aria-label="anchor" href="#validation-checklist"></a></h2>
 <p>Before submitting changes, <strong>always</strong> verify:</p>
-<ol style="list-style-type: decimal"><li>✓ <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> runs without errors</li>
-<li>✓ <code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code> passes all tests</li>
-<li>✓ <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> returns 0 errors, 0 warnings, 0 notes</li>
-<li>✓ Package builds: <code><a href="https://devtools.r-lib.org/reference/build.html" class="external-link">devtools::build()</a></code>
+<ol style="list-style-type: decimal"><li>✓ <code><a href="https://rdrr.io/pkg/devtools/man/document.html" class="external-link">devtools::document()</a></code> runs without errors</li>
+<li>✓ <code><a href="https://rdrr.io/pkg/devtools/man/test.html" class="external-link">devtools::test()</a></code> passes all tests</li>
+<li>✓ <code><a href="https://rdrr.io/pkg/devtools/man/check.html" class="external-link">devtools::check()</a></code> returns 0 errors, 0 warnings, 0 notes</li>
+<li>✓ Package builds: <code><a href="https://rdrr.io/pkg/devtools/man/build.html" class="external-link">devtools::build()</a></code>
 </li>
-<li>✓ Package installs locally: <code><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">devtools::install()</a></code>
+<li>✓ Package installs locally: <code><a href="https://rdrr.io/pkg/devtools/man/install.html" class="external-link">devtools::install()</a></code>
 </li>
 <li>✓ If README changed: knit README.Rmd</li>
 <li>✓ If vignettes changed: test building vignettes</li>
