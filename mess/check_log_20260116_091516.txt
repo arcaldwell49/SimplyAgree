@@ -1,0 +1,113 @@
+══ Building ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Setting env vars:
+• CFLAGS    : -Wall -pedantic
+• CXXFLAGS  : -Wall -pedantic
+• CXX11FLAGS: -Wall -pedantic
+• CXX14FLAGS: -Wall -pedantic
+• CXX17FLAGS: -Wall -pedantic
+• CXX20FLAGS: -Wall -pedantic
+── R CMD build ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+      ✔  checking for file 'C:\Users\caldwellaaron\Documents\GitHub\SimplyAgree/DESCRIPTION' (465ms)
+      ─  preparing 'SimplyAgree': (17.8s)
+✔  checking DESCRIPTION meta-information
+      ─  installing the package to build vignettes
+         creating vignettes ...     creating vignettes ...   ✔  creating vignettes (53.8s)
+      ─  checking for LF line-endings in source and make files and shell scripts (6.5s)
+      ─  checking for empty or unneeded directories
+  Removed empty directory      Removed empty directory 'SimplyAgree/inst/i18n'
+      ─  building 'SimplyAgree_0.3.0.tar.gz' (915ms)
+     
+══ Checking ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Setting env vars:
+• _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
+• _R_CHECK_CRAN_INCOMING_                      : FALSE
+• _R_CHECK_FORCE_SUGGESTS_                     : FALSE
+• _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
+• NOT_CRAN                                     : true
+── R CMD check ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+-    \  ─  using log directory 'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpoDHoMI/file1cc83ce36b21/SimplyAgree.Rcheck' (441ms)
+─  using R version 4.5.1 (2025-06-13 ucrt)
+─  using platform: x86_64-w64-mingw32
+─  R was compiled by
+       gcc.exe (GCC) 14.2.0
+       GNU Fortran (GCC) 14.2.0
+─  running under: Windows 11 x64 (build 22631)
+─  using session charset: UTF-8
+|/-\    |  ─  using options '--no-manual --as-cran' (632ms)
+/     checking for file 'SimplyAgree/DESCRIPTION' ...-  ✔  checking for file 'SimplyAgree/DESCRIPTION'
+   checking extension type ...\  ─  checking extension type ... Package
+─  this is package 'SimplyAgree' version '0.3.0'
+─  package encoding: UTF-8
+   checking package namespace information ...|  ✔  checking package namespace information
+/     checking package dependencies ...-\|/-\|/-\|     checking package dependencies ... /  ─  checking package dependencies ... INFO (2.2s)
+   Package suggested but not available for checking: 'covr'
+   checking if this is a source package ...-     checking if this is a source package ... \  ✔  checking if this is a source package
+✔  checking if there is a namespace
+|/-    \     checking for executable files ...|/-\|/-\|/-\|/-\|/-\|/     checking for executable files ... -  ✔  checking for executable files (5.2s)
+   checking for hidden files and directories ...\     checking for hidden files and directories ... |  ✔  checking for hidden files and directories
+   checking for portable file names .../     checking for portable file names ... -  ✔  checking for portable file names
+\     checking whether package 'SimplyAgree' can be installed ...|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|     checking whether package 'SimplyAgree' can be installed ... [23s]/     checking whether package 'SimplyAgree' can be installed ... [23s] -  ─  checking whether package 'SimplyAgree' can be installed ... [23s] OK (22.5s)
+   checking installed package size ...\|/-     checking installed package size ... \  ✔  checking installed package size (673ms)
+|/    -  ✔  checking package directory (375ms)
+   checking for future file timestamps ...\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking for future file timestamps ... |  ✔  checking for future file timestamps (31.1s)
+   checking 'build' directory .../  ✔  checking 'build' directory
+   checking DESCRIPTION meta-information ...-\|/-\     checking DESCRIPTION meta-information ... |  ✔  checking DESCRIPTION meta-information (1.2s)
+✔  checking top-level files
+   checking for left-over files .../     checking for left-over files ... -  ✔  checking for left-over files
+   checking index information ...\|/     checking index information ... -  ✔  checking index information (448ms)
+   checking package subdirectories ...\|/-\|/     checking package subdirectories ... -  ✔  checking package subdirectories (1.4s)
+   checking code files for non-ASCII characters ...\|     checking code files for non-ASCII characters ... /  ✔  checking code files for non-ASCII characters
+   checking R files for syntax errors ...-\     checking R files for syntax errors ... |  ✔  checking R files for syntax errors
+   checking whether the package can be loaded .../-\|/-\|/-\|/     checking whether the package can be loaded ... -  ✔  checking whether the package can be loaded (2.5s)
+   checking whether the package can be loaded with stated dependencies ...\|/-\|/-\|/     checking whether the package can be loaded with stated dependencies ... -  ✔  checking whether the package can be loaded with stated dependencies (2.2s)
+   checking whether the package can be unloaded cleanly ...\|/-\|/-\|/-\|/     checking whether the package can be unloaded cleanly ... -  ✔  checking whether the package can be unloaded cleanly (3s)
+   checking whether the namespace can be loaded with stated dependencies ...\|/-\|/-\|/-\|/-\|/     checking whether the namespace can be loaded with stated dependencies ... -  ✔  checking whether the namespace can be loaded with stated dependencies (3.8s)
+   checking whether the namespace can be unloaded cleanly ...\|/-\|/-\|/-\     checking whether the namespace can be unloaded cleanly ... |  ✔  checking whether the namespace can be unloaded cleanly (2.6s)
+/-\|/-\|/-\|/-\|/-    \     checking dependencies in R code ...|/-\|/-\|/-\|/     checking dependencies in R code ... -  ✔  checking dependencies in R code (6.3s)
+   checking S3 generic/method consistency ...\|/-\|/-\|/-\|/-\|/     checking S3 generic/method consistency ... -  W  checking S3 generic/method consistency (3.7s)
+   check:
+     function(x)
+   check.simple_eiv:
+     function(x, data)
+   See section 'Generic functions and methods' in the 'Writing R
+   Extensions' manual.
+   checking replacement functions ...\|/-\|/-\|/-\|/     checking replacement functions ... -  ✔  checking replacement functions (3s)
+   checking foreign function calls ...\|/-\|/-\|/-\     checking foreign function calls ... |  ✔  checking foreign function calls (2.6s)
+   checking R code for possible problems .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking R code for possible problems ... [30s]-  ─  checking R code for possible problems ... [30s] OK (30.2s)
+   checking Rd files ...\|/-\     checking Rd files ... |  ✔  checking Rd files (886ms)
+   checking Rd metadata .../-     checking Rd metadata ... \  ✔  checking Rd metadata
+   checking Rd line widths ...|/     checking Rd line widths ... -  ✔  checking Rd line widths (348ms)
+   checking Rd cross-references ...\|/-     checking Rd cross-references ... \  ✔  checking Rd cross-references (716ms)
+   checking for missing documentation entries ...|/-\|/-\|/-\     checking for missing documentation entries ... |  ✔  checking for missing documentation entries (2.4s)
+   checking for code/documentation mismatches .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking for code/documentation mismatches ... -  ✔  checking for code/documentation mismatches (10s)
+   checking Rd \usage sections ...\|/-\|/-\|/-\|/-\|/-\     checking Rd \usage sections ... |  ✔  checking Rd \usage sections (4.3s)
+   checking Rd contents .../-     checking Rd contents ... \  ✔  checking Rd contents (337ms)
+   checking for unstated dependencies in examples ...|/-     checking for unstated dependencies in examples ... \  ✔  checking for unstated dependencies in examples (446ms)
+|     checking contents of 'data' directory .../     checking contents of 'data' directory ... -  ✔  checking contents of 'data' directory
+   checking data for non-ASCII characters ...\|     checking data for non-ASCII characters ... /  ✔  checking data for non-ASCII characters (354ms)
+   checking LazyData ...-  ✔  checking LazyData
+   checking data for ASCII and uncompressed saves ...\|     checking data for ASCII and uncompressed saves ... /  ✔  checking data for ASCII and uncompressed saves (346ms)
+-    \     checking installed files from 'inst/doc' ...|/     checking installed files from 'inst/doc' ... -  ✔  checking installed files from 'inst/doc' (385ms)
+   checking files in 'vignettes' ...\|     checking files in 'vignettes' ... /  ✔  checking files in 'vignettes' (362ms)
+   checking examples ...-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking examples ... |  ✔  checking examples (10.3s)
+/     checking examples with --run-donttest ...-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking examples with --run-donttest ... |  ✔  checking examples with --run-donttest (10.2s)
+   checking for unstated dependencies in 'tests' .../-     checking for unstated dependencies in 'tests' ... \  ✔  checking for unstated dependencies in 'tests' (342ms)
+   checking tests ...|/  ─  checking tests
+-     Running 'testthat.R'\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/  -    [137s]\      [137s] OK
+|    /     checking for unstated dependencies in vignettes ...-\|/-     checking for unstated dependencies in vignettes ... \     * checking for unstated dependencies in vignettes ... OK
+   checking package vignettes ...|/-\     checking package vignettes ... |     * checking package vignettes ... OK
+   checking re-building of vignette outputs .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking re-building of vignette outputs ... [57s]|     checking re-building of vignette outputs ... [57s] /     * checking re-building of vignette outputs ... [57s] OK
+   * checking for non-standard things in the check directory ... OK
+   * checking for detritus in the temp directory ... OK
+-     * DONE
+   
+   Status: 1 WARNING
+   See
+     'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpoDHoMI/file1cc83ce36b21/SimplyAgree.Rcheck/00check.log'
+   for details.
+   
+\|/-     ERROR: Unknown command "TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpoxaO1v/file70d015e94a66". Did you mean command "remove"?
+\|/-\|     Warning message:
+/     In system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=",  :
+     running command '"quarto" TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpoxaO1v/file70d015e94a66 -V' had status 1
+-\ 

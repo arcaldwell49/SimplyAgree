@@ -185,7 +185,7 @@ plot.simple_agree <- function(x, type = 1,
 #' @rdname simple_agree-methods
 #' @export
 
-check <- function(x) {
+check <- function(x, ...) {
   UseMethod("check")
 }
 

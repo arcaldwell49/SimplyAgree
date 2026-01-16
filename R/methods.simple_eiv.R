@@ -3,6 +3,9 @@
 #' Methods defined for objects returned from error-in-variables models (e.g., `dem_reg`, `pb_reg`).
 #'
 #' @param object,x object of class \code{simple_eiv} from dem_reg or pb_reg function.
+#' @param data Optional data frame. Required for methods like `plot()`, `fitted()`, `residuals()`,
+#'   and `predict()` if the model was fitted with `model = FALSE`. If `model = TRUE` (default),
+#'   the data is stored in the object and this argument is not needed.
 #' @param ... further arguments passed through.
 #' @return
 #' \describe{
@@ -79,7 +82,63 @@ formula.simple_eiv <- function(x, ...) {
   formula(x$terms)
 }
 
+#' @rdname simple_eiv-methods
+#' @method model.frame simple_eiv
+#' @param formula A simple_eiv object (for model.frame method)
+#' @param data Optional data frame. Required if the model was fitted with `model = FALSE`.
+#' @param na.action Function for handling NA values (default: na.pass)
+#' @export
 
+model.frame.simple_eiv <- function(formula, data = NULL, na.action = na.pass, ...) {
+  # If model frame is stored, return it directly
+  if (!is.null(formula$model)) {
+    return(formula$model)
+  }
+
+  # Model frame not stored (model = FALSE), need data argument
+
+  if (is.null(data)) {
+    # Try to get data from call as last resort
+    call <- formula$call
+    data <- tryCatch(
+      eval(call$data, parent.frame()),
+      error = function(e) NULL
+    )
+
+    if (is.null(data)) {
+      stop("Model frame not stored (fitted with model = FALSE). ",
+           "Please provide 'data' argument or refit with model = TRUE.")
+    }
+  }
+
+  # Reconstruct model frame from terms and data
+
+  fcall <- formula$terms
+  mf <- model.frame(fcall, data = data, na.action = na.action)
+
+  # Process to df3 format (same as in dem_reg/pb_reg)
+  y_vals <- model.response(mf, "numeric")
+  x_vals <- mf[[2]]
+
+  if (ncol(mf) == 3) {
+    # Has id column
+    id_vals <- mf[[3]]
+    df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
+    df <- df[complete.cases(df), ]
+
+    df3 <- df %>%
+      group_by(id) %>%
+      summarize(x = mean(x, na.rm = TRUE),
+                y = mean(y, na.rm = TRUE),
+                .groups = 'drop') %>%
+      drop_na()
+  } else {
+    df3 <- data.frame(x = x_vals, y = y_vals)
+    df3 <- df3[complete.cases(df3), ]
+  }
+
+  return(df3)
+}
 
 #' @rdname simple_eiv-methods
 #' @method summary simple_eiv
@@ -121,7 +180,7 @@ summary.simple_eiv <- function(object, ...) {
   # Passing-Bablok specific tests
   if (is_passing_bablok) {
     cat("\n")
-   # if (!is.null(object$kendall_test)) {
+    # if (!is.null(object$kendall_test)) {
     #  cat("Kendall's Tau Test (H0: tau = 0):\n")
     #  cat(sprintf("  Tau: %.4f \n",
     #              object$kendall_test$estimate))
@@ -224,6 +283,7 @@ plot.simple_eiv <- function(x,
                             interval = c("none", "confidence"),
                             level = NULL,
                             n_points = 100,
+                            data = NULL,
                             ...) {
 
   interval <- match.arg(interval)
@@ -241,7 +301,7 @@ plot.simple_eiv <- function(x,
 
 
 
-  df <- .get_simple_eiv_data(x)
+  df <- .get_simple_eiv_data(x, data = data)
   scalemin <- min(c(df$x, df$y), na.rm = TRUE)
   scalemax <- max(c(df$x, df$y), na.rm = TRUE)
 
@@ -268,36 +328,36 @@ plot.simple_eiv <- function(x,
     # Check if method supports intervals
     is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
-      # Create sequence of x values for smooth bands
-      x_seq <- seq(scalemin, scalemax, length.out = n_points)
-      newdata <- data.frame(x = x_seq)
-      names(newdata) <- x_name
+    # Create sequence of x values for smooth bands
+    x_seq <- seq(scalemin, scalemax, length.out = n_points)
+    newdata <- data.frame(x = x_seq)
+    names(newdata) <- x_name
 
-      # Compute intervals
-      pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
+    # Compute intervals
+    pred_result <- predict(x, newdata = newdata, interval = interval, level = level)
 
-      # Create data frame for ribbon
-      band_df <- data.frame(
-        x = x_seq,
-        fit = pred_result$fit,
-        lwr = pred_result$lwr,
-        upr = pred_result$upr
-      )
+    # Create data frame for ribbon
+    band_df <- data.frame(
+      x = x_seq,
+      fit = pred_result$fit,
+      lwr = pred_result$lwr,
+      upr = pred_result$upr
+    )
 
-      # Add ribbon to plot
-      interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
-      p1 <- p1 +
-        geom_ribbon(data = band_df,
-                    aes(x = x, ymin = lwr, ymax = upr),
-                    fill = "red",
-                    alpha = 0.2,
-                    inherit.aes = FALSE) +
-        labs(caption = sprintf("%.0f%% %s interval shown",
-                               level * 100,
-                               interval_label))
+    # Add ribbon to plot
+    interval_label <- ifelse(interval == "confidence", "Confidence", "Prediction")
+    p1 <- p1 +
+      geom_ribbon(data = band_df,
+                  aes(x = x, ymin = lwr, ymax = upr),
+                  fill = "red",
+                  alpha = 0.2,
+                  inherit.aes = FALSE) +
+      labs(caption = sprintf("%.0f%% %s interval shown",
+                             level * 100,
+                             interval_label))
 
-      scalemin = min(band_df$lwr, na.rm = TRUE)
-      scalemax = max(band_df$upr, na.rm = TRUE)
+    scalemin = min(band_df$lwr, na.rm = TRUE)
+    scalemax = max(band_df$upr, na.rm = TRUE)
 
   }
 
@@ -317,12 +377,12 @@ plot.simple_eiv <- function(x,
 #' @method check simple_eiv
 #' @export
 
-check.simple_eiv <- function(x) {
+check.simple_eiv <- function(x, data = NULL) {
   is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
   if (is_passing_bablok) {
     # Get the data from the model
-    df <- .get_simple_eiv_data(x)
+    df <- .get_simple_eiv_data(x, data = data)
     n <- nrow(df)
 
     x_name <- attr(x$terms, "term.labels")[1]
@@ -503,7 +563,7 @@ check.simple_eiv <- function(x) {
 
   } else {
     # Original Deming regression code (unchanged)
-    df = .get_simple_eiv_data(x)
+    df = .get_simple_eiv_data(x, data = data)
     b0 = x$model_table$coef[1]
     b1 = x$model_table$coef[2]
     w_i = x$weights
@@ -704,9 +764,9 @@ coef.simple_eiv <- function(object, ...) {
 #'   "x" (estimated true X values), or "both" (returns a data frame with both).
 #' @export
 
-fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
+fitted.simple_eiv <- function(object, type = c("y", "x", "both"), data = NULL, ...) {
   type <- match.arg(type)
-  df3 = .get_simple_eiv_data(object)
+  df3 = .get_simple_eiv_data(object, data = data)
 
   # Compute fitted values and residuals
   b0 <- object$coefficients[1]
@@ -740,12 +800,12 @@ fitted.simple_eiv <- function(object, type = c("y", "x", "both"), ...) {
 #' @param type Type of residuals to return. Options are "optimized" (default), "x", "y", or "raw_y".
 #' @export
 
-residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"), ...) {
+residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"), data = NULL, ...) {
   type <- match.arg(type)
 
   # Check if Passing-Bablok
   is_passing_bablok <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
-  df3 = .get_simple_eiv_data(object)
+  df3 = .get_simple_eiv_data(object, data = data)
 
   # Compute fitted values and residuals
   b0 <- object$coefficients[1]
@@ -798,12 +858,15 @@ residuals.simple_eiv <- function(object, type = c("optimized", "x", "y", "raw_y"
 #' @param se.fit Logical. If TRUE, standard errors of predictions are returned.
 #'   Note: For Passing-Bablok regression without bootstrap, standard errors are not
 #'   available and this argument is ignored with a warning.
+#' @param data Optional data frame. Required if model was fitted with `model = FALSE`
+#'   and `newdata` is NULL.
 #' @export
 predict.simple_eiv <- function(object,
                                newdata = NULL,
                                interval = c("none", "confidence"),
                                level = NULL,
                                se.fit = FALSE,
+                               data = NULL,
                                ...) {
 
   x_name <- attr(object$terms, "term.labels")[1]
@@ -829,8 +892,8 @@ predict.simple_eiv <- function(object,
   b0 <- object$coefficients[1]
   b1 <- object$coefficients[2]
 
-  # Get original data
-  df3 <- .get_simple_eiv_data(object)
+  # Get original data (only needed if newdata is NULL)
+  df3 <- .get_simple_eiv_data(object, data = data)
 
   # Determine X values for prediction
   if (is.null(newdata)) {
@@ -1163,4 +1226,40 @@ jack_dem = function(X, Y, w_i, error.ratio) {
     jacks = list(b0 = b0, b1 = b1),
     vcov = vcov_matrix
   ))
+}
+
+#' Get data from simple_eiv object
+#'
+#' Internal helper function to retrieve the model data frame from a simple_eiv object.
+#' If the model frame is stored (model = TRUE), it returns it directly.
+#' If not stored (model = FALSE), requires data argument or attempts to retrieve from call.
+#'
+#' @param object A simple_eiv object
+#' @param data Optional data frame. Required if model was fitted with model = FALSE.
+#' @return A data frame with columns x and y
+#' @keywords internal
+#' @noRd
+.get_simple_eiv_data <- function(object, data = NULL) {
+  # If model frame is stored, return it directly
+  if (!is.null(object$model)) {
+    return(object$model)
+  }
+
+  # Model frame not stored, need to reconstruct
+  if (is.null(data)) {
+    # Try to get data from call as fallback
+    call <- object$call
+    data <- tryCatch(
+      eval(call$data, parent.frame(2)),
+      error = function(e) NULL
+    )
+
+    if (is.null(data)) {
+      stop("Model frame not stored (fitted with model = FALSE). ",
+           "Please provide 'data' argument or refit with model = TRUE.")
+    }
+  }
+
+  # Use model.frame method with data argument
+  model.frame(object, data = data)
 }

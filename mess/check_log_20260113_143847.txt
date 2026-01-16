@@ -1,175 +1,0 @@
-══ Building ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-Setting env vars:
-• CFLAGS    : -Wall -pedantic
-• CXXFLAGS  : -Wall -pedantic
-• CXX11FLAGS: -Wall -pedantic
-• CXX14FLAGS: -Wall -pedantic
-• CXX17FLAGS: -Wall -pedantic
-• CXX20FLAGS: -Wall -pedantic
-── R CMD build ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-      ✔  checking for file 'C:\Users\caldwellaaron\Documents\GitHub\SimplyAgree/DESCRIPTION' (457ms)
-      ─  preparing 'SimplyAgree': (19.6s)
-   checking DESCRIPTION meta-information ...     checking DESCRIPTION meta-information ...   ✔  checking DESCRIPTION meta-information
-      ─  installing the package to build vignettes (483ms)
-         creating vignettes ...     creating vignettes ...   ✔  creating vignettes (59.6s)
-      ─  checking for LF line-endings in source and make files and shell scripts (8.8s)
-      ─  checking for empty or unneeded directories
-  Removed empty directory      Removed empty directory 'SimplyAgree/inst/i18n'
-      ─  building 'SimplyAgree_0.3.0.tar.gz' (1.1s)
-     
-══ Checking ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-Setting env vars:
-• _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
-• _R_CHECK_CRAN_INCOMING_                      : FALSE
-• _R_CHECK_FORCE_SUGGESTS_                     : FALSE
-• _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
-• NOT_CRAN                                     : true
-── R CMD check ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
--\|/    -  ─  using log directory 'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpQfZNRA/file76a47d534128/SimplyAgree.Rcheck' (941ms)
-─  using R version 4.5.1 (2025-06-13 ucrt)
-─  using platform: x86_64-w64-mingw32
-─  R was compiled by
-       gcc.exe (GCC) 14.2.0
-       GNU Fortran (GCC) 14.2.0
-\  ─  running under: Windows 11 x64 (build 22631)
-─  using session charset: UTF-8
-|/-\|/    -  ─  using options '--no-manual --as-cran' (1.1s)
-\  ✔  checking for file 'SimplyAgree/DESCRIPTION'
-─  checking extension type ... Package
-─  this is package 'SimplyAgree' version '0.3.0'
-─  package encoding: UTF-8
-   checking package namespace information ...|  ✔  checking package namespace information
-   checking package dependencies .../-\|/-\|/-\|/-\|     checking package dependencies ... /  ─  checking package dependencies ... INFO (3.2s)
-   Package suggested but not available for checking: 'covr'
-   checking if this is a source package ...-     checking if this is a source package ... \  ✔  checking if this is a source package
-✔  checking if there is a namespace
-|/-\    |     checking for executable files .../-\|/-\|/-\|/-\|/-\|/-\|/-     checking for executable files ... \  ✔  checking for executable files (5.9s)
-   checking for hidden files and directories ...|     checking for hidden files and directories ... /  ✔  checking for hidden files and directories
-   checking for portable file names ...-     checking for portable file names ... \  ✔  checking for portable file names
-|    /     checking whether package 'SimplyAgree' can be installed ...-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking whether package 'SimplyAgree' can be installed ... [26s]-     checking whether package 'SimplyAgree' can be installed ... [26s] \  ─  checking whether package 'SimplyAgree' can be installed ... [26s] OK (25.6s)
-   checking installed package size ...|/-     checking installed package size ... \  ✔  checking installed package size (550ms)
-|/    -  ✔  checking package directory
-   checking for future file timestamps ...\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\     checking for future file timestamps ... |  ✔  checking for future file timestamps (56.5s)
-   checking 'build' directory .../  ✔  checking 'build' directory
-   checking DESCRIPTION meta-information ...-\|/-\|/-\     checking DESCRIPTION meta-information ... |  ✔  checking DESCRIPTION meta-information (1.9s)
-N  checking top-level files
-   Non-standard files/directories found at top level:
-/       'Rplot.png' 'Rplot01.png'
-   checking for left-over files ...-     checking for left-over files ... \  ✔  checking for left-over files
-   checking index information ...|/-     checking index information ... \  ✔  checking index information (450ms)
-   checking package subdirectories ...|/-\|/-     checking package subdirectories ... \  ✔  checking package subdirectories (1.3s)
-   checking code files for non-ASCII characters ...|/     checking code files for non-ASCII characters ... -  W  checking code files for non-ASCII characters (341ms)
-   Found the following file with non-ASCII characters:
-     R/methods.simple_eiv.R
-   Portable packages must use only ASCII characters in their R code and
-   NAMESPACE directives, except perhaps in comments.
-   Use \uxxxx escapes for other characters.
-   Function 'tools::showNonASCIIfile' can help in finding non-ASCII
-   characters in files.
-\     checking R files for syntax errors ...|/     checking R files for syntax errors ... -  ✔  checking R files for syntax errors
-   checking whether the package can be loaded ...\|/-\|/-\|/-\     checking whether the package can be loaded ... |  ✔  checking whether the package can be loaded (2.5s)
-   checking whether the package can be loaded with stated dependencies .../-\|/-\|/-\     checking whether the package can be loaded with stated dependencies ... |  ✔  checking whether the package can be loaded with stated dependencies (2.2s)
-   checking whether the package can be unloaded cleanly .../-\|/-\|/-\|/     checking whether the package can be unloaded cleanly ... -  ✔  checking whether the package can be unloaded cleanly (2.7s)
-   checking whether the namespace can be loaded with stated dependencies ...\|/-\|/-\|/-\|/-\|     checking whether the namespace can be loaded with stated dependencies ... /  ✔  checking whether the namespace can be loaded with stated dependencies (3.6s)
-   checking whether the namespace can be unloaded cleanly ...-\|/-\|/-\|/-\|/-     checking whether the namespace can be unloaded cleanly ... \  ✔  checking whether the namespace can be unloaded cleanly (3.5s)
-|/-\|/-\|/-\|/-    \     checking dependencies in R code ...|/-\|/-\|/-\|/-\|     checking dependencies in R code ... /  ✔  checking dependencies in R code (6.4s)
-   checking S3 generic/method consistency ...-\|/-\|/-\|/-\     checking S3 generic/method consistency ... |  W  checking S3 generic/method consistency (2.7s)
-   plot_joint:
-     function(x, ...)
-   plot_joint.simple_eiv:
-     function(object, ideal_slope, ideal_intercept, show_intervals,
-              n_points, ...)
-   See section 'Generic functions and methods' in the 'Writing R
-   Extensions' manual.
-   checking replacement functions .../-\|/-\|/-\|/-\|/     checking replacement functions ... -  ✔  checking replacement functions (3.4s)
-   checking foreign function calls ...\|/-\|/-\|/-\|/-     checking foreign function calls ... \  ✔  checking foreign function calls (3.2s)
-   checking R code for possible problems ...|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking R code for possible problems ... [32s]-  ─  checking R code for possible problems ... [32s] NOTE (31.9s)
-   .bootstrap_pb: warning in .passing_bablok_fit(x_boot, y_boot, method,
-     conf = 0, pair_weights_boot, case_weights = wts): partial argument
-     match of 'conf' to 'conf.level'
-   .bootstrap_pb : wild_weights: no visible global function definition for
-     'rbinom'
-   .get_simple_eiv_data: no visible binding for global variable 'na.pass'
-   .passing_bablok_fit: no visible global function definition for 'approx'
-   .test_cusum_linearity: no visible global function definition for
-     'psmirnov'
-   .weighted_median: no visible global function definition for 'approx'
-   check.simple_eiv: no visible binding for global variable 'index'
-   check.simple_eiv: no visible binding for global variable 'residual'
-   check.simple_eiv: no visible binding for global variable 'cusum'
-   check.simple_eiv: no visible global function definition for 'IQR'
-   check.simple_eiv: no visible binding for global variable 'density'
-   dem_reg: no visible binding for global variable 'na.pass'
-   fitted.simple_eiv: no visible binding for global variable 'd_i'
-   model.frame.simple_eiv: no visible binding for global variable
-     'na.pass'
-   plot.simple_eiv: no visible binding for global variable 'lwr'
-   plot.simple_eiv: no visible binding for global variable 'upr'
-   Undefined global functions or variables:
-     IQR approx cusum d_i density index lwr na.pass psmirnov rbinom
-     residual upr
-   Consider adding
-     importFrom("stats", "IQR", "approx", "density", "na.pass", "psmirnov",
-                "rbinom")
-   to your NAMESPACE file.
-   checking Rd files ...\|/-\     checking Rd files ... |  ✔  checking Rd files (877ms)
-   checking Rd metadata .../     checking Rd metadata ... -  ✔  checking Rd metadata
-   checking Rd line widths ...\|     checking Rd line widths ... /  ✔  checking Rd line widths
-   checking Rd cross-references ...-\|/     checking Rd cross-references ... -  ✔  checking Rd cross-references (674ms)
-   checking for missing documentation entries ...\|/-\|/-\|/     checking for missing documentation entries ... -  ✔  checking for missing documentation entries (2.2s)
-   checking for code/documentation mismatches ...\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-     checking for code/documentation mismatches ... \  ✔  checking for code/documentation mismatches (9.7s)
-   checking Rd \usage sections ...|/-     checking Rd \usage sections ... \  W  checking Rd \usage sections (455ms)
-   Undocumented arguments in Rd file 'simple_eiv-methods.Rd'
-     'formula' 'na.action'
-   Duplicated \argument entries in Rd file 'simple_eiv-methods.Rd':
-     'object'
-   
-   Functions with \usage entries need to have the appropriate \alias
-   entries, and all their arguments documented.
-   The \usage entries must correspond to syntactically valid R code.
-   See chapter 'Writing R documentation files' in the 'Writing R
-   Extensions' manual.
-|/-\|/-\|/-\|/-    \     checking Rd contents ...|/     checking Rd contents ... -  ✔  checking Rd contents (3.3s)
-   checking for unstated dependencies in examples ...\|     checking for unstated dependencies in examples ... /  ✔  checking for unstated dependencies in examples (345ms)
-   checking contents of 'data' directory ...-     checking contents of 'data' directory ... \  ✔  checking contents of 'data' directory
-   checking data for non-ASCII characters ...|/     checking data for non-ASCII characters ... -  ✔  checking data for non-ASCII characters (341ms)
-   checking LazyData ...\  ✔  checking LazyData
-   checking data for ASCII and uncompressed saves ...|/     checking data for ASCII and uncompressed saves ... -  ✔  checking data for ASCII and uncompressed saves (345ms)
-\    |     checking installed files from 'inst/doc' .../-     checking installed files from 'inst/doc' ... \  ✔  checking installed files from 'inst/doc' (380ms)
-   checking files in 'vignettes' ...|/     checking files in 'vignettes' ... -  ✔  checking files in 'vignettes' (361ms)
-   checking examples ...\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/     checking examples ... [10s]-     checking examples ... [10s] \  ─  checking examples ... [10s] OK (10.6s)
-|     checking examples with --run-donttest .../-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|     checking examples with --run-donttest ... [11s]/     checking examples with --run-donttest ... [11s] -  ─  checking examples with --run-donttest ... [11s] OK (11.5s)
-   checking for unstated dependencies in 'tests' ...\|/     checking for unstated dependencies in 'tests' ... -  ✔  checking for unstated dependencies in 'tests' (461ms)
-   checking tests ...\|  ─  checking tests
-/     Running 'testthat.R'-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\  |    [173s]/  -     Running the tests in 'tests/testthat.R' failed.
-\     Last 13 lines of output:
-     `expected`: TRUE
-     ── Error ('test-dem_reg_enhanced.R:566:3'): complete workflow works end-to-end ──
-     Error in `eval(call$data, parent.frame())`: object 'workflow_data' not found
-     Backtrace:
-         ▆
-      1. ├─testthat::expect_s3_class(plot(result), "ggplot") at test-dem_reg_enhanced.R:566:3
-      2. │ └─testthat::quasi_label(enquo(object), arg = "object")
-      3. │   └─rlang::eval_bare(expr, quo_get_env(quo))
-      4. ├─base::plot(result)
-      5. └─SimplyAgree:::plot.simple_eiv(result)
-      6.   └─SimplyAgree:::.get_simple_eiv_data(x)
-     
-     [ FAIL 43 | WARN 11 | SKIP 0 | PASS 374 ]
-     Error: Test failures
-     Execution halted
-|    /     checking for unstated dependencies in vignettes ...-\|     checking for unstated dependencies in vignettes ... /  ✔  checking for unstated dependencies in vignettes (626ms)
-   checking package vignettes ...-     checking package vignettes ... \  ✔  checking package vignettes
-   checking re-building of vignette outputs ...|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-     checking re-building of vignette outputs ... [59s]\     checking re-building of vignette outputs ... [59s] |  ─  checking re-building of vignette outputs ... [59s] OK (59.5s)
-✔  checking for non-standard things in the check directory
-✔  checking for detritus in the temp directory
-/     
-   See
-     'C:/Users/caldwellaaron/AppData/Local/Temp/RtmpQfZNRA/file76a47d534128/SimplyAgree.Rcheck/00check.log'
-   for details.
-   
--\|/-     ERROR: Unknown command "TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpmIfT6V/file6bf411644554". Did you mean command "create"?
-\  Warning in system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=",  :|     Warning in system2("quarto", "-V", stdout = TRUE, env = paste0("TMPDIR=",  :
-     running command '"quarto" TMPDIR=C:/Users/caldwellaaron/AppData/Local/Temp/RtmpmIfT6V/file6bf411644554 -V' had status 1
-/-\|/-\      
-
