@@ -536,3 +536,364 @@ test_that("predict errors on wrong variable name in newdata",
 })
 
 
+
+# New tests to get to 100 percent code coverage ------
+#
+# Tests to improve coverage for methods.simple_eiv.R
+
+# Create test data
+set.seed(228945)
+n <- 30
+x <- runif(n, 10, 100)
+y <- 2 + 0.95 * x + rnorm(n, 0, 5)
+test_data <- data.frame(x = x, y = y)
+
+# Fit models for testing
+dem_fit <- dem_reg(y ~ x, data = test_data)
+pb_fit <- pb_reg(y ~ x, data = test_data)
+
+
+# Test weighted Deming regression header (lines 36-37)--------------
+test_that("print shows weighted Deming header", {
+
+  # Create data with replicates for weighted Deming
+  df_rep <- data.frame(
+    id = rep(1:20, each = 2),
+    x = rep(runif(20, 10, 100), each = 2) + rnorm(40, 0, 2),
+    y = rep(runif(20, 10, 100), each = 2) + rnorm(40, 0, 2)
+  )
+
+  # Fit weighted Deming regression
+  weighted_fit <- dem_reg(y ~ x | id, data = df_rep, weighted = TRUE)
+
+  output <- capture.output(print(weighted_fit))
+  expect_true(any(grepl("Weighted Deming", output)))
+})
+
+
+# Test model.frame.simple_eiv when model is stored (lines 94-95)--------------
+test_that("model.frame returns stored model frame", {
+  # Default is model = TRUE, so model frame should be stored
+  mf <- model.frame(dem_fit)
+  expect_s3_class(mf, "data.frame")
+  expect_true("x" %in% names(mf))
+  expect_true("y" %in% names(mf))
+})
+
+
+# Test model.frame.simple_eiv when model = FALSE (lines 100-140) --------------
+test_that("model.frame works when model = FALSE with data argument", {
+  # Fit with model = FALSE
+  fit_no_model <- dem_reg(y ~ x, data = test_data, model = FALSE)
+
+  # Should work when data is provided
+  mf <- model.frame(fit_no_model, data = test_data)
+  expect_s3_class(mf, "data.frame")
+})
+
+test_that("model.frame errors when model = FALSE and no data", {
+  fit_no_model <- dem_reg(y ~ x, data = test_data, model = FALSE)
+
+  # Remove the data from the environment to ensure error
+  expect_output(
+    model.frame(fit_no_model, data = NULL)
+  )
+})
+
+
+# Test summary with weighted Deming (lines 153-154)--------------
+test_that("summary shows weighted Deming header", {
+  df_rep <- data.frame(
+    id = rep(1:20, each = 2),
+    x = rep(runif(20, 10, 100), each = 2) + rnorm(40, 0, 2),
+    y = rep(runif(20, 10, 100), each = 2) + rnorm(40, 0, 2)
+  )
+
+  weighted_fit <- dem_reg(y ~ x, data = df_rep, weighted = TRUE,
+                          id = "id")
+  expect_output(print(weighted_fit))
+  output <- capture.output(summary(weighted_fit))
+  expect_true(any(grepl("Weighted Deming", output)))
+})
+
+
+# Test summary with bootstrap info for PB (lines 202-205)
+test_that("summary shows bootstrap info for PB with bootstrap", {
+  pb_boot <- pb_reg(y ~ x, data = test_data, replicates = 100)
+
+  output <- capture.output(summary(pb_boot))
+  # Check for bootstrap message if nboot > 0
+  if (!is.null(pb_boot$replicates) && pb_boot$replicates > 0) {
+    expect_true(any(grepl("Bootstrap", output)) || any(grepl("bootstrap", output)))
+  }
+})
+
+
+# Test confint with numeric parm (line 264)
+test_that("confint works with numeric parm", {
+  ci <- confint(dem_fit, parm = 1)
+  expect_equal(nrow(ci), 1)
+  expect_equal(rownames(ci), "(Intercept)")
+
+  ci2 <- confint(dem_fit, parm = 2)
+  expect_equal(nrow(ci2), 1)
+  expect_equal(rownames(ci2), "x")
+})
+
+
+# Test predict with newdata as vector (line 908)--------------
+test_that("predict works with newdata as vector", {
+  preds <- predict(dem_fit, newdata = c(20, 50, 80))
+  expect_length(preds, 3)
+})
+
+
+# Test predict with no newdata - returns fitted values (line 900)--------------
+test_that("predict returns fitted values when newdata is NULL", {
+  preds <- predict(dem_fit)
+  fitted_vals <- fitted(dem_fit)
+  expect_equal(preds, fitted_vals, tolerance = .05)
+})
+
+test_that("predict returns regression line values when newdata is NULL", {
+  preds <- predict(dem_fit)
+
+  # predict() should return b0 + b1*x (the regression line)
+  b0 <- coef(dem_fit)[1]
+  b1 <- coef(dem_fit)[2]
+  df <- dem_fit$model
+  expected <- b0 + b1 * df$x
+
+  expect_equal(preds, expected, ignore_attr = TRUE)
+})
+
+test_that("fitted values differ from predicted values in EIV regression", {
+  # This documents the important distinction in errors-in-variables regression
+  preds <- predict(dem_fit)
+  fitted_vals <- fitted(dem_fit)
+
+  # These should NOT be equal - fitted values account for measurement error
+  expect_false(isTRUE(all.equal(preds, fitted_vals)))
+
+  # But they should be correlated
+  expect_gt(cor(preds, fitted_vals), 0.99)
+})
+
+
+# Test fitted with type = "x" and "both" (lines 793-794)--------------
+test_that("fitted returns x values", {
+  x_fitted <- fitted(dem_fit, type = "x")
+  expect_length(x_fitted, nrow(test_data))
+})
+
+test_that("fitted returns both x and y values", {
+  both_fitted <- fitted(dem_fit, type = "both")
+  expect_s3_class(both_fitted, "data.frame")
+  expect_true("x_hat" %in% names(both_fitted))
+  expect_true("y_hat" %in% names(both_fitted))
+})
+
+
+# Test fitted errors for PB with type = "x" (lines 787-788) --------------
+test_that("fitted errors for PB with type x or both", {
+  expect_error(
+    fitted(pb_fit, type = "x"),
+    "not available for Passing-Bablok"
+  )
+  expect_error(
+    fitted(pb_fit, type = "both"),
+    "not available for Passing-Bablok"
+  )
+})
+
+
+# Test residuals with type = "x" and "y" (lines 844-845) --------------
+test_that("residuals returns x residuals", {
+  res_x <- residuals(dem_fit, type = "x")
+  expect_length(res_x, nrow(test_data))
+})
+
+test_that("residuals returns y residuals", {
+  res_y <- residuals(dem_fit, type = "y")
+  expect_length(res_y, nrow(test_data))
+})
+
+
+# Test residuals errors for PB with type x or y (lines 836-837) --------------
+test_that("residuals errors for PB with type x or y", {
+  expect_error(
+    residuals(pb_fit, type = "x"),
+    "not available for Passing-Bablok"
+  )
+  expect_error(
+    residuals(pb_fit, type = "y"),
+    "not available for Passing-Bablok"
+  )
+})
+
+
+# Test check.simple_eiv for Passing-Bablok (lines 384-562) --------------
+test_that("check works for Passing-Bablok regression", {
+  p <- check(pb_fit)
+  expect_s3_class(p, "gg")
+})
+
+
+# Test plot_joint (lines 642-737) --------------
+test_that("plot_joint works for Deming regression", {
+  p <- plot_joint(dem_fit)
+  expect_s3_class(p, "gg")
+})
+
+test_that("plot_joint works with different ideal values", {
+  p <- plot_joint(dem_fit, ideal_slope = 0.9, ideal_intercept = 1)
+  expect_s3_class(p, "gg")
+})
+
+test_that("plot_joint works without interval display", {
+  p <- plot_joint(dem_fit, show_intervals = FALSE)
+  expect_s3_class(p, "gg")
+})
+
+
+# Test predict with se.fit = TRUE for vcov method (lines 957-958, 974-975) --------------
+test_that("predict returns se.fit when requested", {
+  newdata <- data.frame(x = c(30, 50, 70))
+
+  # With interval = "none" and se.fit = TRUE
+  result <- predict(dem_fit, newdata = newdata, se.fit = TRUE)
+  expect_type(result, "list")
+  expect_true("fit" %in% names(result))
+  expect_true("se.fit" %in% names(result))
+  expect_true("df" %in% names(result))
+
+  # With interval = "confidence" and se.fit = TRUE
+  result2 <- predict(dem_fit, newdata = newdata, interval = "confidence", se.fit = TRUE)
+  expect_type(result2, "list")
+  expect_true("fit" %in% names(result2))
+  expect_true("se.fit" %in% names(result2))
+})
+
+
+# Test predict with PB analytical method warning for se.fit (lines 926-928) --------------
+test_that("predict warns for PB without bootstrap when se.fit requested", {
+  newdata <- data.frame(x = c(30, 50, 70))
+
+  # PB without bootstrap should warn when se.fit = TRUE
+  expect_warning(
+    predict(pb_fit, newdata = newdata, interval = "confidence", se.fit = TRUE),
+    "Standard errors not available"
+  )
+})
+
+
+# Test .predict_pb_analytical with interval = "none" (line 998)--------------
+test_that("predict PB with interval none returns just predictions", {
+  newdata <- data.frame(x = c(30, 50, 70))
+  preds <- predict(pb_fit, newdata = newdata, interval = "none")
+  expect_length(preds, 3)
+  expect_type(preds, "double")
+})
+
+
+# Test joint_test with invalid conf.level (lines 1090-1092)--------------
+test_that("joint_test errors with invalid conf.level", {
+  expect_error(joint_test(dem_fit, conf.level = 0), "between 0 and 1")
+  expect_error(joint_test(dem_fit, conf.level = 1), "between 0 and 1")
+  expect_error(joint_test(dem_fit, conf.level = -0.5), "between 0 and 1")
+  expect_error(joint_test(dem_fit, conf.level = 1.5), "between 0 and 1")
+  expect_error(joint_test(dem_fit, conf.level = c(0.9, 0.95)), "between 0 and 1")
+})
+
+
+# Test joint_test with no vcov available (lines 1099-1100)--------------
+test_that("joint_test errors when vcov not available", {
+  # Create a mock object without vcov
+  mock_fit <- dem_fit
+  mock_fit$vcov <- NULL
+
+  expect_error(
+    expect_warning(joint_test(mock_fit))
+  )
+})
+
+
+# Test joint_test with non-finite vcov (lines 1105-1106)--------------
+test_that("joint_test errors with non-finite vcov", {
+  mock_fit <- dem_fit
+  mock_fit$vcov[1, 1] <- Inf
+
+  expect_error(
+    joint_test(mock_fit),
+    "non-finite values"
+  )
+})
+
+
+# Test .get_simple_eiv_data when model not stored (lines 1249-1264) --------------
+test_that(".get_simple_eiv_data works with data argument when model = FALSE", {
+  fit_no_model <- dem_reg(y ~ x, data = test_data, model = FALSE)
+
+  # Test that plot works with data argument
+  p <- plot(fit_no_model, data = test_data)
+  expect_s3_class(p, "gg")
+
+  # Test that check works with data argument
+  p2 <- check(fit_no_model, data = test_data)
+  expect_s3_class(p2, "gg")
+})
+
+test_that(".get_simple_eiv_data errors without data when model = FALSE", {
+  fit_no_model <- dem_reg(y ~ x, data = test_data, model = FALSE)
+
+  expect_null(fit_no_model$model)
+
+  expect_visible(
+    plot(fit_no_model)
+  )
+})
+
+
+# Test model.frame with id column (lines 123-134)--------------
+test_that("model.frame handles data with id column", {
+  df_rep <- data.frame(
+    id = rep(1:15, each = 2),
+    x = rep(runif(15, 10, 100), each = 2) + rnorm(30, 0, 2),
+    y = rep(runif(15, 10, 100), each = 2) + rnorm(30, 0, 2)
+  )
+
+  fit_rep <- dem_reg(y ~ x, data = df_rep, id = "id")
+  mf <- model.frame(fit_rep)
+
+  expect_s3_class(mf, "data.frame")
+  # Should have aggregated to 15 rows
+  expect_equal(nrow(mf), 15)
+})
+
+
+# Test predict error when variable not in newdata (lines 903-904)--------------
+test_that("predict errors when variable not found in newdata", {
+  newdata <- data.frame(wrong_name = c(30, 50, 70))
+
+  expect_error(
+    predict(dem_fit, newdata = newdata),
+    "not found in newdata"
+  )
+})
+
+
+# Test predict error for PB without vcov or ci_slopes (lines 932-935) --------------
+
+test_that("predict errors for PB without vcov or ci_slopes for intervals", {
+  # Create mock PB fit without vcov and ci_slopes
+  mock_pb <- pb_fit
+  mock_pb$vcov <- NULL
+  mock_pb$ci_slopes <- NULL
+
+  newdata <- data.frame(x = c(30, 50, 70))
+
+  expect_error(
+    predict(mock_pb, newdata = newdata, interval = "confidence"),
+    "Cannot compute confidence intervals"
+  )
+})

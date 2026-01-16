@@ -542,3 +542,242 @@ test_that("pb_reg detects systematic bias", {
   # CI for slope should NOT contain 1
   expect_false(mt$lower.ci[slope_row] < 1 && 1 < mt$upper.ci[slope_row])
 })
+
+
+# Additional tests to improve coverage for pb_reg function -------
+
+
+# Create test data
+set.seed(123)
+n <- 50
+test_data <- data.frame(
+  method1 = rnorm(n, 100, 15),
+  method2 = rnorm(n, 100, 15)
+)
+test_data$method2 <- test_data$method1 * 0.95 + 5 + rnorm(n, 0, 3)
+
+# id as vector (not column name) - Line 221 -----------
+test_that("pb_reg handles id as vector directly",
+          {
+            # Create replicate data
+            rep_data <- data.frame(
+              subject = rep(1:10, each = 2),
+              x = rep(seq(10, 100, 10), each = 2) + rnorm(20, 0, 2),
+              y = rep(seq(10, 100, 10), each = 2) * 0.9 + 5 + rnorm(20, 0, 2)
+            )
+
+            # Pass id as a vector directly (not column name)
+            id_vector <- rep_data$subject
+            result <- pb_reg(y ~ x, data = rep_data, id = id_vector)
+
+
+            expect_s3_class(result, "simple_eiv")
+          })
+
+# Weights with replicate data warning - Lines 286-287 -----------
+test_that("pb_reg warns about weights with replicate data", {
+  rep_data <- data.frame(
+    subject = rep(1:10, each = 2),
+    x = rep(seq(10, 100, 10), each = 2) + rnorm(20, 0, 2),
+    y = rep(seq(10, 100, 10), each = 2) * 0.9 + 5 + rnorm(20, 0, 2)
+  )
+
+  expect_error(
+    pb_reg(y ~ x, data = rep_data, id = "subject", weights = rep(1, 20))
+  )
+})
+
+# Weights length equals n (after complete cases) - Lines 293-294 -----------
+test_that("pb_reg handles weights with length matching n", {
+  # Create data with no missing values
+  clean_data <- test_data[complete.cases(test_data), ]
+  n_clean <- nrow(clean_data)
+
+  # Weights matching exactly the number of complete cases
+  wts <- runif(n_clean, 0.5, 1.5)
+
+  result <- pb_reg(method2 ~ method1, data = clean_data,
+                   weights = wts, replicates = 100)
+
+  expect_s3_class(result, "simple_eiv")
+})
+
+# Weights wrong length error - Line 296 -----------
+test_that("pb_reg errors on wrong weights length (not matching data or n)", {
+  # Weights with length that doesn't match nrow(data) or n
+  expect_error(
+    pb_reg(method2 ~ method1, data = test_data, weights = rep(1, 5))
+  )
+})
+
+# Uninformative pairs - Lines 505-507 -----------
+test_that("pb_reg handles uninformative pairs (identical points)", {
+  # Data with some identical x,y pairs
+  dup_data <- data.frame(
+    x = c(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+    y = c(1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  )
+
+  result <- suppressWarnings({pb_reg(y ~ x, data = dup_data)})
+  expect_s3_class(result, "simple_eiv")
+})
+
+# No valid slopes error - Lines 512, 557 -----------
+test_that("pb_reg errors when no valid slopes can be computed", {
+  # All points identical
+  bad_data <- data.frame(
+    x = rep(5, 10),
+    y = rep(5, 10)
+  )
+
+  expect_error(
+    expect_warning(pb_reg(y ~ x, data = bad_data, replicates = 100))
+  )
+})
+
+# Weighted median in method 2 (invariant) - Line 533 -----------
+test_that("pb_reg uses weighted median in invariant method with error.ratio", {
+  result <- pb_reg(method2 ~ method1, data = test_data,
+                   method = "invariant",
+                   error.ratio = 2,
+                   replicates = 100)
+
+  expect_s3_class(result, "simple_eiv")
+  expect_equal(result$method_num, 2)
+})
+
+# Method 2 with no negative slopes (m = -1 fallback) - Line 538 -----------
+test_that("pb_reg handles monotone data in invariant method", {
+  # Strictly increasing data - no negative slopes
+  mono_data <- data.frame(
+    x = 1:20,
+    y = (1:20) * 2 + 3
+  )
+
+  result <- suppressWarnings({pb_reg(y ~ x,
+                                     data = mono_data,
+                                     method = "invariant")})
+  expect_s3_class(result, "simple_eiv")
+})
+
+# Weighted intercept calculation - Lines 623, 636-637 -----------
+test_that("pb_reg computes weighted intercept with case weights", {
+  wts <- runif(nrow(test_data), 0.5, 2)
+
+  result <- pb_reg(method2 ~ method1, data = test_data,
+                   weights = wts,
+                   replicates = 100)
+
+  expect_s3_class(result, "simple_eiv")
+  expect_false(is.null(result$weights))
+})
+
+# dx near zero in pair weights - Lines 454-455 -----------
+test_that("pb_reg handles near-zero dx in pair weights",
+          {
+            # Data with some very close x values
+            close_data <- data.frame(
+              x = c(1, 1 + 1e-16, 2, 3, 4, 5, 6, 7, 8, 9),
+              y = c(1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9)
+            )
+
+            result <- pb_reg(y ~ x, data = close_data, error.ratio = 2, replicates = 50)
+            expect_s3_class(result, "simple_eiv")
+          })
+
+# Weighted median length check error - Line 664 -----------
+test_that(".weighted_median errors on mismatched lengths", {
+  expect_error(
+    SimplyAgree:::.weighted_median(1:5, 1:3),
+    "x and w must have same length"
+  )
+})
+
+# Bootstrap failure fallback - Line 731 -----------
+test_that("pb_reg handles bootstrap failures gracefully", {
+  # Very small sample that might cause bootstrap issues
+  small_data <- data.frame(
+    x = c(1, 2, 3, 4, 5),
+    y = c(1.1, 2.2, 2.9, 4.1, 5.0)
+  )
+
+  # This should complete even if some bootstrap iterations fail
+  result <- pb_reg(y ~ x, data = small_data, replicates = 50)
+  expect_s3_class(result, "simple_eiv")
+})
+
+# CUSUM test edge cases - Lines 814-831 -----------
+test_that("CUSUM test handles very small n_pos or n_neg", {
+  # Data where almost all residuals are positive or negative
+  skewed_data <- data.frame(
+    x = 1:10,
+    y = c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11)  # All above line y=x
+  )
+
+  result <- suppressWarnings({pb_reg(y ~ x, data = skewed_data)})
+  expect_s3_class(result, "simple_eiv")
+  expect_s3_class(result$cusum_test, "htest")
+})
+
+# CUSUM with T_critical NA fallback - Lines 854-857 -----------
+test_that("CUSUM handles edge case where qsmirnov returns NA", {
+  # Create scenario with very small counts
+  edge_data <- data.frame(
+    x = c(1, 2, 3, 4, 5),
+    y = c(1, 2, 3, 4, 5.001)  # Nearly perfect fit
+  )
+
+  result <- suppressWarnings({pb_reg(y ~ x, data = edge_data)})
+  expect_s3_class(result$cusum_test, "htest")
+})
+
+# .kolmogorov_pvalue function - Lines 897-912 -----------
+test_that(".kolmogorov_pvalue handles edge cases", {
+  # H <= 0
+  expect_equal(SimplyAgree:::.kolmogorov_pvalue(0), 1)
+  expect_equal(SimplyAgree:::.kolmogorov_pvalue(-1), 1)
+
+
+  # H >= 3 (essentially zero)
+  expect_equal(SimplyAgree:::.kolmogorov_pvalue(3), 0)
+  expect_equal(SimplyAgree:::.kolmogorov_pvalue(5), 0)
+
+  # Normal range
+  p <- SimplyAgree:::.kolmogorov_pvalue(1.5)
+  expect_true(p > 0 && p < 1)
+})
+
+# All ww equal fallback in .passing_bablok_fit - Line 498 -----------
+test_that("pb_reg handles case with no pair_weights and no case_weights", {
+  # This tests the else branch where ww <- rep(1, length(xx))
+  # Need to call .passing_bablok_fit directly with both NULL
+
+  x <- test_data$method1
+  y <- test_data$method2
+
+  result <- SimplyAgree:::.passing_bablok_fit(
+    x, y,
+    method = 3,
+    conf.level = 0.95,
+    pair_weights = NULL,
+    case_weights = NULL
+  )
+
+  expect_true(!is.null(result$slope))
+  expect_true(!is.null(result$intercept))
+})
+
+# Perfect correlation negative test - Line 328 -----------
+test_that("pb_reg messages when correlation not significant", {
+  # Random uncorrelated data
+  set.seed(2654)
+  uncorr_data <- data.frame(
+    x = rnorm(20),
+    y = rnorm(20)
+  )
+
+  expect_message(
+    suppressWarnings({pb_reg(y ~ x, data = uncorr_data)}),
+    "Kendall's tau is not significantly positive. Passing-Bablok regression requires positive correlation."
+  )
+})

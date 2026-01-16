@@ -22,7 +22,7 @@
   ...
 )
 
-check(x)
+check(x, ...)
 
 \method{check}{simple_agree}(x)
 }

@@ -114,7 +114,9 @@ testthat::test_that("Simple Use Run Through", {
                        agreeWidth = 95)
 
   jmvp = jmvagree1$plotba
+  expect_s3_class(jmvp, "Image")
   jmvp = jmvagree1$plotcon
+  expect_s3_class(jmvp, "Image")
   pr_test = print(agree1)
 
   p = plot(agree1,type=1)

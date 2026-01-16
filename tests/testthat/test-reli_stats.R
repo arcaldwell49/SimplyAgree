@@ -107,6 +107,7 @@ testthat::test_that("Simple Use Run Through", {
                      desc = TRUE,
                      plots = TRUE)
 
+  expect_s3_class(jmvtest2$plots, "Image")
   testthat::expect_equivalent(jmvtest2$icctab$asDF$icc,
                               test1$icc$icc)
   testthat::expect_equivalent(jmvtest2$icctab$asDF$lower.ci,
@@ -115,6 +116,8 @@ testthat::test_that("Simple Use Run Through", {
                               test1$icc$upper.ci)
   pr_test = print(test1)
   p = plot(test1)
+
+  jmvtest2$
 
   df = data.frame(id = c(1,1,1,1,
                          2,2,2,2,

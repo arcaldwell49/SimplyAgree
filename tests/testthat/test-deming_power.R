@@ -595,3 +595,233 @@ test_that("results are reproducible with same seed", {
   expect_equal(result1$power_joint, result2$power_joint)
   expect_equal(result1$power_either_ci, result2$power_either_ci)
 })
+
+
+# Additional tests -------
+#
+# Test deming_power functions ------------------------------------------------
+
+test_that("deming_power_sim validates x_range length", {
+  expect_error(
+    deming_power_sim(
+      n_sims = 100,
+      sample_size = 20,
+      x_range = c(10, 50, 100),  # Wrong length
+      actual_slope = 1.05
+    ),
+    "x_range must be vector of length 2"
+  )
+})
+
+test_that("deming_power_sim handles simulation errors gracefully", {
+  # This tests the tryCatch error handling (lines 163-165)
+  # We need to trigger a fitting error - use extreme/degenerate data
+  # Very small sample with extreme variance should occasionally fail
+  set.seed(999)
+
+  # Run with parameters that might cause occasional fitting issues
+
+  result <- deming_power_sim(
+    n_sims = 100,
+    sample_size = 5,  # Very small
+    x_range = c(1, 2),  # Very narrow range
+    actual_slope = 1.0,
+    actual_intercept = 0,
+    y_var_params = list(beta1 = 100, beta2 = 0, J = 1, type = "constant"),
+    x_var_params = list(beta1 = 100, beta2 = 0, J = 1, type = "constant")
+  )
+
+  expect_s3_class(result, "deming_power")
+})
+
+# Test deming_sample_size function -------------------------------------------
+
+test_that("deming_sample_size validates initial_n", {
+  expect_error(
+    deming_sample_size(
+      target_power = 0.80,
+      initial_n = 2,  # Too small
+      max_n = 50,
+      n_sims = 100,
+      x_range = c(10, 100),
+      actual_slope = 1.05,
+      y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
+      x_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant")
+    ),
+    "initial_n must be at least 3"
+  )
+})
+
+test_that("deming_sample_size runs and finds required N", {
+  skip_on_cran()
+
+  # Use parameters where target is achievable quickly
+  result <- deming_sample_size(
+    target_power = 0.70,  # Lower target for faster convergence
+    initial_n = 30,
+    max_n = 80,
+    n_sims = 200,
+    step_size = 10,
+    x_range = c(10, 100),
+    actual_slope = 1.10,  # Larger effect for easier detection
+    actual_intercept = 0,
+    ideal_slope = 1.0,
+    ideal_intercept = 0,
+    y_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant"),
+    x_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant")
+  )
+
+  expect_s3_class(result, "deming_sample_size")
+  expect_true(!is.na(result$n_required_joint) || !is.na(result$n_required_ci))
+  expect_true(is.data.frame(result$power_curve))
+  expect_equal(result$target_power, 0.70)
+})
+
+test_that("deming_sample_size warns when target not achieved", {
+  skip_on_cran()
+
+  # Use parameters where target is NOT achievable within max_n
+  expect_warning(
+    result <- deming_sample_size(
+      target_power = 0.99,  # Very high target
+      initial_n = 20,
+      max_n = 30,  # Very limited range
+      n_sims = 100,
+      step_size = 10,
+      x_range = c(10, 100),
+      actual_slope = 1.01,  # Very small effect
+      actual_intercept = 0,
+      ideal_slope = 1.0,
+      ideal_intercept = 0,
+      y_var_params = list(beta1 = 25, beta2 = 0, J = 1, type = "constant"),
+      x_var_params = list(beta1 = 25, beta2 = 0, J = 1, type = "constant")
+    ),
+    "Target power not achieved"
+  )
+
+  expect_s3_class(result, "deming_sample_size")
+})
+
+# Test print.deming_sample_size ----------------------------------------------
+
+test_that("print.deming_sample_size works with achieved targets", {
+  skip_on_cran()
+
+  result <- deming_sample_size(
+    target_power = 0.60,
+    initial_n = 25,
+    max_n = 60,
+    n_sims = 150,
+    step_size = 10,
+    x_range = c(10, 100),
+    actual_slope = 1.15,
+    actual_intercept = 0,
+    ideal_slope = 1.0,
+    ideal_intercept = 0,
+    y_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant"),
+    x_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant")
+  )
+
+  expect_output(print(result), "Deming Regression Sample Size Determination")
+  expect_output(print(result), "Target Power")
+  expect_output(print(result), "Required Sample Sizes")
+})
+
+test_that("print.deming_sample_size works when targets not achieved", {
+  # Create a result object manually with NA values
+  result <- structure(
+    list(
+      n_required_ci = NA,
+      n_required_joint = NA,
+      target_power = 0.90,
+      power_curve = data.frame(n = c(20, 30), power_ci = c(0.3, 0.4), power_joint = c(0.35, 0.45)),
+      reduction_n = NA,
+      reduction_pct = NA,
+      settings = list()
+    ),
+    class = "deming_sample_size"
+  )
+
+  expect_output(print(result), "Target not achieved")
+})
+
+# Test plot.deming_sample_size -----------------------------------------------
+
+test_that("plot.deming_sample_size creates ggplot object", {
+  skip_on_cran()
+
+  result <- deming_sample_size(
+    target_power = 0.60,
+    initial_n = 25,
+    max_n = 55,
+    n_sims = 150,
+    step_size = 10,
+    x_range = c(10, 100),
+    actual_slope = 1.15,
+    actual_intercept = 0,
+    ideal_slope = 1.0,
+    ideal_intercept = 0,
+    y_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant"),
+    x_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant")
+  )
+
+  p <- plot(result)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("plot.deming_sample_size errors with empty power curve", {
+  result <- structure(
+    list(
+      n_required_ci = NA,
+      n_required_joint = NA,
+      target_power = 0.90,
+      power_curve = data.frame(n = numeric(0), power_ci = numeric(0), power_joint = numeric(0)),
+      reduction_n = NA,
+      reduction_pct = NA,
+      settings = list()
+    ),
+    class = "deming_sample_size"
+  )
+
+  expect_error(plot(result), "No power curve data available")
+})
+
+test_that("plot.deming_sample_size works without achieved targets", {
+  # Create result with power curve but NA required N values
+  result <- structure(
+    list(
+      n_required_ci = NA,
+      n_required_joint = NA,
+      target_power = 0.90,
+      power_curve = data.frame(
+        n = c(20, 30, 40),
+        power_ci = c(0.3, 0.4, 0.5),
+        power_joint = c(0.35, 0.45, 0.55)
+      ),
+      reduction_n = NA,
+      reduction_pct = NA,
+      settings = list()
+    ),
+    class = "deming_sample_size"
+  )
+
+  p <- plot(result)
+  expect_s3_class(p, "ggplot")
+})
+
+# Test .generate_x_values distribution validation ----------------------------
+test_that(".generate_x_values rejects invalid distribution", {
+  expect_error(
+    SimplyAgree:::.generate_x_values(50, c(10, 100), "invalid_dist"),
+    "distribution must be"
+  )
+})
+
+# Test .calculate_variance type validation -----------------------------------
+
+test_that(".calculate_variance rejects invalid variance type", {
+  expect_error(
+    SimplyAgree:::.calculate_variance(50, 1, 0.05, 2, "invalid_type"),
+    "variance_type must be"
+  )
+})

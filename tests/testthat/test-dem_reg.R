@@ -24,7 +24,9 @@ testthat::test_that("Compare to NCSS 303-26", {
                        plotcon = TRUE,
                        plotcheck = TRUE,
                        weighted = TRUE)
-  dm_u_jam2
+  expect_visible(dm_u_jam2)
+  expect_s3_class(dm_u_jam2$plotcon, "Image")
+  expect_s3_class(dm_u_jam2$plotcheck, "Image")
   expect_equivalent(round(dm_u$model_table$coef,4),
                     c(-0.0897, 1.0012))
 

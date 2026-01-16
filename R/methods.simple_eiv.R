@@ -33,7 +33,7 @@ print.simple_eiv <- function(x, ...) {
 
   if (is_passing_bablok) {
     header <- paste0(x$method, " with ", x$conf.level * 100, "% C.I.")
-  } else if (!is.null(x$weighted) && x$weighted == TRUE) {
+  } else if (!is.null(x$call$weighted) && x$call$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", x$conf.level * 100, "% C.I.")
   } else {
     header <- paste0("Deming Regression with ", x$conf.level * 100, "% C.I.")
@@ -150,7 +150,7 @@ summary.simple_eiv <- function(object, ...) {
 
   if (is_passing_bablok) {
     header <- paste0(object$method, " with ", object$conf.level * 100, "% C.I.")
-  } else if (!is.null(object$weighted) && object$weighted == TRUE) {
+  } else if (!is.null(object$call$weighted) && object$call$weighted == TRUE) {
     header <- paste0("Weighted Deming Regression with ", object$conf.level * 100, "% C.I.")
   } else {
     header <- paste0("Deming Regression with ", object$conf.level * 100, "% C.I.")
@@ -199,9 +199,9 @@ summary.simple_eiv <- function(object, ...) {
     #}
 
     # Bootstrap info
-    if (!is.null(object$nboot) && object$nboot > 0) {
+    if (!is.null(object$replicates) && object$replicates > 0) {
       cat("\n")
-      cat(sprintf("Bootstrap CIs based on %d resamples\n", object$nboot))
+      cat(sprintf("Bootstrap CIs based on %d resamples\n", object$replicates))
     }
   }
 
@@ -1263,3 +1263,4 @@ jack_dem = function(X, Y, w_i, error.ratio) {
   # Use model.frame method with data argument
   model.frame(object, data = data)
 }
+
