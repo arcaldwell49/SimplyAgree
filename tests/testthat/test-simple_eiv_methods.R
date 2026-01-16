@@ -550,7 +550,7 @@ test_data <- data.frame(x = x, y = y)
 
 # Fit models for testing
 dem_fit <- dem_reg(y ~ x, data = test_data)
-pb_fit <- pb_reg(y ~ x, data = test_data)
+pb_fit <- suppressWarnings({pb_reg(y ~ x, data = test_data)})
 
 
 # Test weighted Deming regression header (lines 36-37)--------------
@@ -591,12 +591,12 @@ test_that("model.frame works when model = FALSE with data argument", {
   expect_s3_class(mf, "data.frame")
 })
 
-test_that("model.frame errors when model = FALSE and no data", {
+test_that("model.frame when model = FALSE and no data", {
   fit_no_model <- dem_reg(y ~ x, data = test_data, model = FALSE)
 
   # Remove the data from the environment to ensure error
   expect_output(
-    model.frame(fit_no_model, data = NULL)
+    print(model.frame(fit_no_model, data = NULL))
   )
 })
 

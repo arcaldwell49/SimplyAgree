@@ -117,8 +117,6 @@ testthat::test_that("Simple Use Run Through", {
   pr_test = print(test1)
   p = plot(test1)
 
-  jmvtest2$
-
   df = data.frame(id = c(1,1,1,1,
                          2,2,2,2,
                          3,3,3,3,
