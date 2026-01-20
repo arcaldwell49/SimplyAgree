@@ -377,7 +377,7 @@ plot.simple_eiv <- function(x,
 #' @method check simple_eiv
 #' @export
 
-check.simple_eiv <- function(x, data = NULL) {
+check.simple_eiv <- function(x, data = NULL, ...) {
   is_passing_bablok <- !is.null(x$method) && grepl("Passing-Bablok", x$method)
 
   if (is_passing_bablok) {

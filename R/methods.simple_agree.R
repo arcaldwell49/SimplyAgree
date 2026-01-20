@@ -194,7 +194,7 @@ check <- function(x, ...) {
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check.simple_agree <- function(x) {
+check.simple_agree <- function(x, ...) {
 
   if(!(as.character(x$call[1]) %in% c("agree_nest","agree_reps","agree_test",
                                       "SimplyAgree::agree_nest",

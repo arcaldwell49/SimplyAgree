@@ -203,7 +203,7 @@ plot.loa <- function(x,
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check.loa <- function(x) {
+check.loa <- function(x, ...) {
 
 
   call2 = x$call
