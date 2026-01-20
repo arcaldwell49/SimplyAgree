@@ -5,26 +5,30 @@
 \title{Deming Regression}
 \usage{
 dem_reg(
-  x,
-  y,
-  id = NULL,
+  formula = NULL,
   data,
+  id = NULL,
+  x = NULL,
+  y = NULL,
   conf.level = 0.95,
   weighted = FALSE,
   weights = NULL,
   error.ratio = 1,
+  model = TRUE,
   keep_data = FALSE,
-  compute_joint = TRUE
+  ...
 )
 }
 \arguments{
-\item{x}{Name of column with first measurement.}
-
-\item{y}{Name of other column with the other measurement to compare to the first.}
-
-\item{id}{Column with subject identifier.}
+\item{formula}{A formula of the form \code{y ~ x} specifying the model. If provided, takes precedence over \code{x} and \code{y} arguments.}
 
 \item{data}{Data frame with all data.}
+
+\item{id}{Column with subject identifier (optional).}
+
+\item{x}{Name of column with first measurement (deprecated in favor of formula interface).}
+
+\item{y}{Name of other column with the other measurement to compare to the first (deprecated in favor of formula interface).}
 
 \item{conf.level}{The confidence level required. Default is 95\%.}
 
@@ -34,19 +38,37 @@ dem_reg(
 
 \item{error.ratio}{Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.}
 
-\item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE. Users may wish to set to FALSE if data is especially large.}
+\item{model}{Logical. If TRUE (default), the model frame is stored in the returned object.
+This is needed for methods like \code{plot()}, \code{fitted()}, \code{residuals()}, and \code{predict()} to work
+without supplying \code{data}. If FALSE, the model frame is not stored (saves memory for large datasets),
+but these methods will require a \code{data} argument.}
 
-\item{compute_joint}{Logical indicator (TRUE/FALSE). If TRUE, joint confidence region is computed. Default is TRUE.}
+\item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
-The function returns a simple_eiv (eiv meaning "error in variables") object.
+The function returns a simple_eiv (eiv meaning "error in variables") object with the following components:
 \itemize{
-\item \code{call}: The matched call.
-\item \code{model}: Data frame presenting the results from the Deming regression analysis.
-\item \code{resamples}: List containing resamples from jacknife procedure.
+\item \code{coefficients}: Named vector of coefficients (intercept and slope).
+\item \code{residuals}: Optimized residuals from the fitted model.
+\item \code{fitted.values}: Estimated true Y values (Y-hat).
+\item \code{model_table}: Data frame presenting the full results from the Deming regression analysis.
 \item \code{vcov}: Variance-covariance matrix for slope and intercept.
-\item \code{joint_region}: Joint confidence region ellipse coordinates (if compute_joint = TRUE).
-\item \code{joint_test}: Test of whether ideal point is enclosed by joint region.
+\item \code{df.residual}: Residual degrees of freedom.
+\item \code{call}: The matched call.
+\item \code{terms}: The terms object used.
+\item \code{xlevels}: (Only for models with factors) levels of factors.
+\item \code{model}: The model frame.
+\item \code{x_vals}: Original x values used in fitting.
+\item \code{y_vals}: Original y values used in fitting.
+\item \code{x_hat}: Estimated true X values.
+\item \code{y_hat}: Estimated true Y values.
+\item \code{error.ratio}: Error ratio used in fitting.
+\item \code{weighted}: Whether weighted regression was used.
+\item \code{weights}: Weights used in fitting.
+\item \code{conf.level}: Confidence level used.
+\item \code{resamples}: List containing resamples from jacknife procedure (if keep_data = TRUE).
 }
 }
 \description{
@@ -67,11 +89,25 @@ If the data are measured in replicates, then the measurement error can be direct
 This can be accomplished by indicating the subject identifier with the id argument.
 When the replicates are not available in the data,
 then the ratio of error variances (y/x) can be provided with the error.ratio argument.
+}
+\section{Interface Change}{
 
-When \code{compute_joint = TRUE}, the function computes the joint (slope, intercept) confidence region
-based on the chi-square distribution with 2 degrees of freedom. This elliptical region accounts
-for the correlation between slope and intercept estimates and can provide improved power for
-detecting deviations from (null) hypothesized values (e.g., slope = 1, intercept = 0).
+The \code{x} and \code{y} arguments are deprecated. Please use the \code{formula} interface instead:
+\itemize{
+\item Old: \code{dem_reg(x = "x_var", y = "y_var", data = df)}
+\item New: \code{dem_reg(y_var ~ x_var, data = df)}
+}
+}
+
+\examples{
+\dontrun{
+# New formula interface (recommended)
+model <- dem_reg(y ~ x, data = mydata)
+
+# Old interface (still works with deprecation warning)
+model <- dem_reg(x = "x", y = "y", data = mydata)
+}
+
 }
 \references{
 Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.

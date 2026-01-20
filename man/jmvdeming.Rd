@@ -33,11 +33,11 @@ confidence intervals}
 
 \item{plotcheck}{\code{TRUE} or \code{FALSE} (default), assumptions plots}
 
-\item{weighted}{\code{TRUE} or \code{FALSE}}
+\item{weighted}{\code{TRUE} or \code{FALSE} (default), use weighted Deming regression}
 
-\item{xlabel}{The label for the x-axis}
+\item{xlabel}{The label for the x-axis (default: "Method: 1")}
 
-\item{ylabel}{The label for the y-axis}
+\item{ylabel}{The label for the y-axis (default: "Method: 2")}
 }
 \value{
 A results object containing:

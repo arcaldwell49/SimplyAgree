@@ -22,9 +22,9 @@
   ...
 )
 
-check(x)
+check(x, ...)
 
-\method{check}{simple_agree}(x)
+\method{check}{simple_agree}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{simple_agree} as returned from a function starting with 'agree'}

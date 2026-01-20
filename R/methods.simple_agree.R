@@ -43,7 +43,7 @@ print.simple_agree <- function(x,...){
   cat("\n")
   cat("Hypothesis Test: ",x$shieh_test$h0_test, sep = "")
   cat("\n")
-  if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+  if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
   cat("\n")
   cat("###- Bland-Altman Limits of Agreement (LoA) -###")
   cat("\n")
@@ -63,7 +63,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("Replicate Data Points (true value does not vary)")
     cat("\n")
-    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
@@ -90,7 +90,7 @@ print.simple_agree <- function(x,...){
     cat("\n")
     cat("Nested Data Points (true value may vary)")
     cat("\n")
-    if(get_call(x$call$prop_bias) == TRUE) {cat("Warning: hypothesis test likely bogus with proportional bias.")}
+    if(get_call(x$call$prop_bias) == TRUE) {cat("note: hypothesis test likely bogus with proportional bias.")}
     cat("\n")
     cat("Hypothesis Test: ",x$h0_test, sep = "")
     cat("\n")
@@ -185,7 +185,7 @@ plot.simple_agree <- function(x, type = 1,
 #' @rdname simple_agree-methods
 #' @export
 
-check <- function(x) {
+check <- function(x, ...) {
   UseMethod("check")
 }
 
@@ -194,7 +194,7 @@ check <- function(x) {
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check.simple_agree <- function(x) {
+check.simple_agree <- function(x, ...) {
 
   if(!(as.character(x$call[1]) %in% c("agree_nest","agree_reps","agree_test",
                                       "SimplyAgree::agree_nest",

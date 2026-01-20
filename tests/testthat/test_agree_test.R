@@ -4,16 +4,16 @@ context("agree_test")
 testthat::test_that("Simple Use Run Through", {
   data("reps")
   data("ba1986")
-  agree1 = agree_test(x = reps$x,
+  agree1 = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
-                      TOST = TRUE)
+                      TOST = TRUE))
 
-  agree_pr = agree_test(x = reps$x,
+  agree_pr = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
                       TOST = TRUE,
-                      prop_bias = TRUE)
+                      prop_bias = TRUE))
   p1 = plot(agree_pr)
 
   p1 = plot(agree_pr,
@@ -31,10 +31,10 @@ testthat::test_that("Simple Use Run Through", {
   p1 = plot(agree_pr,
        geom = "stat_density_2d")
 
-  agree2 = agree_test(x = reps$x,
+  agree2 = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
-                      TOST = FALSE)
+                      TOST = FALSE))
 
   agree2_new = agreement_limit(x = "x",
                                y = "y",
@@ -114,7 +114,9 @@ testthat::test_that("Simple Use Run Through", {
                        agreeWidth = 95)
 
   jmvp = jmvagree1$plotba
+  expect_s3_class(jmvp, "Image")
   jmvp = jmvagree1$plotcon
+  expect_s3_class(jmvp, "Image")
   pr_test = print(agree1)
 
   p = plot(agree1,type=1)
@@ -152,10 +154,10 @@ testthat::test_that("Simple Use Run Through", {
   testthat::expect_equivalent(agree1$loa$upper.ci,
                               jmvagree1$blandtab$asDF$upperci)
 
-  agree2 = agree_test(x = reps$x,
+  agree2 = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
-                      agree.level = .8)
+                      agree.level = .8))
   jmvagree2 = jmvagree(data = reps,
                        method1 = "x",
                        method2 = "y",
@@ -165,9 +167,9 @@ testthat::test_that("Simple Use Run Through", {
   testthat::expect_equal(agree2$h0_test,
                         "reject h0")
 
-  agree3 = agree_test(x = reps$x,
+  agree3 = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
-                      agree.level = .8)
+                      agree.level = .8))
   jmvagree3 = jmvagree(data = reps,
                        method1 = "x",
                        method2 = "y",
@@ -186,11 +188,11 @@ testthat::test_that("Added plotting coverage",{
 
   data("reps")
   data("ba1986")
-  agree1 = agree_test(x = reps$x,
+  agree1 = suppressWarnings(agree_test(x = reps$x,
                       y = reps$y,
                       delta = 2.5,
                       TOST = FALSE,
-                      prop_bias = TRUE)
+                      prop_bias = TRUE))
   testthat::expect_equal(class(agree1), "simple_agree")
 
   checker = check(agree1)

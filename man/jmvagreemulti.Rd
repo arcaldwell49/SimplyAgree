@@ -38,7 +38,7 @@ agreement limits}
 
 \item{testValue}{a number specifying the limit of agreement}
 
-\item{CCC}{\code{TRUE} or \code{FALSE} (default), produce CCC table}
+\item{CCC}{\code{TRUE} (default) or \code{FALSE}, produce CCC table}
 
 \item{valEq}{.}
 
@@ -48,11 +48,11 @@ plot}
 \item{plotcon}{\code{TRUE} or \code{FALSE} (default), for Line of identity
 plot}
 
-\item{prop_bias}{\code{TRUE} or \code{FALSE}}
+\item{prop_bias}{\code{TRUE} or \code{FALSE} (default), proportional bias}
 
-\item{xlabel}{The label for the x-axis on the BA plot}
+\item{xlabel}{The label for the x-axis on the BA plot (default: "Average of Both Methods")}
 
-\item{ylabel}{The label for the y-axis on the BA plot}
+\item{ylabel}{The label for the y-axis on the BA plot (default: "Difference between Methods")}
 }
 \value{
 A results object containing:

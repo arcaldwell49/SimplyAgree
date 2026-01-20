@@ -3,63 +3,127 @@
 \name{simple_eiv-methods}
 \alias{simple_eiv-methods}
 \alias{print.simple_eiv}
+\alias{formula.simple_eiv}
+\alias{model.frame.simple_eiv}
+\alias{summary.simple_eiv}
+\alias{confint.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
 \alias{plot_joint}
 \alias{plot_joint.simple_eiv}
 \alias{vcov.simple_eiv}
 \alias{coef.simple_eiv}
+\alias{fitted.simple_eiv}
+\alias{residuals.simple_eiv}
+\alias{predict.simple_eiv}
 \title{Methods for simple_eiv objects}
 \usage{
 \method{print}{simple_eiv}(x, ...)
 
-\method{plot}{simple_eiv}(x, x_name = "x", y_name = "y", show_joint = TRUE, ...)
+\method{formula}{simple_eiv}(x, ...)
 
-\method{check}{simple_eiv}(x)
+\method{model.frame}{simple_eiv}(formula, data = NULL, na.action = na.pass, ...)
 
-plot_joint(object, ...)
+\method{summary}{simple_eiv}(object, ...)
+
+\method{confint}{simple_eiv}(object, parm, level = NULL, ...)
+
+\method{plot}{simple_eiv}(
+  x,
+  x_name = NULL,
+  y_name = NULL,
+  interval = c("none", "confidence"),
+  level = NULL,
+  n_points = 100,
+  data = NULL,
+  ...
+)
+
+\method{check}{simple_eiv}(x, data = NULL, ...)
+
+plot_joint(x, ...)
 
 \method{plot_joint}{simple_eiv}(
-  object,
+  x,
   ideal_slope = 1,
   ideal_intercept = 0,
   show_intervals = TRUE,
+  n_points = 100,
   ...
 )
 
 \method{vcov}{simple_eiv}(object, ...)
 
 \method{coef}{simple_eiv}(object, ...)
+
+\method{fitted}{simple_eiv}(object, type = c("y", "x", "both"), data = NULL, ...)
+
+\method{residuals}{simple_eiv}(object, type = c("optimized", "x", "y", "raw_y"), data = NULL, ...)
+
+\method{predict}{simple_eiv}(
+  object,
+  newdata = NULL,
+  interval = c("none", "confidence"),
+  level = NULL,
+  se.fit = FALSE,
+  data = NULL,
+  ...
+)
 }
 \arguments{
-\item{x}{object of class \code{simple_eiv} from the dem_reg function.}
+\item{...}{further arguments passed through.}
 
-\item{...}{further arguments passed through, see description of return value.
-for details.
-\code{\link{agree_test}}.}
+\item{formula}{A simple_eiv object (for model.frame method)}
 
-\item{x_name}{Name/label for x values (first measurement)}
+\item{data}{Optional data frame. Required if model was fitted with \code{model = FALSE}
+and \code{newdata} is NULL.}
 
-\item{y_name}{Name/label for y values (second measurement)}
+\item{na.action}{Function for handling NA values (default: na.pass)}
 
-\item{show_joint}{Logical. If TRUE and joint region computed, shows joint region status in subtitle.}
+\item{object, x}{object of class \code{simple_eiv} from dem_reg or pb_reg function.}
 
-\item{object}{object of class \code{simple_eiv} for plot_joint method}
+\item{parm}{A specification of which parameters are to be given confidence intervals,
+either a vector of numbers or a vector of names. If missing, all parameters are considered.}
+
+\item{level}{Confidence level for intervals (default uses the model's conf.level).}
+
+\item{x_name}{Name for x-axis label (optional).}
+
+\item{y_name}{Name for y-axis label (optional).}
+
+\item{interval}{Type of interval calculation. Can be "none" (default), or "confidence"}
+
+\item{n_points}{Number of points to use for drawing the joint confidence region (default = 100).}
 
 \item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
 
 \item{ideal_intercept}{The hypothesized intercept value to test against (default = 0)}
 
 \item{show_intervals}{Logical. If TRUE, shows individual confidence intervals as well.}
+
+\item{type}{Type of residuals to return. Options are "optimized" (default), "x", "y", or "raw_y".}
+
+\item{newdata}{An optional data frame containing values of X at which to predict.
+If omitted, the fitted values are returned.}
+
+\item{se.fit}{Logical. If TRUE, standard errors of predictions are returned.
+Note: For Passing-Bablok regression without bootstrap, standard errors are not
+available and this argument is ignored with a warning.}
 }
 \value{
 \describe{
-\item{\code{print}}{Prints short summary of the error-in-variables (e.g., Deming) regression model.}
-\item{\code{plot}}{Returns a plot of the deming regression line, the line-of-identity, and the raw data.}
-\item{\code{check}}{Returns plots of the optimized residuals.}
-\item{\code{plot_joint}}{Returns a plot of the joint confidence region in parameter space.}
+\item{\code{print}}{Prints short summary of the EIV regression model.}
+\item{\code{summary}}{Prints detailed summary.}
+\item{\code{plot}}{Returns a plot of the regression line and data.}
+\item{\code{check}}{Returns plots of residuals.}
+\item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
+\item{\code{predict}}{Predicts Y values for new X values.}
+\item{\code{fitted}}{Extracts fitted values.}
+\item{\code{residuals}}{Extracts residuals.}
+\item{\code{coef}}{Extracts model coefficients.}
+\item{\code{vcov}}{Extracts variance-covariance matrix.}
 }
 }
 \description{
-Methods defined for objects returned from the error-in-variables models (e.g., dem_reg).
+Methods defined for objects returned from error-in-variables models (e.g., \code{dem_reg}, \code{pb_reg}).
 }

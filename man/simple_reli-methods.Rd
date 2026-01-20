@@ -11,7 +11,7 @@
 
 \method{plot}{simple_reli}(x, ...)
 
-\method{check}{simple_reli}(x)
+\method{check}{simple_reli}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{simple_reli} as returned from the reli_stats function}

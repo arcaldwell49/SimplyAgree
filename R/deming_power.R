@@ -133,25 +133,30 @@ deming_power_sim <- function(n_sims = 1000,
     # Fit Deming regression
     tryCatch({
       fit <- dem_reg(
-        x = "x",
-        y = "y",
+        formula = y ~ x,  # UPDATED: Use formula interface
         data = sim_data,
         weighted = weighted,
         error.ratio = error.ratio,
         conf.level = conf.level,
-        keep_data = FALSE,
-        compute_joint = TRUE
+        keep_data = FALSE
       )
 
       # Test with confidence intervals
-      slope_ci <- c(fit$model$lower.ci[2], fit$model$upper.ci[2])
-      int_ci <- c(fit$model$lower.ci[1], fit$model$upper.ci[1])
+      slope_ci <- c(fit$model_table$lower.ci[2], fit$model_table$upper.ci[2])  # UPDATED: model_table
+      int_ci <- c(fit$model_table$lower.ci[1], fit$model_table$upper.ci[1])    # UPDATED: model_table
 
       slope_detected[i] <- !(ideal_slope >= slope_ci[1] && ideal_slope <= slope_ci[2])
       intercept_detected[i] <- !(ideal_intercept >= int_ci[1] && ideal_intercept <= int_ci[2])
 
       # Test with joint region
-      joint_detected[i] <- !fit$joint_test$is_enclosed
+      joint_detected[i] <- !.test_joint_enclosure(
+        intercept = fit$coefficients[1],
+        slope =  fit$coefficients[2],
+        vcov = vcov(fit),
+        ideal_intercept = ideal_intercept,
+        ideal_slope = ideal_slope,
+        conf.level = conf.level
+      )$is_enclosed
 
     }, error = function(e) {
       # If fit fails, count as non-detection
@@ -462,7 +467,7 @@ print.deming_sample_size <- function(x, ...) {
   if (!is.na(x$reduction_n)) {
     cat(sprintf("\nSample Size Reduction:  %d (%.0f%%)\n",
                 x$reduction_n, x$reduction_pct))
-    cat(sprintf("You can save %d participants using joint confidence regions!\n",
+    cat(sprintf("Required number of participants is reduced %d if joint confidence test utilized.\n",
                 x$reduction_n))
   }
 

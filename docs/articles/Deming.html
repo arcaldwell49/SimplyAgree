@@ -5,7 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Deming Regression • SimplyAgree</title>
+<title>Error-in-Variables Regression • SimplyAgree</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -16,7 +21,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Deming Regression">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Error-in-Variables Regression">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -41,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -74,12 +79,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Deming Regression</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Error-in-Variables Regression</h1>
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2025-11-19</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -109,11 +113,11 @@ referred to as “Deming regression” (e.g., <span class="citation">Linnet
 <div class="section level2">
 <h2 id="joint-confidence-regions">Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#joint-confidence-regions"></a>
 </h2>
-<p>A key enhancement to the <code>dem_reg</code> function is the
-addition of <strong>joint confidence regions</strong> for the slope and
-intercept parameters. Traditional confidence intervals treat each
-parameter separately, but in regression analysis, these parameters are
-correlated.</p>
+<p>A key, but currently experimental, enhancement to the
+<code>dem_reg</code> function is the addition of <strong>joint
+confidence regions</strong> for the slope and intercept parameters.
+Traditional confidence intervals treat each parameter separately, but in
+regression analysis, these parameters are correlated.</p>
 <p>Joint confidence regions account for this correlation by creating an
 elliptical region in the (intercept, slope) parameter space. This
 approach, promoted by <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
@@ -151,34 +155,29 @@ method comparisons.</p>
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Also, we will assume, based on historical data, that the measurement
-error ratio is equal to 4.</p>
+error ratio is equal to 2.</p>
 <p>The data can be run through the <code>dem_reg</code> function and the
-results printed. Note that the output now includes a joint confidence
-region test.</p>
+results printed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dem1</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
-<span>               y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<code class="sourceCode R"><span><span class="va">dem1</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>,</span>
 <span>               data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>               error.ratio <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>               error.ratio <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>               weighted <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">dem1</span></span>
-<span><span class="co">#&gt; Deming Regression with 95% C.I.</span></span>
+<span><span class="co">#&gt; Deming Regression with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; dem_reg(formula = y ~ x, data = dat, weighted = FALSE, error.ratio = 2, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt;               coef      bias     se df lower.ci upper.ci        t p.value</span></span>
-<span><span class="co">#&gt; Intercept -0.08974 -0.044938 1.7220  8  -4.0607    3.881 -0.05212  0.9597</span></span>
-<span><span class="co">#&gt; Slope      1.00119  0.003529 0.1872  8   0.5696    1.433  0.00638  0.9951</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Joint Confidence Region Test (H0: slope=1, intercept=0):</span></span>
-<span><span class="co">#&gt;   Mahalanobis distance: 0.1126</span></span>
-<span><span class="co">#&gt;   Chi-square critical:  5.9915</span></span>
-<span><span class="co">#&gt;   Identity enclosed:    Yes</span></span>
-<span><span class="co">#&gt;   p-value:             0.9453</span></span></code></pre></div>
+<span><span class="co">#&gt; (Intercept)           x </span></span>
+<span><span class="co">#&gt;      0.1285      0.9745</span></span></code></pre></div>
 <p>The resulting regression line can then be plotted. The subtitle now
 indicates whether the identity line is enclosed by the joint confidence
 region.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span>, interval <span class="op">=</span> <span class="st">"confidence"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 </div>
 <div class="section level3">
@@ -190,15 +189,7 @@ of the confidence region in parameter space:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
 <span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">SimplyAgree</span> package.</span></span>
-<span><span class="co">#&gt;   Please report the issue at</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/arcaldwell49/SimplyAgree/issues&gt;</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
+<span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 <p>This plot shows: - The <strong>red ellipse</strong>: Joint confidence
 region - The <strong>blue rectangle</strong>: Traditional confidence
@@ -242,230 +233,72 @@ when the weights are helpful. When we look at the two plots below, we
 can see there is severe problem with using the “un-weighted” model.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="st">"new.lot"</span>,</span>
-<span>  y <span class="op">=</span> <span class="st">"old.lot"</span>,</span>
+<span>  <span class="va">old.lot</span> <span class="op">~</span> <span class="va">new.lot</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">dem2</span></span>
-<span><span class="co">#&gt; Deming Regression with 95% C.I.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Deming Regression with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = FALSE, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;             coef      bias      se  df lower.ci upper.ci      t p.value</span></span>
 <span><span class="co">#&gt; Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821</span></span>
 <span><span class="co">#&gt; Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Joint Confidence Region Test (H0: slope=1, intercept=0):</span></span>
-<span><span class="co">#&gt;   Mahalanobis distance: 11.1908</span></span>
-<span><span class="co">#&gt;   Chi-square critical:  5.9915</span></span>
-<span><span class="co">#&gt;   Identity enclosed:    No</span></span>
-<span><span class="co">#&gt;   p-value:             0.0037</span></span>
+<span><span class="co">#&gt; 160 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-3.png" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem3</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="st">"new.lot"</span>,</span>
 <span>  y <span class="op">=</span> <span class="st">"old.lot"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">dem3</span></span>
-<span><span class="co">#&gt; Weighted Deming Regression with 95% C.I.</span></span>
+<span><span class="co">#&gt; Warning: The 'x' and 'y' arguments are deprecated. Please use the formula</span></span>
+<span><span class="co">#&gt; interface instead: dem_reg(y ~ x, data = ...)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Weighted Deming Regression with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; dem_reg(data = ferritin, x = "new.lot", y = "old.lot", weighted = TRUE, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95, formula = old.lot ~ new.lot)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;               coef       bias       se  df lower.ci upper.ci       t   p.value</span></span>
 <span><span class="co">#&gt; Intercept -0.02616  0.0065148 0.033219 160 -0.09176  0.03945 -0.7874 4.322e-01</span></span>
 <span><span class="co">#&gt; Slope      1.03052 -0.0001929 0.006262 160  1.01815  1.04288  4.8729 2.626e-06</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Joint Confidence Region Test (H0: slope=1, intercept=0):</span></span>
-<span><span class="co">#&gt;   Mahalanobis distance: 23.7841</span></span>
-<span><span class="co">#&gt;   Chi-square critical:  5.9915</span></span>
-<span><span class="co">#&gt;   Identity enclosed:    No</span></span>
-<span><span class="co">#&gt;   p-value:             0.0000</span></span>
+<span><span class="co">#&gt; 160 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
-<p>Notice the joint confidence region test now shows different results.
-The weighted model provides a better fit.</p>
-</div>
-<div class="section level2">
-<h2 id="power-analysis-and-sample-size-determination">Power Analysis and Sample Size Determination<a class="anchor" aria-label="anchor" href="#power-analysis-and-sample-size-determination"></a>
-</h2>
-<div class="section level3">
-<h3 id="understanding-power-in-method-comparisons">Understanding Power in Method Comparisons<a class="anchor" aria-label="anchor" href="#understanding-power-in-method-comparisons"></a>
-</h3>
-<p>Before conducting a method comparison study, it’s crucial to
-determine the appropriate sample size. The
-<code><a href="../reference/deming_power.html">deming_power_sim()</a></code> function estimates statistical power for
-detecting specified biases.</p>
-<div class="section level4">
-<h4 id="simple-power-analysis">Simple Power Analysis<a class="anchor" aria-label="anchor" href="#simple-power-analysis"></a>
-</h4>
-<p>Let’s determine the power to detect 5% proportional bias with
-N=50:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define error characteristics (from validation studies)</span></span>
-<span><span class="va">y_errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.5</span>, beta2 <span class="op">=</span> <span class="fl">0.05</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span></span>
-<span><span class="va">x_errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.4</span>, beta2 <span class="op">=</span> <span class="fl">0.04</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">power_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deming_power.html">deming_power_sim</a></span><span class="op">(</span></span>
-<span>  n_sims <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">200</span><span class="op">)</span>,</span>
-<span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,  <span class="co"># 5% proportional bias</span></span>
-<span>  ideal_slope <span class="op">=</span> <span class="fl">1.0</span>,</span>
-<span>  y_var_params <span class="op">=</span> <span class="va">y_errors</span>,</span>
-<span>  x_var_params <span class="op">=</span> <span class="va">x_errors</span>,</span>
-<span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">power_result</span><span class="op">)</span></span></code></pre></div>
-<p>The joint confidence region provides <strong>13.3 percentage points
-higher power</strong> than confidence intervals!</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="automatic-sample-size-determination">Automatic Sample Size Determination<a class="anchor" aria-label="anchor" href="#automatic-sample-size-determination"></a>
-</h3>
-<p>The <code><a href="../reference/deming_sample_size.html">deming_sample_size()</a></code> function automatically finds
-the minimum N needed:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sample_size_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deming_sample_size.html">deming_sample_size</a></span><span class="op">(</span></span>
-<span>  target_power <span class="op">=</span> <span class="fl">0.90</span>,  <span class="co"># Want 90% power</span></span>
-<span>  initial_n <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  max_n <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  n_sims <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">200</span><span class="op">)</span>,</span>
-<span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,</span>
-<span>  ideal_slope <span class="op">=</span> <span class="fl">1.0</span>,</span>
-<span>  y_var_params <span class="op">=</span> <span class="va">y_errors</span>,</span>
-<span>  x_var_params <span class="op">=</span> <span class="va">x_errors</span>,</span>
-<span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sample_size_result</span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="visualizing-the-power-curve">Visualizing the Power Curve<a class="anchor" aria-label="anchor" href="#visualizing-the-power-curve"></a>
-</h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_size_result</span><span class="op">)</span></span></code></pre></div>
-<p>This creates a power curve showing how statistical power increases
-with sample size for both methods.</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="practical-guidelines">Practical Guidelines<a class="anchor" aria-label="anchor" href="#practical-guidelines"></a>
-</h3>
-<div class="section level4">
-<h4 id="when-to-use-joint-confidence-regions">When to Use Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#when-to-use-joint-confidence-regions"></a>
-</h4>
-<p>The power advantage of joint regions is most pronounced when:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Narrow measurement ranges</strong>: max/min ratio &lt;
-10:1</li>
-<li>
-<strong>Testing against identity</strong>: slope=1, intercept=0</li>
-<li>
-<strong>Clinical lab comparisons</strong>: typical measurement
-ranges</li>
-<li>
-<strong>Limited sample availability</strong>: cost or ethical
-constraints</li>
-</ol>
-</div>
-<div class="section level4">
-<h4 id="specifying-error-characteristics">Specifying Error Characteristics<a class="anchor" aria-label="anchor" href="#specifying-error-characteristics"></a>
-</h4>
-<p>The variance parameters should come from validation data:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># From replicate measurements at different concentrations</span></span>
-<span><span class="va">concentrations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span></span>
-<span><span class="va">cv_percent</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8.5</span>, <span class="fl">6.2</span>, <span class="fl">5.1</span>, <span class="fl">4.8</span>, <span class="fl">5.2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Fit power function to estimate parameters</span></span>
-<span><span class="co"># Then create variance parameters</span></span>
-<span><span class="va">y_var_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  beta1 <span class="op">=</span> <span class="fl">0.5</span>,    <span class="co"># Fitted parameter</span></span>
-<span>  beta2 <span class="op">=</span> <span class="fl">0.05</span>,   <span class="co"># Fitted parameter</span></span>
-<span>  J <span class="op">=</span> <span class="fl">2</span>,          <span class="co"># Typically 2 for CV% pattern</span></span>
-<span>  type <span class="op">=</span> <span class="st">"power"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="effect-of-measurement-range">Effect of Measurement Range<a class="anchor" aria-label="anchor" href="#effect-of-measurement-range"></a>
-</h4>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Narrow range (2:1 ratio) - HIGH correlation</span></span>
-<span><span class="va">narrow_power</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deming_power.html">deming_power_sim</a></span><span class="op">(</span></span>
-<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span><span class="op">)</span>,  <span class="co"># Narrow range</span></span>
-<span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,</span>
-<span>  y_var_params <span class="op">=</span> <span class="va">y_errors</span>,</span>
-<span>  x_var_params <span class="op">=</span> <span class="va">x_errors</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Wide range (20:1 ratio) - LOW correlation  </span></span>
-<span><span class="va">wide_power</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deming_power.html">deming_power_sim</a></span><span class="op">(</span></span>
-<span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">200</span><span class="op">)</span>,  <span class="co"># Wide range</span></span>
-<span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,</span>
-<span>  y_var_params <span class="op">=</span> <span class="va">y_errors</span>,</span>
-<span>  x_var_params <span class="op">=</span> <span class="va">x_errors</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Compare advantages</span></span>
-<span><span class="va">narrow_power</span><span class="op">$</span><span class="va">advantage</span>  </span>
-<span><span class="va">wide_power</span><span class="op">$</span><span class="va">advantage</span>   </span></code></pre></div>
-</div>
-</div>
-<div class="section level3">
-<h3 id="complete-workflow-example">Complete Workflow Example<a class="anchor" aria-label="anchor" href="#complete-workflow-example"></a>
-</h3>
-<p>Here’s a complete workflow for planning a method comparison
-study:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Step 1: Define study parameters from prior knowledge</span></span>
-<span><span class="va">x_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">200</span><span class="op">)</span>  <span class="co"># Analyte measurement range</span></span>
-<span><span class="va">bias_to_detect</span> <span class="op">&lt;-</span> <span class="fl">1.03</span>  <span class="co"># Want to detect 3% bias</span></span>
-<span></span>
-<span><span class="co"># Error profiles from validation studies</span></span>
-<span><span class="va">y_errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.5</span>, beta2 <span class="op">=</span> <span class="fl">0.05</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span></span>
-<span><span class="va">x_errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.4</span>, beta2 <span class="op">=</span> <span class="fl">0.04</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 2: Determine required sample size</span></span>
-<span><span class="va">sample_plan</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deming_sample_size.html">deming_sample_size</a></span><span class="op">(</span></span>
-<span>  target_power <span class="op">=</span> <span class="fl">0.90</span>,</span>
-<span>  initial_n <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  max_n <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  n_sims <span class="op">=</span> <span class="fl">1000</span>,  <span class="co"># Use 1000+ for final determination</span></span>
-<span>  x_range <span class="op">=</span> <span class="va">x_range</span>,</span>
-<span>  actual_slope <span class="op">=</span> <span class="va">bias_to_detect</span>,</span>
-<span>  ideal_slope <span class="op">=</span> <span class="fl">1.0</span>,</span>
-<span>  y_var_params <span class="op">=</span> <span class="va">y_errors</span>,</span>
-<span>  x_var_params <span class="op">=</span> <span class="va">x_errors</span>,</span>
-<span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 3: Review results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sample_plan</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_plan</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 4: Collect data with recommended N</span></span>
-<span><span class="va">recommended_n</span> <span class="op">&lt;-</span> <span class="va">sample_plan</span><span class="op">$</span><span class="va">n_required_joint</span></span>
-<span></span>
-<span><span class="co"># Step 5: After data collection, analyze with dem_reg()</span></span>
-<span><span class="co"># final_results &lt;- dem_reg(x = "method_x", y = "method_y", </span></span>
-<span><span class="co">#                          data = my_data, weighted = TRUE)</span></span>
-<span><span class="co"># plot_joint(final_results)</span></span></code></pre></div>
-</div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-8-3.png" width="700"></p>
+<p>The weighted model provides a better fit.</p>
 </div>
 <div class="section level2">
 <h2 id="theoretical-details">Theoretical Details<a class="anchor" aria-label="anchor" href="#theoretical-details"></a>
@@ -505,13 +338,24 @@ H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 (\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq
 \chi^2_{2,\alpha}
 \]</span></p>
-<p>Where: - <span class="math inline">\(\hat{\beta}\)</span> = estimated
+<p>Where:</p>
+<ul>
+<li>
+<span class="math inline">\(\hat{\beta}\)</span> = estimated
 parameters <span class="math inline">\((\hat{\beta}_0,
-\hat{\beta}_1)\)</span> - <span class="math inline">\(\beta_0\)</span> =
-hypothesized parameters (e.g., <span class="math inline">\((0,
-1)\)</span> for identity) - <span class="math inline">\(V\)</span> =
-variance-covariance matrix - <span class="math inline">\(\chi^2_{2,\alpha}\)</span> = chi-square critical
-value with 2 degrees of freedom</p>
+\hat{\beta}_1)\)</span>
+</li>
+<li>
+<span class="math inline">\(\beta_0\)</span> = hypothesized
+parameters (e.g., <span class="math inline">\((0, 1)\)</span> for
+identity)</li>
+<li>
+<span class="math inline">\(V\)</span> = variance-covariance
+matrix</li>
+<li>
+<span class="math inline">\(\chi^2_{2,\alpha}\)</span> = chi-square
+critical value with 2 degrees of freedom</li>
+</ul>
 <p>This forms an ellipse in parameter space that accounts for the
 correlation between slope and intercept.</p>
 </div>

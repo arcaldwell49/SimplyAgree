@@ -106,7 +106,7 @@ plot.simple_reli <- function(x,  ...){
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid fitted
 #' @export
 
-check.simple_reli <- function(x) {
+check.simple_reli <- function(x, ...) {
 
   check_reli(x)
 }

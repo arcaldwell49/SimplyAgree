@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Power Analysis and Sample Size Determination for Agreement Studies • SimplyAgree</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -41,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -74,12 +79,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Power Analysis and Sample Size Determination for Agreement Studies</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Power Analysis and Sample Size Determination for Agreement Studies</h1>
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2025-11-19</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/power_sample_size_vignette.Rmd" class="external-link"><code>vignettes/power_sample_size_vignette.Rmd</code></a></small>
       <div class="d-none name"><code>power_sample_size_vignette.Rmd</code></div>
@@ -193,8 +197,7 @@ sigma.</p>
 <span>  power <span class="op">=</span> <span class="fl">0.80</span>,      <span class="co"># 80% power</span></span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in compute_gamma(n, p, z_p, alpha, numint): Maximum iterations reached</span></span>
-<span><span class="co">#&gt; in gamma computation</span></span>
+<span><span class="co">#&gt; Maximum iterations reached in gamma computation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;      Power for Exact Method for Assessing Agreement Between Two Methods </span></span>
@@ -221,7 +224,8 @@ sigma.</p>
 <h3 id="overview-1">Overview<a class="anchor" aria-label="anchor" href="#overview-1"></a>
 </h3>
 <p>Calculates power curves using approximate Bland-Altman confidence
-intervals. Useful for exploring power across sample sizes.</p>
+intervals using the method of <span class="citation">Lu et al. (<a href="#ref-lu2016">2016</a>)</span> (which is approximate). Useful for
+exploring power across sample sizes.</p>
 </div>
 <div class="section level3">
 <h3 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a>
@@ -298,7 +302,7 @@ half-width ≤ δ across hypothetical repeated studies.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;      Sample size for Bland-Altman range of agreement (Expected Half-Width) </span></span>
+<span><span class="co">#&gt;      Expected half-width and sample size for limits of agreement </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;               n = 52</span></span>
 <span><span class="co">#&gt;      conf.level = 0.95</span></span>
@@ -350,7 +354,7 @@ probability of achieving target precision.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;      Sample size for Bland-Altman range of agreement (Assurance Probability) </span></span>
+<span><span class="co">#&gt;      Assurance probability &amp; sample size for Limits of Agreement </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                n = 115</span></span>
 <span><span class="co">#&gt;       conf.level = 0.95</span></span>
@@ -442,8 +446,7 @@ size</li>
 <span>  delta <span class="op">=</span> <span class="fl">7</span>, mu <span class="op">=</span> <span class="fl">0.5</span>, sigma <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>  p0_star <span class="op">=</span> <span class="fl">0.95</span>, power <span class="op">=</span> <span class="fl">0.80</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in compute_gamma(n, p, z_p, alpha, numint): Maximum iterations reached</span></span>
-<span><span class="co">#&gt; in gamma computation</span></span>
+<span><span class="co">#&gt; Maximum iterations reached in gamma computation</span></span>
 <span><span class="va">n_indep</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">n</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Independent pairs needed:"</span>, <span class="va">n_indep</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Independent pairs needed: 34</span></span>
@@ -522,8 +525,7 @@ consult a statistician.</p>
 <span>  delta <span class="op">=</span> <span class="va">delta</span>, mu <span class="op">=</span> <span class="fl">0</span>, sigma <span class="op">=</span> <span class="va">sigma</span>,</span>
 <span>  p0_star <span class="op">=</span> <span class="fl">0.95</span>, power <span class="op">=</span> <span class="fl">0.80</span>, alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in compute_gamma(n, p, z_p, alpha, numint): Maximum iterations reached</span></span>
-<span><span class="co">#&gt; in gamma computation</span></span>
+<span><span class="co">#&gt; Maximum iterations reached in gamma computation</span></span>
 <span></span>
 <span><span class="co"># Step 2: Account for clustering</span></span>
 <span><span class="va">DEFF</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="va">m</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="va">ICC</span></span>
@@ -534,8 +536,6 @@ consult a statistician.</p>
 <span><span class="va">K_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">K_pre</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">dropout</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"═══ SAMPLE SIZE SUMMARY ═══\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ═══ SAMPLE SIZE SUMMARY ═══</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Independent pairs:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">n</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Independent pairs: 566</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Design effect:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">DEFF</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
