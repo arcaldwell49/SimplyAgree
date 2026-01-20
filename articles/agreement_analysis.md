@@ -90,8 +90,8 @@ tolerance_limit(
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4982, 0.8056]
-#>         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6983, 1.1543]
+#>         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4983, 0.8056]
+#>         PM 0.2280 [0.1341, 0.3219]   [-0.3163, 0.7723] [-0.6985, 1.1545]
 ```
 
 ### Calculative Approach
@@ -189,8 +189,8 @@ test1
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits
-#>         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4982]
-#>         PM -0.2280 [-0.3218, -0.1342]   [-0.7723, 0.3163] [-1.1543, 0.6983]
+#>         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4983]
+#>         PM -0.2280 [-0.3219, -0.1341]   [-0.7723, 0.3163] [-1.1545, 0.6985]
 ```
 
 ## Agreement
@@ -636,8 +636,8 @@ tolerance_limit(
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.4188  [0.1616, 0.676]   [-0.7957, 1.6333] [-1.3555, 2.1931]
-#>         PM 0.6184 [0.3623, 0.8746]   [-0.8699, 2.1068]  [-1.918, 3.1548]
+#>         AM 0.4188  [0.1616, 0.676]   [-0.7958, 1.6334] [-1.3558, 2.1934]
+#>         PM 0.6184 [0.3622, 0.8746]   [-0.8703, 2.1072] [-1.9189, 3.1558]
 ```
 
 ## Visualizing “Big” Data

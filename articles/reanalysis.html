@@ -238,9 +238,9 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]   [-0.3242, 0.8342] [-0.5239, 1.0339]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3142, 0.8222] [-0.4974, 1.0054]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7109, 1.0729] [-1.4753, 1.8373]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3245, 0.8345] [-0.5248, 1.0348]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3144, 0.8224] [-0.4978, 1.0058]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.7101, 1.0721] [-1.4732, 1.8352]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -274,9 +274,9 @@ researchers.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3465, 0.3085]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2645, 0.2945]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3516, 0.2336]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3466, 0.3086]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
@@ -318,9 +318,9 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2561, -0.1039]   [-0.4324, 0.0724] [-0.5535, 0.1935]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.4601, 0.0361] [-0.5409, 0.1169]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2297, -0.0623]   [-0.4149, 0.1229] [-0.5648, 0.2728]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2564, -0.1036]   [-0.4332, 0.0732]   [-0.556, 0.196]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212   [-0.329, -0.095]   [-0.4603, 0.0363] [-0.5414, 0.1174]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146    [-0.23, -0.062]   [-0.4159, 0.1239] [-0.5676, 0.2756]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -334,7 +334,7 @@ Limits of Agreement for Teso Post Exercise
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2708, 0.2308]</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]</span></span>
 <span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0721, 0.0621]   [-0.1858, 0.1758] [-0.2458, 0.2358]</span></span>
 <span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
