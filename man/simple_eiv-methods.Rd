@@ -39,7 +39,7 @@
   ...
 )
 
-\method{check}{simple_eiv}(x, data = NULL)
+\method{check}{simple_eiv}(x, data = NULL, ...)
 
 plot_joint(x, ...)
 

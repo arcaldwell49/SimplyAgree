@@ -19,7 +19,7 @@
   ...
 )
 
-\method{check}{loa_mermod}(x)
+\method{check}{loa_mermod}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{loa_mermod}.}

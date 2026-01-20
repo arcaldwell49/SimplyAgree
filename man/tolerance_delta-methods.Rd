@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{tolerance_delta}(x)
+\method{check}{tolerance_delta}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{tolerance_delta} as returned from a agreement_limit function.}
