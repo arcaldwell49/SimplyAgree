@@ -74,6 +74,7 @@ utils::globalVariables(c("boot_bias",
                          "method", "slope", "intercept",
                          "xmin", "xmax", "ymin", "ymax",
                          "rbeta",
+                         "id",
                          "index", "residual", "cusum", "lwr", "upr", "rank_x", "rank_y",
                          "the_int", "the_slope", "slope", "intercept", "xmin", "xmax",
                          "ymin", "ymax"))
