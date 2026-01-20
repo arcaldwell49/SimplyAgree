@@ -18,7 +18,7 @@ plot(
 )
 
 # S3 method for class 'loa'
-check(x)
+check(x, ...)
 ```
 
 ## Arguments

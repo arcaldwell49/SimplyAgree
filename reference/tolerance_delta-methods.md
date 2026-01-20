@@ -19,7 +19,7 @@ plot(
 )
 
 # S3 method for class 'tolerance_delta'
-check(x)
+check(x, ...)
 ```
 
 ## Arguments

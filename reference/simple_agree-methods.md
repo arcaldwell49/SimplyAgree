@@ -21,10 +21,10 @@ plot(
   ...
 )
 
-check(x)
+check(x, ...)
 
 # S3 method for class 'simple_agree'
-check(x)
+check(x, ...)
 ```
 
 ## Arguments

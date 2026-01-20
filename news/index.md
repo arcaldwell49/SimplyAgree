@@ -9,6 +9,10 @@
     intervals and plotting.
 - Added more power and sample size determination functions for limits of
   agreement.
+- Added Passing-Bablok regression function (`pb_reg`) for method
+  comparison studies.
+- Updated methods for `simple_eiv` objects to be more extensive and act
+  like other statistical models
 
 ## SimplyAgree 0.2.2
 

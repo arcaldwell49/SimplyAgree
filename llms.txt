@@ -1,6 +1,4 @@
-# SimplyAgree R Package
-
-![](https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png)
+# SimplyAgree
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
@@ -67,10 +65,10 @@ Beyond the two core functions, `SimplyAgree` provides:
   and
   [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
   functions for comprehensive reliability assessment
-- **Agreement Testing**: Exact hypothesis tests for declaring
-  measurement agreement (based on Shieh, 2019)
 - **Power Analysis**: `power_exact_agreement()` and related functions
   for sample size determination in agreement studies
+- **Error-in-Variables**: supports “Deming” and “Passing-Bablok”
+  regression methods for method comparison
 - **Visualization**: Built-in plotting capabilities for Bland-Altman
   plots and related visualizations
 - **Flexible Design Support**: Handles simple, nested, and repeated
@@ -232,16 +230,27 @@ limits of agreement with multiple observations per individual.
   [`check(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
   : Methods for simple_reli objects
 
-## Deming Regression
+## Error-in-Variables Regression
 
 - [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
   **\[stable\]** : Deming Regression
+- [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
+  **\[experimental\]** : Passing-Bablok Regression for Method Comparison
+- [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  : Joint Confidence Region Test for Method Agreement
 - [`print(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`formula(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`model.frame(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`summary(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`confint(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`plot(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`check(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`vcov(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`coef(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`fitted(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`residuals(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`predict(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   : Methods for simple_eiv objects
 
 ## Agreement Tests
@@ -335,7 +344,7 @@ Old functions that are no longer maintained; use with caution
   Tests](https://aaroncaldwell.us/SimplyAgree/articles/agree_tests.md):
 - [Agreement & Tolerance
   Limits](https://aaroncaldwell.us/SimplyAgree/articles/agreement_analysis.md):
-- [Deming
+- [Errors-in-Variables
   Regression](https://aaroncaldwell.us/SimplyAgree/articles/Deming.md):
 - [Power Analysis and Sample Size Determination for Agreement
   Studies](https://aaroncaldwell.us/SimplyAgree/articles/power_sample_size_vignette.md):

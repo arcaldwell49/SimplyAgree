@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Agreement &amp; Tolerance Limits • SimplyAgree</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -41,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -74,12 +79,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Agreement &amp; Tolerance Limits</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Agreement &amp; Tolerance Limits</h1>
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-01-13</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -175,8 +179,8 @@ correlation.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4983, 0.8056]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1341, 0.3219]   [-0.3163, 0.7723] [-0.6985, 1.1545]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4982, 0.8056]</span></span>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6983, 1.1543]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -277,8 +281,8 @@ controlling for time of day (<code>tod</code>).</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4983]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3219, -0.1341]   [-0.7723, 0.3163] [-1.1545, 0.6985]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4982]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]   [-0.7723, 0.3163] [-1.1543, 0.6983]</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -753,8 +757,8 @@ difference between the two paired measures.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676]   [-0.7958, 1.6334] [-1.3558, 2.1934]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8746]   [-0.8703, 2.1072] [-1.9189, 3.1558]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676]   [-0.7957, 1.6333] [-1.3555, 2.1931]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3623, 0.8746]   [-0.8699, 2.1068]  [-1.918, 3.1548]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>

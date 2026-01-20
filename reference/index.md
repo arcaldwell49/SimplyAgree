@@ -30,16 +30,27 @@
   [`check(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
   : Methods for simple_reli objects
 
-## Deming Regression
+## Error-in-Variables Regression
 
 - [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
   **\[stable\]** : Deming Regression
+- [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
+  **\[experimental\]** : Passing-Bablok Regression for Method Comparison
+- [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  : Joint Confidence Region Test for Method Agreement
 - [`print(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`formula(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`model.frame(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`summary(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`confint(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`plot(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`check(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`vcov(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`coef(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`fitted(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`residuals(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+  [`predict(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   : Methods for simple_eiv objects
 
 ## Agreement Tests

@@ -476,7 +476,7 @@ print(a1)
 #> ###- Shieh Results -###
 #> Exact 90% C.I.  [-1.2551, 2.1318]
 #> Hypothesis Test: No Hypothesis Test
-#> Warning: hypothesis test likely bogus with proportional bias.
+#> note: hypothesis test likely bogus with proportional bias.
 #> ###- Bland-Altman Limits of Agreement (LoA) -###
 #>           Estimate Lower CI Upper CI CI Level
 #> Bias        0.4383 -0.08968   0.9663     0.95

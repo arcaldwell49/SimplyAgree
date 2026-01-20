@@ -12,7 +12,7 @@ print(x, ...)
 plot(x, ...)
 
 # S3 method for class 'simple_reli'
-check(x)
+check(x, ...)
 ```
 
 ## Arguments

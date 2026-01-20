@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>SimplyAgree R package • SimplyAgree</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -45,7 +50,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -74,9 +79,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="simplyagree-r-package">SimplyAgree R Package<a class="anchor" aria-label="anchor" href="#simplyagree-r-package"></a>
-</h1></div>
-<p><img src="https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png" width="150" height="150"></p>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="simplyagree-">SimplyAgree 
+<a class="anchor" aria-label="anchor" href="#simplyagree-"></a>
+</h1>
+</div>
 <p><em>Artwork courtesy of Chelsea Parlett Pelleriti</em></p>
 <!-- badges: start -->
 
@@ -130,9 +137,9 @@
 <li>
 <strong>Reliability Analysis</strong>: <code><a href="reference/reli_stats.html">reli_stats()</a></code> and <code><a href="reference/reli_stats.html">reli_aov()</a></code> functions for comprehensive reliability assessment</li>
 <li>
-<strong>Agreement Testing</strong>: Exact hypothesis tests for declaring measurement agreement (based on Shieh, 2019)</li>
-<li>
 <strong>Power Analysis</strong>: <code>power_exact_agreement()</code> and related functions for sample size determination in agreement studies</li>
+<li>
+<strong>Error-in-Variables</strong>: supports “Deming” and “Passing-Bablok” regression methods for method comparison</li>
 <li>
 <strong>Visualization</strong>: Built-in plotting capabilities for Bland-Altman plots and related visualizations</li>
 <li>

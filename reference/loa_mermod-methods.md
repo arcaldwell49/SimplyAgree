@@ -20,7 +20,7 @@ plot(
 )
 
 # S3 method for class 'loa_mermod'
-check(x)
+check(x, ...)
 ```
 
 ## Arguments

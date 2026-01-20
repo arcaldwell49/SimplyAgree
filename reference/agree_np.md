@@ -95,8 +95,6 @@ Issue 2, pp. 135–160). SAGE Publications.
 ``` r
 data('reps')
 agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
-#> Warning: Model has 4 prior weights, but we recovered 2 rows of data.
-#> So prior weights were ignored.
 #> Warning: Evidence of proportional bias. Consider setting prop_bias to TRUE.
 #> Limit of Agreement = 95%
 #> Binomial proportions test and quantile regression for LoA

@@ -9,37 +9,45 @@ and Y) that are measured with error.
 
 ``` r
 dem_reg(
-  x,
-  y,
-  id = NULL,
+  formula = NULL,
   data,
+  id = NULL,
+  x = NULL,
+  y = NULL,
   conf.level = 0.95,
   weighted = FALSE,
   weights = NULL,
   error.ratio = 1,
+  model = TRUE,
   keep_data = FALSE,
-  compute_joint = TRUE
+  ...
 )
 ```
 
 ## Arguments
 
-- x:
+- formula:
 
-  Name of column with first measurement.
-
-- y:
-
-  Name of other column with the other measurement to compare to the
-  first.
-
-- id:
-
-  Column with subject identifier.
+  A formula of the form `y ~ x` specifying the model. If provided, takes
+  precedence over `x` and `y` arguments.
 
 - data:
 
   Data frame with all data.
+
+- id:
+
+  Column with subject identifier (optional).
+
+- x:
+
+  Name of column with first measurement (deprecated in favor of formula
+  interface).
+
+- y:
+
+  Name of other column with the other measurement to compare to the
+  first (deprecated in favor of formula interface).
 
 - conf.level:
 
@@ -60,35 +68,71 @@ dem_reg(
   Ratio of the two error variances. Default is 1. This argument is
   ignored if subject identifiers are provided.
 
+- model:
+
+  Logical. If TRUE (default), the model frame is stored in the returned
+  object. This is needed for methods like
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html),
+  [`residuals()`](https://rdrr.io/r/stats/residuals.html), and
+  [`predict()`](https://rdrr.io/r/stats/predict.html) to work without
+  supplying `data`. If FALSE, the model frame is not stored (saves
+  memory for large datasets), but these methods will require a `data`
+  argument.
+
 - keep_data:
 
   Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are
-  returned; default is FALSE. Users may wish to set to FALSE if data is
-  especially large.
+  returned; default is FALSE.
 
-- compute_joint:
+- ...:
 
-  Logical indicator (TRUE/FALSE). If TRUE, joint confidence region is
-  computed. Default is TRUE.
+  Additional arguments (currently unused).
 
 ## Value
 
 The function returns a simple_eiv (eiv meaning "error in variables")
-object.
+object with the following components:
 
-- `call`: The matched call.
+- `coefficients`: Named vector of coefficients (intercept and slope).
 
-- `model`: Data frame presenting the results from the Deming regression
-  analysis.
+- `residuals`: Optimized residuals from the fitted model.
 
-- `resamples`: List containing resamples from jacknife procedure.
+- `fitted.values`: Estimated true Y values (Y-hat).
+
+- `model_table`: Data frame presenting the full results from the Deming
+  regression analysis.
 
 - `vcov`: Variance-covariance matrix for slope and intercept.
 
-- `joint_region`: Joint confidence region ellipse coordinates (if
-  compute_joint = TRUE).
+- `df.residual`: Residual degrees of freedom.
 
-- `joint_test`: Test of whether ideal point is enclosed by joint region.
+- `call`: The matched call.
+
+- `terms`: The terms object used.
+
+- `xlevels`: (Only for models with factors) levels of factors.
+
+- `model`: The model frame.
+
+- `x_vals`: Original x values used in fitting.
+
+- `y_vals`: Original y values used in fitting.
+
+- `x_hat`: Estimated true X values.
+
+- `y_hat`: Estimated true Y values.
+
+- `error.ratio`: Error ratio used in fitting.
+
+- `weighted`: Whether weighted regression was used.
+
+- `weights`: Weights used in fitting.
+
+- `conf.level`: Confidence level used.
+
+- `resamples`: List containing resamples from jacknife procedure (if
+  keep_data = TRUE).
 
 ## Details
 
@@ -110,12 +154,14 @@ indicating the subject identifier with the id argument. When the
 replicates are not available in the data, then the ratio of error
 variances (y/x) can be provided with the error.ratio argument.
 
-When `compute_joint = TRUE`, the function computes the joint (slope,
-intercept) confidence region based on the chi-square distribution with 2
-degrees of freedom. This elliptical region accounts for the correlation
-between slope and intercept estimates and can provide improved power for
-detecting deviations from (null) hypothesized values (e.g., slope = 1,
-intercept = 0).
+## Interface Change
+
+The `x` and `y` arguments are deprecated. Please use the `formula`
+interface instead:
+
+- Old: `dem_reg(x = "x_var", y = "y_var", data = df)`
+
+- New: `dem_reg(y_var ~ x_var, data = df)`
 
 ## References
 
@@ -129,3 +175,15 @@ comparison studies. Clinical chemistry, 39, 424-432.
 Sadler, W.A. (2010). Joint parameter confidence regions improve the
 power of parametric regression in method-comparison studies.
 Accreditation and Quality Assurance, 15, 547-554.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# New formula interface (recommended)
+model <- dem_reg(y ~ x, data = mydata)
+
+# Old interface (still works with deprecation warning)
+model <- dem_reg(x = "x", y = "y", data = mydata)
+} # }
+```
