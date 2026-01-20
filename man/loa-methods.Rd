@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{loa}(x)
+\method{check}{loa}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{loa} as returned from a agreement_limit function.}

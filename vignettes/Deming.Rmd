@@ -1,5 +1,5 @@
 ---
-title: "Deming Regression"
+title: "Errors-in-Variables Regression"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
@@ -9,7 +9,7 @@ output:
 bibliography: refs.bib
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Deming Regression}
+  %\VignetteIndexEntry{Errors-in-Variables Regression}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -29,19 +29,7 @@ Error-in-variables (EIV) models are useful tools to account for measurement erro
 
 Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990). 
 
-# Joint Confidence Regions
-
-A key enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
-
-Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
-
-1. **Higher Statistical Power**: The ellipse typically requires 20-50% fewer samples than traditional confidence intervals to detect the same bias
-2. **Accounts for Parameter Correlation**: When the measurement range is narrow, slope and intercept are highly negatively correlated
-3. **More Appropriate Test**: Testing against a point (e.g., slope=1, intercept=0) is naturally done with a region, not separate intervals
-
-The power advantage is most pronounced when the ratio of maximum to minimum X values is small (< 10:1), which is common in clinical method comparisons.
-
-# Basic Deming Regression
+# Deming Regression
 
 ## Simple Deming Regression
 
@@ -56,43 +44,23 @@ dat = data.frame(
 )
 ```
 
-Also, we will assume, based on historical data, that the measurement error ratio is equal to 4.
+Also, we will assume, based on historical data, that the measurement error ratio is equal to 2.
 
-The data can be run through the `dem_reg` function and the results printed. Note that the output now includes a joint confidence region test.
+The data can be run through the `dem_reg` function and the results printed. 
 
 ```{r}
-dem1 = dem_reg(x = "x",
-               y = "y",
+dem1 = dem_reg(y ~ x,
                data = dat,
-               error.ratio = 4,
+               error.ratio = 2,
                weighted = FALSE)
 dem1
 ```
 
-The resulting regression line can then be plotted. The subtitle now indicates whether the identity line is enclosed by the joint confidence region.
+The resulting regression line can then be plotted. 
 
 ```{r}
-plot(dem1)
+plot(dem1, interval = "confidence")
 ```
-
-## Visualizing the Joint Confidence Region
-
-A new plotting method `plot_joint()` allows visualization of the confidence region in parameter space:
-
-```{r}
-plot_joint(dem1, 
-           ideal_slope = 1, 
-           ideal_intercept = 0,
-           show_intervals = TRUE)
-```
-
-This plot shows:
-- The **red ellipse**: Joint confidence region
-- The **blue rectangle**: Traditional confidence intervals
-- The **black dot**: Estimated (intercept, slope)
-- The **green/red X**: Ideal point (whether enclosed or not)
-
-Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
 
 ## Model Diagnostics
 
@@ -102,7 +70,11 @@ The assumptions of the Deming regression model, primarily normality and homogene
 check(dem1)
 ```
 
-# Weighted Deming Regression
+## Fitted Values and Residuals
+
+After fitting a Deming regression model, you can extract the estimated true values and residuals. The `fitted()` function returns the estimated true Y values, accounting for measurement error. The `residuals()` function returns the optimized residuals by default, which correspond to the perpendicular distances from each point to the regression line.
+
+## Weighted Deming Regression
 
 For this example, I will rely upon the "ferritin" data from the `deming` R package.
 
@@ -117,12 +89,13 @@ Let me demonstrate the problem with using simple Deming regression when the weig
 
 ```{r}
 dem2 = dem_reg(
-  x = "new.lot",
-  y = "old.lot",
+  old.lot ~ new.lot,
   data = ferritin,
   weighted = FALSE
 )
-dem2
+summary(dem2)
+
+plot(dem2)
 
 check(dem2)
 ```
@@ -131,183 +104,144 @@ Now, let us see what happens when `weighted` is set to TRUE.
 
 ```{r}
 dem3 = dem_reg(
-  x = "new.lot",
-  y = "old.lot",
+  old.lot ~ new.lot,
   data = ferritin,
   weighted = TRUE
 )
-dem3
+summary(dem3)
 
 plot(dem3)
 
 check(dem3)
 ```
 
-Notice the joint confidence region test now shows different results. The weighted model provides a better fit.
+The weighted model provides a better fit.
 
-# Power Analysis and Sample Size Determination
+# Passing-Bablok Regression
 
-## Understanding Power in Method Comparisons
+Passing-Bablok regression is a robust, nonparametric alternative to Deming regression for method comparison studies [@passing1983]. Unlike Deming regression, it makes no assumptions about the distribution of the measurement errors. The method estimates the slope as the shifted median of all pairwise slopes between data points, which makes it resistant to outliers.
 
-Before conducting a method comparison study, it's crucial to determine the appropriate sample size. The `deming_power_sim()` function estimates statistical power for detecting specified biases.
+## When to Use Passing-Bablok
 
-### Simple Power Analysis
+Passing-Bablok regression is particularly useful when:
 
-Let's determine the power to detect 5% proportional bias with N=50:
+- Both X and Y are measured with error
+- You want a robust method not sensitive to outliers
+- The relationship is assumed to be linear
+- X and Y are highly positively correlated
 
-```{r, eval=TRUE}
-# Define error characteristics (from validation studies)
-y_errors <- list(beta1 = 0.5, beta2 = 0.05, J = 2, type = "power")
-x_errors <- list(beta1 = 0.4, beta2 = 0.04, J = 2, type = "power")
+## Basic Usage
 
-power_result <- deming_power_sim(
-  n_sims = 100,
-  sample_size = 50,
-  x_range = c(20, 200),
-  actual_slope = 1.05,  # 5% proportional bias
-  ideal_slope = 1.0,
-  y_var_params = y_errors,
-  x_var_params = x_errors,
-  weighted = TRUE
+The `pb_reg()` function implements three variants of Passing-Bablok regression:
+
+- **"scissors"** (default): Most robust, scale-invariant method from @bablok1988
+- **"symmetric"**: Original method from @passing1983
+- **"invariant"**: Scale-invariant method from @passing1984
+
+```{r}
+# Create example data
+pb_data <- data.frame(
+  method1 = c(69.3, 27.1, 61.3, 50.8, 34.4, 92.3, 57.5, 45.5, 33.3, 60.9,
+              56.3, 49.9, 89.7, 28.9, 96.3, 76.6, 83.2, 79.4, 51.7, 32.5,
+              99.1, 14.2, 84.1, 48.8, 61.5, 84.9, 93.2, 73.8, 62.1, 98.6),
+  method2 = c(69.1, 26.7, 61.4, 51.2, 34.7, 88.5, 57.9, 45.1, 33.4, 60.8,
+              66.5, 48.2, 88.3, 29.3, 96.4, 77.1, 82.7, 78.9, 51.6, 28.8,
+              98.4, 12.7, 83.6, 47.3, 61.2, 84.6, 92.1, 73.4, 61.9, 98.6)
 )
 
-print(power_result)
+# Fit Passing-Bablok regression
+pb1 <- pb_reg(method2 ~ method1, data = pb_data)
+pb1
 ```
 
+## Summary and Plots
 
+The summary provides details about the regression coefficients and diagnostic tests:
 
-The joint confidence region provides **13.3 percentage points higher power** than confidence intervals!
-
-## Automatic Sample Size Determination
-
-The `deming_sample_size()` function automatically finds the minimum N needed:
-
-```{r, eval=TRUE}
-sample_size_result <- deming_sample_size(
-  target_power = 0.90,  # Want 90% power
-  initial_n = 30,
-  max_n = 200,
-  n_sims = 100,
-  x_range = c(20, 200),
-  actual_slope = 1.05,
-  ideal_slope = 1.0,
-  y_var_params = y_errors,
-  x_var_params = x_errors,
-  weighted = TRUE
-)
-
-print(sample_size_result)
+```{r}
+summary(pb1)
 ```
 
+The `plot()` method displays the regression line with data:
 
-
-### Visualizing the Power Curve
-
-```{r, eval=FALSE}
-plot(sample_size_result)
+```{r}
+plot(pb1)
 ```
 
-This creates a power curve showing how statistical power increases with sample size for both methods.
+## Model Diagnostics
 
-## Practical Guidelines
-
-### When to Use Joint Confidence Regions
-
-The power advantage of joint regions is most pronounced when:
-
-1. **Narrow measurement ranges**: max/min ratio < 10:1
-2. **Testing against identity**: slope=1, intercept=0
-3. **Clinical lab comparisons**: typical measurement ranges
-4. **Limited sample availability**: cost or ethical constraints
-
-### Specifying Error Characteristics
-
-The variance parameters should come from validation data:
-
-```{r, eval=TRUE}
-# From replicate measurements at different concentrations
-concentrations <- c(10, 25, 50, 100, 200)
-cv_percent <- c(8.5, 6.2, 5.1, 4.8, 5.2)
-
-# Fit power function to estimate parameters
-# Then create variance parameters
-y_var_params <- list(
-  beta1 = 0.5,    # Fitted parameter
-  beta2 = 0.05,   # Fitted parameter
-  J = 2,          # Typically 2 for CV% pattern
-  type = "power"
-)
+The `check()` method provides diagnostic plots specific to Passing-Bablok regression, including the CUSUM linearity test and Kendall's tau correlation:
+ 
+```{r}
+check(pb1)
 ```
 
-### Effect of Measurement Range
+## Bootstrap Confidence Intervals
 
-```{r, eval=TRUE}
-# Narrow range (2:1 ratio) - HIGH correlation
-narrow_power <- deming_power_sim(
-  sample_size = 50,
-  x_range = c(50, 100),  # Narrow range
-  actual_slope = 1.05,
-  y_var_params = y_errors,
-  x_var_params = x_errors
-)
+For more robust inference, especially with the "invariant" or "scissors" methods, bootstrap confidence intervals are recommended:
 
-# Wide range (20:1 ratio) - LOW correlation  
-wide_power <- deming_power_sim(
-  sample_size = 50,
-  x_range = c(10, 200),  # Wide range
-  actual_slope = 1.05,
-  y_var_params = y_errors,
-  x_var_params = x_errors
-)
-
-# Compare advantages
-narrow_power$advantage  
-wide_power$advantage   
+```{r}
+pb2 <- pb_reg(method2 ~ method1, 
+              data = pb_data, 
+              replicates = 999)
+summary(pb2)
 ```
 
-## Complete Workflow Example
+# Joint Confidence Regions
 
-Here's a complete workflow for planning a method comparison study:
+A theoretically valid, but still experimental, enhancement to the `dem_reg` and `pb_reg` functions is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
 
-```{r, eval=TRUE}
-# Step 1: Define study parameters from prior knowledge
-x_range <- c(20, 200)  # Analyte measurement range
-bias_to_detect <- 1.03  # Want to detect 3% bias
+Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
 
-# Error profiles from validation studies
-y_errors <- list(beta1 = 0.5, beta2 = 0.05, J = 2, type = "power")
-x_errors <- list(beta1 = 0.4, beta2 = 0.04, J = 2, type = "power")
+- **Higher Statistical Power**: The ellipse typically requires 20-50% fewer samples than traditional confidence intervals to detect the same bias
+- **Accounts for Parameter Correlation**: When the measurement range is narrow, slope and intercept are highly negatively correlated
+- **More Appropriate Test**: Testing against a point (e.g., slope=1, intercept=0) is naturally done with a region, not separate intervals
 
-# Step 2: Determine required sample size
-sample_plan <- deming_sample_size(
-  target_power = 0.90,
-  initial_n = 65,
-  max_n = 200,
-  n_sims = 100,  # Use 1000+ for final determination
-  x_range = x_range,
-  actual_slope = bias_to_detect,
-  ideal_slope = 1.0,
-  y_var_params = y_errors,
-  x_var_params = x_errors,
-  weighted = TRUE
-)
+The power advantage is most pronounced when the ratio of maximum to minimum X values is small (< 10:1), which is common in clinical method comparisons.
 
-# Step 3: Review results
-print(sample_plan)
-plot(sample_plan)
+## Visualizing the Joint Confidence Region
 
-# Step 4: Collect data with recommended N
-recommended_n <- sample_plan$n_required_joint
+The `plot_joint()` function allows visualization of the confidence region in parameter space:
 
-# Step 5: After data collection, analyze with dem_reg()
-# final_results <- dem_reg(x = "method_x", y = "method_y", 
-#                          data = my_data, weighted = TRUE)
-# plot_joint(final_results)
+```{r}
+plot_joint(dem1, 
+           ideal_slope = 1, 
+           ideal_intercept = 0,
+           show_intervals = TRUE)
+```
+
+This plot shows:
+
+- The **red ellipse**: Joint confidence region
+- The **blue rectangle**: Traditional confidence intervals
+- The **black dot**: Estimated (intercept, slope)
+- The **green/red X**: Ideal point (whether enclosed or not)
+
+Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
+
+For Passing-Bablok regression, bootstrap resampling must be used to obtain the variance-covariance matrix needed for the joint confidence region:
+
+```{r}
+plot_joint(pb2)
+```
+
+## Joint Hypothesis Test
+
+The `joint_test()` function provides a formal hypothesis test for whether the identity line (slope = 1, intercept = 0) falls within the joint confidence region:
+
+```{r}
+joint_test(dem1)
+```
+
+This returns an `htest` object with the Mahalanobis distance (chi-squared statistic) and p-value. The test can also be applied to Passing-Bablok models fitted with bootstrap:
+
+```{r}
+joint_test(pb2)
 ```
 
 # Theoretical Details
 
-## Calculative Approach
+## Deming Calculative Approach
 
 Deming regression assumes paired measures ($x_i, \space  y_i$) are each measured with error.
 
@@ -325,21 +259,21 @@ $$
 \hat Y_i = \beta_0 + \beta_1 \cdot \hat X_i
 $$
 
-Traditionally there are 2 null hypotheses
+Traditionally there are 2 null hypotheses.
 
-First, the intercept is equal to zero
+First, the intercept is equal to zero:
 
 $$
 H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 $$
 
-Second, that the slope is equal to one.
+Second, that the slope is equal to one:
 
 $$
 H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 $$
 
-## Joint Confidence Region
+# Joint Confidence Region Calculative Approach
 
 The joint $(1-\alpha) \times 100\%$ confidence region for $(\beta_0, \beta_1)$ is defined as:
 

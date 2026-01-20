@@ -106,7 +106,7 @@ plot.loa_mermod <- function(x,
 #' @importFrom patchwork wrap_plots
 #' @export
 
-check.loa_mermod <- function(x) {
+check.loa_mermod <- function(x, ...) {
   if(x$call$condition == 1){
     df_plt = model.frame(x$call$lm_mod)
     colnames(df_plt) = c("diff", "avg", "id")

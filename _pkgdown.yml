@@ -8,7 +8,8 @@ template:
   bootstrap: 5
   math-rendering: mathjax
   light-switch: true
-  bootswatch: materia
+  bslib:
+    bootswatch: minty
   opengraph:
     image:
       src: images/sticker.png
@@ -34,9 +35,11 @@ reference:
   - reli_aov
   - simple_reli-methods
 
-- title: "Deming Regression"
+- title: "Error-in-Variables Regression"
   contents:
   - dem_reg
+  - pb_reg
+  - joint_test
   - simple_eiv-methods
 
 - title: "Agreement Tests"

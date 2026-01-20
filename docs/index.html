@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>SimplyAgree R package • SimplyAgree</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -45,7 +50,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="articles/Deming.html">Deming Regression</a></li>
+    <li><a class="dropdown-item" href="articles/Deming.html">Error-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -74,9 +79,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="simplyagree-r-package">SimplyAgree R Package<a class="anchor" aria-label="anchor" href="#simplyagree-r-package"></a>
-</h1></div>
-<p><img src="https://raw.githubusercontent.com/arcaldwell49/SimplyAgree/master/images/sticker.png" width="150" height="150"></p>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="simplyagree-">SimplyAgree 
+<a class="anchor" aria-label="anchor" href="#simplyagree-"></a>
+</h1>
+</div>
 <p><em>Artwork courtesy of Chelsea Parlett Pelleriti</em></p>
 <!-- badges: start -->
 
@@ -85,13 +92,91 @@
 <div class="section level1">
 <h1 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
 </h1>
-<p><code>SimplyAgree</code> is an R package, and <a href="https://www.jamovi.org/" class="external-link">jamovi</a> module, created to make agreement and reliability analyses easier for the average researcher. The functions within this package include simple tests of agreement (<code>agree_test</code>), agreement analysis for nested (<code>agree_nest</code>) and replicate data (<code>agree_reps</code>), and provide robust analyses of reliability (<code>reli_stats</code>). In addition, this package contains a set of functions to help when planning studies looking to assess measurement agreement (<code>blandPowerCurve</code>).</p>
+<p><code>SimplyAgree</code> is an R package, and <a href="https://www.jamovi.org/" class="external-link">jamovi</a> module, designed to simplify agreement and reliability analyses for researchers. The package implements rigorous statistical methods for method comparison studies, providing both classical and modern approaches to assessing measurement agreement.</p>
+<div class="section level2">
+<h2 id="core-functionality">Core Functionality<a class="anchor" aria-label="anchor" href="#core-functionality"></a>
+</h2>
+<p>The package provides two primary approaches for assessing agreement between measurement methods:</p>
+<div class="section level3">
+<h3 id="id_1-limits-of-agreement-agreement_limit">1. Limits of Agreement: <code>agreement_limit()</code>
+<a class="anchor" aria-label="anchor" href="#id_1-limits-of-agreement-agreement_limit"></a>
+</h3>
+<p>The <code><a href="reference/agreement_limit.html">agreement_limit()</a></code> function implements Bland-Altman style limits of agreement analysis. This approach:</p>
+<ul>
+<li>Computes confidence intervals for the range of agreement between two methods</li>
+<li>Supports both simple and nested/repeated measures designs</li>
+<li>Implements exact procedures based on Shieh (2019) and Jan &amp; Shieh
+<ol start="2018" style="list-style-type: decimal"><li>
+</li></ol>
+</li>
+<li>Handles design effects for clustered data</li>
+<li>Provides multiple interval estimation methods (exact, MOVER, Zou’s method)</li>
+</ul>
+<p>This is the preferred function when you want to describe what proportion of differences fall within specified bounds or when making inferences about the central region of the paired-difference distribution.</p>
+</div>
+<div class="section level3">
+<h3 id="id_2-tolerance-intervals-tolerance_limit">2. Tolerance Intervals: <code>tolerance_limit()</code>
+<a class="anchor" aria-label="anchor" href="#id_2-tolerance-intervals-tolerance_limit"></a>
+</h3>
+<p>The <code><a href="reference/tolerance_limit.html">tolerance_limit()</a></code> function creates statistical tolerance intervals that:</p>
+<ul>
+<li>Construct intervals expected to contain a specified proportion of future observations</li>
+<li>Implement exact equal-tailed tolerance intervals</li>
+<li>Support confidence intervals for ranges of percentiles</li>
+<li>Handle both simple and complex study designs</li>
+<li>Provide sample size and power calculations</li>
+</ul>
+<p>Tolerance intervals are most appropriate when making simultaneous inferences about pairs of percentile limits or when you need prediction-oriented intervals for future measurements.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="additional-features">Additional Features<a class="anchor" aria-label="anchor" href="#additional-features"></a>
+</h2>
+<p>Beyond the two core functions, <code>SimplyAgree</code> provides:</p>
+<ul>
+<li>
+<strong>Reliability Analysis</strong>: <code><a href="reference/reli_stats.html">reli_stats()</a></code> and <code><a href="reference/reli_stats.html">reli_aov()</a></code> functions for comprehensive reliability assessment</li>
+<li>
+<strong>Power Analysis</strong>: <code>power_exact_agreement()</code> and related functions for sample size determination in agreement studies</li>
+<li>
+<strong>Error-in-Variables</strong>: supports “Deming” and “Passing-Bablok” regression methods for method comparison</li>
+<li>
+<strong>Visualization</strong>: Built-in plotting capabilities for Bland-Altman plots and related visualizations</li>
+<li>
+<strong>Flexible Design Support</strong>: Handles simple, nested, and repeated measures designs with appropriate variance adjustments</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="installing-simplyagree">Installing SimplyAgree<a class="anchor" aria-label="anchor" href="#installing-simplyagree"></a>
 </h2>
 <p>You can install the most up-to-date version of <code>SimplyAgree</code> from <a href="https://github.com/arcaldwell49/SimplyAgree" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/remotes/man/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"arcaldwell49/SimplyAgree"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start-example">Quick Start Example<a class="anchor" aria-label="anchor" href="#quick-start-example"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://aaroncaldwell.us/SimplyAgree/">SimplyAgree</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load example data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">temps</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Limits of agreement analysis</span></span>
+<span><span class="va">agree_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"method1"</span>, </span>
+<span>                                  y <span class="op">=</span> <span class="st">"method2"</span>, </span>
+<span>                                  data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>                                  agree.level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Tolerance interval analysis  </span></span>
+<span><span class="va">tol_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"method1"</span>,</span>
+<span>                                y <span class="op">=</span> <span class="st">"method2"</span>, </span>
+<span>                                data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>                                prop <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reliability analysis</span></span>
+<span><span class="va">reli_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/reli_stats.html">reli_stats</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>                           wide <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level1">
@@ -115,15 +200,20 @@
 <h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h1>
 <p>The functions in this package are largely based on the following works:</p>
-<p>Lin L (1989). A concordance correlation coefficient to evaluate reproducibility. <em>Biometrics</em> 45: 255 - 268. <a href="https://doi.org/10.2307/2532051" class="external-link uri">https://doi.org/10.2307/2532051</a></p>
-<p>Shieh, G. (2019). Assessing agreement between two methods of quantitative measurements: Exact test procedure and sample size calculation. <em>Statistics in Biopharmaceutical Research</em>, 1-8. <a href="https://doi.org/10.1080/19466315.2019.1677495" class="external-link uri">https://doi.org/10.1080/19466315.2019.1677495</a></p>
-<p>Parker, R. A., et al (2016). Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients. Plos one, 11(12), e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link uri">https://doi.org/10.1371/journal.pone.0168321</a></p>
-<p>Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. <em>Statistical methods in medical research</em>, 22(6), 630-642. <a href="https://doi.org/10.1177/0962280211402548" class="external-link uri">https://doi.org/10.1177/0962280211402548</a></p>
-<p>Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. <em>The Journal of Strength &amp; Conditioning Research</em>, 19(1), 231-240.</p>
-<p>Lu, Meng-Jie, et al (2016). “Sample Size for Assessing Agreement between Two Methods of Measurement by Bland−Altman Method” <em>The International Journal of Biostatistics</em>, 12(2), <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link uri">https://doi.org/10.1515/ijb-2015-0039</a></p>
-<p>King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. <em>Statistics in Medicine</em>, 20, 2131:2147.</p>
-<p>King, TS, Chinchilli, VM, and Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. <em>Statistics in Medicine</em>, 26, 3095:3113.</p>
-<p>Carrasco, JL, et al. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. <em>Computer Methods and Programs in Biomedicine</em>, 109, 293-304.</p>
+<p>Bland, J. M., &amp; Altman, D. G. (1986). Statistical methods for assessing agreement between two methods of clinical measurement. <em>The Lancet</em>, 327(8476), 307-310. <a href="https://doi.org/10.1016/S0140-6736(86)90837-8" class="external-link uri">https://doi.org/10.1016/S0140-6736(86)90837-8</a></p>
+<p>Bland, J. M., &amp; Altman, D. G. (1999). Measuring agreement in method comparison studies. <em>Statistical Methods in Medical Research</em>, 8(2), 135-160. <a href="https://doi.org/10.1177/096228029900800204" class="external-link uri">https://doi.org/10.1177/096228029900800204</a></p>
+<p>Carrasco, JL, et al. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. <em>Computer Methods and Programs in Biomedicine</em>, 109, 293-304. <a href="https://doi.org/10.1016/j.cmpb.2012.09.002" class="external-link uri">https://doi.org/10.1016/j.cmpb.2012.09.002</a></p>
+<p>Francq, B. G., Berger, M., &amp; Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. <em>Statistics in Medicine</em>, 39(28), 4334-4349. <a href="https://doi.org/10.1002/sim.8709" class="external-link uri">https://doi.org/10.1002/sim.8709</a></p>
+<p>Francq, B. G., Lin, D., &amp; Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. <em>Statistics in Medicine</em>, 38(30), 5603-5622. <a href="https://doi.org/10.1002/sim.8386" class="external-link uri">https://doi.org/10.1002/sim.8386</a></p>
+<p>Jan, S. L., &amp; Shieh, G. (2018). The Bland-Altman range of agreement: Exact interval procedure and sample size determination. <em>Computers in Biology and Medicine</em>, 100, 247-252. <a href="https://doi.org/10.1016/j.compbiomed.2018.06.020" class="external-link uri">https://doi.org/10.1016/j.compbiomed.2018.06.020</a></p>
+<p>King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. <em>Statistics in Medicine</em>, 20, 2131-2147. <a href="https://doi.org/10.1002/sim.845" class="external-link uri">https://doi.org/10.1002/sim.845</a></p>
+<p>King, TS, Chinchilli, VM, and Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. <em>Statistics in Medicine</em>, 26, 3095-3113. <a href="https://doi.org/10.1002/sim.2778" class="external-link uri">https://doi.org/10.1002/sim.2778</a></p>
+<p>Lin, L. I. (1989). A concordance correlation coefficient to evaluate reproducibility. <em>Biometrics</em>, 45(1), 255-268. <a href="https://doi.org/10.2307/2532051" class="external-link uri">https://doi.org/10.2307/2532051</a></p>
+<p>Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between Two Methods of Measurement by Bland-Altman Method. <em>The International Journal of Biostatistics</em>, 12(2). <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link uri">https://doi.org/10.1515/ijb-2015-0039</a></p>
+<p>Parker, R. A., et al. (2016). Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients. <em>PloS One</em>, 11(12), e0168321. <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link uri">https://doi.org/10.1371/journal.pone.0168321</a></p>
+<p>Shieh, G. (2019). Assessing agreement between two methods of quantitative measurements: Exact test procedure and sample size calculation. <em>Statistics in Biopharmaceutical Research</em>, 12(3), 352-359. <a href="https://doi.org/10.1080/19466315.2019.1677495" class="external-link uri">https://doi.org/10.1080/19466315.2019.1677495</a></p>
+<p>Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. <em>The Journal of Strength &amp; Conditioning Research</em>, 19(1), 231-240. <a href="https://doi.org/10.1519/15184.1" class="external-link uri">https://doi.org/10.1519/15184.1</a></p>
+<p>Zou, G. Y. (2013). Confidence interval estimation for the Bland-Altman limits of agreement with multiple observations per individual. <em>Statistical Methods in Medical Research</em>, 22(6), 630-642. <a href="https://doi.org/10.1177/0962280211402548" class="external-link uri">https://doi.org/10.1177/0962280211402548</a></p>
 </div>
 
   </main><aside class="col-md-3"><div class="links">
@@ -171,6 +261,7 @@
 <li><a href="https://app.codecov.io/gh/arcaldwell49/SimplyAgree?branch=master" class="external-link"><img src="https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/arcaldwell49/SimplyAgree/actions" class="external-link"><img src="https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://aaroncaldwell.us/SimplyAgree/"><img src="https://img.shields.io/badge/website-active-blue" alt="documentation"></a></li>
+<li><a href="https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 

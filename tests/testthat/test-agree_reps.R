@@ -4,10 +4,10 @@ context("agree_reps")
 testthat::test_that("examples from Zou", {
  data("reps")
 
-  reps_test = agree_reps(x="x",y="y",
+  reps_test = suppressWarnings(agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,
-                         TOST = FALSE)
+                         TOST = FALSE))
 
   reps_test_new  = agreement_limit(x="x",y="y",
                               id = "id",
@@ -41,19 +41,19 @@ testthat::test_that("examples from Zou", {
   print(reps_test_blan)
   print(reps_test_newlog)
   print(reps_test_new)
-  reps_test2 = agree_reps(x="x",y="y",
+  reps_test2 = suppressWarnings(agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,
                          TOST = FALSE,
-                         prop_bias = TRUE)
+                         prop_bias = TRUE))
   ptest = plot(reps_test2)
 
-  reps_test3 = agree_reps(x="x",y="y",
+  reps_test3 = suppressWarnings(agree_reps(x="x",y="y",
                           id = "id",
                           data = reps,
                           TOST = FALSE,
                           delta = 5,
-                          prop_bias = TRUE)
+                          prop_bias = TRUE))
   ptest = plot(reps_test2)
   ptest = plot(reps_test2,
                delta = 5)
@@ -88,15 +88,15 @@ testthat::test_that("examples from Zou", {
   testthat::expect_equivalent(reps_test$loa$upper.ci[2:3],
                               c(-.48,11.20),
                               tolerance = 0.01)
-  reps_test2 = agree_reps(
+  reps_test2 = suppressWarnings(agree_reps(
     x = "x",
     y = "y",
     delta = 2.5,
     id = "id",
     data = reps
-  )
+  ))
 
-  reps_test3 = agree_reps(
+  reps_test3 = suppressWarnings({agree_reps(
     x = "x",
     y = "y",
     delta = 2.5,
@@ -104,9 +104,9 @@ testthat::test_that("examples from Zou", {
     data = reps,
     agree.level = .8,
     conf.level = .75
-  )
+  )})
 
-  reps_test4 = agree_reps(
+  reps_test4 = suppressWarnings(agree_reps(
     x = "x",
     y = "y",
     delta = 2.5,
@@ -114,7 +114,7 @@ testthat::test_that("examples from Zou", {
     data = reps,
     agree.level = .75,
     conf.level = .8
-  )
+  ))
 
   pr_test = print(reps_test)
   p = plot(reps_test, type = 1,
@@ -153,9 +153,9 @@ testthat::test_that("examples from Zou", {
   p = plot(reps_test3, type = 1)
   p = plot(reps_test3, type = 2)
 
-  reps_test = agree_reps(x="x",y="y",
+  reps_test = suppressWarnings(agree_reps(x="x",y="y",
                          id = "id",
-                         data = reps)
+                         data = reps))
 
   test_jmv = jmvagreemulti(
     data = reps,
@@ -177,8 +177,8 @@ testthat::test_that("examples from Zou", {
   testthat::expect_equivalent(test_jmv$blandtab$asDF$upperci,
                               reps_test$loa$upper.ci)
 
-  reps_test = agree_reps(x="x",y="y",
+  reps_test = suppressWarnings(agree_reps(x="x",y="y",
                          id = "id",
                          data = reps,
-                         ccc = FALSE)
+                         ccc = FALSE))
 })
