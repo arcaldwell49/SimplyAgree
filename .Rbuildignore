@@ -33,3 +33,4 @@
 ^mess$
 ^CRAN-SUBMISSION$
 ^.covrignore
+^.*-manual\.tex$
