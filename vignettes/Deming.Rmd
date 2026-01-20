@@ -29,19 +29,7 @@ Error-in-variables (EIV) models are useful tools to account for measurement erro
 
 Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990). 
 
-# Joint Confidence Regions
-
-A key enhancement to the `dem_reg` function is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
-
-Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
-
-1. **Higher Statistical Power**: The ellipse typically requires 20-50% fewer samples than traditional confidence intervals to detect the same bias
-2. **Accounts for Parameter Correlation**: When the measurement range is narrow, slope and intercept are highly negatively correlated
-3. **More Appropriate Test**: Testing against a point (e.g., slope=1, intercept=0) is naturally done with a region, not separate intervals
-
-The power advantage is most pronounced when the ratio of maximum to minimum X values is small (< 10:1), which is common in clinical method comparisons.
-
-# Basic Deming Regression
+# Deming Regression
 
 ## Simple Deming Regression
 
@@ -74,36 +62,6 @@ The resulting regression line can then be plotted.
 plot(dem1, interval = "confidence")
 ```
 
-## Visualizing the Joint Confidence Region
-
-The `plot_joint()` function allows visualization of the confidence region in parameter space:
-
-```{r}
-plot_joint(dem1, 
-           ideal_slope = 1, 
-           ideal_intercept = 0,
-           show_intervals = TRUE)
-```
-
-This plot shows:
-
-- The **red ellipse**: Joint confidence region
-- The **blue rectangle**: Traditional confidence intervals
-- The **black dot**: Estimated (intercept, slope)
-- The **green/red X**: Ideal point (whether enclosed or not)
-
-Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
-
-## Joint Hypothesis Test
-
-The `joint_test()` function provides a formal hypothesis test for whether the identity line (slope = 1, intercept = 0) falls within the joint confidence region:
-
-```{r}
-joint_test(dem1)
-```
-
-This returns an `htest` object with the Mahalanobis distance (chi-squared statistic) and p-value.
-
 ## Model Diagnostics
 
 The assumptions of the Deming regression model, primarily normality and homogeneity of variance, can then be checked with the `check` method for Deming regression results. Both plots appear to be fine with regards to the assumptions.
@@ -116,7 +74,7 @@ check(dem1)
 
 After fitting a Deming regression model, you can extract the estimated true values and residuals. The `fitted()` function returns the estimated true Y values, accounting for measurement error. The `residuals()` function returns the optimized residuals by default, which correspond to the perpendicular distances from each point to the regression line.
 
-# Weighted Deming Regression
+## Weighted Deming Regression
 
 For this example, I will rely upon the "ferritin" data from the `deming` R package.
 
@@ -139,8 +97,6 @@ summary(dem2)
 
 plot(dem2)
 
-plot_joint(dem2)
-
 check(dem2)
 ```
 
@@ -155,8 +111,6 @@ dem3 = dem_reg(
 summary(dem3)
 
 plot(dem3)
-
-plot_joint(dem3)
 
 check(dem3)
 ```
@@ -233,17 +187,61 @@ pb2 <- pb_reg(method2 ~ method1,
 summary(pb2)
 ```
 
-When bootstrap is used, the joint confidence region and `joint_test()` function become available:
+# Joint Confidence Regions
+
+A theoretically valid, but still experimental, enhancement to the `dem_reg` and `pb_reg` functions is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
+
+Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
+
+- **Higher Statistical Power**: The ellipse typically requires 20-50% fewer samples than traditional confidence intervals to detect the same bias
+- **Accounts for Parameter Correlation**: When the measurement range is narrow, slope and intercept are highly negatively correlated
+- **More Appropriate Test**: Testing against a point (e.g., slope=1, intercept=0) is naturally done with a region, not separate intervals
+
+The power advantage is most pronounced when the ratio of maximum to minimum X values is small (< 10:1), which is common in clinical method comparisons.
+
+## Visualizing the Joint Confidence Region
+
+The `plot_joint()` function allows visualization of the confidence region in parameter space:
+
+```{r}
+plot_joint(dem1, 
+           ideal_slope = 1, 
+           ideal_intercept = 0,
+           show_intervals = TRUE)
+```
+
+This plot shows:
+
+- The **red ellipse**: Joint confidence region
+- The **blue rectangle**: Traditional confidence intervals
+- The **black dot**: Estimated (intercept, slope)
+- The **green/red X**: Ideal point (whether enclosed or not)
+
+Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
+
+For Passing-Bablok regression, bootstrap resampling must be used to obtain the variance-covariance matrix needed for the joint confidence region:
 
 ```{r}
 plot_joint(pb2)
+```
+
+## Joint Hypothesis Test
+
+The `joint_test()` function provides a formal hypothesis test for whether the identity line (slope = 1, intercept = 0) falls within the joint confidence region:
+
+```{r}
+joint_test(dem1)
+```
+
+This returns an `htest` object with the Mahalanobis distance (chi-squared statistic) and p-value. The test can also be applied to Passing-Bablok models fitted with bootstrap:
+
+```{r}
 joint_test(pb2)
 ```
 
-
 # Theoretical Details
 
-## Calculative Approach
+## Deming Calculative Approach
 
 Deming regression assumes paired measures ($x_i, \space  y_i$) are each measured with error.
 
@@ -261,21 +259,21 @@ $$
 \hat Y_i = \beta_0 + \beta_1 \cdot \hat X_i
 $$
 
-Traditionally there are 2 null hypotheses
+Traditionally there are 2 null hypotheses.
 
-First, the intercept is equal to zero
+First, the intercept is equal to zero:
 
 $$
 H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 $$
 
-Second, that the slope is equal to one.
+Second, that the slope is equal to one:
 
 $$
 H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 $$
 
-## Joint Confidence Region
+# Joint Confidence Region Calculative Approach
 
 The joint $(1-\alpha) \times 100\%$ confidence region for $(\beta_0, \beta_1)$ is defined as:
 
