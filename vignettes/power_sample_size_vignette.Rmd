@@ -261,7 +261,7 @@ $$\text{ICC} = \frac{\sigma^2_{\text{between}}}{\sigma^2_{\text{between}} + \sig
 3. Estimate ICC (from pilot data, literature, or theory)
 4. Calculate DEFF = 1 + (m-1)*ICC
 5. Inflate: n_total = n_indep * DEFF
-6. Calculate clusters: K = ⌈n_total / m⌉
+6. Calculate clusters: K = ceil(n_total / m)
 
 ## Example: Repeated Measures Design
 
