@@ -82,7 +82,7 @@ Specify **exactly three** of: n, delta, power, sigma.
 ``` r
 # Blood pressure device comparison
 result <- power_agreement_exact(
-  delta = 7,          # ±7 mmHg tolerance
+  delta = 7,          # +/-7 mmHg tolerance
   mu = 0.5,          # Expected bias
   sigma = 2.5,       # Expected SD
   p0_star = 0.95,    # 95% must be within bounds
@@ -163,8 +163,8 @@ find_n(pc, power = 0.8)
 
 ### Overview
 
-Determines sample size to ensure **average** CI half-width ≤ δ across
-hypothetical repeated studies.
+Determines sample size to ensure **average** CI half-width \<= delta
+across hypothetical repeated studies.
 
 ### Usage
 
@@ -183,7 +183,7 @@ Specify **either** n OR delta.
 ### Example: Sample Size for Precision
 
 ``` r
-# Want E[H] ≤ 2.5σ
+# Want E[H] <= 2.5*sigma
 result <- agree_expected_half(
   conf.level = 0.95,
   delta = 2.5,         # As multiple of sigma
@@ -209,8 +209,8 @@ print(result)
 
 ### Overview
 
-Determines sample size to ensure **probability** that CI half-width ≤ ω
-is at least (1-γ).
+Determines sample size to ensure **probability** that CI half-width \<=
+omega is at least (1-gamma).
 
 Stronger guarantee than expected half-width — ensures specific
 probability of achieving target precision.
@@ -233,7 +233,7 @@ Specify **either** n OR omega.
 ### Example: Sample Size with Guarantee
 
 ``` r
-# Want 90% probability that H ≤ 2.5σ
+# Want 90% probability that H <= 2.5*sigma
 result <- agree_assurance(
   conf.level = 0.95,
   assurance = 0.90,    # 90% probability
@@ -259,13 +259,13 @@ print(result)
 ## Decision Guide for the Method
 
     Research Goal?
-    │
-    ├─ Hypothesis Testing → 
-    │   └─ Need exact Type I error control → Power for Agreement
-    │
-    └─ Precision Estimation →
-        ├─ Average precision sufficient → Expected Half-Width
-        └─ Need probabilistic guarantee → Assurance Probability
+    |
+    |- Hypothesis Testing -> 
+    |   \- Need exact Type I error control -> Power for Agreement
+    |
+    \- Precision Estimation ->
+        |- Average precision sufficient -> Expected Half-Width
+        \- Need probabilistic guarantee -> Assurance Probability
 
 ## Handling Clustered/Nested Data
 
@@ -313,9 +313,10 @@ ICC = proportion of variance between clusters:
 1.  Calculate independent sample size (using power function)
 2.  Determine m (observations per cluster)
 3.  Estimate ICC (from pilot data, literature, or theory)
-4.  Calculate DEFF = 1 + (m-1)×ICC
-5.  Inflate: n_total = n_indep × DEFF
-6.  Calculate clusters: K = ⌈n_total / m⌉
+4.  Calculate DEFF = 1 + (m-1)\*ICC
+5.  Inflate: n_total = n_indep \* DEFF
+6.  Calculate clusters: K = the smallest integer greater than or equal
+    to (n_total / m) (i.e., round up n_total / m)
 
 ### Example: Repeated Measures Design
 
@@ -375,7 +376,7 @@ for (ICC in ICC_values) {
 
 - Balanced designs (equal cluster sizes)
 - Moderate ICC (0.01 - 0.30)
-- Sufficient clusters (K ≥ 10)
+- Sufficient clusters (K \>= 10)
 - Simple two-level hierarchy
 
 ✗ **Problematic:**
