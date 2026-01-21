@@ -122,7 +122,7 @@ then the ratio of error variances (var(x)/var(y)) can be provided with the
 
 The error ratio affects how pairwise slopes are weighted in the robust median
 calculation. When error.ratio = 1, all pairs receive equal weight. When
-error.ratio ≠ 1, pairs are weighted to account for heterogeneous measurement
+error.ratio != 1, pairs are weighted to account for heterogeneous measurement
 precision.
 }
 
@@ -138,7 +138,7 @@ you to down-weight or up-weight specific observations in the analysis.
 Wild bootstrap resampling is used when \code{replicates > 0}. This is particularly
 useful for:
 \itemize{
-\item Weighted regression (case weights or error.ratio ≠ 1)
+\item Weighted regression (case weights or error.ratio != 1)
 \item Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)
 \item Small sample sizes
 }

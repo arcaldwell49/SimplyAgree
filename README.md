@@ -1,5 +1,5 @@
 
-# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
+# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree/"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
@@ -10,7 +10,6 @@
 coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/badge.svg)](https://app.codecov.io/gh/arcaldwell49/SimplyAgree?branch=master)
 [![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/workflows/R-CMD-check/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions)
 [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
-[![R-CMD-check](https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/arcaldwell49/SimplyAgree/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Please see the package’s
