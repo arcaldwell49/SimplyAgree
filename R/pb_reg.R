@@ -69,7 +69,7 @@
 #'
 #' The error ratio affects how pairwise slopes are weighted in the robust median
 #' calculation. When error.ratio = 1, all pairs receive equal weight. When
-#' error.ratio ≠ 1, pairs are weighted to account for heterogeneous measurement
+#' error.ratio != 1, pairs are weighted to account for heterogeneous measurement
 #' precision.
 #'
 #' ## Weighting
@@ -82,7 +82,7 @@
 #'
 #' Wild bootstrap resampling is used when `replicates > 0`. This is particularly
 #' useful for:
-#' - Weighted regression (case weights or error.ratio ≠ 1)
+#' - Weighted regression (case weights or error.ratio != 1)
 #' - Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)
 #' - Small sample sizes
 #'

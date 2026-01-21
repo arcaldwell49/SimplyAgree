@@ -8,7 +8,7 @@ library(SimplyAgree)
 ```
 
 
-# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
+# SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree/"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
 *Artwork courtesy of Chelsea Parlett Pelleriti*
 
