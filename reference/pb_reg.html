@@ -199,7 +199,7 @@ then the ratio of error variances (var(x)/var(y)) can be provided with the
 <code>error.ratio</code> argument (default = 1, indicating equal measurement errors).</p>
 <p>The error ratio affects how pairwise slopes are weighted in the robust median
 calculation. When error.ratio = 1, all pairs receive equal weight. When
-error.ratio ≠ 1, pairs are weighted to account for heterogeneous measurement
+error.ratio != 1, pairs are weighted to account for heterogeneous measurement
 precision.</p>
 </div>
 
@@ -217,7 +217,7 @@ you to down-weight or up-weight specific observations in the analysis.</p>
 
 
 <p>Wild bootstrap resampling is used when <code>replicates &gt; 0</code>. This is particularly
-useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio ≠ 1)</p></li>
+useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio != 1)</p></li>
 <li><p>Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)</p></li>
 <li><p>Small sample sizes</p></li>
 </ul><p>The method automatically:</p><ul><li><p>Tests for high positive correlation using Kendall's tau</p></li>

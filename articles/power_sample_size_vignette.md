@@ -54,12 +54,12 @@ The methods divide into two categories:
 ### Overview
 
 Tests whether the central P\* proportion of paired differences falls
-within the maximal allowable difference \[-δ, δ\].
+within the maximal allowable difference \[-delta, delta\].
 
 **Hypotheses:**
 
-- H₀: Methods disagree (central portion extends beyond bounds)
-- H₁: Methods agree (central portion within bounds)
+- H0: Methods disagree (central portion extends beyond bounds)
+- H1: Methods agree (central portion within bounds)
 
 ### Usage
 
@@ -372,14 +372,14 @@ for (ICC in ICC_values) {
 
 ### When Design Effect Works Well
 
-✓ **Good situations:**
+**Good situations:**
 
 - Balanced designs (equal cluster sizes)
 - Moderate ICC (0.01 - 0.30)
 - Sufficient clusters (K \>= 10)
 - Simple two-level hierarchy
 
-✗ **Problematic:**
+**Problematic:**
 
 - Highly unbalanced clusters
 - Very high ICC (\> 0.4)
@@ -436,7 +436,7 @@ Define research question (hypothesis test vs. estimation)
 
 Choose appropriate power method
 
-If possible, obtain pilot estimates (σ, ICC if clustered)
+If possible, obtain pilot estimates (SD, ICC if clustered)
 
 Calculate independent sample size
 
@@ -454,10 +454,10 @@ Pre-register before data collection
 
 When uncertain:
 
-- Use **upper range** of plausible σ estimates
+- Use **upper range** of plausible SD estimates
 - Use **upper range** of plausible ICC estimates
 - Build in **10-20% buffer** beyond calculated required sample size
-- Conduct **sensitivity analyses** for key parameters (σ, ICC, etc)
+- Conduct **sensitivity analyses** for key parameters (SD, ICC, etc)
 
 ## References
 

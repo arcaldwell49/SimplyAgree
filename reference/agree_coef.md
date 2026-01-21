@@ -67,9 +67,9 @@ Returns single data frame of inter-rater reliability coefficients.
 
 ## References
 
-Gwet, K.L. (2014, ISBN:978-0970806284). “Handbook of Inter-Rater
-Reliability,” 4th Edition. Advanced Analytics, LLC. Gwet, K. L. (2008).
-“Computing inter-rater reliability and its variance in the presence of
+Gwet, K.L. (2014, ISBN:978-0970806284). "Handbook of Inter-Rater
+Reliability", 4th Edition. Advanced Analytics, LLC. Gwet, K. L. (2008).
+"Computing inter-rater reliability and its variance in the presence of
 high agreement," British Journal of Mathematical and Statistical
 Psychology, 61, 29-48.
 
