@@ -46,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -83,7 +83,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-01-16</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/power_sample_size_vignette.Rmd" class="external-link"><code>vignettes/power_sample_size_vignette.Rmd</code></a></small>
       <div class="d-none name"><code>power_sample_size_vignette.Rmd</code></div>
@@ -161,11 +161,11 @@ target CI half-width of limits of agreement</li>
 <h3 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h3>
 <p>Tests whether the central P* proportion of paired differences falls
-within the maximal allowable difference [-δ, δ].</p>
+within the maximal allowable difference [-delta, delta].</p>
 <p><strong>Hypotheses:</strong></p>
 <ul>
-<li>H₀: Methods disagree (central portion extends beyond bounds)</li>
-<li>H₁: Methods agree (central portion within bounds)</li>
+<li>H0: Methods disagree (central portion extends beyond bounds)</li>
+<li>H1: Methods agree (central portion within bounds)</li>
 </ul>
 </div>
 <div class="section level3">
@@ -190,7 +190,7 @@ sigma.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Blood pressure device comparison</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_agreement_exact.html">power_agreement_exact</a></span><span class="op">(</span></span>
-<span>  delta <span class="op">=</span> <span class="fl">7</span>,          <span class="co"># ±7 mmHg tolerance</span></span>
+<span>  delta <span class="op">=</span> <span class="fl">7</span>,          <span class="co"># +/-7 mmHg tolerance</span></span>
 <span>  mu <span class="op">=</span> <span class="fl">0.5</span>,          <span class="co"># Expected bias</span></span>
 <span>  sigma <span class="op">=</span> <span class="fl">2.5</span>,       <span class="co"># Expected SD</span></span>
 <span>  p0_star <span class="op">=</span> <span class="fl">0.95</span>,    <span class="co"># 95% must be within bounds</span></span>
@@ -274,7 +274,7 @@ exploring power across sample sizes.</p>
 <h3 id="overview-2">Overview<a class="anchor" aria-label="anchor" href="#overview-2"></a>
 </h3>
 <p>Determines sample size to ensure <strong>average</strong> CI
-half-width ≤ δ across hypothetical repeated studies.</p>
+half-width &lt;= delta across hypothetical repeated studies.</p>
 </div>
 <div class="section level3">
 <h3 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a>
@@ -293,7 +293,7 @@ half-width ≤ δ across hypothetical repeated studies.</p>
 <h3 id="example-sample-size-for-precision">Example: Sample Size for Precision<a class="anchor" aria-label="anchor" href="#example-sample-size-for-precision"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Want E[H] ≤ 2.5σ</span></span>
+<code class="sourceCode R"><span><span class="co"># Want E[H] &lt;= 2.5*sigma</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agree_expected_half.html">agree_expected_half</a></span><span class="op">(</span></span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  delta <span class="op">=</span> <span class="fl">2.5</span>,         <span class="co"># As multiple of sigma</span></span>
@@ -322,7 +322,7 @@ half-width ≤ δ across hypothetical repeated studies.</p>
 <h3 id="overview-3">Overview<a class="anchor" aria-label="anchor" href="#overview-3"></a>
 </h3>
 <p>Determines sample size to ensure <strong>probability</strong> that CI
-half-width ≤ ω is at least (1-γ).</p>
+half-width &lt;= omega is at least (1-gamma).</p>
 <p>Stronger guarantee than expected half-width — ensures specific
 probability of achieving target precision.</p>
 </div>
@@ -344,7 +344,7 @@ probability of achieving target precision.</p>
 <h3 id="example-sample-size-with-guarantee">Example: Sample Size with Guarantee<a class="anchor" aria-label="anchor" href="#example-sample-size-with-guarantee"></a>
 </h3>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Want 90% probability that H ≤ 2.5σ</span></span>
+<code class="sourceCode R"><span><span class="co"># Want 90% probability that H &lt;= 2.5*sigma</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agree_assurance.html">agree_assurance</a></span><span class="op">(</span></span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  assurance <span class="op">=</span> <span class="fl">0.90</span>,    <span class="co"># 90% probability</span></span>
@@ -371,13 +371,13 @@ probability of achieving target precision.</p>
 <h2 id="decision-guide-for-the-method">Decision Guide for the Method<a class="anchor" aria-label="anchor" href="#decision-guide-for-the-method"></a>
 </h2>
 <pre><code>Research Goal?
-│
-├─ Hypothesis Testing → 
-│   └─ Need exact Type I error control → Power for Agreement
-│
-└─ Precision Estimation →
-    ├─ Average precision sufficient → Expected Half-Width
-    └─ Need probabilistic guarantee → Assurance Probability</code></pre>
+|
+|- Hypothesis Testing -&gt; 
+|   \- Need exact Type I error control -&gt; Power for Agreement
+|
+\- Precision Estimation -&gt;
+    |- Average precision sufficient -&gt; Expected Half-Width
+    \- Need probabilistic guarantee -&gt; Assurance Probability</code></pre>
 </div>
 <div class="section level2">
 <h2 id="handling-clusterednested-data">Handling Clustered/Nested Data<a class="anchor" aria-label="anchor" href="#handling-clusterednested-data"></a>
@@ -432,9 +432,10 @@ size</li>
 <li>Calculate independent sample size (using power function)</li>
 <li>Determine m (observations per cluster)</li>
 <li>Estimate ICC (from pilot data, literature, or theory)</li>
-<li>Calculate DEFF = 1 + (m-1)×ICC</li>
-<li>Inflate: n_total = n_indep × DEFF</li>
-<li>Calculate clusters: K = ⌈n_total / m⌉</li>
+<li>Calculate DEFF = 1 + (m-1)*ICC</li>
+<li>Inflate: n_total = n_indep * DEFF</li>
+<li>Calculate clusters: K = the smallest integer greater than or equal
+to (n_total / m) (i.e., round up n_total / m)</li>
 </ol>
 </div>
 <div class="section level3">
@@ -491,14 +492,14 @@ participants (45 total observations).</p>
 <div class="section level3">
 <h3 id="when-design-effect-works-well">When Design Effect Works Well<a class="anchor" aria-label="anchor" href="#when-design-effect-works-well"></a>
 </h3>
-<p>✓ <strong>Good situations:</strong></p>
+<p><strong>Good situations:</strong></p>
 <ul>
 <li>Balanced designs (equal cluster sizes)</li>
 <li>Moderate ICC (0.01 - 0.30)</li>
-<li>Sufficient clusters (K ≥ 10)</li>
+<li>Sufficient clusters (K &gt;= 10)</li>
 <li>Simple two-level hierarchy</li>
 </ul>
-<p>✗ <strong>Problematic:</strong></p>
+<p><strong>Problematic:</strong></p>
 <ul>
 <li>Highly unbalanced clusters</li>
 <li>Very high ICC (&gt; 0.4)</li>
@@ -554,13 +555,12 @@ consult a statistician.</p>
 <div class="section level3">
 <h3 id="planning-checklist">Planning Checklist<a class="anchor" aria-label="anchor" href="#planning-checklist"></a>
 </h3>
-<ul class="task-list">
+<ul>
 <li><label><input type="checkbox">Define research question (hypothesis
 test vs. estimation)</label></li>
 <li><label><input type="checkbox">Choose appropriate power
 method</label></li>
-<li><label><input type="checkbox">If possible, obtain pilot estimates
-(σ, ICC if clustered)</label></li>
+<li>If possible, obtain pilot estimates (SD, ICC if clustered)</li>
 <li><label><input type="checkbox">Calculate independent sample
 size</label></li>
 <li><label><input type="checkbox">Adjust for clustering (if
@@ -579,12 +579,12 @@ collection</label></li>
 </h3>
 <p>When uncertain:</p>
 <ul>
-<li>Use <strong>upper range</strong> of plausible σ estimates</li>
+<li>Use <strong>upper range</strong> of plausible SD estimates</li>
 <li>Use <strong>upper range</strong> of plausible ICC estimates</li>
 <li>Build in <strong>10-20% buffer</strong> beyond calculated required
 sample size</li>
-<li>Conduct <strong>sensitivity analyses</strong> for key parameters (σ,
-ICC, etc)</li>
+<li>Conduct <strong>sensitivity analyses</strong> for key parameters
+(SD, ICC, etc)</li>
 </ul>
 </div>
 </div>

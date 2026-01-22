@@ -32,7 +32,7 @@ method comparison studies."><meta property="og:image" content="https://aaroncald
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -199,7 +199,7 @@ then the ratio of error variances (var(x)/var(y)) can be provided with the
 <code>error.ratio</code> argument (default = 1, indicating equal measurement errors).</p>
 <p>The error ratio affects how pairwise slopes are weighted in the robust median
 calculation. When error.ratio = 1, all pairs receive equal weight. When
-error.ratio ≠ 1, pairs are weighted to account for heterogeneous measurement
+error.ratio != 1, pairs are weighted to account for heterogeneous measurement
 precision.</p>
 </div>
 
@@ -217,7 +217,7 @@ you to down-weight or up-weight specific observations in the analysis.</p>
 
 
 <p>Wild bootstrap resampling is used when <code>replicates &gt; 0</code>. This is particularly
-useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio ≠ 1)</p></li>
+useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio != 1)</p></li>
 <li><p>Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)</p></li>
 <li><p>Small sample sizes</p></li>
 </ul><p>The method automatically:</p><ul><li><p>Tests for high positive correlation using Kendall's tau</p></li>
@@ -228,15 +228,14 @@ useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio ≠ 1
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Passing, H. and Bablok, W. (1983). A new biometrical procedure for testing the
-equality of measurements from two different analytical methods. Journal of
-Clinical Chemistry and Clinical Biochemistry, 21, 709-720.</p>
-<p>Passing, H. and Bablok, W. (1984). Comparison of several regression procedures
-for method comparison studies and determination of sample sizes. Journal of
-Clinical Chemistry and Clinical Biochemistry, 22, 431-445.</p>
-<p>Bablok, W., Passing, H., Bender, R. and Schneider, B. (1988). A general
-regression procedure for method transformation. Journal of Clinical Chemistry
-and Clinical Biochemistry, 26, 783-790.</p>
+    <p>Passing, H., &amp; Bablok, W. (1983). A New Biometrical Procedure for Testing the Equality of Measurements from Two Different Analytical Methods. Application of linear regression procedures for method comparison studies in Clinical Chemistry,
+Part I. Cclm, 21(11), 709-720. doi: 10.1515/cclm.1983.21.11.709</p>
+<p>Passing, H., &amp; Bablok, W. (1984). Comparison of Several Regression Procedures for Method Comparison Studies and Determination of Sample Sizes Application of linear regression procedures for method comparison studies in Clinical Chemistry, Part II.
+Clinical Chemistry and Laboratory Medicine,
+22(6). doi: 10.1515/cclm.1984.22.6.431</p>
+<p>Bablok, W., Passing, H., Bender, R., &amp; Schneider, B. (1988). A General Regression Procedure for Method Transformation. Application of Linear Regression Procedures for Method Comparison Studies in Clinical Chemistry, Part III.
+Clinical Chemistry and Laboratory Medicine,
+26(11). doi: 10.1515/cclm.1988.26.11.783</p>
     </div>
 
     <div class="section level2">

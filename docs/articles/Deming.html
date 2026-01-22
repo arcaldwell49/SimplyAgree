@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Error-in-Variables Regression • SimplyAgree</title>
+<title>Errors-in-Variables Regression • SimplyAgree</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -21,7 +21,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Error-in-Variables Regression">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Errors-in-Variables Regression">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -46,7 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
-    <li><a class="dropdown-item" href="../articles/Deming.html">Error-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -79,11 +79,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Error-in-Variables Regression</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Errors-in-Variables Regression</h1>
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-01-16</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-01-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -111,37 +111,7 @@ referred to as “Deming regression” (e.g., <span class="citation">Linnet
 (<a href="#ref-linnet1990">1990</a>)</span>).</p>
 </div>
 <div class="section level2">
-<h2 id="joint-confidence-regions">Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#joint-confidence-regions"></a>
-</h2>
-<p>A key, but currently experimental, enhancement to the
-<code>dem_reg</code> function is the addition of <strong>joint
-confidence regions</strong> for the slope and intercept parameters.
-Traditional confidence intervals treat each parameter separately, but in
-regression analysis, these parameters are correlated.</p>
-<p>Joint confidence regions account for this correlation by creating an
-elliptical region in the (intercept, slope) parameter space. This
-approach, promoted by <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
-advantages:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Higher Statistical Power</strong>: The ellipse typically
-requires 20-50% fewer samples than traditional confidence intervals to
-detect the same bias</li>
-<li>
-<strong>Accounts for Parameter Correlation</strong>: When the
-measurement range is narrow, slope and intercept are highly negatively
-correlated</li>
-<li>
-<strong>More Appropriate Test</strong>: Testing against a point
-(e.g., slope=1, intercept=0) is naturally done with a region, not
-separate intervals</li>
-</ol>
-<p>The power advantage is most pronounced when the ratio of maximum to
-minimum X values is small (&lt; 10:1), which is common in clinical
-method comparisons.</p>
-</div>
-<div class="section level2">
-<h2 id="basic-deming-regression">Basic Deming Regression<a class="anchor" aria-label="anchor" href="#basic-deming-regression"></a>
+<h2 id="deming-regression">Deming Regression<a class="anchor" aria-label="anchor" href="#deming-regression"></a>
 </h2>
 <div class="section level3">
 <h3 id="simple-deming-regression">Simple Deming Regression<a class="anchor" aria-label="anchor" href="#simple-deming-regression"></a>
@@ -173,31 +143,10 @@ results printed.</p>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt; (Intercept)           x </span></span>
 <span><span class="co">#&gt;      0.1285      0.9745</span></span></code></pre></div>
-<p>The resulting regression line can then be plotted. The subtitle now
-indicates whether the identity line is enclosed by the joint confidence
-region.</p>
+<p>The resulting regression line can then be plotted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span>, interval <span class="op">=</span> <span class="st">"confidence"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-</div>
-<div class="section level3">
-<h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
-</h3>
-<p>A new plotting method <code><a href="../reference/simple_eiv-methods.html">plot_joint()</a></code> allows visualization
-of the confidence region in parameter space:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
-<span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
-<span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
-<p>This plot shows: - The <strong>red ellipse</strong>: Joint confidence
-region - The <strong>blue rectangle</strong>: Traditional confidence
-intervals - The <strong>black dot</strong>: Estimated (intercept, slope)
-- The <strong>green/red X</strong>: Ideal point (whether enclosed or
-not)</p>
-<p>Notice how the ellipse is smaller than the rectangle, especially in
-the directions that matter for detecting bias.</p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics"></a>
@@ -206,17 +155,26 @@ the directions that matter for detecting bias.</p>
 and homogeneity of variance, can then be checked with the
 <code>check</code> method for Deming regression results. Both plots
 appear to be fine with regards to the assumptions.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 </div>
+<div class="section level3">
+<h3 id="fitted-values-and-residuals">Fitted Values and Residuals<a class="anchor" aria-label="anchor" href="#fitted-values-and-residuals"></a>
+</h3>
+<p>After fitting a Deming regression model, you can extract the
+estimated true values and residuals. The <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> function
+returns the estimated true Y values, accounting for measurement error.
+The <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> function returns the optimized residuals by
+default, which correspond to the perpendicular distances from each point
+to the regression line.</p>
 </div>
-<div class="section level2">
-<h2 id="weighted-deming-regression">Weighted Deming Regression<a class="anchor" aria-label="anchor" href="#weighted-deming-regression"></a>
-</h2>
+<div class="section level3">
+<h3 id="weighted-deming-regression">Weighted Deming Regression<a class="anchor" aria-label="anchor" href="#weighted-deming-regression"></a>
+</h3>
 <p>For this example, I will rely upon the “ferritin” data from the
 <code>deming</code> R package.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span></span>
 <span></span>
@@ -231,7 +189,7 @@ appear to be fine with regards to the assumptions.</p>
 <p>Let me demonstrate the problem with using simple Deming regression
 when the weights are helpful. When we look at the two plots below, we
 can see there is severe problem with using the “un-weighted” model.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem2</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
 <span>  <span class="va">old.lot</span> <span class="op">~</span> <span class="va">new.lot</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
@@ -253,32 +211,25 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-3.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem3</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="st">"new.lot"</span>,</span>
-<span>  y <span class="op">=</span> <span class="st">"old.lot"</span>,</span>
+<span>  <span class="va">old.lot</span> <span class="op">~</span> <span class="va">new.lot</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The 'x' and 'y' arguments are deprecated. Please use the formula</span></span>
-<span><span class="co">#&gt; interface instead: dem_reg(y ~ x, data = ...)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Weighted Deming Regression with 95% C.I. </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; dem_reg(data = ferritin, x = "new.lot", y = "old.lot", weighted = TRUE, </span></span>
-<span><span class="co">#&gt;     conf.level = 0.95, formula = old.lot ~ new.lot)</span></span>
+<span><span class="co">#&gt; dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = TRUE, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;               coef       bias       se  df lower.ci upper.ci       t   p.value</span></span>
@@ -289,22 +240,250 @@ TRUE.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-8-3.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
 <p>The weighted model provides a better fit.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="passing-bablok-regression">Passing-Bablok Regression<a class="anchor" aria-label="anchor" href="#passing-bablok-regression"></a>
+</h2>
+<p>Passing-Bablok regression is a robust, nonparametric alternative to
+Deming regression for method comparison studies <span class="citation">(<a href="#ref-passing1983">Passing and Bablok
+1983</a>)</span>. Unlike Deming regression, it makes no assumptions
+about the distribution of the measurement errors. The method estimates
+the slope as the shifted median of all pairwise slopes between data
+points, which makes it resistant to outliers.</p>
+<div class="section level3">
+<h3 id="when-to-use-passing-bablok">When to Use Passing-Bablok<a class="anchor" aria-label="anchor" href="#when-to-use-passing-bablok"></a>
+</h3>
+<p>Passing-Bablok regression is particularly useful when:</p>
+<ul>
+<li>Both X and Y are measured with error</li>
+<li>You want a robust method not sensitive to outliers</li>
+<li>The relationship is assumed to be linear</li>
+<li>X and Y are highly positively correlated</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
+</h3>
+<p>The <code><a href="../reference/pb_reg.html">pb_reg()</a></code> function implements three variants of
+Passing-Bablok regression:</p>
+<ul>
+<li>
+<strong>“scissors”</strong> (default): Most robust, scale-invariant
+method from <span class="citation">Bablok et al. (<a href="#ref-bablok1988">1988</a>)</span>
+</li>
+<li>
+<strong>“symmetric”</strong>: Original method from <span class="citation">Passing and Bablok (<a href="#ref-passing1983">1983</a>)</span>
+</li>
+<li>
+<strong>“invariant”</strong>: Scale-invariant method from <span class="citation">Passing and Bablok (<a href="#ref-passing1984">1984</a>)</span>
+</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create example data</span></span>
+<span><span class="va">pb_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  method1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">69.3</span>, <span class="fl">27.1</span>, <span class="fl">61.3</span>, <span class="fl">50.8</span>, <span class="fl">34.4</span>, <span class="fl">92.3</span>, <span class="fl">57.5</span>, <span class="fl">45.5</span>, <span class="fl">33.3</span>, <span class="fl">60.9</span>,</span>
+<span>              <span class="fl">56.3</span>, <span class="fl">49.9</span>, <span class="fl">89.7</span>, <span class="fl">28.9</span>, <span class="fl">96.3</span>, <span class="fl">76.6</span>, <span class="fl">83.2</span>, <span class="fl">79.4</span>, <span class="fl">51.7</span>, <span class="fl">32.5</span>,</span>
+<span>              <span class="fl">99.1</span>, <span class="fl">14.2</span>, <span class="fl">84.1</span>, <span class="fl">48.8</span>, <span class="fl">61.5</span>, <span class="fl">84.9</span>, <span class="fl">93.2</span>, <span class="fl">73.8</span>, <span class="fl">62.1</span>, <span class="fl">98.6</span><span class="op">)</span>,</span>
+<span>  method2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">69.1</span>, <span class="fl">26.7</span>, <span class="fl">61.4</span>, <span class="fl">51.2</span>, <span class="fl">34.7</span>, <span class="fl">88.5</span>, <span class="fl">57.9</span>, <span class="fl">45.1</span>, <span class="fl">33.4</span>, <span class="fl">60.8</span>,</span>
+<span>              <span class="fl">66.5</span>, <span class="fl">48.2</span>, <span class="fl">88.3</span>, <span class="fl">29.3</span>, <span class="fl">96.4</span>, <span class="fl">77.1</span>, <span class="fl">82.7</span>, <span class="fl">78.9</span>, <span class="fl">51.6</span>, <span class="fl">28.8</span>,</span>
+<span>              <span class="fl">98.4</span>, <span class="fl">12.7</span>, <span class="fl">83.6</span>, <span class="fl">47.3</span>, <span class="fl">61.2</span>, <span class="fl">84.6</span>, <span class="fl">92.1</span>, <span class="fl">73.4</span>, <span class="fl">61.9</span>, <span class="fl">98.6</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit Passing-Bablok regression</span></span>
+<span><span class="va">pb1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pb_reg.html">pb_reg</a></span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">pb_data</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in pb_reg(method2 ~ method1, data = pb_data): Bootstrap confidence</span></span>
+<span><span class="co">#&gt; intervals are recommended for 'invariant' and 'scissors' methods. Consider</span></span>
+<span><span class="co">#&gt; setting replicates &gt; 0.</span></span>
+<span><span class="va">pb1</span></span>
+<span><span class="co">#&gt; Passing-Bablok (scissors) with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; pb_reg(formula = method2 ~ method1, data = pb_data)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt; (Intercept)     method1 </span></span>
+<span><span class="co">#&gt;     0.09622     0.99440 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Kendall's Tau (H0: tau &lt;= 0):</span></span>
+<span><span class="co">#&gt;   tau:       0.9632</span></span>
+<span><span class="co">#&gt;   p-value:   0.0000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; CUSUM Linearity Test:</span></span>
+<span><span class="co">#&gt;   Test stat: 1.0000</span></span>
+<span><span class="co">#&gt;   p-value:   0.1844</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="summary-and-plots">Summary and Plots<a class="anchor" aria-label="anchor" href="#summary-and-plots"></a>
+</h3>
+<p>The summary provides details about the regression coefficients and
+diagnostic tests:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Passing-Bablok (scissors) with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; pb_reg(formula = method2 ~ method1, data = pb_data)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;        term    coef       se lower.ci upper.ci df null_value reject_h0</span></span>
+<span><span class="co">#&gt; 1 Intercept 0.09622 0.390603  -0.7206   0.8105 28          0     FALSE</span></span>
+<span><span class="co">#&gt; 2   method1 0.99440 0.005918   0.9840   1.0072 28          1     FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 28 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span></code></pre></div>
+<p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method displays the regression line with
+data:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="model-diagnostics-1">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics-1"></a>
+</h3>
+<p>The <code><a href="../reference/simple_agree-methods.html">check()</a></code> method provides diagnostic plots specific to
+Passing-Bablok regression, including the CUSUM linearity test and
+Kendall’s tau correlation:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="bootstrap-confidence-intervals">Bootstrap Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
+</h3>
+<p>For more robust inference, especially with the “invariant” or
+“scissors” methods, bootstrap confidence intervals are recommended:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pb2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pb_reg.html">pb_reg</a></span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, </span>
+<span>              data <span class="op">=</span> <span class="va">pb_data</span>, </span>
+<span>              replicates <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Passing-Bablok (scissors) with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; pb_reg(formula = method2 ~ method1, data = pb_data, replicates = 999)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;        term    coef       se lower.ci upper.ci df null_value reject_h0</span></span>
+<span><span class="co">#&gt; 1 Intercept 0.09622 0.088205 -0.09182   0.2539 28          0     FALSE</span></span>
+<span><span class="co">#&gt; 2   method1 0.99440 0.001291  0.99198   0.9970 28          1      TRUE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 28 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Bootstrap CIs based on 999 resamples</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="joint-confidence-regions">Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#joint-confidence-regions"></a>
+</h2>
+<p>A theoretically valid, but still experimental, enhancement to the
+<code>dem_reg</code> and <code>pb_reg</code> functions is the addition
+of <strong>joint confidence regions</strong> for the slope and intercept
+parameters. Traditional confidence intervals treat each parameter
+separately, but in regression analysis, these parameters are
+correlated.</p>
+<p>Joint confidence regions account for this correlation by creating an
+elliptical region in the (intercept, slope) parameter space. This
+approach, promoted by <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
+advantages:</p>
+<ul>
+<li>
+<strong>Higher Statistical Power</strong>: The ellipse typically
+requires 20-50% fewer samples than traditional confidence intervals to
+detect the same bias</li>
+<li>
+<strong>Accounts for Parameter Correlation</strong>: When the
+measurement range is narrow, slope and intercept are highly negatively
+correlated</li>
+<li>
+<strong>More Appropriate Test</strong>: Testing against a point
+(e.g., slope=1, intercept=0) is naturally done with a region, not
+separate intervals</li>
+</ul>
+<p>The power advantage is most pronounced when the ratio of maximum to
+minimum X values is small (&lt; 10:1), which is common in clinical
+method comparisons.</p>
+<div class="section level3">
+<h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
+</h3>
+<p>The <code><a href="../reference/simple_eiv-methods.html">plot_joint()</a></code> function allows visualization of the
+confidence region in parameter space:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
+<span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
+<span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p>This plot shows:</p>
+<ul>
+<li>The <strong>red ellipse</strong>: Joint confidence region</li>
+<li>The <strong>blue rectangle</strong>: Traditional confidence
+intervals</li>
+<li>The <strong>black dot</strong>: Estimated (intercept, slope)</li>
+<li>The <strong>green/red X</strong>: Ideal point (whether enclosed or
+not)</li>
+</ul>
+<p>Notice how the ellipse is smaller than the rectangle, especially in
+the directions that matter for detecting bias.</p>
+<p>For Passing-Bablok regression, bootstrap resampling must be used to
+obtain the variance-covariance matrix needed for the joint confidence
+region:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="joint-hypothesis-test">Joint Hypothesis Test<a class="anchor" aria-label="anchor" href="#joint-hypothesis-test"></a>
+</h3>
+<p>The <code><a href="../reference/joint_test.html">joint_test()</a></code> function provides a formal hypothesis
+test for whether the identity line (slope = 1, intercept = 0) falls
+within the joint confidence region:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  y ~ x</span></span>
+<span><span class="co">#&gt; X-squared = 0.21666, df = 2, p-value = 0.8973</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
+<span><span class="co">#&gt; null values:</span></span>
+<span><span class="co">#&gt; intercept     slope </span></span>
+<span><span class="co">#&gt;         0         1 </span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; intercept     slope </span></span>
+<span><span class="co">#&gt; 0.1284751 0.9744516</span></span></code></pre></div>
+<p>This returns an <code>htest</code> object with the Mahalanobis
+distance (chi-squared statistic) and p-value. The test can also be
+applied to Passing-Bablok models fitted with bootstrap:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  method2 ~ method1</span></span>
+<span><span class="co">#&gt; X-squared = 905.61, df = 2, p-value &lt; 2.2e-16</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
+<span><span class="co">#&gt; null values:</span></span>
+<span><span class="co">#&gt; intercept     slope </span></span>
+<span><span class="co">#&gt;         0         1 </span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  intercept      slope </span></span>
+<span><span class="co">#&gt; 0.09621849 0.99439776</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="theoretical-details">Theoretical Details<a class="anchor" aria-label="anchor" href="#theoretical-details"></a>
 </h2>
 <div class="section level3">
-<h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
+<h3 id="deming-calculative-approach">Deming Calculative Approach<a class="anchor" aria-label="anchor" href="#deming-calculative-approach"></a>
 </h3>
 <p>Deming regression assumes paired measures (<span class="math inline">\(x_i, \space  y_i\)</span>) are each measured with
 error.</p>
@@ -319,19 +498,20 @@ the following model.</p>
 <p><span class="math display">\[
 \hat Y_i = \beta_0 + \beta_1 \cdot \hat X_i
 \]</span></p>
-<p>Traditionally there are 2 null hypotheses</p>
-<p>First, the intercept is equal to zero</p>
+<p>Traditionally there are 2 null hypotheses.</p>
+<p>First, the intercept is equal to zero:</p>
 <p><span class="math display">\[
 H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 \]</span></p>
-<p>Second, that the slope is equal to one.</p>
+<p>Second, that the slope is equal to one:</p>
 <p><span class="math display">\[
 H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
 \]</span></p>
 </div>
-<div class="section level3">
-<h3 id="joint-confidence-region">Joint Confidence Region<a class="anchor" aria-label="anchor" href="#joint-confidence-region"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="joint-confidence-region-calculative-approach">Joint Confidence Region Calculative Approach<a class="anchor" aria-label="anchor" href="#joint-confidence-region-calculative-approach"></a>
+</h2>
 <p>The joint <span class="math inline">\((1-\alpha) \times
 100\%\)</span> confidence region for <span class="math inline">\((\beta_0, \beta_1)\)</span> is defined as:</p>
 <p><span class="math display">\[
@@ -358,7 +538,6 @@ critical value with 2 degrees of freedom</li>
 </ul>
 <p>This forms an ellipse in parameter space that accounts for the
 correlation between slope and intercept.</p>
-</div>
 <div class="section level3">
 <h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h3>
@@ -440,6 +619,13 @@ method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990">199
 Adcock, R J. 1878. <span>“A Problem in Least Squares.”</span> <em>The
 Analyst</em> 5 (2): 53. <a href="https://doi.org/10.2307/2635758" class="external-link">https://doi.org/10.2307/2635758</a>.
 </div>
+<div id="ref-bablok1988" class="csl-entry">
+Bablok, W., H. Passing, R. Bender, and B. Schneider. 1988. <span>“A
+General Regression Procedure for Method Transformation. Application of
+Linear Regression Procedures for Method Comparison Studies in Clinical
+Chemistry, Part III.”</span> <em>Clinical Chemistry and Laboratory
+Medicine</em> 26 (11). <a href="https://doi.org/10.1515/cclm.1988.26.11.783" class="external-link">https://doi.org/10.1515/cclm.1988.26.11.783</a>.
+</div>
 <div id="ref-deming1943" class="csl-entry">
 Deming, W E. 1943. <em>Statistical Adjustment of Data</em>. Wiley.
 </div>
@@ -461,6 +647,20 @@ Errors.”</span> <em>Statistics in Medicine</em> 9 (12): 1463–73. <a href="ht
 <div id="ref-linnet1993" class="csl-entry">
 ———. 1993. <span>“Evaluation of Regression Procedures for Methods
 Comparison Studies.”</span> <em>Clinical Chemistry</em> 39 (3): 424–32.
+</div>
+<div id="ref-passing1983" class="csl-entry">
+Passing, H., and W. Bablok. 1983. <span>“A New Biometrical Procedure for
+Testing the Equality of Measurements from Two Different Analytical
+Methods. Application of Linear Regression Procedures for Method
+Comparison Studies in Clinical Chemistry, Part i.”</span> <em>Cclm</em>
+21 (11): 709–20. <a href="https://doi.org/10.1515/cclm.1983.21.11.709" class="external-link">https://doi.org/10.1515/cclm.1983.21.11.709</a>.
+</div>
+<div id="ref-passing1984" class="csl-entry">
+———. 1984. <span>“Comparison of Several Regression Procedures for Method
+Comparison Studies and Determination of Sample Sizes Application of
+Linear Regression Procedures for Method Comparison Studies in Clinical
+Chemistry, Part II.”</span> <em>Clinical Chemistry and Laboratory
+Medicine</em> 22 (6). <a href="https://doi.org/10.1515/cclm.1984.22.6.431" class="external-link">https://doi.org/10.1515/cclm.1984.22.6.431</a>.
 </div>
 <div id="ref-sadler2010" class="csl-entry">
 Sadler, W A. 2010. <span>“Joint Parameter Confidence Regions Improve the

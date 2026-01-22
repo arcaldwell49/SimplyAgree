@@ -147,17 +147,16 @@
 #' }
 #'
 #' @references
-#' Passing, H. and Bablok, W. (1983). A new biometrical procedure for testing the
-#'   equality of measurements from two different analytical methods. Journal of
-#'   Clinical Chemistry and Clinical Biochemistry, 21, 709-720.
+#' Passing, H., & Bablok, W. (1983). A New Biometrical Procedure for Testing the Equality of Measurements from Two Different Analytical Methods. Application of linear regression procedures for method comparison studies in Clinical Chemistry,
+#'   Part I. Cclm, 21(11), 709-720. doi: 10.1515/cclm.1983.21.11.709
 #'
-#' Passing, H. and Bablok, W. (1984). Comparison of several regression procedures
-#'   for method comparison studies and determination of sample sizes. Journal of
-#'   Clinical Chemistry and Clinical Biochemistry, 22, 431-445.
+#' Passing, H., & Bablok, W. (1984). Comparison of Several Regression Procedures for Method Comparison Studies and Determination of Sample Sizes Application of linear regression procedures for method comparison studies in Clinical Chemistry, Part II.
+#'   Clinical Chemistry and Laboratory Medicine,
+#'   22(6). doi: 10.1515/cclm.1984.22.6.431
 #'
-#' Bablok, W., Passing, H., Bender, R. and Schneider, B. (1988). A general
-#'   regression procedure for method transformation. Journal of Clinical Chemistry
-#'   and Clinical Biochemistry, 26, 783-790.
+#' Bablok, W., Passing, H., Bender, R., & Schneider, B. (1988). A General Regression Procedure for Method Transformation. Application of Linear Regression Procedures for Method Comparison Studies in Clinical Chemistry, Part III.
+#'   Clinical Chemistry and Laboratory Medicine,
+#'   26(11). doi: 10.1515/cclm.1988.26.11.783
 #'
 #' @importFrom stats rbinom psmirnov na.pass density approx IQR qsmirnov cor.test pnorm pt qnorm qt model.frame model.matrix model.response model.weights terms complete.cases cor sd var
 #' @importFrom dplyr group_by mutate ungroup summarize %>%
