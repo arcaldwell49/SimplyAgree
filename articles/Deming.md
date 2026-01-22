@@ -183,11 +183,11 @@ The weighted model provides a better fit.
 ## Passing-Bablok Regression
 
 Passing-Bablok regression is a robust, nonparametric alternative to
-Deming regression for method comparison studies
-([**passing1983?**](#ref-passing1983)). Unlike Deming regression, it
-makes no assumptions about the distribution of the measurement errors.
-The method estimates the slope as the shifted median of all pairwise
-slopes between data points, which makes it resistant to outliers.
+Deming regression for method comparison studies ([Passing and Bablok
+1983](#ref-passing1983)). Unlike Deming regression, it makes no
+assumptions about the distribution of the measurement errors. The method
+estimates the slope as the shifted median of all pairwise slopes between
+data points, which makes it resistant to outliers.
 
 ### When to Use Passing-Bablok
 
@@ -205,11 +205,11 @@ The
 function implements three variants of Passing-Bablok regression:
 
 - **“scissors”** (default): Most robust, scale-invariant method from
-  ([**bablok1988?**](#ref-bablok1988))
-- **“symmetric”**: Original method from
-  ([**passing1983?**](#ref-passing1983))
-- **“invariant”**: Scale-invariant method from
-  ([**passing1984?**](#ref-passing1984))
+  Bablok et al. ([1988](#ref-bablok1988))
+- **“symmetric”**: Original method from Passing and Bablok
+  ([1983](#ref-passing1983))
+- **“invariant”**: Scale-invariant method from Passing and Bablok
+  ([1984](#ref-passing1984))
 
 ``` r
 # Create example data
@@ -536,6 +536,12 @@ method (detailed by Linnet ([1990](#ref-linnet1990))).
 Adcock, R J. 1878. “A Problem in Least Squares.” *The Analyst* 5 (2):
 53. <https://doi.org/10.2307/2635758>.
 
+Bablok, W., H. Passing, R. Bender, and B. Schneider. 1988. “A General
+Regression Procedure for Method Transformation. Application of Linear
+Regression Procedures for Method Comparison Studies in Clinical
+Chemistry, Part III.” *Clinical Chemistry and Laboratory Medicine* 26
+(11). <https://doi.org/10.1515/cclm.1988.26.11.783>.
+
 Deming, W E. 1943. *Statistical Adjustment of Data*. Wiley.
 
 Koopmans, Tjalling Charles. 1936. *Linear Regression Analysis of
@@ -551,6 +557,18 @@ in Medicine* 9 (12): 1463–73. <https://doi.org/10.1002/sim.4780091210>.
 
 ———. 1993. “Evaluation of Regression Procedures for Methods Comparison
 Studies.” *Clinical Chemistry* 39 (3): 424–32.
+
+Passing, H., and W. Bablok. 1983. “A New Biometrical Procedure for
+Testing the Equality of Measurements from Two Different Analytical
+Methods. Application of Linear Regression Procedures for Method
+Comparison Studies in Clinical Chemistry, Part i.” *Cclm* 21 (11):
+709–20. <https://doi.org/10.1515/cclm.1983.21.11.709>.
+
+———. 1984. “Comparison of Several Regression Procedures for Method
+Comparison Studies and Determination of Sample Sizes Application of
+Linear Regression Procedures for Method Comparison Studies in Clinical
+Chemistry, Part II.” *Clinical Chemistry and Laboratory Medicine* 22
+(6). <https://doi.org/10.1515/cclm.1984.22.6.431>.
 
 Sadler, W A. 2010. “Joint Parameter Confidence Regions Improve the Power
 of Parametric Regression in Method-Comparison Studies.” *Accreditation
