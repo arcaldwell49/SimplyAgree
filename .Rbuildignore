@@ -34,3 +34,5 @@
 ^CRAN-SUBMISSION$
 ^.covrignore
 ^.*-manual\.tex$
+^CLAUDE\.md$
+^references$
