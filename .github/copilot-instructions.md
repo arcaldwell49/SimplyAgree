@@ -1,263 +1,50 @@
-# SimplyAgree R Package - Copilot Coding Agent Instructions
+# SimplyAgree - GitHub Copilot Instructions
 
-## Repository Overview
+## Package Context
+R package for agreement and reliability analyses (Bland-Altman, ICC, CCC). Uses roxygen2 with markdown enabled.
 
-SimplyAgree is an R package for flexible and robust agreement and reliability analyses. It provides statistical methods for method comparison studies, implementing Bland-Altman limits of agreement, tolerance intervals, and reliability statistics. The package is CRAN-published and includes a jamovi module for GUI-based analyses.
+## Code Style Requirements
+- **Naming**: snake_case functions (`agree_test`, `reli_stats`), parameters with dots (`conf.level`, `agree.level`)
+- **Style**: Tidyverse conventions (pipes, dplyr verbs)
+- **Validation**: Use `match.arg()` for choice parameters, early `stop()` for invalid inputs
+- **Returns**: Named lists via `structure(..., class = "classname")`
+- **Match surrounding code** - consistency over personal preference
 
-**Repository Statistics:**
-- **Primary Language:** R (with HTML documentation)
-- **Package Type:** R package with standard structure
-- **Size:** ~161 MB (includes rendered documentation)
-- **License:** GPL-3.0
-- **Current Version:** 0.3.0
+## For Issue Fixes
+- Make **minimal, targeted changes** addressing only the specific problem
+- **Do not refactor** unrelated code
+- **Preserve function signatures** unless the issue explicitly requires API changes
+- If fix requires a **new dependency**, flag for human review instead of adding it
+- Check if similar patterns exist elsewhere in codebase and follow them
 
-## Build and Development Workflow
+## For PR Reviews
+Check for:
+- [ ] Consistency with existing code style
+- [ ] Functions returning test results use `htest` or `power.htest` class where appropriate
+- [ ] Complete roxygen2 docs: `@param`, `@return`, `@examples`, `@export`
+- [ ] Test coverage for new code paths
+- [ ] Hardcoded values that should be parameters
+- [ ] Edge cases: NA handling, zero-length inputs, type validation
+- [ ] `NAMESPACE` changes match `@export`/`@importFrom` tags
 
-### Prerequisites
-- R >= 3.6
-- RStudio (recommended, project file: `SimplyAgree.Rproj`)
-- Pandoc (required for vignettes and documentation)
-- TinyTeX (for PDF documentation)
+## Limitations - Do Not Attempt
+**Recommend human review instead for:**
+- C++ code in `src/`
+- GitHub Actions workflows (`.github/workflows/`)
+- Adding/removing dependencies in `DESCRIPTION`
+- Refactoring S3 method dispatch
+- Changing exported function APIs (breaking changes)
+- Changes spanning more than 2-3 files
 
-### Package Dependencies
-**Always install dependencies before building.** The package has extensive dependencies including:
-- Core: `ggplot2`, `dplyr`, `lme4`, `emmeans`, `boot`, `nlme`
-- Testing: `testthat`, `covr`
-- Documentation: `knitr`, `rmarkdown`, `pkgdown`
-- Important: `Matrix` package is explicitly required in workflows
+## Testing Expectations
+- Every fix needs a corresponding test case
+- Framework: `testthat`
+- Numerical tolerance: `expect_equal(..., tolerance = 1e-5)`
+- Validate against published results when available
+- Test file pattern: `tests/testthat/test-{function_name}.R`
 
-### Installation and Setup
-
-**CRITICAL:** Always run these commands in order:
-
-```r
-# Install from GitHub (development version)
-devtools::install_github("arcaldwell49/SimplyAgree")
-
-# Or for local development, from package root:
-devtools::install()
-```
-
-### Building the Package
-
-**Standard Build Process** (from R console in package root):
-
-```r
-# 1. ALWAYS load devtools first
-library(devtools)
-
-# 2. Update documentation from roxygen comments
-devtools::document()
-
-# 3. Check the package (runs tests and validation)
-devtools::check()
-
-# 4. Build the package
-devtools::build()
-
-# 5. Install locally
-devtools::install()
-```
-
-**Using RStudio:** The project is configured with `BuildType: Package` and `PackageUseDevtools: Yes` in `SimplyAgree.Rproj`. Use:
-- Ctrl/Cmd + Shift + B to build
-- Ctrl/Cmd + Shift + E to check
-- Ctrl/Cmd + Shift + D to document
-
-### Testing
-
-**Running Tests:**
-
-```r
-# Run all tests
-devtools::test()
-
-# Or using testthat directly
-library(testthat)
-library(SimplyAgree)
-test_check("SimplyAgree")
-```
-
-Tests are located in `tests/testthat/` and use the testthat framework. Test files follow the pattern `test-*.R`.
-
-### Documentation
-
-**Generating Documentation:**
-
-```r
-# Update function documentation
-devtools::document()
-
-# Build package website (pkgdown)
-pkgdown::build_site()
-
-# Build vignettes
-devtools::build_vignettes()
-```
-
-Configuration: `_pkgdown.yml` controls website structure (though file fetch failed, it exists in root).
-
-## Continuous Integration
-
-### GitHub Actions Workflows (`.github/workflows/`)
-
-**Three workflows run on every push and pull request:**
-
-1. **R-CMD-check.yaml** - Package validation across platforms
-   - Runs on: macOS-latest, Windows-latest, Ubuntu-latest
-   - Uses R release version
-   - **Critical:** Installs Matrix package explicitly via `extra-packages: any::rcmdcheck, Matrix`
-   - **Always ensure your changes pass R CMD check before committing**
-
-2. **test-coverage.yaml** - Code coverage analysis
-   - Runs on: Ubuntu-latest only
-   - Uses codecov for reporting
-   - Requires Matrix package: `extra-packages: covr, any::rcmdcheck, Matrix`
-
-3. **pkgdown.yaml** - Documentation website generation
-   - Builds and deploys to gh-pages branch
-   - Requires pandoc and TinyTeX
-   - Deploys automatically on push to master/main
-
-**All workflows use `pak-version: devel` for dependency installation.**
-
-### Build Configuration
-
-Key files:
-- `.Rbuildignore`: Excludes jamovi files, docs, images, paper, vignettes/reanalysis_supp.R
-- `NAMESPACE`: Auto-generated by roxygen2 - **DO NOT EDIT MANUALLY**
-- `DESCRIPTION`: Package metadata - update version and dependencies here
-
-## Project Structure
-
-### Directory Layout
-
-```
-SimplyAgree/
-├── R/                    # R source code (50+ files)
-│   ├── agreement_limit.R # Main agreement analysis function
-│   ├── tolerance_limit.R # Tolerance interval function
-│   ├── reli_stats.R     # Reliability statistics
-│   ├── dem_reg.R        # Deming regression
-│   ├── agree_*.R        # Agreement analysis variants (nest, reps, test, np, coef)
-│   ├── loa_*.R          # Limits of agreement implementations
-│   ├── methods.*.R      # S3 methods (print, plot, check)
-│   ├── jmv*.R           # jamovi module interface files
-│   ├── power_*.R        # Power analysis functions
-│   └── *_functions.R    # Helper functions
-├── man/                  # Documentation (auto-generated)
-├── tests/
-│   └── testthat/        # Unit tests (test-*.R files)
-├── vignettes/           # Long-form documentation (.Rmd files)
-│   ├── agreement_analysis.Rmd
-│   ├── reliability_analysis.Rmd
-│   ├── power_sample_size_vignette.Rmd
-│   ├── Deming.Rmd
-│   └── agree_tests.Rmd
-├── data/                # Example datasets (.rda files)
-├── inst/                # Installed files
-├── jamovi/              # jamovi module files (.a.yaml, .u.yaml, .r.yaml)
-├── docs/                # pkgdown site (auto-generated, in .Rbuildignore)
-├── paper/               # JOSS paper files (in .Rbuildignore)
-├── DESCRIPTION          # Package metadata
-├── NAMESPACE            # Exports (auto-generated)
-└── README.Rmd          # Source for README.md
-```
-
-### Key Source Files
-
-**Core Analysis Functions:**
-- `agreement_limit.R`: Main function for Bland-Altman limits of agreement (19KB)
-- `tolerance_limit.R`: Tolerance interval calculations (15KB)
-- `reli_stats.R`: Comprehensive reliability statistics (29KB)
-- `dem_reg.R`: Deming regression (errors-in-variables)
-
-**Data Structure Support:**
-- `agree_test.R`: Simple paired data
-- `agree_reps.R`: Repeated measures (Zou's method)
-- `agree_nest.R`: Nested data structures
-- `agree_np.R`: Non-parametric approaches
-
-**Visualization & Methods:**
-- `methods.simple_agree.R`: Print, plot, check methods (13KB)
-- `simple_plot_functions.R`: Plotting utilities (22KB)
-- `loa_plot_functions.R`: Limits of agreement plots
-
-## Making Changes
-
-### Adding New Features
-
-1. **Add R function** in `R/` directory
-2. **Include roxygen2 documentation** above function:
-   ```r
-   #' Function Title
-   #' @param x Parameter description
-   #' @export
-   ```
-3. **Run `devtools::document()`** to update NAMESPACE and man pages
-4. **Add tests** in `tests/testthat/test-yourfunction.R`
-5. **Run `devtools::check()`** to validate
-
-### Modifying Existing Functions
-
-1. **Update function code** in relevant `R/*.R` file
-2. **Update roxygen documentation** if parameters/behavior change
-3. **Run `devtools::document()`**
-4. **Update or add tests** covering the change
-5. **Run `devtools::test()`** to ensure tests pass
-6. **Run `devtools::check()`** - must pass with no errors, warnings, or notes
-7. **Update vignettes** if user-facing behavior changed
-
-### Common Issues and Solutions
-
-**Matrix Package Dependency:**
-- The Matrix package is critical and must be explicitly available
-- CI workflows specifically include `Matrix` in `extra-packages`
-- If you encounter Matrix-related errors, ensure it's installed: `install.packages("Matrix")`
-
-**NAMESPACE Conflicts:**
-- NAMESPACE is auto-generated by roxygen2
-- Never edit NAMESPACE directly
-- Use roxygen2 tags: `@export`, `@importFrom`, `@import`
-
-**Test Failures:**
-- Tests use `testthat` framework with `context()` and `test_that()`
-- Many tests include `expect_equivalent()`, `expect_error()`, `expect_message()`, `expect_warning()`
-- Some tests use tolerance for numerical comparisons: `tolerance = 0.01`
-- Power simulation tests use small `n_sims` for speed and have stochastic results
-
-**Documentation:**
-- README.md is generated from README.Rmd - edit the .Rmd file
-- Always knit README.Rmd after changes: `devtools::build_readme()`
-- Vignettes contain cached results (.rds files) for computationally intensive examples
-
-## Validation Checklist
-
-Before submitting changes, **always** verify:
-
-1. ✓ `devtools::document()` runs without errors
-2. ✓ `devtools::test()` passes all tests
-3. ✓ `devtools::check()` returns 0 errors, 0 warnings, 0 notes
-4. ✓ Package builds: `devtools::build()`
-5. ✓ Package installs locally: `devtools::install()`
-6. ✓ If README changed: knit README.Rmd
-7. ✓ If vignettes changed: test building vignettes
-8. ✓ Check that changes don't break existing examples
-
-## Important Notes
-
-- **Trust these instructions:** The build process is well-established. Follow the sequence exactly.
-- **R CMD check is mandatory:** All GitHub Actions run full package checks. Local check must pass first.
-- **Roxygen2 manages exports:** Use `@export` for user-facing functions, `@keywords internal` for internal ones.
-- **Testing is comprehensive:** The package has extensive test coverage. Add tests for new functionality.
-- **S3 methods pattern:** The package uses S3 OOP extensively. Follow existing patterns in `methods.*.R` files.
-- **Data handling:** Functions support both formula interface and direct variable specification with `data` argument.
-- **Bootstrap/simulation:** Some functions use bootstrapping or simulation - these can be slow. Consider `replicates` parameter.
-- **Style:** This package tends to follow "tidyverse" style coding
-- **Review:** When reviewing merges the man and docs folders can be ignored as they are not relevant
-
-## Additional Resources
-
-- Package website: https://aaroncaldwell.us/SimplyAgree/
-- Bug reports: https://github.com/arcaldwell49/SimplyAgree/issues
-- JOSS paper: https://doi.org/10.21105/joss.04148
+## When Uncertain
+- **Multiple approaches?** Describe options, don't pick arbitrarily
+- **Backward compatibility risk?** Flag it explicitly
+- **Complex fix?** Recommend human review
+- **Unsure about statistical correctness?** Always flag for expert review
