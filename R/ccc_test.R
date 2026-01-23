@@ -1,4 +1,4 @@
-#' Concordance Correlation Coefficient Test
+#' Concordance Correlation Coefficient
 #'
 #' @description
 #' Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
@@ -25,6 +25,7 @@
 #' @return A list with class \code{"htest"} containing the following components:
 #'   \item{statistic}{The Z-statistic (Fisher-transformed).}
 #'   \item{parameter}{The sample size (n for simple data, number of subjects for reps/nest).}
+#'   \item{stderr}{The standard errors for CCC and Z-transformed CCC.}
 #'   \item{p.value}{The p-value for the test.}
 #'   \item{conf.int}{A confidence interval for the CCC.}
 #'   \item{estimate}{The estimated CCC.}
@@ -150,9 +151,10 @@ ccc_test <- function(x,
     sep <- sqrt(((1 - r^2) * ccc_est^2 * (1 - ccc_est^2) / r^2 +
                    (2 * ccc_est^3 * (1 - ccc_est) * u^2 / r) -
                    0.5 * ccc_est^4 * u^4 / r^2) / (k - 2))
-
+    names(sep) <- "SE CCC"
     # SE of Z-transformed CCC
     se_z <- sep / (1 - ccc_est^2)
+    names(se_z) <- "SE Z"
 
     method <- "Lin's Concordance Correlation Coefficient"
 
@@ -182,6 +184,8 @@ ccc_test <- function(x,
                               rmet = "method",
                               cl = conf.level)
 
+    sep <- ccc_ust_result["SE CCC"]  # SE of CCC
+    se_z <- ccc_ust_result["SE Z"]  # SE of Z-transformed CCC
     ccc_est <- ccc_ust_result[1]  # CCC
     ccc_lower <- ccc_ust_result[2]  # Lower CI
     ccc_upper <- ccc_ust_result[3]  # Upper CI
@@ -230,6 +234,7 @@ ccc_test <- function(x,
     list(
       statistic = statistic,
       parameter = parameter,
+      stderr = c(sep, se_z),
       p.value = test_result$p_value,
       conf.int = ci,
       estimate = estimate,

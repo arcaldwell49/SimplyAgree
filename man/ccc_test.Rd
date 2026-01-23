@@ -2,7 +2,7 @@
 % Please edit documentation in R/ccc_test.R
 \name{ccc_test}
 \alias{ccc_test}
-\title{Concordance Correlation Coefficient Test}
+\title{Concordance Correlation Coefficient}
 \usage{
 ccc_test(
   x,
@@ -45,6 +45,7 @@ default is 0.}
 A list with class \code{"htest"} containing the following components:
 \item{statistic}{The Z-statistic (Fisher-transformed).}
 \item{parameter}{The sample size (n for simple data, number of subjects for reps/nest).}
+\item{stderr}{The standard errors for CCC and Z-transformed CCC.}
 \item{p.value}{The p-value for the test.}
 \item{conf.int}{A confidence interval for the CCC.}
 \item{estimate}{The estimated CCC.}
@@ -78,12 +79,11 @@ ccc_test(x, y)
 
 # Using data frame interface
 data("reps")
-# Simple data (using first observation per subject)
-reps_simple <- reps[!duplicated(reps$id), ]
-ccc_test(x = "x", y = "y", data = reps_simple)
+# Simple data
+ccc_test(x = "x", y = "y", data = reps)
 
 # Test against specific null value
-ccc_test(x = "x", y = "y", data = reps_simple,
+ccc_test(x = "x", y = "y", data = reps,
          null.value = 0.8, alternative = "greater")
 
 # Replicate data
