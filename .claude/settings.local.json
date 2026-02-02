@@ -3,7 +3,9 @@
     "allow": [
       "Bash(Rscript:*)",
       "Bash(where:*)",
-      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(filter=''ccc_test''\\)\")"
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(filter=''ccc_test''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\":*)",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/SimplyAgree'', filter=''simple_eiv''\\)\")"
     ]
   }
 }

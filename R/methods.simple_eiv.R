@@ -649,14 +649,19 @@ plot_joint <- function(x, ...) {
 #' @param ideal_intercept The hypothesized intercept value to test against (default = 0)
 #' @param show_intervals Logical. If TRUE, shows individual confidence intervals as well.
 #' @param n_points Number of points to use for drawing the joint confidence region (default = 100).
+#' @param test_method Reference distribution for the ellipse and test. \code{"F"} (default)
+#'   uses the finite-sample F(2, n-2) distribution. \code{"asymptotic"} uses chi-squared(2).
 #' @export
 plot_joint.simple_eiv <- function(x,
                                   ideal_slope = 1,
                                   ideal_intercept = 0,
                                   show_intervals = TRUE,
                                   n_points = 100,
+                                  test_method = c("F", "asymptotic"),
                                   ...) {
   object <- x
+  test_method <- match.arg(test_method)
+  df_res <- if (test_method == "F") object$df.residual else NULL
 
   # Get estimates
   est_slope <- object$coefficients[2]
@@ -673,7 +678,8 @@ plot_joint.simple_eiv <- function(x,
     vcov = object$vcov,
     ideal_intercept = ideal_intercept,
     ideal_slope = ideal_slope,
-    conf.level = object$conf.level
+    conf.level = object$conf.level,
+    df_residual = df_res
   )
 
   joint_region <- .compute_joint_region(
@@ -681,7 +687,8 @@ plot_joint.simple_eiv <- function(x,
     slope = est_slope,
     vcov = vcov(object),
     conf.level = conf.level,
-    n_points = n_points
+    n_points = n_points,
+    df_residual = df_res
   )
 
   # Create base plot
@@ -708,9 +715,10 @@ plot_joint.simple_eiv <- function(x,
                          ifelse(ideal_test$is_enclosed, "ENCLOSED", "NOT enclosed")),
       x = "Slope",
       y = "Intercept",
-      caption = sprintf("chi-squared statistic = %.3f | chi-squared critical = %.3f | p = %.4f",
+      caption = sprintf("%s statistic = %.3f | critical value = %.3f | p = %.4f",
+                        ideal_test$distribution,
                         ideal_test$mahalanobis_distance,
-                        ideal_test$chi2_critical,
+                        ideal_test$critical_value,
                         ideal_test$p_value)
     ) +
     theme_bw() +
@@ -1045,12 +1053,17 @@ predict.simple_eiv <- function(object,
 #' @param ideal_intercept The hypothesized intercept value (default: 0).
 #' @param ideal_slope The hypothesized slope value (default: 1).
 #' @param conf.level Confidence level for the test (default: 0.95).
+#' @param test_method Reference distribution for the test. \code{"F"} (default)
+#'   uses the finite-sample F(2, n-2) distribution per Sadler (2010).
+#'   \code{"asymptotic"} uses the chi-squared(2) distribution, which is the
+#'   large-sample approximation. The two converge for large n.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @return An object of class `htest` containing:
 #' \describe{
-#'   \item{statistic}{The Mahalanobis distance (chi-squared distributed with df=2).}
-#'   \item{parameter}{Degrees of freedom (always 2).}
+#'   \item{statistic}{The Mahalanobis distance.}
+#'   \item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
+#'     \code{df2}; for the asymptotic test, \code{df} (always 2).}
 #'   \item{p.value}{The p-value for the test.}
 #'   \item{conf.int}{The confidence level used.}
 #'   \item{estimate}{Named vector of estimated intercept and slope.}
@@ -1063,13 +1076,18 @@ predict.simple_eiv <- function(object,
 #' @details
 #' The test computes the Mahalanobis distance between the estimated coefficients
 #' and the hypothesized values using the variance-covariance matrix of the
-#' estimates. Under the null hypothesis, this distance follows a chi-squared
-#' distribution with 2 degrees of freedom.
+#' estimates. By default, the finite-sample F(2, n-2) reference distribution
+#' is used (Sadler, 2010), which is more conservative than the asymptotic
+#' chi-squared(2) approximation for small samples.
 #'
 #' For Deming regression, the variance-covariance matrix is computed via
-
 #' jackknife. For Passing-Bablok regression, bootstrap resampling must have
 #' been performed (i.e., `boot_ci = TRUE` in the original call).
+#'
+#' @references
+#' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
+#' parametric regression in method-comparison studies. *Accreditation and Quality
+#' Assurance*, 15, 547-554.
 #'
 #' @export
 joint_test <- function(object, ...) {
@@ -1083,6 +1101,7 @@ joint_test.simple_eiv <- function(object,
                                   ideal_intercept = 0,
                                   ideal_slope = 1,
                                   conf.level = 0.95,
+                                  test_method = c("F", "asymptotic"),
                                   ...) {
 
   # Validate conf.level
@@ -1091,6 +1110,11 @@ joint_test.simple_eiv <- function(object,
       conf.level <= 0 || conf.level >= 1) {
     stop("'conf.level' must be a single number between 0 and 1")
   }
+
+  test_method <- match.arg(test_method)
+
+  # Only pass df_residual when using the finite-sample F reference
+  df_res <- if (test_method == "F") object$df.residual else NULL
 
   # Extract variance-covariance matrix
   vcov_mat <- vcov(object)
@@ -1118,7 +1142,8 @@ joint_test.simple_eiv <- function(object,
     vcov = vcov_mat,
     ideal_intercept = ideal_intercept,
     ideal_slope = ideal_slope,
-    conf.level = conf.level
+    conf.level = conf.level,
+    df_residual = df_res
   )
 
   # Handle failure from internal function
@@ -1131,17 +1156,22 @@ joint_test.simple_eiv <- function(object,
   dname <- deparse(formula(object$terms))
 
   # Format null hypothesis string for method description
+  dist_label <- if (test_method == "F") "F-based" else "asymptotic chi-squared"
   method_string <- sprintf(
-    "Joint Confidence Region Test (H0: intercept = %g, slope = %g)",
-    ideal_intercept, ideal_slope
+    "Joint Confidence Region Test [%s] (H0: intercept = %g, slope = %g)",
+    dist_label, ideal_intercept, ideal_slope
   )
 
   statistic <- test_result$mahalanobis_distance
   names(statistic) <- "X-squared"
 
-
-  parameter <- 2L
-  names(parameter) <- "df"
+  if (test_method == "F") {
+    parameter <- c(2L, as.integer(test_result$df_residual))
+    names(parameter) <- c("df1", "df2")
+  } else {
+    parameter <- 2L
+    names(parameter) <- "df"
+  }
 
   estimate <- c(intercept, slope)
   names(estimate) <- c("intercept", "slope")

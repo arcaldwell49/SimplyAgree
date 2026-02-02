@@ -1,5 +1,10 @@
 # NEWS
 
+# SimplyAgree 0.3.1
+
+- Added `ccc_test` function for concordance correlation coefficient hypothesis testing, returning an `htest` object.
+- Fixed `joint_test` and `plot_joint` to use the finite-sample F(2, n-2) reference distribution (Sadler, 2010) instead of the asymptotic chi-squared(2) approximation. The previous chi-squared approach was anti-conservative for small samples. A `test_method` argument allows selecting `"F"` (default) or `"asymptotic"` (old behavior).
+
 # SimplyAgree 0.3.0
 
 - Add enhanced support for Deming regression.

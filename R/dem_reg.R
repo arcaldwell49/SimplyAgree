@@ -84,7 +84,7 @@
 #'
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of parametric regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
 #'
-#' @importFrom stats pnorm pt qnorm qt lm anova aov complete.cases cor dchisq qchisq sd var prcomp model.frame model.matrix model.response terms delete.response na.pass
+#' @importFrom stats pnorm pt qnorm qt pf qf lm anova aov complete.cases cor dchisq qchisq pchisq sd var prcomp model.frame model.matrix model.response terms delete.response na.pass
 #' @importFrom graphics text
 #' @import ggplot2
 #' @export
@@ -313,7 +313,8 @@ dem_reg <- function(formula = NULL,
 }
 
 
-.compute_joint_region <- function(intercept, slope, vcov, conf.level = 0.95, n_points = 100) {
+.compute_joint_region <- function(intercept, slope, vcov, conf.level = 0.95,
+                                  n_points = 100, df_residual = NULL) {
 
   # Check for invalid vcov matrix
   if (any(!is.finite(vcov))) {
@@ -321,8 +322,12 @@ dem_reg <- function(formula = NULL,
     return(NULL)
   }
 
-  # Chi-square critical value for 2 df
-  chi2_crit <- qchisq(conf.level, df = 2)
+  # Use F-distribution (finite-sample) when df_residual is available
+  if (!is.null(df_residual) && is.finite(df_residual) && df_residual > 0) {
+    crit_value <- 2 * qf(conf.level, df1 = 2, df2 = df_residual)
+  } else {
+    crit_value <- qchisq(conf.level, df = 2)
+  }
 
   # Eigendecomposition of covariance matrix with error handling
   eig <- tryCatch(
@@ -351,7 +356,7 @@ dem_reg <- function(formula = NULL,
   circle <- cbind(cos(theta), sin(theta))
 
   # Transform to ellipse
-  ellipse <- t(v %*% diag(sqrt(lambda * chi2_crit)) %*% t(circle))
+  ellipse <- t(v %*% diag(sqrt(lambda * crit_value)) %*% t(circle))
 
   # Center at (intercept, slope)
   ellipse[, 1] <- ellipse[, 1] + intercept
@@ -365,7 +370,8 @@ dem_reg <- function(formula = NULL,
 
 .test_joint_enclosure <- function(intercept, slope, vcov,
                                   ideal_intercept, ideal_slope,
-                                  conf.level = 0.95) {
+                                  conf.level = 0.95,
+                                  df_residual = NULL) {
 
   # Check for invalid vcov matrix
   if (any(!is.finite(vcov))) {
@@ -394,16 +400,29 @@ dem_reg <- function(formula = NULL,
 
   mahal_dist <- as.numeric(t(diff) %*% vcov_inv %*% diff)
 
-  # Chi-square critical value
-  chi2_crit <- qchisq(conf.level, df = 2)
-
-  is_enclosed <- mahal_dist <= chi2_crit
+  # Use F-distribution (finite-sample) when df_residual is available,
+  # otherwise fall back to chi-squared (asymptotic)
+  if (!is.null(df_residual) && is.finite(df_residual) && df_residual > 0) {
+    f_crit <- 2 * qf(conf.level, df1 = 2, df2 = df_residual)
+    is_enclosed <- mahal_dist <= f_crit
+    p_value <- pf(mahal_dist / 2, df1 = 2, df2 = df_residual, lower.tail = FALSE)
+    crit_value <- f_crit
+    dist_name <- "F"
+  } else {
+    chi2_crit <- qchisq(conf.level, df = 2)
+    is_enclosed <- mahal_dist <= chi2_crit
+    p_value <- 1 - pchisq(mahal_dist, df = 2)
+    crit_value <- chi2_crit
+    dist_name <- "chi-squared"
+  }
 
   list(
     mahalanobis_distance = mahal_dist,
-    chi2_critical = chi2_crit,
+    critical_value = crit_value,
+    distribution = dist_name,
+    df_residual = df_residual,
     is_enclosed = is_enclosed,
-    p_value = 1 - pchisq(mahal_dist, df = 2)
+    p_value = p_value
   )
 }
 
