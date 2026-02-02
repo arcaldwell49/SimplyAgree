@@ -196,9 +196,11 @@ ccc_test <- function(x,
 
     sep <- ccc_ust_result["SE CCC"]  # SE of CCC
     se_z <- ccc_ust_result["SE Z"]  # SE of Z-transformed CCC
-    ccc_est <- ccc_ust_result[1]  # CCC
-    ccc_lower <- ccc_ust_result[2]  # Lower CI
-    ccc_upper <- ccc_ust_result[3]  # Upper CI
+    ccc_est <- ccc_ust_result["CCC"]  # CCC
+    lower_name <- grep("^LL CI", names(ccc_ust_result), value = TRUE)
+    upper_name <- grep("^UL CI", names(ccc_ust_result), value = TRUE)
+    ccc_lower <- ccc_ust_result[lower_name]  # Lower CI
+    ccc_upper <- ccc_ust_result[upper_name]  # Upper CI
 
     # Number of subjects
     n_param <- length(unique(id_vec))
