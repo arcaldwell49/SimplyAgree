@@ -53,6 +53,11 @@
   [`predict(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   : Methods for simple_eiv objects
 
+### Other Miscellaneous Functions
+
+- [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
+  : Concordance Correlation Coefficient
+
 ## Agreement Tests
 
 ### Simple
