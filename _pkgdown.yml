@@ -42,6 +42,10 @@ reference:
   - joint_test
   - simple_eiv-methods
 
+- subtitle: "Other Miscellaneous Functions"
+  contents:
+  - ccc_test
+
 - title: "Agreement Tests"
 
 - subtitle: "Simple"
