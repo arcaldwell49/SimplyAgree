@@ -166,6 +166,7 @@ ccc_test <- function(x,
       se_z <- sep / (1 - ccc_est^2)
       names(se_z) <- "SE Z"
     }
+    n_param <- sum(complete.cases(data.frame(x_vec, y_vec)))
     method <- "Lin's Concordance Correlation Coefficient"
 
   } else {
