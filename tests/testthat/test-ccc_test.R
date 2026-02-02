@@ -268,8 +268,9 @@ test_that("parameter n is correctly computed", {
   result_simple <- ccc_test(x = "x", y = "y", data = reps_simple)
   result_reps <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 
-  # For simple data, n should equal number of complete pairs
-  expect_equal(unname(result_simple$parameter), nrow(reps_simple))
+  # For simple data, n should equal number of complete (non-missing) x-y pairs
+  expected_n_simple <- sum(complete.cases(reps_simple[, c("x", "y")]))
+  expect_equal(unname(result_simple$parameter), expected_n_simple)
 
   # For reps data, n should equal number of unique subjects
   expect_equal(unname(result_reps$parameter), length(unique(reps$id)))
