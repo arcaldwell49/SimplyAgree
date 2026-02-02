@@ -335,7 +335,7 @@ ccc_test <- function(x,
     y_vec <- data[[y]]
 
     if (!is.numeric(x_vec) || !is.numeric(y_vec)) {
-      stop("Columns '", x, "' and '", y, "' must be numeric")
+      stop(paste0("Columns '", x, "' and '", y, "' must be numeric"))
     }
 
     data_name <- paste(x, "and", y)
