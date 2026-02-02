@@ -133,29 +133,39 @@ ccc_test <- function(x,
     ccc_lower <- ccc_result$rho.c$lower.ci
     ccc_upper <- ccc_result$rho.c$upper.ci
 
-    # Compute SE for z-transformed CCC
-    # From ccc.xy: sep is SE of CCC, set is SE of Z-transformed
-    k <- sum(complete.cases(data.frame(x_vec, y_vec)))
-    n_param <- k
+    # Standard errors: prefer values computed by ccc.xy, fall back to
+    # local computation only if necessary to avoid duplication.
+    sep <- NULL
+    se_z <- NULL
 
-    # Recompute the SE_Z using the formula from ccc.xy
-    sx2 <- var(x_vec, na.rm = TRUE) * (k - 1) / k
-    sy2 <- var(y_vec, na.rm = TRUE) * (k - 1) / k
-    r <- cor(x_vec, y_vec, use = "complete.obs")
-    v <- sd(y_vec, na.rm = TRUE) / sd(x_vec, na.rm = TRUE)
-    xb <- mean(x_vec, na.rm = TRUE)
-    yb <- mean(y_vec, na.rm = TRUE)
-    u <- (yb - xb) / ((sx2 * sy2)^0.25)
+    # From ccc.xy: sep is SE of CCC, set is SE of Z-transformed CCC
+    if (!is.null(ccc_result$rho.c$sep)) {
+      sep <- ccc_result$rho.c$sep
+    }
+    if (!is.null(ccc_result$rho.c$set)) {
+      se_z <- ccc_result$rho.c$set
+    }
 
-    # SE of CCC on original scale
-    sep <- sqrt(((1 - r^2) * ccc_est^2 * (1 - ccc_est^2) / r^2 +
-                   (2 * ccc_est^3 * (1 - ccc_est) * u^2 / r) -
-                   0.5 * ccc_est^4 * u^4 / r^2) / (k - 2))
-    names(sep) <- "SE CCC"
-    # SE of Z-transformed CCC
-    se_z <- sep / (1 - ccc_est^2)
-    names(se_z) <- "SE Z"
+    if (is.null(sep) || is.null(se_z)) {
+      # Recompute SEs only if they are not available from ccc.xy
+      k <- sum(complete.cases(data.frame(x_vec, y_vec)))
+      sx2 <- var(x_vec, na.rm = TRUE) * (k - 1) / k
+      sy2 <- var(y_vec, na.rm = TRUE) * (k - 1) / k
+      r <- cor(x_vec, y_vec, use = "complete.obs")
+      xb <- mean(x_vec, na.rm = TRUE)
+      yb <- mean(y_vec, na.rm = TRUE)
+      u <- (yb - xb) / ((sx2 * sy2)^0.25)
 
+      # SE of CCC on original scale
+      sep <- sqrt(((1 - r^2) * ccc_est^2 * (1 - ccc_est^2) / r^2 +
+                     (2 * ccc_est^3 * (1 - ccc_est) * u^2 / r) -
+                     0.5 * ccc_est^4 * u^4 / r^2) / (k - 2))
+      names(sep) <- "SE CCC"
+
+      # SE of Z-transformed CCC
+      se_z <- sep / (1 - ccc_est^2)
+      names(se_z) <- "SE Z"
+    }
     method <- "Lin's Concordance Correlation Coefficient"
 
   } else {
