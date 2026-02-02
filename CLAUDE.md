@@ -108,7 +108,7 @@ covr::package_coverage()            # Check coverage
 - **Target**: 100% coverage (minimum 90%)
 - **Tolerance**: Use tight tolerances for published results: `expect_equal(..., tolerance = 1e-5)`
 - **Validation**: Test against known published values where available
-- **Structure**: One `test_that()` per behavior, use `context()` for grouping
+- **Structure**: One `test_that()` per behavior; use descriptive test file names to provide context
 
 ### Test Patterns
 ```r
