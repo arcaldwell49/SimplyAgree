@@ -189,7 +189,6 @@ ccc_test <- function(x,
     ccc_est <- ccc_ust_result[1]  # CCC
     ccc_lower <- ccc_ust_result[2]  # Lower CI
     ccc_upper <- ccc_ust_result[3]  # Upper CI
-    se_z <- ccc_ust_result[6]  # SE Z
 
     # Number of subjects
     n_param <- length(unique(id_vec))
