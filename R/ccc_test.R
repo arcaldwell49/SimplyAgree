@@ -268,9 +268,27 @@ ccc_test <- function(x,
     x_vec <- x
     y_vec <- y
 
-    # Generate data name
-    x_name <- deparse(substitute(x))
-    y_name <- deparse(substitute(y))
+    # Generate data name from the original ccc_test() call
+    parent_call <- sys.call(sys.parent())
+    if (!is.null(parent_call) && is.call(parent_call)) {
+      if (!is.null(names(parent_call)) && "x" %in% names(parent_call)) {
+        x_name <- deparse(parent_call[["x"]])
+      } else if (length(parent_call) >= 2L) {
+        x_name <- deparse(parent_call[[2L]])
+      } else {
+        x_name <- "x"
+      }
+      if (!is.null(names(parent_call)) && "y" %in% names(parent_call)) {
+        y_name <- deparse(parent_call[["y"]])
+      } else if (length(parent_call) >= 3L) {
+        y_name <- deparse(parent_call[[3L]])
+      } else {
+        y_name <- "y"
+      }
+    } else {
+      x_name <- "x"
+      y_name <- "y"
+    }
     data_name <- paste(x_name, "and", y_name)
 
     # For vector input, force simple data type
