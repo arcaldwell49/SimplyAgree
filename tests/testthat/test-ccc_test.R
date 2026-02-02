@@ -1,5 +1,3 @@
-context("ccc_test")
-
 test_that("ccc_test returns htest class for simple data (vector interface)", {
   # Simple paired data
   x <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
