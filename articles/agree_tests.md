@@ -1,13 +1,13 @@
 # Agreement Tests
 
-The `SimplyAgree` R package was created to make the process of
-quantifying measurement agreement, consistency, and reliability. This
-package expands upon the capabilities of currently available R packages
-(such as `psych` and `blandr`) by 1) providing support for agreement
-studies that involve multiple observations (`agree_test` and
-`agree_reps` functions) 2) provide robust tests of agreement even in
-simple studies (`shieh_test` output from the `agree_test` function) and
-3) a robust set of reliability statistics (`reli_stats` function).
+The `SimplyAgree` R package was created to simplify quantifying
+measurement agreement, consistency, and reliability. This package
+expands upon the capabilities of currently available R packages (such as
+`psych` and `blandr`) by 1) providing support for agreement studies that
+involve multiple observations (`agree_test` and `agree_reps` functions)
+2) provide robust tests of agreement even in simple studies
+(`shieh_test` output from the `agree_test` function) and 3) a robust set
+of reliability statistics (`reli_stats` function).
 
 In this vignette I will briefly demonstrate the implementation of the
 functions that include tests of agreement. *Please note*, I would

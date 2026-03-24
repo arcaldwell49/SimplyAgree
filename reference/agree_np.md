@@ -95,7 +95,6 @@ Issue 2, pp. 135–160). SAGE Publications.
 ``` r
 data('reps')
 agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
-#> Warning: Evidence of proportional bias. Consider setting prop_bias to TRUE.
 #> Limit of Agreement = 95%
 #> Binomial proportions test and quantile regression for LoA
 #> 
@@ -105,8 +104,8 @@ agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #> 
 #> ###- Quantile Limits of Agreement (LoA) -###
 #>           Estimate Lower CI Upper CI CI Level
-#> Lower LoA    -1.12  -1.4927  -0.7473     0.90
-#> Bias          0.04  -0.5694   0.6494     0.95
-#> Upper LoA     2.97   2.2967   3.6433     0.90
+#> Lower LoA    -1.12  -1.4605  -0.7795     0.90
+#> Bias          0.04  -0.5234   0.6034     0.95
+#> Upper LoA     2.97   2.3178   3.6222     0.90
 #> 
 ```
