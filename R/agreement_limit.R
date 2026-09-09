@@ -145,8 +145,8 @@ agreement_limit = function(x,
 
   # Save data
 
-  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
-                                                   df$id + df$avg + df$delta)))
+  lm_mod = plot_frame(y = df$y, x = df$x, id = df$id,
+                      avg = df$avg, delta = df$delta)
   call2$lm_mod = lm_mod
   res = structure(list(loa = df_loa,
                        call = call2),
