@@ -1,7 +1,7 @@
 ---
 title: Flexible and Robust Agreement and Reliability Analyses
 name: SimplyAgree
-version: 0.1.0
+version: 0.1.1
 jms: '1.0'
 authors:
   - Aaron R. Caldwell
@@ -15,21 +15,25 @@ analyses:
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Simple Agreement Analysis
+    category: analyses
   - title: Nested/Replicate Data Agreement Analysis
     name: jmvagreemulti
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Nested/Replicate Data Agreement Analysis
+    category: analyses
   - title: Reliability Analysis
     name: jmvreli
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Reliability Analysis
+    category: analyses
   - title: Deming Regression
     name: jmvdeming
     ns: SimplyAgree
     menuGroup: SimplyAgree
     menuTitle: Deming Regression
+    category: analyses
 datasets:
   - name: reps
     path: reps.csv
