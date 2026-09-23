@@ -23,6 +23,7 @@ calculations:
     2018](#ref-JanShieh2018))
 
 ``` r
+
 library(SimplyAgree)
 ```
 
@@ -64,6 +65,7 @@ within the maximal allowable difference \[-delta, delta\].
 ### Usage
 
 ``` r
+
 power_agreement_exact(
   n = NULL,           # Sample size
   delta = NULL,       # Tolerance bound
@@ -80,6 +82,7 @@ Specify **exactly three** of: n, delta, power, sigma.
 ### Example: Sample Size Calculation
 
 ``` r
+
 # Blood pressure device comparison
 result <- power_agreement_exact(
   delta = 7,          # +/-7 mmHg tolerance
@@ -120,6 +123,7 @@ approximate). Useful for exploring power across sample sizes.
 ### Usage
 
 ``` r
+
 blandPowerCurve(
   samplesizes = seq(10, 100, 1),  # Range of sample sizes
   mu = 0,                          # Mean difference
@@ -133,6 +137,7 @@ blandPowerCurve(
 ### Example: Power Curve
 
 ``` r
+
 # Generate power curve
 pc <- blandPowerCurve(
   samplesizes = seq(10, 200, 1),
@@ -150,6 +155,7 @@ plot(pc, type = 1)
 ![](power_sample_size_vignette_files/figure-html/bland_ex1-1.png)
 
 ``` r
+
 
 # Find n for 80% power
 find_n(pc, power = 0.8)
@@ -169,6 +175,7 @@ across hypothetical repeated studies.
 ### Usage
 
 ``` r
+
 agree_expected_half(
   conf.level = 0.95,    # CI confidence level
   delta = NULL,         # Target expected half-width
@@ -183,6 +190,7 @@ Specify **either** n OR delta.
 ### Example: Sample Size for Precision
 
 ``` r
+
 # Want E[H] <= 2.5*sigma
 result <- agree_expected_half(
   conf.level = 0.95,
@@ -218,6 +226,7 @@ probability of achieving target precision.
 ### Usage
 
 ``` r
+
 agree_assurance(
   conf.level = 0.95,     # CI confidence level
   assurance = 0.90,      # Target assurance probability
@@ -233,6 +242,7 @@ Specify **either** n OR omega.
 ### Example: Sample Size with Guarantee
 
 ``` r
+
 # Want 90% probability that H <= 2.5*sigma
 result <- agree_assurance(
   conf.level = 0.95,
@@ -278,8 +288,8 @@ but not to situations where replicate measures are taken within a
 measurement occasion (e.g., multiple measures at the same time point
 wherein any variation would only represent measurement error).
 
-Standard formulas assume independence[¹](#fn1). Ignoring clustering can
-leads to studies that lack precision. To my knowledge, there is no well
+Standard formulas assume independence[^1]. Ignoring clustering can leads
+to studies that lack precision. To my knowledge, there is no well
 developed methods for accounting for clustering in sample size
 calculations for agreement studies, so we use a common approximation
 from survey sampling and multilevel modeling: the **design effect**.
@@ -321,6 +331,7 @@ ICC = proportion of variance between clusters:
 ### Example: Repeated Measures Design
 
 ``` r
+
 # Step 1: Independent sample size
 result <- power_agreement_exact(
   delta = 7, mu = 0.5, sigma = 2.5,
@@ -353,6 +364,7 @@ total observations).
 ### Impact of ICC
 
 ``` r
+
 # Compare different ICC values
 n_indep <- 50
 m <- 4
@@ -393,6 +405,7 @@ consult a statistician.
 ### Complete Example with Clustering
 
 ``` r
+
 # Study parameters
 sigma <- 3.3
 delta <- 7
@@ -461,8 +474,8 @@ When uncertain:
 
 ## References
 
-Bland, J. Martin. 2003. “Cluster Randomised Trials in the Medical
-Literature: Two Bibliometric Surveys.” Talk presented to the RSS Medical
+Bland, J. Martin. 2003. *Cluster Randomised Trials in the Medical
+Literature: Two Bibliometric Surveys*. Talk presented to the RSS Medical
 Section and RSS Liverpool Local Group.
 <https://www-users.york.ac.uk/~mb55/talks/clusml.htm>.
 
@@ -481,7 +494,5 @@ Quantitative Measurements: Exact Test Procedure and Sample Size
 Calculation.” *Statistics in Biopharmaceutical Research* 12 (3): 352–59.
 <https://doi.org/10.1080/19466315.2019.1677495>.
 
-------------------------------------------------------------------------
-
-1.  Implications of which are discussed by Bland
+[^1]: Implications of which are discussed by Bland
     ([2003](#ref-bland2003cluster)) among many others

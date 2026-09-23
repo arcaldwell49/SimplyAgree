@@ -80,12 +80,14 @@ You can install the most up-to-date version of `SimplyAgree` from
 [GitHub](https://github.com/arcaldwell49/SimplyAgree) with:
 
 ``` r
+
 devtools::install_github("arcaldwell49/SimplyAgree")
 ```
 
 ## Quick Start Example
 
 ``` r
+
 library(SimplyAgree)
 
 # Load example data

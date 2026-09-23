@@ -17,6 +17,7 @@ data, repeated measures, and nested data structures.
 ## Development Commands
 
 ``` r
+
 library(devtools)
 devtools::load_all()    # Load package for interactive dev
 devtools::document()    # Generate docs from roxygen2
@@ -66,14 +67,14 @@ No Makefile. RStudio shortcuts: Ctrl+Shift+L (load), Ctrl+Shift+D
 
 Methods are organized in `R/methods.*.R` files:
 
-| Class           | print                | plot          | check | Other                                                    |
-|-----------------|----------------------|---------------|-------|----------------------------------------------------------|
-| simple_agree    | Yes                  | Yes (ggplot2) | Yes   | \-                                                       |
-| simple_reli     | Yes                  | Yes (ggplot2) | Yes   | \-                                                       |
-| simple_eiv      | Yes                  | Yes           | Yes   | coef, confint, fitted, predict, residuals, summary, vcov |
-| loa, loa_mermod | Yes                  | Yes (ggplot2) | Yes   | \-                                                       |
-| tolerance_delta | Yes                  | Yes (ggplot2) | Yes   | \-                                                       |
-| htest           | Inherited from stats | \-            | \-    | \-                                                       |
+| Class | print | plot | check | Other |
+|----|----|----|----|----|
+| simple_agree | Yes | Yes (ggplot2) | Yes | \- |
+| simple_reli | Yes | Yes (ggplot2) | Yes | \- |
+| simple_eiv | Yes | Yes | Yes | coef, confint, fitted, predict, residuals, summary, vcov |
+| loa, loa_mermod | Yes | Yes (ggplot2) | Yes | \- |
+| tolerance_delta | Yes | Yes (ggplot2) | Yes | \- |
+| htest | Inherited from stats | \- | \- | \- |
 
 ### Plot Methods
 
@@ -127,6 +128,7 @@ Methods are organized in `R/methods.*.R` files:
 **Framework**: testthat (edition 3)
 
 ``` r
+
 devtools::test()                    # Run all tests
 devtools::test(filter = "ccc")      # Run specific test file
 covr::package_coverage()            # Check coverage
@@ -144,6 +146,7 @@ covr::package_coverage()            # Check coverage
 ### Test Patterns
 
 ``` r
+
 test_that("function returns correct class", {
   result <- my_function(x, y)
   expect_s3_class(result, "expected_class")
@@ -166,6 +169,7 @@ test_that("input validation works", {
 ### Standard Tags
 
 ``` r
+
 #' @title Short Title
 #' @description
 #' `r lifecycle::badge('stable')`
@@ -247,14 +251,14 @@ source material and methodology papers.
 
 ### Key Methods
 
-| Method              | Function                                                                                                                                                     | Data Type                |
-|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| Bland-Altman LoA    | [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)                                                                     | Simple, repeated, nested |
-| Tolerance Intervals | [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)                                                                     | Simple, repeated, nested |
-| CCC                 | [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)                                                                                   | Simple, repeated, nested |
-| ICC                 | [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md), [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md) | Repeated measures        |
-| Deming Regression   | [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)                                                                                     | Paired                   |
-| Passing-Bablok      | [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)                                                                                       | Paired                   |
+| Method | Function | Data Type |
+|----|----|----|
+| Bland-Altman LoA | [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md) | Simple, repeated, nested |
+| Tolerance Intervals | [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md) | Simple, repeated, nested |
+| CCC | [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md) | Simple, repeated, nested |
+| ICC | [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md), [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md) | Repeated measures |
+| Deming Regression | [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md) | Paired |
+| Passing-Bablok | [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md) | Paired |
 
 ### Data Structures
 

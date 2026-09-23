@@ -7,7 +7,7 @@ reliability of a measurement. This R package allows for the calculation
 of Intraclass Correlation Coefficients (ICC), various standard errors
 (SEM, SEE, and SEP), and coefficient of variation. All of the underlying
 calculations (sans the coefficient of variation) are based on the paper
-by Weir ([2005](#ref-weir2005))[¹](#fn1). This is a fairly popular paper
+by Weir ([2005](#ref-weir2005))[^1]. This is a fairly popular paper
 within my own field (kinesiology), and hence was the inspiration for
 creating this function that provides all the calculative approaches
 included within that manuscript.
@@ -35,6 +35,7 @@ format.
 
 ``` r
 
+
   # Example from Shrout and Fleiss (1979), pg. 423
   dat = data.frame(judge1 = 
                      c(9,6,8,7,10,6),
@@ -50,6 +51,7 @@ Now, that we have a data set (`dat`), I can use it in the `reli_stats`
 function.
 
 ``` r
+
 test1 = reli_stats(
   data = dat,
   wide = TRUE,
@@ -68,6 +70,7 @@ report is beyond the current vignette, but is heavily detailed in Weir
 the what these different ICCs are intended to measure, respectively.
 
 ``` r
+
 print(test1)
 #> 
 #> Coefficient of Variation (%):  19.1
@@ -89,6 +92,7 @@ Also included in the results is a plot of the measurements across the
 items (e.g., time points).
 
 ``` r
+
 plot(test1)
 ```
 
@@ -105,6 +109,7 @@ there are convergence issues. Rows with missing data are dropped when
 using `reli_aov`.
 
 ``` r
+
 test2 = reli_aov(
   data = dat,
   wide = TRUE,
@@ -287,7 +292,7 @@ MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)} \\
 
 The standard error of the measurement (SEM), standard error of the
 estimate (SEE), and standard error of prediction (SEP) are all estimated
-with the following calculations.[²](#fn2)
+with the following calculations.[^2]
 
 The default SEM calculation is the following:
 
@@ -312,7 +317,7 @@ recommend reporting the default version of CV.
 
 \\ CV = \frac{ \sqrt{MSE} }{ \bar y} \\
 
-2.  From the SEM[³](#fn3)
+2.  From the SEM[^3]
 
 \\ CV = \frac{SEM}{ \bar y} \\
 
@@ -395,6 +400,7 @@ users to Gwet’s textbook on inter-rater agreement ([Gwet
 As a demonstration, we can create a matrix of ratings.
 
 ``` r
+
   ratermat1 = ("Rater1 Rater2 Rater3 Rater4
 1       1      1     NA      1
 2       2      2      3      2
@@ -417,6 +423,7 @@ As a demonstration, we can create a matrix of ratings.
 We can then perform the analysis without the weights.
 
 ``` r
+
 agree_coef(data = ratermat2,
                      wide = TRUE,
                      weighted = FALSE,
@@ -431,6 +438,7 @@ agree_coef(data = ratermat2,
 Or, perform it with weighting.
 
 ``` r
+
 agree_coef(data = ratermat2,
                     wide = TRUE,
                     weighted = TRUE,
@@ -447,8 +455,8 @@ agree_coef(data = ratermat2,
 Gwet, Kilem L. 2014. *Handbook of Inter-Rater Reliability*. Advanced
 Analytics, LLC. <https://www.agreestat.com/book4/>.
 
-———. 2019. *irrCAC: Computing Chance-Corrected Agreement Coefficients
-(CAC)*. <https://CRAN.R-project.org/package=irrCAC>.
+Gwet, Kilem L. 2019. *irrCAC: Computing Chance-Corrected Agreement
+Coefficients (CAC)*. <https://CRAN.R-project.org/package=irrCAC>.
 
 McGraw, Kenneth O, and Seok P Wong. 1996. “Forming Inferences about Some
 Intraclass Correlation Coefficients.” *Psychological Methods* 1 (1): 30.
@@ -463,14 +471,12 @@ Intraclass Correlation Coefficient and the SEM.” *The Journal of
 Strength and Conditioning Research* 19 (1): 231.
 <https://pubmed.ncbi.nlm.nih.gov/15705040/>.
 
-------------------------------------------------------------------------
-
-1.  The paper by Weir also appears to heavily rely on the work of Shrout
-    and Fleiss ([1979](#ref-shrout1979)) and McGraw and Wong
+[^1]: The paper by Weir also appears to heavily rely on the work of
+    Shrout and Fleiss ([1979](#ref-shrout1979)) and McGraw and Wong
     ([1996](#ref-mcgraw1996))
 
-2.  This section was previously incorrect. The variance calculation used
-    to utilize \\n_j\\ instead of N.
+[^2]: This section was previously incorrect. The variance calculation
+    used to utilize \\n_j\\ instead of N.
 
-3.  Also called “%SEM” in some texts. Equivalent to MSE if the `se_type`
-    is set to “MSE”
+[^3]: Also called “%SEM” in some texts. Equivalent to MSE if the
+    `se_type` is set to “MSE”

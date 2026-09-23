@@ -18,8 +18,8 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Agreement &amp; Tolerance Limits">
 </head>
@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-03-24</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-09-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -104,7 +104,7 @@ concepts.</p>
 <div class="section level2">
 <h2 id="agree-or-tolerate">Agree or Tolerate?<a class="anchor" aria-label="anchor" href="#agree-or-tolerate"></a>
 </h2>
-<p><span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> pose this question in a
+<p><span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span> pose this question in a
 paper published in <em>Statistics in Medicine</em>. Traditionally, those
 working in medicine or physiology have defaulted to calculating some
 form of “limits of agreement” that <span class="citation">Bland and
@@ -123,7 +123,7 @@ to other distributions (please see the tolerance package by <span class="citatio
 However, in the agreement studies typically seen in medicine, tolerance
 limits may be a more accurate way of determining whether two
 measurements are adequately close to one another.</p>
-<p>To quote <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
+<p>To quote <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
 <blockquote>
 <p>In terms of terminology, tolerance means, in this context, that some
 difference between the methods is tolerated (the measurements are still
@@ -147,9 +147,9 @@ limits more attractive for 2 reasons: 1) the coverage of the prediction
 intervals and their tolerance limits is often better than confidence
 intervals for agreement limits, and 2) the interpretation of the
 tolerance limits is much clearer. For a greater discussion of this
-topic, please see the manuscript by <span class="citation">Francq,
-Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>
-and check out their R package <code>BivRegBLS</code>.</p>
+topic, please see the manuscript by <span class="citation">Francq et al.
+(<a href="#ref-francq2020tolerate">2020</a>)</span> and check out their
+R package <code>BivRegBLS</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="tolerance">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance"></a>
@@ -179,8 +179,8 @@ correlation.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4983, 0.8056]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1341, 0.3219]   [-0.3163, 0.7723] [-0.6985, 1.1545]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4982, 0.8056]</span></span>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6983, 1.1543]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -229,7 +229,7 @@ calculated with following:</p>
 PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
 \]</span></p>
 <p><strong>NOTE</strong>: the degrees of freedom (df) are calculated
-using an approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946">1946</a>)</span> (see <span class="citation">Kuznetsova, Brockhoff, and Christensen (<a href="#ref-lmertest">2017</a>)</span> for an explanation of this
+using an approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946">1946</a>)</span> (see <span class="citation">Kuznetsova et al. (<a href="#ref-lmertest">2017</a>)</span> for an explanation of this
 implementation in R).</p>
 </div>
 <div class="section level4">
@@ -239,7 +239,7 @@ implementation in R).</p>
 <code>tol_method</code> argument with options including “approx” and
 “perc”. Tolerance limits are calculated either through the “Beta
 expectation” approximation (<code>tol_method = "approx"</code>) detailed
-by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> or through a parametric
+by <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span> or through a parametric
 bootstrap method (<code>tol_method = "perc"</code>). The bootstrap
 methods re-samples from the model and, after a certain number of
 replicates (default is 1999), calculates the bounds the prediction
@@ -250,7 +250,7 @@ than 2 minutes for even small data sets. The approximation is the
 default only because it is substantially quicker. Users should be aware
 that the bootstrap method will likely be more accurate and provide
 smaller (i.e., more forgiving) tolerance limits.</p>
-<p>The approximate tolerance limits based on the work of <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> are calculated as the
+<p>The approximate tolerance limits based on the work of <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span> are calculated as the
 following:</p>
 <p><span class="math display">\[
 TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot
@@ -281,8 +281,8 @@ controlling for time of day (<code>tod</code>).</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4983]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3219, -0.1341]   [-0.7723, 0.3163] [-1.1545, 0.6985]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4982]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]   [-0.7723, 0.3163] [-1.1543, 0.6983]</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -757,8 +757,8 @@ difference between the two paired measures.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676]   [-0.7958, 1.6334] [-1.3558, 2.1934]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8746]   [-0.8703, 2.1072] [-1.9189, 3.1558]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676]   [-0.7957, 1.6333] [-1.3555, 2.1931]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3623, 0.8746]   [-0.8699, 2.1068]  [-1.918, 3.1548]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>
@@ -809,16 +809,16 @@ the plots from showing the individual data points we can modify the
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bland1986" class="csl-entry">
 Bland, J Martin, and Douglas G Altman. 1986. <span>“Statistical Methods
 for Assessing Agreement Between Two Methods of Clinical
 Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8" class="external-link">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.
 </div>
 <div id="ref-bland1999" class="csl-entry">
-———. 1999. <span>“Measuring Agreement in Method Comparison
-Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2):
-135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
+Bland, J Martin, and Douglas G Altman. 1999. <span>“Measuring Agreement
+in Method Comparison Studies.”</span> <em>Statistical Methods in Medical
+Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
 </div>
 <div id="ref-donner2012closed" class="csl-entry">
 Donner, Allan, and GY Zou. 2012. <span>“Closed-Form Confidence Intervals
@@ -866,7 +866,7 @@ Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

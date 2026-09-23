@@ -18,8 +18,8 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Re-analysis of an Agreement Study">
 </head>
@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,16 +116,15 @@ provide an answer to different, albeit related, question.</p>
 estimate the absolute <em>agreement</em> between the AM and PM sessions
 within each condition. This is rather complicated because we have
 multiple measurement within each participant. However, with the tools
-included in <code>SimplyAgree</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt; &lt;span class="citation"&gt;Josep Lluis Carrasco and
-Martinez (2020)&lt;/span&gt; is another package to check out&lt;/p&gt;'><sup>1</sup></a> I believe we can get closer to the right
+included in <code>SimplyAgree</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt; &lt;span class="citation"&gt;Carrasco and Martinez
+(2020)&lt;/span&gt; is another package to check out&lt;/p&gt;'><sup>1</sup></a> I believe we can get closer to the right
 answer.</p>
 <p>In order to understand the underlying processes of these functions
 and procedures I highly recommend reading the statistical literature
 that documents methods within these functions. For the
-<code>cccrm</code> package please see the work by <span class="citation">Josep L. Carrasco and Jover (2003)</span>, <span class="citation">Josep L. Carrasco, King, and Chinchilli (2009)</span>,
-and <span class="citation">Josep L. Carrasco et al. (2013)</span>. The
-<code>tolerance_limit</code> function was inspired by the work of <span class="citation">Francq, Berger, and Boachie (2020)</span> which
-documented how to implement tolerance limits to measure agreement.</p>
+<code>cccrm</code> package please see the work by <span class="citation">Carrasco and Jover (2003)</span>, <span class="citation">Carrasco et al. (2009)</span>, and <span class="citation">Carrasco et al. (2013)</span>. The
+<code>tolerance_limit</code> function was inspired by the work of <span class="citation">Francq et al. (2020)</span> which documented how to
+implement tolerance limits to measure agreement.</p>
 </div>
 <div class="section level2">
 <h2 id="concordance">Concordance<a class="anchor" aria-label="anchor" href="#concordance"></a>
@@ -238,9 +237,9 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3245, 0.8345] [-0.5248, 1.0348]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3144, 0.8224] [-0.4978, 1.0058]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.7101, 1.0721] [-1.4732, 1.8352]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]   [-0.3242, 0.8342] [-0.5239, 1.0339]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3142, 0.8222] [-0.4974, 1.0054]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7109, 1.0729] [-1.4753, 1.8373]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -274,9 +273,9 @@ researchers.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3466, 0.3086]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3465, 0.3085]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2645, 0.2945]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3516, 0.2336]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
@@ -318,9 +317,9 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2564, -0.1036]   [-0.4332, 0.0732]   [-0.556, 0.196]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212   [-0.329, -0.095]   [-0.4603, 0.0363] [-0.5414, 0.1174]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146    [-0.23, -0.062]   [-0.4159, 0.1239] [-0.5676, 0.2756]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2561, -0.1039]   [-0.4324, 0.0724] [-0.5535, 0.1935]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.4601, 0.0361] [-0.5409, 0.1169]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2297, -0.0623]   [-0.4149, 0.1229] [-0.5648, 0.2728]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -334,7 +333,7 @@ Limits of Agreement for Teso Post Exercise
 <span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2708, 0.2308]</span></span>
 <span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0721, 0.0621]   [-0.1858, 0.1758] [-0.2458, 0.2358]</span></span>
 <span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -350,7 +349,7 @@ Limits of Agreement for Delta Teso
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-carrasco2003" class="csl-entry">
 Carrasco, Josep L., and Lluı́s Jover. 2003. <span>“Estimating the
 Generalized Concordance Correlation Coefficient Through Variance
@@ -388,7 +387,7 @@ to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href=
 Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core
 Temperature and Sweating Response During Exercise Are Unaffected by Time
 of Day Within the Wake Period.”</span> <em>Medicine and Science in
-Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575" class="external-link">https://doi.org/10.1249/mss.0000000000002575</a>.
+Sports and Exercise</em>, ahead of print. <a href="https://doi.org/10.1249/mss.0000000000002575" class="external-link">https://doi.org/10.1249/mss.0000000000002575</a>.
 </div>
 </div>
 </div>
@@ -404,7 +403,7 @@ Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575"
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

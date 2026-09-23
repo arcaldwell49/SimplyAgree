@@ -1,6 +1,7 @@
 # Re-analysis of an Agreement Study
 
 ``` r
+
 library(SimplyAgree)
 #library(tidyverse)
 library(dplyr)
@@ -29,16 +30,15 @@ Instead, the authors could test their hypotheses by using tools that
 estimate the absolute *agreement* between the AM and PM sessions within
 each condition. This is rather complicated because we have multiple
 measurement within each participant. However, with the tools included in
-`SimplyAgree`[¹](#fn1) I believe we can get closer to the right answer.
+`SimplyAgree`[^1] I believe we can get closer to the right answer.
 
 In order to understand the underlying processes of these functions and
 procedures I highly recommend reading the statistical literature that
 documents methods within these functions. For the `cccrm` package please
-see the work by Josep L. Carrasco and Jover (2003), Josep L. Carrasco,
-King, and Chinchilli (2009), and Josep L. Carrasco et al. (2013). The
-`tolerance_limit` function was inspired by the work of Francq, Berger,
-and Boachie (2020) which documented how to implement tolerance limits to
-measure agreement.
+see the work by Carrasco and Jover (2003), Carrasco et al. (2009), and
+Carrasco et al. (2013). The `tolerance_limit` function was inspired by
+the work of Francq et al. (2020) which documented how to implement
+tolerance limits to measure agreement.
 
 ## Concordance
 
@@ -54,6 +54,7 @@ identity the higher the CCC (and vice versa). Please see the `cccrm`
 package for more details.
 
 ``` r
+
 qplot(1,1) + geom_abline(intercept = 0, slope = 1)
 #> Warning: `qplot()` was deprecated in ggplot2 3.4.0.
 #> This warning is displayed once per session.
@@ -134,6 +135,7 @@ tolerance limits, and I will use percentile bootstrap confidence
 intervals.
 
 ``` r
+
 # note: more accurate tolerance limits are given by tol_method = "perc"
 rec.post_tol = tolerance_limit(
   data = df_rec.post,
@@ -148,14 +150,15 @@ When we print a table of the tolerance limits, at least for Trec post
 exercise, are providing the same conclusion (poor agreement).
 
 ``` r
+
 print(rec.post_tol)
 #> Agreement between Measures (Difference: x-y)
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 0.255 [0.0803, 0.4297]   [-0.3245, 0.8345] [-0.5248, 1.0348]
-#>    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3144, 0.8224] [-0.4978, 1.0058]
-#>    33C/7.5 0.181   [0.021, 0.341]   [-0.7101, 1.0721] [-1.4732, 1.8352]
+#>    23C/5.5 0.255 [0.0804, 0.4296]   [-0.3242, 0.8342] [-0.5239, 1.0339]
+#>    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3142, 0.8222] [-0.4974, 1.0054]
+#>    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7109, 1.0729] [-1.4753, 1.8373]
 ```
 
 Furthermore, we can visualize the results with a Bland-Altman style plot
@@ -165,6 +168,7 @@ result, but if we inspect the results further (`rec.post_tol$emmeans`)
 we can see the degrees of freedom for this condition are horribly low.
 
 ``` r
+
 plot(rec.post_tol)
 ```
 
@@ -181,6 +185,7 @@ researchers.
 
 ``` r
 
+
 rec.delta_tol = tolerance_limit(
   x = "PM",
   y = "AM",
@@ -194,12 +199,13 @@ rec.delta_tol
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3466, 0.3086]
-#>    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2646, 0.2946]
-#>    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3517, 0.2337]
+#>    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3465, 0.3085]
+#>    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2645, 0.2945]
+#>    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3516, 0.2336]
 ```
 
 ``` r
+
 
 # Plot Maximal Allowable Difference with delta argument
 plot(rec.delta_tol,
@@ -220,6 +226,7 @@ there is “good” agreement between the AM and PM measurements.
 
 ``` r
 
+
 eso.post_tol = tolerance_limit(
   x = "AM",
   y = "PM",
@@ -238,17 +245,19 @@ eso.delta_tol = tolerance_limit(
 ```
 
 ``` r
+
 eso.post_tol
 #> Agreement between Measures (Difference: x-y)
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.180 [-0.2564, -0.1036]   [-0.4332, 0.0732]   [-0.556, 0.196]
-#>    33C/5.5 -0.212   [-0.329, -0.095]   [-0.4603, 0.0363] [-0.5414, 0.1174]
-#>    33C/7.5 -0.146    [-0.23, -0.062]   [-0.4159, 0.1239] [-0.5676, 0.2756]
+#>    23C/5.5 -0.180 [-0.2561, -0.1039]   [-0.4324, 0.0724] [-0.5535, 0.1935]
+#>    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.4601, 0.0361] [-0.5409, 0.1169]
+#>    33C/7.5 -0.146 [-0.2297, -0.0623]   [-0.4149, 0.1229] [-0.5648, 0.2728]
 ```
 
 ``` r
+
 plot(eso.post_tol)
 ```
 
@@ -258,17 +267,19 @@ Exercise](reanalysis_files/figure-html/unnamed-chunk-9-1.png)
 Limits of Agreement for Teso Post Exercise
 
 ``` r
+
 eso.delta_tol
 #> Agreement between Measures (Difference: x-y)
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2709, 0.2309]
+#>    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2708, 0.2308]
 #>    33C/5.5 -0.005 [-0.0721, 0.0621]   [-0.1858, 0.1758] [-0.2458, 0.2358]
 #>    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]
 ```
 
 ``` r
+
 plot(eso.delta_tol,
      delta = .25)
 ```
@@ -312,9 +323,7 @@ Evaluate Reproducibility.” *Biometrics* 45 (1): 255.
 Ravanelli, Nicholas, and Ollie Jay. 2020. “The Change in Core
 Temperature and Sweating Response During Exercise Are Unaffected by Time
 of Day Within the Wake Period.” *Medicine and Science in Sports and
-Exercise*. <https://doi.org/10.1249/mss.0000000000002575>.
+Exercise*, ahead of print.
+<https://doi.org/10.1249/mss.0000000000002575>.
 
-------------------------------------------------------------------------
-
-1.  Josep Lluis Carrasco and Martinez (2020) is another package to check
-    out
+[^1]: Carrasco and Martinez (2020) is another package to check out

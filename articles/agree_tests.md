@@ -16,6 +16,7 @@ functions with the exception of `agree_np` which provides non-parametric
 agreement limits.
 
 ``` r
+
 library(SimplyAgree)
 ```
 
@@ -44,6 +45,7 @@ hypothesis I will not declare a `delta` argument, but I will estimate
 the 95% confidence intervals for 80% limits of agreement.
 
 ``` r
+
 a1 = agree_test(x = reps$x,
                 y = reps$y,
                 agree.level = .8)
@@ -62,6 +64,7 @@ confidence limits, are included. Lastly, Lin’s Concordance Correlation
 Coefficient, another measure of agreement, is also included.
 
 ``` r
+
 print(a1)
 #> Limit of Agreement = 80%
 #> 
@@ -84,12 +87,14 @@ of agreement. This includes the Bland-Altman plot (`type = 1`) and a
 line-of-identity plot (`type = 2`).
 
 ``` r
+
 plot(a1, type = 1)
 ```
 
 ![](agree_tests_files/figure-html/unnamed-chunk-4-1.png)
 
 ``` r
+
 
 plot(a1, type = 2) 
 ```
@@ -181,6 +186,7 @@ provided. Again, if there is a hypothesized agreement limit then this
 could be provided with the `delta` argument.
 
 ``` r
+
 a2 = agree_reps(x = "x",
                 y = "y",
                 id = "id",
@@ -201,6 +207,7 @@ results are missing because they cannot be estimated for this type of
 design.
 
 ``` r
+
 print(a2)
 #> Limit of Agreement = 80%
 #> Replicate Data Points (true value does not vary)
@@ -215,12 +222,14 @@ print(a2)
 ```
 
 ``` r
+
 plot(a2, type = 1)
 ```
 
 ![](agree_tests_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
+
 
 plot(a2, type = 2)
 ```
@@ -239,6 +248,7 @@ The function works almost identically to `agree_reps` but the underlying
 calculations are different
 
 ``` r
+
 a3 = agree_nest(x = "x",
                 y = "y",
                 id = "id",
@@ -257,6 +267,7 @@ this scenario may not be entirely appropriate given the nature of the
 data.
 
 ``` r
+
 print(a3)
 #> Limit of Agreement = 80%
 #> Nested Data Points (true value may vary)
@@ -271,12 +282,14 @@ print(a3)
 ```
 
 ``` r
+
 plot(a3, type = 1)
 ```
 
 ![](agree_tests_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
+
 
 plot(a3, type = 2)
 ```
@@ -421,8 +434,8 @@ RME**
 
 The CCC calculations are derived from the `cccUst` function of the
 `cccrm` R package. The mathematics for this CCC calculation can be found
-in the work of King, Chinchilli, and Carrasco ([2007](#ref-king2007))
-and Carrasco, King, and Chinchilli ([2009](#ref-carrasco2009)).
+in the work of King et al. ([2007](#ref-king2007)) and Carrasco et al.
+([2009](#ref-carrasco2009)).
 
 ## Checking Assumptions
 
@@ -440,6 +453,7 @@ plot.
 ### An Example
 
 ``` r
+
 a1 = agree_test(x = reps$x,
                 y = reps$y,
                 agree.level = .8)
@@ -465,6 +479,7 @@ likely bogus for the extreme ends of the measurement. In any case, plots
 of the data should always be inspected
 
 ``` r
+
 a1 = agree_test(x = reps$x,
                 y = reps$y,
                 prop_bias = TRUE,
@@ -518,6 +533,7 @@ In the code demo below, you will notice that the limits of agreement are
 no longer symmetric around the bias estimate.
 
 ``` r
+
 a1 = agree_np(x = "x",
               y = "y",
               data = reps,
@@ -548,6 +564,7 @@ assumed. You can see that the LoA changes but the test for agreement
 does not.
 
 ``` r
+
 a1 = agree_np(x = "x",
               y = "y",
               data = reps,
@@ -587,6 +604,7 @@ from showing the individual data points we can modify the `geom_point`
 argument.
 
 ``` r
+
 set.seed(81346)
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)
@@ -608,6 +626,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1, 
      geom = "geom_bin2d")
 #> `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.
@@ -617,6 +636,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1,
      geom = "geom_density_2d")
 ```
@@ -625,6 +645,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1,
      geom = "geom_density_2d_filled")
 ```
@@ -632,6 +653,7 @@ plot(a1,
 ![](agree_tests_files/figure-html/unnamed-chunk-15-4.png)
 
 ``` r
+
 
 plot(a1,
      geom = "stat_density_2d")
@@ -661,6 +683,7 @@ depending the number of replicates or if `het_var` is set to TRUE.
 
 ``` r
 
+
 recpre_long$avg = (recpre_long$PM + recpre_long$PM)/2
 a4 = loa_lme(data = recpre_long,
                diff = "diff",
@@ -679,9 +702,9 @@ Assessing Agreement Between Two Methods of Clinical Measurement.” *The
 Lancet* 327 (8476): 307–10.
 <https://doi.org/10.1016/s0140-6736(86)90837-8>.
 
-———. 1999. “Measuring Agreement in Method Comparison Studies.”
-*Statistical Methods in Medical Research* 8 (2): 135–60.
-<https://doi.org/10.1177/096228029900800204>.
+Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in
+Method Comparison Studies.” *Statistical Methods in Medical Research* 8
+(2): 135–60. <https://doi.org/10.1177/096228029900800204>.
 
 Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. “The
 Concordance Correlation Coefficient for Repeated Measures Estimated by
@@ -690,7 +713,7 @@ Variance Components.” *Journal of Biopharmaceutical Statistics* 19 (1):
 
 King, Tonya S, Vernon M Chinchilli, and Josep L Carrasco. 2007. “A
 Repeated Measures Concordance Correlation Coefficient.” *Statistics in
-Medicine* 26 (16): 3095–3113. <https://doi.org/10.1002/sim.2778>.
+Medicine* 26 (16): 3095–113. <https://doi.org/10.1002/sim.2778>.
 
 Koenker, Roger. 2020. *Quantreg: Quantile Regression*.
 <https://CRAN.R-project.org/package=quantreg>.

@@ -8,16 +8,17 @@ references listed in this vignette *before* going further if you are not
 familiar with both concepts.
 
 ``` r
+
 library(SimplyAgree)
 data(temps)
 ```
 
 ## Agree or Tolerate?
 
-Francq, Berger, and Boachie ([2020](#ref-francq2020tolerate)) pose this
-question in a paper published in *Statistics in Medicine*.
-Traditionally, those working in medicine or physiology have defaulted to
-calculating some form of “limits of agreement” that Bland and Altman
+Francq et al. ([2020](#ref-francq2020tolerate)) pose this question in a
+paper published in *Statistics in Medicine*. Traditionally, those
+working in medicine or physiology have defaulted to calculating some
+form of “limits of agreement” that Bland and Altman
 ([1986](#ref-bland1986)) recommended in their seminal paper. The
 recommendation by Bland and Altman ([1986](#ref-bland1986)) was only an
 approximation, and that has undergone many modifications (e.g., [Bland
@@ -34,7 +35,7 @@ agreement studies typically seen in medicine, tolerance limits may be a
 more accurate way of determining whether two measurements are adequately
 close to one another.
 
-To quote Francq, Berger, and Boachie ([2020](#ref-francq2020tolerate)):
+To quote Francq et al. ([2020](#ref-francq2020tolerate)):
 
 > In terms of terminology, tolerance means, in this context, that some
 > difference between the methods is tolerated (the measurements are
@@ -59,7 +60,7 @@ more attractive for 2 reasons: 1) the coverage of the prediction
 intervals and their tolerance limits is often better than confidence
 intervals for agreement limits, and 2) the interpretation of the
 tolerance limits is much clearer. For a greater discussion of this
-topic, please see the manuscript by Francq, Berger, and Boachie
+topic, please see the manuscript by Francq et al.
 ([2020](#ref-francq2020tolerate)) and check out their R package
 `BivRegBLS`.
 
@@ -78,6 +79,7 @@ between different times of day (`tod`) and controlling for the
 intra-subject correlation.
 
 ``` r
+
 tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
@@ -90,17 +92,17 @@ tolerance_limit(
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4983, 0.8056]
-#>         PM 0.2280 [0.1341, 0.3219]   [-0.3163, 0.7723] [-0.6985, 1.1545]
+#>         AM 0.1537 [0.0595, 0.2479]    [-0.292, 0.5993] [-0.4982, 0.8056]
+#>         PM 0.2280 [0.1342, 0.3218]   [-0.3163, 0.7723] [-0.6983, 1.1543]
 ```
 
 ### Calculative Approach
 
 Overall, the model is fit using the `gls` function, and, for those
 interested, I would suggest reading book by Pinheiro and Bates which
-details the function[¹](#fn1). This function is different than the
-linear, or linear mixed, models that are utilized in calculating limits
-of agreement because it accommodates correlated errors and/or unequal
+details the function[^1]. This function is different than the linear, or
+linear mixed, models that are utilized in calculating limits of
+agreement because it accommodates correlated errors and/or unequal
 variances.
 
 #### Arguments Influencing the Model
@@ -138,30 +140,29 @@ with following:
 
 **NOTE**: the degrees of freedom (df) are calculated using an
 approximation of Satterthwaite ([1946](#ref-satterthwaite1946)) (see
-Kuznetsova, Brockhoff, and Christensen ([2017](#ref-lmertest)) for an
-explanation of this implementation in R).
+Kuznetsova et al. ([2017](#ref-lmertest)) for an explanation of this
+implementation in R).
 
 #### Tolerance
 
 The type of tolerance limit calculation can be set using the
 `tol_method` argument with options including “approx” and “perc”.
 Tolerance limits are calculated either through the “Beta expectation”
-approximation (`tol_method = "approx"`) detailed by Francq, Berger, and
-Boachie ([2020](#ref-francq2020tolerate)) or through a parametric
-bootstrap method (`tol_method = "perc"`). The bootstrap methods
-re-samples from the model and, after a certain number of replicates
-(default is 1999), calculates the bounds the prediction interval based
-on the quantiles of the replicates for the lower and upper limit. This
-is preferred for its accuracy and power, but is *extremely* slow which
-may involve computations lasting greater than 2 minutes for even small
-data sets. The approximation is the default only because it is
-substantially quicker. Users should be aware that the bootstrap method
-will likely be more accurate and provide smaller (i.e., more forgiving)
-tolerance limits.
+approximation (`tol_method = "approx"`) detailed by Francq et al.
+([2020](#ref-francq2020tolerate)) or through a parametric bootstrap
+method (`tol_method = "perc"`). The bootstrap methods re-samples from
+the model and, after a certain number of replicates (default is 1999),
+calculates the bounds the prediction interval based on the quantiles of
+the replicates for the lower and upper limit. This is preferred for its
+accuracy and power, but is *extremely* slow which may involve
+computations lasting greater than 2 minutes for even small data sets.
+The approximation is the default only because it is substantially
+quicker. Users should be aware that the bootstrap method will likely be
+more accurate and provide smaller (i.e., more forgiving) tolerance
+limits.
 
-The approximate tolerance limits based on the work of Francq, Berger,
-and Boachie ([2020](#ref-francq2020tolerate)) are calculated as the
-following:
+The approximate tolerance limits based on the work of Francq et al.
+([2020](#ref-francq2020tolerate)) are calculated as the following:
 
 \\ TI = EMM \pm z\_{1-\alpha_1/2} \cdot SEP \cdot
 \sqrt{\frac{df}{\chi^2\_{\alpha_2,df}}} \\ **NOTE**: \\\alpha_1\\ refers
@@ -178,6 +179,7 @@ agreement between esophageal and rectal temperature while controlling
 for time of day (`tod`).
 
 ``` r
+
 test1 = tolerance_limit(data = temps,
                         x = "teso_pre",
                         y = "trec_pre",
@@ -189,8 +191,8 @@ test1
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits
-#>         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4983]
-#>         PM -0.2280 [-0.3219, -0.1341]   [-0.7723, 0.3163] [-1.1545, 0.6985]
+#>         AM -0.1537 [-0.2479, -0.0595]    [-0.5993, 0.292] [-0.8056, 0.4982]
+#>         PM -0.2280 [-0.3218, -0.1342]   [-0.7723, 0.3163] [-1.1543, 0.6983]
 ```
 
 ## Agreement
@@ -243,6 +245,7 @@ The data for the two measurements are put into the `x` and `y`
 arguments.
 
 ``` r
+
 # Calc. LoA
 a1 = agreement_limit(data = reps,
                      x = "x",
@@ -318,6 +321,7 @@ argument) and second (`y` argument) must then be provided. An additional
 column indicating the subject identifier (`id`) must also be provided.
 
 ``` r
+
 a2 = agreement_limit(x = "x",
                 y = "y",
                 id = "id",
@@ -407,6 +411,7 @@ estimates that are very close to those described by Zou
 ([2011](#ref-zou2011)).
 
 ``` r
+
 a3 = agreement_limit(x = "x",
                 y = "y",
                 id = "id",
@@ -490,6 +495,7 @@ visualized against the tolerance/agreement limits using the `delta`
 argument for the `plot` method.
 
 ``` r
+
 res1 = tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
@@ -512,16 +518,17 @@ tolerance limits.
 The function will provide 3 plots: Q-Q normality plot, standardized
 residuals plot, and proportional bias plot.
 
-All 3 plots will have a statistical test in the bottom right
-corner[²](#fn2). The Shapiro-Wilk test is included for the normality
-plot, the Bagan-Preusch test for heterogeneity, and the test for linear
-slope on the residuals plot. Please note that there is no formal test of
+All 3 plots will have a statistical test in the bottom right corner[^2].
+The Shapiro-Wilk test is included for the normality plot, the
+Bagan-Preusch test for heterogeneity, and the test for linear slope on
+the residuals plot. Please note that there is no formal test of
 proportional bias for the tolerance limits, but a plot is still included
 for visual checks.
 
 ### An Example
 
 ``` r
+
 test_agree = agreement_limit(x = "x",
                              y = "y",
                              data = reps)
@@ -532,6 +539,7 @@ check(test_agree)
 ![](agreement_analysis_files/figure-html/unnamed-chunk-8-1.png)
 
 ``` r
+
 
 test_tol = tolerance_limit(x = "x",
                            y = "y",
@@ -556,6 +564,7 @@ then the proportional bias adjusted model is utilized. Plots and checks
 of the data should always be inspected.
 
 ``` r
+
 
 test_tol = tolerance_limit(x = "x",
                            y = "y",
@@ -582,6 +591,7 @@ plot(test_tol)
 
 ``` r
 
+
 # Confirm its effects in proportional bias check plot (should be horizontal now)
 check(test_tol)
 ```
@@ -597,6 +607,7 @@ transformed) can be interpreted as ratios. The log transformation
 (natural base) can be accomplished with the `log_tf` argument.
 
 ``` r
+
 tolerance_limit(
   data = temps,
   log_tf = TRUE, # natural log transformation of responses
@@ -622,6 +633,7 @@ which is the log transformed differences between the measures, \\s\\ =
 interpreted as a percentage difference between the two paired measures.
 
 ``` r
+
 tolerance_limit(
   data = temps,
   log_tf = TRUE, # natural log transformation of responses
@@ -636,8 +648,8 @@ tolerance_limit(
 #> 95% Prediction Interval with 95% Tolerance Limits
 #> 
 #>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.4188  [0.1616, 0.676]   [-0.7958, 1.6334] [-1.3558, 2.1934]
-#>         PM 0.6184 [0.3622, 0.8746]   [-0.8703, 2.1072] [-1.9189, 3.1558]
+#>         AM 0.4188  [0.1616, 0.676]   [-0.7957, 1.6333] [-1.3555, 2.1931]
+#>         PM 0.6184 [0.3623, 0.8746]   [-0.8699, 2.1068]  [-1.918, 3.1548]
 ```
 
 ## Visualizing “Big” Data
@@ -648,6 +660,7 @@ the plots from showing the individual data points we can modify the
 `geom` argument.
 
 ``` r
+
 set.seed(81346)
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)
@@ -669,6 +682,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1,
      geom = "geom_bin2d")
 #> `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.
@@ -678,6 +692,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1,
      geom = "geom_density_2d")
 ```
@@ -686,6 +701,7 @@ plot(a1,
 
 ``` r
 
+
 plot(a1,
      geom = "geom_density_2d_filled")
 ```
@@ -693,6 +709,7 @@ plot(a1,
 ![](agreement_analysis_files/figure-html/unnamed-chunk-12-4.png)
 
 ``` r
+
 
 plot(a1,
      geom = "stat_density_2d")
@@ -707,9 +724,9 @@ Assessing Agreement Between Two Methods of Clinical Measurement.” *The
 Lancet* 327 (8476): 307–10.
 <https://doi.org/10.1016/s0140-6736(86)90837-8>.
 
-———. 1999. “Measuring Agreement in Method Comparison Studies.”
-*Statistical Methods in Medical Research* 8 (2): 135–60.
-<https://doi.org/10.1177/096228029900800204>.
+Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in
+Method Comparison Studies.” *Statistical Methods in Medical Research* 8
+(2): 135–60. <https://doi.org/10.1177/096228029900800204>.
 
 Donner, Allan, and GY Zou. 2012. “Closed-Form Confidence Intervals for
 Functions of the Normal Mean and Standard Deviation.” *Statistical
@@ -735,10 +752,8 @@ Limits of Agreement with Multiple Observations Per Individual.”
 *Statistical Methods in Medical Research* 22 (6): 630–42.
 <https://doi.org/10.1177/0962280211402548>.
 
-------------------------------------------------------------------------
-
-1.  Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects Models in S
+[^1]: Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects Models in S
     and S-PLUS”, Springer, pp. 100, 461.
 
-2.  No test is included for proportional bias for `tolerance_limit`
+[^2]: No test is included for proportional bias for `tolerance_limit`
     results at this time.

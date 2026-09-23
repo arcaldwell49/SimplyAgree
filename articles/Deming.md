@@ -10,9 +10,9 @@ assays of the same analyte).
 
 Deming regression is one of the simplest forms of of EIV models promoted
 by [W. Edwards
-Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)[¹](#fn1). The
-first to detail the method were Adcock ([1878](#ref-adcock1878))
-followed by Kummell ([1879](#ref-kummell1879)) and Koopmans
+Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)[^1]. The first
+to detail the method were Adcock ([1878](#ref-adcock1878)) followed by
+Kummell ([1879](#ref-kummell1879)) and Koopmans
 ([1936](#ref-koopmans1936)). The name comes from the popularity of
 Deming’s book ([Deming 1943](#ref-deming1943)), and within the field of
 clinical chemistry, the procedure was simply referred to as “Deming
@@ -25,6 +25,7 @@ regression” (e.g., Linnet ([1990](#ref-linnet1990))).
 We can start by creating some fake data to work with.
 
 ``` r
+
 library(SimplyAgree)
 
 dat = data.frame(
@@ -40,6 +41,7 @@ The data can be run through the `dem_reg` function and the results
 printed.
 
 ``` r
+
 dem1 = dem_reg(y ~ x,
                data = dat,
                error.ratio = 2,
@@ -59,6 +61,7 @@ dem1
 The resulting regression line can then be plotted.
 
 ``` r
+
 plot(dem1, interval = "confidence")
 ```
 
@@ -72,6 +75,7 @@ Deming regression results. Both plots appear to be fine with regards to
 the assumptions.
 
 ``` r
+
 check(dem1)
 ```
 
@@ -93,6 +97,7 @@ For this example, I will rely upon the “ferritin” data from the `deming`
 R package.
 
 ``` r
+
 library(deming)
 data('ferritin')
 
@@ -111,6 +116,7 @@ the weights are helpful. When we look at the two plots below, we can see
 there is severe problem with using the “un-weighted” model.
 
 ``` r
+
 dem2 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
@@ -138,6 +144,7 @@ plot(dem2)
 
 ``` r
 
+
 check(dem2)
 ```
 
@@ -146,6 +153,7 @@ check(dem2)
 Now, let us see what happens when `weighted` is set to TRUE.
 
 ``` r
+
 dem3 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
@@ -172,6 +180,7 @@ plot(dem3)
 ![](Deming_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
+
 
 check(dem3)
 ```
@@ -212,6 +221,7 @@ function implements three variants of Passing-Bablok regression:
   ([1984](#ref-passing1984))
 
 ``` r
+
 # Create example data
 pb_data <- data.frame(
   method1 = c(69.3, 27.1, 61.3, 50.8, 34.4, 92.3, 57.5, 45.5, 33.3, 60.9,
@@ -252,6 +262,7 @@ The summary provides details about the regression coefficients and
 diagnostic tests:
 
 ``` r
+
 summary(pb1)
 #> Passing-Bablok (scissors) with 95% C.I. 
 #> 
@@ -271,6 +282,7 @@ The [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method
 displays the regression line with data:
 
 ``` r
+
 plot(pb1)
 ```
 
@@ -284,6 +296,7 @@ method provides diagnostic plots specific to Passing-Bablok regression,
 including the CUSUM linearity test and Kendall’s tau correlation:
 
 ``` r
+
 check(pb1)
 ```
 
@@ -295,6 +308,7 @@ For more robust inference, especially with the “invariant” or “scissors”
 methods, bootstrap confidence intervals are recommended:
 
 ``` r
+
 pb2 <- pb_reg(method2 ~ method1, 
               data = pb_data, 
               replicates = 999)
@@ -349,6 +363,7 @@ function allows visualization of the confidence region in parameter
 space:
 
 ``` r
+
 plot_joint(dem1, 
            ideal_slope = 1, 
            ideal_intercept = 0,
@@ -372,6 +387,7 @@ obtain the variance-covariance matrix needed for the joint confidence
 region:
 
 ``` r
+
 plot_joint(pb2)
 ```
 
@@ -385,6 +401,7 @@ function provides a formal hypothesis test for whether the identity line
 (slope = 1, intercept = 0) falls within the joint confidence region:
 
 ``` r
+
 joint_test(dem1)
 #> 
 #>  Joint Confidence Region Test (H0: intercept = 0, slope = 1)
@@ -405,6 +422,7 @@ This returns an `htest` object with the Mahalanobis distance
 Passing-Bablok models fitted with bootstrap:
 
 ``` r
+
 joint_test(pb2)
 #> 
 #>  Joint Confidence Region Test (H0: intercept = 0, slope = 1)
@@ -555,8 +573,8 @@ Linnet, Kristian. 1990. “Estimation of the Linear Relationship Between
 the Measurements of Two Methods with Proportional Errors.” *Statistics
 in Medicine* 9 (12): 1463–73. <https://doi.org/10.1002/sim.4780091210>.
 
-———. 1993. “Evaluation of Regression Procedures for Methods Comparison
-Studies.” *Clinical Chemistry* 39 (3): 424–32.
+Linnet, Kristian. 1993. “Evaluation of Regression Procedures for Methods
+Comparison Studies.” *Clinical Chemistry* 39 (3): 424–32.
 
 Passing, H., and W. Bablok. 1983. “A New Biometrical Procedure for
 Testing the Equality of Measurements from Two Different Analytical
@@ -564,17 +582,16 @@ Methods. Application of Linear Regression Procedures for Method
 Comparison Studies in Clinical Chemistry, Part i.” *Cclm* 21 (11):
 709–20. <https://doi.org/10.1515/cclm.1983.21.11.709>.
 
-———. 1984. “Comparison of Several Regression Procedures for Method
-Comparison Studies and Determination of Sample Sizes Application of
-Linear Regression Procedures for Method Comparison Studies in Clinical
-Chemistry, Part II.” *Clinical Chemistry and Laboratory Medicine* 22
-(6). <https://doi.org/10.1515/cclm.1984.22.6.431>.
+Passing, H., and W. Bablok. 1984. “Comparison of Several Regression
+Procedures for Method Comparison Studies and Determination of Sample
+Sizes Application of Linear Regression Procedures for Method Comparison
+Studies in Clinical Chemistry, Part II.” *Clinical Chemistry and
+Laboratory Medicine* 22 (6).
+<https://doi.org/10.1515/cclm.1984.22.6.431>.
 
 Sadler, W A. 2010. “Joint Parameter Confidence Regions Improve the Power
 of Parametric Regression in Method-Comparison Studies.” *Accreditation
 Qual. Assur.* 15 (10): 547–54.
 
-------------------------------------------------------------------------
-
-1.  Deming was a titan of the fields of statistics and engineering and I
-    would highly recommend reading some of his academic work and books
+[^1]: Deming was a titan of the fields of statistics and engineering and
+    I would highly recommend reading some of his academic work and books
