@@ -279,9 +279,8 @@ loa_hetvar = function(diff,
            avg = all_of(avg),
            condition = all_of(condition))
 
-  lm_mod = list(call = list(
-    formula = as.formula(df_plt$diff ~ df_plt$avg + df_plt$id + df_plt$condition)
-  ))
+  lm_mod = plot_frame(diff = df_plt$diff, avg = df_plt$avg,
+                      id = df_plt$id, condition = df_plt$condition)
 
 
   mc$lm_mod = lm_mod

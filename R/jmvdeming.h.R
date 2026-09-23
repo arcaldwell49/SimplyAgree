@@ -183,7 +183,8 @@ jmvdemingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Deming Regression
@@ -197,9 +198,9 @@ jmvdemingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param testValue Ratio of the two error variances. Default is 1.
 #' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
 #' @param plotcheck \code{TRUE} or \code{FALSE} (default), assumptions plots
-#' @param weighted \code{TRUE} or \code{FALSE} (default), use weighted Deming regression
-#' @param xlabel The label for the x-axis (default: "Method: 1")
-#' @param ylabel The label for the y-axis (default: "Method: 2")
+#' @param weighted \code{TRUE} or \code{FALSE}
+#' @param xlabel The label for the x-axis
+#' @param ylabel The label for the y-axis
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr

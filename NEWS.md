@@ -1,5 +1,10 @@
 # NEWS
 
+# SimplyAgree 0.3.1
+
+- Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).
+  - The data needed by the `plot` and `check` methods are now stored in the returned object itself, rather than as a formula that pointed back at the environment the analysis was run in.
+
 # SimplyAgree 0.3.0
 
 - Add enhanced support for Deming regression.

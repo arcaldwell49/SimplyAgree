@@ -244,7 +244,9 @@ tolerance_limit = function(data,
   }
 
   df = as.data.frame(temp_frame)
-  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x + df$id + df$avg + df$delta + df$condition + df$time)))
+  lm_mod = plot_frame(y = df$y, x = df$x, id = df$id,
+                      avg = df$avg, delta = df$delta,
+                      condition = df$condition, time = df$time)
   call2$lm_mod = lm_mod
 
   res = structure(list(limits = emm_df,
