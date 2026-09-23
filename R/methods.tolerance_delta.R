@@ -108,7 +108,8 @@ print.tolerance_delta <- function(x,
            `Bias CI`,
            `Prediction Interval`,
            `Tolerance Limits`)
-  if(call2$prop_bias){
+  # limits vary with avg under prop_bias or an avg-dependent variance function
+  if(call2$prop_bias || any(!is.na(df_tolerance_delta$avg))){
     if(is.null(call2$condition)){
       pr_table3 = pr_table2[,c(
         "Average of Both Methods",
@@ -148,7 +149,10 @@ print.tolerance_delta <- function(x,
   }
 
   title1 = "Agreement between Measures (Difference: x-y)"
+  conf_level = if(is.null(x$call$conf_level)) 0.95 else x$call$conf_level
   subtitle1 = paste0(
+    conf_level*100,
+    "% CI for Bias; ",
     x$call$pred_level*100,
     "% Prediction Interval with ",
     x$call$tol_level*100,
@@ -329,7 +333,8 @@ plot.tolerance_delta <- function(x,
                 "Tolerance Limits = ",
                 x$call$tol_level * 100,
                 "%")
-  if(call2$prop_bias){
+  # limits vary with avg under prop_bias or an avg-dependent variance function
+  if(call2$prop_bias || any(!is.na(df_loa$avg))){
 
   if(geom == "geom_bin2d" | geom == "geom_density_2d" | geom == "stat_density_2d"){
     bland_alt.plot = bland_alt.plot +

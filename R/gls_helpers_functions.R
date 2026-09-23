@@ -123,7 +123,7 @@ predict_varFunc = function (object, newdata)
       }
       else {
         cvrt.nm <- as.character(nlme::getCovariateFormula(vrSt))[2]
-        if (!grepl(cvrt.nm, names(newdata)))
+        if (!cvrt.nm %in% names(newdata))
           stop("Variance covariate should be present in 'newdata' object",
                call. = FALSE)
         cvrt <- newdata[[cvrt.nm]]
@@ -161,7 +161,7 @@ predict_varFunc = function (object, newdata)
       }
       else {
         cvrt.nm <- as.character(nlme::getCovariateFormula(vrSt))[2]
-        if (!grepl(cvrt.nm, names(newdata)))
+        if (!cvrt.nm %in% names(newdata))
           stop("Variance covariate should be present in 'newdata' object",
                call. = FALSE)
         cvrt <- newdata[[cvrt.nm]]

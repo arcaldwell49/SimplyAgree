@@ -35,20 +35,20 @@ agreement limits}
 
 \item{testValue}{a number specifying the limit of agreement}
 
-\item{CCC}{\code{TRUE} (default) or \code{FALSE}, produce CCC table}
+\item{CCC}{\code{TRUE} or \code{FALSE} (default), produce CCC table}
 
-\item{plotbland}{\code{TRUE} (default) or \code{FALSE}, for Bland-Altman
+\item{plotbland}{\code{TRUE} or \code{FALSE} (default), for Bland-Altman
 plot}
 
 \item{plotcon}{\code{TRUE} or \code{FALSE} (default), for Bland-Altman plot}
 
 \item{plotcheck}{\code{TRUE} or \code{FALSE} (default), assumptions plots}
 
-\item{prop_bias}{\code{TRUE} or \code{FALSE} (default), proportional bias}
+\item{prop_bias}{\code{TRUE} or \code{FALSE}}
 
-\item{xlabel}{The label for the x-axis on the BA plot (default: "Average of Both Methods")}
+\item{xlabel}{The label for the x-axis on the BA plot}
 
-\item{ylabel}{The label for the y-axis on the BA plot (default: "Difference between Methods")}
+\item{ylabel}{The label for the y-axis on the BA plot}
 }
 \value{
 A results object containing:

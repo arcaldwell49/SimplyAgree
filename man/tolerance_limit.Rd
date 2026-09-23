@@ -13,6 +13,7 @@ tolerance_limit(
   time = NULL,
   pred_level = 0.95,
   tol_level = 0.95,
+  conf_level = 0.95,
   tol_method = c("approx", "perc"),
   prop_bias = FALSE,
   log_tf = FALSE,
@@ -41,6 +42,8 @@ tolerance_limit(
 
 \item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95\%.}
 
+\item{conf_level}{Confidence level for the confidence interval of the bias (\code{lower.CL}/\code{upper.CL}). Default is 95\%. This does not affect the prediction or tolerance limits. For a two one-sided tests (TOST) procedure on the bias at level alpha, use \code{conf_level = 1 - 2 * alpha} (e.g., 0.90).}
+
 \item{tol_method}{Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.}
 
 \item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.}
@@ -53,7 +56,7 @@ tolerance_limit(
 
 \item{correlation}{an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.}
 
-\item{weights}{an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.}
+\item{weights}{an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (\code{avg}, \code{condition}, \code{x}, \code{y}, \code{time}) or \code{fitted(.)}. Currently \code{varIdent}, \code{varFixed}, \code{varExp}, and \code{varPower} are supported. If the variance depends on \code{avg}, the limits are reported at the minimum, median, and maximum of \code{avg} even when \code{prop_bias = FALSE}.}
 
 \item{keep_model}{Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.}
 
@@ -62,8 +65,8 @@ tolerance_limit(
 \value{
 Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 \itemize{
-\item \code{limits}: A data frame containing the prediction/tolerance limits.
-\item \code{model}: The GLS model; NULL if keep_model set to FALSE.
+\item \code{limits}: A data frame containing the prediction/tolerance limits. Columns include \code{bias} (estimated mean difference), \code{SEM} (standard error of the bias), \code{SD} (residual standard deviation of a single difference at that row, from the variance function if one is in the model), \code{SEP} (standard error of prediction, \code{sqrt(SD^2 + SEM^2)}), \code{lower.CL}/\code{upper.CL} (confidence limits for the bias), \code{lower.PL}/\code{upper.PL} (prediction limits), and \code{lower.TL}/\code{upper.TL} (tolerance limits).
+\item \code{model}: The GLS model; NULL if keep_model set to FALSE. The data (with the internal column names \code{x}, \code{y}, \code{delta}, \code{avg}, \code{id} (the row number if not supplied), and, if supplied, \code{condition} and \code{time}), correlation structure, and variance function are stored with the model, so \code{update()} and \code{nlme::getData()} can be used on it directly.
 \item \code{call}: The matched call.
 }
 }

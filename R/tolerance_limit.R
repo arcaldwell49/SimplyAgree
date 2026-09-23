@@ -14,13 +14,14 @@
 #' @param time Name of the column indicating the time points. Only necessary if the data is from time series or repeated measures collection.
 #' @param pred_level Prediction level for the prediction interval. Default is 95%.
 #' @param tol_level Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95%.
+#' @param conf_level Confidence level for the confidence interval of the bias (`lower.CL`/`upper.CL`). Default is 95%. This does not affect the prediction or tolerance limits. For a two one-sided tests (TOST) procedure on the bias at level alpha, use `conf_level = 1 - 2 * alpha` (e.g., 0.90).
 #' @param tol_method Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
 #' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.
 #' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.
-#' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.
+#' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (`avg`, `condition`, `x`, `y`, `time`) or `fitted(.)`. Currently `varIdent`, `varFixed`, `varExp`, and `varPower` are supported. If the variance depends on `avg`, the limits are reported at the minimum, median, and maximum of `avg` even when `prop_bias = FALSE`.
 #' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
 #' @inheritParams loa_lme
 #' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
@@ -30,8 +31,8 @@
 #'
 #' @return Returns single `tolerance_delta` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
-#'   - `limits`: A data frame containing the prediction/tolerance limits.
-#'   - `model`: The GLS model; NULL if keep_model set to FALSE.
+#'   - `limits`: A data frame containing the prediction/tolerance limits. Columns include `bias` (estimated mean difference), `SEM` (standard error of the bias), `SD` (residual standard deviation of a single difference at that row, from the variance function if one is in the model), `SEP` (standard error of prediction, `sqrt(SD^2 + SEM^2)`), `lower.CL`/`upper.CL` (confidence limits for the bias), `lower.PL`/`upper.PL` (prediction limits), and `lower.TL`/`upper.TL` (tolerance limits).
+#'   - `model`: The GLS model; NULL if keep_model set to FALSE. The data (with the internal column names `x`, `y`, `delta`, `avg`, `id` (the row number if not supplied), and, if supplied, `condition` and `time`), correlation structure, and variance function are stored with the model, so `update()` and `nlme::getData()` can be used on it directly.
 #'   - `call`: The matched call.
 #' @examples
 #' data('reps')
@@ -66,6 +67,7 @@ tolerance_limit = function(data,
                                time = NULL,
                                pred_level = 0.95,
                                tol_level = 0.95,
+                               conf_level = 0.95,
                                tol_method = c("approx","perc"),
                                prop_bias = FALSE,
                                log_tf = FALSE,
@@ -87,6 +89,7 @@ tolerance_limit = function(data,
   call2$condition = condition
   call2$pred_level = pred_level
   call2$tol_level = tol_level
+  call2$conf_level = conf_level
   call2$prop_bias = prop_bias
   call2$log_tf = log_tf
   call2$cor_type = cor_type
@@ -116,7 +119,6 @@ tolerance_limit = function(data,
   if(!("id" %in% colnames(temp_frame))){
     temp_frame$id = 1:nrow(temp_frame)
   }
-  deg_of_freedom = length(unique(temp_frame$id)) -1
   # MODEL ----
   model = gls(delta ~ 1, data = temp_frame)
   # Set to null for when not used
@@ -172,6 +174,11 @@ tolerance_limit = function(data,
 
   }
 
+  model = gls_self_contained(model = model,
+                             data = temp_frame,
+                             cor1 = cor1,
+                             var1 = var1)
+
   # EMMEANS ----
 
   ## Ref Grid then Marginal Means ----
@@ -180,39 +187,31 @@ tolerance_limit = function(data,
 
   res_emm = gls_emm_delta(model = model,
                           temp_frame = temp_frame,
-                          avg_vals = avg_vals)
+                          avg_vals = avg_vals,
+                          conf_level = conf_level)
+
+  emm_df = tol_grid(res_emm = res_emm,
+                    model = model,
+                    avg_vals = avg_vals) %>%
+    add_pred_limits(model = model,
+                    alpha.pred = alpha.pred)
 
   if(tol_method == "approx"){
-    emm_df = as.data.frame(res_emm) %>%
-      rename(SEM = SE) %>%
-      mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
-      mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
-             upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP,
-             lower.TL = emmean - qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)),
+    emm_df = emm_df %>%
+      mutate(lower.TL = emmean - qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df)),
              upper.TL = emmean + qnorm(1-alpha.pred/2) * SEP * sqrt(df/qchisq(alpha,df))) %>%
       rename(bias = emmean)
   }
 
   if(tol_method == "perc"){
-    emm_df = as.data.frame(res_emm) %>%
-      rename(SEM = SE) %>%
-      mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
-      mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
-             upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)
-
-    res_sum_df = boot_delta_gls(model = model,
-                                temp_frame = temp_frame,
-                                avg_vals = avg_vals,
-                                res_emm = res_emm,
-                                tol_level = tol_level,
-                                alpha.pred = alpha.pred,
-                                replicates = replicates,
-                                cor1 = cor1,
-                                var1 = var1)
-
-    emm_df = suppressMessages({ full_join(emm_df, res_sum_df) %>%
+    emm_df = boot_delta_gls(model = model,
+                            temp_frame = temp_frame,
+                            avg_vals = avg_vals,
+                            emm_df = emm_df,
+                            tol_level = tol_level,
+                            alpha.pred = alpha.pred,
+                            replicates = replicates) %>%
       rename(bias = emmean)
-    })
   }
 
 
@@ -263,8 +262,13 @@ tolerance_limit = function(data,
 
 gls_emm_delta = function(model,
                          temp_frame,
-                         avg_vals){
-  # "avg" %in% paste0(nlme::getCovariateFormula(model))
+                         avg_vals,
+                         conf_level = 0.95){
+  # emmeans passes the gls call's weights (a varFunc) to model.frame when
+  # recovering the data, which errors for intercept-only models. The varFunc
+  # is not needed from the call (vcov and apVar come from the fitted object),
+  # so drop it from this local copy.
+  model$call$weights = NULL
 
   if(grepl("avg", paste0(nlme::getCovariateFormula(model))[2])){
     if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
@@ -297,25 +301,43 @@ gls_emm_delta = function(model,
                         data = temp_frame)
     }
   }
+  res_emm = update(res_emm, level = conf_level)
   return(res_emm)
+}
+
+# self-contained model ----
+# The gls call built above refers to objects that only exist inside
+# tolerance_limit() (temp_frame, cor1, var1), so update() and getData() on
+# the returned model would fail. Replace them with the objects themselves.
+# The data are stored in a small environment rather than inline so that
+# print(model) does not deparse the whole data frame.
+gls_self_contained = function(model,
+                              data,
+                              cor1,
+                              var1){
+  data_env = new.env(parent = baseenv())
+  assign("tol_data", data, envir = data_env)
+
+  model$call[[1]] = quote(nlme::gls)
+  model$call$data = call("get", "tol_data", envir = data_env)
+  if(!is.null(cor1)){
+    model$call$correlation = cor1
+  }
+  if(!is.null(var1)){
+    model$call$weights = var1
+  }
+
+  model
 }
 
 # bootstrap ----
 boot_delta_gls = function(model,
                           temp_frame,
                           avg_vals,
-                          res_emm,
+                          emm_df,
                           tol_level,
                           alpha.pred,
-                          replicates,
-                          cor1,
-                          var1){
-  emm_df = as.data.frame(res_emm) %>%
-    rename(SEM = SE) %>%
-    mutate(SEP = sqrt(sigma(model)^2+SEM^2)) %>%
-    mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
-           upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)
-
+                          replicates){
   res_df = data.frame()
 
   for(i in 1:replicates){
@@ -326,62 +348,91 @@ boot_delta_gls = function(model,
     emm1 = gls_emm_delta(model = res_i,
                          temp_frame = dat2,
                          avg_vals = avg_vals)
-    emm_df1 = as.data.frame(emm1) %>%
-      rename(SEM = SE) %>%
-      mutate(SEP = sqrt(sigma(res_i)^2+SEM^2)) %>%
-      mutate(lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
-             upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)
+    emm_df1 = tol_grid(res_emm = emm1,
+                       model = res_i,
+                       avg_vals = avg_vals) %>%
+      add_pred_limits(model = res_i,
+                      alpha.pred = alpha.pred)
     class(emm_df1) = "data.frame"
     emm_df1$boot_n = i
 
     res_df = rbind(res_df,emm_df1)
   }
 
-  if(grepl("avg",paste0(nlme::getCovariateFormula(model))[2])){
-    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
-      sum_res_df = res_df %>%
-        group_by(avg, condition) %>%
-        summarize(
-          lower.TL = quantile(lower.PL, 1 - tol_level),
-          upper.TL = quantile(upper.PL, tol_level)
-        ) %>%
-        inner_join(emm_df,
-                   .,
-                   by = join_by(condition, avg))
-    } else{
-      sum_res_df = res_df %>%
-        group_by(avg) %>%
-        summarize(
-          lower.TL = quantile(lower.PL, 1 - tol_level),
-          upper.TL = quantile(upper.PL, tol_level)
-        ) %>%
-        inner_join(emm_df,
-                   .,
-                   by = join_by(avg))
-    }
+  grp_vars = intersect(c("condition", "avg"), colnames(emm_df))
 
+  sum_res_df = res_df %>%
+    group_by(across(all_of(grp_vars))) %>%
+    summarize(
+      lower.TL = quantile(lower.PL, 1 - tol_level),
+      upper.TL = quantile(upper.PL, tol_level),
+      .groups = "drop"
+    )
+
+  if(length(grp_vars) > 0){
+    sum_res_df = left_join(emm_df,
+                           sum_res_df,
+                           by = grp_vars)
   } else {
-    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
-      sum_res_df = res_df %>%
-        group_by(condition) %>%
-        summarize(
-          lower.TL = quantile(lower.PL, 1 - tol_level),
-          upper.TL = quantile(upper.PL, tol_level)
-        ) %>%
-        inner_join(emm_df,
-                   .,
-                   by = join_by(condition))
-    } else{
-      sum_res_df = res_df %>%
-        summarize(
-          lower.TL = quantile(lower.PL, 1 - tol_level),
-          upper.TL = quantile(upper.PL, tol_level)
-        ) %>% cbind(emm_df, .)
-    }
+    sum_res_df = cbind(emm_df, sum_res_df)
   }
 
   return(sum_res_df)
 
+}
+
+# prediction grid ----
+# Data frame of the emmeans grid. If the variance function depends on avg
+# but the mean model does not, the grid is expanded over avg_vals so that
+# the limits can vary with avg even though the bias does not.
+tol_grid = function(res_emm,
+                    model,
+                    avg_vals){
+  grid = as.data.frame(res_emm)
+  class(grid) = "data.frame"
+  vrSt = model$modelStruct$varStruct
+
+  if(!is.null(vrSt) && !("avg" %in% colnames(grid))){
+    var_covs = all.vars(nlme::getCovariateFormula(vrSt))
+    if("avg" %in% var_covs){
+      grid = merge(grid,
+                   data.frame(avg = avg_vals),
+                   by = NULL)
+    }
+  }
+
+  return(grid)
+}
+
+# residual SD for each row of the prediction grid ----
+# sigma(model) is only the SD at the reference level of the variance
+# function, so the variance function has to be evaluated at each grid row.
+resid_sd_grid = function(model,
+                         grid){
+  vrSt = model$modelStruct$varStruct
+
+  if(is.null(vrSt)){
+    return(rep(sigma(model), nrow(grid)))
+  }
+
+  # varIdent without a grouping factor is a constant variance
+  if(inherits(vrSt, "varIdent") && is.null(nlme::getGroupsFormula(vrSt))){
+    return(rep(sigma(model), nrow(grid)))
+  }
+
+  predict_varFunc(model, newdata = grid)
+}
+
+# prediction limits ----
+add_pred_limits = function(grid,
+                           model,
+                           alpha.pred){
+  grid %>%
+    rename(SEM = SE) %>%
+    mutate(SD = resid_sd_grid(model, grid),
+           SEP = sqrt(SD^2 + SEM^2),
+           lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
+           upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)
 }
 
 r_gen <- function(dat, mle) {
