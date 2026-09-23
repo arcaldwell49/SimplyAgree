@@ -38,7 +38,7 @@ To quote @francq2020tolerate:
 
 > In terms of terminology, tolerance means, in this context, that some difference between the methods is tolerated (the measurements are still comparable in practice). Furthermore, the tolerance interval is exact and therefore more appropriate than the agreement interval.
 
-In this package, tolerance limits refer to the "tolerance" associated with the prediction interval for the difference between 2 measurements. The calculative approach (detailed much further below) involves calculating the prediction interval for the difference between two methods (i.e., an estimate of an interval in which a future observation will fall, with a certain probability, given what has already been observed) and then calculating the confidence in the interval (i.e., tolerance). Therefore, if we want a 95% prediction interval with 95% tolerance limits, we are calculating the interval in which 95% of future observations (prediction) with only a 5% probability (1-tolerance) the "true" prediction interval limits are greater/less than the upper/lower tolerance limits.
+In this package, tolerance limits refer to the "tolerance" associated with the prediction interval for the difference between 2 measurements. The calculative approach (detailed much further below) involves calculating the prediction interval for the difference between two methods (i.e., an estimate of an interval in which a future observation will fall, with a certain probability, given what has already been observed) and then calculating the confidence in the interval (i.e., tolerance). Therefore, if we want a 95% prediction interval with 95% tolerance limits, the prediction interval is expected to contain 95% of future observations, and the tolerance limits are an interval that, with 95% confidence, contains at least 95% of all differences (the default, `bound_type = "joint"`; see the calculative approach below for the alternative).
 
 Personally, I find the use of prediction intervals and tolerance limits more attractive for 2 reasons: 1) the coverage of the prediction intervals and their tolerance limits is often better than confidence intervals for agreement limits, and 2) the interpretation of the tolerance limits is much clearer. For a greater discussion of this topic, please see the manuscript by @francq2020tolerate and check out their R package `BivRegBLS`.
 
@@ -90,18 +90,43 @@ $$
 
 ### Tolerance 
 
-The type of tolerance limit calculation can be set using the `tol_method` argument with options including "approx" and "perc".
-Tolerance limits are calculated either through the "Beta expectation" approximation (`tol_method = "approx"`) detailed by @francq2020tolerate or through a parametric bootstrap method (`tol_method = "perc"`). 
-The bootstrap methods re-samples from the model and, after a certain number of replicates (default is 1999), calculates the bounds the prediction interval based on the quantiles of the replicates for the lower and upper limit.
-This is preferred for its accuracy and power, but is *extremely* slow which may involve computations lasting greater than 2 minutes for even small data sets.
-The approximation is the default only because it is substantially quicker.
-Users should be aware that the bootstrap method will likely be more accurate and provide smaller (i.e., more forgiving) tolerance limits.
+The prediction interval above is a "beta-expectation" tolerance interval: on average over repeated studies it contains `pred_level` of the differences, but it is not a confidence statement.
+The tolerance limits add a confidence statement, and the `bound_type` argument sets which one:
 
-The approximate tolerance limits based on the work of @francq2020tolerate are calculated as the following:
+- `bound_type = "joint"` (default): a "beta-content" tolerance interval. With confidence `tol_level`, at least `pred_level` of all differences lie within the limits. If the limits fall within a maximal allowable difference ($\pm \Delta$), we can conclude that at least `pred_level` of differences lie within $\pm \Delta$.
+- `bound_type = "iu"`: a one-sided `tol_level` confidence bound on each of the lower and upper limits of agreement (the $(1 \mp \beta)/2$ percentiles of the differences). If both bounds fall within $\pm \Delta$, we can reject that either limit of agreement lies outside $\pm \Delta$ (an intersection-union test). These bounds are not a joint `tol_level` interval, and they target the same quantities as the confidence bounds that `agreement_limit()` reports by default.
+
+The type of tolerance limit calculation can be set using the `tol_method` argument with options "analytic" (default) and "boot_cal".
+Both target the interval chosen with `bound_type`.
+
+For `bound_type = "joint"`, the analytic tolerance limits, based on @francq2020tolerate, are calculated as the following:
 
 $$
-TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot \sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
+TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot \frac{S_U}{S}
 $$
+
+where $S$ is the residual standard deviation and $S_U$ is a one-sided upper confidence bound for it, at the `tol_level`.
+With independent data, $S_U / S = \sqrt{df / \chi^2_{\alpha_2,df}}$ with $df = n - 1$ (for a model with only an intercept), and this is the approximation of @howe1969.
+With repeated measures (compound symmetry), $S_U$ combines the between- and within-subject variance components using the MOVER method [@zou2011], because the between-subject component is estimated with far fewer degrees of freedom than the total.
+For other correlation structures, $S_U$ uses an effective degrees of freedom for $S^2$.
+With a variance function (e.g., from `condition`), the analytic limits are approximations and can be somewhat too narrow (coverage of about 93% for a 95% target in our simulations).
+
+The bootstrap-calibrated method (`tol_method = "boot_cal"`) simulates new data from the fitted model, refits the model to each replicate (default is 999 replicates), and computes the analytic limits in each replicate over a range of nominal confidence levels.
+It then reports the analytic limits at the nominal level at which the replicates achieve the target confidence (`lower.TL.level` and `upper.TL.level` in the output).
+This corrects the remaining error in the analytic limits, which matters most when a variance function is in the model (e.g., when `condition` is supplied).
+For independent data, compound symmetry, or AR(1) correlation alone, the analytic limits were already accurate in our simulations and are much faster.
+With very few subjects (around 10), the calibration inherits some error from the estimated correlation and can be slightly liberal.
+
+### Model assumptions
+
+A few modelling choices deserve attention (see the "Model assumptions" section of `?tolerance_limit` for details):
+
+- The autoregressive correlation structures (`cor_type = "ar1"` or `"car1"`) have no persistent subject effect: the correlation between measurements from the same subject decays towards zero over time. If subjects have a persistent bias of their own, these structures understate the uncertainty in the bias and give limits that are too narrow; compound symmetry (`cor_type = "sym"`) is the safer default for repeated measures.
+- With compound symmetry and a variance function (e.g., from `condition`), the between-subject variance scales with the residual standard deviation of each condition, rather than being shared across conditions as in a random-intercept model.
+- Only one level of clustering (`id`) is supported.
+- Under compound symmetry, the output reports the between- and within-subject components of the standard deviation (`SD.between` and `SD.within`).
+- A slope of the differences on the average (`prop_bias = TRUE`) can appear without any true proportional bias when the two methods have unequal measurement error variances [@bland1999].
+
 **NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument; `1-pred_level`) whereas $\alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument; `1-tol_level`).
 
 ## Example 

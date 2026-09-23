@@ -20,7 +20,7 @@ test_that("tolerance_limit returns a tolerance_delta class", {
   expect_s3_class(tolerance_limit(data = temps2,
                                   x = "x",
                                   y = "y",
-                                  tol_method = "perc",
+                                  tol_method = "boot_cal",
                                   replicates = 20),
                   "tolerance_delta")
 
@@ -80,7 +80,7 @@ test_that("tolerance_limit returns a tolerance_delta class", {
                                       y = "y",
                                       id = "id",
                                       condition = "condition",
-                                      tol_method = "p",
+                                      tol_method = "boot_cal",
                                       replicates = 20),
                   "tolerance_delta")
 
@@ -196,7 +196,7 @@ test_that("check methods",{
                           y = "y",
                           id = "id",
                           condition = "condition",
-                          tol_method = "p",
+                          tol_method = "boot_cal",
                           replicates = 20)
 
   print(test6)
@@ -249,7 +249,7 @@ test_that("check methods",{
                           condition = "condition",
                           log_tf = TRUE,
                           prop_bias = TRUE,
-                          tol_method = "perc",
+                          tol_method = "boot_cal",
                           replicates = 20,
                           )
 
@@ -265,7 +265,7 @@ test_that("check methods",{
                          # condition = "condition",
                           log_tf = TRUE,
                           prop_bias = TRUE,
-                          tol_method = "perc",
+                          tol_method = "boot_cal",
                           replicates = 20,
   )
 
@@ -348,7 +348,7 @@ test_that("an avg-dependent variance expands the grid without prop_bias", {
   expect_s3_class(plot(t3), "ggplot")
 })
 
-test_that("perc limits use the condition-specific residual SD", {
+test_that("boot_cal limits use the condition-specific residual SD", {
   set.seed(2)
   n = 40
   d1 = data.frame(id = rep(1:n, 2), condition = rep(c("A", "B"), each = n))
@@ -358,7 +358,7 @@ test_that("perc limits use the condition-specific residual SD", {
   t1 = tolerance_limit(d1, x = "x", y = "y",
                        condition = "condition",
                        cor_type = "none",
-                       tol_method = "perc",
+                       tol_method = "boot_cal",
                        replicates = 20)
   lim = t1$limits[order(t1$limits$condition), ]
 
@@ -425,6 +425,242 @@ test_that("conf_level sets the level of the bias CI", {
   expect_equal(t90$limits[, c("lower.PL", "upper.PL", "lower.TL", "upper.TL")],
                t95$limits[, c("lower.PL", "upper.PL", "lower.TL", "upper.TL")])
   expect_output(print(t90), "90% CI for Bias")
+})
+
+test_that("gls simulation reproduces the fitted marginal covariance", {
+  set.seed(4)
+  n = 30
+  # ids are not contiguous, as in data stacked by condition
+  d = data.frame(id = rep(1:n, 2), condition = rep(c("A", "B"), each = n))
+  a = rnorm(n, 0, 2)
+  d$delta = a[d$id] + rnorm(2 * n, 0, ifelse(d$condition == "A", 1, 3))
+  g = nlme::gls(delta ~ condition, d,
+                correlation = nlme::corCompSymm(form = ~1 | id),
+                weights = nlme::varIdent(form = ~1 | condition))
+  V = unclass(nlme::getVarCov(g, individual = "1"))
+
+  st = gls_sim_setup(g, d)
+  expect_equal(st$mu, as.vector(fitted(g)))
+
+  sims = replicate(5000, gls_sim_draw(st) - st$mu)
+  S = cov(t(sims))
+  # rows 1 and 31 are subject 1 under conditions A and B
+  expect_equal(c(S[1, 1], S[1, 31], S[31, 31]),
+               c(V[1, 1], V[1, 2], V[2, 2]),
+               tolerance = 0.1)
+  # rows from different subjects are independent
+  expect_lt(abs(S[1, 2]), 0.3)
+})
+
+test_that("parametric bootstrap does not inflate the SE of the bias", {
+  set.seed(3)
+  n = 20; k = 19
+  df = data.frame(id = rep(1:n, each = k))
+  a = rnorm(n, 0, 0.5)
+  df$delta = 0.8 + a[df$id] + rnorm(n * k, 0, 1)
+  g = nlme::gls(delta ~ 1, data = df,
+                correlation = nlme::corCompSymm(form = ~1 | id))
+
+  st = gls_sim_setup(g, df)
+  cf = replicate(300, {
+    d2 = df
+    d2$delta = gls_sim_draw(st)
+    coef(update(g, data = d2))
+  })
+  # simulating from the point estimates: ratio should be ~1, not ~1.41
+  ratio = sd(cf) / sqrt(vcov(g)[1])
+  expect_gt(ratio, 0.85)
+  expect_lt(ratio, 1.15)
+})
+
+test_that("boot_cal is reproducible and matches the analytic prediction limits", {
+  data(reps)
+  set.seed(10)
+  t1 = tolerance_limit(reps, x = "x", y = "y", id = "id",
+                       tol_method = "boot_cal", replicates = 50)
+  set.seed(10)
+  t2 = tolerance_limit(reps, x = "x", y = "y", id = "id",
+                       tol_method = "boot_cal", replicates = 50)
+  ta = tolerance_limit(reps, x = "x", y = "y", id = "id")
+
+  expect_equal(t1$limits, t2$limits)
+  expect_equal(t1$limits[, c("bias", "SEM", "SD", "lower.PL", "upper.PL")],
+               ta$limits[, c("bias", "SEM", "SD", "lower.PL", "upper.PL")])
+  expect_true(all(t1$limits$lower.TL < t1$limits$lower.PL))
+  expect_true(all(t1$limits$upper.TL > t1$limits$upper.PL))
+})
+
+test_that("analytic joint limits match Howe (1969) for independent data", {
+  set.seed(5)
+  n = 30
+  d = data.frame(x = rnorm(n, 100, 10))
+  d$y = d$x + rnorm(n, 0.5, 2)
+  t1 = tolerance_limit(d, x = "x", y = "y", tol_method = "analytic")
+
+  dd = d$x - d$y
+  nu = n - 1
+  k_howe = sqrt(nu * (1 + 1/n) * qnorm(0.975)^2 / qchisq(0.05, nu))
+  expect_equal(c(t1$limits$lower.TL, t1$limits$upper.TL),
+               mean(dd) + c(-1, 1) * k_howe * sd(dd),
+               tolerance = 1e-6)
+  expect_equal(t1$limits$SD.df, nu)
+  expect_equal(c(t1$limits$lower.TL, t1$limits$upper.TL),
+               c(-6.1724, 4.5375), tolerance = 1e-4)
+})
+
+test_that("analytic iu bounds use the exact noncentral t for independent data", {
+  set.seed(5)
+  n = 30
+  d = data.frame(x = rnorm(n, 100, 10))
+  d$y = d$x + rnorm(n, 0.5, 2)
+  t1 = tolerance_limit(d, x = "x", y = "y", bound_type = "iu")
+
+  dd = d$x - d$y
+  k1 = qt(0.95, df = n - 1, ncp = qnorm(0.975) * sqrt(n)) / sqrt(n)
+  expect_equal(c(t1$limits$lower.TL, t1$limits$upper.TL),
+               mean(dd) + c(-1, 1) * k1 * sd(dd),
+               tolerance = 1e-6)
+  expect_output(print(t1), "not a joint 95% interval")
+})
+
+test_that("compound symmetry uses the MOVER bound for the SD", {
+  set.seed(11)
+  ng = 20; k = 19
+  d = data.frame(id = rep(1:ng, each = k))
+  d$x = rnorm(ng * k, 100, 10)
+  d$y = d$x - 0.8 - rnorm(ng, 0, 0.5)[d$id] - rnorm(ng * k, 0, 1)
+  t1 = tolerance_limit(d, x = "x", y = "y", id = "id")
+
+  # balanced one-way ANOVA version of the same bound
+  rho = unname(coef(t1$model$modelStruct$corStruct, unconstrained = FALSE))
+  s2 = t1$limits$SD^2
+  msw = (1 - rho) * s2
+  msb = msw + k * rho * s2
+  u_s2 = s2 + sqrt((1/k * (msb * (ng - 1) / qchisq(0.05, ng - 1) - msb))^2 +
+                   ((1 - 1/k) * (msw * (ng * k - ng) / qchisq(0.05, ng * k - ng) - msw))^2)
+  expect_equal(t1$limits$SD.upper, sqrt(u_s2), tolerance = 1e-8)
+
+  # variance components
+  expect_equal(t1$limits$SD.between^2 + t1$limits$SD.within^2,
+               t1$limits$SD^2, tolerance = 1e-8)
+  expect_equal(t1$limits$SD.between^2, rho * s2, tolerance = 1e-8)
+
+  zp = qnorm(0.975)
+  expect_equal(t1$limits$upper.TL,
+               t1$limits$bias + zp * t1$limits$SEP * sqrt(u_s2) / t1$limits$SD,
+               tolerance = 1e-8)
+})
+
+test_that("effective df is used for other correlation structures", {
+  data(temps)
+  temps2 = temps
+  temps2$x = temps$trec_pre
+  temps2$y = temps$teso_pre
+  temps2$ts = as.numeric(temps$trial_num)
+  t1 = tolerance_limit(temps2, x = "x", y = "y", id = "id",
+                       time = "ts", cor_type = "ar1")
+  expect_true(all(is.finite(t1$limits$SD.df)))
+  expect_true(all(t1$limits$SD.upper > t1$limits$SD))
+  expect_true(all(t1$limits$lower.TL < t1$limits$lower.PL))
+  # variance components are only defined under compound symmetry
+  expect_true(all(is.na(t1$limits$SD.between)))
+
+  # independent data with a variance function: about n - 1 per condition
+  set.seed(2)
+  n = 40
+  d1 = data.frame(id = rep(1:n, 2), condition = rep(c("A", "B"), each = n))
+  d1$x = rnorm(2 * n, 100, 10)
+  d1$y = d1$x + rnorm(2 * n, 0, ifelse(d1$condition == "A", 1, 5))
+  t2 = tolerance_limit(d1, x = "x", y = "y", condition = "condition",
+                       cor_type = "none")
+  expect_equal(t2$limits$SD.df, c(n - 1, n - 1), tolerance = 0.5)
+})
+
+test_that("boot_cal limits agree with analytic limits where both are accurate", {
+  set.seed(6)
+  gd = data.frame(id = rep(1:20, length.out = 366))
+  gd$x = rnorm(366, 100, 10)
+  gd$y = gd$x - 0.8 - rnorm(20, 0, 0.5)[gd$id] + rnorm(366, 0, 1)
+
+  for(bt in c("joint", "iu")){
+    ta = tolerance_limit(gd, x = "x", y = "y", id = "id", bound_type = bt)
+    set.seed(1)
+    expect_silent(
+      tp <- tolerance_limit(gd, x = "x", y = "y", id = "id", bound_type = bt,
+                            tol_method = "boot_cal", replicates = 199)
+    )
+    expect_equal(c(tp$limits$lower.TL, tp$limits$upper.TL),
+                 c(ta$limits$lower.TL, ta$limits$upper.TL),
+                 tolerance = 0.05)
+    expect_true(all(tp$limits$lower.TL.level > 0.5 & tp$limits$lower.TL.level < 1))
+  }
+
+  # independent data: the analytic limits are exact, so calibration keeps
+  # the level close to tol_level
+  set.seed(5)
+  n = 30
+  d = data.frame(x = rnorm(n, 100, 10))
+  d$y = d$x + rnorm(n, 0.5, 2)
+  for(bt in c("joint", "iu")){
+    ta = tolerance_limit(d, x = "x", y = "y", bound_type = bt)
+    set.seed(2)
+    tp = tolerance_limit(d, x = "x", y = "y", bound_type = bt,
+                         tol_method = "boot_cal", replicates = 999)
+    expect_equal(c(tp$limits$lower.TL.level, tp$limits$upper.TL.level),
+                 c(0.95, 0.95), tolerance = 0.02)
+    expect_equal(c(tp$limits$lower.TL, tp$limits$upper.TL),
+                 c(ta$limits$lower.TL, ta$limits$upper.TL),
+                 tolerance = 0.03)
+  }
+})
+
+test_that("calibration reproduces the analytic limits at the calibrated level", {
+  set.seed(2)
+  n = 40
+  d1 = data.frame(id = rep(1:n, 2), condition = rep(c("A", "B"), each = n))
+  d1$x = rnorm(2 * n, 100, 10)
+  d1$y = d1$x + rnorm(2 * n, 0, ifelse(d1$condition == "A", 1, 5))
+  set.seed(3)
+  tp = tolerance_limit(d1, x = "x", y = "y", id = "id", condition = "condition",
+                       tol_method = "boot_cal", replicates = 50)
+  lim = tp$limits
+  for(j in seq_len(nrow(lim))){
+    ta = tolerance_limit(d1, x = "x", y = "y", id = "id", condition = "condition",
+                         tol_level = lim$lower.TL.level[j])
+    expect_equal(ta$limits$lower.TL[j], lim$lower.TL[j], tolerance = 1e-8)
+  }
+})
+
+test_that("calibrate_level finds the smallest level reaching the target", {
+  cov_fun = function(level) pnorm(100 * (level - 0.9))
+  lev = calibrate_level(cov_fun, 0.95)
+  expect_equal(lev, 0.9 + qnorm(0.95) / 100, tolerance = 1e-6)
+  expect_equal(calibrate_level(function(level) 1, 0.95), 0.5)
+  expect_warning(calibrate_level(function(level) 0, 0.95), "did not reach")
+})
+
+test_that("old tol_method names are deprecated aliases", {
+  data(reps)
+  old_opts = options(lifecycle_verbosity = "warning")
+  on.exit(options(old_opts), add = TRUE)
+  expect_warning(
+    t_old <- tolerance_limit(reps, x = "x", y = "y", tol_method = "approx"),
+    "deprecated"
+  )
+  t_new = tolerance_limit(reps, x = "x", y = "y", tol_method = "analytic")
+  expect_equal(t_old$limits, t_new$limits)
+  expect_identical(t_old$call$tol_method, "analytic")
+
+  expect_warning(
+    t_p <- tolerance_limit(reps, x = "x", y = "y", tol_method = "p",
+                           replicates = 20),
+    "boot_cal"
+  )
+  expect_identical(t_p$call$tol_method, "boot_cal")
+  # "a" partially matches the new name
+  expect_identical(tolerance_limit(reps, x = "x", y = "y",
+                                   tol_method = "a")$call$tol_method,
+                   "analytic")
 })
 
 test_that("Checked against BivRegBLS", {

@@ -14,7 +14,8 @@ tolerance_limit(
   pred_level = 0.95,
   tol_level = 0.95,
   conf_level = 0.95,
-  tol_method = c("approx", "perc"),
+  tol_method = c("analytic", "boot_cal"),
+  bound_type = c("joint", "iu"),
   prop_bias = FALSE,
   log_tf = FALSE,
   log_tf_display = c("ratio", "sympercent"),
@@ -32,27 +33,29 @@ tolerance_limit(
 
 \item{y}{Name of the column for the second measurement.}
 
-\item{id}{Name of the column for the subject ID.}
+\item{id}{Name of the column for the subject ID. Only one level of clustering is supported; see "Model assumptions" in details.}
 
-\item{condition}{Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.}
+\item{condition}{Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested. Supplying a condition adds a separate residual variance for each condition (\code{nlme::varIdent}); see "Model assumptions" in details.}
 
 \item{time}{Name of the column indicating the time points. Only necessary if the data is from time series or repeated measures collection.}
 
-\item{pred_level}{Prediction level for the prediction interval. Default is 95\%.}
+\item{pred_level}{Prediction level for the prediction interval, which is also the content (the proportion of differences to be covered, beta) for the tolerance limits. Default is 95\%.}
 
-\item{tol_level}{Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95\%.}
+\item{tol_level}{Confidence level (gamma) for the tolerance limits. Default is 95\%. See \code{bound_type} for what this confidence refers to.}
 
 \item{conf_level}{Confidence level for the confidence interval of the bias (\code{lower.CL}/\code{upper.CL}). Default is 95\%. This does not affect the prediction or tolerance limits. For a two one-sided tests (TOST) procedure on the bias at level alpha, use \code{conf_level = 1 - 2 * alpha} (e.g., 0.90).}
 
-\item{tol_method}{Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.}
+\item{tol_method}{Method for calculating the tolerance limits. Options are "analytic" (default) for closed-form limits and "boot_cal" for the closed-form limits calibrated by a parametric bootstrap. Both target the interval set by \code{bound_type}. The previous names, "approx" and "perc", are deprecated aliases for "analytic" and "boot_cal".}
 
-\item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.}
+\item{bound_type}{Which claim the tolerance limits (\code{lower.TL}/\code{upper.TL}) support. "joint" (default) gives a beta-content, gamma-confidence tolerance interval: with confidence \code{tol_level}, at least \code{pred_level} of all differences lie within the limits. "iu" gives equal-tailed bounds: a one-sided \code{tol_level} confidence bound on each of the (1 - \code{pred_level})/2 and (1 + \code{pred_level})/2 percentiles of the differences. The "iu" bounds are intended for an intersection-union test of agreement against a maximal allowable difference and are not a joint \code{tol_level} interval. See details.}
+
+\item{prop_bias}{Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations. Note that a slope of the differences on the average can appear without any true proportional bias when the two methods have unequal measurement error variances; see "Model assumptions" in details.}
 
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
 
 \item{log_tf_display}{The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".}
 
-\item{cor_type}{The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.}
+\item{cor_type}{The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1. The autoregressive options ("ar1" and "car1") have no persistent subject effect; see "Model assumptions" in details.}
 
 \item{correlation}{an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.}
 
@@ -65,7 +68,7 @@ tolerance_limit(
 \value{
 Returns single \code{tolerance_delta} class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 \itemize{
-\item \code{limits}: A data frame containing the prediction/tolerance limits. Columns include \code{bias} (estimated mean difference), \code{SEM} (standard error of the bias), \code{SD} (residual standard deviation of a single difference at that row, from the variance function if one is in the model), \code{SEP} (standard error of prediction, \code{sqrt(SD^2 + SEM^2)}), \code{lower.CL}/\code{upper.CL} (confidence limits for the bias), \code{lower.PL}/\code{upper.PL} (prediction limits), and \code{lower.TL}/\code{upper.TL} (tolerance limits).
+\item \code{limits}: A data frame containing the prediction/tolerance limits. Columns include \code{bias} (estimated mean difference), \code{SEM} (standard error of the bias), \code{SD} (residual standard deviation of a single difference at that row, from the variance function if one is in the model), \code{SEP} (standard error of prediction, \code{sqrt(SD^2 + SEM^2)}), \code{SD.df} (degrees of freedom of the residual variance), \code{SD.upper} (one-sided \code{tol_level} upper confidence bound for SD), \code{SD.between}/\code{SD.within} (between- and within-subject components of SD under compound symmetry; \code{NA} otherwise), \code{lower.CL}/\code{upper.CL} (confidence limits for the bias), \code{lower.PL}/\code{upper.PL} (prediction limits), \code{lower.TL}/\code{upper.TL} (tolerance limits), and, for \code{tol_method = "boot_cal"}, \code{lower.TL.level}/\code{upper.TL.level} (the calibrated nominal levels at which the analytic limits were computed).
 \item \code{model}: The GLS model; NULL if keep_model set to FALSE. The data (with the internal column names \code{x}, \code{y}, \code{delta}, \code{avg}, \code{id} (the row number if not supplied), and, if supplied, \code{condition} and \code{time}), correlation structure, and variance function are stored with the model, so \code{update()} and \code{nlme::getData()} can be used on it directly.
 \item \code{call}: The matched call.
 }
@@ -79,9 +82,45 @@ See vignettes for more details.
 }
 \details{
 The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
-When \code{tol_method} is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
-However, these are only an approximation and conservative.
-Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (\code{tol_method = "perc"}).
+
+The output contains three kinds of interval, which support different claims:
+\itemize{
+\item \strong{Prediction interval} (\code{lower.PL}/\code{upper.PL}): a beta-expectation tolerance interval. It is expected to contain a single future difference, from a new subject, with probability \code{pred_level}, averaged over repeated studies. It is not a confidence statement: any single prediction interval may cover less than \code{pred_level} of the differences.
+\item \strong{Tolerance limits, \code{bound_type = "joint"}} (\code{lower.TL}/\code{upper.TL}): a beta-content, gamma-confidence tolerance interval. With confidence \code{tol_level}, at least \code{pred_level} of all differences lie within the limits. If the limits lie within a maximal allowable difference of plus or minus delta, one can conclude (at level 1 - \code{tol_level}) that at least \code{pred_level} of the differences lie within plus or minus delta (Lin, 2000). The tails do not need to be split equally.
+\item \strong{Tolerance limits, \code{bound_type = "iu"}}: a one-sided \code{tol_level} bound on the lower and on the upper (1 -/+ \code{pred_level})/2 percentile of the differences, i.e., on the limits of agreement. If both bounds lie within plus or minus delta, one can reject, at level 1 - \code{tol_level}, that either limit of agreement lies outside plus or minus delta (intersection-union test). Both bounds hold together only about 1 - 2 * (1 - \code{tol_level}) of the time, so they should not be reported as a joint \code{tol_level} interval. These target the same quantities as the default confidence bounds from \code{\link[=agreement_limit]{agreement_limit()}} (numerically close but not identical, because the models differ).
+}
+
+The "joint" and "iu" limits test different hypotheses (coverage versus each tail), so they do not nest: the "iu" bounds can be wider than the "joint" limits, and a skewed distribution can pass one test and fail the other.
+
+With \code{tol_method = "analytic"}:
+\itemize{
+\item "joint" uses the approximation of Howe (1969) as described by Francq et al. (2020), with the standard error of prediction (SEP) in place of the sample standard deviation. For independent data this matches Howe's approximation exactly.
+\item "iu" uses the exact noncentral t bound for independent data, and otherwise the MOVER bound of Zou (2013).
+\item Both use a one-sided upper confidence bound for the residual standard deviation (SD). With independent data this is the usual chi-square bound. With compound symmetry (\code{cor_type = "sym"}), the between- and within-subject variance components are combined with the MOVER, as in \code{\link[=agreement_limit]{agreement_limit()}} with \code{data_type = "nest"}. With other correlation structures, the bound uses an effective degrees of freedom (\code{SD.df}) from the approximate covariance of the variance parameters.
+}
+
+The analytic limits are exact for independent data (without a variance function). In simulations (95\% target), they were close to nominal with compound symmetry (about 0.95, with 10 to 20 subjects) and with AR(1) correlation (about 0.95). With a variance function (\code{condition} or \code{weights}) combined with compound symmetry they were somewhat liberal (about 0.93, even when the data followed the fitted model), because the variance-component bounds then use degrees of freedom from the whole data set rather than from each condition; \code{tol_method = "boot_cal"} is recommended in that case.
+
+With \code{tol_method = "boot_cal"}, the analytic limits are calibrated by a parametric bootstrap (Loh, 1987; Beran, 1987). New data are simulated from the fitted model (Francq et al., 2019), the model is refit to each replicate, and the analytic limits are computed for each replicate over a range of nominal confidence levels. The level is chosen at which the replicates achieve the target confidence for the fitted model:
+\itemize{
+\item "joint": a proportion \code{tol_level} of the replicate intervals contain at least \code{pred_level} of the fitted distribution of the differences.
+\item "iu": separately for each bound, a proportion \code{tol_level} of the replicate bounds lie beyond the fitted limit of agreement.
+}
+
+The limits for the observed data are the analytic limits at the calibrated levels, which are returned as \code{lower.TL.level} and \code{upper.TL.level}. Because the analytic limits already account for most of the uncertainty in the variance components, the calibration only has to correct what remains, and it depends much less on the estimated correlation than calibrating the bootstrap limits directly. In simulations (95\% target), the calibrated limits were close to nominal with compound symmetry and a variance function (about 0.95 to 0.96, where the analytic limits were about 0.93) and slightly conservative with AR(1) correlation (about 0.96). With few subjects the calibration inherits some error from the estimated correlation: with 10 subjects, coverage of the "joint" limits was about 0.93 (the "iu" bounds were about 0.94). The bootstrap is therefore recommended mainly when a variance function is in the model; otherwise the analytic limits are as accurate and much faster.
+
+For clustered data (\code{id} supplied), all limits refer to a new difference from a new subject: the SD includes both the between- and within-subject variance.
+\subsection{Model assumptions}{
+
+The model is a marginal (generalized least squares) model fit with \code{\link[nlme:gls]{nlme::gls()}}. For the default setup (\code{cor_type = "sym"} without a variance function), compound symmetry with a non-negative correlation gives the same likelihood as a random-intercept model, and targets the marginal distribution of a single difference from a randomly chosen subject. The other options carry assumptions that should be checked:
+\itemize{
+\item \strong{Autoregressive correlation} (\code{cor_type = "ar1"} or \code{"car1"}): the correlation between two measurements from the same subject decays towards zero as they get further apart in time. A persistent subject-specific bias (e.g., a subject by method interaction) instead makes all measurements from that subject equally correlated. When such an effect exists, the autoregressive structures miss most of the long-range correlation, so the standard error of the bias is too small and the limits are too narrow; the bootstrap does not correct this, because it simulates from the same model. In one simulation (20 subjects with 19 measurements each, and a random subject effect), the 95\% confidence interval for the bias covered the true value 74\% of the time with AR(1), versus 96\% with compound symmetry. Use the autoregressive options only when no persistent subject effect is expected. The fits can be compared with \code{AIC()} on the returned models (a REML comparison is valid because the fixed effects are the same). A random subject effect combined with serial correlation is not currently supported.
+\item \strong{Variance functions with compound symmetry} (\code{condition}, or \code{weights} together with \code{cor_type = "sym"}): in \code{gls}, the correlation applies to the standardized residuals, so the covariance between two measurements from the same subject is rho * sigma_i * sigma_j. The between-subject variance therefore scales with the variance function (e.g., it is larger in a condition with a larger residual SD), rather than being common to all conditions as in a random-intercept model with the same variance function. The marginal variance of each condition, which drives the limits, is not directly affected, but the standard error of each condition's bias and the reported variance components are. This may be reasonable (e.g., with proportional error) but is an assumption.
+\item \strong{One level of clustering}: the correlation structure has a single grouping factor (\code{id}). Designs with more than one level of clustering (e.g., repeated measurements within device settings within subjects) cannot be represented. Setting \code{id} to the finer level (e.g., subject by setting) drops the correlation across settings within the same subject, which understates the standard error of a bias pooled across settings; a mixed model with a random effect for each level is needed for such designs.
+\item \strong{Variance components}: under compound symmetry the residual variance splits into between-subject (rho * SD^2) and within-subject ((1 - rho) * SD^2) components, returned as \code{SD.between} and \code{SD.within}. These can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m), or for the between-subject floor of agreement. They are point estimates only.
+\item \strong{Proportional bias} (\code{prop_bias = TRUE}): a non-zero slope of the differences on the average can appear without any true proportional bias. Whenever the two methods have unequal measurement error variances, cov(difference, average) = (var(x) - var(y)) / 2 is not zero (Bland & Altman, 1999), so the slope should not be read as proportional bias on its own. Errors-in-variables methods such as \code{\link[=dem_reg]{dem_reg()}} or \code{\link[=pb_reg]{pb_reg()}} are better suited to assessing proportional bias.
+}
+}
 }
 \examples{
 data('reps')
@@ -99,4 +138,14 @@ Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a Bland–Al
 Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.
 
 Francq, B. G., Berger, M., & Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.
+
+Howe, W. G. (1969). Two-sided tolerance limits for normal populations—some improvements. Journal of the American Statistical Association, 64(326), 610-620.
+
+Lin, L. I. (2000). Total deviation index for measuring individual agreement with applications in laboratory performance and bioequivalence. Statistics in Medicine, 19(2), 255-270.
+
+Loh, W. Y. (1987). Calibrating confidence coefficients. Journal of the American Statistical Association, 82(397), 155-162.
+
+Beran, R. (1987). Prepivoting to reduce level error of confidence sets. Biometrika, 74(3), 457-468.
+
+Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical Methods in Medical Research, 22(6), 630-642.
 }

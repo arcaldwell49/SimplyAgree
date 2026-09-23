@@ -150,13 +150,27 @@ print.tolerance_delta <- function(x,
 
   title1 = "Agreement between Measures (Difference: x-y)"
   conf_level = if(is.null(x$call$conf_level)) 0.95 else x$call$conf_level
+  tl_label = switch(
+    if(is.null(x$call$bound_type)) "old" else x$call$bound_type,
+    joint = paste0(
+      "Tolerance Limits: at least ", x$call$pred_level * 100,
+      "% of differences with ", x$call$tol_level * 100, "% confidence"
+    ),
+    iu = paste0(
+      "Tolerance Limits: one-sided ", x$call$tol_level * 100,
+      "% bounds on the ", (1 - x$call$pred_level) / 2 * 100, "th & ",
+      (1 + x$call$pred_level) / 2 * 100, "th percentiles",
+      "\n  (intersection-union test against a maximal allowable difference; not a joint ",
+      x$call$tol_level * 100, "% interval)"
+    ),
+    old = paste0(x$call$tol_level * 100, "% Tolerance Limits")
+  )
   subtitle1 = paste0(
     conf_level*100,
     "% CI for Bias; ",
     x$call$pred_level*100,
-    "% Prediction Interval with ",
-    x$call$tol_level*100,
-    "% Tolerance Limits"
+    "% Prediction Interval\n",
+    tl_label
   )
 
   if(call2$log_tf){

@@ -11,6 +11,7 @@ agreement_limit(
   data,
   data_type = c("simple", "nest", "reps"),
   loa_calc = c("mover", "blandaltman"),
+  bound_type = c("iu", "joint"),
   agree.level = 0.95,
   alpha = 0.05,
   prop_bias = FALSE,
@@ -33,11 +34,13 @@ agreement_limit(
 
 \item{loa_calc}{The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).}
 
+\item{bound_type}{Which claim the confidence bounds of the limits of agreement (\code{lower_loa_ci}/\code{upper_loa_ci}) support. "iu" (default) gives a one-sided 1 - \code{alpha} bound on each limit (the outer ends of 1 - 2 * \code{alpha} two-sided intervals). These give an intersection-union test, at level \code{alpha}, of whether both limits of agreement lie within a maximal allowable difference, but are not a joint 1 - \code{alpha} interval for the limits. "joint" gives a one-sided 1 - \code{alpha}/2 bound on each limit (the outer ends of 1 - \code{alpha} two-sided intervals, the Bland-Altman convention), with at least 1 - \code{alpha} joint confidence for both limits. See details.}
+
 \item{agree.level}{the agreement level required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95.}
 
 \item{alpha}{The alpha-level for confidence levels.}
 
-\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.}
+\item{prop_bias}{Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations. Note that a non-zero slope of the differences on the average can appear without any true proportional bias whenever the two methods have unequal measurement error variances, because cov(difference, average) = (var(x) - var(y)) / 2 (Bland & Altman, 1999); errors-in-variables methods such as \code{\link[=dem_reg]{dem_reg()}} or \code{\link[=pb_reg]{pb_reg()}} are better suited to assessing proportional bias.}
 
 \item{log_tf}{Calculate limits of agreement using log-transformed data.}
 
@@ -64,6 +67,15 @@ Please note that the package developer recommends reporting/using tolerance limi
 The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Atlman (1986 & 1999).
 The \code{loa_calc} allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (\code{loa_calc = "blandaltman"}),
 or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (\code{loa_calc = "mover"}).
+
+The confidence bounds on the limits of agreement answer one of two questions, set by \code{bound_type}:
+\itemize{
+\item "iu" (default): "Can I conclude agreement within plus or minus delta?" If \code{lower_loa_ci} > -delta and \code{upper_loa_ci} < delta, reject at level \code{alpha} that either limit of agreement lies outside plus or minus delta. \code{conf.level} (1 - \code{alpha}) applies to each side separately; both bounds hold together only about 1 - 2 * \code{alpha} of the time.
+\item "joint": "Where are the limits of agreement?" With at least 1 - \code{alpha} confidence, both limits of agreement lie within . Used as a test against plus or minus delta, the error rate is at most \code{alpha}/2 (conservative).
+}
+
+Because a one-sided bound on the (1 - \code{agree.level})/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as \code{tolerance_limit(bound_type = "iu")}.
+The bias confidence interval (\code{lower.CL}/\code{upper.CL}) is always a two-sided 1 - \code{alpha} interval.
 }
 \examples{
 data('reps')
