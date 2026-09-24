@@ -216,8 +216,14 @@ tol_model_label = function(call2){
   serial = c(ar1 = "AR(1)", car1 = "continuous AR(1)")
   has_id = !is.null(call2$id)
 
+  ids = call2$id
   label = if(model_type == "lme"){
-    paste0("Model: random intercept for each id (lme)",
+    paste0(if(length(ids) == 2){
+             paste0("Model: nested random intercepts for ", ids[1], " and ",
+                    ids[2], " within ", ids[1], " (lme)")
+           } else {
+             "Model: random intercept for each id (lme)"
+           },
            if(!is.null(call2$correlation)) {
              " with user-specified residual correlation"
            } else if(cor_type %in% names(serial)) {

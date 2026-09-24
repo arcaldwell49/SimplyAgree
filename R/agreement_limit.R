@@ -474,20 +474,12 @@ calc_loa_nest = function(df,
   alpha.u = alpha_u = (1 - side.level)
   conf2 = 1 - (1 - conf.level) * 2
 
-  df2 = df %>%
-    group_by(id) %>%
-    summarize(m = n(),
-              x_bar = mean(x, na.rm= TRUE),
-              x_var = var(x, na.rm= TRUE),
-              y_bar = mean(y, na.rm= TRUE),
-              y_var = var(y, na.rm= TRUE),
-              d = mean(x-y, na.rm = TRUE),
-              d_var = var(x-y, na.rm = TRUE),
-              .groups = "drop") %>%
-    mutate(avg = (x_bar+y_bar)/2)
-
-  df3 = df2 %>%
-    drop_na()
+  # Use the rows the mixed model uses: drop pairs with a missing measurement.
+  # Every subject with at least one complete pair counts, including subjects
+  # with a single measurement (they contribute to the between-subject df).
+  df = df[!is.na(df$x) & !is.na(df$y), ]
+  m_i = as.vector(table(df$id))
+  m_i = m_i[m_i > 0]
 
   if(prop_bias == TRUE){
     form1 = as.formula(delta ~ avg + (1|id))
@@ -505,8 +497,8 @@ calc_loa_nest = function(df,
   between_variance = total_variance-subset(df_var, grp == "Residual")$vcov
   sd_w = sqrt(within_variance)
   sd_b = sqrt(between_variance)
-  mh = nrow(df3)/sum(1/df3$m)
-  n_sub = nrow(df3)
+  n_sub = length(m_i)
+  mh = n_sub/sum(1/m_i)
   n_obs = nrow(df)
 
   # LoA Variance ----

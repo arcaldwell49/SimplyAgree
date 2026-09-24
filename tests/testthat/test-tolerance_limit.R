@@ -696,7 +696,7 @@ test_that("model = 'lme' validates its inputs", {
   expect_error(tolerance_limit(reps, x = "x", y = "y", id = "id",
                                model = "lme",
                                correlation = nlme::corAR1()),
-               "must be grouped by id")
+               "innermost level")
 })
 
 test_that("a random intercept lme matches gls with compound symmetry", {
@@ -795,6 +795,120 @@ test_that("boot_cal runs with lme", {
                        model = "lme", tol_method = "boot_cal", replicates = 20)
   expect_false(anyNA(t1$limits$lower.TL))
   expect_true(all(t1$limits$lower.TL.level > 0.5))
+})
+
+# nested data: settings within subjects, measurements within settings
+nested_data = function(n = 12, s = 3, k = 4, seed = 12){
+  set.seed(seed)
+  d = expand.grid(shot = 1:k, club = paste0("c", 1:s),
+                  golfer = paste0("g", 1:n))
+  u1 = rnorm(n, 0, 0.7)
+  u2 = rnorm(n * s, 0, 0.5)
+  d$x = 100 + rnorm(nrow(d))
+  d$y = d$x - (0.8 + u1[as.integer(d$golfer)] +
+                 u2[(as.integer(d$golfer) - 1) * s + as.integer(d$club)] +
+                 rnorm(nrow(d)))
+  d
+}
+
+test_that("nested id is validated", {
+  d = nested_data()
+  expect_error(tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club")),
+               "requires model = \"lme\"")
+  expect_error(tolerance_limit(d, x = "x", y = "y",
+                               id = c("golfer", "club", "shot"),
+                               model = "lme"),
+               "at most two columns")
+  expect_error(tolerance_limit(d, x = "x", y = "y", id = c("golfer", "golfer"),
+                               model = "lme"),
+               "must be different")
+  expect_error(tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club"),
+                               model = "lme",
+                               correlation = nlme::corAR1(form = ~ shot | id)),
+               "innermost level")
+})
+
+test_that("nested random intercepts use a three-piece MOVER bound", {
+  n = 12; s = 3; k = 4
+  d = nested_data(n, s, k)
+  t1 = tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club"),
+                       model = "lme")
+  lim = t1$limits
+
+  # variance components
+  # exact components (VarCorr() returns rounded character values)
+  v = unname(c(re_vars(t1$model), sigma(t1$model)^2))
+  expect_equal(v, as.numeric(nlme::VarCorr(t1$model)[c(2, 4, 5), "Variance"]),
+               tolerance = 1e-5)
+  expect_equal(c(lim$SD.between, lim$SD.nested, lim$SD.within)^2, v,
+               tolerance = 1e-6)
+  expect_equal(lim$SD^2, sum(v), tolerance = 1e-8)
+
+  # balanced nested ANOVA decomposition, by hand
+  a1 = v[1] + v[2] / s + v[3] / (s * k)
+  a2 = (1 - 1 / s) * v[2] + (1 / k - 1 / (s * k)) * v[3]
+  a3 = (1 - 1 / k) * v[3]
+  df = c(n - 1, n * (s - 1), n * s * k - n * s)
+  move = c(a1, a2, a3) * (df / qchisq(0.05, df) - 1)
+  expect_equal(lim$SD.upper, sqrt(sum(v) + sqrt(sum(move^2))),
+               tolerance = 1e-8)
+  expect_equal(lim$SD.df, sum(v)^2 / sum(c(a1, a2, a3)^2 / df),
+               tolerance = 1e-8)
+  expect_output(print(t1), "nested random intercepts for golfer and club")
+})
+
+test_that("single-level models have no nested component", {
+  data(reps)
+  l = tolerance_limit(reps, x = "x", y = "y", id = "id", model = "lme")
+  g = tolerance_limit(reps, x = "x", y = "y", id = "id")
+  expect_true(is.na(l$limits$SD.nested))
+  expect_true(is.na(g$limits$SD.nested))
+})
+
+test_that("nested simulation reproduces the fitted marginal covariance", {
+  d = nested_data(n = 10, s = 3, k = 4, seed = 3)
+  d$condition = ifelse(d$shot <= 2, "A", "B")
+  d = d[sample(nrow(d)), ]
+  t1 = tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club"),
+                       time = "shot", cor_type = "ar1", model = "lme")
+  m = t1$model
+  dat = nlme::getData(m)
+  st = gls_sim_setup(m, dat)
+  set.seed(4)
+  sims = replicate(5000, gls_sim_draw(st) - st$mu)
+  S = cov(t(sims))
+
+  g1 = as.character(dat$id[1])
+  rows = which(as.character(dat$id) == g1)
+  vc = re_vars(m)
+  phi = unname(coef(m$modelStruct$corStruct, unconstrained = FALSE))
+  cl = as.character(dat$id_2[rows])
+  tm = dat$time[rows]
+  same = outer(cl, cl, "==")
+  V = vc[["id"]] + vc[["id_2"]] * same +
+    sigma(m)^2 * same * phi^abs(outer(tm, tm, "-"))
+  expect_equal(as.vector(S[rows, rows]), as.vector(V), tolerance = 0.1)
+})
+
+test_that("nested lme works with condition, AR(1), methods, and boot_cal", {
+  d = nested_data()
+  d$condition = ifelse(d$shot <= 2, "A", "B")
+  t1 = tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club"),
+                       condition = "condition", time = "shot",
+                       cor_type = "ar1", model = "lme")
+  expect_equal(nrow(t1$limits), 2)
+  expect_equal(t1$limits$SD.between[1], t1$limits$SD.between[2])
+  expect_false(anyNA(t1$limits$lower.TL))
+  expect_equal(logLik(stats::update(t1$model, . ~ .)), logLik(t1$model))
+  expect_equal(nrow(nlme::getData(t1$model)), nrow(d))
+  expect_silent(check(t1))
+  expect_s3_class(plot(t1), "ggplot")
+
+  set.seed(1)
+  tb = tolerance_limit(d, x = "x", y = "y", id = c("golfer", "club"),
+                       model = "lme", tol_method = "boot_cal",
+                       replicates = 20)
+  expect_false(anyNA(tb$limits$lower.TL))
 })
 
 test_that("predict_varFunc works with tibbles", {

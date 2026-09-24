@@ -1,0 +1,7 @@
+unbalanced (nsim=250) fails: 0
+  lme_nested_joint   lme_nested_iu_lo   lme_nested_iu_hi  lme_subject_joint 
+             0.948              0.940              0.952              0.944 
+ lme_subject_iu_lo  lme_subject_iu_hi lme_combined_joint lme_combined_iu_lo 
+             0.936              0.960              0.884              0.852 
+lme_combined_iu_hi  gls_subject_joint  gls_subject_iu_lo  gls_subject_iu_hi 
+             0.888              0.944              0.936              0.960 

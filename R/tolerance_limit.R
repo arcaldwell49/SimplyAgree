@@ -9,7 +9,7 @@
 #' @param data A data frame containing the variables.
 #' @param x Name of the column for the first measurement.
 #' @param y Name of the column for the second measurement.
-#' @param id Name of the column for the subject ID. Only one level of clustering is supported; see "Model assumptions" in details.
+#' @param id Name of the column for the subject ID. With `model = "lme"`, two column names can be given for nested random intercepts, outer level first (e.g., `c("golfer", "club")` for clubs within golfers); see "Model assumptions" in details.
 #' @param condition Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested. Supplying a condition adds a separate residual variance for each condition (`nlme::varIdent`); see "Model assumptions" in details.
 #' @param time Name of the column indicating the time points. Only necessary if the data is from time series or repeated measures collection.
 #' @param pred_level Prediction level for the prediction interval, which is also the content (the proportion of differences to be covered, beta) for the tolerance limits. Default is 95%.
@@ -20,13 +20,13 @@
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations. Note that a slope of the differences on the average can appear without any true proportional bias when the two methods have unequal measurement error variances; see "Model assumptions" in details.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
-#' @param model The type of model for the differences. "gls" (default) is a marginal generalized least squares model ([nlme::gls()]) with the correlation structure set by `cor_type`. "lme" is a linear mixed model ([nlme::lme()]) with a random intercept for each `id`, which requires `id`. With compound symmetry and no variance function both give the same fit; "lme" differs when serial correlation (`cor_type = "ar1"` or `"car1"`) or a variance function (`condition` or `weights`) is added, because it keeps a persistent subject effect and applies the variance function to the residuals only. See "Model assumptions" in details.
+#' @param model The type of model for the differences. "gls" (default) is a marginal generalized least squares model ([nlme::gls()]) with the correlation structure set by `cor_type`. "lme" is a linear mixed model ([nlme::lme()]) with a random intercept for each `id`, which requires `id`; with two `id` columns it has nested random intercepts (outer level, and inner level within outer). With compound symmetry and no variance function both give the same fit; "lme" differs when serial correlation (`cor_type = "ar1"` or `"car1"`) or a variance function (`condition` or `weights`) is added, because it keeps a persistent subject effect and applies the variance function to the residuals only. See "Model assumptions" in details.
 #' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1. The autoregressive options ("ar1" and "car1") have no persistent subject effect; see "Model assumptions" in details. With `model = "lme"`, "sym" fits the random intercept alone, "ar1" and "car1" add serial correlation of the residuals within `id` on top of the random intercept, and "none" is not allowed.
-#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL. With `model = "lme"`, this is the correlation of the residuals within `id` (on top of the random intercept) and must be grouped by `id` (e.g., `nlme::corAR1(form = ~ time | id)`).
+#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL. With `model = "lme"`, this is the correlation of the residuals within the innermost level of `id` (on top of the random intercepts) and must be grouped by it using the internal names: `id` for one level (e.g., `nlme::corAR1(form = ~ time | id)`) or `id/id_2` for two (e.g., `nlme::corAR1(form = ~ time | id/id_2)`).
 #' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (`avg`, `condition`, `x`, `y`, `time`) or `fitted(.)`. Currently `varIdent`, `varFixed`, `varExp`, and `varPower` are supported. If the variance depends on `avg`, the limits are reported at the minimum, median, and maximum of `avg` even when `prop_bias = FALSE`. With `model = "lme"`, the variance function applies to the residuals only; the random-intercept variance is common to all observations.
 #' @param keep_model Logical indicator to retain the fitted model (`gls` or `lme`). Useful when working with large data and the model is very large.
 #' @inheritParams loa_lme
-#' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
+#' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020). The formulas, including how the degrees of freedom are determined for clustered data, are given in `vignette("agreement_analysis", package = "SimplyAgree")`.
 #'
 #' The output contains three kinds of interval, which support different claims:
 #'
@@ -59,13 +59,13 @@
 #'
 #'   - **Autoregressive correlation** (`cor_type = "ar1"` or `"car1"`): with `model = "gls"`, the correlation between two measurements from the same subject decays towards zero as they get further apart in time. A persistent subject-specific bias (e.g., a subject by method interaction) instead makes all measurements from that subject equally correlated. When such an effect exists, the autoregressive structures miss most of the long-range correlation, so the standard error of the bias is too small and the limits are too narrow; the bootstrap does not correct this, because it simulates from the same model. In one simulation (20 subjects with 19 measurements each, and a random subject effect), the 95% confidence interval for the bias covered the true value 74% of the time with AR(1), versus 96% with compound symmetry. With `model = "lme"`, the serial correlation is added to the residuals on top of a random intercept, which keeps the persistent subject effect. In simulations with a random subject effect and AR(1) residuals (15 subjects, 8 measurements each; 95% target), coverage of the joint tolerance limits was about 0.89 with `model = "gls", cor_type = "ar1"` and about 0.95 with `model = "lme", cor_type = "ar1"`. Use the autoregressive options with `model = "gls"` only when no persistent subject effect is expected. The fits can be compared with `AIC()` on the returned models (a REML comparison is valid because the fixed effects are the same).
 #'   - **Variance functions with compound symmetry** (`condition`, or `weights` together with `cor_type = "sym"`): in `gls`, the correlation applies to the standardized residuals, so the covariance between two measurements from the same subject is rho * sigma_i * sigma_j. The between-subject variance therefore scales with the variance function (e.g., it is larger in a condition with a larger residual SD), rather than being common to all conditions. The marginal variance of each condition, which drives the limits, is not directly affected, but the standard error of each condition's bias and the reported variance components are. With `model = "lme"`, the variance function applies to the residuals only, and the between-subject variance is common to all conditions. In simulations where that was true (12 subjects; 95% target), the joint tolerance limits had coverage of about 0.96 with `model = "gls"` and about 0.97 with `model = "lme"`.
-#'   - **One level of clustering**: both models have a single grouping factor (`id`). Designs with more than one level of clustering (e.g., repeated measurements within device settings within subjects) cannot be represented. Setting `id` to the finer level (e.g., subject by setting) drops the correlation across settings within the same subject, which understates the standard error of a bias pooled across settings; a mixed model with a random effect for each level is needed for such designs.
-#'   - **Variance components**: the SD of a single difference splits into between-subject (`SD.between`) and within-subject (`SD.within`) components. With `model = "gls"` and compound symmetry these are sqrt(rho) * SD and sqrt(1 - rho) * SD; with `model = "lme"`, `SD.between` is the random-intercept SD and `SD.within` the residual SD. They can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m) (without residual correlation), or for the between-subject floor of agreement. They are point estimates only.
+#'   - **Clustering levels**: `model = "gls"` has a single grouping factor (`id`). With `model = "lme"`, `id` can name two nested levels (e.g., `id = c("golfer", "club")` for shots with several clubs per golfer), giving random intercepts for the outer level and for the inner level within the outer level. Setting `id` to the inner level alone (e.g., a golfer-by-club identifier) should be avoided: it drops the correlation across inner levels within the same outer level, which understates the uncertainty. In simulations (15 subjects with 2 to 4 settings each; 95% target), the joint tolerance limits had coverage of about 0.88 to 0.91 with the inner level as `id`, versus about 0.96 with nested random intercepts. Grouping by the outer level only (`id = "golfer"`) also gave close to nominal coverage (about 0.96), because the inner-level variance is then absorbed into the residual; the nested model additionally reports the inner-level variance component (`SD.nested`). More than two levels are not supported.
+#'   - **Variance components**: the SD of a single difference splits into between-subject (`SD.between`), inner-level (`SD.nested`, with two `id` columns), and within-subject (`SD.within`) components. With `model = "gls"` and compound symmetry these are sqrt(rho) * SD and sqrt(1 - rho) * SD; with `model = "lme"`, `SD.between` is the random-intercept SD and `SD.within` the residual SD. They can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m) (without residual correlation), or for the between-subject floor of agreement. They are point estimates only.
 #'   - **Proportional bias** (`prop_bias = TRUE`): a non-zero slope of the differences on the average can appear without any true proportional bias. Whenever the two methods have unequal measurement error variances, cov(difference, average) = (var(x) - var(y)) / 2 is not zero (Bland & Altman, 1999), so the slope should not be read as proportional bias on its own. Errors-in-variables methods such as [dem_reg()] or [pb_reg()] are better suited to assessing proportional bias.
 #'
 #' @return Returns single `tolerance_delta` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
-#'   - `limits`: A data frame containing the prediction/tolerance limits. Columns include `bias` (estimated mean difference), `SEM` (standard error of the bias), `SD` (residual standard deviation of a single difference at that row, from the variance function if one is in the model), `SEP` (standard error of prediction, `sqrt(SD^2 + SEM^2)`), `SD.df` (degrees of freedom of the residual variance), `SD.upper` (one-sided `tol_level` upper confidence bound for SD), `SD.between`/`SD.within` (between- and within-subject components of SD, under compound symmetry or with `model = "lme"`; `NA` otherwise), `lower.CL`/`upper.CL` (confidence limits for the bias), `lower.PL`/`upper.PL` (prediction limits), `lower.TL`/`upper.TL` (tolerance limits), and, for `tol_method = "boot_cal"`, `lower.TL.level`/`upper.TL.level` (the calibrated nominal levels at which the analytic limits were computed).
+#'   - `limits`: A data frame containing the prediction/tolerance limits. Columns include `bias` (estimated mean difference), `SEM` (standard error of the bias), `SD` (residual standard deviation of a single difference at that row, from the variance function if one is in the model), `SEP` (standard error of prediction, `sqrt(SD^2 + SEM^2)`), `SD.df` (degrees of freedom of the residual variance), `SD.upper` (one-sided `tol_level` upper confidence bound for SD), `SD.between`/`SD.nested`/`SD.within` (between-subject, nested (inner level), and within-subject components of SD, under compound symmetry or with `model = "lme"`; `NA` otherwise, and `SD.nested` is `NA` without nesting), `lower.CL`/`upper.CL` (confidence limits for the bias), `lower.PL`/`upper.PL` (prediction limits), `lower.TL`/`upper.TL` (tolerance limits), and, for `tol_method = "boot_cal"`, `lower.TL.level`/`upper.TL.level` (the calibrated nominal levels at which the analytic limits were computed).
 #'   - `model`: The fitted `gls` or `lme` model; NULL if keep_model set to FALSE. The data (with the internal column names `x`, `y`, `delta`, `avg`, `id` (the row number if not supplied), and, if supplied, `condition` and `time`), correlation structure, and variance function are stored with the model, so `update()` and `nlme::getData()` can be used on it directly.
 #'   - `call`: The matched call.
 #' @examples
@@ -79,6 +79,14 @@
 #'
 #' # Nested, random intercept (mixed) model
 #' tolerance_limit(x = "x", y ="y", data = reps, id = "id", model = "lme")
+#'
+#' # Nested random intercepts (e.g., measurements within settings within subjects)
+#' \donttest{
+#' reps2 = reps
+#' reps2$setting = rep(1:2, length.out = nrow(reps2))
+#' tolerance_limit(x = "x", y = "y", data = reps2, id = c("id", "setting"),
+#'                 model = "lme")
+#' }
 #'
 #' @references
 #'
@@ -132,6 +140,19 @@ tolerance_limit = function(data,
   tol_method = tol_method_arg(tol_method)
   bound_type = match.arg(bound_type)
   log_tf_display = match.arg(log_tf_display)
+  # id: one column, or two columns (outer, inner) for nested random intercepts
+  if(length(id) > 2){
+    stop("`id` can have at most two columns (outer level first, e.g., ",
+         "c(\"subject\", \"setting\")).", call. = FALSE)
+  }
+  if(anyDuplicated(id)){
+    stop("The columns in `id` must be different.", call. = FALSE)
+  }
+  nested = length(id) == 2
+  if(nested && model_type == "gls"){
+    stop("Nested grouping (two `id` columns) requires model = \"lme\".",
+         call. = FALSE)
+  }
   if(model_type == "lme"){
     if(is.null(id)){
       stop("model = \"lme\" requires `id`: the random intercept is for each level of `id`.",
@@ -143,10 +164,15 @@ tolerance_limit = function(data,
            "intercept alone, or \"ar1\"/\"car1\" to add serial correlation.",
            call. = FALSE)
     }
+    # residual correlation must be grouped by the innermost random effect
+    cor_groups = if(nested) c("id", "id_2") else "id"
     if(!is.null(correlation) &&
-       !identical(all.vars(nlme::getGroupsFormula(correlation)), "id")){
-      stop("With model = \"lme\", `correlation` must be grouped by id ",
-           "(e.g., nlme::corAR1(form = ~ time | id)).", call. = FALSE)
+       !identical(all.vars(nlme::getGroupsFormula(correlation)), cor_groups)){
+      stop("With model = \"lme\", `correlation` must be grouped by the ",
+           "innermost level of `id`, using the internal names (e.g., ",
+           if(nested) "nlme::corAR1(form = ~ time | id/id_2)" else
+             "nlme::corAR1(form = ~ time | id)",
+           ").", call. = FALSE)
     }
   }
   # set call ----
@@ -169,7 +195,10 @@ tolerance_limit = function(data,
   temp_frame = data[c(x,y,id,condition,time)]
   names(temp_frame)[names(temp_frame) == x] <- "x"
   names(temp_frame)[names(temp_frame) == y] <- "y"
-  names(temp_frame)[names(temp_frame) == id] <- "id"
+  names(temp_frame)[names(temp_frame) == id[1]] <- "id"
+  if(nested){
+    names(temp_frame)[names(temp_frame) == id[2]] <- "id_2"
+  }
   names(temp_frame)[names(temp_frame) == condition] <- "condition"
   names(temp_frame)[names(temp_frame) == time] <- "time"
   #colnames(temp_frame) = c(x,y,id,condition,time)
@@ -193,6 +222,7 @@ tolerance_limit = function(data,
   var1 = NULL
   cor1 = NULL
   fixed = NULL
+  random = NULL
 
   if(model_type == "lme"){
     ## Random intercept model ----
@@ -201,9 +231,14 @@ tolerance_limit = function(data,
     if(!is.null(condition)){
       var1 = varIdent(form = ~1|condition)
     }
-    # residual serial correlation within id, on top of the random intercept
+    # residual serial correlation within the innermost level, on top of the
+    # random intercept(s)
     if(cor_type %in% c("ar1", "car1")){
-      cor_form = if(!is.null(time)) ~time|id else ~1|id
+      cor_form = if(nested){
+        if(!is.null(time)) ~time|id/id_2 else ~1|id/id_2
+      } else {
+        if(!is.null(time)) ~time|id else ~1|id
+      }
       cor1 = switch(cor_type,
                     car1 = nlme::corCAR1(form = cor_form),
                     ar1 = nlme::corAR1(form = cor_form))
@@ -218,8 +253,9 @@ tolerance_limit = function(data,
                                  if(!is.null(condition)) "condition",
                                  if(prop_bias) "avg"),
                                response = "delta")
+    random = if(nested) ~ 1 | id/id_2 else ~ 1 | id
     model = nlme::lme(fixed = fixed,
-                      random = ~ 1 | id,
+                      random = random,
                       data = temp_frame,
                       weights = var1,
                       correlation = cor1)
@@ -281,7 +317,8 @@ tolerance_limit = function(data,
                                data = temp_frame,
                                cor1 = cor1,
                                var1 = var1,
-                               fixed = fixed)
+                               fixed = fixed,
+                               random = random)
 
   # EMMEANS ----
 
@@ -310,9 +347,12 @@ tolerance_limit = function(data,
   # compound symmetry
   if(sd_info$type == "comp"){
     emm_df$SD.between = sd_info$between
-    emm_df$SD.within = sqrt(emm_df$SD^2 - sd_info$between^2)
+    emm_df$SD.nested = sd_info$nested
+    nested_var = ifelse(is.na(sd_info$nested), 0, sd_info$nested^2)
+    emm_df$SD.within = sqrt(emm_df$SD^2 - sd_info$between^2 - nested_var)
   } else {
     emm_df$SD.between = NA_real_
+    emm_df$SD.nested = NA_real_
     emm_df$SD.within = NA_real_
   }
   # a random intercept correlates measurements within id even without a
@@ -482,13 +522,15 @@ model_self_contained = function(model,
                                 data,
                                 cor1,
                                 var1,
-                                fixed = NULL){
+                                fixed = NULL,
+                                random = NULL){
   data_env = new.env(parent = baseenv())
   assign("tol_data", data, envir = data_env)
 
   if(inherits(model, "lme")){
     model$call[[1]] = quote(nlme::lme)
     model$call$fixed = fixed
+    model$call$random = random
   } else {
     model$call[[1]] = quote(nlme::gls)
   }
@@ -500,12 +542,19 @@ model_self_contained = function(model,
   model
 }
 
-# random-intercept variance (zero for gls) ----
-re_var = function(model){
+# random-intercept variances ----
+# re_vars(): one variance per level, named "id" (outer) and, if nested,
+# "id_2" (inner); re_var(): their sum (zero for gls)
+re_vars = function(model){
   if(!inherits(model, "lme")){
-    return(0)
+    return(c(id = 0))
   }
-  as.matrix(model$modelStruct$reStruct[[1]])[1, 1] * sigma(model)^2
+  mats = as.matrix(model$modelStruct$reStruct)
+  vapply(mats, function(m) m[1, 1], numeric(1)) * sigma(model)^2
+}
+
+re_var = function(model){
+  sum(re_vars(model))
 }
 
 # fixed-effect coefficients ----
@@ -536,8 +585,12 @@ boot_delta = function(model,
 
   dat2 = temp_frame
   # replicates x grid rows; rows stay NA for replicates whose refit failed
-  b_star = s_star = sem_star = nu_star = kb_star =
+  b_star = s_star = sem_star = nu_star =
     matrix(NA_real_, nrow = replicates, ncol = n_row)
+  # shares of the variance pieces: replicates x grid rows x pieces
+  sh_star = if(sd_info$type == "comp"){
+    array(NA_real_, c(replicates, n_row, ncol(sd_info$shares)))
+  } else NULL
 
   for(i in seq_len(replicates)){
     dat2$delta = gls_sim_draw(sim_setup)
@@ -561,7 +614,7 @@ boot_delta = function(model,
     # variance-component information for the analytic limits in this replicate
     if(sd_info$type == "comp"){
       grid_i$SD = s_star[i, ]
-      kb_star[i, ] = sd_bound_info(res_i, grid_i, dat2)$k_b
+      sh_star[i, , ] = sd_bound_info(res_i, grid_i, dat2)$shares
     } else {
       nu_star[i, ] = suppressWarnings(tol_sd_df(res_i, grid_i))
     }
@@ -577,7 +630,7 @@ boot_delta = function(model,
   list(bias = b_star[keep, , drop = FALSE],
        SD = s_star[keep, , drop = FALSE],
        SEM = sem_star[keep, , drop = FALSE],
-       k_b = kb_star[keep, , drop = FALSE],
+       shares = if(is.null(sh_star)) NULL else sh_star[keep, , , drop = FALSE],
        nu = nu_star[keep, , drop = FALSE])
 }
 
@@ -593,18 +646,31 @@ boot_delta = function(model,
 # upper confidence bound of the residual SD ----
 # How the one-sided upper confidence bound for the SD of a single difference
 # is formed:
-# - Variance components ("comp"): gls with compound symmetry, or lme with a
-#   random intercept. For each row the variance splits as s^2 = a + b, where
-#   a = k_b * s^2 is the variance of a subject mean (estimated with
-#   df_b = subjects - 1) and b = (1 - k_b) * s^2 is the remainder (estimated
-#   with df_w = N - subjects). The bound combines the two pieces with the
-#   MOVER (Zou, 2013), as in agreement_limit(data_type = "nest"); a single
-#   Satterthwaite df understates the skewness of the between-subject part.
-#     gls, compound symmetry:        k_b = rho + (1 - rho) / mh
-#     lme, random intercept:         k_b = (sigma_b^2 + kappa * sigma_w^2) / s^2
-#   where mh is the harmonic mean number of measurements per subject and
-#   kappa = mean over subjects of 1'R_i 1 / m_i^2 for the residual
-#   correlation matrix R_i (kappa = 1 / mh without residual correlation).
+# - Variance components ("comp"): gls with compound symmetry, or lme with
+#   random intercept(s). For each row the variance s^2 is split into pieces
+#   a_j = shares_j * s^2, each estimated with its own df, and the bound
+#   combines them with the MOVER (Zou, 2013), as in
+#   agreement_limit(data_type = "nest"); a single Satterthwaite df
+#   understates the skewness of the between-subject part.
+#     gls, compound symmetry (2 pieces):
+#       a1 = (rho + (1 - rho) / mh) s^2          df = subjects - 1
+#       a2 = the rest                             df = N - subjects
+#     lme, random intercept(s) (3 pieces; the middle one is empty without
+#     nesting): with sigma_1^2 (subject), sigma_2^2 (setting within
+#     subject), and sigma_e^2 (residual, for the row),
+#       a1 = sigma_1^2 + tau sigma_2^2 + kappa_sub sigma_e^2
+#                                                 df = subjects - 1
+#       a2 = (1 - tau) sigma_2^2 + (kappa_set - kappa_sub) sigma_e^2
+#                                                 df = settings - subjects
+#       a3 = (1 - kappa_set) sigma_e^2            df = N - settings
+#     where tau = mean over subjects of sum_c m_ic^2 / m_i^2 (the setting
+#     share of the variance of a subject mean), and kappa_sub and kappa_set
+#     are the means of 1'R 1 / m^2 over subjects and over settings for the
+#     residual correlation matrix R (1 / m without residual correlation).
+#     This is the nested ANOVA decomposition
+#     s^2 = MS_A / (sk) + MS_B (1/k - 1/(sk)) + MS_W (1 - 1/k) for balanced
+#     data. Without nesting, a2 is empty and a1, a3 are the random-intercept
+#     pieces.
 # - Otherwise ("df"): chi-square bound with the effective df from
 #   tol_sd_df() (N - p with no correlation or variance function, which makes
 #   the limits exact; approximate for other structures).
@@ -620,11 +686,6 @@ sd_bound_info = function(model,
                                grid = grid)))
   }
 
-  grp = if(is_lme){
-    data$id
-  } else {
-    nlme::getGroups(data, nlme::getGroupsFormula(cs))
-  }
   # With a separate residual variance per condition (varIdent by condition),
   # each condition's variance components are estimated from the measurements
   # in that condition: the subject means in a condition are based on that
@@ -645,30 +706,49 @@ sd_bound_info = function(model,
   } else {
     rep(list(rep(TRUE, nrow(data))), nrow(grid))
   }
-  counts = lapply(row_sets, function(rows) cs_counts(grp[rows]))
-  df_b = vapply(counts, `[[`, numeric(1), "df_b")
-  df_w = vapply(counts, `[[`, numeric(1), "df_w")
+  s2 = grid$SD^2
 
   if(is_lme){
-    s2 = grid$SD^2
-    sb2 = re_var(model)
-    kappa = vapply(row_sets, function(rows){
-      lme_kappa(model, grp, rows)
-    }, numeric(1))
-    k_b = (sb2 + kappa * (s2 - sb2)) / s2
-    between = rep(sqrt(sb2), nrow(grid))
+    vars = re_vars(model)
+    s1 = vars[["id"]]
+    s2n = if("id_2" %in% names(vars)) vars[["id_2"]] else 0
+    se2 = s2 - s1 - s2n
+    parts = lapply(row_sets, function(rows) lme_structure(model, data, rows))
+
+    tau = vapply(parts, `[[`, numeric(1), "tau")
+    k_sub = vapply(parts, `[[`, numeric(1), "kappa_sub")
+    k_set = vapply(parts, `[[`, numeric(1), "kappa_set")
+    a1 = s1 + tau * s2n + k_sub * se2
+    a2 = (1 - tau) * s2n + (k_set - k_sub) * se2
+    a3 = (1 - k_set) * se2
+    shares = cbind(a1, a2, a3) / s2
+    df = cbind(vapply(parts, `[[`, numeric(1), "n_sub") - 1,
+               vapply(parts, `[[`, numeric(1), "n_set") -
+                 vapply(parts, `[[`, numeric(1), "n_sub"),
+               vapply(parts, `[[`, numeric(1), "N") -
+                 vapply(parts, `[[`, numeric(1), "n_set"))
+    between = rep(sqrt(s1), nrow(grid))
+    nested = if("id_2" %in% names(vars)) rep(sqrt(s2n), nrow(grid)) else
+      rep(NA_real_, nrow(grid))
   } else {
+    grp = nlme::getGroups(data, nlme::getGroupsFormula(cs))
+    counts = lapply(row_sets, function(rows) cs_counts(grp[rows]))
     rho = cs_rho(model)
     mh = vapply(counts, `[[`, numeric(1), "mh")
     k_b = rho + (1 - rho) / mh
+    shares = cbind(k_b, 1 - k_b)
+    df = cbind(vapply(counts, `[[`, numeric(1), "df_b"),
+               vapply(counts, `[[`, numeric(1), "df_w"))
     between = sqrt(rho) * grid$SD
+    nested = rep(NA_real_, nrow(grid))
   }
 
+  dimnames(shares) = dimnames(df) = NULL
   list(type = "comp",
-       k_b = k_b,
-       df_b = df_b,
-       df_w = df_w,
-       between = between)
+       shares = shares,
+       df = df,
+       between = between,
+       nested = nested)
 }
 
 # cluster sizes for the MOVER bound: harmonic mean number of measurements per
@@ -682,27 +762,55 @@ cs_counts = function(grp){
        df_w = sum(m_i) - n_sub)
 }
 
-# kappa: the residual variance of a subject mean, relative to the residual
-# variance of one measurement, averaged over subjects (mean of 1'R_i 1 / m_i^2
-# over the rows in `rows`). Without residual correlation this is 1 / mh.
-lme_kappa = function(model,
-                     grp,
-                     rows){
-  cs = model$modelStruct$corStruct
-  ids = unique(as.character(grp[rows]))
-  if(is.null(cs)){
-    m_i = as.vector(table(as.character(grp[rows])))
-    return(mean(1 / m_i[m_i > 0]))
+# Structure of an lme random intercept model over the data rows in `rows`:
+# the numbers of subjects, settings (the inner level if nested, otherwise the
+# subjects), and measurements; tau; and kappa for subject and setting means.
+# The residual correlation is block diagonal across the innermost groups, so
+# 1'R 1 for a subject is the sum over its settings.
+lme_structure = function(model,
+                         data,
+                         rows){
+  sub = as.character(data$id)
+  set = if("id_2" %in% names(data)){
+    paste(sub, as.character(data$id_2), sep = "/")
+  } else {
+    sub
   }
-  cor_mat = nlme::corMatrix(cs)
-  grp_chr = as.character(grp)
-  vapply(ids, function(g){
-    # corMatrix blocks are in data order within each subject
-    in_g = which(grp_chr == g)
-    keep = rows[in_g]
-    R = as.matrix(cor_mat[[g]])[keep, keep, drop = FALSE]
-    sum(R) / sum(keep)^2
-  }, numeric(1)) %>% mean()
+  sub_r = sub[rows]
+  set_r = set[rows]
+
+  # sum of the residual correlation matrix over each setting's rows in `rows`
+  # (corMatrix blocks are named by the innermost group, "outer/inner" when
+  # nested, and are in data order within each group)
+  cs = model$modelStruct$corStruct
+  set_ids = unique(set_r)
+  sum_R = if(is.null(cs)){
+    as.vector(table(set_r)[set_ids])
+  } else {
+    cor_mat = nlme::corMatrix(cs)
+    vapply(set_ids, function(g){
+      in_g = which(set == g)
+      keep = rows[in_g]
+      sum(as.matrix(cor_mat[[g]])[keep, keep, drop = FALSE])
+    }, numeric(1))
+  }
+  names(sum_R) = set_ids
+
+  m_set = as.vector(table(set_r)[set_ids])
+  sub_of_set = sub_r[match(set_ids, set_r)]
+  sub_ids = unique(sub_r)
+  m_sub = vapply(sub_ids, function(i) sum(m_set[sub_of_set == i]), numeric(1))
+
+  list(n_sub = length(sub_ids),
+       n_set = length(set_ids),
+       N = sum(rows),
+       tau = mean(vapply(sub_ids, function(i){
+         sum(m_set[sub_of_set == i]^2) / m_sub[[i]]^2
+       }, numeric(1))),
+       kappa_sub = mean(vapply(sub_ids, function(i){
+         sum(sum_R[sub_of_set == i]) / m_sub[[i]]^2
+       }, numeric(1))),
+       kappa_set = mean(sum_R / m_set^2))
 }
 
 # correlation of a compound symmetry model, truncated at zero
@@ -712,7 +820,8 @@ cs_rho = function(model){
 }
 
 # One-sided upper confidence bound, at `level`, for the SD. Vectorized over s
-# and over k_b, df_b, and df_w (for "comp") or nu (for "df").
+# and over the rows of shares and df (for "comp") or nu (for "df"). Pieces
+# with zero df are empty and are dropped.
 sd_upper_at = function(s,
                        level,
                        info){
@@ -720,14 +829,16 @@ sd_upper_at = function(s,
     return(s * sqrt(info$nu / qchisq(1 - level, info$nu)))
   }
   s2 = s^2
-  a = info$k_b * s2
-  b = (1 - info$k_b) * s2
-  move_b = a * (info$df_b / qchisq(1 - level, info$df_b) - 1)
-  # with one observation per subject there is no within-subject term
-  move_w = ifelse(info$df_w > 0,
-                  b * (info$df_w / qchisq(1 - level, info$df_w) - 1),
-                  0)
-  sqrt(s2 + sqrt(move_b^2 + move_w^2))
+  shares = comp_rows(info$shares, length(s))
+  df = comp_rows(info$df, length(s))
+  total = 0
+  for(j in seq_len(ncol(shares))){
+    d = df[, j]
+    move = shares[, j] * s2 * (d / qchisq(1 - level, d) - 1)
+    move[!(d > 0)] = 0
+    total = total + move^2
+  }
+  sqrt(s2 + sqrt(total))
 }
 
 # degrees of freedom of the residual variance
@@ -737,22 +848,36 @@ sd_df_at = function(s,
     return(info$nu)
   }
   s2 = s^2
-  a = info$k_b * s2
-  b = (1 - info$k_b) * s2
-  var_w = ifelse(info$df_w > 0, b^2 / info$df_w, 0)
+  shares = comp_rows(info$shares, length(s))
+  df = comp_rows(info$df, length(s))
+  total = 0
+  for(j in seq_len(ncol(shares))){
+    d = df[, j]
+    v = (shares[, j] * s2)^2 / d
+    v[!(d > 0)] = 0
+    total = total + v
+  }
   # Satterthwaite df of s2 (reported only; the bound uses the MOVER)
-  s2^2 / (a^2 / info$df_b + var_w)
+  s2^2 / total
 }
 
-# one grid row of an info list (nu, or k_b, df_b, and df_w, have one value
-# per grid row)
+# recycle a one-row shares/df matrix to n rows
+comp_rows = function(m, n){
+  m = as.matrix(m)
+  if(nrow(m) == 1 && n > 1){
+    m = m[rep(1, n), , drop = FALSE]
+  }
+  m
+}
+
+# one grid row of an info list (nu, or the rows of shares and df, have one
+# value per grid row)
 sd_info_row = function(info, j){
   if(info$type == "df"){
     info$nu = info$nu[j]
   } else {
-    info$k_b = info$k_b[j]
-    info$df_b = info$df_b[j]
-    info$df_w = info$df_w[j]
+    info$shares = info$shares[j, , drop = FALSE]
+    info$df = info$df[j, , drop = FALSE]
   }
   info
 }
@@ -862,7 +987,9 @@ tol_boot = function(emm_df,
     info_j = sd_info_row(sd_info, j)
 
     info_star = if(sd_info$type == "comp"){
-      utils::modifyList(info_j, list(k_b = boot_df$k_b[, j]))
+      utils::modifyList(info_j,
+                        list(shares = matrix(boot_df$shares[, j, ],
+                                             ncol = dim(boot_df$shares)[3])))
     } else {
       list(type = "df", nu = boot_df$nu[, j])
     }

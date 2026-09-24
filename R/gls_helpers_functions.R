@@ -45,9 +45,12 @@ gls_sim_setup = function(model, data){
 }
 
 # Random intercept model: the marginal covariance for subject i is
-# sigma_b^2 * J + diag(sd_i) R_i diag(sd_i), where sd_i are the residual SDs
-# (from the variance function) and R_i is the residual correlation matrix
-# (identity without a corStruct).
+# sigma_1^2 * J + sigma_2^2 * B_i + diag(sd_i) R_i diag(sd_i), where
+# sigma_2^2 and B_i (1 for pairs of rows in the same setting within the
+# subject, 0 otherwise) are present only with nested random intercepts, sd_i
+# are the residual SDs (from the variance function), and R_i is the residual
+# correlation matrix (block diagonal over the innermost groups; identity
+# without a corStruct).
 lme_sim_setup = function(model, data){
   N = model$dims$N
   if (nrow(data) != N)
@@ -61,22 +64,38 @@ lme_sim_setup = function(model, data){
   } else {
     predict_varFunc(model, newdata = data)
   }
-  sb2 = as.matrix(model$modelStruct$reStruct[[1]])[1, 1] * sigma(model)^2
+  vars = as.matrix(model$modelStruct$reStruct)
+  vars = vapply(vars, function(m) m[1, 1], numeric(1)) * sigma(model)^2
+  s1 = vars[["id"]]
+  s2 = if ("id_2" %in% names(vars)) vars[["id_2"]] else 0
   cs = model$modelStruct$corStruct
 
-  grp = as.character(data$id)
-  rows = split(seq_len(N), factor(grp, levels = unique(grp)))
+  sub = as.character(data$id)
+  # innermost group labels, matching the corMatrix names ("outer/inner")
+  inner = if ("id_2" %in% names(data)) {
+    paste(sub, as.character(data$id_2), sep = "/")
+  } else {
+    sub
+  }
+  rows = split(seq_len(N), factor(sub, levels = unique(sub)))
   cor_mat = if (!is.null(cs)) nlme::corMatrix(cs) else NULL
 
-  blocks = lapply(names(rows), function(g) {
-    i = rows[[g]]
-    # corMatrix blocks are in data order within each subject
-    R = if (is.null(cor_mat)) diag(length(i)) else as.matrix(cor_mat[[g]])
-    S = sb2 + sds[i] * t(sds[i] * R)
+  blocks = lapply(rows, function(i) {
+    g_in = inner[i]
+    same_set = outer(g_in, g_in, "==")
+    R = diag(length(i))
+    if (!is.null(cor_mat)) {
+      for (g in unique(g_in)) {
+        # corMatrix blocks are in data order within each innermost group
+        pos = which(g_in == g)
+        R[pos, pos] = as.matrix(cor_mat[[g]])
+      }
+    }
+    S = s1 + s2 * same_set + sds[i] * t(sds[i] * R)
     list(rows = i, L = t(chol(S)))
   })
 
-  list(mu = mu, sds = sds, blocks = blocks)
+  list(mu = mu, sds = sds, blocks = unname(blocks))
 }
 
 gls_sim_draw = function(setup){

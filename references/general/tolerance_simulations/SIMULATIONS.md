@@ -25,6 +25,7 @@ Several studies ran against intermediate code that was never committed, or that 
 | `e973451` | "Calibrated bootstrap added" | Component MOVER for compound symmetry (CS), `boot_cal` calibration, `bound_type`; whole-data cluster sizes with `condition` |
 | `251fe88` | "Simulations confirmed" | Per-condition cluster sizes/df with `condition`; `boot_cal` marked experimental |
 | Phase 1 (uncommitted when run) | after `251fe88` | `model = "lme"` option; share-based (`k_b`) SD bound |
+| Phase 2 (uncommitted when run) | after Phase 1 | Nested random intercepts (two `id` columns); J-piece share-based SD bound (`shares`, `df`) |
 
 ## Common definitions
 
@@ -216,6 +217,32 @@ Several studies ran against intermediate code that was never committed, or that 
 
 - **Conclusion:** confirms review Issue 9 for the tolerance limits (`gls` AR1 is liberal with a persistent subject effect) and that `lme` AR1 fixes it. With `condition`, `lme` is slightly conservative, because the between piece uses per-condition cluster sizes while σ_b is estimated from all of a subject's measurements.
 
+## 12. Nested random intercepts (`id = c(outer, inner)`, review Issue 11)
+
+- **Script:** `scripts/cov_nested.R`. It uses only the exported `tolerance_limit()`, so it runs on the current code. **Code:** Phase 2 (nested `lme`, three-piece MOVER bound; uncommitted when run). Smoke checks are in `scripts/nested_smoke.R`.
+- **Truth:** subject random intercept σ_1 = 0.7, setting-within-subject random intercept σ_2 = 0.5, residual σ_e = 1, μ = 0.8.
+- **Designs:** 4 × 250 = 1,000 data sets each; analytic limits only.
+  - `balanced`: 15 subjects × 3 settings × 5 measurements.
+  - `unbalanced`: 15 subjects, with 2–4 settings per subject and 3–7 measurements per setting.
+- **Fits** for each data set:
+  - `lme_nested`: `id = c("subject", "setting")`, `model = "lme"`.
+  - `lme_subject`: `id = "subject"`, `model = "lme"`.
+  - `lme_combined`: `id` = the subject:setting identifier (the review's workaround).
+  - `gls_subject`: `id = "subject"`, CS.
+- **Results:** `results/12_nested/` (`nest_*.rds` and `.txt`), pooled:
+
+  | Fit | Balanced: joint / IU lo / IU hi | Unbalanced: joint / IU lo / IU hi |
+  |---|---|---|
+  | lme_nested | 0.961 / 0.965 / 0.957 | 0.963 / 0.948 / 0.954 |
+  | lme_subject | 0.958 / 0.965 / 0.953 | 0.957 / 0.940 / 0.960 |
+  | lme_combined | 0.905 / 0.898 / 0.894 | 0.883 / 0.855 / 0.890 |
+  | gls_subject | 0.958 / 0.965 / 0.953 | 0.957 / 0.940 / 0.960 |
+
+- **Conclusion:**
+  - Confirms review Issue 11: using the inner level as `id` is liberal (0.86–0.90).
+  - Nested random intercepts are close to nominal, slightly conservative.
+  - Grouping by the outer level only is also close to nominal for these marginal limits, because the inner-level variance is absorbed into the residual. The nested model additionally reports the inner-level component (`SD.nested`).
+
 ## Other checks (console only)
 
 These were not coverage simulations. Their outputs appear in the session log only; where a script exists it's in `scripts/`.
@@ -239,10 +266,10 @@ These were not coverage simulations. Their outputs appear in the session log onl
 
 ## Reproducing
 
-- `cov_lme.R` runs against the current code as is. Usage: `Rscript cov_lme.R <design> <nsim> <seed offset>`, with results written to the working directory.
+- `cov_lme.R` and `cov_nested.R` run against the current code as is. Usage: `Rscript cov_lme.R <design> <nsim> <seed offset>`, with results written to the working directory.
 - `cov_boot2.R` (usage: `Rscript cov_boot2.R <design> <nsim> <B> <seed offset>`) needs these renames for the Phase 1 code:
   - `boot_delta_gls()` is now `boot_delta()`
-  - the SD-bound info type `"cs"` (with `rho`/`mh`) is now `"comp"` (with `k_b`)
+  - the SD-bound info type `"cs"` (with `rho`/`mh`) is now `"comp"` (with a `shares` matrix and a `df` matrix, one column per variance piece)
   - `gls_sim_setup()` also handles `lme`
 - `cov_approx.R`, `cov_perc.R` and `cov_perc2.R` use functions that no longer exist (`tol_sd_upper()`, `tol_perc()`, `content_k()`), so they document historical code states only.
 - Seeds are set inside each script from the design and the seed offset. Designs were run as parallel processes, 4 or 6 offsets per design; the offsets used are in the result file names.
