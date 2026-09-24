@@ -20,10 +20,11 @@
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations. Note that a slope of the differences on the average can appear without any true proportional bias when the two methods have unequal measurement error variances; see "Model assumptions" in details.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
-#' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1. The autoregressive options ("ar1" and "car1") have no persistent subject effect; see "Model assumptions" in details.
-#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.
-#' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (`avg`, `condition`, `x`, `y`, `time`) or `fitted(.)`. Currently `varIdent`, `varFixed`, `varExp`, and `varPower` are supported. If the variance depends on `avg`, the limits are reported at the minimum, median, and maximum of `avg` even when `prop_bias = FALSE`.
-#' @param keep_model Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.
+#' @param model The type of model for the differences. "gls" (default) is a marginal generalized least squares model ([nlme::gls()]) with the correlation structure set by `cor_type`. "lme" is a linear mixed model ([nlme::lme()]) with a random intercept for each `id`, which requires `id`. With compound symmetry and no variance function both give the same fit; "lme" differs when serial correlation (`cor_type = "ar1"` or `"car1"`) or a variance function (`condition` or `weights`) is added, because it keeps a persistent subject effect and applies the variance function to the residuals only. See "Model assumptions" in details.
+#' @param cor_type The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1. The autoregressive options ("ar1" and "car1") have no persistent subject effect; see "Model assumptions" in details. With `model = "lme"`, "sym" fits the random intercept alone, "ar1" and "car1" add serial correlation of the residuals within `id` on top of the random intercept, and "none" is not allowed.
+#' @param correlation an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL. With `model = "lme"`, this is the correlation of the residuals within `id` (on top of the random intercept) and must be grouped by `id` (e.g., `nlme::corAR1(form = ~ time | id)`).
+#' @param weights an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (`avg`, `condition`, `x`, `y`, `time`) or `fitted(.)`. Currently `varIdent`, `varFixed`, `varExp`, and `varPower` are supported. If the variance depends on `avg`, the limits are reported at the minimum, median, and maximum of `avg` even when `prop_bias = FALSE`. With `model = "lme"`, the variance function applies to the residuals only; the random-intercept variance is common to all observations.
+#' @param keep_model Logical indicator to retain the fitted model (`gls` or `lme`). Useful when working with large data and the model is very large.
 #' @inheritParams loa_lme
 #' @details The tolerance limits calculated in this function are based on the papers by Francq & Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
 #'
@@ -54,18 +55,18 @@
 #'
 #' ## Model assumptions
 #'
-#' The model is a marginal (generalized least squares) model fit with [nlme::gls()]. For the default setup (`cor_type = "sym"` without a variance function), compound symmetry with a non-negative correlation gives the same likelihood as a random-intercept model, and targets the marginal distribution of a single difference from a randomly chosen subject. The other options carry assumptions that should be checked:
+#' With `model = "gls"` (default), the model is a marginal (generalized least squares) model fit with [nlme::gls()]. For the default setup (`cor_type = "sym"` without a variance function), compound symmetry with a non-negative correlation gives the same likelihood as a random-intercept model, and targets the marginal distribution of a single difference from a randomly chosen subject. With `model = "lme"`, the model is a linear mixed model fit with [nlme::lme()] with a random intercept for each `id`; with compound symmetry and no variance function it gives the same fit and limits. With `model = "lme"`, the degrees of freedom for the bias are the containment degrees of freedom (subjects - 1 for the models fit here), because the Satterthwaite approximation for `lme` models in emmeans can fail. The other options carry assumptions that should be checked:
 #'
-#'   - **Autoregressive correlation** (`cor_type = "ar1"` or `"car1"`): the correlation between two measurements from the same subject decays towards zero as they get further apart in time. A persistent subject-specific bias (e.g., a subject by method interaction) instead makes all measurements from that subject equally correlated. When such an effect exists, the autoregressive structures miss most of the long-range correlation, so the standard error of the bias is too small and the limits are too narrow; the bootstrap does not correct this, because it simulates from the same model. In one simulation (20 subjects with 19 measurements each, and a random subject effect), the 95% confidence interval for the bias covered the true value 74% of the time with AR(1), versus 96% with compound symmetry. Use the autoregressive options only when no persistent subject effect is expected. The fits can be compared with `AIC()` on the returned models (a REML comparison is valid because the fixed effects are the same). A random subject effect combined with serial correlation is not currently supported.
-#'   - **Variance functions with compound symmetry** (`condition`, or `weights` together with `cor_type = "sym"`): in `gls`, the correlation applies to the standardized residuals, so the covariance between two measurements from the same subject is rho * sigma_i * sigma_j. The between-subject variance therefore scales with the variance function (e.g., it is larger in a condition with a larger residual SD), rather than being common to all conditions as in a random-intercept model with the same variance function. The marginal variance of each condition, which drives the limits, is not directly affected, but the standard error of each condition's bias and the reported variance components are. This may be reasonable (e.g., with proportional error) but is an assumption.
-#'   - **One level of clustering**: the correlation structure has a single grouping factor (`id`). Designs with more than one level of clustering (e.g., repeated measurements within device settings within subjects) cannot be represented. Setting `id` to the finer level (e.g., subject by setting) drops the correlation across settings within the same subject, which understates the standard error of a bias pooled across settings; a mixed model with a random effect for each level is needed for such designs.
-#'   - **Variance components**: under compound symmetry the residual variance splits into between-subject (rho * SD^2) and within-subject ((1 - rho) * SD^2) components, returned as `SD.between` and `SD.within`. These can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m), or for the between-subject floor of agreement. They are point estimates only.
+#'   - **Autoregressive correlation** (`cor_type = "ar1"` or `"car1"`): with `model = "gls"`, the correlation between two measurements from the same subject decays towards zero as they get further apart in time. A persistent subject-specific bias (e.g., a subject by method interaction) instead makes all measurements from that subject equally correlated. When such an effect exists, the autoregressive structures miss most of the long-range correlation, so the standard error of the bias is too small and the limits are too narrow; the bootstrap does not correct this, because it simulates from the same model. In one simulation (20 subjects with 19 measurements each, and a random subject effect), the 95% confidence interval for the bias covered the true value 74% of the time with AR(1), versus 96% with compound symmetry. With `model = "lme"`, the serial correlation is added to the residuals on top of a random intercept, which keeps the persistent subject effect. In simulations with a random subject effect and AR(1) residuals (15 subjects, 8 measurements each; 95% target), coverage of the joint tolerance limits was about 0.89 with `model = "gls", cor_type = "ar1"` and about 0.95 with `model = "lme", cor_type = "ar1"`. Use the autoregressive options with `model = "gls"` only when no persistent subject effect is expected. The fits can be compared with `AIC()` on the returned models (a REML comparison is valid because the fixed effects are the same).
+#'   - **Variance functions with compound symmetry** (`condition`, or `weights` together with `cor_type = "sym"`): in `gls`, the correlation applies to the standardized residuals, so the covariance between two measurements from the same subject is rho * sigma_i * sigma_j. The between-subject variance therefore scales with the variance function (e.g., it is larger in a condition with a larger residual SD), rather than being common to all conditions. The marginal variance of each condition, which drives the limits, is not directly affected, but the standard error of each condition's bias and the reported variance components are. With `model = "lme"`, the variance function applies to the residuals only, and the between-subject variance is common to all conditions. In simulations where that was true (12 subjects; 95% target), the joint tolerance limits had coverage of about 0.96 with `model = "gls"` and about 0.97 with `model = "lme"`.
+#'   - **One level of clustering**: both models have a single grouping factor (`id`). Designs with more than one level of clustering (e.g., repeated measurements within device settings within subjects) cannot be represented. Setting `id` to the finer level (e.g., subject by setting) drops the correlation across settings within the same subject, which understates the standard error of a bias pooled across settings; a mixed model with a random effect for each level is needed for such designs.
+#'   - **Variance components**: the SD of a single difference splits into between-subject (`SD.between`) and within-subject (`SD.within`) components. With `model = "gls"` and compound symmetry these are sqrt(rho) * SD and sqrt(1 - rho) * SD; with `model = "lme"`, `SD.between` is the random-intercept SD and `SD.within` the residual SD. They can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m) (without residual correlation), or for the between-subject floor of agreement. They are point estimates only.
 #'   - **Proportional bias** (`prop_bias = TRUE`): a non-zero slope of the differences on the average can appear without any true proportional bias. Whenever the two methods have unequal measurement error variances, cov(difference, average) = (var(x) - var(y)) / 2 is not zero (Bland & Altman, 1999), so the slope should not be read as proportional bias on its own. Errors-in-variables methods such as [dem_reg()] or [pb_reg()] are better suited to assessing proportional bias.
 #'
 #' @return Returns single `tolerance_delta` class object with the results of the agreement analysis with a prediction interval and tolerance limits.
 #'
-#'   - `limits`: A data frame containing the prediction/tolerance limits. Columns include `bias` (estimated mean difference), `SEM` (standard error of the bias), `SD` (residual standard deviation of a single difference at that row, from the variance function if one is in the model), `SEP` (standard error of prediction, `sqrt(SD^2 + SEM^2)`), `SD.df` (degrees of freedom of the residual variance), `SD.upper` (one-sided `tol_level` upper confidence bound for SD), `SD.between`/`SD.within` (between- and within-subject components of SD under compound symmetry; `NA` otherwise), `lower.CL`/`upper.CL` (confidence limits for the bias), `lower.PL`/`upper.PL` (prediction limits), `lower.TL`/`upper.TL` (tolerance limits), and, for `tol_method = "boot_cal"`, `lower.TL.level`/`upper.TL.level` (the calibrated nominal levels at which the analytic limits were computed).
-#'   - `model`: The GLS model; NULL if keep_model set to FALSE. The data (with the internal column names `x`, `y`, `delta`, `avg`, `id` (the row number if not supplied), and, if supplied, `condition` and `time`), correlation structure, and variance function are stored with the model, so `update()` and `nlme::getData()` can be used on it directly.
+#'   - `limits`: A data frame containing the prediction/tolerance limits. Columns include `bias` (estimated mean difference), `SEM` (standard error of the bias), `SD` (residual standard deviation of a single difference at that row, from the variance function if one is in the model), `SEP` (standard error of prediction, `sqrt(SD^2 + SEM^2)`), `SD.df` (degrees of freedom of the residual variance), `SD.upper` (one-sided `tol_level` upper confidence bound for SD), `SD.between`/`SD.within` (between- and within-subject components of SD, under compound symmetry or with `model = "lme"`; `NA` otherwise), `lower.CL`/`upper.CL` (confidence limits for the bias), `lower.PL`/`upper.PL` (prediction limits), `lower.TL`/`upper.TL` (tolerance limits), and, for `tol_method = "boot_cal"`, `lower.TL.level`/`upper.TL.level` (the calibrated nominal levels at which the analytic limits were computed).
+#'   - `model`: The fitted `gls` or `lme` model; NULL if keep_model set to FALSE. The data (with the internal column names `x`, `y`, `delta`, `avg`, `id` (the row number if not supplied), and, if supplied, `condition` and `time`), correlation structure, and variance function are stored with the model, so `update()` and `nlme::getData()` can be used on it directly.
 #'   - `call`: The matched call.
 #' @examples
 #' data('reps')
@@ -75,6 +76,9 @@
 #'
 #' # Nested
 #' tolerance_limit(x = "x", y ="y", data = reps, id = "id")
+#'
+#' # Nested, random intercept (mixed) model
+#' tolerance_limit(x = "x", y ="y", data = reps, id = "id", model = "lme")
 #'
 #' @references
 #'
@@ -114,6 +118,7 @@ tolerance_limit = function(data,
                                prop_bias = FALSE,
                                log_tf = FALSE,
                            log_tf_display = c("ratio", "sympercent"),
+                               model = c("gls", "lme"),
                                cor_type = c("sym", "car1", "ar1", "none"),
                                correlation = NULL,
                                weights = NULL,
@@ -122,12 +127,31 @@ tolerance_limit = function(data,
   alpha = 1 - tol_level
   alpha.pred=1-pred_level
   # match args -----
+  model_type = match.arg(model)
   cor_type = match.arg(cor_type)
   tol_method = tol_method_arg(tol_method)
   bound_type = match.arg(bound_type)
   log_tf_display = match.arg(log_tf_display)
+  if(model_type == "lme"){
+    if(is.null(id)){
+      stop("model = \"lme\" requires `id`: the random intercept is for each level of `id`.",
+           call. = FALSE)
+    }
+    if(cor_type == "none"){
+      stop("With model = \"lme\", the random intercept already correlates ",
+           "measurements within `id`; use cor_type = \"sym\" for the random ",
+           "intercept alone, or \"ar1\"/\"car1\" to add serial correlation.",
+           call. = FALSE)
+    }
+    if(!is.null(correlation) &&
+       !identical(all.vars(nlme::getGroupsFormula(correlation)), "id")){
+      stop("With model = \"lme\", `correlation` must be grouped by id ",
+           "(e.g., nlme::corAR1(form = ~ time | id)).", call. = FALSE)
+    }
+  }
   # set call ----
   call2 = match.call()
+  call2$model = model_type
   call2$id = id
   call2$condition = condition
   call2$pred_level = pred_level
@@ -165,64 +189,99 @@ tolerance_limit = function(data,
     temp_frame$id = 1:nrow(temp_frame)
   }
   # MODEL ----
-  model = gls(delta ~ 1, data = temp_frame)
   # Set to null for when not used
   var1 = NULL
   cor1 = NULL
-  ## Update model with condition -----
-  if(!is.null(condition)){
-    var1 = varIdent(form=~1|condition)
-    model = update(model,
-                   . ~ . + condition,
-                   weights = var1)
+  fixed = NULL
 
-  }
-
-  ## Update model for prop bias ----
-  if(prop_bias){
-    model = update(model,
-                   . ~ . + avg)
-  }
-
-  ## Correlation -----
-  if(!is.null(id) && cor_type != "none"){
-
-    if(!is.null(time)){
+  if(model_type == "lme"){
+    ## Random intercept model ----
+    # the variance function applies to the residuals only, so the
+    # between-subject variance is common to all conditions
+    if(!is.null(condition)){
+      var1 = varIdent(form = ~1|condition)
+    }
+    # residual serial correlation within id, on top of the random intercept
+    if(cor_type %in% c("ar1", "car1")){
+      cor_form = if(!is.null(time)) ~time|id else ~1|id
       cor1 = switch(cor_type,
-                    sym = nlme::corCompSymm(form = ~time|id),
-                    car1 = nlme::corCAR1(form = ~time|id),
-                    ar1 = nlme::corAR1(form= ~time|id))
-    } else {
-      cor1 = switch(cor_type,
-                    sym = nlme::corCompSymm(form = ~1|id),
-                    car1 = nlme::corCAR1(form = ~1|id),
-                    ar1 = nlme::corAR1(form= ~1|id))
+                    car1 = nlme::corCAR1(form = cor_form),
+                    ar1 = nlme::corAR1(form = cor_form))
+    }
+    if(!is.null(weights)){
+      var1 = weights
+    }
+    if(!is.null(correlation)){
+      cor1 = correlation
+    }
+    fixed = stats::reformulate(c("1",
+                                 if(!is.null(condition)) "condition",
+                                 if(prop_bias) "avg"),
+                               response = "delta")
+    model = nlme::lme(fixed = fixed,
+                      random = ~ 1 | id,
+                      data = temp_frame,
+                      weights = var1,
+                      correlation = cor1)
+  } else {
+
+    model = gls(delta ~ 1, data = temp_frame)
+    ## Update model with condition -----
+    if(!is.null(condition)){
+      var1 = varIdent(form=~1|condition)
+      model = update(model,
+                     . ~ . + condition,
+                     weights = var1)
+
     }
 
-    model = update(model,
-                   correlation = cor1)
+    ## Update model for prop bias ----
+    if(prop_bias){
+      model = update(model,
+                     . ~ . + avg)
+    }
+
+    ## Correlation -----
+    if(!is.null(id) && cor_type != "none"){
+
+      if(!is.null(time)){
+        cor1 = switch(cor_type,
+                      sym = nlme::corCompSymm(form = ~time|id),
+                      car1 = nlme::corCAR1(form = ~time|id),
+                      ar1 = nlme::corAR1(form= ~time|id))
+      } else {
+        cor1 = switch(cor_type,
+                      sym = nlme::corCompSymm(form = ~1|id),
+                      car1 = nlme::corCAR1(form = ~1|id),
+                      ar1 = nlme::corAR1(form= ~1|id))
+      }
+
+      model = update(model,
+                     correlation = cor1)
+    }
+
+    ## Custom model input -----
+
+    if(!is.null(weights)){
+      var1 = weights
+      model = update(model,
+             weights = var1)
+
+    }
+
+    if(!is.null(correlation)){
+      cor1 = correlation
+      model = update(model,
+             correlation = cor1)
+
+    }
   }
 
-  ## Custom model input -----
-
-  if(!is.null(weights)){
-    var1 = weights
-    model = update(model,
-           weights = var1)
-
-  }
-
-  if(!is.null(correlation)){
-    cor1 = correlation
-    model = update(model,
-           correlation = cor1)
-
-  }
-
-  model = gls_self_contained(model = model,
-                             data = temp_frame,
-                             cor1 = cor1,
-                             var1 = var1)
+  model = model_self_contained(model = model,
+                               data = temp_frame,
+                               cor1 = cor1,
+                               var1 = var1,
+                               fixed = fixed)
 
   # EMMEANS ----
 
@@ -246,16 +305,19 @@ tolerance_limit = function(data,
                           data = temp_frame)
   emm_df$SD.df = sd_df_at(emm_df$SD, sd_info)
   emm_df$SD.upper = sd_upper_at(emm_df$SD, tol_level, sd_info)
-  # variance components under compound symmetry:
-  # sigma_b^2 = rho * sigma^2 and sigma_w^2 = (1 - rho) * sigma^2
-  if(sd_info$type == "cs"){
-    emm_df$SD.between = sqrt(sd_info$rho) * emm_df$SD
-    emm_df$SD.within = sqrt(1 - sd_info$rho) * emm_df$SD
+  # variance components: the random-intercept SD for lme, or
+  # sigma_b^2 = rho * sigma^2 and sigma_w^2 = (1 - rho) * sigma^2 under
+  # compound symmetry
+  if(sd_info$type == "comp"){
+    emm_df$SD.between = sd_info$between
+    emm_df$SD.within = sqrt(emm_df$SD^2 - sd_info$between^2)
   } else {
     emm_df$SD.between = NA_real_
     emm_df$SD.within = NA_real_
   }
-  independent = is.null(model$modelStruct$corStruct)
+  # a random intercept correlates measurements within id even without a
+  # corStruct
+  independent = !inherits(model, "lme") && is.null(model$modelStruct$corStruct)
 
   if(tol_method == "analytic"){
     emm_df = tol_approx(emm_df = emm_df,
@@ -268,7 +330,7 @@ tolerance_limit = function(data,
   }
 
   if(tol_method == "boot_cal"){
-    boot_df = boot_delta_gls(model = model,
+    boot_df = boot_delta(model = model,
                              temp_frame = temp_frame,
                              avg_vals = avg_vals,
                              res_emm = res_emm,
@@ -356,127 +418,167 @@ gls_emm_delta = function(model,
                          temp_frame,
                          avg_vals,
                          conf_level = 0.95){
-  # emmeans passes the gls call's weights (a varFunc) to model.frame when
+  # emmeans passes the call's weights (a varFunc) to model.frame when
   # recovering the data, which errors for intercept-only models. The varFunc
   # is not needed from the call (vcov and apVar come from the fitted object),
   # so drop it from this local copy.
   model$call$weights = NULL
 
-  if(grepl("avg", paste0(nlme::getCovariateFormula(model))[2])){
-    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
+  # For lme, emmeans' Satterthwaite df can fail (e.g., intercept only) or not
+  # terminate (seen with a varIdent residual variance), so the containment df
+  # are used (subjects - 1 for the random intercept models fit here).
+  mode = if(inherits(model, "lme")) "containment" else "satterthwaite"
+  res_emm = emm_delta_mode(model, temp_frame, avg_vals, mode)
+  res_emm = update(res_emm, level = conf_level)
+  return(res_emm)
+}
 
+emm_delta_mode = function(model,
+                          temp_frame,
+                          avg_vals,
+                          mode){
+  covs = paste0(nlme::getCovariateFormula(model))[2]
+
+  if(grepl("avg", covs)){
+    if(grepl("condition", covs)){
       res_emm = emmeans(ref_grid(model,
                                  at = list(avg = avg_vals),
                                  data = temp_frame),
                         ~ condition + avg,
-                        mode = "satterthwaite",
+                        mode = mode,
                         data = temp_frame)
     } else{
       res_emm = emmeans(ref_grid(model,
                                  at = list(avg = avg_vals),
                                  data = temp_frame),
                         ~ avg,
-                        mode = "satterthwaite",
+                        mode = mode,
                         data = temp_frame)
     }
 
   } else {
-    if(grepl("condition",paste0(nlme::getCovariateFormula(model))[2])){
+    if(grepl("condition", covs)){
       res_emm = emmeans(model,
                         ~ condition ,
-                        mode = "satterthwaite",
+                        mode = mode,
                         data = temp_frame)
     } else{
       res_emm = emmeans(model,
                         ~ 1 ,
-                        mode = "satterthwaite",
+                        mode = mode,
                         data = temp_frame)
     }
   }
-  res_emm = update(res_emm, level = conf_level)
-  return(res_emm)
+  res_emm
 }
 
 # self-contained model ----
-# The gls call built above refers to objects that only exist inside
-# tolerance_limit() (temp_frame, cor1, var1), so update() and getData() on
-# the returned model would fail. Replace them with the objects themselves.
-# The data are stored in a small environment rather than inline so that
-# print(model) does not deparse the whole data frame.
-gls_self_contained = function(model,
-                              data,
-                              cor1,
-                              var1){
+# The gls/lme call built above refers to objects that only exist inside
+# tolerance_limit() (temp_frame, cor1, var1, and fixed for lme), so update()
+# and getData() on the returned model would fail. Replace them with the
+# objects themselves. The data are stored in a small environment rather than
+# inline so that print(model) does not deparse the whole data frame.
+model_self_contained = function(model,
+                                data,
+                                cor1,
+                                var1,
+                                fixed = NULL){
   data_env = new.env(parent = baseenv())
   assign("tol_data", data, envir = data_env)
 
-  model$call[[1]] = quote(nlme::gls)
+  if(inherits(model, "lme")){
+    model$call[[1]] = quote(nlme::lme)
+    model$call$fixed = fixed
+  } else {
+    model$call[[1]] = quote(nlme::gls)
+  }
   model$call$data = call("get", "tol_data", envir = data_env)
-  if(!is.null(cor1)){
-    model$call$correlation = cor1
-  }
-  if(!is.null(var1)){
-    model$call$weights = var1
-  }
+  # assigning NULL removes the argument from the call
+  model$call$correlation = cor1
+  model$call$weights = var1
 
   model
 }
 
+# random-intercept variance (zero for gls) ----
+re_var = function(model){
+  if(!inherits(model, "lme")){
+    return(0)
+  }
+  as.matrix(model$modelStruct$reStruct[[1]])[1, 1] * sigma(model)^2
+}
+
+# fixed-effect coefficients ----
+fixed_coef = function(model){
+  if(inherits(model, "lme")) nlme::fixef(model) else stats::coef(model)
+}
+
 # bootstrap ----
-boot_delta_gls = function(model,
-                          temp_frame,
-                          avg_vals,
-                          res_emm,
-                          sd_info,
-                          replicates){
+boot_delta = function(model,
+                      temp_frame,
+                      avg_vals,
+                      res_emm,
+                      sd_info,
+                      replicates){
   # Simulate from the point estimates of the fitted model; the covariance
   # factorization is fixed across replicates so it is computed once.
   sim_setup = gls_sim_setup(model, data = temp_frame)
 
-  # The emmeans grid is a linear function of the coefficients, so each
-  # replicate's bias and SEM come from coef() and vcov() directly rather than
-  # re-running emmeans.
+  # The emmeans grid is a linear function of the fixed effects, so each
+  # replicate's bias and SEM come from the coefficients and vcov() directly
+  # rather than re-running emmeans.
   L = res_emm@linfct
   emm_base = as.data.frame(res_emm)
   class(emm_base) = "data.frame"
+  n_row = nrow(tol_grid(res_emm = emm_base,
+                        model = model,
+                        avg_vals = avg_vals))
 
   dat2 = temp_frame
-  b_star = s_star = sem_star = nu_star = NULL
-  rho_star = numeric(replicates)
+  # replicates x grid rows; rows stay NA for replicates whose refit failed
+  b_star = s_star = sem_star = nu_star = kb_star =
+    matrix(NA_real_, nrow = replicates, ncol = n_row)
 
   for(i in seq_len(replicates)){
     dat2$delta = gls_sim_draw(sim_setup)
-    res_i = update(model, data = dat2)
+    res_i = tryCatch(update(model, data = dat2),
+                     error = function(e) NULL)
+    if(is.null(res_i)){
+      next
+    }
 
     grid_i = emm_base
-    grid_i$emmean = as.vector(L %*% coef(res_i))
+    grid_i$emmean = as.vector(L %*% fixed_coef(res_i))
     grid_i$SE = sqrt(rowSums((L %*% vcov(res_i)) * L))
     # rows come back in the same order as the original grid
     grid_i = tol_grid(res_emm = grid_i,
                       model = res_i,
                       avg_vals = avg_vals)
 
-    if(is.null(b_star)){
-      b_star = s_star = sem_star = nu_star =
-        matrix(NA_real_, nrow = replicates, ncol = nrow(grid_i))
-    }
     b_star[i, ] = grid_i$emmean
-    s_star[i, ] = resid_sd_grid(res_i, grid_i)
+    s_star[i, ] = marginal_sd_grid(res_i, grid_i)
     sem_star[i, ] = grid_i$SE
     # variance-component information for the analytic limits in this replicate
-    if(sd_info$type == "cs"){
-      rho_star[i] = cs_rho(res_i)
+    if(sd_info$type == "comp"){
+      grid_i$SD = s_star[i, ]
+      kb_star[i, ] = sd_bound_info(res_i, grid_i, dat2)$k_b
     } else {
       nu_star[i, ] = suppressWarnings(tol_sd_df(res_i, grid_i))
     }
   }
 
-  # replicates x grid rows
-  list(bias = b_star,
-       SD = s_star,
-       SEM = sem_star,
-       rho = rho_star,
-       nu = nu_star)
+  failed = is.na(b_star[, 1])
+  if(mean(failed) > 0.05){
+    warning(sum(failed), " of ", replicates, " bootstrap refits failed ",
+            "and were dropped.", call. = FALSE)
+  }
+  keep = !failed
+
+  list(bias = b_star[keep, , drop = FALSE],
+       SD = s_star[keep, , drop = FALSE],
+       SEM = sem_star[keep, , drop = FALSE],
+       k_b = kb_star[keep, , drop = FALSE],
+       nu = nu_star[keep, , drop = FALSE])
 }
 
 # tolerance limits ----
@@ -489,12 +591,20 @@ boot_delta_gls = function(model,
 #   pair is not a joint gamma-confidence interval.
 
 # upper confidence bound of the residual SD ----
-# How the one-sided upper confidence bound for the residual SD is formed:
-# - Compound symmetry ("cs"): sigma^2 = sigma_b^2 + sigma_w^2 with
-#   sigma_b^2 = rho * sigma^2 and sigma_w^2 = (1 - rho) * sigma^2. The bound
-#   combines the between- and within-subject mean squares with the MOVER
-#   (Zou, 2013), as in agreement_limit(data_type = "nest"); a single
+# How the one-sided upper confidence bound for the SD of a single difference
+# is formed:
+# - Variance components ("comp"): gls with compound symmetry, or lme with a
+#   random intercept. For each row the variance splits as s^2 = a + b, where
+#   a = k_b * s^2 is the variance of a subject mean (estimated with
+#   df_b = subjects - 1) and b = (1 - k_b) * s^2 is the remainder (estimated
+#   with df_w = N - subjects). The bound combines the two pieces with the
+#   MOVER (Zou, 2013), as in agreement_limit(data_type = "nest"); a single
 #   Satterthwaite df understates the skewness of the between-subject part.
+#     gls, compound symmetry:        k_b = rho + (1 - rho) / mh
+#     lme, random intercept:         k_b = (sigma_b^2 + kappa * sigma_w^2) / s^2
+#   where mh is the harmonic mean number of measurements per subject and
+#   kappa = mean over subjects of 1'R_i 1 / m_i^2 for the residual
+#   correlation matrix R_i (kappa = 1 / mh without residual correlation).
 # - Otherwise ("df"): chi-square bound with the effective df from
 #   tol_sd_df() (N - p with no correlation or variance function, which makes
 #   the limits exact; approximate for other structures).
@@ -502,40 +612,63 @@ sd_bound_info = function(model,
                          grid,
                          data){
   cs = model$modelStruct$corStruct
+  is_lme = inherits(model, "lme")
 
-  if(inherits(cs, "corCompSymm")){
-    grp = nlme::getGroups(data, nlme::getGroupsFormula(cs))
-    # With a separate residual variance per condition (varIdent by
-    # condition), each condition's variance components are estimated from the
-    # measurements in that condition: the subject means in a condition are
-    # based on that subject's measurements in the condition only. The cluster
-    # sizes and df are therefore taken per condition for each grid row.
-    # Otherwise they come from the whole data set.
-    vs = model$modelStruct$varStruct
-    per_cond = inherits(vs, "varIdent") &&
-      !is.null(nlme::getGroupsFormula(vs)) &&
-      identical(all.vars(nlme::getGroupsFormula(vs)), "condition") &&
-      "condition" %in% names(grid) &&
-      "condition" %in% names(data)
-
-    counts = if(per_cond){
-      lapply(as.character(grid$condition), function(cond){
-        cs_counts(grp[as.character(data$condition) == cond])
-      })
-    } else {
-      rep(list(cs_counts(grp)), nrow(grid))
-    }
-
-    return(list(type = "cs",
-                rho = cs_rho(model),
-                mh = vapply(counts, `[[`, numeric(1), "mh"),
-                df_b = vapply(counts, `[[`, numeric(1), "df_b"),
-                df_w = vapply(counts, `[[`, numeric(1), "df_w")))
+  if(!is_lme && !inherits(cs, "corCompSymm")){
+    return(list(type = "df",
+                nu = tol_sd_df(model = model,
+                               grid = grid)))
   }
 
-  list(type = "df",
-       nu = tol_sd_df(model = model,
-                      grid = grid))
+  grp = if(is_lme){
+    data$id
+  } else {
+    nlme::getGroups(data, nlme::getGroupsFormula(cs))
+  }
+  # With a separate residual variance per condition (varIdent by condition),
+  # each condition's variance components are estimated from the measurements
+  # in that condition: the subject means in a condition are based on that
+  # subject's measurements in the condition only. The cluster sizes and df
+  # are therefore taken per condition for each grid row. Otherwise they come
+  # from the whole data set.
+  vs = model$modelStruct$varStruct
+  per_cond = inherits(vs, "varIdent") &&
+    !is.null(nlme::getGroupsFormula(vs)) &&
+    identical(all.vars(nlme::getGroupsFormula(vs)), "condition") &&
+    "condition" %in% names(grid) &&
+    "condition" %in% names(data)
+
+  row_sets = if(per_cond){
+    lapply(as.character(grid$condition), function(cond){
+      as.character(data$condition) == cond
+    })
+  } else {
+    rep(list(rep(TRUE, nrow(data))), nrow(grid))
+  }
+  counts = lapply(row_sets, function(rows) cs_counts(grp[rows]))
+  df_b = vapply(counts, `[[`, numeric(1), "df_b")
+  df_w = vapply(counts, `[[`, numeric(1), "df_w")
+
+  if(is_lme){
+    s2 = grid$SD^2
+    sb2 = re_var(model)
+    kappa = vapply(row_sets, function(rows){
+      lme_kappa(model, grp, rows)
+    }, numeric(1))
+    k_b = (sb2 + kappa * (s2 - sb2)) / s2
+    between = rep(sqrt(sb2), nrow(grid))
+  } else {
+    rho = cs_rho(model)
+    mh = vapply(counts, `[[`, numeric(1), "mh")
+    k_b = rho + (1 - rho) / mh
+    between = sqrt(rho) * grid$SD
+  }
+
+  list(type = "comp",
+       k_b = k_b,
+       df_b = df_b,
+       df_w = df_w,
+       between = between)
 }
 
 # cluster sizes for the MOVER bound: harmonic mean number of measurements per
@@ -549,6 +682,29 @@ cs_counts = function(grp){
        df_w = sum(m_i) - n_sub)
 }
 
+# kappa: the residual variance of a subject mean, relative to the residual
+# variance of one measurement, averaged over subjects (mean of 1'R_i 1 / m_i^2
+# over the rows in `rows`). Without residual correlation this is 1 / mh.
+lme_kappa = function(model,
+                     grp,
+                     rows){
+  cs = model$modelStruct$corStruct
+  ids = unique(as.character(grp[rows]))
+  if(is.null(cs)){
+    m_i = as.vector(table(as.character(grp[rows])))
+    return(mean(1 / m_i[m_i > 0]))
+  }
+  cor_mat = nlme::corMatrix(cs)
+  grp_chr = as.character(grp)
+  vapply(ids, function(g){
+    # corMatrix blocks are in data order within each subject
+    in_g = which(grp_chr == g)
+    keep = rows[in_g]
+    R = as.matrix(cor_mat[[g]])[keep, keep, drop = FALSE]
+    sum(R) / sum(keep)^2
+  }, numeric(1)) %>% mean()
+}
+
 # correlation of a compound symmetry model, truncated at zero
 cs_rho = function(model){
   rho = stats::coef(model$modelStruct$corStruct, unconstrained = FALSE)
@@ -556,7 +712,7 @@ cs_rho = function(model){
 }
 
 # One-sided upper confidence bound, at `level`, for the SD. Vectorized over s
-# and over rho, mh, df_b, and df_w (for "cs") or nu (for "df").
+# and over k_b, df_b, and df_w (for "comp") or nu (for "df").
 sd_upper_at = function(s,
                        level,
                        info){
@@ -564,13 +720,12 @@ sd_upper_at = function(s,
     return(s * sqrt(info$nu / qchisq(1 - level, info$nu)))
   }
   s2 = s^2
-  msw = (1 - info$rho) * s2
-  msb = msw + info$mh * info$rho * s2
-  # s2 = msb / mh + (1 - 1 / mh) * msw
-  move_b = 1 / info$mh * (msb * info$df_b / qchisq(1 - level, info$df_b) - msb)
+  a = info$k_b * s2
+  b = (1 - info$k_b) * s2
+  move_b = a * (info$df_b / qchisq(1 - level, info$df_b) - 1)
   # with one observation per subject there is no within-subject term
   move_w = ifelse(info$df_w > 0,
-                  (1 - 1 / info$mh) * (msw * info$df_w / qchisq(1 - level, info$df_w) - msw),
+                  b * (info$df_w / qchisq(1 - level, info$df_w) - 1),
                   0)
   sqrt(s2 + sqrt(move_b^2 + move_w^2))
 }
@@ -582,20 +737,20 @@ sd_df_at = function(s,
     return(info$nu)
   }
   s2 = s^2
-  msw = (1 - info$rho) * s2
-  msb = msw + info$mh * info$rho * s2
-  var_w = ifelse(info$df_w > 0, ((1 - 1 / info$mh) * msw)^2 / info$df_w, 0)
+  a = info$k_b * s2
+  b = (1 - info$k_b) * s2
+  var_w = ifelse(info$df_w > 0, b^2 / info$df_w, 0)
   # Satterthwaite df of s2 (reported only; the bound uses the MOVER)
-  s2^2 / ((msb / info$mh)^2 / info$df_b + var_w)
+  s2^2 / (a^2 / info$df_b + var_w)
 }
 
-# one grid row of an info list (nu, or mh, df_b, and df_w, have one value per
-# grid row)
+# one grid row of an info list (nu, or k_b, df_b, and df_w, have one value
+# per grid row)
 sd_info_row = function(info, j){
   if(info$type == "df"){
     info$nu = info$nu[j]
   } else {
-    info$mh = info$mh[j]
+    info$k_b = info$k_b[j]
     info$df_b = info$df_b[j]
     info$df_w = info$df_w[j]
   }
@@ -706,8 +861,8 @@ tol_boot = function(emm_df,
     s = emm_df$SD[j]
     info_j = sd_info_row(sd_info, j)
 
-    info_star = if(sd_info$type == "cs"){
-      utils::modifyList(info_j, list(rho = boot_df$rho))
+    info_star = if(sd_info$type == "comp"){
+      utils::modifyList(info_j, list(k_b = boot_df$k_b[, j]))
     } else {
       list(type = "df", nu = boot_df$nu[, j])
     }
@@ -864,9 +1019,16 @@ tol_grid = function(res_emm,
   return(grid)
 }
 
-# residual SD for each row of the prediction grid ----
-# sigma(model) is only the SD at the reference level of the variance
-# function, so the variance function has to be evaluated at each grid row.
+# SD of a single difference for each row of the prediction grid ----
+# sigma(model) is only the residual SD at the reference level of the variance
+# function, so the variance function has to be evaluated at each grid row
+# (resid_sd_grid). For lme the random-intercept variance is added, giving the
+# marginal SD of a difference from a new subject.
+marginal_sd_grid = function(model,
+                            grid){
+  sqrt(re_var(model) + resid_sd_grid(model, grid)^2)
+}
+
 resid_sd_grid = function(model,
                          grid){
   vrSt = model$modelStruct$varStruct
@@ -889,7 +1051,7 @@ add_pred_limits = function(grid,
                            alpha.pred){
   grid %>%
     rename(SEM = SE) %>%
-    mutate(SD = resid_sd_grid(model, grid),
+    mutate(SD = marginal_sd_grid(model, grid),
            SEP = sqrt(SD^2 + SEM^2),
            lower.PL = emmean - qt(1-alpha.pred/2,df) * SEP,
            upper.PL = emmean + qt(1-alpha.pred/2,df) * SEP)

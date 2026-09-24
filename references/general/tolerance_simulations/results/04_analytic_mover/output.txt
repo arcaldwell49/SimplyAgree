@@ -1,0 +1,14 @@
+14:  e = tol_sd_upper(g, e, d, gam)
+18:  e_old = e; e_old$SD.upper = e_old$SD * sqrt(e_old$df / qchisq(1 - gam, e_old$df))
+19:  jo = tol_approx(e_old, beta, gam, "joint", FALSE)
+20 x 19, sa=0.5, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.957     1.000     0.940     0.958     0.901   224.375    18.993 
+20 x 19, sa=1.5, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.946     0.989     0.939     0.946     0.896    40.875    19.000 
+10 x 5, sa=1.0, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.949     1.000     0.951     0.950     0.912    25.504     8.985 
+
+[exited with code 0]

@@ -1,0 +1,5 @@
+rivar (nsim=250) fails: 0
+gls_cond_joint gls_cond_iu_lo gls_cond_iu_hi lme_cond_joint lme_cond_iu_lo 
+         0.958          0.954          0.942          0.980          0.972 
+lme_cond_iu_hi 
+         0.968 

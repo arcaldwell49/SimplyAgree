@@ -1,0 +1,3 @@
+ar1 (nsim=250, B=199)
+approx_joint   boot_joint approx_iu_lo approx_iu_hi   boot_iu_lo   boot_iu_hi 
+       0.944        0.956        0.948        0.944        0.960        0.944 

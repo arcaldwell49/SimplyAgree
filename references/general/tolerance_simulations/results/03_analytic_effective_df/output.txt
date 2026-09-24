@@ -1,0 +1,11 @@
+20 x 19, sa=0.5, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.921     1.000     0.927     0.941     0.873   224.218    18.993 
+20 x 19, sa=1.5, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.911     0.989     0.918     0.931     0.865    40.867    19.000 
+10 x 5, sa=1.0, se=1.0 (nsim=1000)
+    joint joint_old     iu_lo     iu_hi   iu_both        nu   df_bias 
+    0.912     1.000     0.915     0.922     0.859    25.475     8.985 
+
+[exited with code 0]

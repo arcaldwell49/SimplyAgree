@@ -1,0 +1,8 @@
+PERC 10 x 5, sa=1.0, se=1.0 (nsim=300, B=199)
+  joint   iu_lo   iu_hi iu_both 
+  0.883   0.870   0.870   0.790 
+PERC 20 x 19, sa=0.5, se=1.0 (nsim=300, B=199)
+  joint   iu_lo   iu_hi iu_both 
+  0.917   0.923   0.923   0.850 
+
+[exited with code 0]

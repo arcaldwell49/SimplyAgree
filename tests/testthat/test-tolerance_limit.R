@@ -686,6 +686,130 @@ test_that("old tol_method names are deprecated aliases", {
                    "analytic")
 })
 
+test_that("model = 'lme' validates its inputs", {
+  data(reps)
+  expect_error(tolerance_limit(reps, x = "x", y = "y", model = "lme"),
+               "requires `id`")
+  expect_error(tolerance_limit(reps, x = "x", y = "y", id = "id",
+                               model = "lme", cor_type = "none"),
+               "random intercept already correlates")
+  expect_error(tolerance_limit(reps, x = "x", y = "y", id = "id",
+                               model = "lme",
+                               correlation = nlme::corAR1()),
+               "must be grouped by id")
+})
+
+test_that("a random intercept lme matches gls with compound symmetry", {
+  data(reps)
+  cols = c("bias", "SEM", "SD", "SD.upper", "SD.between", "SD.within",
+           "lower.TL", "upper.TL")
+  for(bt in c("joint", "iu")){
+    g = tolerance_limit(reps, x = "x", y = "y", id = "id", bound_type = bt)
+    l = tolerance_limit(reps, x = "x", y = "y", id = "id", bound_type = bt,
+                        model = "lme")
+    expect_s3_class(l$model, "lme")
+    expect_equal(unlist(l$limits[, cols]), unlist(g$limits[, cols]),
+                 tolerance = 1e-4)
+  }
+  # lme uses the containment df (subjects - 1) for the bias
+  expect_equal(l$limits$df, length(unique(reps$id)) - 1)
+  expect_output(print(l), "random intercept")
+})
+
+test_that("lme with condition has a common between-subject SD", {
+  data(temps)
+  temps2 = temps
+  temps2$x = temps$trec_pre
+  temps2$y = temps$teso_pre
+  t1 = tolerance_limit(temps2, x = "x", y = "y", id = "id",
+                       condition = "tod", model = "lme")
+  lim = t1$limits
+  expect_equal(lim$SD.between[1], lim$SD.between[2])
+  expect_false(isTRUE(all.equal(lim$SD.within[1], lim$SD.within[2])))
+  expect_equal(lim$SD^2, lim$SD.between^2 + lim$SD.within^2, tolerance = 1e-8)
+
+  sb2 = as.numeric(nlme::VarCorr(t1$model)[1, "Variance"])
+  expect_equal(lim$SD.between^2, rep(sb2, 2), tolerance = 1e-6)
+
+  # the returned model is self-contained
+  refit = stats::update(t1$model, . ~ .)
+  expect_equal(logLik(refit), logLik(t1$model))
+  expect_equal(nrow(nlme::getData(t1$model)), nrow(temps2))
+  expect_silent(check(t1))
+  expect_s3_class(plot(t1), "ggplot")
+})
+
+test_that("lme with AR(1) residual correlation uses kappa for the subject mean", {
+  set.seed(8)
+  ng = 10; k = 5
+  d = data.frame(id = rep(1:ng, each = k), time = rep(1:k, ng))
+  d$y = 0
+  d$x = 0.5 + rnorm(ng, 0, 0.7)[d$id] +
+    as.vector(replicate(ng, arima.sim(list(ar = 0.5), k, sd = 0.8)))
+  t1 = tolerance_limit(d, x = "x", y = "y", id = "id", time = "time",
+                       cor_type = "ar1", model = "lme")
+  lim = t1$limits
+  expect_true(lim$SD.between > 0)
+
+  phi = unname(coef(t1$model$modelStruct$corStruct, unconstrained = FALSE))
+  R = phi^abs(outer(1:k, 1:k, "-"))
+  kappa = sum(R) / k^2
+  sb2 = lim$SD.between^2
+  sw2 = lim$SD.within^2
+  k_b = (sb2 + kappa * sw2) / lim$SD^2
+  a = k_b * lim$SD^2
+  b = (1 - k_b) * lim$SD^2
+  u_s2 = lim$SD^2 + sqrt((a * ((ng - 1) / qchisq(0.05, ng - 1) - 1))^2 +
+                         (b * ((ng * k - ng) / qchisq(0.05, ng * k - ng) - 1))^2)
+  expect_equal(lim$SD.upper, sqrt(u_s2), tolerance = 1e-8)
+})
+
+test_that("lme simulation reproduces the fitted marginal covariance", {
+  set.seed(9)
+  ng = 12; k = 4
+  d = data.frame(id = rep(1:ng, each = 2 * k), time = rep(1:(2 * k), ng),
+                 condition = rep(rep(c("A", "B"), each = k), ng))
+  d$y = 0
+  d$x = rnorm(ng)[d$id] + rnorm(nrow(d), 0, ifelse(d$condition == "A", 1, 2))
+  d = d[sample(nrow(d)), ]
+  t1 = tolerance_limit(d, x = "x", y = "y", id = "id", time = "time",
+                       condition = "condition", cor_type = "ar1", model = "lme")
+  m = t1$model
+  dat = nlme::getData(m)
+  st = gls_sim_setup(m, dat)
+  sims = replicate(5000, gls_sim_draw(st) - st$mu)
+  S = cov(t(sims))
+  id1 = as.character(dat$id[1])
+  rows = which(as.character(dat$id) == id1)
+  V = unclass(nlme::getVarCov(m, individuals = id1, type = "marginal")[[1]])
+  expect_equal(as.vector(S[rows, rows]), as.vector(V), tolerance = 0.1)
+})
+
+test_that("boot_cal runs with lme", {
+  data(temps)
+  temps2 = temps
+  temps2$x = temps$trec_pre
+  temps2$y = temps$teso_pre
+  set.seed(1)
+  t1 = tolerance_limit(temps2, x = "x", y = "y", id = "id", condition = "tod",
+                       model = "lme", tol_method = "boot_cal", replicates = 20)
+  expect_false(anyNA(t1$limits$lower.TL))
+  expect_true(all(t1$limits$lower.TL.level > 0.5))
+})
+
+test_that("predict_varFunc works with tibbles", {
+  data(temps)
+  temps2 = temps
+  temps2$x = temps$trec_pre
+  temps2$y = temps$teso_pre
+  t1 = tolerance_limit(temps2, x = "x", y = "y", id = "id", condition = "tod")
+  dat = nlme::getData(t1$model)
+  sds_tbl = predict_varFunc(t1$model, newdata = dat)
+  sds_df = predict_varFunc(t1$model, newdata = as.data.frame(dat))
+  expect_false(anyNA(sds_tbl))
+  expect_equal(sds_tbl, sds_df)
+})
+
 test_that("Checked against BivRegBLS", {
   data(reps)
   # test2 = BivRegBLS::MD.horiz.lines(data = reps, xcol = "y", ycol = "x", pred.level = .95, .95)

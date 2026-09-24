@@ -122,10 +122,24 @@ The analytic limits are therefore recommended; the bootstrap may be useful as a 
 
 A few modelling choices deserve attention (see the "Model assumptions" section of `?tolerance_limit` for details):
 
-- The autoregressive correlation structures (`cor_type = "ar1"` or `"car1"`) have no persistent subject effect: the correlation between measurements from the same subject decays towards zero over time. If subjects have a persistent bias of their own, these structures understate the uncertainty in the bias and give limits that are too narrow; compound symmetry (`cor_type = "sym"`) is the safer default for repeated measures.
-- With compound symmetry and a variance function (e.g., from `condition`), the between-subject variance scales with the residual standard deviation of each condition, rather than being shared across conditions as in a random-intercept model.
+- With the default marginal model (`model = "gls"`), the autoregressive correlation structures (`cor_type = "ar1"` or `"car1"`) have no persistent subject effect: the correlation between measurements from the same subject decays towards zero over time. If subjects have a persistent bias of their own, these structures understate the uncertainty in the bias and give limits that are too narrow. Setting `model = "lme"` fits a random intercept for each subject and adds the serial correlation to the residuals, which keeps the persistent subject effect (in our simulations the joint tolerance limits had about 89% coverage with `gls` and AR(1), and about 95% with `lme` and AR(1), for a 95% target).
+- With `model = "gls"`, compound symmetry, and a variance function (e.g., from `condition`), the between-subject variance scales with the residual standard deviation of each condition. With `model = "lme"`, the variance function applies to the residuals only and the between-subject variance is shared across conditions.
 - Only one level of clustering (`id`) is supported.
-- Under compound symmetry, the output reports the between- and within-subject components of the standard deviation (`SD.between` and `SD.within`).
+- Under compound symmetry or with `model = "lme"`, the output reports the between- and within-subject components of the standard deviation (`SD.between` and `SD.within`).
+
+For example, a random intercept model with serial correlation of the residuals:
+
+```{r, eval = FALSE}
+tolerance_limit(
+  data = temps,
+  x = "trec_pre",
+  y = "teso_pre",
+  id = "id",
+  time = "trial_num",
+  model = "lme", # random intercept for each subject
+  cor_type = "ar1" # plus AR(1) correlation of the residuals within subject
+)
+```
 - A slope of the differences on the average (`prop_bias = TRUE`) can appear without any true proportional bias when the two methods have unequal measurement error variances [@bland1999].
 
 **NOTE**: $\alpha_1$ refers to the alpha-level for the prediction interval (modified by the `pred_level` argument; `1-pred_level`) whereas $\alpha_2$ refers to the alpha-level for the tolerance limit (modified by the `tol_level` argument; `1-tol_level`).

@@ -170,7 +170,9 @@ print.tolerance_delta <- function(x,
     "% CI for Bias; ",
     x$call$pred_level*100,
     "% Prediction Interval\n",
-    tl_label
+    tl_label,
+    "\n",
+    tol_model_label(x$call)
   )
 
   if(call2$log_tf){
@@ -205,6 +207,38 @@ print.tolerance_delta <- function(x,
   #cat(var_print, sep = "")
   cat("\n")
 
+}
+
+# one-line description of the model behind a tolerance_limit() result
+tol_model_label = function(call2){
+  model_type = if(is.null(call2$model)) "gls" else call2$model
+  cor_type = if(is.null(call2$cor_type)) "sym" else call2$cor_type
+  serial = c(ar1 = "AR(1)", car1 = "continuous AR(1)")
+  has_id = !is.null(call2$id)
+
+  label = if(model_type == "lme"){
+    paste0("Model: random intercept for each id (lme)",
+           if(!is.null(call2$correlation)) {
+             " with user-specified residual correlation"
+           } else if(cor_type %in% names(serial)) {
+             paste0(" with ", serial[[cor_type]], " residual correlation")
+           })
+  } else if(!is.null(call2$correlation)){
+    "Model: GLS with user-specified correlation"
+  } else if(!has_id || cor_type == "none"){
+    "Model: GLS, independent differences"
+  } else if(cor_type == "sym"){
+    "Model: GLS, compound symmetry within id"
+  } else {
+    paste0("Model: GLS, ", serial[[cor_type]], " correlation within id")
+  }
+
+  if(!is.null(call2$weights)){
+    label = paste0(label, "; user-specified variance function")
+  } else if(!is.null(call2$condition)){
+    label = paste0(label, "; residual SD by condition")
+  }
+  label
 }
 
 #' @rdname tolerance_delta-methods
