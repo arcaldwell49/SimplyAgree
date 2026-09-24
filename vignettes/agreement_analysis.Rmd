@@ -109,13 +109,14 @@ where $S$ is the residual standard deviation and $S_U$ is a one-sided upper conf
 With independent data, $S_U / S = \sqrt{df / \chi^2_{\alpha_2,df}}$ with $df = n - 1$ (for a model with only an intercept), and this is the approximation of @howe1969.
 With repeated measures (compound symmetry), $S_U$ combines the between- and within-subject variance components using the MOVER method [@zou2011], because the between-subject component is estimated with far fewer degrees of freedom than the total.
 For other correlation structures, $S_U$ uses an effective degrees of freedom for $S^2$.
-With a variance function (e.g., from `condition`), the analytic limits are approximations and can be somewhat too narrow (coverage of about 93% for a 95% target in our simulations).
+When `condition` is supplied (a separate residual variance per condition), the variance components of each condition are bounded using the number of subjects and measurements in that condition.
+In our simulations (95% target, 10 to 20 subjects), the analytic limits had coverage of about 95% to 96.5% with compound symmetry (with or without `condition`) and with AR(1) correlation.
 
-The bootstrap-calibrated method (`tol_method = "boot_cal"`) simulates new data from the fitted model, refits the model to each replicate (default is 999 replicates), and computes the analytic limits in each replicate over a range of nominal confidence levels.
+The bootstrap-calibrated method (`tol_method = "boot_cal"`) is experimental.
+It simulates new data from the fitted model, refits the model to each replicate (default is 999 replicates), and computes the analytic limits in each replicate over a range of nominal confidence levels.
 It then reports the analytic limits at the nominal level at which the replicates achieve the target confidence (`lower.TL.level` and `upper.TL.level` in the output).
-This corrects the remaining error in the analytic limits, which matters most when a variance function is in the model (e.g., when `condition` is supplied).
-For independent data, compound symmetry, or AR(1) correlation alone, the analytic limits were already accurate in our simulations and are much faster.
-With very few subjects (around 10), the calibration inherits some error from the estimated correlation and can be slightly liberal.
+Because the replicates are simulated from the estimated correlation as if it were known, the calibration has its own error with few subjects: in our simulations with 10 to 15 subjects its coverage ranged from about 93% to 96%.
+The analytic limits are therefore recommended; the bootstrap may be useful as a check for models whose analytic limits have not been evaluated (e.g., other variance functions or proportional bias).
 
 ### Model assumptions
 

@@ -15,7 +15,7 @@
 #' @param pred_level Prediction level for the prediction interval, which is also the content (the proportion of differences to be covered, beta) for the tolerance limits. Default is 95%.
 #' @param tol_level Confidence level (gamma) for the tolerance limits. Default is 95%. See `bound_type` for what this confidence refers to.
 #' @param conf_level Confidence level for the confidence interval of the bias (`lower.CL`/`upper.CL`). Default is 95%. This does not affect the prediction or tolerance limits. For a two one-sided tests (TOST) procedure on the bias at level alpha, use `conf_level = 1 - 2 * alpha` (e.g., 0.90).
-#' @param tol_method Method for calculating the tolerance limits. Options are "analytic" (default) for closed-form limits and "boot_cal" for the closed-form limits calibrated by a parametric bootstrap. Both target the interval set by `bound_type`. The previous names, "approx" and "perc", are deprecated aliases for "analytic" and "boot_cal".
+#' @param tol_method Method for calculating the tolerance limits. Options are "analytic" (default) for closed-form limits and "boot_cal" (experimental) for the closed-form limits calibrated by a parametric bootstrap. The analytic limits are recommended; see details. Both target the interval set by `bound_type`. The previous names, "approx" and "perc", are deprecated aliases for "analytic" and "boot_cal".
 #' @param bound_type Which claim the tolerance limits (`lower.TL`/`upper.TL`) support. "joint" (default) gives a beta-content, gamma-confidence tolerance interval: with confidence `tol_level`, at least `pred_level` of all differences lie within the limits. "iu" gives equal-tailed bounds: a one-sided `tol_level` confidence bound on each of the (1 - `pred_level`)/2 and (1 + `pred_level`)/2 percentiles of the differences. The "iu" bounds are intended for an intersection-union test of agreement against a maximal allowable difference and are not a joint `tol_level` interval. See details.
 #' @param prop_bias Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations. Note that a slope of the differences on the average can appear without any true proportional bias when the two methods have unequal measurement error variances; see "Model assumptions" in details.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
@@ -41,14 +41,14 @@
 #'   - "iu" uses the exact noncentral t bound for independent data, and otherwise the MOVER bound of Zou (2013).
 #'   - Both use a one-sided upper confidence bound for the residual standard deviation (SD). With independent data this is the usual chi-square bound. With compound symmetry (`cor_type = "sym"`), the between- and within-subject variance components are combined with the MOVER, as in [agreement_limit()] with `data_type = "nest"`. With other correlation structures, the bound uses an effective degrees of freedom (`SD.df`) from the approximate covariance of the variance parameters.
 #'
-#' The analytic limits are exact for independent data (without a variance function). In simulations (95% target), they were close to nominal with compound symmetry (about 0.95, with 10 to 20 subjects) and with AR(1) correlation (about 0.95). With a variance function (`condition` or `weights`) combined with compound symmetry they were somewhat liberal (about 0.93, even when the data followed the fitted model), because the variance-component bounds then use degrees of freedom from the whole data set rather than from each condition; `tol_method = "boot_cal"` is recommended in that case.
+#' The analytic limits are exact for independent data (without a variance function). In simulations (95% target), they were close to nominal with compound symmetry (about 0.95, with 10 to 20 subjects) and with AR(1) correlation (about 0.95). With `condition` (a separate residual variance per condition) combined with compound symmetry, the variance components for each condition are bounded using that condition's cluster sizes and degrees of freedom; coverage was then about 0.96. Other variance functions (`weights`) use the cluster sizes of the whole data set and have not been checked by simulation.
 #'
 #' With `tol_method = "boot_cal"`, the analytic limits are calibrated by a parametric bootstrap (Loh, 1987; Beran, 1987). New data are simulated from the fitted model (Francq et al., 2019), the model is refit to each replicate, and the analytic limits are computed for each replicate over a range of nominal confidence levels. The level is chosen at which the replicates achieve the target confidence for the fitted model:
 #'
 #'   - "joint": a proportion `tol_level` of the replicate intervals contain at least `pred_level` of the fitted distribution of the differences.
 #'   - "iu": separately for each bound, a proportion `tol_level` of the replicate bounds lie beyond the fitted limit of agreement.
 #'
-#' The limits for the observed data are the analytic limits at the calibrated levels, which are returned as `lower.TL.level` and `upper.TL.level`. Because the analytic limits already account for most of the uncertainty in the variance components, the calibration only has to correct what remains, and it depends much less on the estimated correlation than calibrating the bootstrap limits directly. In simulations (95% target), the calibrated limits were close to nominal with compound symmetry and a variance function (about 0.95 to 0.96, where the analytic limits were about 0.93) and slightly conservative with AR(1) correlation (about 0.96). With few subjects the calibration inherits some error from the estimated correlation: with 10 subjects, coverage of the "joint" limits was about 0.93 (the "iu" bounds were about 0.94). The bootstrap is therefore recommended mainly when a variance function is in the model; otherwise the analytic limits are as accurate and much faster.
+#' The limits for the observed data are the analytic limits at the calibrated levels, which are returned as `lower.TL.level` and `upper.TL.level`. `tol_method = "boot_cal"` is **experimental**. The calibration is judged against the fitted model, so it treats the estimated correlation as known. With few subjects this adds its own error: in simulations with 10 to 15 subjects (95% target), coverage ranged from about 0.93 (compound symmetry, with or without `condition`) to about 0.96 (AR(1) correlation), while the analytic limits were 0.95 to 0.965 in the same settings. The analytic limits are therefore recommended; the bootstrap may be useful as a check for models whose analytic limits have not been evaluated (e.g., other variance functions or `prop_bias = TRUE`).
 #'
 #' For clustered data (`id` supplied), all limits refer to a new difference from a new subject: the SD includes both the between- and within-subject variance.
 #'
@@ -505,19 +505,48 @@ sd_bound_info = function(model,
 
   if(inherits(cs, "corCompSymm")){
     grp = nlme::getGroups(data, nlme::getGroupsFormula(cs))
-    m_i = as.vector(table(grp))
-    m_i = m_i[m_i > 0]
-    n_sub = length(m_i)
+    # With a separate residual variance per condition (varIdent by
+    # condition), each condition's variance components are estimated from the
+    # measurements in that condition: the subject means in a condition are
+    # based on that subject's measurements in the condition only. The cluster
+    # sizes and df are therefore taken per condition for each grid row.
+    # Otherwise they come from the whole data set.
+    vs = model$modelStruct$varStruct
+    per_cond = inherits(vs, "varIdent") &&
+      !is.null(nlme::getGroupsFormula(vs)) &&
+      identical(all.vars(nlme::getGroupsFormula(vs)), "condition") &&
+      "condition" %in% names(grid) &&
+      "condition" %in% names(data)
+
+    counts = if(per_cond){
+      lapply(as.character(grid$condition), function(cond){
+        cs_counts(grp[as.character(data$condition) == cond])
+      })
+    } else {
+      rep(list(cs_counts(grp)), nrow(grid))
+    }
+
     return(list(type = "cs",
                 rho = cs_rho(model),
-                mh = n_sub / sum(1 / m_i),
-                df_b = n_sub - 1,
-                df_w = sum(m_i) - n_sub))
+                mh = vapply(counts, `[[`, numeric(1), "mh"),
+                df_b = vapply(counts, `[[`, numeric(1), "df_b"),
+                df_w = vapply(counts, `[[`, numeric(1), "df_w")))
   }
 
   list(type = "df",
        nu = tol_sd_df(model = model,
                       grid = grid))
+}
+
+# cluster sizes for the MOVER bound: harmonic mean number of measurements per
+# subject, and the between- and within-subject df
+cs_counts = function(grp){
+  m_i = as.vector(table(grp))
+  m_i = m_i[m_i > 0]
+  n_sub = length(m_i)
+  list(mh = n_sub / sum(1 / m_i),
+       df_b = n_sub - 1,
+       df_w = sum(m_i) - n_sub)
 }
 
 # correlation of a compound symmetry model, truncated at zero
@@ -527,7 +556,7 @@ cs_rho = function(model){
 }
 
 # One-sided upper confidence bound, at `level`, for the SD. Vectorized over s
-# and over rho (for "cs") or nu (for "df").
+# and over rho, mh, df_b, and df_w (for "cs") or nu (for "df").
 sd_upper_at = function(s,
                        level,
                        info){
@@ -540,9 +569,9 @@ sd_upper_at = function(s,
   # s2 = msb / mh + (1 - 1 / mh) * msw
   move_b = 1 / info$mh * (msb * info$df_b / qchisq(1 - level, info$df_b) - msb)
   # with one observation per subject there is no within-subject term
-  move_w = if(info$df_w > 0){
-    (1 - 1 / info$mh) * (msw * info$df_w / qchisq(1 - level, info$df_w) - msw)
-  } else 0
+  move_w = ifelse(info$df_w > 0,
+                  (1 - 1 / info$mh) * (msw * info$df_w / qchisq(1 - level, info$df_w) - msw),
+                  0)
   sqrt(s2 + sqrt(move_b^2 + move_w^2))
 }
 
@@ -555,15 +584,20 @@ sd_df_at = function(s,
   s2 = s^2
   msw = (1 - info$rho) * s2
   msb = msw + info$mh * info$rho * s2
-  var_w = if(info$df_w > 0) ((1 - 1 / info$mh) * msw)^2 / info$df_w else 0
+  var_w = ifelse(info$df_w > 0, ((1 - 1 / info$mh) * msw)^2 / info$df_w, 0)
   # Satterthwaite df of s2 (reported only; the bound uses the MOVER)
   s2^2 / ((msb / info$mh)^2 / info$df_b + var_w)
 }
 
-# rows of an info list (for "df" nu is one value per grid row)
+# one grid row of an info list (nu, or mh, df_b, and df_w, have one value per
+# grid row)
 sd_info_row = function(info, j){
   if(info$type == "df"){
     info$nu = info$nu[j]
+  } else {
+    info$mh = info$mh[j]
+    info$df_b = info$df_b[j]
+    info$df_w = info$df_w[j]
   }
   info
 }
@@ -646,8 +680,10 @@ tol_approx = function(emm_df,
 #   of replicates lie beyond the fitted limit of agreement.
 #
 # TODO: With few subjects the calibration still treats the estimated
-# correlation (rho) as known, and "joint" limits were slightly liberal in
-# simulations (about 0.93 for a 0.95 target with 10 subjects). A possible
+# correlation (rho) as known. In simulations with 10-15 subjects its coverage
+# was off by 2-3 points in either direction (about 0.93 with compound symmetry,
+# with or without condition; about 0.96 with AR(1)), while the analytic limits
+# were 0.95-0.965, which is why "boot_cal" is marked experimental. A possible
 # improvement is to draw the variance parameters for each replicate from their
 # approximate sampling distribution (model$apVar, on the unconstrained scale)
 # before simulating, and to judge each replicate against the parameters it was
@@ -671,7 +707,7 @@ tol_boot = function(emm_df,
     info_j = sd_info_row(sd_info, j)
 
     info_star = if(sd_info$type == "cs"){
-      utils::modifyList(sd_info, list(rho = boot_df$rho))
+      utils::modifyList(info_j, list(rho = boot_df$rho))
     } else {
       list(type = "df", nu = boot_df$nu[, j])
     }

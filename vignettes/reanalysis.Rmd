@@ -180,8 +180,6 @@ The `tolerance_limit` function can be used to calculate the "tolerance limits". 
 So we will calculate the tolerance using the `loa_lme` function. We will need to identify the columns with the right information using the `diff`, `avg`, `condition`, and `id` arguments. We then select the right data set using the `data` argument. Lastly, we specify the specifics of the conditions for how the limits are calculated. For this specific analysis I decided to calculate 95% prediction intervals with 95% tolerance limits, using the default analytic tolerance limits.
 
 ```{r recpost}
-# note: with a condition (and therefore a variance function), the analytic limits
-# are approximate; tol_method = "boot_cal" calibrates them by parametric bootstrap
 rec.post_tol = tolerance_limit(
   data = df_rec.post,
   x = "PM",

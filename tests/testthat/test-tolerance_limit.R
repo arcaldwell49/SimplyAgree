@@ -551,6 +551,29 @@ test_that("compound symmetry uses the MOVER bound for the SD", {
                tolerance = 1e-8)
 })
 
+test_that("compound symmetry with condition uses per-condition cluster sizes", {
+  set.seed(4)
+  ng = 12; k = 4
+  d = data.frame(id = rep(1:ng, each = 2 * k),
+                 condition = rep(rep(c("A", "B"), each = k), ng))
+  d$y = 0
+  d$x = rnorm(ng, 0, 1)[d$id] +
+    rnorm(nrow(d), ifelse(d$condition == "A", 0.5, -0.5),
+          ifelse(d$condition == "A", 1, 2))
+  t1 = tolerance_limit(d, x = "x", y = "y", id = "id", condition = "condition")
+  lim = t1$limits
+
+  rho = unname(coef(t1$model$modelStruct$corStruct, unconstrained = FALSE))
+  # each subject has k measurements per condition
+  mh = k; df_b = ng - 1; df_w = ng * k - ng
+  s2 = lim$SD^2
+  msw = (1 - rho) * s2
+  msb = msw + mh * rho * s2
+  u_s2 = s2 + sqrt((1/mh * (msb * df_b / qchisq(0.05, df_b) - msb))^2 +
+                   ((1 - 1/mh) * (msw * df_w / qchisq(0.05, df_w) - msw))^2)
+  expect_equal(lim$SD.upper, sqrt(u_s2), tolerance = 1e-8)
+})
+
 test_that("effective df is used for other correlation structures", {
   data(temps)
   temps2 = temps
