@@ -17,7 +17,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,6 +72,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 <span>  <span class="va">data</span>,</span>
 <span>  data_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"simple"</span>, <span class="st">"nest"</span>, <span class="st">"reps"</span><span class="op">)</span>,</span>
 <span>  loa_calc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mover"</span>, <span class="st">"blandaltman"</span><span class="op">)</span>,</span>
+<span>  bound_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"iu"</span>, <span class="st">"joint"</span><span class="op">)</span>,</span>
 <span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -110,6 +111,10 @@ Please note that the package developer recommends reporting/using tolerance limi
 <dd><p>The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).</p></dd>
 
 
+<dt id="arg-bound-type">bound_type<a class="anchor" aria-label="anchor" href="#arg-bound-type"></a></dt>
+<dd><p>Which claim the confidence bounds of the limits of agreement (<code>lower_loa_ci</code>/<code>upper_loa_ci</code>) support. "iu" (default) gives a one-sided 1 - <code>alpha</code> bound on each limit (the outer ends of 1 - 2 * <code>alpha</code> two-sided intervals). These give an intersection-union test, at level <code>alpha</code>, of whether both limits of agreement lie within a maximal allowable difference, but are not a joint 1 - <code>alpha</code> interval for the limits. "joint" gives a one-sided 1 - <code>alpha</code>/2 bound on each limit (the outer ends of 1 - <code>alpha</code> two-sided intervals, the Bland-Altman convention), with at least 1 - <code>alpha</code> joint confidence for both limits. See details.</p></dd>
+
+
 <dt id="arg-agree-level">agree.level<a class="anchor" aria-label="anchor" href="#arg-agree-level"></a></dt>
 <dd><p>the agreement level required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95.</p></dd>
 
@@ -119,7 +124,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 
 
 <dt id="arg-prop-bias">prop_bias<a class="anchor" aria-label="anchor" href="#arg-prop-bias"></a></dt>
-<dd><p>Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations.</p></dd>
+<dd><p>Logical indicator (TRUE/FALSE) of whether proportional bias should be considered for the limits of agreement calculations. Note that a non-zero slope of the differences on the average can appear without any true proportional bias whenever the two methods have unequal measurement error variances, because cov(difference, average) = (var(x) - var(y)) / 2 (Bland &amp; Altman, 1999); errors-in-variables methods such as <code><a href="dem_reg.html">dem_reg()</a></code> or <code><a href="pb_reg.html">pb_reg()</a></code> are better suited to assessing proportional bias.</p></dd>
 
 
 <dt id="arg-log-tf">log_tf<a class="anchor" aria-label="anchor" href="#arg-log-tf"></a></dt>
@@ -148,6 +153,10 @@ Please note that the package developer recommends reporting/using tolerance limi
     <p>The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland &amp; Atlman (1986 &amp; 1999).
 The <code>loa_calc</code> allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (<code>loa_calc = "blandaltman"</code>),
 or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (<code>loa_calc = "mover"</code>).</p>
+<p>The confidence bounds on the limits of agreement answer one of two questions, set by <code>bound_type</code>:</p><ul><li><p>"iu" (default): "Can I conclude agreement within plus or minus delta?" If <code>lower_loa_ci</code> &gt; -delta and <code>upper_loa_ci</code> &lt; delta, reject at level <code>alpha</code> that either limit of agreement lies outside plus or minus delta. <code>conf.level</code> (1 - <code>alpha</code>) applies to each side separately; both bounds hold together only about 1 - 2 * <code>alpha</code> of the time.</p></li>
+<li><p>"joint": "Where are the limits of agreement?" With at least 1 - <code>alpha</code> confidence, both limits of agreement lie within . Used as a test against plus or minus delta, the error rate is at most <code>alpha</code>/2 (conservative).</p></li>
+</ul><p>Because a one-sided bound on the (1 - <code>agree.level</code>)/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as <code>tolerance_limit(bound_type = "iu")</code>.
+The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is always a two-sided 1 - <code>alpha</code> interval.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -173,6 +182,8 @@ or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.4383 [-0.1669, 1.0436]    -1.947     2.824 [-3.0117, 3.8884]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   not a joint 95% interval for the LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SD of Differences = 1.217</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Replicates</span></span></span>
@@ -184,6 +195,8 @@ or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.7152 [-1.5287, 2.9591]    -2.232     3.662 [-7.5482, 8.9786]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   not a joint 95% interval for the LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SD of Differences = 1.5036</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Nested</span></span></span>
@@ -195,6 +208,8 @@ or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5572, 2.9664]    -2.153     3.562 [-7.4979, 8.9071]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   not a joint 95% interval for the LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SD of Differences = 1.4581</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -208,7 +223,7 @@ or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

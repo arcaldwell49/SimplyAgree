@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,16 +116,15 @@ provide an answer to different, albeit related, question.</p>
 estimate the absolute <em>agreement</em> between the AM and PM sessions
 within each condition. This is rather complicated because we have
 multiple measurement within each participant. However, with the tools
-included in <code>SimplyAgree</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt; &lt;span class="citation"&gt;Josep Lluis Carrasco and
-Martinez (2020)&lt;/span&gt; is another package to check out&lt;/p&gt;'><sup>1</sup></a> I believe we can get closer to the right
+included in <code>SimplyAgree</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt; &lt;span class="citation"&gt;Carrasco and Martinez
+(2020)&lt;/span&gt; is another package to check out&lt;/p&gt;'><sup>1</sup></a> I believe we can get closer to the right
 answer.</p>
 <p>In order to understand the underlying processes of these functions
 and procedures I highly recommend reading the statistical literature
 that documents methods within these functions. For the
-<code>cccrm</code> package please see the work by <span class="citation">Josep L. Carrasco and Jover (2003)</span>, <span class="citation">Josep L. Carrasco, King, and Chinchilli (2009)</span>,
-and <span class="citation">Josep L. Carrasco et al. (2013)</span>. The
-<code>tolerance_limit</code> function was inspired by the work of <span class="citation">Francq, Berger, and Boachie (2020)</span> which
-documented how to implement tolerance limits to measure agreement.</p>
+<code>cccrm</code> package please see the work by <span class="citation">Carrasco and Jover (2003)</span>, <span class="citation">Carrasco et al. (2009)</span>, and <span class="citation">Carrasco et al. (2013)</span>. The
+<code>tolerance_limit</code> function was inspired by the work of <span class="citation">Francq et al. (2020)</span> which documented how to
+implement tolerance limits to measure agreement.</p>
 </div>
 <div class="section level2">
 <h2 id="concordance">Concordance<a class="anchor" aria-label="anchor" href="#concordance"></a>
@@ -143,11 +142,11 @@ identity the higher the CCC (and vice versa). Please see the
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/qplot.html" class="external-link">qplot</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, slope <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: `qplot()` was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" alt="Example of the Line of Identity" width="700"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="Example of the Line of Identity" width="700"><p class="caption">
 Example of the Line of Identity
 </p>
 </div>
@@ -165,16 +164,16 @@ by calculating the differences scores we can see a higher degree of
 disagreement between the two conditions.</p>
 <pre><code><span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre>
 <div class="figure">
-<img src="reanalysis_files/figure-html/pltsrec-1.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
+<img src="reanalysis_files/figure-html/pltsrec-1.png" class="r-plt" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
 </p>
 </div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/pltsrec-2.png" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
+<img src="reanalysis_files/figure-html/pltsrec-2.png" class="r-plt" alt="Concordance Plots of Rectal Temperature" width="816"><p class="caption">
 Concordance Plots of Rectal Temperature
 </p>
 </div>
@@ -186,12 +185,12 @@ Concordance Plots of Rectal Temperature
 <pre><code><span><span class="co">#&gt; Warning: Removed 3 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre>
 <div class="figure">
-<img src="reanalysis_files/figure-html/pltseso-1.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
+<img src="reanalysis_files/figure-html/pltseso-1.png" class="r-plt" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
 </p>
 </div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/pltseso-2.png" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
+<img src="reanalysis_files/figure-html/pltseso-2.png" class="r-plt" alt="Concordance Plots of Esophageal Temperature" width="816"><p class="caption">
 Concordance Plots of Esophageal Temperature
 </p>
 </div>
@@ -205,10 +204,10 @@ calculated which provides the predicted difference between two measuring
 systems for 95% of future measurements pairs. However, we have to
 account for sampling error so we also need to estimate the confidence in
 the prediction intervals, and therefore we calculate the tolerance
-limits. So, when we have 95% tolerance limits for a 95% prediction
-interval, we can conclude that there is only a 5% probability
-(1-tolerance) that our tolerance limits do not contain the <em>true</em>
-prediction interval/limit.</p>
+limits. So, with 95% tolerance limits for a 95% prediction interval (the
+default, <code>bound_type = "joint"</code>), we can be 95% confident
+that at least 95% of all differences between the two measuring systems
+lie within the tolerance limits.</p>
 <div class="section level3">
 <h3 id="rectal-temperature-1">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature-1"></a>
 </h3>
@@ -219,11 +218,10 @@ information using the <code>diff</code>, <code>avg</code>,
 the right data set using the <code>data</code> argument. Lastly, we
 specify the specifics of the conditions for how the limits are
 calculated. For this specific analysis I decided to calculate 95%
-prediction intervals with 95% tolerance limits, and I will use
-percentile bootstrap confidence intervals.</p>
+prediction intervals with 95% tolerance limits, using the default
+analytic tolerance limits.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># note: more accurate tolerance limits are given by tol_method = "perc"</span></span>
-<span><span class="va">rec.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">rec.post_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">df_rec.post</span>,</span>
 <span>  x <span class="op">=</span> <span class="st">"PM"</span>,</span>
 <span>  y <span class="op">=</span> <span class="st">"AM"</span>,</span>
@@ -235,12 +233,14 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]     [-0.324, 0.834] [-0.5232, 1.0332]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3141, 0.8221] [-0.4971, 1.0051]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.7103, 1.0723] [-1.4736, 1.8356]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]     [-0.324, 0.834] [-0.6109, 1.1209]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.2687, 0.7767] [-0.5366, 1.0446]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.3497, 0.7117] [-0.3188, 0.6808]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -250,7 +250,7 @@ for this condition are horribly low.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-4-1.png" alt="Tolerance Limits for Trec Post Exercise" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="Tolerance Limits for Trec Post Exercise" width="672"><p class="caption">
 Tolerance Limits for Trec Post Exercise
 </p>
 </div>
@@ -271,19 +271,21 @@ researchers.</p>
 <span>  </span>
 <span><span class="va">rec.delta_tol</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3464, 0.3084]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2645, 0.2945]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3516, 0.2336]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3062, 0.2682]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]     [-0.242, 0.272] [-0.3615, 0.3915]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.4055, 0.2875] [-0.5692, 0.4512]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rec.delta_tol</span>,</span>
 <span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" alt="Tolerance Limits for Delta Trec" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="Tolerance Limits for Delta Trec" width="672"><p class="caption">
 Tolerance Limits for Delta Trec
 </p>
 </div>
@@ -315,33 +317,37 @@ there is “good” agreement between the AM and PM measurements.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eso.post_tol</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104]     [-0.432, 0.072] [-0.5526, 0.1926]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.4599, 0.0359] [-0.5402, 0.1162]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622]     [-0.415, 0.123] [-0.5651, 0.2731]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104]     [-0.432, 0.072] [-0.5265, 0.1665]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.5996, 0.1756] [-0.7976, 0.3736]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622]   [-0.4238, 0.1318]   [-0.505, 0.213]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-9-1.png" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="Limits of Agreement for Teso Post Exercise" width="672"><p class="caption">
 Limits of Agreement for Teso Post Exercise
 </p>
 </div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eso.delta_tol</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347]   [-0.2013, 0.1613]   [-0.271, 0.231]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.1858, 0.1758] [-0.2459, 0.2359]</span></span>
-<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1827, 0.2167] [-0.2573, 0.2913]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347]   [-0.2013, 0.1613]   [-0.285, 0.245]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.2277, 0.2177] [-0.3402, 0.3302]</span></span>
+<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]     [-0.321, 0.355] [-0.4803, 0.5143]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,</span>
 <span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
+<img src="reanalysis_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Limits of Agreement for Delta Teso" width="672"><p class="caption">
 Limits of Agreement for Delta Teso
 </p>
 </div>
@@ -350,7 +356,7 @@ Limits of Agreement for Delta Teso
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-carrasco2003" class="csl-entry">
 Carrasco, Josep L., and Lluı́s Jover. 2003. <span>“Estimating the
 Generalized Concordance Correlation Coefficient Through Variance
@@ -388,7 +394,7 @@ to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href=
 Ravanelli, Nicholas, and Ollie Jay. 2020. <span>“The Change in Core
 Temperature and Sweating Response During Exercise Are Unaffected by Time
 of Day Within the Wake Period.”</span> <em>Medicine and Science in
-Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575" class="external-link">https://doi.org/10.1249/mss.0000000000002575</a>.
+Sports and Exercise</em>, ahead of print. <a href="https://doi.org/10.1249/mss.0000000000002575" class="external-link">https://doi.org/10.1249/mss.0000000000002575</a>.
 </div>
 </div>
 </div>
@@ -404,7 +410,7 @@ Sports and Exercise</em>. <a href="https://doi.org/10.1249/mss.0000000000002575"
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

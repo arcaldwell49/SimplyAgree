@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-01-22</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-09-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -104,7 +104,7 @@ concepts.</p>
 <div class="section level2">
 <h2 id="agree-or-tolerate">Agree or Tolerate?<a class="anchor" aria-label="anchor" href="#agree-or-tolerate"></a>
 </h2>
-<p><span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> pose this question in a
+<p><span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span> pose this question in a
 paper published in <em>Statistics in Medicine</em>. Traditionally, those
 working in medicine or physiology have defaulted to calculating some
 form of “limits of agreement” that <span class="citation">Bland and
@@ -123,7 +123,7 @@ to other distributions (please see the tolerance package by <span class="citatio
 However, in the agreement studies typically seen in medicine, tolerance
 limits may be a more accurate way of determining whether two
 measurements are adequately close to one another.</p>
-<p>To quote <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
+<p>To quote <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
 <blockquote>
 <p>In terms of terminology, tolerance means, in this context, that some
 difference between the methods is tolerated (the measurements are still
@@ -138,18 +138,206 @@ methods (i.e., an estimate of an interval in which a future observation
 will fall, with a certain probability, given what has already been
 observed) and then calculating the confidence in the interval (i.e.,
 tolerance). Therefore, if we want a 95% prediction interval with 95%
-tolerance limits, we are calculating the interval in which 95% of future
-observations (prediction) with only a 5% probability (1-tolerance) the
-“true” prediction interval limits are greater/less than the upper/lower
-tolerance limits.</p>
+tolerance limits, the prediction interval is expected to contain 95% of
+future observations, and the tolerance limits are an interval that, with
+95% confidence, contains at least 95% of all differences (the default,
+<code>bound_type = "joint"</code>; see <a href="#joint-versus-intersection-union-iu-bounds">Joint versus
+Intersection-Union (IU) Bounds</a> for the alternative and when to use
+which).</p>
 <p>Personally, I find the use of prediction intervals and tolerance
 limits more attractive for 2 reasons: 1) the coverage of the prediction
 intervals and their tolerance limits is often better than confidence
 intervals for agreement limits, and 2) the interpretation of the
 tolerance limits is much clearer. For a greater discussion of this
-topic, please see the manuscript by <span class="citation">Francq,
-Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span>
-and check out their R package <code>BivRegBLS</code>.</p>
+topic, please see the manuscript by <span class="citation">Francq et al.
+(<a href="#ref-francq2020tolerate">2020</a>)</span> and check out their
+R package <code>BivRegBLS</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="joint-versus-intersection-union-iu-bounds">Joint versus Intersection-Union (IU) Bounds<a class="anchor" aria-label="anchor" href="#joint-versus-intersection-union-iu-bounds"></a>
+</h2>
+<p>Both <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> and
+<code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> report confidence bounds around the
+limits, and both have a <code>bound_type</code> argument with the
+options <code>"joint"</code> and <code>"iu"</code>. The two options
+answer different questions, so it is worth being clear about which one a
+reported interval supports.</p>
+<div class="section level3">
+<h3 id="two-questions">Two questions<a class="anchor" aria-label="anchor" href="#two-questions"></a>
+</h3>
+<p>Suppose the two methods would be considered interchangeable if the
+differences stay within a maximal allowable difference, <span class="math inline">\(\pm\Delta\)</span>, that was set in advance on
+clinical or practical grounds. Two different questions can then be asked
+of the data:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>“Where are the limits?”</strong> We want an interval that we
+can report as a statement about the limits (or about the bulk of the
+differences), with a stated confidence.</li>
+<li>
+<strong>“Can we conclude agreement within <span class="math inline">\(\pm\Delta\)</span>?”</strong> We want a hypothesis
+test, with a controlled error rate, of whether the differences stay
+within <span class="math inline">\(\pm\Delta\)</span>.</li>
+</ol>
+<p>A <strong>joint</strong> bound answers the first question: it is an
+interval, and the confidence applies to the whole interval. An
+<strong>intersection-union (IU)</strong> bound answers the second
+question: it gives the correctly sized test, but the pair of bounds is
+not an interval with the stated confidence.</p>
+</div>
+<div class="section level3">
+<h3 id="limits-of-agreement-agreement_limit">Limits of agreement (<code>agreement_limit()</code>)<a class="anchor" aria-label="anchor" href="#limits-of-agreement-agreement_limit"></a>
+</h3>
+<p>The limits of agreement estimate two parameters, the lower and upper
+percentiles of the differences, <span class="math inline">\(\theta_L =
+\mu - z\sigma\)</span> and <span class="math inline">\(\theta_U = \mu +
+z\sigma\)</span> (the 2.5th and 97.5th percentiles for 95% limits of
+agreement). Each limit has its own sampling uncertainty, and the “LoA
+CI” reports the outer confidence bound of each one: a lower bound for
+<span class="math inline">\(\theta_L\)</span> and an upper bound for
+<span class="math inline">\(\theta_U\)</span>.</p>
+<ul>
+<li>
+<strong><code>"joint"</code></strong>: each bound is the outer end
+of a two-sided <span class="math inline">\(1 - \alpha\)</span>
+confidence interval, so each side is a one-sided <span class="math inline">\(1 - \alpha/2\)</span> bound. By the Bonferroni
+inequality, both limits of agreement lie within the reported interval
+with at least <span class="math inline">\(1 - \alpha\)</span>
+confidence. This is the Bland-Altman convention, and the interval can be
+reported as “with 95% confidence, both limits of agreement lie within
+[L, U]”. Used as a test against <span class="math inline">\(\pm\Delta\)</span>, the error rate is at most
+<span class="math inline">\(\alpha/2\)</span> (conservative).</li>
+<li>
+<strong><code>"iu"</code></strong>: each bound is a one-sided <span class="math inline">\(1 - \alpha\)</span> bound (the outer end of a
+two-sided <span class="math inline">\(1 - 2\alpha\)</span> interval,
+e.g., a 90% interval for <span class="math inline">\(\alpha =
+0.05\)</span>). Agreement within <span class="math inline">\(\pm\Delta\)</span> means that <em>both</em> <span class="math inline">\(\theta_L &gt; -\Delta\)</span> <em>and</em> <span class="math inline">\(\theta_U &lt; \Delta\)</span>, so the null
+hypothesis of no agreement is the <em>union</em> <span class="math inline">\(H_0: \theta_L \le -\Delta\)</span> or <span class="math inline">\(\theta_U \ge \Delta\)</span>. By the
+intersection-union principle <span class="citation">(<a href="#ref-berger1996">Berger and Hsu 1996</a>)</span>, rejecting only
+when each of the two one-sided tests rejects at level <span class="math inline">\(\alpha\)</span> gives an overall test with error
+rate at most <span class="math inline">\(\alpha\)</span>, with no
+multiplicity adjustment. This is the same logic as the two one-sided
+tests (TOST) procedure for equivalence. The price is that the two bounds
+hold together only about <span class="math inline">\(1 -
+2\alpha\)</span> of the time (about 90% for <span class="math inline">\(\alpha = 0.05\)</span>), so they should not be
+reported as a 95% interval for the limits of agreement.</li>
+</ul>
+<p>Because the IU bounds use a less extreme quantile on each side, the
+IU bounds always lie inside the joint bounds for the limits of
+agreement. A result near <span class="math inline">\(\pm\Delta\)</span>
+can therefore pass the IU test but not the joint criterion.</p>
+</div>
+<div class="section level3">
+<h3 id="tolerance-limits-tolerance_limit">Tolerance limits (<code>tolerance_limit()</code>)<a class="anchor" aria-label="anchor" href="#tolerance-limits-tolerance_limit"></a>
+</h3>
+<p>For tolerance limits, the two options target different
+quantities:</p>
+<ul>
+<li>
+<strong><code>"joint"</code></strong>: a “beta-content”,
+“gamma-confidence” tolerance interval: with confidence <span class="math inline">\(\gamma\)</span> (<code>tol_level</code>), at least
+a proportion <span class="math inline">\(\beta\)</span>
+(<code>pred_level</code>) of all differences lie within <span class="math inline">\([L, U]\)</span>. This is a single statement about
+the <em>coverage</em> of the interval, and it is how tolerance intervals
+are usually defined <span class="citation">(<a href="#ref-howe1969">Howe
+1969</a>; <a href="#ref-francq2020tolerate">Francq et al.
+2020</a>)</span>. If <span class="math inline">\([L, U]\)</span> lies
+within <span class="math inline">\(\pm\Delta\)</span>, one can conclude
+at level <span class="math inline">\(1 - \gamma\)</span> that at least a
+proportion <span class="math inline">\(\beta\)</span> of the differences
+lie within <span class="math inline">\(\pm\Delta\)</span>. The two tails
+do not need to be split equally: an interval with 1% of the differences
+below it and 4% above it still has 95% content.</li>
+<li>
+<strong><code>"iu"</code></strong>: a one-sided <span class="math inline">\(\gamma\)</span> confidence bound on each of the
+<span class="math inline">\((1 \mp \beta)/2\)</span> percentiles of the
+differences, i.e., on the limits of agreement. These target the same
+quantities as the <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> bounds, and the test
+against <span class="math inline">\(\pm\Delta\)</span> has the same
+intersection-union interpretation.</li>
+</ul>
+<p>Unlike the limits of agreement, the two kinds of tolerance limits
+<strong>do not nest</strong>, because they test different hypotheses:
+the joint limits bound the total proportion of differences outside <span class="math inline">\([L, U]\)</span>, while the IU bounds control each
+tail separately. For example, with 30 independent differences and <span class="math inline">\(\beta = \gamma = 0.95\)</span>, the multipliers of
+the standard deviation are:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Interval</th>
+<th>Multiplier</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Plug-in limits of agreement (no uncertainty), <span class="math inline">\(z_{0.975}\)</span>
+</td>
+<td>1.960</td>
+</tr>
+<tr class="even">
+<td>Joint (<span class="math inline">\(\beta\)</span>-content,
+Howe)</td>
+<td>2.550</td>
+</tr>
+<tr class="odd">
+<td>IU (one-sided 95% bound on each percentile)</td>
+<td>2.608</td>
+</tr>
+<tr class="even">
+<td>Equal-tailed joint (Bonferroni, 97.5% per side)</td>
+<td>2.757</td>
+</tr>
+</tbody>
+</table>
+<p>so the IU tolerance bounds are slightly <em>wider</em> than the joint
+tolerance limits here. A skewed distribution of differences can also
+pass one criterion and fail the other. The choice between them is
+therefore about the hypothesis of interest (coverage, or each tail), not
+only about how conservative the result is.</p>
+</div>
+<div class="section level3">
+<h3 id="why-the-defaults-differ">Why the defaults differ<a class="anchor" aria-label="anchor" href="#why-the-defaults-differ"></a>
+</h3>
+<p>The defaults follow what each function is for:</p>
+<ul>
+<li>
+<strong><code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> defaults to
+<code>"iu"</code>.</strong> The confidence bounds on the limits of
+agreement are used to decide whether the limits fall within <span class="math inline">\(\pm\Delta\)</span>. That is an intersection-union
+question, and the IU bounds give a test with the stated error rate <span class="math inline">\(\alpha\)</span>; the joint bounds would be
+conservative (error rate <span class="math inline">\(\alpha/2\)</span>).
+This is also what <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> has always computed, so
+the default does not change earlier results. Use
+<code>bound_type = "joint"</code> when the interval itself is to be
+reported.</li>
+<li>
+<strong><code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> defaults to
+<code>"joint"</code>.</strong> A tolerance interval is itself a
+reportable statement (“with 95% confidence, at least 95% of the
+differences lie within [L, U]”), and the <span class="math inline">\(\beta\)</span>-content interval is what the
+tolerance interval literature, and the approximation of <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span>, refer to. The IU
+version duplicates the confidence bounds of
+<code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, so it is offered as an option rather
+than the default.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="what-to-report">What to report<a class="anchor" aria-label="anchor" href="#what-to-report"></a>
+</h3>
+<ul>
+<li>State which kind of bound is reported, and at what level. The
+printed output of both functions does this.</li>
+<li>To <em>report</em> an interval: use the joint bounds
+(<code>agreement_limit(bound_type = "joint")</code> or the default
+tolerance limits).</li>
+<li>To <em>test</em> agreement within <span class="math inline">\(\pm\Delta\)</span>: compare either the IU bounds
+of the limits of agreement (the default of
+<code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>) or the joint tolerance limits against
+<span class="math inline">\(\pm\Delta\)</span>, depending on whether the
+hypothesis concerns each tail or the overall proportion of differences,
+and state which was used.</li>
+<li>Remember, IU bounds limits of agreement are one-tailed confidence
+intervals.</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="tolerance">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance"></a>
@@ -176,90 +364,642 @@ correlation.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478]   [-0.2919, 0.5993] [-0.4982, 0.8055]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3162, 0.7722] [-0.6982, 1.1542]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478]   [-0.2919, 0.5993] [-0.3674, 0.6748]</span></span>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]     [-0.216, 0.672] [-0.1938, 0.6498]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
-<p>Overall, the model is fit using the <code>gls</code> function, and,
-for those interested, I would suggest reading book by Pinheiro and Bates
-which details the function<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects
-Models in S and S-PLUS”, Springer, pp. 100, 461.&lt;/p&gt;"><sup>1</sup></a>. This function is different than the
-linear, or linear mixed, models that are utilized in calculating limits
-of agreement because it accommodates correlated errors and/or unequal
+<p>This section describes how <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> computes
+each interval. The model is fit with the <code>nlme</code> package
+(Pinheiro &amp; Bates)<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects
+Models in S and S-PLUS”, Springer, pp. 100, 461.&lt;/p&gt;"><sup>1</sup></a>, which, unlike the models used for the
+limits of agreement below, accommodates correlated errors and unequal
 variances.</p>
+<div class="section level4">
+<h4 id="notation">Notation<a class="anchor" aria-label="anchor" href="#notation"></a>
+</h4>
+<ul>
+<li>
+<span class="math inline">\(d\)</span> is the difference between the
+two measurements (<code>x - y</code>), and <span class="math inline">\(b\)</span> is its estimated mean (the bias, the
+estimated marginal mean from <code>emmeans</code>) for a given row of
+the output (a condition and/or a value of the average when
+<code>prop_bias = TRUE</code>).</li>
+<li>
+<span class="math inline">\(\beta\)</span> = <code>pred_level</code>
+is the content, the proportion of differences the limits should cover,
+and <span class="math inline">\(\alpha_1 = 1 - \beta\)</span>.</li>
+<li>
+<span class="math inline">\(\gamma\)</span> = <code>tol_level</code>
+is the confidence of the tolerance limits, and <span class="math inline">\(\alpha_2 = 1 - \gamma\)</span>.</li>
+<li>
+<span class="math inline">\(z = z_{1 - \alpha_1/2}\)</span>, the
+standard normal quantile (1.96 for <span class="math inline">\(\beta =
+0.95\)</span>).</li>
+<li>
+<span class="math inline">\(\chi^2_{p, \nu}\)</span> is the <span class="math inline">\(p\)</span> quantile of a chi-square distribution
+with <span class="math inline">\(\nu\)</span> degrees of freedom, and
+<span class="math inline">\(t_{p, \nu}\)</span> the <span class="math inline">\(p\)</span> quantile of a <span class="math inline">\(t\)</span> distribution.</li>
+<li>With repeated measures, every interval refers to <strong>a single
+new difference from a new subject</strong>: its variance includes the
+between-subject and within-subject variance.</li>
+</ul>
+</div>
 <div class="section level4">
 <h4 id="arguments-influencing-the-model">Arguments Influencing the Model<a class="anchor" aria-label="anchor" href="#arguments-influencing-the-model"></a>
 </h4>
-<p>There are a number of options with the arguments provided in the
-<code>tolerance_limit</code> function. The only required arguments are
-<code>x</code>, <code>y</code>, and <code>data</code> which dictate the
-data frame, and the columns that contain the 2 measurements. The
-<code>id</code> argument, when specified, identifies the column that
-contains the subject identifier or some time of nesting within which the
-data should be correlated to some degree. The <code>time</code>,
-argument is utilized when the data come from a repeated measures or time
-series data, and indicates the order of the data points. The
-<code>condition</code> argument identifies some factor within a data
-frame that may effect the mean difference (and variance) of the
-differences between the 2 measurements. The <code>cor_type</code>
-argument can also be utilized to specific 1 of 3 possible correlation
-structure types. Lastly, savvy users can specify a particular variance
-or correlation structure using the <code>weights</code> and
-<code>correlation</code> arguments which directly alter the model being
-fit using <code>gls</code>.</p>
+<p>The only required arguments are <code>x</code>, <code>y</code>, and
+<code>data</code>, which give the data frame and the columns that
+contain the two measurements.</p>
+<ul>
+<li>
+<code>id</code> identifies the subjects (or other clusters) within
+which differences are correlated. With <code>model = "lme"</code>, it
+can name two nested levels, outer level first (e.g.,
+<code>id = c("golfer", "club")</code>).</li>
+<li>
+<code>time</code> gives the order of the measurements within a
+subject, for the autoregressive correlation structures.</li>
+<li>
+<code>condition</code> identifies a factor that may change the mean
+and the variance of the differences; it adds a separate mean and a
+separate residual variance for each condition.</li>
+<li>
+<code>prop_bias = TRUE</code> adds the average of the two
+measurements as a covariate, and the limits are reported at its minimum,
+median, and maximum.</li>
+<li>
+<code>model</code> and <code>cor_type</code> set the model for the
+correlation between differences from the same subject (below).</li>
+<li>
+<code>weights</code> and <code>correlation</code> let you specify an
+<code>nlme</code> variance function or correlation structure
+directly.</li>
+</ul>
 </div>
 <div class="section level4">
-<h4 id="prediction">Prediction<a class="anchor" aria-label="anchor" href="#prediction"></a>
+<h4 id="the-model">The model<a class="anchor" aria-label="anchor" href="#the-model"></a>
 </h4>
-<p>After the model is fit, the estimated marginal means (EMM), and their
-associated standard errors (SEM), are calculated based on the
-<code>gls</code> fit model using <code>emmeans</code>. The standard
-error of prediction (SEP) for each EMM is then calculated using the SEM
-and residual standard error from the model (formula below).</p>
+<p>With <code>model = "gls"</code> (default), the differences follow a
+marginal generalized least squares model (<code><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">nlme::gls()</a></code>):</p>
 <p><span class="math display">\[
-SEP = \sqrt{SEM^2 + S^2_{residual} }
+d_{ij} = \mathbf{x}_{ij}^\top \boldsymbol{\beta} + e_{ij}, \qquad
+\text{Var}(e_{ij}) = \sigma^2 g_{ij}^2, \qquad
+\text{Cor}(e_{ij}, e_{ij'}) = R_{i, jj'}
 \]</span></p>
-<p>After the SEP is calculated, the prediction interval can be
-calculated with following:</p>
+<p>where <span class="math inline">\(g_{ij}\)</span> is the variance
+function (1 without one) and <span class="math inline">\(R_i\)</span> is
+the correlation matrix for subject <span class="math inline">\(i\)</span>: compound symmetry
+(<code>cor_type = "sym"</code>, a common correlation <span class="math inline">\(\rho\)</span>), AR(1) or continuous AR(1)
+(<code>"ar1"</code>, <code>"car1"</code>), or none. The variance of a
+single difference for a given row of the output is <span class="math inline">\(S^2 = \hat\sigma^2 g^2\)</span>.</p>
+<p>With <code>model = "lme"</code>, the differences follow a linear
+mixed model (<code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme()</a></code>) with a random intercept for each
+subject and, optionally, for each setting (inner level) within
+subject:</p>
 <p><span class="math display">\[
-PI = EMM \pm t_{1-\alpha/2, df} \cdot SEP
+d_{ijk} = \mathbf{x}_{ijk}^\top \boldsymbol{\beta} + u_i + v_{ij} +
+e_{ijk}, \qquad
+u_i \sim N(0, \sigma_1^2), \quad v_{ij} \sim N(0, \sigma_2^2), \quad
+\text{Var}(e_{ijk}) = \sigma^2 g_{ijk}^2
 \]</span></p>
-<p><strong>NOTE</strong>: the degrees of freedom (df) are calculated
-using an approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946">1946</a>)</span> (see <span class="citation">Kuznetsova, Brockhoff, and Christensen (<a href="#ref-lmertest">2017</a>)</span> for an explanation of this
-implementation in R).</p>
+<p>where <span class="math inline">\(v_{ij}\)</span> is present only
+with two <code>id</code> columns, the variance function applies to the
+residuals only, and <code>cor_type = "ar1"</code> or <code>"car1"</code>
+adds serial correlation of the residuals within the innermost level. The
+variance of a single difference for a given row is</p>
+<p><span class="math display">\[
+S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2 .
+\]</span></p>
+<p>The output reports the components as <code>SD.between</code> (<span class="math inline">\(\hat\sigma_1\)</span>), <code>SD.nested</code>
+(<span class="math inline">\(\hat\sigma_2\)</span>), and
+<code>SD.within</code> (<span class="math inline">\(\hat\sigma
+g\)</span>). For <code>gls</code> with compound symmetry,
+<code>SD.between</code> <span class="math inline">\(= \sqrt{\hat\rho}\,
+S\)</span> and <code>SD.within</code> <span class="math inline">\(=
+\sqrt{1 - \hat\rho}\, S\)</span>.</p>
 </div>
 <div class="section level4">
-<h4 id="tolerance-1">Tolerance<a class="anchor" aria-label="anchor" href="#tolerance-1"></a>
+<h4 id="the-bias-and-its-standard-error">The bias and its standard error<a class="anchor" aria-label="anchor" href="#the-bias-and-its-standard-error"></a>
 </h4>
-<p>The type of tolerance limit calculation can be set using the
-<code>tol_method</code> argument with options including “approx” and
-“perc”. Tolerance limits are calculated either through the “Beta
-expectation” approximation (<code>tol_method = "approx"</code>) detailed
-by <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> or through a parametric
-bootstrap method (<code>tol_method = "perc"</code>). The bootstrap
-methods re-samples from the model and, after a certain number of
-replicates (default is 1999), calculates the bounds the prediction
-interval based on the quantiles of the replicates for the lower and
-upper limit. This is preferred for its accuracy and power, but is
-<em>extremely</em> slow which may involve computations lasting greater
-than 2 minutes for even small data sets. The approximation is the
-default only because it is substantially quicker. Users should be aware
-that the bootstrap method will likely be more accurate and provide
-smaller (i.e., more forgiving) tolerance limits.</p>
-<p>The approximate tolerance limits based on the work of <span class="citation">Francq, Berger, and Boachie (<a href="#ref-francq2020tolerate">2020</a>)</span> are calculated as the
-following:</p>
+<p>The bias <span class="math inline">\(b\)</span> for each row and its
+standard error (SEM) are the estimated marginal mean and its standard
+error from <code>emmeans</code>. The confidence interval for the bias is
+<span class="math inline">\(b \pm t_{1 - (1 - c)/2,\, df_b} \cdot
+SEM\)</span>, where <span class="math inline">\(c\)</span> is
+<code>conf_level</code>. The degrees of freedom <span class="math inline">\(df_b\)</span> are:</p>
+<ul>
+<li>
+<code>model = "gls"</code>: the approximation of <span class="citation">Satterthwaite (<a href="#ref-satterthwaite1946">1946</a>)</span> (see <span class="citation">Kuznetsova et al. (<a href="#ref-lmertest">2017</a>)</span> for its implementation in R).</li>
+<li>
+<code>model = "lme"</code>: the “containment” degrees of freedom,
+which are the number of subjects minus 1 for the models fit here. The
+Satterthwaite approximation for <code>lme</code> models in
+<code>emmeans</code> can fail (for a model with only an intercept) or
+not terminate (with a variance function), so it is not used.</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="prediction-interval">Prediction interval<a class="anchor" aria-label="anchor" href="#prediction-interval"></a>
+</h4>
+<p>The standard error of prediction (SEP) combines the uncertainty in
+the bias with the variance of a single difference:</p>
 <p><span class="math display">\[
-TI = EMM \pm z_{1-\alpha_1/2} \cdot SEP \cdot
-\sqrt{\frac{df}{\chi^2_{\alpha_2,df}}}
-\]</span> <strong>NOTE</strong>: <span class="math inline">\(\alpha_1\)</span> refers to the alpha-level for
-the prediction interval (modified by the <code>pred_level</code>
-argument; <code>1-pred_level</code>) whereas <span class="math inline">\(\alpha_2\)</span> refers to the alpha-level for
-the tolerance limit (modified by the <code>tol_level</code> argument;
-<code>1-tol_level</code>).</p>
+SEP = \sqrt{SEM^2 + S^2}
+\]</span></p>
+<p>and the prediction interval is</p>
+<p><span class="math display">\[
+PI = b \pm t_{1-\alpha_1/2,\, df_b} \cdot SEP .
+\]</span></p>
+<p>This is a “beta-expectation” tolerance interval: on average over
+repeated studies, it contains a proportion <span class="math inline">\(\beta\)</span> of the differences. It is not a
+confidence statement.</p>
+</div>
+<div class="section level4">
+<h4 id="upper-confidence-bound-for-the-sd">Upper confidence bound for the SD<a class="anchor" aria-label="anchor" href="#upper-confidence-bound-for-the-sd"></a>
+</h4>
+<p>Both kinds of tolerance limits need a one-sided upper confidence
+bound <span class="math inline">\(S_U\)</span>, at level <span class="math inline">\(\gamma\)</span>, for the SD of a single
+difference. The difficulty with repeated measures is that <span class="math inline">\(S^2\)</span> is a sum of variance components that
+are estimated with very different amounts of information: the
+between-subject variance with only (subjects <span class="math inline">\(- 1\)</span>) degrees of freedom, and the
+within-subject variance with many more. A single chi-square distribution
+with a single “effective” degrees of freedom misses the skewness of the
+between-subject part and gives limits that are too narrow (coverage of
+about 91% for a 95% target in our simulations). Instead, <span class="math inline">\(S^2\)</span> is split into pieces, each with its
+own degrees of freedom, and the pieces are combined with the MOVER
+method <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>; <a href="#ref-donner2012closed">Donner and Zou 2012</a>)</span>, as for the
+nested limits of agreement further below.</p>
+<p><strong>Independent data</strong> (<code>gls</code> without
+<code>id</code>, or with <code>cor_type = "none"</code>): with <span class="math inline">\(\nu\)</span> the residual degrees of freedom
+(<span class="math inline">\(N - p\)</span> without a variance
+function),</p>
+<p><span class="math display">\[
+S_U = S \sqrt{\frac{\nu}{\chi^2_{\alpha_2, \nu}}} .
+\]</span></p>
+<p><strong>Variance components</strong> (<code>gls</code> with compound
+symmetry, or <code>lme</code>): write <span class="math inline">\(S^2 =
+\sum_j a_j\)</span>, where piece <span class="math inline">\(j\)</span>
+is estimated with <span class="math inline">\(\nu_j\)</span> degrees of
+freedom. Then</p>
+<p><span class="math display">\[
+S_U^2 = S^2 + \sqrt{\sum_j \left[ a_j \left(
+\frac{\nu_j}{\chi^2_{\alpha_2, \nu_j}} - 1 \right) \right]^2 } .
+\]</span></p>
+<p>Pieces with zero degrees of freedom are dropped. The pieces are the
+balanced nested analysis of variance decomposition of <span class="math inline">\(S^2\)</span> into the variance of a subject mean
+and the remaining within-subject variation, generalized to unbalanced
+data and to residual correlation:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Model</th>
+<th>Piece</th>
+<th><span class="math inline">\(a_j\)</span></th>
+<th><span class="math inline">\(\nu_j\)</span></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>gls</code>, compound symmetry</td>
+<td>subject mean</td>
+<td><span class="math inline">\(\left(\hat\rho + \dfrac{1 -
+\hat\rho}{m_h}\right) S^2\)</span></td>
+<td><span class="math inline">\(n - 1\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>within subject</td>
+<td><span class="math inline">\(S^2 - a_1\)</span></td>
+<td><span class="math inline">\(N - n\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>lme</code></td>
+<td>subject mean</td>
+<td><span class="math inline">\(\hat\sigma_1^2 + \tau\, \hat\sigma_2^2 +
+\kappa_{s}\, \hat\sigma_e^2\)</span></td>
+<td><span class="math inline">\(n - 1\)</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>setting within subject</td>
+<td><span class="math inline">\((1 - \tau)\, \hat\sigma_2^2 +
+(\kappa_{c} - \kappa_{s})\, \hat\sigma_e^2\)</span></td>
+<td><span class="math inline">\(n_c - n\)</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>within setting</td>
+<td><span class="math inline">\((1 - \kappa_{c})\,
+\hat\sigma_e^2\)</span></td>
+<td><span class="math inline">\(N - n_c\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>where:</p>
+<ul>
+<li>
+<span class="math inline">\(n\)</span> is the number of subjects,
+<span class="math inline">\(n_c\)</span> the number of settings (the
+inner level; <span class="math inline">\(n_c = n\)</span> without
+nesting, so the middle piece is empty), and <span class="math inline">\(N\)</span> the number of measurements.</li>
+<li>
+<span class="math inline">\(\hat\sigma_e^2 = \hat\sigma^2
+g^2\)</span> is the residual variance for the row, and <span class="math inline">\(\hat\rho\)</span> is the compound symmetry
+correlation (truncated at 0).</li>
+<li>
+<span class="math inline">\(m_h = n / \sum_i m_i^{-1}\)</span> is
+the harmonic mean number of measurements per subject (<span class="math inline">\(m_i\)</span> for subject <span class="math inline">\(i\)</span>).</li>
+<li>
+<span class="math inline">\(\kappa_s = \frac{1}{n} \sum_i
+\mathbf{1}^\top R_i \mathbf{1} / m_i^2\)</span> is the residual variance
+of a subject mean relative to that of one measurement, averaged over
+subjects, and <span class="math inline">\(\kappa_c\)</span> is the same
+for setting means. Without residual correlation, <span class="math inline">\(\kappa_s\)</span> is the mean of <span class="math inline">\(1/m_i\)</span> (so <span class="math inline">\(\kappa_s = 1/m_h\)</span>) and <span class="math inline">\(\kappa_c\)</span> the mean of <span class="math inline">\(1/m_c\)</span>; with AR(1) residuals, <span class="math inline">\(\mathbf{1}^\top R_i \mathbf{1}\)</span> adds the
+correlations between measurements.</li>
+<li>
+<span class="math inline">\(\tau = \frac{1}{n} \sum_i \sum_c
+m_{ic}^2 / m_i^2\)</span> is the share of the setting variance in the
+variance of a subject mean (<span class="math inline">\(1/s\)</span>
+with <span class="math inline">\(s\)</span> settings of equal
+size).</li>
+</ul>
+<p>For balanced data without residual correlation, these are exactly the
+pieces of the classical decomposition <span class="math inline">\(S^2 =
+MS_A / (sk) + MS_B (1/k - 1/(sk)) + MS_W (1 - 1/k)\)</span> for <span class="math inline">\(n\)</span> subjects, <span class="math inline">\(s\)</span> settings per subject, and <span class="math inline">\(k\)</span> measurements per setting.</p>
+<p>When <code>condition</code> is supplied, each condition has its own
+residual variance, and each condition’s variance components are
+estimated from the measurements in that condition. The counts (<span class="math inline">\(n\)</span>, <span class="math inline">\(n_c\)</span>, <span class="math inline">\(N\)</span>, <span class="math inline">\(m_i\)</span>, <span class="math inline">\(m_h\)</span>) and <span class="math inline">\(\kappa\)</span>, <span class="math inline">\(\tau\)</span> are then computed from the rows of
+that condition only. (Using the counts of the whole data set gave limits
+that were too narrow: about 93% coverage for a 95% target.)</p>
+<p><strong>Other correlation structures</strong> (<code>gls</code> with
+AR(1), continuous AR(1), or a user-specified structure): <span class="math inline">\(S_U = S \sqrt{\nu / \chi^2_{\alpha_2,
+\nu}}\)</span> with an effective degrees of freedom</p>
+<p><span class="math display">\[
+\nu = \frac{2 S^4}{\widehat{\text{Var}}(S^2)},
+\]</span></p>
+<p>where <span class="math inline">\(\widehat{\text{Var}}(S^2)\)</span>
+comes from the delta method applied to the approximate covariance matrix
+of the variance parameters (<span class="math inline">\(\log
+\hat\sigma\)</span> and the variance function parameters) that
+<code>nlme</code> computes (<code>apVar</code>). If that matrix is not
+available, <span class="math inline">\(df_b\)</span> is used instead,
+with a warning.</p>
+<p>The output reports <span class="math inline">\(S_U\)</span> as
+<code>SD.upper</code> and the degrees of freedom of <span class="math inline">\(S^2\)</span> as <code>SD.df</code> (for the
+variance components, the Satterthwaite value <span class="math inline">\(S^4 / \sum_j a_j^2 / \nu_j\)</span>, reported for
+information only).</p>
+</div>
+<div class="section level4">
+<h4 id="tolerance-limits-bound_type-joint">Tolerance limits: <code>bound_type = "joint"</code><a class="anchor" aria-label="anchor" href="#tolerance-limits-bound_type-joint"></a>
+</h4>
+<p>See <a href="#joint-versus-intersection-union-iu-bounds">Joint versus
+Intersection-Union (IU) Bounds</a> for when to use the joint or the IU
+limits.</p>
+<p>The joint tolerance limits are a “beta-content”, “gamma-confidence”
+tolerance interval: with confidence <span class="math inline">\(\gamma\)</span>, at least a proportion <span class="math inline">\(\beta\)</span> of all differences lie within the
+limits. They use the approximation of <span class="citation">Howe (<a href="#ref-howe1969">1969</a>)</span>, as described by <span class="citation">Francq et al. (<a href="#ref-francq2020tolerate">2020</a>)</span>:</p>
+<p><span class="math display">\[
+TI = b \pm z \cdot SEP \cdot \frac{S_U}{S} .
+\]</span></p>
+<p>For independent data with only an intercept, <span class="math inline">\(SEP = S \sqrt{1 + 1/n}\)</span> and <span class="math inline">\(S_U / S = \sqrt{(n-1)/\chi^2_{\alpha_2,
+n-1}}\)</span>, and this is exactly Howe’s tolerance factor. If the
+limits lie within a maximal allowable difference <span class="math inline">\(\pm\Delta\)</span>, one can conclude, at level
+<span class="math inline">\(\alpha_2\)</span>, that at least a
+proportion <span class="math inline">\(\beta\)</span> of the differences
+lie within <span class="math inline">\(\pm\Delta\)</span>. The tails do
+not need to be split equally.</p>
+</div>
+<div class="section level4">
+<h4 id="tolerance-limits-bound_type-iu">Tolerance limits: <code>bound_type = "iu"</code><a class="anchor" aria-label="anchor" href="#tolerance-limits-bound_type-iu"></a>
+</h4>
+<p>The “iu” limits are one-sided <span class="math inline">\(\gamma\)</span> confidence bounds on each of the
+two limits of agreement, <span class="math inline">\(\theta_L = \mu -
+z\sigma\)</span> and <span class="math inline">\(\theta_U = \mu +
+z\sigma\)</span> (the <span class="math inline">\((1 \mp
+\beta)/2\)</span> percentiles of the differences). If both bounds lie
+within <span class="math inline">\(\pm\Delta\)</span>, one can reject,
+at level <span class="math inline">\(\alpha_2\)</span>, that either
+limit of agreement lies outside <span class="math inline">\(\pm\Delta\)</span> (an intersection-union test).
+The two bounds hold together only about <span class="math inline">\(1 -
+2\alpha_2\)</span> of the time, so they are not a joint <span class="math inline">\(\gamma\)</span> interval.</p>
+<p><strong>Independent data</strong> (<code>gls</code> without a
+correlation structure): the bounds are exact, from the noncentral <span class="math inline">\(t\)</span> distribution,</p>
+<p><span class="math display">\[
+b \mp t'_{\gamma,\, \nu}\!\left(\frac{zS}{SEM}\right) SEM ,
+\]</span></p>
+<p>where <span class="math inline">\(t'_{\gamma,
+\nu}(\lambda)\)</span> is the <span class="math inline">\(\gamma\)</span> quantile of a noncentral <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(\nu\)</span> degrees of freedom and noncentrality
+<span class="math inline">\(\lambda\)</span>. (When <span class="math inline">\(\lambda &gt; 37\)</span>, where the noncentral
+<span class="math inline">\(t\)</span> quantile is numerically
+unreliable, the MOVER bound below is used.)</p>
+<p><strong>Otherwise</strong>, the MOVER bound <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>)</span> combines
+the one-sided bounds for the bias and for <span class="math inline">\(S\)</span>:</p>
+<p><span class="math display">\[
+L = (b - zS) - \sqrt{\left(t_{\gamma,\, df_b}\, SEM\right)^2 + z^2
+\left(S_U - S\right)^2}, \qquad
+U = (b + zS) + \sqrt{\left(t_{\gamma,\, df_b}\, SEM\right)^2 + z^2
+\left(S_U - S\right)^2} .
+\]</span></p>
+</div>
+<div class="section level4">
+<h4 id="bootstrap-calibration-tol_method-boot_cal-experimental">Bootstrap calibration: <code>tol_method = "boot_cal"</code>
+(experimental)<a class="anchor" aria-label="anchor" href="#bootstrap-calibration-tol_method-boot_cal-experimental"></a>
+</h4>
+<p>The bootstrap calibrates the nominal confidence level of the analytic
+limits <span class="citation">(<a href="#ref-loh1987">Loh 1987</a>; <a href="#ref-beran1987">Beran 1987</a>)</span>:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Simulate</strong> <span class="math inline">\(B\)</span>
+(<code>replicates</code>) new data sets from the fitted model, using the
+point estimates: <span class="math inline">\(\mathbf{d}^* =
+\mathbf{X}\hat{\boldsymbol\beta} + \mathbf{e}^*\)</span>, where <span class="math inline">\(\mathbf{e}^*\)</span> has the fitted marginal
+covariance. For subject <span class="math inline">\(i\)</span> this is
+<span class="math inline">\(D_i R_i D_i\)</span> for <code>gls</code>
+and <span class="math inline">\(\hat\sigma_1^2 J + \hat\sigma_2^2 B_i +
+D_i R_i D_i\)</span> for <code>lme</code>, where <span class="math inline">\(D_i\)</span> holds the residual SDs, <span class="math inline">\(J\)</span> is a matrix of ones, and <span class="math inline">\(B_i\)</span> has ones for pairs of measurements in
+the same setting.</li>
+<li>
+<strong>Refit</strong> the model to each data set, and compute the
+replicate bias <span class="math inline">\(b^*\)</span>, SD <span class="math inline">\(S^*\)</span>, SEM<span class="math inline">\(^*\)</span>, and variance components (or effective
+degrees of freedom). Replicates whose model fails to converge are
+dropped, with a warning if more than 5% fail.</li>
+<li>
+<strong>Calibrate.</strong> For a nominal level <span class="math inline">\(\lambda\)</span>, compute the analytic limits
+<span class="math inline">\(L^*(\lambda)\)</span> and <span class="math inline">\(U^*(\lambda)\)</span> in each replicate (reusing
+<span class="math inline">\(df_b\)</span> from the original fit). The
+fitted model plays the role of the truth, with differences distributed
+as <span class="math inline">\(N(b, S^2)\)</span>.
+<ul>
+<li>
+<code>"joint"</code>: the coverage at level <span class="math inline">\(\lambda\)</span> is <span class="math inline">\(C(\lambda) = \frac{1}{B} \sum \mathbb{1}\left\{
+\Phi\!\left(\frac{U^* - b}{S}\right) - \Phi\!\left(\frac{L^* -
+b}{S}\right) \ge \beta \right\}\)</span>.</li>
+<li>
+<code>"iu"</code>: separately for each bound, <span class="math inline">\(C_L(\lambda) = \frac{1}{B} \sum
+\mathbb{1}\{L^*(\lambda) \le b - zS\}\)</span> and <span class="math inline">\(C_U(\lambda) = \frac{1}{B} \sum
+\mathbb{1}\{U^*(\lambda) \ge b + zS\}\)</span>.</li>
+</ul>
+The calibrated level <span class="math inline">\(\hat\lambda\)</span> is
+the smallest <span class="math inline">\(\lambda \in [0.5, 1)\)</span>
+with coverage of at least <span class="math inline">\(\gamma\)</span>
+(found by bisection).</li>
+<li>
+<strong>Report</strong> the analytic limits for the observed data at
+the calibrated level(s), which are returned as
+<code>lower.TL.level</code> and <code>upper.TL.level</code>.</li>
+</ol>
+<p>Because the replicates are simulated from the estimated variance
+components as if they were known, the calibration has its own error when
+there are few subjects: in our simulations with 10 to 15 subjects, its
+coverage ranged from about 93% to 96% for a 95% target, while the
+analytic limits were 95% to 96.5% in the same settings. The analytic
+limits are therefore recommended, and the bootstrap may be useful as a
+check for models whose analytic limits have not been evaluated (e.g.,
+other variance functions or proportional bias).</p>
+</div>
+<div class="section level4">
+<h4 id="summary-of-the-degrees-of-freedom">Summary of the degrees of freedom<a class="anchor" aria-label="anchor" href="#summary-of-the-degrees-of-freedom"></a>
+</h4>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Quantity</th>
+<th>Model</th>
+<th>Degrees of freedom</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Bias CI and prediction interval (<span class="math inline">\(df_b\)</span>)</td>
+<td><code>gls</code></td>
+<td>Satterthwaite (<code>emmeans</code>)</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code>lme</code></td>
+<td>Containment: subjects <span class="math inline">\(- 1\)</span>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<span class="math inline">\(S_U\)</span>, independent data</td>
+<td>
+<code>gls</code>, no correlation</td>
+<td>
+<span class="math inline">\(N - p\)</span> (with a variance
+function: effective df, below)</td>
+</tr>
+<tr class="even">
+<td>
+<span class="math inline">\(S_U\)</span>, variance components</td>
+<td>
+<code>gls</code> compound symmetry; <code>lme</code>
+</td>
+<td>subject mean: <span class="math inline">\(n - 1\)</span>; setting
+within subject: <span class="math inline">\(n_c - n\)</span>; within:
+<span class="math inline">\(N - n_c\)</span> (per condition when
+<code>condition</code> is supplied)</td>
+</tr>
+<tr class="odd">
+<td>
+<span class="math inline">\(S_U\)</span>, other structures</td>
+<td>
+<code>gls</code> AR(1), CAR(1), user structure, or a variance
+function without correlation</td>
+<td>effective df <span class="math inline">\(2S^4 /
+\widehat{\text{Var}}(S^2)\)</span> from <code>apVar</code> (fallback:
+<span class="math inline">\(df_b\)</span>)</td>
+</tr>
+<tr class="even">
+<td>“iu” noncentral <span class="math inline">\(t\)</span>
+</td>
+<td>independent data</td>
+<td>
+<span class="math inline">\(\nu\)</span> as for <span class="math inline">\(S_U\)</span>
+</td>
+</tr>
+<tr class="odd">
+<td>“iu” MOVER bound for the bias</td>
+<td>all others</td>
+<td><span class="math inline">\(df_b\)</span></td>
+</tr>
+<tr class="even">
+<td>
+<code>SD.df</code> (reported)</td>
+<td>variance components</td>
+<td>Satterthwaite, <span class="math inline">\(S^4 / \sum_j a_j^2 /
+\nu_j\)</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="coverage-in-simulations">Coverage in simulations<a class="anchor" aria-label="anchor" href="#coverage-in-simulations"></a>
+</h4>
+<p>The table summarizes the coverage of the analytic limits in our
+simulations (95% content and 95% confidence; 1,000 simulated data sets
+each, so the Monte Carlo standard error is about 0.7 percentage points).
+The full record, with the scripts, is kept in the package’s source
+repository (<code>references/general/tolerance_simulations</code>).</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Design</th>
+<th>Model</th>
+<th>Joint</th>
+<th>IU (lower / upper)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>20 subjects × 19, compound symmetry</td>
+<td>
+<code>gls</code>, <code>"sym"</code>
+</td>
+<td>0.957</td>
+<td>0.940 / 0.958</td>
+</tr>
+<tr class="even">
+<td>10 subjects × 5, compound symmetry</td>
+<td>
+<code>gls</code>, <code>"sym"</code>
+</td>
+<td>0.954</td>
+<td>0.950 / 0.948</td>
+</tr>
+<tr class="odd">
+<td>15 × 8, AR(1), no subject effect</td>
+<td>
+<code>gls</code>, <code>"ar1"</code>
+</td>
+<td>0.950</td>
+<td>0.951 / 0.952</td>
+</tr>
+<tr class="even">
+<td>15 × 8, subject effect + AR(1)</td>
+<td>
+<code>gls</code>, <code>"ar1"</code>
+</td>
+<td>0.893</td>
+<td>0.895 / 0.916</td>
+</tr>
+<tr class="odd">
+<td>15 × 8, subject effect + AR(1)</td>
+<td>
+<code>lme</code>, <code>"ar1"</code>
+</td>
+<td>0.949</td>
+<td>0.939 / 0.957</td>
+</tr>
+<tr class="even">
+<td>12 × 8, condition-specific residual SD</td>
+<td>
+<code>gls</code>, <code>condition</code>
+</td>
+<td>0.965</td>
+<td>0.958 / 0.963</td>
+</tr>
+<tr class="odd">
+<td>12 × 8, common subject effect, condition-specific residual SD</td>
+<td>
+<code>lme</code>, <code>condition</code>
+</td>
+<td>0.971</td>
+<td>0.969 / 0.965</td>
+</tr>
+<tr class="even">
+<td>15 subjects, 2–4 settings each (nested)</td>
+<td>
+<code>lme</code>, nested <code>id</code>
+</td>
+<td>0.963</td>
+<td>0.948 / 0.954</td>
+</tr>
+<tr class="odd">
+<td>15 subjects, 2–4 settings each (nested)</td>
+<td>
+<code>lme</code>, inner level as <code>id</code>
+</td>
+<td>0.883</td>
+<td>0.855 / 0.890</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="model-assumptions">Model assumptions<a class="anchor" aria-label="anchor" href="#model-assumptions"></a>
+</h4>
+<p>A few modelling choices deserve attention (see the “Model
+assumptions” section of <code><a href="../reference/tolerance_limit.html">?tolerance_limit</a></code> for details):</p>
+<ul>
+<li>With the default marginal model (<code>model = "gls"</code>), the
+autoregressive correlation structures (<code>cor_type = "ar1"</code> or
+<code>"car1"</code>) have no persistent subject effect and the
+correlation between measurements from the same subject decays towards
+zero over time. If subjects have a persistent bias of their own, these
+structures understate the uncertainty in the bias and give limits that
+are too narrow. Setting <code>model = "lme"</code> fits a random
+intercept for each subject and adds the serial correlation to the
+residuals, which keeps the persistent subject effect (see the
+simulations above).</li>
+<li>With <code>model = "gls"</code>, compound symmetry, and a variance
+function (e.g., from <code>condition</code>), the between-subject
+variance scales with the residual standard deviation of each condition.
+With <code>model = "lme"</code>, the variance function applies to the
+residuals only, and the between-subject variance is shared across
+conditions.</li>
+<li>With <code>model = "lme"</code>, <code>id</code> can name two nested
+levels, outer level first (e.g., <code>id = c("golfer", "club")</code>
+for shots with several clubs per golfer). Avoid setting <code>id</code>
+to the inner level alone (e.g., a golfer-by-club identifier): that drops
+the correlation across clubs within a golfer and gives limits that are
+too narrow. More than two levels are not supported.</li>
+<li>A slope of the differences on the average
+(<code>prop_bias = TRUE</code>) can appear without any true proportional
+bias when the two methods have unequal measurement error variances <span class="citation">(<a href="#ref-bland1999">Bland and Altman
+1999</a>)</span>.</li>
+</ul>
+<p>For example, a random intercept model with serial correlation of the
+residuals, and one with nested random intercepts:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># random intercept for each subject, plus AR(1) correlation of the residuals</span></span>
+<span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
+<span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"teso_pre"</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>  time <span class="op">=</span> <span class="st">"trial_num"</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"lme"</span>,</span>
+<span>  cor_type <span class="op">=</span> <span class="st">"ar1"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># nested random intercepts: clubs within golfers</span></span>
+<span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">golf</span>, <span class="co"># a data set with columns golfer, club, x, and y</span></span>
+<span>  x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>  y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"golfer"</span>, <span class="st">"club"</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"lme"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -269,7 +1009,7 @@ the tolerance limit (modified by the <code>tol_level</code> argument;
 temperature at varying times of day. Let us assume we want to measure
 pre-exercise agreement between esophageal and rectal temperature while
 controlling for time of day (<code>tod</code>).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>                        x <span class="op">=</span> <span class="st">"teso_pre"</span>,</span>
 <span>                        y <span class="op">=</span> <span class="st">"trec_pre"</span>,</span>
@@ -278,11 +1018,13 @@ controlling for time of day (<code>tod</code>).</p>
 <span></span>
 <span><span class="va">test1</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM -0.1537 [-0.2478, -0.0595]   [-0.5993, 0.2919] [-0.8055, 0.4982]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]   [-0.7722, 0.3162] [-1.1542, 0.6982]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM -0.1537 [-0.2478, -0.0595]   [-0.5993, 0.2919] [-0.6748, 0.3674]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]     [-0.672, 0.216] [-0.6498, 0.1938]</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -302,10 +1044,15 @@ true underlying value will not be expected to vary (i.e., replicates or
 functions in the package (i.e., <code>agree_test</code>,
 <code>agree_reps</code>, and <code>agree_nest</code>), allows users to
 make any of the three calculations all-in-one function. Further,
-<code>agreement_limit</code> assumes you are only interested in the
-outermost confidence interval of the limits of agreement and therefore
-one-tailed confidence intervals are only calculated for the LoA (i.e.,
-there is no <code>TOST</code> argument).</p>
+<code>agreement_limit</code> reports only the outer confidence bound of
+each limit of agreement (a lower bound for the lower limit and an upper
+bound for the upper limit), because those are the bounds that matter
+when comparing the limits against a maximal allowable difference. By
+default (<code>bound_type = "iu"</code>), each is a one-sided <span class="math inline">\(1 - \alpha\)</span> bound, which gives an
+intersection-union test of agreement at level <span class="math inline">\(\alpha\)</span>; with
+<code>bound_type = "joint"</code>, each is a one-sided <span class="math inline">\(1 - \alpha/2\)</span> bound, and both limits of
+agreement lie within the reported interval with at least <span class="math inline">\(1 - \alpha\)</span> confidence (see <a href="#joint-versus-intersection-union-iu-bounds">Joint versus
+Intersection-Union (IU) Bounds</a>).</p>
 <div class="section level3">
 <h3 id="arguments-influencing-the-loa-calculations">Arguments Influencing the LoA Calculations<a class="anchor" aria-label="anchor" href="#arguments-influencing-the-loa-calculations"></a>
 </h3>
@@ -320,7 +1067,18 @@ the <code>loa_calc</code> function dictates how the limits of agreement
 are calculated. Users have the option of computing <span class="citation">Bland and Altman (<a href="#ref-bland1999">1999</a>)</span> or MOVER <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>; <a href="#ref-donner2012closed">Donner and Zou 2012</a>)</span> limits of
 agreement (calculations detailed below). I strongly recommend utilizing
 the MOVER limits of agreement over the Bland-Altman limits <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>; <a href="#ref-donner2012closed">Donner and Zou 2012</a>)</span> as it is
-the more conservative of the two options.</p>
+the more conservative of the two options. The <code>bound_type</code>
+argument sets what the confidence bounds of the limits of agreement
+claim (see <a href="#joint-versus-intersection-union-iu-bounds">Joint
+versus Intersection-Union (IU) Bounds</a>).</p>
+<p><strong>NOTE</strong>: in the formulas for the confidence bounds of
+the limits of agreement below, <span class="math inline">\(\alpha\)</span> denotes the one-sided level used
+for each bound: <span class="math inline">\(\alpha\)</span> =
+<code>alpha</code> for <code>bound_type = "iu"</code> (default) and
+<span class="math inline">\(\alpha\)</span> = <code>alpha</code>/2 for
+<code>bound_type = "joint"</code>. The confidence interval for the bias
+is always a two-sided <span class="math inline">\(1 -\)</span>
+<code>alpha</code> interval.</p>
 </div>
 <div class="section level3">
 <h3 id="simple-agreement">Simple Agreement<a class="anchor" aria-label="anchor" href="#simple-agreement"></a>
@@ -332,7 +1090,7 @@ this scenario each pair of observations (x and y) are
 subject/participant that is uncorrelated with other pairs.</p>
 <p>The data for the two measurements are put into the <code>x</code> and
 <code>y</code> arguments.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calc. LoA</span></span>
 <span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>,</span>
 <span>                     x <span class="op">=</span> <span class="st">"x"</span>,</span>
@@ -346,40 +1104,46 @@ subject/participant that is uncorrelated with other pairs.</p>
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
 <span><span class="co">#&gt;  0.4383 [-0.1669, 1.0436]    -1.947     2.824 [-3.0117, 3.8884]</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
 <span><span class="co">#&gt; SD of Differences = 1.217</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculation-steps">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps"></a>
 </h4>
 <p>The reported limits of agreement are derived from the work of <span class="citation">Bland and Altman (<a href="#ref-bland1986">1986</a>)</span> and <span class="citation">Bland
-and Altman (<a href="#ref-bland1999">1999</a>)</span>.</p>
+and Altman (<a href="#ref-bland1999">1999</a>)</span>. Throughout, <span class="math inline">\(z_A = z_{1-(1-agree)/2}\)</span> is the normal
+quantile for the agreement level (1.96 for the default of 95%), and
+<span class="math inline">\(z_{1-\alpha}\)</span> and <span class="math inline">\(t_{1-\alpha, df}\)</span> use the one-sided level
+<span class="math inline">\(\alpha\)</span> for each confidence bound
+(see the note above).</p>
 <p><strong>LoA</strong></p>
 <p><span class="math display">\[
-LoA = \bar d \pm z_{1-(1-agree)/2} \cdot S_d
+LoA = \bar d \pm z_A \cdot S_d
 \]</span></p>
-<p>wherein <span class="math inline">\(z_{1-(1-agree)/2}\)</span> is the
-value of the normal distribution at the given agreement level (default
-is 95%), <span class="math inline">\(\bar d\)</span> is the mean of the
-differences, and <span class="math inline">\(S_d\)</span> is the
-standard deviations of the differences.</p>
+<p>wherein <span class="math inline">\(\bar d\)</span> is the mean of
+the <span class="math inline">\(N\)</span> differences and <span class="math inline">\(S_d\)</span> is their standard deviation.</p>
 <p><strong>Confidence Interval</strong></p>
 <ol style="list-style-type: decimal">
-<li>Calculate variance of LoA</li>
+<li>Calculate the standard error of the LoA</li>
 </ol>
 <p><span class="math display">\[
-S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_{1-(1-agree)/2}}{2
-\cdot(N-1)} }
+S_{LoA} = S_d \cdot \sqrt{\frac{1}{N}+ \frac{z^2_A}{2 \cdot(N-1)} }
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Calculate Left Moving Estimator</li>
+<li>Calculate the limit of agreement margin of error (LME)</li>
 </ol>
 <p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
-LME = t_{1 - \alpha, \space df} \cdot S_{LoA}
-\]</span> <strong>MOVER Method</strong></p>
-<p><span class="math display">\[
-LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_{1-agree} \cdot
-(\sqrt{\frac{df}{\chi^2_{\alpha,df}}}-1)^2}
+LME = t_{1 - \alpha, \, N-1} \cdot S_{LoA}
 \]</span></p>
+<p><strong>MOVER Method</strong></p>
+<p><span class="math display">\[
+LME = S_d \cdot \sqrt{\frac{z_{1-\alpha}^2}{N} + z^2_A \cdot
+\left(\sqrt{\frac{N-1}{\chi^2_{\alpha, N-1}}}-1\right)^2}
+\]</span></p>
+<p>where <span class="math inline">\(\chi^2_{\alpha, N-1}\)</span> is
+the lower <span class="math inline">\(\alpha\)</span> quantile of the
+chi-square distribution.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Calculate Confidence Interval</li>
 </ol>
@@ -414,7 +1178,7 @@ in duplicate/triplicate.</p>
 first (<code>x</code> argument) and second (<code>y</code> argument)
 must then be provided. An additional column indicating the subject
 identifier (<code>id</code>) must also be provided.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -430,63 +1194,81 @@ identifier (<code>id</code>) must also be provided.</p>
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA           LoA CI</span></span>
 <span><span class="co">#&gt;  0.7152 [-1.5287, 2.9591]    -1.212     2.642 [-4.797, 6.2274]</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
 <span><span class="co">#&gt; SD of Differences = 1.5036</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculative-steps">Calculative Steps<a class="anchor" aria-label="anchor" href="#calculative-steps"></a>
 </h4>
+<p>With replicates, <code>x</code> and <code>y</code> need not be
+measured the same number of times, so their within-subject variances are
+estimated separately <span class="citation">(<a href="#ref-zou2011">Zou
+2011</a>)</span>.</p>
 <ol style="list-style-type: decimal">
-<li>Compute mean and variance</li>
+<li>Compute the subject means and the within-subject variances</li>
 </ol>
+<p>For subject <span class="math inline">\(i\)</span> (<span class="math inline">\(i = 1, \dots, n\)</span>), with <span class="math inline">\(m_{xi}\)</span> measurements of <code>x</code> and
+<span class="math inline">\(m_{yi}\)</span> measurements of
+<code>y</code>:</p>
 <p><span class="math display">\[
-\bar d_i = \Sigma_{j=1}^{n_i} \frac{d_{ij}}{n_i}
-\]</span> <span class="math display">\[
-\bar d = \Sigma^{n}_{i=1} \frac{d_i}{n}
+\bar d_i = \bar x_i - \bar y_i, \qquad
+\bar d = \frac{1}{n} \Sigma_{i=1}^{n} \bar d_i
 \]</span></p>
-<p><span class="math display">\[
-s_i^2 = \Sigma_{j=1}^{n_i} \frac{(d_{ij} - \bar d_i)^2}{n_i-1}
-\]</span></p>
+<p>and <span class="math inline">\(s_{xi}^2\)</span> and <span class="math inline">\(s_{yi}^2\)</span> are the sample variances of the
+replicates of <code>x</code> and of <code>y</code> within subject <span class="math inline">\(i\)</span>.</p>
 <ol start="2" style="list-style-type: decimal">
-<li>Compute pooled estimate of within subject error</li>
+<li>Compute pooled estimates of the within-subject variances</li>
 </ol>
 <p><span class="math display">\[
-s_{dw}^2 = \Sigma_{i=1}^{n} [\frac{n_i-1}{N-n} \cdot s_i^2]
+s_{xw}^2 = \Sigma_{i=1}^{n} \frac{m_{xi}-1}{N_x-n} \cdot s_{xi}^2,
+\qquad
+s_{yw}^2 = \Sigma_{i=1}^{n} \frac{m_{yi}-1}{N_y-n} \cdot s_{yi}^2
 \]</span></p>
+<p>where <span class="math inline">\(N_x = \Sigma_i m_{xi}\)</span> and
+<span class="math inline">\(N_y = \Sigma_i m_{yi}\)</span>.</p>
 <ol start="3" style="list-style-type: decimal">
-<li>Compute pooled estimate of between subject error</li>
+<li>Compute the variance of the subject mean differences
+(between-subject variance)</li>
 </ol>
 <p><span class="math display">\[
 s^2_b = \Sigma_{i=1}^n \frac{ (\bar d_i - \bar d)^2}{n-1}
 \]</span></p>
 <ol start="4" style="list-style-type: decimal">
-<li>Compute the harmonic mean of the replicate size</li>
+<li>Compute the harmonic means of the replicate sizes</li>
 </ol>
 <p><span class="math display">\[
-m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
+m_{xh} = \frac{n}{\Sigma_{i=1}^n m_{xi}^{-1}}, \qquad
+m_{yh} = \frac{n}{\Sigma_{i=1}^n m_{yi}^{-1}}
 \]</span></p>
 <ol start="5" style="list-style-type: decimal">
-<li>Compute SD of the difference</li>
+<li>Compute the variance of a single difference</li>
 </ol>
 <p><span class="math display">\[
-s_d^2 = s^2_b + (1+m_h^{-1}) \cdot s_{dw}^2
+s_d^2 = s^2_b + \left(1 - \frac{1}{m_{xh}}\right) s_{xw}^2 + \left(1 -
+\frac{1}{m_{yh}}\right) s_{yw}^2
 \]</span></p>
 <ol start="6" style="list-style-type: decimal">
-<li>Calculate LME</li>
+<li>Calculate the LME</li>
 </ol>
 <p><strong>MOVER Method</strong></p>
 <p><span class="math display">\[
-u = s_d^2 + \sqrt{[s_d^2 \cdot (1 - \frac{n-1}{\chi^2_{(1-\alpha,
-n-1)}})]^2+[(1-m_h^{-1}) \cdot (1- \frac{N-n}{\chi^2_{(1-\alpha,
-N-n)}})]^2}
+u = s_d^2 + \sqrt{\left[s_b^2 \left(\frac{n-1}{\chi^2_{\alpha, n-1}} -
+1\right)\right]^2
++ \left[\left(1-\frac{1}{m_{xh}}\right) s_{xw}^2
+\left(\frac{N_x-n}{\chi^2_{\alpha, N_x-n}} - 1\right)\right]^2
++ \left[\left(1-\frac{1}{m_{yh}}\right) s_{yw}^2
+\left(\frac{N_y-n}{\chi^2_{\alpha, N_y-n}} - 1\right)\right]^2}
 \]</span></p>
 <p><span class="math display">\[
-LME = \sqrt{\frac{z_{\alpha} \cdot s_d^2}{n} + z_{\beta/2}^2 \cdot
-(\sqrt{u}-\sqrt{s^2_d} )^2}
+LME = \sqrt{\frac{z_{1-\alpha}^2 \cdot s_b^2}{n} + z_A^2 \cdot
+\left(\sqrt{u}-\sqrt{s^2_d}\right)^2}
 \]</span></p>
 <p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
-S_{LoA}^2 = \frac{s^2_d}{n} + \frac{z_{1-agree}^2}{2 \cdot s_d^2} \cdot
-(\frac{S_d^2}{n-1} + (1-\frac{1}{m_{xh}})^2 \cdot \frac{S_{xw}^4}{N_x -
-n} + (1-\frac{1}{m_{yh}})^2 \cdot \frac{S_{yw}^4}{N_y - n})
+S_{LoA}^2 = \frac{s^2_b}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
+\left(\frac{s_b^4}{n-1} + \left(1-\frac{1}{m_{xh}}\right)^2
+\frac{s_{xw}^4}{N_x - n} + \left(1-\frac{1}{m_{yh}}\right)^2
+\frac{s_{yw}^4}{N_y - n}\right)
 \]</span></p>
 <p><span class="math display">\[
 LME = z_{1-\alpha} \cdot S_{LoA}
@@ -495,10 +1277,10 @@ LME = z_{1-\alpha} \cdot S_{LoA}
 <li>Calculate LoA</li>
 </ol>
 <p><span class="math display">\[
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+LoA_{lower} = \bar d - z_A \cdot s_d
 \]</span></p>
 <p><span class="math display">\[
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+LoA_{upper} = \bar d + z_A \cdot s_d
 \]</span></p>
 <ol start="8" style="list-style-type: decimal">
 <li>Calculate LoA CI</li>
@@ -523,7 +1305,7 @@ utilized in <code>agreement_limit</code> is similar to, but not the
 exact same as those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>. However, the results should be
 <em>approximately</em> the same as <code>agree_nest</code> and should
 provide estimates that are very close to those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -539,6 +1321,8 @@ provide estimates that are very close to those described by <span class="citatio
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
 <span><span class="co">#&gt;  0.7046 [-1.5572, 2.9664]    -2.153     3.562 [-7.4979, 8.9071]</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
 <span><span class="co">#&gt; SD of Differences = 1.4581</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculation-steps-1">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps-1"></a>
@@ -546,57 +1330,66 @@ provide estimates that are very close to those described by <span class="citatio
 <ol style="list-style-type: decimal">
 <li>Model</li>
 </ol>
-<p>A linear mixed model (detailed below) is fit to estimate the bias
-(mean difference) and variance components (within and between subject
-variance).</p>
+<p>A linear mixed model with a random intercept for each subject (fit
+with <code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lme4::lmer</a></code>, REML) is used to estimate the bias (mean
+difference) and the variance components:</p>
 <p><span class="math display">\[
 \begin{aligned}
-  \operatorname{difference}_{i}  &amp;\sim N \left(\alpha_{j[i]},
-\sigma^2 \right) \\
-    \alpha_{j}  &amp;\sim N \left(\mu_{\alpha_{j}},
-\sigma^2_{\alpha_{j}} \right)
-    \text{, for subject j = 1,} \dots \text{,J}
+  d_{ij} &amp;\sim N \left(\mu + u_{i}, \sigma^2_w \right) \\
+  u_{i} &amp;\sim N \left(0, \sigma^2_b \right)
+  \text{, for subject } i = 1, \dots, n
 \end{aligned}
-\]</span> 2. Extract Components</p>
-<p>The two variance components, (<span class="math inline">\(s_b^2\)</span> and <span class="math inline">\(s_w^2\)</span> for <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\sigma_{\alpha_j}^2\)</span>), are estimated from
-the model. The sum of both (<span class="math inline">\(s_{total}^2\)</span>) is the total variance, and
-grand intercept represents the bias (mean difference, <span class="math inline">\(\bar d\)</span>).</p>
-<p>The harmonic mean is also calculated.</p>
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Extract Components</li>
+</ol>
+<p>The between-subject variance <span class="math inline">\(s_b^2\)</span> (the estimate of <span class="math inline">\(\sigma^2_b\)</span>) and the within-subject
+variance <span class="math inline">\(s_w^2\)</span> (the estimate of
+<span class="math inline">\(\sigma^2_w\)</span>) are estimated from the
+model. Their sum is the variance of a single difference, <span class="math inline">\(s_d^2 = s_b^2 + s_w^2\)</span>, and the intercept
+is the bias <span class="math inline">\(\bar d\)</span>.</p>
+<p>The harmonic mean of the number of measurements per subject (<span class="math inline">\(m_i\)</span> for subject <span class="math inline">\(i\)</span>) is also calculated:</p>
 <p><span class="math display">\[
 m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 \]</span></p>
+<p>and <span class="math inline">\(N = \Sigma_i m_i\)</span> is the
+total number of measurements.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Compute LME</li>
 </ol>
 <p><strong>MOVER Method</strong></p>
 <p><span class="math display">\[
-u_1 =   (s_b^2 \cdot ((n-1)/(\chi^2_{\alpha,n-1})-1))^2
+u_1 = \left[s_b^2
+\left(\frac{n-1}{\chi^2_{\alpha,n-1}}-1\right)\right]^2
 \]</span></p>
 <p><span class="math display">\[
-u_2 = ((1-1/m_h) \cdot s_w^2 \cdot ((N-n)/( \chi^2_{\alpha,N-n} -1))^2
+u_2 = \left[\left(1-\frac{1}{m_h}\right) s_w^2
+\left(\frac{N-n}{\chi^2_{\alpha,N-n}} -1\right)\right]^2
 \]</span></p>
 <p><span class="math display">\[
-u = s_{total}^2 + \sqrt{u_1 + u_2}
+u = s_d^2 + \sqrt{u_1 + u_2}
 \]</span></p>
 <p><span class="math display">\[
-LME = \sqrt{\frac{z^2_{\alpha} \cdot s_d^2}{n} + z^2_{\beta/2}
-\cdot(\sqrt{u} - \sqrt{s^2_d})^2}
+LME = \sqrt{\frac{z^2_{1-\alpha} \cdot s_b^2}{n} + z^2_A \cdot
+\left(\sqrt{u} - \sqrt{s^2_d}\right)^2}
 \]</span></p>
 <p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
-S_{LoA} = \frac{s_b^2}{n} + z_{agree}^2 / (2 \cdot s_{total}^2) \cdot
-((s_b^2)^2/(n-1) + (1 - 1/m_h)^2 \cdot (s_{w}^2)^2/(N-n))
-\]</span> <span class="math display">\[
+S_{LoA}^2 = \frac{s_b^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
+\left(\frac{s_b^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2
+\frac{s_{w}^4}{N-n}\right)
+\]</span></p>
+<p><span class="math display">\[
 LME = z_{1-\alpha} \cdot S_{LoA}
 \]</span></p>
 <ol start="4" style="list-style-type: decimal">
 <li>Calculate LoA</li>
 </ol>
 <p><span class="math display">\[
-LoA_{lower} = \bar d - z_{\beta/2} \cdot s_d
+LoA_{lower} = \bar d - z_A \cdot s_d
 \]</span></p>
 <p><span class="math display">\[
-LoA_{upper} = \bar d + z_{\beta/2} \cdot s_d
+LoA_{upper} = \bar d + z_A \cdot s_d
 \]</span></p>
 <ol start="5" style="list-style-type: decimal">
 <li>Calculate LoA CI</li>
@@ -620,7 +1413,7 @@ limits are within a maximal allowable difference. However, the results a
 maximal allowable difference can be visualized against the
 tolerance/agreement limits using the <code>delta</code> argument for the
 <code>plot</code> method.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
@@ -630,7 +1423,7 @@ tolerance/agreement limits using the <code>delta</code> argument for the
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res1</span>, delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span> <span class="co"># Set maximal allowable difference to .25 units</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="checking-assumptions">Checking Assumptions<a class="anchor" aria-label="anchor" href="#checking-assumptions"></a>
@@ -650,21 +1443,21 @@ checks.</p>
 <div class="section level3">
 <h3 id="an-example">An Example<a class="anchor" aria-label="anchor" href="#an-example"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_agree</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                             y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                             data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_agree</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                           data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -681,7 +1474,7 @@ slope model rather than intercept only model).</p>
 the <code>prop_bias</code> argument. When this is set to TRUE, then the
 proportional bias adjusted model is utilized. Plots and checks of the
 data should always be inspected.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
@@ -689,7 +1482,9 @@ data should always be inspected.</p>
 <span>                           prop_bias <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, independent differences</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Average of Both Methods    Bias           Bias CI Prediction Interval</span></span>
 <span><span class="co">#&gt;                    3.905 -0.4670 [-1.3842, 0.4502]   [-2.8876, 1.9537]</span></span>
@@ -702,12 +1497,12 @@ data should always be inspected.</p>
 <span></span>
 <span><span class="co"># See effect of proportional bias on limits</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Confirm its effects in proportional bias check plot (should be horizontal now)</span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-2.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="log-transformation">Log transformation<a class="anchor" aria-label="anchor" href="#log-transformation"></a>
@@ -718,7 +1513,7 @@ mean. The interpretation is also easy because the differences (when back
 transformed) can be interpreted as ratios. The log transformation
 (natural base) can be accomplished with the <code>log_tf</code>
 argument.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># natural log transformation of responses</span></span>
@@ -729,11 +1524,13 @@ argument.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Ratio: x/y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068]    [0.9921, 1.0165] [0.9865, 1.0222]</span></span>
-<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088]    [0.9913, 1.0213]  [0.981, 1.0321]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068]    [0.9921, 1.0165]   [0.99, 1.0186]</span></span>
+<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088]    [0.9941, 1.0185] [0.9947, 1.0178]</span></span></code></pre></div>
 <p>If you prefer to interpret the differences as a percentage
 difference, you can do this by setting the <code>log_tf_display</code>
 argument to “sympercent”. This stands for the “symmetric percentage
@@ -741,7 +1538,7 @@ difference” which is the log transformed differences between the
 measures, <span class="math inline">\(s\% = (log(x)-log(y) ) \cdot 100\%
 = log(x/y) \cdot 100\%\)</span>, and can be interpreted as a percentage
 difference between the two paired measures.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># natural log transformation of responses</span></span>
@@ -753,11 +1550,13 @@ difference between the two paired measures.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Sympercent Difference between Methods (s%)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188 [0.1615, 0.6761]   [-0.7959, 1.6335] [-1.3562, 2.1938]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8747]   [-0.8705, 2.1074] [-1.9196, 3.1564]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.4188 [0.1615, 0.6761]   [-0.7959, 1.6335] [-1.0041, 1.8417]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8747]   [-0.5916, 1.8285] [-0.5288, 1.7656]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>
@@ -766,7 +1565,7 @@ difference between the two paired measures.</p>
 mean difference visualization may be less than ideal. In order to change
 the plots from showing the individual data points we can modify the
 <code>geom</code> argument.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -782,42 +1581,51 @@ the plots from showing the individual data points we can modify the
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-2.png" width="700"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-3.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-2.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
-<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-4.png" width="700"></p>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-3.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
+<span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-4.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-5.png" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-5.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-beran1987" class="csl-entry">
+Beran, Rudolf. 1987. <span>“Prepivoting to Reduce Level Error of
+Confidence Sets.”</span> <em>Biometrika</em> 74 (3): 457–68. <a href="https://doi.org/10.1093/biomet/74.3.457" class="external-link">https://doi.org/10.1093/biomet/74.3.457</a>.
+</div>
+<div id="ref-berger1996" class="csl-entry">
+Berger, Roger L., and Jason C. Hsu. 1996. <span>“Bioequivalence Trials,
+Intersection-Union Tests and Equivalence Confidence Sets.”</span>
+<em>Statistical Science</em> 11 (4): 283–319. <a href="https://doi.org/10.1214/ss/1032280304" class="external-link">https://doi.org/10.1214/ss/1032280304</a>.
+</div>
 <div id="ref-bland1986" class="csl-entry">
 Bland, J Martin, and Douglas G Altman. 1986. <span>“Statistical Methods
 for Assessing Agreement Between Two Methods of Clinical
 Measurement.”</span> <em>The Lancet</em> 327 (8476): 307–10. <a href="https://doi.org/10.1016/s0140-6736(86)90837-8" class="external-link">https://doi.org/10.1016/s0140-6736(86)90837-8</a>.
 </div>
 <div id="ref-bland1999" class="csl-entry">
-———. 1999. <span>“Measuring Agreement in Method Comparison
-Studies.”</span> <em>Statistical Methods in Medical Research</em> 8 (2):
-135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
+Bland, J Martin, and Douglas G Altman. 1999. <span>“Measuring Agreement
+in Method Comparison Studies.”</span> <em>Statistical Methods in Medical
+Research</em> 8 (2): 135–60. <a href="https://doi.org/10.1177/096228029900800204" class="external-link">https://doi.org/10.1177/096228029900800204</a>.
 </div>
 <div id="ref-donner2012closed" class="csl-entry">
 Donner, Allan, and GY Zou. 2012. <span>“Closed-Form Confidence Intervals
@@ -830,10 +1638,20 @@ Tolerate or to Agree: A Tutorial on Tolerance Intervals in Method
 Comparison Studies with BivRegBLS r Package.”</span> <em>Statistics in
 Medicine</em> 39 (28): 4334–49.
 </div>
+<div id="ref-howe1969" class="csl-entry">
+Howe, W. G. 1969. <span>“Two-Sided Tolerance Limits for Normal
+Populations<span></span>some Improvements.”</span> <em>Journal of the
+American Statistical Association</em> 64 (326): 610–20. <a href="https://doi.org/10.1080/01621459.1969.10500999" class="external-link">https://doi.org/10.1080/01621459.1969.10500999</a>.
+</div>
 <div id="ref-lmertest" class="csl-entry">
 Kuznetsova, Alexandra, Per B Brockhoff, and Rune HB Christensen. 2017.
 <span>“lmerTest Package: Tests in Linear Mixed Effects Models.”</span>
 <em>Journal of Statistical Software</em> 82: 1–26.
+</div>
+<div id="ref-loh1987" class="csl-entry">
+Loh, Wei-Yin. 1987. <span>“Calibrating Confidence Coefficients.”</span>
+<em>Journal of the American Statistical Association</em> 82 (397):
+155–62. <a href="https://doi.org/10.1080/01621459.1987.10478408" class="external-link">https://doi.org/10.1080/01621459.1987.10478408</a>.
 </div>
 <div id="ref-satterthwaite1946" class="csl-entry">
 Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
@@ -865,7 +1683,7 @@ Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

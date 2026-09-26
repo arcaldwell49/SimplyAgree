@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,55 @@
       <small>Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="simplyagree-031">SimplyAgree 0.3.1<a class="anchor" aria-label="anchor" href="#simplyagree-031"></a></h2>
+<ul><li>Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with “object ‘y’ not found” (<a href="https://github.com/arcaldwell49/SimplyAgree/issues/76" class="external-link">#76</a>).
+<ul><li>The data needed by the <code>plot</code> and <code>check</code> methods are now stored in the returned object itself, rather than as a formula that pointed back at the environment the analysis was run in.</li>
+</ul></li>
+<li>Fixed <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> prediction and tolerance limits when the model has a variance function (from <code>condition</code> or a user-supplied <code>weights</code>). The limits previously used <code>sigma(model)</code>, which is only the residual SD at the reference level of the variance function, so they were too narrow for other conditions or covariate values. The residual SD is now evaluated for each row of the limits (funnily caught when reviewing another manuscript!).
+<ul><li>
+<code>limits</code> gains an <code>SD</code> column with the residual SD used for each row.</li>
+<li>If the variance depends on <code>avg</code> (e.g., <code>weights = nlme::varPower(form = ~avg)</code>), the limits are reported at the minimum, median, and maximum of <code>avg</code>, even when <code>prop_bias = FALSE</code>.</li>
+</ul></li>
+<li>The <code>model</code> returned by <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> is now self-contained: its call stores the data, correlation structure, and variance function, and calls <code><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">nlme::gls</a></code>. <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code>, <code><a href="https://rdrr.io/pkg/nlme/man/getData.html" class="external-link">nlme::getData()</a></code>, and <code>emmeans()</code> now work on it outside of the function (previously they failed with errors like “object ‘var1’ not found”).</li>
+<li>Renamed the <code>tol_method</code> options of <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>: <code>"approx"</code> is now <code>"analytic"</code> (the default) and <code>"perc"</code> is now <code>"boot_cal"</code>. The old names still work but are deprecated.</li>
+<li>Fixed the parametric bootstrap used by <code>tolerance_limit(tol_method = "boot_cal")</code> (previously <code>"perc"</code>). <strong>Results for the bootstrap will change.</strong>
+<ul><li>Replicates are now simulated from the point estimates of the fitted model. Previously the coefficients were also drawn from their sampling distribution before adding residual noise, which roughly doubled the sampling variance of the bootstrapped bias and made the tolerance limits too wide.</li>
+<li>The simulated residuals now have the fitted covariance. Previously the within-subject correlation blocks were placed assuming each subject’s rows were contiguous (so data not sorted by <code>id</code> got correlation between the wrong rows), and the Cholesky factor was applied in the wrong orientation.</li>
+<li>The bootstrap is about 5 times faster: the covariance factorization is computed once, the bias and its standard error are computed directly from each refit instead of calling <code>emmeans</code>, and results are no longer accumulated with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>.</li>
+<li>
+<code>MASS</code> and <code>Matrix</code> are no longer imported.</li>
+</ul></li>
+<li>The tolerance limits from <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> now have a clearly defined target, set by the new <code>bound_type</code> argument, and both <code>tol_method</code> options estimate the same thing. <strong>Tolerance limits (<code>lower.TL</code>/<code>upper.TL</code>) will change</strong>; prediction limits do not.
+<ul><li>
+<code>bound_type = "joint"</code> (default): a beta-content, gamma-confidence tolerance interval (with confidence <code>tol_level</code>, at least <code>pred_level</code> of differences lie within the limits). The analytic limits use Howe’s approximation (unchanged for independent data). Previously the bootstrap took quantiles of the bootstrapped prediction limits, which targeted a different quantity.</li>
+<li>
+<code>bound_type = "iu"</code>: a one-sided <code>tol_level</code> bound on each of the lower and upper (1 -/+ <code>pred_level</code>)/2 percentiles, for an intersection-union test against a maximal allowable difference. The analytic bounds use the exact noncentral t for independent data and the MOVER otherwise.</li>
+<li>For clustered data, the analytic limits previously used the degrees of freedom of the bias for the residual variance, which was very conservative. The upper confidence bound for the residual SD now combines the between- and within-subject variance components with the MOVER under compound symmetry, and uses an effective degrees of freedom for other correlation structures.</li>
+<li>
+<code>"boot_cal"</code> is a bootstrap calibration of the analytic limits: the analytic limits are computed in each replicate over a range of nominal levels, and the level at which the replicates reach the target confidence is used (returned as <code>lower.TL.level</code>/<code>upper.TL.level</code>). Calibrating the raw bootstrap limits instead was liberal with few subjects, because the estimated correlation is treated as known.</li>
+<li>With <code>condition</code> and compound symmetry, the variance components of each condition are bounded using that condition’s cluster sizes and degrees of freedom (using those of the whole data set was liberal, about 0.93 coverage for a 95% target).</li>
+<li>In simulations (95% target, 10 to 20 subjects), the analytic limits had coverage of about 0.95 to 0.965 with compound symmetry (with or without <code>condition</code>) and AR(1) correlation. <code>"boot_cal"</code> is marked experimental: treating the estimated correlation as known, its coverage ranged from about 0.93 to 0.96 with 10 to 15 subjects, so the analytic limits are recommended.</li>
+<li>
+<code>limits</code> gains <code>SD.df</code> and <code>SD.upper</code> columns, and the printed output states what the tolerance limits claim.</li>
+</ul></li>
+<li>Added a <code>model</code> argument to <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>. <code>model = "lme"</code> fits a linear mixed model (<code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme</a></code>) with a random intercept for each <code>id</code> (which is then required), instead of the default marginal <code>gls</code> model.
+<ul><li>With compound symmetry and no variance function it gives the same fit and limits as <code>"gls"</code>.</li>
+<li>With <code>cor_type = "ar1"</code> or <code>"car1"</code>, the serial correlation is added to the residuals on top of the random intercept, so a persistent subject effect is kept. In simulations with a random subject effect and AR(1) residuals, the joint tolerance limits had coverage of about 0.95 with <code>"lme"</code> versus about 0.89 with <code>"gls"</code> (95% target).</li>
+<li>With <code>condition</code> or <code>weights</code>, the variance function applies to the residuals only, so the between-subject variance is common to all conditions.</li>
+<li>The degrees of freedom for the bias are the containment degrees of freedom, because emmeans’ Satterthwaite approximation can fail for <code>lme</code> models.</li>
+<li>The printed output names the model that was fit.</li>
+<li>With <code>model = "lme"</code>, <code>id</code> can name two nested levels, outer level first (e.g., <code>id = c("golfer", "club")</code>), for nested random intercepts. The tolerance limits combine the three variance components (outer, inner, and residual) with the MOVER, and <code>limits</code> gains an <code>SD.nested</code> column. In simulations, using the inner level alone as <code>id</code> gave limits that were too narrow (about 0.88 to 0.91 coverage for a 95% target), while nested random intercepts had about 0.96.</li>
+</ul></li>
+<li>Fixed <code>predict_varFunc()</code> (used internally by <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>) returning <code>NA</code> residual SDs for some groups when the data were a tibble.</li>
+<li>
+<code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> now reports the between- and within-subject components of the residual SD (<code>SD.between</code>, <code>SD.within</code>) under compound symmetry.</li>
+<li>Documented the model assumptions of <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>: autoregressive correlation (<code>"ar1"</code>, <code>"car1"</code>) has no persistent subject effect and can understate the uncertainty in the bias; with compound symmetry, variance functions also scale the between-subject covariance; only one level of clustering is supported; and a proportional bias slope can arise from unequal measurement error variances alone (also noted for <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>).</li>
+<li>Fixed <code>agreement_limit(data_type = "nest")</code> counting rows with a missing measurement, and dropping subjects with a single measurement, when computing the number of measurements, the number of subjects, and the harmonic mean cluster size used for the confidence bounds of the limits of agreement. These now match the data used to fit the mixed model. Results change only when the data have missing measurements or subjects with a single measurement.</li>
+<li>Corrected the formulas for the limits of agreement in the “Agreement &amp; Tolerance Limits” vignette to match the implementation (notably for <code>data_type = "reps"</code>, which uses separate within-subject variances for <code>x</code> and <code>y</code>).</li>
+<li>Added a <code>bound_type</code> argument to <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>. The default, <code>"iu"</code>, keeps the existing results: each confidence bound of the limits of agreement is a one-sided 1 - <code>alpha</code> bound (the outer end of a 1 - 2 * <code>alpha</code> interval), for an intersection-union test against a maximal allowable difference. <code>"joint"</code> uses 1 - <code>alpha</code>/2 per side (the outer ends of 1 - <code>alpha</code> intervals, the Bland-Altman convention), giving joint confidence for both limits. The printed output and plot caption now say which is shown.</li>
+<li>Added a <code>conf_level</code> argument to <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> for the confidence interval of the bias (<code>lower.CL</code>/<code>upper.CL</code>), which was previously fixed at 95%. The level is shown in the printed output.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="simplyagree-030">SimplyAgree 0.3.0<a class="anchor" aria-label="anchor" href="#simplyagree-030"></a></h2><p class="text-muted">CRAN release: 2026-01-21</p>
 <ul><li>Add enhanced support for Deming regression.
@@ -152,7 +201,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

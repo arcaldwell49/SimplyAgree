@@ -19,7 +19,7 @@ See vignettes for more details."><meta property="og:image" content="https://aaro
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,10 +77,13 @@ See vignettes for more details.</p>
 <span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pred_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  tol_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  tol_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"approx"</span>, <span class="st">"perc"</span><span class="op">)</span>,</span>
+<span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  tol_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"analytic"</span>, <span class="st">"boot_cal"</span><span class="op">)</span>,</span>
+<span>  bound_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"joint"</span>, <span class="st">"iu"</span><span class="op">)</span>,</span>
 <span>  prop_bias <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  log_tf_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ratio"</span>, <span class="st">"sympercent"</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gls"</span>, <span class="st">"lme"</span><span class="op">)</span>,</span>
 <span>  cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sym"</span>, <span class="st">"car1"</span>, <span class="st">"ar1"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  correlation <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -106,11 +109,11 @@ See vignettes for more details.</p>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
-<dd><p>Name of the column for the subject ID.</p></dd>
+<dd><p>Name of the column for the subject ID. With <code>model = "lme"</code>, two column names can be given for nested random intercepts, outer level first (e.g., <code>c("golfer", "club")</code> for clubs within golfers); see "Model assumptions" in details.</p></dd>
 
 
 <dt id="arg-condition">condition<a class="anchor" aria-label="anchor" href="#arg-condition"></a></dt>
-<dd><p>Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested.</p></dd>
+<dd><p>Name of the column indicating different conditions subjects were tested under. This can be left missing if there are no differing conditions to be tested. Supplying a condition adds a separate residual variance for each condition (<code><a href="https://rdrr.io/pkg/nlme/man/varIdent.html" class="external-link">nlme::varIdent</a></code>); see "Model assumptions" in details.</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
@@ -118,19 +121,27 @@ See vignettes for more details.</p>
 
 
 <dt id="arg-pred-level">pred_level<a class="anchor" aria-label="anchor" href="#arg-pred-level"></a></dt>
-<dd><p>Prediction level for the prediction interval. Default is 95%.</p></dd>
+<dd><p>Prediction level for the prediction interval, which is also the content (the proportion of differences to be covered, beta) for the tolerance limits. Default is 95%.</p></dd>
 
 
 <dt id="arg-tol-level">tol_level<a class="anchor" aria-label="anchor" href="#arg-tol-level"></a></dt>
-<dd><p>Tolerance level for the tolerance limit (i.e., the CI of the prediction limit). Default is 95%.</p></dd>
+<dd><p>Confidence level (gamma) for the tolerance limits. Default is 95%. See <code>bound_type</code> for what this confidence refers to.</p></dd>
+
+
+<dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
+<dd><p>Confidence level for the confidence interval of the bias (<code>lower.CL</code>/<code>upper.CL</code>). Default is 95%. This does not affect the prediction or tolerance limits. For a two one-sided tests (TOST) procedure on the bias at level alpha, use <code>conf_level = 1 - 2 * alpha</code> (e.g., 0.90).</p></dd>
 
 
 <dt id="arg-tol-method">tol_method<a class="anchor" aria-label="anchor" href="#arg-tol-method"></a></dt>
-<dd><p>Method for calculating the tolerance interval. Options are "approx" for a chi-square based approximation and "perc" for a parametric percentile bootstrap method.</p></dd>
+<dd><p>Method for calculating the tolerance limits. Options are "analytic" (default) for closed-form limits and "boot_cal" (experimental) for the closed-form limits calibrated by a parametric bootstrap. The analytic limits are recommended; see details. Both target the interval set by <code>bound_type</code>. The previous names, "approx" and "perc", are deprecated aliases for "analytic" and "boot_cal".</p></dd>
+
+
+<dt id="arg-bound-type">bound_type<a class="anchor" aria-label="anchor" href="#arg-bound-type"></a></dt>
+<dd><p>Which claim the tolerance limits (<code>lower.TL</code>/<code>upper.TL</code>) support. "joint" (default) gives a beta-content, gamma-confidence tolerance interval: with confidence <code>tol_level</code>, at least <code>pred_level</code> of all differences lie within the limits. "iu" gives equal-tailed bounds: a one-sided <code>tol_level</code> confidence bound on each of the (1 - <code>pred_level</code>)/2 and (1 + <code>pred_level</code>)/2 percentiles of the differences. The "iu" bounds are intended for an intersection-union test of agreement against a maximal allowable difference and are not a joint <code>tol_level</code> interval. See details.</p></dd>
 
 
 <dt id="arg-prop-bias">prop_bias<a class="anchor" aria-label="anchor" href="#arg-prop-bias"></a></dt>
-<dd><p>Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations.</p></dd>
+<dd><p>Whether to include a proportional bias term in the model. Determines whether proportional bias should be considered for the prediction/tolerance limits calculations. Note that a slope of the differences on the average can appear without any true proportional bias when the two methods have unequal measurement error variances; see "Model assumptions" in details.</p></dd>
 
 
 <dt id="arg-log-tf">log_tf<a class="anchor" aria-label="anchor" href="#arg-log-tf"></a></dt>
@@ -141,20 +152,24 @@ See vignettes for more details.</p>
 <dd><p>The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".</p></dd>
 
 
+<dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
+<dd><p>The type of model for the differences. "gls" (default) is a marginal generalized least squares model (<code><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">nlme::gls()</a></code>) with the correlation structure set by <code>cor_type</code>. "lme" is a linear mixed model (<code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme()</a></code>) with a random intercept for each <code>id</code>, which requires <code>id</code>; with two <code>id</code> columns it has nested random intercepts (outer level, and inner level within outer). With compound symmetry and no variance function both give the same fit; "lme" differs when serial correlation (<code>cor_type = "ar1"</code> or <code>"car1"</code>) or a variance function (<code>condition</code> or <code>weights</code>) is added, because it keeps a persistent subject effect and applies the variance function to the residuals only. See "Model assumptions" in details.</p></dd>
+
+
 <dt id="arg-cor-type">cor_type<a class="anchor" aria-label="anchor" href="#arg-cor-type"></a></dt>
-<dd><p>The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1.</p></dd>
+<dd><p>The type of correlation structure. "sym" is for Compound Symmetry, "car1" is for continuous autocorrelation structure of order 1, or "ar1" for autocorrelation structure of order 1. The autoregressive options ("ar1" and "car1") have no persistent subject effect; see "Model assumptions" in details. With <code>model = "lme"</code>, "sym" fits the random intercept alone, "ar1" and "car1" add serial correlation of the residuals within <code>id</code> on top of the random intercept, and "none" is not allowed.</p></dd>
 
 
 <dt id="arg-correlation">correlation<a class="anchor" aria-label="anchor" href="#arg-correlation"></a></dt>
-<dd><p>an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL.</p></dd>
+<dd><p>an optional corStruct object describing the within-group correlation structure that overrides the default setting. See the documentation of corClasses for a description of the available corStruct classes. If a grouping variable is to be used, it must be specified in the form argument to the corStruct constructor. Defaults to NULL. With <code>model = "lme"</code>, this is the correlation of the residuals within the innermost level of <code>id</code> (on top of the random intercepts) and must be grouped by it using the internal names: <code>id</code> for one level (e.g., <code>nlme::corAR1(form = ~ time | id)</code>) or <code>id/id_2</code> for two (e.g., <code>nlme::corAR1(form = ~ time | id/id_2)</code>).</p></dd>
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes.</p></dd>
+<dd><p>an optional varFunc object or one-sided formula describing the within-group heteroskedasticity structure that overrides the default setting. If given as a formula, it is used as the argument to varFixed, corresponding to fixed variance weights. See the documentation on varClasses for a description of the available varFunc classes. Variance covariates must use the internal column names (<code>avg</code>, <code>condition</code>, <code>x</code>, <code>y</code>, <code>time</code>) or <code>fitted(.)</code>. Currently <code>varIdent</code>, <code>varFixed</code>, <code>varExp</code>, and <code>varPower</code> are supported. If the variance depends on <code>avg</code>, the limits are reported at the minimum, median, and maximum of <code>avg</code> even when <code>prop_bias = FALSE</code>. With <code>model = "lme"</code>, the variance function applies to the residuals only; the random-intercept variance is common to all observations.</p></dd>
 
 
 <dt id="arg-keep-model">keep_model<a class="anchor" aria-label="anchor" href="#arg-keep-model"></a></dt>
-<dd><p>Logical indicator to retain the GLS model. Useful when working with large data and the model is very large.</p></dd>
+<dd><p>Logical indicator to retain the fitted model (<code>gls</code> or <code>lme</code>). Useful when working with large data and the model is very large.</p></dd>
 
 
 <dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
@@ -163,22 +178,46 @@ See vignettes for more details.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns single <code>tolerance_delta</code> class object with the results of the agreement analysis with a prediction interval and tolerance limits.</p><ul><li><p><code>limits</code>: A data frame containing the prediction/tolerance limits.</p></li>
-<li><p><code>model</code>: The GLS model; NULL if keep_model set to FALSE.</p></li>
+    <p>Returns single <code>tolerance_delta</code> class object with the results of the agreement analysis with a prediction interval and tolerance limits.</p><ul><li><p><code>limits</code>: A data frame containing the prediction/tolerance limits. Columns include <code>bias</code> (estimated mean difference), <code>SEM</code> (standard error of the bias), <code>SD</code> (residual standard deviation of a single difference at that row, from the variance function if one is in the model), <code>SEP</code> (standard error of prediction, <code>sqrt(SD^2 + SEM^2)</code>), <code>SD.df</code> (degrees of freedom of the residual variance), <code>SD.upper</code> (one-sided <code>tol_level</code> upper confidence bound for SD), <code>SD.between</code>/<code>SD.nested</code>/<code>SD.within</code> (between-subject, nested (inner level), and within-subject components of SD, under compound symmetry or with <code>model = "lme"</code>; <code>NA</code> otherwise, and <code>SD.nested</code> is <code>NA</code> without nesting), <code>lower.CL</code>/<code>upper.CL</code> (confidence limits for the bias), <code>lower.PL</code>/<code>upper.PL</code> (prediction limits), <code>lower.TL</code>/<code>upper.TL</code> (tolerance limits), and, for <code>tol_method = "boot_cal"</code>, <code>lower.TL.level</code>/<code>upper.TL.level</code> (the calibrated nominal levels at which the analytic limits were computed).</p></li>
+<li><p><code>model</code>: The fitted <code>gls</code> or <code>lme</code> model; NULL if keep_model set to FALSE. The data (with the internal column names <code>x</code>, <code>y</code>, <code>delta</code>, <code>avg</code>, <code>id</code> (the row number if not supplied), and, if supplied, <code>condition</code> and <code>time</code>), correlation structure, and variance function are stored with the model, so <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> and <code><a href="https://rdrr.io/pkg/nlme/man/getData.html" class="external-link">nlme::getData()</a></code> can be used on it directly.</p></li>
 <li><p><code>call</code>: The matched call.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The tolerance limits calculated in this function are based on the papers by Francq &amp; Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020).
-When <code>tol_method</code> is set to "approx", the tolerance limits are calculated using the approximation detailed in Francq et al. (2020).
-However, these are only an approximation and conservative.
-Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approach can be utilized to calculate percentile tolerance limits (<code>tol_method = "perc"</code>).</p>
+    <p>The tolerance limits calculated in this function are based on the papers by Francq &amp; Govaerts (2016), Francq, et al. (2019), and Francq, et al. (2020). The formulas, including how the degrees of freedom are determined for clustered data, are given in <code><a href="../articles/agreement_analysis.html">vignette("agreement_analysis", package = "SimplyAgree")</a></code>.</p>
+<p>The output contains three kinds of interval, which support different claims:</p><ul><li><p><strong>Prediction interval</strong> (<code>lower.PL</code>/<code>upper.PL</code>): a beta-expectation tolerance interval. It is expected to contain a single future difference, from a new subject, with probability <code>pred_level</code>, averaged over repeated studies. It is not a confidence statement: any single prediction interval may cover less than <code>pred_level</code> of the differences.</p></li>
+<li><p><strong>Tolerance limits, <code>bound_type = "joint"</code></strong> (<code>lower.TL</code>/<code>upper.TL</code>): a beta-content, gamma-confidence tolerance interval. With confidence <code>tol_level</code>, at least <code>pred_level</code> of all differences lie within the limits. If the limits lie within a maximal allowable difference of plus or minus delta, one can conclude (at level 1 - <code>tol_level</code>) that at least <code>pred_level</code> of the differences lie within plus or minus delta (Lin, 2000). The tails do not need to be split equally.</p></li>
+<li><p><strong>Tolerance limits, <code>bound_type = "iu"</code></strong>: a one-sided <code>tol_level</code> bound on the lower and on the upper (1 -/+ <code>pred_level</code>)/2 percentile of the differences, i.e., on the limits of agreement. If both bounds lie within plus or minus delta, one can reject, at level 1 - <code>tol_level</code>, that either limit of agreement lies outside plus or minus delta (intersection-union test). Both bounds hold together only about 1 - 2 * (1 - <code>tol_level</code>) of the time, so they should not be reported as a joint <code>tol_level</code> interval. These target the same quantities as the default confidence bounds from <code><a href="agreement_limit.html">agreement_limit()</a></code> (numerically close but not identical, because the models differ).</p></li>
+</ul><p>The "joint" and "iu" limits test different hypotheses (coverage versus each tail), so they do not nest: the "iu" bounds can be wider than the "joint" limits, and a skewed distribution can pass one test and fail the other.</p>
+<p>With <code>tol_method = "analytic"</code>:</p><ul><li><p>"joint" uses the approximation of Howe (1969) as described by Francq et al. (2020), with the standard error of prediction (SEP) in place of the sample standard deviation. For independent data this matches Howe's approximation exactly.</p></li>
+<li><p>"iu" uses the exact noncentral t bound for independent data, and otherwise the MOVER bound of Zou (2013).</p></li>
+<li><p>Both use a one-sided upper confidence bound for the residual standard deviation (SD). With independent data this is the usual chi-square bound. With compound symmetry (<code>cor_type = "sym"</code>), the between- and within-subject variance components are combined with the MOVER, as in <code><a href="agreement_limit.html">agreement_limit()</a></code> with <code>data_type = "nest"</code>. With other correlation structures, the bound uses an effective degrees of freedom (<code>SD.df</code>) from the approximate covariance of the variance parameters.</p></li>
+</ul><p>The analytic limits are exact for independent data (without a variance function). In simulations (95% target), they were close to nominal with compound symmetry (about 0.95, with 10 to 20 subjects) and with AR(1) correlation (about 0.95). With <code>condition</code> (a separate residual variance per condition) combined with compound symmetry, the variance components for each condition are bounded using that condition's cluster sizes and degrees of freedom; coverage was then about 0.96. Other variance functions (<code>weights</code>) use the cluster sizes of the whole data set and have not been checked by simulation.</p>
+<p>With <code>tol_method = "boot_cal"</code>, the analytic limits are calibrated by a parametric bootstrap (Loh, 1987; Beran, 1987). New data are simulated from the fitted model (Francq et al., 2019), the model is refit to each replicate, and the analytic limits are computed for each replicate over a range of nominal confidence levels. The level is chosen at which the replicates achieve the target confidence for the fitted model:</p><ul><li><p>"joint": a proportion <code>tol_level</code> of the replicate intervals contain at least <code>pred_level</code> of the fitted distribution of the differences.</p></li>
+<li><p>"iu": separately for each bound, a proportion <code>tol_level</code> of the replicate bounds lie beyond the fitted limit of agreement.</p></li>
+</ul><p>The limits for the observed data are the analytic limits at the calibrated levels, which are returned as <code>lower.TL.level</code> and <code>upper.TL.level</code>. <code>tol_method = "boot_cal"</code> is <strong>experimental</strong>. The calibration is judged against the fitted model, so it treats the estimated correlation as known. With few subjects this adds its own error: in simulations with 10 to 15 subjects (95% target), coverage ranged from about 0.93 (compound symmetry, with or without <code>condition</code>) to about 0.96 (AR(1) correlation), while the analytic limits were 0.95 to 0.965 in the same settings. The analytic limits are therefore recommended; the bootstrap may be useful as a check for models whose analytic limits have not been evaluated (e.g., other variance functions or <code>prop_bias = TRUE</code>).</p>
+<p>For clustered data (<code>id</code> supplied), all limits refer to a new difference from a new subject: the SD includes both the between- and within-subject variance.</p><div class="section">
+<h3 id="model-assumptions">Model assumptions<a class="anchor" aria-label="anchor" href="#model-assumptions"></a></h3>
+
+
+<p>With <code>model = "gls"</code> (default), the model is a marginal (generalized least squares) model fit with <code><a href="https://rdrr.io/pkg/nlme/man/gls.html" class="external-link">nlme::gls()</a></code>. For the default setup (<code>cor_type = "sym"</code> without a variance function), compound symmetry with a non-negative correlation gives the same likelihood as a random-intercept model, and targets the marginal distribution of a single difference from a randomly chosen subject. With <code>model = "lme"</code>, the model is a linear mixed model fit with <code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme()</a></code> with a random intercept for each <code>id</code>; with compound symmetry and no variance function it gives the same fit and limits. With <code>model = "lme"</code>, the degrees of freedom for the bias are the containment degrees of freedom (subjects - 1 for the models fit here), because the Satterthwaite approximation for <code>lme</code> models in emmeans can fail. The other options carry assumptions that should be checked:</p><ul><li><p><strong>Autoregressive correlation</strong> (<code>cor_type = "ar1"</code> or <code>"car1"</code>): with <code>model = "gls"</code>, the correlation between two measurements from the same subject decays towards zero as they get further apart in time. A persistent subject-specific bias (e.g., a subject by method interaction) instead makes all measurements from that subject equally correlated. When such an effect exists, the autoregressive structures miss most of the long-range correlation, so the standard error of the bias is too small and the limits are too narrow; the bootstrap does not correct this, because it simulates from the same model. In one simulation (20 subjects with 19 measurements each, and a random subject effect), the 95% confidence interval for the bias covered the true value 74% of the time with AR(1), versus 96% with compound symmetry. With <code>model = "lme"</code>, the serial correlation is added to the residuals on top of a random intercept, which keeps the persistent subject effect. In simulations with a random subject effect and AR(1) residuals (15 subjects, 8 measurements each; 95% target), coverage of the joint tolerance limits was about 0.89 with <code>model = "gls", cor_type = "ar1"</code> and about 0.95 with <code>model = "lme", cor_type = "ar1"</code>. Use the autoregressive options with <code>model = "gls"</code> only when no persistent subject effect is expected. The fits can be compared with <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC()</a></code> on the returned models (a REML comparison is valid because the fixed effects are the same).</p></li>
+<li><p><strong>Variance functions with compound symmetry</strong> (<code>condition</code>, or <code>weights</code> together with <code>cor_type = "sym"</code>): in <code>gls</code>, the correlation applies to the standardized residuals, so the covariance between two measurements from the same subject is rho * sigma_i * sigma_j. The between-subject variance therefore scales with the variance function (e.g., it is larger in a condition with a larger residual SD), rather than being common to all conditions. The marginal variance of each condition, which drives the limits, is not directly affected, but the standard error of each condition's bias and the reported variance components are. With <code>model = "lme"</code>, the variance function applies to the residuals only, and the between-subject variance is common to all conditions. In simulations where that was true (12 subjects; 95% target), the joint tolerance limits had coverage of about 0.96 with <code>model = "gls"</code> and about 0.97 with <code>model = "lme"</code>.</p></li>
+<li><p><strong>Clustering levels</strong>: <code>model = "gls"</code> has a single grouping factor (<code>id</code>). With <code>model = "lme"</code>, <code>id</code> can name two nested levels (e.g., <code>id = c("golfer", "club")</code> for shots with several clubs per golfer), giving random intercepts for the outer level and for the inner level within the outer level. Setting <code>id</code> to the inner level alone (e.g., a golfer-by-club identifier) should be avoided: it drops the correlation across inner levels within the same outer level, which understates the uncertainty. In simulations (15 subjects with 2 to 4 settings each; 95% target), the joint tolerance limits had coverage of about 0.88 to 0.91 with the inner level as <code>id</code>, versus about 0.96 with nested random intercepts. Grouping by the outer level only (<code>id = "golfer"</code>) also gave close to nominal coverage (about 0.96), because the inner-level variance is then absorbed into the residual; the nested model additionally reports the inner-level variance component (<code>SD.nested</code>). More than two levels are not supported.</p></li>
+<li><p><strong>Variance components</strong>: the SD of a single difference splits into between-subject (<code>SD.between</code>), inner-level (<code>SD.nested</code>, with two <code>id</code> columns), and within-subject (<code>SD.within</code>) components. With <code>model = "gls"</code> and compound symmetry these are sqrt(rho) * SD and sqrt(1 - rho) * SD; with <code>model = "lme"</code>, <code>SD.between</code> is the random-intercept SD and <code>SD.within</code> the residual SD. They can be used, for example, for the point estimate of limits for the mean of m measurements per subject, bias +/- z * sqrt(SD.between^2 + SD.within^2 / m) (without residual correlation), or for the between-subject floor of agreement. They are point estimates only.</p></li>
+<li><p><strong>Proportional bias</strong> (<code>prop_bias = TRUE</code>): a non-zero slope of the differences on the average can appear without any true proportional bias. Whenever the two methods have unequal measurement error variances, cov(difference, average) = (var(x) - var(y)) / 2 is not zero (Bland &amp; Altman, 1999), so the slope should not be read as proportional bias on its own. Errors-in-variables methods such as <code><a href="dem_reg.html">dem_reg()</a></code> or <code><a href="pb_reg.html">pb_reg()</a></code> are better suited to assessing proportional bias.</p></li>
+</ul></div>
+
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Francq, B. G., &amp; Govaerts, B. (2016). How to regress and predict in a Bland–Altman plot? Review and contribution based on tolerance intervals and correlated‐errors‐in‐variables models. Statistics in mMdicine, 35(14), 2328-2358.</p>
 <p>Francq, B. G., Lin, D., &amp; Hoyer, W. (2019). Confidence, prediction, and tolerance in linear mixed models. Statistics in Medicine, 38(30), 5603-5622.</p>
 <p>Francq, B. G., Berger, M., &amp; Boachie, C. (2020). To tolerate or to agree: A tutorial on tolerance intervals in method comparison studies with BivRegBLS R Package. Statistics in Medicine, 39(28), 4334-4349.</p>
+<p>Howe, W. G. (1969). Two-sided tolerance limits for normal populations—some improvements. Journal of the American Statistical Association, 64(326), 610-620.</p>
+<p>Lin, L. I. (2000). Total deviation index for measuring individual agreement with applications in laboratory performance and bioequivalence. Statistics in Medicine, 19(2), 255-270.</p>
+<p>Loh, W. Y. (1987). Calibrating confidence coefficients. Journal of the American Statistical Association, 82(397), 155-162.</p>
+<p>Beran, R. (1987). Prepivoting to reduce level error of confidence sets. Biometrika, 74(3), 457-468.</p>
+<p>Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical Methods in Medical Research, 22(6), 630-642.</p>
     </div>
 
     <div class="section level2">
@@ -188,7 +227,9 @@ Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approac
 <span class="r-in"><span><span class="co"># Simple</span></span></span>
 <span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% CI for Bias; 95% Prediction Interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance Limits: at least 95% of differences with 95% confidence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model: GLS, independent differences</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval Tolerance Limits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.4383 [-0.1669, 1.0436]   [-2.1998, 3.0764] [-2.993, 3.8697]</span>
@@ -198,12 +239,43 @@ Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approac
 <span class="r-in"><span><span class="co"># Nested</span></span></span>
 <span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 95% Prediction Interval with 95% Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% CI for Bias; 95% Prediction Interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance Limits: at least 95% of differences with 95% confidence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model: GLS, compound symmetry within id</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval   Tolerance Limits</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5572, 2.9664]   [-4.4687, 5.8779] [-8.6103, 10.0195]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5572, 2.9664]   [-4.4687, 5.8779] [-8.3471, 9.7562]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Nested, random intercept (mixed) model</span></span></span>
+<span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span>, model <span class="op">=</span> <span class="st">"lme"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% CI for Bias; 95% Prediction Interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance Limits: at least 95% of differences with 95% confidence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model: random intercept for each id (lme)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5511, 2.9603]    [-4.4548, 5.864] [-8.3471, 9.7562]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Nested random intercepts (e.g., measurements within settings within subjects)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">reps2</span> <span class="op">=</span> <span class="va">reps</span></span></span>
+<span class="r-in"><span><span class="va">reps2</span><span class="op">$</span><span class="va">setting</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">reps2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tolerance_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps2</span>, id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"setting"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                model <span class="op">=</span> <span class="st">"lme"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% CI for Bias; 95% Prediction Interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance Limits: at least 95% of differences with 95% confidence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model: nested random intercepts for id and setting within id (lme)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Bias           Bias CI Prediction Interval  Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.7046 [-1.5511, 2.9603]    [-4.4548, 5.864] [-8.3473, 9.7565]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -216,7 +288,7 @@ Therefore, as suggested by Francq, et al. (2019), a parametric bootstrap approac
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
