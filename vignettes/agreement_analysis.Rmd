@@ -155,7 +155,7 @@ The only required arguments are `x`, `y`, and `data`, which give the data frame 
 With `model = "gls"` (default), the differences follow a marginal generalized least squares model (`nlme::gls()`):
 
 $$
-d_{ij} = \mathbf{x}_{ij}^\top \boldsymbol{\beta} + e_{ij}, \qquad
+d_{ij} = \mathbf{x}_{ij}^\top \beta + e_{ij}, \qquad
 \text{Var}(e_{ij}) = \sigma^2 g_{ij}^2, \qquad
 \text{Cor}(e_{ij}, e_{ij'}) = R_{i, jj'}
 $$
@@ -165,7 +165,7 @@ where $g_{ij}$ is the variance function (1 without one) and $R_i$ is the correla
 With `model = "lme"`, the differences follow a linear mixed model (`nlme::lme()`) with a random intercept for each subject and, optionally, for each setting (inner level) within subject:
 
 $$
-d_{ijk} = \mathbf{x}_{ijk}^\top \boldsymbol{\beta} + u_i + v_{ij} + e_{ijk}, \qquad
+d_{ijk} = \mathbf{x}_{ijk}^\top \\beta + u_i + v_{ij} + e_{ijk}, \qquad
 u_i \sim N(0, \sigma_1^2), \quad v_{ij} \sim N(0, \sigma_2^2), \quad
 \text{Var}(e_{ijk}) = \sigma^2 g_{ijk}^2
 $$
@@ -173,7 +173,7 @@ $$
 where $v_{ij}$ is present only with two `id` columns, the variance function applies to the residuals only, and `cor_type = "ar1"` or `"car1"` adds serial correlation of the residuals within the innermost level. The variance of a single difference for a given row is
 
 $$
-S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2 .
+S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2
 $$
 
 The output reports the components as `SD.between` ($\hat\sigma_1$), `SD.nested` ($\hat\sigma_2$), and `SD.within` ($\hat\sigma g$). For `gls` with compound symmetry, `SD.between` $= \sqrt{\hat\rho}\, S$ and `SD.within` $= \sqrt{1 - \hat\rho}\, S$.
@@ -198,7 +198,7 @@ $$
 and the prediction interval is
 
 $$
-PI = b \pm t_{1-\alpha_1/2,\, df_b} \cdot SEP .
+PI = b \pm t_{1-\alpha_1/2,\, df_b} \cdot SEP
 $$
 
 This is a "beta-expectation" tolerance interval: on average over repeated studies, it contains a proportion $\beta$ of the differences. It is not a confidence statement.
@@ -210,13 +210,13 @@ Both kinds of tolerance limits need a one-sided upper confidence bound $S_U$, at
 **Independent data** (`gls` without `id`, or with `cor_type = "none"`): with $\nu$ the residual degrees of freedom ($N - p$ without a variance function),
 
 $$
-S_U = S \sqrt{\frac{\nu}{\chi^2_{\alpha_2, \nu}}} .
+S_U = S \sqrt{\frac{\nu}{\chi^2_{\alpha_2, \nu}}}
 $$
 
 **Variance components** (`gls` with compound symmetry, or `lme`): write $S^2 = \sum_j a_j$, where piece $j$ is estimated with $\nu_j$ degrees of freedom. Then
 
 $$
-S_U^2 = S^2 + \sqrt{\sum_j \left[ a_j \left( \frac{\nu_j}{\chi^2_{\alpha_2, \nu_j}} - 1 \right) \right]^2 } .
+S_U^2 = S^2 + \sqrt{\sum_j \left[ a_j \left( \frac{\nu_j}{\chi^2_{\alpha_2, \nu_j}} - 1 \right) \right]^2 }
 $$
 
 Pieces with zero degrees of freedom are dropped. The pieces are the balanced nested analysis of variance decomposition of $S^2$ into the variance of a subject mean and the remaining within-subject variation, generalized to unbalanced data and to residual correlation:
@@ -244,7 +244,7 @@ When `condition` is supplied, each condition has its own residual variance, and 
 **Other correlation structures** (`gls` with AR(1), continuous AR(1), or a user-specified structure): $S_U = S \sqrt{\nu / \chi^2_{\alpha_2, \nu}}$ with an effective degrees of freedom
 
 $$
-\nu = \frac{2 S^4}{\widehat{\text{Var}}(S^2)},
+\nu = \frac{2 \cdot S^4}{\widehat{\text{Var}}(S^2)}
 $$
 
 where $\widehat{\text{Var}}(S^2)$ comes from the delta method applied to the approximate covariance matrix of the variance parameters ($\log \hat\sigma$ and the variance function parameters) that `nlme` computes (`apVar`). If that matrix is not available, $df_b$ is used instead, with a warning.
@@ -258,7 +258,7 @@ See [Joint versus Intersection-Union (IU) Bounds] for when to use the joint or t
 The joint tolerance limits are a "beta-content", "gamma-confidence" tolerance interval: with confidence $\gamma$, at least a proportion $\beta$ of all differences lie within the limits. They use the approximation of @howe1969, as described by @francq2020tolerate:
 
 $$
-TI = b \pm z \cdot SEP \cdot \frac{S_U}{S} .
+TI = b \pm z \cdot SEP \cdot \frac{S_U}{S} 
 $$
 
 For independent data with only an intercept, $SEP = S \sqrt{1 + 1/n}$ and $S_U / S = \sqrt{(n-1)/\chi^2_{\alpha_2, n-1}}$, and this is exactly Howe's tolerance factor.
@@ -272,7 +272,7 @@ If both bounds lie within $\pm\Delta$, one can reject, at level $\alpha_2$, that
 **Independent data** (`gls` without a correlation structure): the bounds are exact, from the noncentral $t$ distribution,
 
 $$
-b \mp t'_{\gamma,\, \nu}\!\left(\frac{zS}{SEM}\right) SEM ,
+b \mp t'_{\gamma,\, \nu}\!\left(\frac{zS}{SEM}\right) SEM 
 $$
 
 where $t'_{\gamma, \nu}(\lambda)$ is the $\gamma$ quantile of a noncentral $t$ distribution with $\nu$ degrees of freedom and noncentrality $\lambda$. (When $\lambda > 37$, where the noncentral $t$ quantile is numerically unreliable, the MOVER bound below is used.)
@@ -280,15 +280,18 @@ where $t'_{\gamma, \nu}(\lambda)$ is the $\gamma$ quantile of a noncentral $t$ d
 **Otherwise**, the MOVER bound [@zou2011] combines the one-sided bounds for the bias and for $S$:
 
 $$
-L = (b - zS) - \sqrt{\left(t_{\gamma,\, df_b}\, SEM\right)^2 + z^2 \left(S_U - S\right)^2}, \qquad
-U = (b + zS) + \sqrt{\left(t_{\gamma,\, df_b}\, SEM\right)^2 + z^2 \left(S_U - S\right)^2} .
+H = \sqrt{\left(t_{\gamma,\, df_b}\, SEM\right)^2 + z^2 \left(S_U - S\right)^2}
+$$
+
+$$
+L = (b - zS) - H, \qquad U = (b + zS) + H
 $$
 
 ### Bootstrap calibration: `tol_method = "boot_cal"` (experimental)
 
 The bootstrap calibrates the nominal confidence level of the analytic limits [@loh1987; @beran1987]:
 
-1. **Simulate** $B$ (`replicates`) new data sets from the fitted model, using the point estimates: $\mathbf{d}^* = \mathbf{X}\hat{\boldsymbol\beta} + \mathbf{e}^*$, where $\mathbf{e}^*$ has the fitted marginal covariance. For subject $i$ this is $D_i R_i D_i$ for `gls` and $\hat\sigma_1^2 J + \hat\sigma_2^2 B_i + D_i R_i D_i$ for `lme`, where $D_i$ holds the residual SDs, $J$ is a matrix of ones, and $B_i$ has ones for pairs of measurements in the same setting.
+1. **Simulate** $B$ (`replicates`) new data sets from the fitted model, using the point estimates: $\mathbf{d}^* = \mathbf{X}\hat{\beta} + \mathbf{e}^*$, where $\mathbf{e}^*$ has the fitted marginal covariance. For subject $i$ this is $D_i R_i D_i$ for `gls` and $\hat\sigma_1^2 J + \hat\sigma_2^2 B_i + D_i R_i D_i$ for `lme`, where $D_i$ holds the residual SDs, $J$ is a matrix of ones, and $B_i$ has ones for pairs of measurements in the same setting.
 2. **Refit** the model to each data set, and compute the replicate bias $b^*$, SD $S^*$, SEM$^*$, and variance components (or effective degrees of freedom). Replicates whose model fails to converge are dropped, with a warning if more than 5% fail.
 3. **Calibrate.** For a nominal level $\lambda$, compute the analytic limits $L^*(\lambda)$ and $U^*(\lambda)$ in each replicate (reusing $df_b$ from the original fit). The fitted model plays the role of the truth, with differences distributed as $N(b, S^2)$.
     - `"joint"`: the coverage at level $\lambda$ is $C(\lambda) = \frac{1}{B} \sum \mathbb{1}\left\{ \Phi\!\left(\frac{U^* - b}{S}\right) - \Phi\!\left(\frac{L^* - b}{S}\right) \ge \beta \right\}$.
@@ -544,9 +547,19 @@ $$
 **MOVER Method**
 
 $$
-u = s_d^2 + \sqrt{\left[s_b^2 \left(\frac{n-1}{\chi^2_{\alpha, n-1}} - 1\right)\right]^2
-+ \left[\left(1-\frac{1}{m_{xh}}\right) s_{xw}^2 \left(\frac{N_x-n}{\chi^2_{\alpha, N_x-n}} - 1\right)\right]^2
-+ \left[\left(1-\frac{1}{m_{yh}}\right) s_{yw}^2 \left(\frac{N_y-n}{\chi^2_{\alpha, N_y-n}} - 1\right)\right]^2}
+u_1 = \left[s_b^2 \left(\frac{n-1}{\chi^2_{\alpha, n-1}} - 1\right)\right]^2
+$$
+
+$$
+u_2 = \left[\left(1-\frac{1}{m_{xh}}\right) s_{xw}^2 \left(\frac{N_x-n}{\chi^2_{\alpha, N_x-n}} - 1\right)\right]^2
+$$
+
+$$
+u_3 = \left[\left(1-\frac{1}{m_{yh}}\right) s_{yw}^2 \left(\frac{N_y-n}{\chi^2_{\alpha, N_y-n}} - 1\right)\right]^2
+$$
+
+$$
+u = s_d^2 + \sqrt{u_1 + u_2 + u_3}
 $$
 
 $$
