@@ -13,6 +13,7 @@ pb_reg(
   weights = NULL,
   error.ratio = 1,
   replicates = 0,
+  se_method = c("bootstrap", "jackknife", "dufey"),
   model = TRUE,
   keep_data = TRUE,
   ...
@@ -41,9 +42,25 @@ Should be NULL or a numeric vector.}
 \item{error.ratio}{Ratio of measurement error variances (var(x)/var(y)). Default is 1.
 This argument is ignored if subject identifiers are provided via \code{id}.}
 
-\item{replicates}{Number of bootstrap iterations for confidence intervals. If 0 (default),
-analytical confidence intervals are used. Bootstrap is recommended for weighted
-data and 'invariant' or 'scissors' methods.}
+\item{replicates}{Number of resamples for confidence intervals and the
+variance-covariance matrix. For \code{se_method = "bootstrap"} this is the number of
+bootstrap resamples; for \code{se_method = "jackknife"} it is the number of random
+delete-d subsets. If 0 (default), analytical confidence intervals are used and no
+variance-covariance matrix is returned (unless \code{se_method = "dufey"}). Resampling
+is recommended for weighted data and 'invariant' or 'scissors' methods.}
+
+\item{se_method}{Method used to estimate the variance-covariance matrix and
+confidence intervals of the coefficients. Options are:
+\itemize{
+\item "bootstrap": Nonparametric pairs (case) bootstrap with percentile
+confidence intervals (default). Used when \code{replicates > 0}.
+\item "jackknife": Delete-d jackknife with d = floor(n/2), using \code{replicates}
+random subsets (Shao & Wu, 1989). Used when \code{replicates > 0}.
+\item "dufey": \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Analytic sandwich
+estimator of Dufey (2020). Does not require resampling (\code{replicates} is
+ignored). Only available for the "scissors" method without case weights
+and with \code{error.ratio = 1}. See Details before using it for joint tests.
+}}
 
 \item{model}{Logical. If TRUE (default), the model frame is stored in the returned object.
 This is needed for methods like \code{plot()}, \code{fitted()}, \code{residuals()}, and \code{predict()} to work
@@ -62,7 +79,8 @@ The function returns a simple_eiv object with the following components:
 \item \code{residuals}: Residuals from the fitted model.
 \item \code{fitted.values}: Predicted Y values.
 \item \code{model_table}: Data frame presenting the full results from the Passing-Bablok regression.
-\item \code{vcov}: Variance-covariance matrix for slope and intercept (if bootstrap used).
+\item \code{vcov}: Variance-covariance matrix for slope and intercept (if resampling
+or \code{se_method = "dufey"} is used; otherwise NULL).
 \item \code{df.residual}: Residual degrees of freedom.
 \item \code{call}: The matched call.
 \item \code{terms}: The terms object used.
@@ -77,7 +95,10 @@ The function returns a simple_eiv object with the following components:
 \item \code{kendall_test}: Results of Kendall's tau correlation test.
 \item \code{cusum_test}: Results of CUSUM linearity test.
 \item \code{n_slopes}: Number of slopes used in estimation.
-\item \code{boot}: Bootstrap results (if replicates > 0).
+\item \code{boot}: Resampling results (if replicates > 0 and \code{se_method} is
+"bootstrap" or "jackknife").
+\item \code{se_method}: Method actually used for standard errors ("analytic",
+"bootstrap", "jackknife", or "dufey").
 }
 }
 \description{
@@ -133,14 +154,40 @@ measurement error weighting (controlled by \code{error.ratio}). Case weights all
 you to down-weight or up-weight specific observations in the analysis.
 }
 
-\subsection{Bootstrap}{
+\subsection{Standard Errors and Variance-Covariance Matrix}{
 
-Wild bootstrap resampling is used when \code{replicates > 0}. This is particularly
-useful for:
+The analytical (Passing & Bablok, 1983) confidence intervals do not provide a
+covariance between the intercept and slope, so a variance-covariance matrix
+(needed by \code{\link[=joint_test]{joint_test()}} and \code{\link[=plot_joint]{plot_joint()}}) is only returned when one of the
+following is used:
+\itemize{
+\item \strong{Pairs bootstrap} (\code{se_method = "bootstrap"}, \code{replicates > 0}): whole
+(x, y) observations are resampled with replacement and the model is refit.
+The variance-covariance matrix is the covariance of the bootstrap estimates
+and the confidence intervals are percentile intervals.
+\item \strong{Delete-d jackknife} (\code{se_method = "jackknife"}, \code{replicates > 0}): the
+model is refit on \code{replicates} random subsets that each leave out
+d = floor(n/2) observations. The delete-1 jackknife is inconsistent for
+median-type estimators such as Passing-Bablok; deleting d observations with
+\eqn{\sqrt{n}/d \to 0} restores consistency (Shao & Wu, 1989). Confidence
+intervals are Wald-type intervals using a t(n-2) quantile.
+\item \strong{Dufey (2020)} (\code{se_method = "dufey"}): an analytic, distribution-free
+estimator for the equivariant ("scissors") Passing-Bablok estimator, based on
+the U-statistic variance of Kendall's tau and a sandwich estimator for the
+intercept. The slope interval is formed from order statistics of the pairwise
+slopes and the intercept interval is Wald-type. \strong{This option is
+experimental.} In simulations its marginal standard errors were accurate
+for n >= 20, but joint tests of intercept and slope (\code{\link[=joint_test]{joint_test()}}) rejected
+a true null hypothesis about 7-11\% of the time at a nominal 5\%, suggesting the
+intercept-slope covariance is not yet reliable. Prefer the pairs bootstrap
+or delete-d jackknife for joint tests.
+}
+
+Resampling is particularly useful for:
 \itemize{
 \item Weighted regression (case weights or error.ratio != 1)
 \item Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)
-\item Small sample sizes
+\item Joint tests of intercept and slope
 }
 
 The method automatically:
@@ -165,6 +212,12 @@ model_rep <- pb_reg(method2 ~ method1, data = mydata, id = "subject_id")
 # With bootstrap confidence intervals
 model_boot <- pb_reg(method2 ~ method1, data = mydata,
                      error.ratio = 1.5, replicates = 1000)
+
+# Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix
+model_jack <- pb_reg(method2 ~ method1, data = mydata,
+                     se_method = "jackknife", replicates = 1000)
+model_dufey <- pb_reg(method2 ~ method1, data = mydata, se_method = "dufey")
+joint_test(model_dufey)
 
 # Symmetric method
 model_sym <- pb_reg(method2 ~ method1, data = mydata, method = "symmetric")
@@ -194,4 +247,16 @@ Clinical Chemistry and Laboratory Medicine,
 Bablok, W., Passing, H., Bender, R., & Schneider, B. (1988). A General Regression Procedure for Method Transformation. Application of Linear Regression Procedures for Method Comparison Studies in Clinical Chemistry, Part III.
 Clinical Chemistry and Laboratory Medicine,
 26(11). doi: 10.1515/cclm.1988.26.11.783
+
+Dufey, F. (2020). Derivation of Passing-Bablok regression from Kendall's tau.
+The International Journal of Biostatistics, 16(2), 20190157.
+doi: 10.1515/ijb-2019-0157
+
+Sen, P. K. (1968). Estimates of the regression coefficient based on
+Kendall's tau. Journal of the American Statistical Association, 63(324),
+1379-1389. doi: 10.1080/01621459.1968.10480934
+
+Shao, J., & Wu, C. F. J. (1989). A general theory for jackknife variance
+estimation. The Annals of Statistics, 17(3), 1176-1197.
+doi: 10.1214/aos/1176347263
 }

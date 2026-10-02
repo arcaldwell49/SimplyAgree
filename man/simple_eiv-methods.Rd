@@ -49,6 +49,7 @@ plot_joint(x, ...)
   ideal_intercept = 0,
   show_intervals = TRUE,
   n_points = 100,
+  test_method = c("F", "asymptotic"),
   ...
 )
 
@@ -100,6 +101,9 @@ either a vector of numbers or a vector of names. If missing, all parameters are 
 \item{ideal_intercept}{The hypothesized intercept value to test against (default = 0)}
 
 \item{show_intervals}{Logical. If TRUE, shows individual confidence intervals as well.}
+
+\item{test_method}{Reference distribution for the ellipse and test. \code{"F"} (default)
+uses the finite-sample F(2, n-2) distribution. \code{"asymptotic"} uses chi-squared(2).}
 
 \item{type}{Type of residuals to return. Options are "optimized" (default), "x", "y", or "raw_y".}
 

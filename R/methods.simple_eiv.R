@@ -199,9 +199,19 @@ summary.simple_eiv <- function(object, ...) {
     #}
 
     # Bootstrap info
-    if (!is.null(object$replicates) && object$replicates > 0) {
+    se_method <- if (!is.null(object$se_method)) object$se_method else "analytic"
+    if (se_method == "dufey") {
       cat("\n")
-      cat(sprintf("Bootstrap CIs based on %d resamples\n", object$replicates))
+      cat("Analytic SEs and CIs (Dufey, 2020)\n")
+    } else if (!is.null(object$replicates) && object$replicates > 0) {
+      cat("\n")
+      if (se_method == "jackknife") {
+        cat(sprintf("Delete-d jackknife CIs (d = %d) based on %d subsets\n",
+                    as.integer(floor((object$df.residual + 2) / 2)),
+                    object$replicates))
+      } else {
+        cat(sprintf("Pairs bootstrap CIs based on %d resamples\n", object$replicates))
+      }
     }
   }
 

@@ -3,6 +3,10 @@
 # SimplyAgree 0.3.1
 
 - Added `ccc_test` function for concordance correlation coefficient hypothesis testing, returning an `htest` object.
+- Fixed the Passing-Bablok (`pb_reg`) bootstrap. The previous wild bootstrap perturbed the observed values rather than the fitted values, so resampled points never crossed the regression line; standard errors were roughly 4-5 times too small and joint tests rejected a true null hypothesis 80-95% of the time in simulations. `pb_reg` now uses a nonparametric pairs (case) bootstrap by default.
+- Added a `se_method` argument to `pb_reg`: `"bootstrap"` (pairs bootstrap, default), `"jackknife"` (delete-d jackknife with d = n/2; Shao & Wu, 1989), and `"dufey"` (experimental; analytic variance-covariance matrix for the scissors estimator; Dufey, 2020). Standard errors in the model table are now taken from the variance-covariance matrix when one is available.
+- Fixed the tie correction in the analytic `pb_reg` slope confidence interval. The correction for tied x values was subtracted after taking the square root of the variance of Kendall's S rather than inside it, which made intervals too narrow when x contained ties (simulated coverage fell to 72% at n = 80 with rounded data; now ~95%). The same tie-corrected variance is now also used for `ci_slopes`.
+- Fixed `pb_reg` reporting `reject_h0 = TRUE` when a confidence interval collapsed onto the null value (common with coarsely rounded data), due to floating-point error in `tan(pi/4)`.
 - Fixed `joint_test` and `plot_joint` to use the finite-sample F(2, n-2) reference distribution (Sadler, 2010) instead of the asymptotic chi-squared(2) approximation. The previous chi-squared approach was anti-conservative for small samples. A `test_method` argument allows selecting `"F"` (default) or `"asymptotic"` (old behavior).
 
 # SimplyAgree 0.3.0
