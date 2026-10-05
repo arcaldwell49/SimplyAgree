@@ -34,7 +34,7 @@ for details.
 }
 \value{
 \describe{
-\item{\code{print}}{Prints short summary of the tolerance limits.}
+\item{\code{print}}{Prints short summary of the tolerance limits, with the SD of the differences (coefficient of variation when log-transformed). If the SD differs between rows of the limits (e.g., by condition), it is shown as a column instead. For clustered models, the between- and within-subject SDs are also printed.}
 \item{\code{plot}}{Returns a plot of the tolerance limits.}
 \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
 }

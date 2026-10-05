@@ -943,3 +943,52 @@ test_that("Checked against BivRegBLS", {
   expect_equivalent(test1$limits$bias, .4383,
                tolerance = .001)
 } )
+
+test_that("print reports the SD of the differences", {
+  data(temps)
+  temps2 = temps
+  temps2$x = temps$trec_pre
+  temps2$y = temps$teso_pre
+
+  t1 = tolerance_limit(temps2, x = "x", y = "y", cor_type = "none")
+  expect_output(print(t1), "SD of Differences = ")
+  expect_output(print(t1), as.character(round(t1$limits$SD[1], 4)), fixed = TRUE)
+
+  # same SD as agreement_limit for independent data
+  a1 = agreement_limit(data = temps2, x = "x", y = "y")
+  expect_equal(t1$limits$SD[1], a1$loa$sd_delta[1], tolerance = 1e-5)
+
+  tl = tolerance_limit(temps2, x = "x", y = "y", cor_type = "none",
+                       log_tf = TRUE)
+  expect_output(print(tl), "Coefficient of Variation (%)", fixed = TRUE)
+
+  # objects created before the SD column existed still print
+  t_old = t1
+  t_old$limits$SD = NULL
+  out = capture.output(print(t_old))
+  expect_false(any(grepl("SD of Differences", out)))
+})
+
+test_that("print shows the SD as a column when it varies by condition", {
+  set.seed(2)
+  n = 40
+  d1 = data.frame(id = rep(1:n, 2), condition = rep(c("A", "B"), each = n))
+  d1$x = rnorm(2 * n, 100, 10)
+  d1$y = d1$x + rnorm(2 * n, 0, ifelse(d1$condition == "A", 1, 5))
+  t1 = tolerance_limit(d1, x = "x", y = "y", condition = "condition",
+                       cor_type = "none")
+  out = capture.output(print(t1))
+  expect_true(any(grepl("Bias CI +SD +Prediction Interval", out)))
+  expect_false(any(grepl("SD of Differences", out)))
+})
+
+test_that("print shows the variance components for clustered data", {
+  set.seed(11)
+  ng = 20; k = 5
+  d = data.frame(id = rep(1:ng, each = k))
+  d$x = rnorm(ng * k, 100, 10)
+  d$y = d$x - 0.8 - rnorm(ng, 0, 0.5)[d$id] - rnorm(ng * k, 0, 1)
+  t1 = tolerance_limit(d, x = "x", y = "y", id = "id")
+  expect_output(print(t1), "Between-Subject SD = ")
+  expect_output(print(t1), "Within-Subject SD = ")
+})

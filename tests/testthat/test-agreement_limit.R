@@ -116,3 +116,50 @@ test_that("subjects with a single measurement count in the nested LoA", {
                nest_loa_by_hand(single, "mover"),
                tolerance = 1e-6)
 })
+
+test_that("print shows the within-subject SDs for replicate data", {
+  data("reps")
+  a1 = agreement_limit(x = "x", y = "y", data = reps, id = "id",
+                       data_type = "reps")
+  expect_output(print(a1), "Within-Subject SDs of X & Y = ")
+  expect_output(print(a1),
+                as.character(round(sqrt(a1$loa$within_variance_x[1]), 4)),
+                fixed = TRUE)
+
+  a2 = agreement_limit(x = "x", y = "y", data = reps, id = "id",
+                       data_type = "reps", log_tf = TRUE)
+  expect_output(print(a2), "(log scale)", fixed = TRUE)
+
+  a3 = agreement_limit(x = "x", y = "y", data = reps, id = "id",
+                       data_type = "nest")
+  out = capture.output(print(a3))
+  expect_false(any(grepl("Within-Subject SDs", out)))
+})
+
+test_that("reps within-subject variances are pooled over each method's own replicates", {
+  set.seed(42)
+  d = do.call(rbind, lapply(1:8, function(i) {
+    mu = rnorm(1, 50, 5)
+    data.frame(id = i, x = mu + rnorm(4, 0, 1), y = mu + 0.5 + rnorm(4, 0, 2))
+  }))
+  # unbalanced: id 1 has a single y, id 2 a single x
+  d$y[d$id == 1][-1] = NA
+  d$x[d$id == 2][-1] = NA
+
+  a1 = agreement_limit(x = "x", y = "y", data = d, id = "id",
+                       data_type = "reps")
+
+  # one-way ANOVA residual mean square of each method on id
+  dx = d[!is.na(d$x), ]
+  dy = d[!is.na(d$y), ]
+  expect_equal(a1$loa$within_variance_x[1],
+               sigma(lm(x ~ factor(id), data = dx))^2, tolerance = 1e-8)
+  expect_equal(a1$loa$within_variance_y[1],
+               sigma(lm(y ~ factor(id), data = dy))^2, tolerance = 1e-8)
+
+  # no replicates for a method is an error rather than a zero variance
+  d1 = d[!duplicated(d$id), ]
+  expect_error(agreement_limit(x = "x", y = "y", data = d1, id = "id",
+                               data_type = "reps"),
+               "requires replicate measurements")
+})

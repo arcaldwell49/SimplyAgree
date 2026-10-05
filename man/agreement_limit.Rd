@@ -71,7 +71,7 @@ or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (\cod
 The confidence bounds on the limits of agreement answer one of two questions, set by \code{bound_type}:
 \itemize{
 \item "iu" (default): "Can I conclude agreement within plus or minus delta?" If \code{lower_loa_ci} > -delta and \code{upper_loa_ci} < delta, reject at level \code{alpha} that either limit of agreement lies outside plus or minus delta. \code{conf.level} (1 - \code{alpha}) applies to each side separately; both bounds hold together only about 1 - 2 * \code{alpha} of the time.
-\item "joint": "Where are the limits of agreement?" With at least 1 - \code{alpha} confidence, both limits of agreement lie within . Used as a test against plus or minus delta, the error rate is at most \code{alpha}/2 (conservative).
+\item "joint": "Where are the limits of agreement?" With at least 1 - \code{alpha} confidence, both limits of agreement lie between \code{lower_loa_ci} and \code{upper_loa_ci}. Used as a test against plus or minus delta, the error rate is at most \code{alpha}/2 (conservative).
 }
 
 Because a one-sided bound on the (1 - \code{agree.level})/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as \code{tolerance_limit(bound_type = "iu")}.

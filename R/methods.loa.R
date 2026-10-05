@@ -173,11 +173,14 @@ print.loa <- function(x,
   cat("\n")
   if(call2$data_type == "reps"){
     var_print2 = paste0(
-      "Within-Subject Variances of X & Y = ",
-      round(x$loa$within_variance_x[1],digits=digits),
+      "Within-Subject SDs of X & Y = ",
+      round(sqrt(x$loa$within_variance_x[1]),digits=digits),
       " & ",
-      round(x$loa$within_variance_y[1],digits=digits)
+      round(sqrt(x$loa$within_variance_y[1]),digits=digits),
+      if(call2$log_tf) " (log scale)"
     )
+    cat(var_print2, sep = "")
+    cat("\n")
   }
 
 }

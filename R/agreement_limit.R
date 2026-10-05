@@ -30,7 +30,7 @@
 #' The confidence bounds on the limits of agreement answer one of two questions, set by `bound_type`:
 #'
 #'   - "iu" (default): "Can I conclude agreement within plus or minus delta?" If `lower_loa_ci` > -delta and `upper_loa_ci` < delta, reject at level `alpha` that either limit of agreement lies outside plus or minus delta. `conf.level` (1 - `alpha`) applies to each side separately; both bounds hold together only about 1 - 2 * `alpha` of the time.
-#'   - "joint": "Where are the limits of agreement?" With at least 1 - `alpha` confidence, both limits of agreement lie within [`lower_loa_ci`, `upper_loa_ci`]. Used as a test against plus or minus delta, the error rate is at most `alpha`/2 (conservative).
+#'   - "joint": "Where are the limits of agreement?" With at least 1 - `alpha` confidence, both limits of agreement lie between `lower_loa_ci` and `upper_loa_ci`. Used as a test against plus or minus delta, the error rate is at most `alpha`/2 (conservative).
 #'
 #' Because a one-sided bound on the (1 - `agree.level`)/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as `tolerance_limit(bound_type = "iu")`.
 #' The bias confidence interval (`lower.CL`/`upper.CL`) is always a two-sided 1 - `alpha` interval.
@@ -331,7 +331,7 @@ calc_loa_reps = function(df,
   alpha_u = (1 - side.level)
   conf2 = 1 - (1 - conf.level) * 2
 
-  df2 = df %>%
+  df_sub = df %>%
     group_by(id) %>%
     summarize(mxi = base::sum(!is.na(x)),
               myi = base::sum(!is.na(y)),
@@ -343,11 +343,21 @@ calc_loa_reps = function(df,
     mutate(d = x_bar-y_bar,
            avg = (x_bar+y_bar)/2)
 
-  df3 = df2 %>%
-    drop_na()
+  # Pooled within-subject variance of each method: each subject adds m_i - 1
+  # df, so a subject with a single measurement of one method adds nothing to
+  # that method and keeps its replicates of the other
+  dfx = base::sum(pmax(df_sub$mxi - 1, 0))
+  dfy = base::sum(pmax(df_sub$myi - 1, 0))
+  if(dfx == 0 || dfy == 0){
+    stop("data_type = 'reps' requires replicate measurements of both x and y for at least one id.")
+  }
+  sxw2 = base::sum((df_sub$mxi - 1) * df_sub$x_var, na.rm = TRUE) / dfx
+  syw2 = base::sum((df_sub$myi - 1) * df_sub$y_var, na.rm = TRUE) / dfy
 
-  Nx = base::sum(df2$mxi)
-  Ny = base::sum(df2$myi)
+  # subjects measured by both methods give the mean differences
+  df2 = df_sub %>%
+    dplyr::filter(mxi > 0, myi > 0)
+
   mxh = nrow(df2)/base::sum(1/df2$mxi)
   myh = nrow(df2)/base::sum(1/df2$myi)
 
@@ -367,8 +377,6 @@ calc_loa_reps = function(df,
       as.data.frame() %>%
       rename(bias = emmean)
 
-    sxw2 = base::sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
-    syw2 = base::sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
     d_bar = base::mean(df2$d, na.rm = TRUE)
     d_var = sigma(model)^2
     between_variance = d_var
@@ -377,8 +385,6 @@ calc_loa_reps = function(df,
   } else{
     form1 = as.formula(d ~ 1 )
     model = lm(form1, data = df2)
-    sxw2 = base::sum((df3$mxi-1)/(Nx-nrow(df3))*df3$x_var)
-    syw2 = base::sum((df3$myi-1)/(Ny-nrow(df3))*df3$y_var)
     d_var = sigma(model)^2
     between_variance = d_var
     total_variance = d_var + (1-1/mxh)*sxw2 + (1-1/myh)*syw2
@@ -397,8 +403,8 @@ calc_loa_reps = function(df,
   # LoA Variance ----
   loa_var = (between_variance/n_sub) + agreeq^2 / (2*total_variance) *
     ((between_variance)^2/(n_sub-1) + (1 - 1/mxh)^2 *
-       (sxw2)^2/(Nx-n_sub) + (1 - 1/myh)^2 *
-       (syw2)^2/(Ny-n_sub))
+       (sxw2)^2/dfx + (1 - 1/myh)^2 *
+       (syw2)^2/dfy)
 
   # LoA -------
   if(loa_calc == "blandaltman"){
@@ -425,8 +431,8 @@ calc_loa_reps = function(df,
 
     # MOVER Components -----
     move_u_1 = (d_var*(1-(n_sub-1)/(qchisq(alpha_u,n_sub-1))))^2
-    move_u_2 = ((1-1/mxh)*sxw2*(1-(Nx-n_sub)/(qchisq(alpha_u,Nx-n_sub))))^2
-    move_u_3 = ((1-1/myh)*syw2*(1-(Ny-n_sub)/(qchisq(alpha_u,Ny-n_sub))))^2
+    move_u_2 = ((1-1/mxh)*sxw2*(1-dfx/(qchisq(alpha_u,dfx))))^2
+    move_u_3 = ((1-1/myh)*syw2*(1-dfy/(qchisq(alpha_u,dfy))))^2
     move_u = total_variance + sqrt(move_u_1+move_u_2+move_u_3)
 
     # LME -----

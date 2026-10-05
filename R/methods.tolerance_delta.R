@@ -10,7 +10,7 @@
 #'   \code{\link{tolerance_limit}}.
 #' @return
 #' \describe{
-#'   \item{\code{print}}{Prints short summary of the tolerance limits.}
+#'   \item{\code{print}}{Prints short summary of the tolerance limits, with the SD of the differences (coefficient of variation when log-transformed). If the SD differs between rows of the limits (e.g., by condition), it is shown as a column instead. For clustered models, the between- and within-subject SDs are also printed.}
 #'   \item{\code{plot}}{Returns a plot of the tolerance limits.}
 #'   \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
 #' }
@@ -185,17 +185,45 @@ print.tolerance_delta <- function(x,
     }
 
   }
-  #var_print = switch(ifelse(call2$log_tf,"log","norm"),
-  #                   "log" = paste0(
-  #                     "Coefficient of Variation (%) = ",
-  #                     round((exp(x$limits$SEP[1])-1)*100,digits=digits)
-  #                   ),
-  #                   "norm" =  paste0(
-  #                     "Standard Error of Prediction = ",
-  #                     round(x$limits$SEP[1],digits=digits)
-  #                   ))
-
-
+  # SD of a new difference (CV on the log scale, as in print.loa); a single
+  # line when constant, otherwise a column next to each row of the limits
+  sds = df_tolerance_delta$SD
+  sd_varies = !is.null(sds) && length(unique(round(sds, 10))) > 1
+  sd_label = if(call2$log_tf) "CV (%)" else "SD"
+  sd_disp = if(is.null(sds) || !call2$log_tf){
+    sds
+  } else if(call2$log_tf_display == "ratio"){
+    (exp(sds) - 1) * 100
+  } else {
+    sds * 100
+  }
+  var_print = NULL
+  comp_print = NULL
+  if(sd_varies){
+    cols = colnames(pr_table3)
+    pos = match("Bias CI", cols)
+    pr_table3[[sd_label]] = round(sd_disp, digits = digits)
+    pr_table3 = pr_table3[, c(cols[1:pos], sd_label, cols[-(1:pos)])]
+  } else if(!is.null(sds)){
+    var_print = if(call2$log_tf){
+      paste0("Coefficient of Variation (%) = ", round(sd_disp[1], digits = digits))
+    } else {
+      paste0("SD of Differences = ", round(sds[1], digits = digits))
+    }
+    sd_b = df_tolerance_delta$SD.between
+    if(!is.null(sd_b) && !is.na(sd_b[1])){
+      sd_n = df_tolerance_delta$SD.nested
+      comp_print = paste0(
+        "Between-Subject SD = ", round(sd_b[1], digits = digits),
+        if(!is.null(sd_n) && !is.na(sd_n[1])) {
+          paste0("; Nested SD = ", round(sd_n[1], digits = digits))
+        },
+        "; Within-Subject SD = ",
+        round(df_tolerance_delta$SD.within[1], digits = digits),
+        if(call2$log_tf) " (log scale)"
+      )
+    }
+  }
 
   cat(title1, sep = "")
   cat("\n")
@@ -204,7 +232,14 @@ print.tolerance_delta <- function(x,
   cat("\n")
   print(pr_table3, digits = digits, row.names = FALSE)
   cat("\n")
-  #cat(var_print, sep = "")
+  if(!is.null(var_print)){
+    cat(var_print, sep = "")
+    cat("\n")
+  }
+  if(!is.null(comp_print)){
+    cat(comp_print, sep = "")
+    cat("\n")
+  }
   cat("\n")
 
 }
