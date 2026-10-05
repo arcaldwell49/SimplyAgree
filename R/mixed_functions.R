@@ -113,7 +113,8 @@ simple_mix_plot = function(x,
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
     }
     if(smooth_method == "gam"){
-      if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
+      if (requireNamespace("mgcv", quietly = TRUE) &&
+          requireNamespace("ggeffects", quietly = TRUE)) {
 
 
           gam1 = mgcv::gam(data = df_plt,

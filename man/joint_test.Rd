@@ -12,6 +12,7 @@ joint_test(object, ...)
   ideal_intercept = 0,
   ideal_slope = 1,
   conf.level = 0.95,
+  test_method = c("F", "asymptotic"),
   ...
 )
 }
@@ -25,12 +26,18 @@ joint_test(object, ...)
 \item{ideal_slope}{The hypothesized slope value (default: 1).}
 
 \item{conf.level}{Confidence level for the test (default: 0.95).}
+
+\item{test_method}{Reference distribution for the test. \code{"F"} (default)
+uses the finite-sample F(2, n-2) distribution per Sadler (2010).
+\code{"asymptotic"} uses the chi-squared(2) distribution, which is the
+large-sample approximation. The two converge for large n.}
 }
 \value{
 An object of class \code{htest} containing:
 \describe{
-\item{statistic}{The Mahalanobis distance (chi-squared distributed with df=2).}
-\item{parameter}{Degrees of freedom (always 2).}
+\item{statistic}{The Mahalanobis distance.}
+\item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
+\code{df2}; for the asymptotic test, \code{df} (always 2).}
 \item{p.value}{The p-value for the test.}
 \item{conf.int}{The confidence level used.}
 \item{estimate}{Named vector of estimated intercept and slope.}
@@ -48,10 +55,16 @@ and slope=1 for method comparison studies).
 \details{
 The test computes the Mahalanobis distance between the estimated coefficients
 and the hypothesized values using the variance-covariance matrix of the
-estimates. Under the null hypothesis, this distance follows a chi-squared
-distribution with 2 degrees of freedom.
+estimates. By default, the finite-sample F(2, n-2) reference distribution
+is used (Sadler, 2010), which is more conservative than the asymptotic
+chi-squared(2) approximation for small samples.
 
 For Deming regression, the variance-covariance matrix is computed via
 jackknife. For Passing-Bablok regression, bootstrap resampling must have
 been performed (i.e., \code{boot_ci = TRUE} in the original call).
+}
+\references{
+Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
+parametric regression in method-comparison studies. \emph{Accreditation and Quality
+Assurance}, 15, 547-554.
 }
