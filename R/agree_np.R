@@ -264,21 +264,11 @@ agree_np <- function(x,
   # function name will be: as.character(call2[[1]])
   lm_mod = plot_frame(y = df$y, x = df$x)
   call2 = match.call()
-  if(is.null(call2$agree.level)){
-    call2$agree.level = agree.level
-  }
-
-  if(is.null(call2$conf.level)){
-    call2$conf.level = conf.level
-  }
-
-  if(is.null(call2$prop_bias)){
-    call2$prop_bias = prop_bias
-  }
-
-  if(is.null(call2$TOST)){
-    call2$TOST = TOST
-  }
+  call2$agree.level = agree.level
+  call2$conf.level = conf.level
+  call2$prop_bias = prop_bias
+  call2$TOST = TOST
+  call2$delta = delta
   call2$lm_mod = lm_mod
   # Return Results ----
 
