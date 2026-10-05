@@ -118,10 +118,11 @@ limits”. Typically a 95% prediction interval is calculated which
 provides the predicted difference between two measuring systems for 95%
 of future measurements pairs. However, we have to account for sampling
 error so we also need to estimate the confidence in the prediction
-intervals, and therefore we calculate the tolerance limits. So, when we
-have 95% tolerance limits for a 95% prediction interval, we can conclude
-that there is only a 5% probability (1-tolerance) that our tolerance
-limits do not contain the *true* prediction interval/limit.
+intervals, and therefore we calculate the tolerance limits. So, with 95%
+tolerance limits for a 95% prediction interval (the default,
+`bound_type = "joint"`), we can be 95% confident that at least 95% of
+all differences between the two measuring systems lie within the
+tolerance limits.
 
 ### Rectal Temperature
 
@@ -131,12 +132,10 @@ need to identify the columns with the right information using the
 data set using the `data` argument. Lastly, we specify the specifics of
 the conditions for how the limits are calculated. For this specific
 analysis I decided to calculate 95% prediction intervals with 95%
-tolerance limits, and I will use percentile bootstrap confidence
-intervals.
+tolerance limits, using the default analytic tolerance limits.
 
 ``` r
 
-# note: more accurate tolerance limits are given by tol_method = "perc"
 rec.post_tol = tolerance_limit(
   data = df_rec.post,
   x = "PM",
@@ -153,12 +152,14 @@ exercise, are providing the same conclusion (poor agreement).
 
 print(rec.post_tol)
 #> Agreement between Measures (Difference: x-y)
-#> 95% Prediction Interval with 95% Tolerance Limits
+#> 95% CI for Bias; 95% Prediction Interval
+#> Tolerance Limits: at least 95% of differences with 95% confidence
+#> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 0.255 [0.0804, 0.4296]   [-0.3242, 0.8342] [-0.5239, 1.0339]
-#>    33C/5.5 0.254 [0.0964, 0.4116]   [-0.3142, 0.8222] [-0.4974, 1.0054]
-#>    33C/7.5 0.181 [0.0209, 0.3411]   [-0.7109, 1.0729] [-1.4753, 1.8373]
+#>  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits
+#>    23C/5.5 0.255 [0.0803, 0.4297] 0.2561   [-0.3245, 0.8345] [-0.6109, 1.1209]
+#>    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2689, 0.7769] [-0.5366, 1.0446]
+#>    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3496, 0.7116] [-0.3188, 0.6808]
 ```
 
 Furthermore, we can visualize the results with a Bland-Altman style plot
@@ -196,12 +197,18 @@ rec.delta_tol = tolerance_limit(
   
 rec.delta_tol
 #> Agreement between Measures (Difference: x-y)
-#> 95% Prediction Interval with 95% Tolerance Limits
+#> 95% CI for Bias; 95% Prediction Interval
+#> Tolerance Limits: at least 95% of differences with 95% confidence
+#> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3465, 0.3085]
-#>    33C/5.5  0.015 [-0.0625, 0.0925]   [-0.1874, 0.2174] [-0.2645, 0.2945]
-#>    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.2723, 0.1543] [-0.3516, 0.2336]
+#>  Condition   Bias           Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]
+#>    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113   [-0.2421, 0.2721]
+#>    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]
+#>   Tolerance Limits
+#>  [-0.3062, 0.2682]
+#>  [-0.3615, 0.3915]
+#>  [-0.5692, 0.4512]
 ```
 
 ``` r
@@ -248,12 +255,18 @@ eso.delta_tol = tolerance_limit(
 
 eso.post_tol
 #> Agreement between Measures (Difference: x-y)
-#> 95% Prediction Interval with 95% Tolerance Limits
+#> 95% CI for Bias; 95% Prediction Interval
+#> Tolerance Limits: at least 95% of differences with 95% confidence
+#> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.180 [-0.2561, -0.1039]   [-0.4324, 0.0724] [-0.5535, 0.1935]
-#>    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.4601, 0.0361] [-0.5409, 0.1169]
-#>    33C/7.5 -0.146 [-0.2297, -0.0623]   [-0.4149, 0.1229] [-0.5648, 0.2728]
+#>  Condition   Bias            Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.180 [-0.2564, -0.1036] 0.1025   [-0.4332, 0.0732]
+#>    33C/5.5 -0.212   [-0.329, -0.095] 0.1732   [-0.6001, 0.1761]
+#>    33C/7.5 -0.146    [-0.23, -0.062] 0.1062   [-0.4247, 0.1327]
+#>   Tolerance Limits
+#>  [-0.5265, 0.1665]
+#>  [-0.7976, 0.3736]
+#>    [-0.505, 0.213]
 ```
 
 ``` r
@@ -270,12 +283,18 @@ Limits of Agreement for Teso Post Exercise
 
 eso.delta_tol
 #> Agreement between Measures (Difference: x-y)
-#> 95% Prediction Interval with 95% Tolerance Limits
+#> 95% CI for Bias; 95% Prediction Interval
+#> Tolerance Limits: at least 95% of differences with 95% confidence
+#> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.020 [-0.0746, 0.0346]   [-0.2012, 0.1612] [-0.2708, 0.2308]
-#>    33C/5.5 -0.005 [-0.0721, 0.0621]   [-0.1858, 0.1758] [-0.2458, 0.2358]
-#>    33C/7.5  0.017 [-0.0849, 0.1189]   [-0.1826, 0.2166] [-0.2571, 0.2911]
+#>  Condition   Bias           Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.020 [-0.0746, 0.0346] 0.0783   [-0.2012, 0.1612]
+#>    33C/5.5 -0.005 [-0.0721, 0.0621] 0.0991   [-0.2277, 0.2177]
+#>    33C/7.5  0.017 [-0.0849, 0.1189] 0.1470   [-0.3209, 0.3549]
+#>   Tolerance Limits
+#>    [-0.285, 0.245]
+#>  [-0.3402, 0.3302]
+#>  [-0.4803, 0.5143]
 ```
 
 ``` r

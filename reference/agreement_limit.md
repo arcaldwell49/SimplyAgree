@@ -17,6 +17,7 @@ agreement_limit(
   data,
   data_type = c("simple", "nest", "reps"),
   loa_calc = c("mover", "blandaltman"),
+  bound_type = c("iu", "joint"),
   agree.level = 0.95,
   alpha = 0.05,
   prop_bias = FALSE,
@@ -59,6 +60,19 @@ agreement_limit(
   calculated. Options are "mover" (Methods of Recovering Variances
   method) or "blandlatman" (Bland-Altman method).
 
+- bound_type:
+
+  Which claim the confidence bounds of the limits of agreement
+  (`lower_loa_ci`/`upper_loa_ci`) support. "iu" (default) gives a
+  one-sided 1 - `alpha` bound on each limit (the outer ends of 1 - 2 \*
+  `alpha` two-sided intervals). These give an intersection-union test,
+  at level `alpha`, of whether both limits of agreement lie within a
+  maximal allowable difference, but are not a joint 1 - `alpha` interval
+  for the limits. "joint" gives a one-sided 1 - `alpha`/2 bound on each
+  limit (the outer ends of 1 - `alpha` two-sided intervals, the
+  Bland-Altman convention), with at least 1 - `alpha` joint confidence
+  for both limits. See details.
+
 - agree.level:
 
   the agreement level required. Default is 95%. The proportion of data
@@ -72,7 +86,16 @@ agreement_limit(
 - prop_bias:
 
   Logical indicator (TRUE/FALSE) of whether proportional bias should be
-  considered for the limits of agreement calculations.
+  considered for the limits of agreement calculations. Note that a
+  non-zero slope of the differences on the average can appear without
+  any true proportional bias whenever the two methods have unequal
+  measurement error variances, because cov(difference, average) =
+  (var(x) - var(y)) / 2 (Bland & Altman, 1999); errors-in-variables
+  methods such as
+  [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
+  or
+  [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
+  are better suited to assessing proportional bias.
 
 - log_tf:
 
@@ -113,6 +136,27 @@ which can be based on Bland-Altman (1999) (`loa_calc = "blandaltman"`),
 or by the more accurate MOVER method of Zou (2013) and Donner & Zou
 (2012) (`loa_calc = "mover"`).
 
+The confidence bounds on the limits of agreement answer one of two
+questions, set by `bound_type`:
+
+- "iu" (default): "Can I conclude agreement within plus or minus delta?"
+  If `lower_loa_ci` \> -delta and `upper_loa_ci` \< delta, reject at
+  level `alpha` that either limit of agreement lies outside plus or
+  minus delta. `conf.level` (1 - `alpha`) applies to each side
+  separately; both bounds hold together only about 1 - 2 \* `alpha` of
+  the time.
+
+- "joint": "Where are the limits of agreement?" With at least 1 -
+  `alpha` confidence, both limits of agreement lie between
+  `lower_loa_ci` and `upper_loa_ci`. Used as a test against plus or
+  minus delta, the error rate is at most `alpha`/2 (conservative).
+
+Because a one-sided bound on the (1 - `agree.level`)/2 percentile is a
+one-sided tolerance bound, these bounds are equal-tailed tolerance
+bounds; they target the same quantities as
+`tolerance_limit(bound_type = "iu")`. The bias confidence interval
+(`lower.CL`/`upper.CL`) is always a two-sided 1 - `alpha` interval.
+
 ## References
 
 MOVER methods:
@@ -152,6 +196,8 @@ agreement_limit(x = "x", y ="y", data = reps)
 #>    Bias           Bias CI Lower LoA Upper LoA            LoA CI
 #>  0.4383 [-0.1669, 1.0436]    -1.947     2.824 [-3.0117, 3.8884]
 #> 
+#> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
+#>   not a joint 95% interval for the LoA
 #> SD of Differences = 1.217
 
 # Replicates
@@ -163,7 +209,10 @@ agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "rep")
 #>    Bias           Bias CI Lower LoA Upper LoA            LoA CI
 #>  0.7152 [-1.5287, 2.9591]    -2.232     3.662 [-7.5482, 8.9786]
 #> 
+#> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
+#>   not a joint 95% interval for the LoA
 #> SD of Differences = 1.5036
+#> Within-Subject SDs of X & Y = 0.4011 & 0.4348
 
 # Nested
 agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")
@@ -175,5 +224,7 @@ agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")
 #>    Bias           Bias CI Lower LoA Upper LoA            LoA CI
 #>  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.4979, 8.9071]
 #> 
+#> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
+#>   not a joint 95% interval for the LoA
 #> SD of Differences = 1.4581
 ```

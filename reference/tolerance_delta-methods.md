@@ -53,7 +53,11 @@ check(x, ...)
 
 - `print`:
 
-  Prints short summary of the tolerance limits.
+  Prints short summary of the tolerance limits, with the SD of the
+  differences (coefficient of variation when log-transformed). If the SD
+  differs between rows of the limits (e.g., by condition), it is shown
+  as a column instead. For clustered models, the between- and
+  within-subject SDs are also printed.
 
 - `plot`:
 
