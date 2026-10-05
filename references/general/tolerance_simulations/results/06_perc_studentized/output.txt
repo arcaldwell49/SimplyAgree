@@ -1,0 +1,13 @@
+24:  stL = thL - qL*e$SD; stU = thU - qU*e$SD
+29:    st_lo = stL <= mu - zp*sig, st_hi = stU >= mu + zp*sig)
+PERC 10 x 5, sa=0.0, se=1.0 (nsim=300, B=199)
+    joint     iu_lo     iu_hi   iu_both st_lo.95%  st_hi.5% 
+    0.957     0.927     0.917     0.860     0.950     0.953 
+PERC 10 x 5, sa=1.0, se=1.0 (nsim=300, B=199)
+    joint     iu_lo     iu_hi   iu_both st_lo.95%  st_hi.5% 
+    0.883     0.870     0.870     0.790     0.890     0.910 
+PERC 20 x 19, sa=0.5, se=1.0 (nsim=300, B=199)
+    joint     iu_lo     iu_hi   iu_both st_lo.95%  st_hi.5% 
+    0.917     0.923     0.923     0.850     0.937     0.927 
+
+[exited with code 0]

@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # SimplyAgree - GitHub Copilot Instructions
 
 ## Package Context

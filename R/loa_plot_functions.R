@@ -40,6 +40,9 @@ simple_loa_plot = function(x,
   conf.level = get_call(x$call$conf.level)
   agree.level = get_call(x$call$agree.level)
   confq = qnorm(1 - (1 - get_call(x$call$conf.level)) / 2)
+  # two-sided level whose outer ends are shown for the LoA:
+  # IU bounds (default) are the outer ends of 1 - 2 * alpha CIs
+  loa_ci_level = if(isTRUE(x$call$bound_type == "joint")) conf.level else 1 - (1 - conf.level) * 2
   delta = delta
   #smooth_method = x$smooths$smooth_method
   #smooth_se = x$smooths$smooth_se
@@ -83,7 +86,7 @@ simple_loa_plot = function(x,
     "Confidence Level = ",
     conf.level * 100,
     "% (Bias) & ",
-    (1 - (1 - conf.level) * 2) * 100,
+    loa_ci_level * 100,
     "% (LoA)"
   )
 
@@ -169,6 +172,9 @@ bias_loa_plot = function(x,
   conf.level = get_call(x$call$conf.level)
   agree.level = get_call(x$call$agree.level)
   confq = qnorm(1 - (1 - get_call(x$call$conf.level)) / 2)
+  # two-sided level whose outer ends are shown for the LoA:
+  # IU bounds (default) are the outer ends of 1 - 2 * alpha CIs
+  loa_ci_level = if(isTRUE(x$call$bound_type == "joint")) conf.level else 1 - (1 - conf.level) * 2
   delta = delta
 
   if(geom == "geom_point"){
@@ -208,7 +214,9 @@ bias_loa_plot = function(x,
                 "% \n",
                 "Confidence Level = ",
                 conf.level * 100,
-                "%")
+                "% (Bias) & ",
+                loa_ci_level * 100,
+                "% (LoA)")
 
     bland_alt.plot = bland_alt.plot +
       geom_ribbon(inherit.aes = FALSE,

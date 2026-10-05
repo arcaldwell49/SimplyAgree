@@ -1,0 +1,7 @@
+riar1 (nsim=250) fails: 0
+gls_ar1_joint gls_ar1_iu_lo gls_ar1_iu_hi gls_sym_joint gls_sym_iu_lo 
+        0.924         0.896         0.916         0.964         0.952 
+gls_sym_iu_hi lme_ar1_joint lme_ar1_iu_lo lme_ar1_iu_hi lme_sym_joint 
+        0.964         0.960         0.952         0.964         0.964 
+lme_sym_iu_lo lme_sym_iu_hi 
+        0.952         0.964 

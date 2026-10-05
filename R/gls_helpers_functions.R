@@ -1,91 +1,121 @@
-# Adapted from nlraa below -----
-sim_gls = function (object, psim = 2, na.action = na.fail, naPattern = NULL,
-                    data = NULL, ...)
-{
-  if (!inherits(object, "gls"))
-    stop("This function is only for 'gls' objects")
-  args <- list(...)
-  if (!is.null(args$newdata)) {
-    stop("At this point 'newdata' is not compatible.",
-         call. = FALSE)
+# Parametric simulation from a fitted gls or lme model ----
+# Simulates new responses from the point estimates of the fitted model:
+# fitted (population-level) values plus errors with the model's marginal
+# covariance (random intercept, variance function, and within-group
+# correlation). The Cholesky factors of the within-group covariance blocks are
+# computed once in gls_sim_setup() so each draw in gls_sim_draw() is cheap.
+
+gls_sim_setup = function(model, data){
+  if (inherits(model, "lme")) {
+    return(lme_sim_setup(model, data))
   }
-  else {
-    if (is.null(data)) {
-      newdata <- try(nlme::getData(object), silent = TRUE)
-      if (inherits(newdata, "try-error") || is.null(newdata))
-        stop("'data' argument is required. It is likely you are using sim_gls inside another function")
-    }
-    else {
-      if (object$dims$N != nrow(data)) {
-        stop("Number of rows in data argument does not match the original data \n\n The data argument should only be used to pass the same data.frame \n \n  used to fit the model",
-             call. = FALSE)
-      }
-      newdata <- data
-    }
+  if (!inherits(model, "gls"))
+    stop("This function is only for 'gls' or 'lme' objects")
+  N = model$dims$N
+  if (nrow(data) != N)
+    stop("Number of rows in data does not match the data used to fit the model")
+
+  mu = as.vector(fitted(model))
+  # residual SD for each row (sigma scaled by the variance function)
+  sds = as.vector(attr(residuals(model), "std"))
+  cs = model$modelStruct$corStruct
+
+  if (is.null(cs)) {
+    return(list(mu = mu, sds = sds, blocks = NULL))
   }
-  form <- nlme::getCovariateFormula(object)
-  mfArgs <- list(formula = form, data = newdata, na.action = na.action)
-  mfArgs$drop.unused.levels <- TRUE
-  dataMod <- do.call(model.frame, mfArgs)
-  contr <- object$contrasts
-  for (i in names(dataMod)) {
-    if (inherits(dataMod[, i], "factor") && !is.null(contr[[i]])) {
-      levs <- levels(dataMod[, i])
-      levsC <- dimnames(contr[[i]])[[1]]
-      if (any(wch <- is.na(match(levs, levsC)))) {
-        stop(sprintf(ngettext(sum(wch), "level %s not allowed for %s",
-                              "levels %s not allowed for %s"), paste(levs[wch],
-                                                                     collapse = ",")), domain = NA)
-      }
-      attr(dataMod[, i], "contrasts") <- contr[[i]][levs,
-                                                    , drop = FALSE]
-    }
+
+  cor_mat = nlme::corMatrix(cs)
+  if (!is.list(cor_mat)) {
+    # correlation without a grouping factor: one block for all rows
+    rows = list(seq_len(N))
+    cor_mat = list(cor_mat)
+  } else {
+    # corMatrix blocks are named by group; rows within a group are in data
+    # order (gls sorts by group with a stable sort)
+    grp = nlme::getGroups(data, nlme::getGroupsFormula(cs))
+    rows = split(seq_len(N), grp)[names(cor_mat)]
   }
-  N <- nrow(dataMod)
-  if (length(all.vars(form)) > 0) {
-    X <- model.matrix(form, dataMod)
-  }
-  else {
-    X <- array(1, c(N, 1), list(row.names(dataMod), "(Intercept)"))
-  }
-  if (psim == 0) {
-    cf <- coef(object)
-  }
-  if (psim == 1) {
-    cf <- MASS::mvrnorm(n = 1, mu = coef(object), Sigma = vcov(object))
-  }
-  if (psim == 2) {
-    cf <- MASS::mvrnorm(n = 1, mu = coef(object), Sigma = vcov(object))
-    if (is.null(object$modelStruct$corStruct)) {
-      if (is.null(args$newdata) || is.null(object$modelStruct$varStruct)) {
-        rsds.std <- stats::rnorm(N, 0, 1)
-        rsds <- rsds.std * attr(residuals(object), "std")
-      }
-      else {
-        rsds.std <- stats::rnorm(nrow(newdata), 0, 1)
-        rsds <- rsds.std * predict_varFunc(object, newdata = newdata)
-      }
-    }
-    else {
-      var.cov.err <- var_cov(object, sparse = TRUE, data = newdata)
-      chol.var.cov.err <- Matrix::chol(var.cov.err)
-      rsds <- chol.var.cov.err %*% rnorm(nrow(chol.var.cov.err))
-    }
-  }
-  val <- c(X[, names(cf), drop = FALSE] %*% cf)
-  if (psim == 2)
-    val <- as.vector(val + rsds)
-  lab <- "Predicted values"
-  if (!is.null(aux <- attr(object, "units")$y)) {
-    lab <- paste(lab, aux)
-  }
-  structure(val, label = lab)
+
+  blocks = mapply(function(i, R) {
+    S = sds[i] * t(sds[i] * R)
+    list(rows = i, L = t(chol(S)))
+  }, rows, cor_mat, SIMPLIFY = FALSE)
+
+  list(mu = mu, sds = sds, blocks = blocks)
 }
 
+# Random intercept model: the marginal covariance for subject i is
+# sigma_1^2 * J + sigma_2^2 * B_i + diag(sd_i) R_i diag(sd_i), where
+# sigma_2^2 and B_i (1 for pairs of rows in the same setting within the
+# subject, 0 otherwise) are present only with nested random intercepts, sd_i
+# are the residual SDs (from the variance function), and R_i is the residual
+# correlation matrix (block diagonal over the innermost groups; identity
+# without a corStruct).
+lme_sim_setup = function(model, data){
+  N = model$dims$N
+  if (nrow(data) != N)
+    stop("Number of rows in data does not match the data used to fit the model")
+
+  mu = as.vector(fitted(model, level = 0))
+  # residual SD for each row, in data order (residuals() of an lme has no
+  # "std" attribute, and varWeights() is in the internal, grouped order)
+  sds = if (is.null(model$modelStruct$varStruct)) {
+    rep(sigma(model), N)
+  } else {
+    predict_varFunc(model, newdata = data)
+  }
+  vars = as.matrix(model$modelStruct$reStruct)
+  vars = vapply(vars, function(m) m[1, 1], numeric(1)) * sigma(model)^2
+  s1 = vars[["id"]]
+  s2 = if ("id_2" %in% names(vars)) vars[["id_2"]] else 0
+  cs = model$modelStruct$corStruct
+
+  sub = as.character(data$id)
+  # innermost group labels, matching the corMatrix names ("outer/inner")
+  inner = if ("id_2" %in% names(data)) {
+    paste(sub, as.character(data$id_2), sep = "/")
+  } else {
+    sub
+  }
+  rows = split(seq_len(N), factor(sub, levels = unique(sub)))
+  cor_mat = if (!is.null(cs)) nlme::corMatrix(cs) else NULL
+
+  blocks = lapply(rows, function(i) {
+    g_in = inner[i]
+    same_set = outer(g_in, g_in, "==")
+    R = diag(length(i))
+    if (!is.null(cor_mat)) {
+      for (g in unique(g_in)) {
+        # corMatrix blocks are in data order within each innermost group
+        pos = which(g_in == g)
+        R[pos, pos] = as.matrix(cor_mat[[g]])
+      }
+    }
+    S = s1 + s2 * same_set + sds[i] * t(sds[i] * R)
+    list(rows = i, L = t(chol(S)))
+  })
+
+  list(mu = mu, sds = sds, blocks = unname(blocks))
+}
+
+gls_sim_draw = function(setup){
+  if (is.null(setup$blocks)) {
+    return(setup$mu + stats::rnorm(length(setup$mu)) * setup$sds)
+  }
+  err = numeric(length(setup$mu))
+  for (b in setup$blocks) {
+    err[b$rows] = b$L %*% stats::rnorm(length(b$rows))
+  }
+  setup$mu + err
+}
 
 predict_varFunc = function (object, newdata)
 {
-  fttd <- predict(object, newdata = newdata)
+  fttd <- if (inherits(object, "lme")) {
+    predict(object, newdata = newdata, level = 0)
+  } else {
+    predict(object, newdata = newdata)
+  }
   if (is.null(object$modelStruct$varStruct))
     stop("varStruct should not be null for this function",
          call. = TRUE)
@@ -110,7 +140,7 @@ predict_varFunc = function (object, newdata)
     if (grepl("*", grp.nm, fixed = TRUE))
       stop("This is not supported yet. Please submit this as an issue to github if you need it.")
     for (i in 1:nrow(newdata)) {
-      crr.grp <- newdata[i, grp.nm]
+      crr.grp <- as.character(newdata[[grp.nm]][i])
       wch.grp.nm <- which(names(nlme::varWeights(vrSt)) == crr.grp)[1]
       ans[i] <- sigma(object) * (1/nlme::varWeights(vrSt))[wch.grp.nm]
     }
@@ -123,7 +153,7 @@ predict_varFunc = function (object, newdata)
       }
       else {
         cvrt.nm <- as.character(nlme::getCovariateFormula(vrSt))[2]
-        if (!grepl(cvrt.nm, names(newdata)))
+        if (!cvrt.nm %in% names(newdata))
           stop("Variance covariate should be present in 'newdata' object",
                call. = FALSE)
         cvrt <- newdata[[cvrt.nm]]
@@ -146,7 +176,7 @@ predict_varFunc = function (object, newdata)
           cvrt <- fttd[wch.crr.grp]
         }
         else {
-          cvrt <- newdata[wch.crr.grp, as.character(nlme::getCovariateFormula(vrSt))[[2]]]
+          cvrt <- newdata[[as.character(nlme::getCovariateFormula(vrSt))[[2]]]][wch.crr.grp]
         }
         ans[wch.crr.grp] <- sigma(object) * sqrt(var_exp_fun(cvrt,
                                                              grp.coef))
@@ -161,7 +191,7 @@ predict_varFunc = function (object, newdata)
       }
       else {
         cvrt.nm <- as.character(nlme::getCovariateFormula(vrSt))[2]
-        if (!grepl(cvrt.nm, names(newdata)))
+        if (!cvrt.nm %in% names(newdata))
           stop("Variance covariate should be present in 'newdata' object",
                call. = FALSE)
         cvrt <- newdata[[cvrt.nm]]
@@ -186,7 +216,7 @@ predict_varFunc = function (object, newdata)
           cvrt <- fttd[wch.crr.grp]
         }
         else {
-          cvrt <- newdata[wch.crr.grp, as.character(nlme::getCovariateFormula(vrSt))[[2]]]
+          cvrt <- newdata[[as.character(nlme::getCovariateFormula(vrSt))[[2]]]][wch.crr.grp]
         }
         ans[wch.crr.grp] <- sigma(object) * sqrt(var_power_fun(cvrt,
                                                                grp.coef))
@@ -194,120 +224,5 @@ predict_varFunc = function (object, newdata)
     }
   }
   ans <- c(as.vector(ans))
-  return(ans)
-}
-
-var_cov = function (object, type = c("residual", "random", "all", "conditional",
-                                     "marginal"), aug = FALSE, sparse = FALSE, data = NULL)
-{
-  type <- match.arg(type)
-  if (type == "conditional")
-    type <- "residual"
-  if (type == "marginal")
-    type <- "all"
-  if (type == "random" && inherits(object, c("lm", "nls",
-                                             "gls")))
-    stop("The variance-covariance of the random effects is only available for \n\n          objects which inherit class 'lme' ")
-  if (isTRUE(sparse)) {
-    if (!requireNamespace("Matrix", quietly = TRUE)) {
-      warning("Matrix package is required for this option")
-      return(NULL)
-    }
-  }
-  if (inherits(object, c("lm", "nls"))) {
-    ans <- diag(nrow = length(fitted(object))) * sigma(object)^2
-    if (sparse)
-      ans <- Matrix::Matrix(ans, sparse = TRUE)
-  }
-  if (inherits(object, c("gls", "lme"))) {
-    if (type == "residual") {
-      ans <- var_cov_lme_resid(object, sparse = sparse,
-                               data = data)
-    }
-    if (type == "random") {
-      ans <- var_cov_lme_ranef(object, aug = aug, sparse = sparse,
-                               data = data)
-    }
-    if (type == "all") {
-      ans <- var_cov_lme_resid(object, sparse = sparse,
-                               data = data) + var_cov_lme_ranef(object, aug = TRUE,
-                                                                sparse = sparse, data = data)
-    }
-  }
-  return(ans)
-}
-
-
-var_cov_lme_resid = function (object, sparse = FALSE, data = data)
-{
-  if (!inherits(object, c("gls", "lme")))
-    stop("Only for objects which inherit the 'gls' or 'lme' class")
-  if (inherits(object, "gls")) {
-    sgms <- attr(residuals(object), "std")
-  }
-  else {
-    sgms <- attr(object[["residuals"]], "std")
-  }
-  if (is.null(object$modelStruct$corStruct)) {
-    Lambda <- diag(sgms^2)
-  }
-  else {
-    if (is.null(object$groups)) {
-      Lambda <- t(sgms * nlme::corMatrix(object$modelStruct$corStruct)) *
-        sgms
-    }
-    else {
-      corrMat <- nlme::corMatrix(object$modelStruct$corStruct)
-      if (is.list(corrMat)) {
-        grp.nm <- deparse(nlme::getGroupsFormula(object$modelStruct$corStruct)[[2]])
-        if (is.null(data)) {
-          gdat <- nlme::getData(object)
-        }
-        else {
-          gdat <- data
-        }
-        ogrpo <- unique(gdat[[grp.nm]])
-        corrMat <- corrMat[ogrpo]
-      }
-      Lambda <- t(sgms * as.matrix(Matrix::bdiag(corrMat))) *
-        sgms
-    }
-  }
-  if (sparse) {
-    Lambda <- Matrix::Matrix(Lambda, sparse = TRUE)
-  }
-  return(Lambda)
-}
-
-var_cov_lme_ranef = function (object, aug = FALSE, sparse = FALSE, data = NULL)
-{
-  if (!inherits(object, c("gls", "lme")))
-    stop("Only for objects which inherit the 'gls' or 'lme' class")
-  if (inherits(object, "nlme") && aug)
-    stop("Don't know how to augment nlme random effects.")
-  lreg <- length(names(object$modelStruct$reStruct))
-  if (lreg == 1L && aug == FALSE) {
-    ans <- as.matrix(object$modelStruct$reStruct[[1]]) *
-      sigma(object)^2
-  }
-  else {
-    if (!inherits(object, "nlme")) {
-      V <- mgcv::extract.lme.cov(object, data = data)
-      ans <- V - var_cov_lme_resid(object, data = data)
-    }
-    else {
-      ans <- vector("list", lreg)
-      names(ans) <- names(object$modelStruct$reStruct)
-      for (i in 1:lreg) {
-        tm <- as.matrix(object$modelStruct$reStruct[[i]]) *
-          sigma(object)^2
-        if (sparse)
-          tm <- Matrix::Matrix(tm, sparse = TRUE)
-        ans[[i]] <- tm
-      }
-    }
-  }
-  if (sparse && !is.list(ans))
-    ans <- Matrix::Matrix(ans, sparse = TRUE)
   return(ans)
 }
