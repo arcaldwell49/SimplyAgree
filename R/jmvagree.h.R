@@ -236,7 +236,8 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' Simple Agreement Analysis
@@ -250,14 +251,14 @@ jmvagreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param agreeWidth a number between 50 and 99.9 (default: 95), the width of
 #'   agreement limits
 #' @param testValue a number specifying the limit of agreement
-#' @param CCC \code{TRUE} (default) or \code{FALSE}, produce CCC table
-#' @param plotbland \code{TRUE} (default) or \code{FALSE}, for Bland-Altman
+#' @param CCC \code{TRUE} or \code{FALSE} (default), produce CCC table
+#' @param plotbland \code{TRUE} or \code{FALSE} (default), for Bland-Altman
 #'   plot
 #' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
 #' @param plotcheck \code{TRUE} or \code{FALSE} (default), assumptions plots
-#' @param prop_bias \code{TRUE} or \code{FALSE} (default), proportional bias
-#' @param xlabel The label for the x-axis on the BA plot (default: "Average of Both Methods")
-#' @param ylabel The label for the y-axis on the BA plot (default: "Difference between Methods")
+#' @param prop_bias \code{TRUE} or \code{FALSE}
+#' @param xlabel The label for the x-axis on the BA plot
+#' @param ylabel The label for the y-axis on the BA plot
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr

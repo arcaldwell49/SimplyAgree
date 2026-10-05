@@ -158,9 +158,10 @@ loa_lmer = function(diff,
       )
   }
   if(condition == 1){
-    lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$id)))
+    lm_mod = plot_frame(diff = df_plt$diff, avg = df_plt$avg, id = df_plt$id)
   } else {
-    lm_mod = list(call = list(formula = as.formula(df_plt$diff~df_plt$avg+df_plt$id+df_plt$condition)))
+    lm_mod = plot_frame(diff = df_plt$diff, avg = df_plt$avg,
+                        id = df_plt$id, condition = df_plt$condition)
   }
 
   mc$lm_mod = lm_mod

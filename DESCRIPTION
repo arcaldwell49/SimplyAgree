@@ -29,8 +29,6 @@ Imports:
     insight,
     nlme,
     purrr,
-    Matrix,
-    MASS,
     lifecycle,
     scales
 Suggests: 

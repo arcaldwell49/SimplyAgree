@@ -210,8 +210,7 @@ agree_reps <- function(x,
 
   # Save call----
 
-  lm_mod = list(call = list(formula = as.formula(df$y ~ df$x +
-                                                   df$id)))
+  lm_mod = plot_frame(y = df$y, x = df$x, id = df$id)
   call2 = match.call()
   if(is.null(call2$agree.level)){
     call2$agree.level = agree.level

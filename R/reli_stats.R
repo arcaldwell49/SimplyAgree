@@ -321,13 +321,7 @@ reli_stats = function(measure,
 
 
   # Save call
-  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
-  call2 = match.call()
-
-  call2$lm_mod = lm_mod
-
-  # Save call
-  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
+  lm_mod = plot_frame(values = x.df$values, id = x.df$id, items = x.df$items)
   call2 = match.call()
 
   call2$lm_mod = lm_mod
@@ -732,13 +726,7 @@ reli_aov = function(measure,
 
 
   # Save call
-  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
-  call2 = match.call()
-
-  call2$lm_mod = lm_mod
-
-  # Save call
-  lm_mod = list(call = list(formula = as.formula(x.df$values ~ x.df$id + x.df$items)))
+  lm_mod = plot_frame(values = x.df$values, id = x.df$id, items = x.df$items)
   call2 = match.call()
 
   call2$lm_mod = lm_mod

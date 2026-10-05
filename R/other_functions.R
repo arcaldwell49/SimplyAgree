@@ -533,3 +533,18 @@ get_call = function(x){
     x
   }
 }
+
+# Store data for plot/check methods --------
+
+# The data needed by the plot and check methods are stored as a model frame
+# rather than as a formula pointing at the environment the analysis was run in.
+# This keeps the returned object self-contained: jamovi restores the analysis
+# state without that environment, which made every plot fail with
+# "object 'y' not found" (GitHub issue #76). model.frame() returns the `model`
+# element of a list as-is, so the methods can keep calling
+# model.frame(x$call$lm_mod). Rows with missing values are dropped to match
+# the default na.action previously applied by model.frame().
+
+plot_frame = function(...) {
+  list(model = na.omit(data.frame(...)))
+}

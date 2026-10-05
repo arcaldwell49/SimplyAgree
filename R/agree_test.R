@@ -148,7 +148,7 @@ agree_test <- function(x,
   )
 
   # Save call -----
-  lm_mod = list(call = list(formula = as.formula(y~x)))
+  lm_mod = plot_frame(y = y, x = x)
   call2 = match.call()
   if(is.null(call2$agree.level)){
     call2$agree.level = agree.level

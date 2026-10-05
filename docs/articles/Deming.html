@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-01-22</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-09-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -146,7 +146,7 @@ results printed.</p>
 <p>The resulting regression line can then be plotted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span>, interval <span class="op">=</span> <span class="st">"confidence"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics"></a>
@@ -157,7 +157,7 @@ and homogeneity of variance, can then be checked with the
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="fitted-values-and-residuals">Fitted Values and Residuals<a class="anchor" aria-label="anchor" href="#fitted-values-and-residuals"></a>
@@ -211,11 +211,11 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" alt="" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -240,11 +240,11 @@ TRUE.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" alt="" width="700"></p>
 <p>The weighted model provides a better fit.</p>
 </div>
 </div>
@@ -342,7 +342,7 @@ diagnostic tests:</p>
 data:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics-1">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics-1"></a>
@@ -352,7 +352,7 @@ Passing-Bablok regression, including the CUSUM linearity test and
 Kendall’s tau correlation:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="bootstrap-confidence-intervals">Bootstrap Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
@@ -421,7 +421,7 @@ confidence region in parameter space:</p>
 <span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
 <p>This plot shows:</p>
 <ul>
 <li>The <strong>red ellipse</strong>: Joint confidence region</li>
@@ -438,7 +438,7 @@ obtain the variance-covariance matrix needed for the joint confidence
 region:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="joint-hypothesis-test">Joint Hypothesis Test<a class="anchor" aria-label="anchor" href="#joint-hypothesis-test"></a>
@@ -614,7 +614,7 @@ method (detailed by <span class="citation">Linnet (<a href="#ref-linnet1990">199
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-adcock1878" class="csl-entry">
 Adcock, R J. 1878. <span>“A Problem in Least Squares.”</span> <em>The
 Analyst</em> 5 (2): 53. <a href="https://doi.org/10.2307/2635758" class="external-link">https://doi.org/10.2307/2635758</a>.
@@ -645,8 +645,9 @@ Between the Measurements of Two Methods with Proportional
 Errors.”</span> <em>Statistics in Medicine</em> 9 (12): 1463–73. <a href="https://doi.org/10.1002/sim.4780091210" class="external-link">https://doi.org/10.1002/sim.4780091210</a>.
 </div>
 <div id="ref-linnet1993" class="csl-entry">
-———. 1993. <span>“Evaluation of Regression Procedures for Methods
-Comparison Studies.”</span> <em>Clinical Chemistry</em> 39 (3): 424–32.
+Linnet, Kristian. 1993. <span>“Evaluation of Regression Procedures for
+Methods Comparison Studies.”</span> <em>Clinical Chemistry</em> 39 (3):
+424–32.
 </div>
 <div id="ref-passing1983" class="csl-entry">
 Passing, H., and W. Bablok. 1983. <span>“A New Biometrical Procedure for
@@ -656,11 +657,11 @@ Comparison Studies in Clinical Chemistry, Part i.”</span> <em>Cclm</em>
 21 (11): 709–20. <a href="https://doi.org/10.1515/cclm.1983.21.11.709" class="external-link">https://doi.org/10.1515/cclm.1983.21.11.709</a>.
 </div>
 <div id="ref-passing1984" class="csl-entry">
-———. 1984. <span>“Comparison of Several Regression Procedures for Method
-Comparison Studies and Determination of Sample Sizes Application of
-Linear Regression Procedures for Method Comparison Studies in Clinical
-Chemistry, Part II.”</span> <em>Clinical Chemistry and Laboratory
-Medicine</em> 22 (6). <a href="https://doi.org/10.1515/cclm.1984.22.6.431" class="external-link">https://doi.org/10.1515/cclm.1984.22.6.431</a>.
+Passing, H., and W. Bablok. 1984. <span>“Comparison of Several
+Regression Procedures for Method Comparison Studies and Determination of
+Sample Sizes Application of Linear Regression Procedures for Method
+Comparison Studies in Clinical Chemistry, Part II.”</span> <em>Clinical
+Chemistry and Laboratory Medicine</em> 22 (6). <a href="https://doi.org/10.1515/cclm.1984.22.6.431" class="external-link">https://doi.org/10.1515/cclm.1984.22.6.431</a>.
 </div>
 <div id="ref-sadler2010" class="csl-entry">
 Sadler, W A. 2010. <span>“Joint Parameter Confidence Regions Improve the
@@ -681,7 +682,7 @@ Power of Parametric Regression in Method-Comparison Studies.”</span>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

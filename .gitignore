@@ -12,3 +12,5 @@ CRAN-RELEASE
 /Meta/
 /build/
 /references/working/
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
