@@ -8,6 +8,20 @@
   - The data needed by the `plot` and `check` methods are now stored in
     the returned object itself, rather than as a formula that pointed
     back at the environment the analysis was run in.
+- Fixed [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+  [`print()`](https://rdrr.io/r/base/print.html) failing for
+  [`agree_test()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_test.md),
+  [`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md),
+  [`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md),
+  and
+  [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  when `delta` (or `conf.level`, `agree.level`, `TOST`, `prop_bias`) was
+  supplied as an expression (e.g., `delta = log(1.10)`) or from inside
+  another function
+  ([\#50](https://github.com/arcaldwell49/SimplyAgree/issues/50)). The
+  stored call now holds the evaluated values of these settings rather
+  than the code as typed; the data arguments are still not copied into
+  the object.
 - Fixed
   [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
   prediction and tolerance limits when the model has a variance function
