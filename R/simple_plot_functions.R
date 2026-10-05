@@ -176,18 +176,17 @@ simple_ba_plot = function(x,
       stop("Only lm, loess, and gam are supported as smooth_method at this time.")
     }
     if(smooth_method == "gam"){
-      if (requireNamespace(c("mgcv","ggeffects"), quietly = TRUE)) {
+      if(!(as.character(x$call[1]) %in% c("agree_test", "agree_np",
+                                          "SimplyAgree::agree_test", "SimplyAgree::agree_np"))){
+        stop("gam is not supported for agree_reps or agree_nest at this time")
+        #gam1 = mgcv::gam(data = df,
+        #                 delta ~ s(mean, bs = "tp") + s(id, bs="re"))
+      }
+      if (requireNamespace("mgcv", quietly = TRUE) &&
+          requireNamespace("ggeffects", quietly = TRUE)) {
 
-        if(as.character(x$call[1]) %in% c("agree_test", "agree_np",
-                                          "SimplyAgree::agree_test", "SimplyAgree::agree_np") ){
-          gam1 = mgcv::gam(data = df,
-                           delta ~ s(mean))
-        } else {
-
-          stop("gam is not supported for agree_reps or agree_nest at this time")
-          #gam1 = mgcv::gam(data = df,
-          #                 delta ~ s(mean, bs = "tp") + s(id, bs="re"))
-        }
+        gam1 = mgcv::gam(data = df,
+                         delta ~ s(mean))
 
         df2 = data.frame(mean = seq(min(df$mean, na.rm=TRUE),
                                         max(df$mean, na.rm=TRUE),

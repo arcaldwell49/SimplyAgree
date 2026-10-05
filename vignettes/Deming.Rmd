@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+has_deming <- requireNamespace("deming", quietly = TRUE)
 ```
 
 # Background
@@ -77,8 +78,9 @@ After fitting a Deming regression model, you can extract the estimated true valu
 ## Weighted Deming Regression
 
 For this example, I will rely upon the "ferritin" data from the `deming` R package.
+`r if (!has_deming) "*The code in this section was not run because the deming package is not installed.*"`
 
-```{r}
+```{r, eval = has_deming}
 library(deming)
 data('ferritin')
 
@@ -87,7 +89,7 @@ head(ferritin)
 
 Let me demonstrate the problem with using simple Deming regression when the weights are helpful. When we look at the two plots below, we can see there is severe problem with using the "un-weighted" model.
 
-```{r}
+```{r, eval = has_deming}
 dem2 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
@@ -102,7 +104,7 @@ check(dem2)
 
 Now, let us see what happens when `weighted` is set to TRUE.
 
-```{r}
+```{r, eval = has_deming}
 dem3 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
