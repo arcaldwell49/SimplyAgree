@@ -18,6 +18,7 @@ pb_reg(
   weights = NULL,
   error.ratio = 1,
   replicates = 0,
+  se_method = c("bootstrap", "jackknife", "dufey"),
   model = TRUE,
   keep_data = TRUE,
   ...
@@ -67,9 +68,30 @@ pb_reg(
 
 - replicates:
 
-  Number of bootstrap iterations for confidence intervals. If 0
-  (default), analytical confidence intervals are used. Bootstrap is
-  recommended for weighted data and 'invariant' or 'scissors' methods.
+  Number of resamples for confidence intervals and the
+  variance-covariance matrix. For `se_method = "bootstrap"` this is the
+  number of bootstrap resamples; for `se_method = "jackknife"` it is the
+  number of random delete-d subsets. If 0 (default), analytical
+  confidence intervals are used and no variance-covariance matrix is
+  returned (unless `se_method = "dufey"`). Resampling is recommended for
+  weighted data and 'invariant' or 'scissors' methods.
+
+- se_method:
+
+  Method used to estimate the variance-covariance matrix and confidence
+  intervals of the coefficients. Options are:
+
+  - "bootstrap": Nonparametric pairs (case) bootstrap with percentile
+    confidence intervals (default). Used when `replicates > 0`.
+
+  - "jackknife": Delete-d jackknife with d = floor(n/2), using
+    `replicates` random subsets (Shao & Wu, 1989). Used when
+    `replicates > 0`.
+
+  - "dufey": **\[experimental\]** Analytic sandwich estimator of Dufey
+    (2020). Does not require resampling (`replicates` is ignored). Only
+    available for the "scissors" method without case weights and with
+    `error.ratio = 1`. See Details before using it for joint tests.
 
 - model:
 
@@ -106,7 +128,7 @@ The function returns a simple_eiv object with the following components:
   Passing-Bablok regression.
 
 - `vcov`: Variance-covariance matrix for slope and intercept (if
-  bootstrap used).
+  resampling or `se_method = "dufey"` is used; otherwise NULL).
 
 - `df.residual`: Residual degrees of freedom.
 
@@ -136,7 +158,11 @@ The function returns a simple_eiv object with the following components:
 
 - `n_slopes`: Number of slopes used in estimation.
 
-- `boot`: Bootstrap results (if replicates \> 0).
+- `boot`: Resampling results (if replicates \> 0 and `se_method` is
+  "bootstrap" or "jackknife").
+
+- `se_method`: Method actually used for standard errors ("analytic",
+  "bootstrap", "jackknife", or "dufey").
 
 ## Details
 
@@ -188,17 +214,51 @@ distinct from measurement error weighting (controlled by `error.ratio`).
 Case weights allow you to down-weight or up-weight specific observations
 in the analysis.
 
-### Bootstrap
+### Standard Errors and Variance-Covariance Matrix
 
-Wild bootstrap resampling is used when `replicates > 0`. This is
-particularly useful for:
+The analytical (Passing & Bablok, 1983) confidence intervals do not
+provide a covariance between the intercept and slope, so a
+variance-covariance matrix (needed by
+[`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+and
+[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md))
+is only returned when one of the following is used:
+
+- **Pairs bootstrap** (`se_method = "bootstrap"`, `replicates > 0`):
+  whole (x, y) observations are resampled with replacement and the model
+  is refit. The variance-covariance matrix is the covariance of the
+  bootstrap estimates and the confidence intervals are percentile
+  intervals.
+
+- **Delete-d jackknife** (`se_method = "jackknife"`, `replicates > 0`):
+  the model is refit on `replicates` random subsets that each leave out
+  d = floor(n/2) observations. The delete-1 jackknife is inconsistent
+  for median-type estimators such as Passing-Bablok; deleting d
+  observations with \\\sqrt{n}/d \to 0\\ restores consistency (Shao &
+  Wu, 1989). Confidence intervals are Wald-type intervals using a t(n-2)
+  quantile.
+
+- **Dufey (2020)** (`se_method = "dufey"`): an analytic,
+  distribution-free estimator for the equivariant ("scissors")
+  Passing-Bablok estimator, based on the U-statistic variance of
+  Kendall's tau and a sandwich estimator for the intercept. The slope
+  interval is formed from order statistics of the pairwise slopes and
+  the intercept interval is Wald-type. **This option is experimental.**
+  In simulations its marginal standard errors were accurate for n \>=
+  20, but joint tests of intercept and slope
+  ([`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md))
+  rejected a true null hypothesis about 7-11% of the time at a nominal
+  5%, suggesting the intercept-slope covariance is not yet reliable.
+  Prefer the pairs bootstrap or delete-d jackknife for joint tests.
+
+Resampling is particularly useful for:
 
 - Weighted regression (case weights or error.ratio != 1)
 
 - Methods 'invariant' and 'scissors' (where analytical CI validity is
   uncertain)
 
-- Small sample sizes
+- Joint tests of intercept and slope
 
 The method automatically:
 
@@ -228,6 +288,18 @@ Regression Procedures for Method Comparison Studies in Clinical
 Chemistry, Part III. Clinical Chemistry and Laboratory Medicine, 26(11).
 doi: 10.1515/cclm.1988.26.11.783
 
+Dufey, F. (2020). Derivation of Passing-Bablok regression from Kendall's
+tau. The International Journal of Biostatistics, 16(2), 20190157. doi:
+10.1515/ijb-2019-0157
+
+Sen, P. K. (1968). Estimates of the regression coefficient based on
+Kendall's tau. Journal of the American Statistical Association, 63(324),
+1379-1389. doi: 10.1080/01621459.1968.10480934
+
+Shao, J., & Wu, C. F. J. (1989). A general theory for jackknife variance
+estimation. The Annals of Statistics, 17(3), 1176-1197. doi:
+10.1214/aos/1176347263
+
 ## Examples
 
 ``` r
@@ -244,6 +316,12 @@ model_rep <- pb_reg(method2 ~ method1, data = mydata, id = "subject_id")
 # With bootstrap confidence intervals
 model_boot <- pb_reg(method2 ~ method1, data = mydata,
                      error.ratio = 1.5, replicates = 1000)
+
+# Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix
+model_jack <- pb_reg(method2 ~ method1, data = mydata,
+                     se_method = "jackknife", replicates = 1000)
+model_dufey <- pb_reg(method2 ~ method1, data = mydata, se_method = "dufey")
+joint_test(model_dufey)
 
 # Symmetric method
 model_sym <- pb_reg(method2 ~ method1, data = mydata, method = "symmetric")

@@ -45,6 +45,7 @@ plot_joint(
   ideal_intercept = 0,
   show_intervals = TRUE,
   n_points = 100,
+  test_method = c("F", "asymptotic"),
   ...
 )
 
@@ -133,6 +134,12 @@ predict(
 - show_intervals:
 
   Logical. If TRUE, shows individual confidence intervals as well.
+
+- test_method:
+
+  Reference distribution for the ellipse and test. `"F"` (default) uses
+  the finite-sample F(2, n-2) distribution. `"asymptotic"` uses
+  chi-squared(2).
 
 - type:
 

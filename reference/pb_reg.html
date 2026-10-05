@@ -77,6 +77,7 @@ method comparison studies.</p>
 <span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  error.ratio <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  replicates <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  se_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bootstrap"</span>, <span class="st">"jackknife"</span>, <span class="st">"dufey"</span><span class="op">)</span>,</span>
 <span>  model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  keep_data <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -122,9 +123,25 @@ This argument is ignored if subject identifiers are provided via <code>id</code>
 
 
 <dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
-<dd><p>Number of bootstrap iterations for confidence intervals. If 0 (default),
-analytical confidence intervals are used. Bootstrap is recommended for weighted
-data and 'invariant' or 'scissors' methods.</p></dd>
+<dd><p>Number of resamples for confidence intervals and the
+variance-covariance matrix. For <code>se_method = "bootstrap"</code> this is the number of
+bootstrap resamples; for <code>se_method = "jackknife"</code> it is the number of random
+delete-d subsets. If 0 (default), analytical confidence intervals are used and no
+variance-covariance matrix is returned (unless <code>se_method = "dufey"</code>). Resampling
+is recommended for weighted data and 'invariant' or 'scissors' methods.</p></dd>
+
+
+<dt id="arg-se-method">se_method<a class="anchor" aria-label="anchor" href="#arg-se-method"></a></dt>
+<dd><p>Method used to estimate the variance-covariance matrix and
+confidence intervals of the coefficients. Options are:</p><ul><li><p>"bootstrap": Nonparametric pairs (case) bootstrap with percentile
+confidence intervals (default). Used when <code>replicates &gt; 0</code>.</p></li>
+<li><p>"jackknife": Delete-d jackknife with d = floor(n/2), using <code>replicates</code>
+random subsets (Shao &amp; Wu, 1989). Used when <code>replicates &gt; 0</code>.</p></li>
+<li><p>"dufey": <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> Analytic sandwich
+estimator of Dufey (2020). Does not require resampling (<code>replicates</code> is
+ignored). Only available for the "scissors" method without case weights
+and with <code>error.ratio = 1</code>. See Details before using it for joint tests.</p></li>
+</ul></dd>
 
 
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
@@ -149,7 +166,8 @@ are returned; default is FALSE.</p></dd>
 <li><p><code>residuals</code>: Residuals from the fitted model.</p></li>
 <li><p><code>fitted.values</code>: Predicted Y values.</p></li>
 <li><p><code>model_table</code>: Data frame presenting the full results from the Passing-Bablok regression.</p></li>
-<li><p><code>vcov</code>: Variance-covariance matrix for slope and intercept (if bootstrap used).</p></li>
+<li><p><code>vcov</code>: Variance-covariance matrix for slope and intercept (if resampling
+or <code>se_method = "dufey"</code> is used; otherwise NULL).</p></li>
 <li><p><code>df.residual</code>: Residual degrees of freedom.</p></li>
 <li><p><code>call</code>: The matched call.</p></li>
 <li><p><code>terms</code>: The terms object used.</p></li>
@@ -164,7 +182,10 @@ are returned; default is FALSE.</p></dd>
 <li><p><code>kendall_test</code>: Results of Kendall's tau correlation test.</p></li>
 <li><p><code>cusum_test</code>: Results of CUSUM linearity test.</p></li>
 <li><p><code>n_slopes</code>: Number of slopes used in estimation.</p></li>
-<li><p><code>boot</code>: Bootstrap results (if replicates &gt; 0).</p></li>
+<li><p><code>boot</code>: Resampling results (if replicates &gt; 0 and <code>se_method</code> is
+"bootstrap" or "jackknife").</p></li>
+<li><p><code>se_method</code>: Method actually used for standard errors ("analytic",
+"bootstrap", "jackknife", or "dufey").</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -213,13 +234,35 @@ you to down-weight or up-weight specific observations in the analysis.</p>
 </div>
 
 <div class="section">
-<h3 id="bootstrap">Bootstrap<a class="anchor" aria-label="anchor" href="#bootstrap"></a></h3>
+<h3 id="standard-errors-and-variance-covariance-matrix">Standard Errors and Variance-Covariance Matrix<a class="anchor" aria-label="anchor" href="#standard-errors-and-variance-covariance-matrix"></a></h3>
 
 
-<p>Wild bootstrap resampling is used when <code>replicates &gt; 0</code>. This is particularly
-useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio != 1)</p></li>
+<p>The analytical (Passing &amp; Bablok, 1983) confidence intervals do not provide a
+covariance between the intercept and slope, so a variance-covariance matrix
+(needed by <code><a href="joint_test.html">joint_test()</a></code> and <code><a href="simple_eiv-methods.html">plot_joint()</a></code>) is only returned when one of the
+following is used:</p><ul><li><p><strong>Pairs bootstrap</strong> (<code>se_method = "bootstrap"</code>, <code>replicates &gt; 0</code>): whole
+(x, y) observations are resampled with replacement and the model is refit.
+The variance-covariance matrix is the covariance of the bootstrap estimates
+and the confidence intervals are percentile intervals.</p></li>
+<li><p><strong>Delete-d jackknife</strong> (<code>se_method = "jackknife"</code>, <code>replicates &gt; 0</code>): the
+model is refit on <code>replicates</code> random subsets that each leave out
+d = floor(n/2) observations. The delete-1 jackknife is inconsistent for
+median-type estimators such as Passing-Bablok; deleting d observations with
+\(\sqrt{n}/d \to 0\) restores consistency (Shao &amp; Wu, 1989). Confidence
+intervals are Wald-type intervals using a t(n-2) quantile.</p></li>
+<li><p><strong>Dufey (2020)</strong> (<code>se_method = "dufey"</code>): an analytic, distribution-free
+estimator for the equivariant ("scissors") Passing-Bablok estimator, based on
+the U-statistic variance of Kendall's tau and a sandwich estimator for the
+intercept. The slope interval is formed from order statistics of the pairwise
+slopes and the intercept interval is Wald-type. <strong>This option is
+experimental.</strong> In simulations its marginal standard errors were accurate
+for n &gt;= 20, but joint tests of intercept and slope (<code><a href="joint_test.html">joint_test()</a></code>) rejected
+a true null hypothesis about 7-11% of the time at a nominal 5%, suggesting the
+intercept-slope covariance is not yet reliable. Prefer the pairs bootstrap
+or delete-d jackknife for joint tests.</p></li>
+</ul><p>Resampling is particularly useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio != 1)</p></li>
 <li><p>Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)</p></li>
-<li><p>Small sample sizes</p></li>
+<li><p>Joint tests of intercept and slope</p></li>
 </ul><p>The method automatically:</p><ul><li><p>Tests for high positive correlation using Kendall's tau</p></li>
 <li><p>Tests for linearity using a CUSUM test</p></li>
 <li><p>Computes confidence intervals (analytical or bootstrap)</p></li>
@@ -236,6 +279,15 @@ Clinical Chemistry and Laboratory Medicine,
 <p>Bablok, W., Passing, H., Bender, R., &amp; Schneider, B. (1988). A General Regression Procedure for Method Transformation. Application of Linear Regression Procedures for Method Comparison Studies in Clinical Chemistry, Part III.
 Clinical Chemistry and Laboratory Medicine,
 26(11). doi: 10.1515/cclm.1988.26.11.783</p>
+<p>Dufey, F. (2020). Derivation of Passing-Bablok regression from Kendall's tau.
+The International Journal of Biostatistics, 16(2), 20190157.
+doi: 10.1515/ijb-2019-0157</p>
+<p>Sen, P. K. (1968). Estimates of the regression coefficient based on
+Kendall's tau. Journal of the American Statistical Association, 63(324),
+1379-1389. doi: 10.1080/01621459.1968.10480934</p>
+<p>Shao, J., &amp; Wu, C. F. J. (1989). A general theory for jackknife variance
+estimation. The Annals of Statistics, 17(3), 1176-1197.
+doi: 10.1214/aos/1176347263</p>
     </div>
 
     <div class="section level2">
@@ -253,6 +305,12 @@ Clinical Chemistry and Laboratory Medicine,
 <span class="r-in"><span><span class="co"># With bootstrap confidence intervals</span></span></span>
 <span class="r-in"><span><span class="va">model_boot</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
 <span class="r-in"><span>                     error.ratio <span class="op">=</span> <span class="fl">1.5</span>, replicates <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix</span></span></span>
+<span class="r-in"><span><span class="va">model_jack</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
+<span class="r-in"><span>                     se_method <span class="op">=</span> <span class="st">"jackknife"</span>, replicates <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model_dufey</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, se_method <span class="op">=</span> <span class="st">"dufey"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">model_dufey</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Symmetric method</span></span></span>
 <span class="r-in"><span><span class="va">model_sym</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, method <span class="op">=</span> <span class="st">"symmetric"</span><span class="op">)</span></span></span>

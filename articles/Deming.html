@@ -125,7 +125,8 @@ referred to as “Deming regression” (e.g., <span class="citation">Linnet
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Also, we will assume, based on historical data, that the measurement
-error ratio is equal to 2.</p>
+error ratio is equal to 2 (i.e., the error variance of x is twice the
+error variance of y).</p>
 <p>The data can be run through the <code>dem_reg</code> function and the
 results printed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -371,14 +372,14 @@ Kendall’s tau correlation:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;        term    coef       se lower.ci upper.ci df null_value reject_h0</span></span>
-<span><span class="co">#&gt; 1 Intercept 0.09622 0.088205 -0.09182   0.2539 28          0     FALSE</span></span>
-<span><span class="co">#&gt; 2   method1 0.99440 0.001291  0.99198   0.9970 28          1      TRUE</span></span>
+<span><span class="co">#&gt; 1 Intercept 0.09622 0.498965  -0.9118   0.8647 28          0     FALSE</span></span>
+<span><span class="co">#&gt; 2   method1 0.99440 0.006917   0.9836   1.0075 28          1     FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 28 degrees of freedom</span></span>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Bootstrap CIs based on 999 resamples</span></span></code></pre></div>
+<span><span class="co">#&gt; Pairs bootstrap CIs based on 999 resamples</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -449,10 +450,10 @@ within the joint confidence region:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  y ~ x</span></span>
-<span><span class="co">#&gt; X-squared = 0.21666, df = 2, p-value = 0.8973</span></span>
+<span><span class="co">#&gt; X-squared = 0.21666, df1 = 2, df2 = 8, p-value = 0.8986</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
 <span><span class="co">#&gt; null values:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
@@ -466,10 +467,10 @@ applied to Passing-Bablok models fitted with bootstrap:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  method2 ~ method1</span></span>
-<span><span class="co">#&gt; X-squared = 905.61, df = 2, p-value &lt; 2.2e-16</span></span>
+<span><span class="co">#&gt; X-squared = 7.7659, df1 = 2, df2 = 28, p-value = 0.03248</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
 <span><span class="co">#&gt; null values:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
@@ -541,7 +542,9 @@ correlation between slope and intercept.</p>
 <div class="section level3">
 <h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h3>
-<p>A Deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant.</p>
+<p>A Deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant. In
+<code>SimplyAgree</code>, the error ratio is always the error variance
+of x divided by the error variance of y.</p>
 <p><span class="math display">\[
 \lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta}
 \]</span></p>
@@ -555,7 +558,7 @@ then be estimated from the data itself.</p>
 coefficient of variation (if that data is available) and the mean of x
 and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
 <p><span class="math display">\[
-\lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2}
+\lambda = \frac{(CV_x \cdot \bar x)^2}{(CV_y \cdot \bar y)^2}
 \]</span></p>
 </div>
 <div class="section level3">
