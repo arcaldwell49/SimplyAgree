@@ -269,12 +269,13 @@ calc_loa_simple = function(df,
   }
   delta.sd <- sigma(model)
   dfs = df.residual(model)
+  infl = if(prop_bias) bias_inflation(model, bias_values$avg) else 1
 
   if(loa_calc == "blandaltman"){
     df_loa = bias_values %>%
       mutate(
         sd_delta = delta.sd,
-        var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
+        var_loa = (delta.sd*sqrt(infl/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
         lme = qt(side.level, df) * sqrt(var_loa)
         ) %>%
@@ -297,9 +298,9 @@ calc_loa_simple = function(df,
     df_loa = bias_values %>%
       mutate(
         sd_delta = delta.sd,
-        var_loa = (delta.sd*sqrt(1/k + agreeq^2 / (2*(k-1))) )^2,
+        var_loa = (delta.sd*sqrt(infl/k + agreeq^2 / (2*(k-1))) )^2,
         agree_int = agreeq * sd_delta,
-        lme =  sd_delta * sqrt(confq2^2/k + agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2)
+        lme =  sd_delta * sqrt(confq2^2*infl/k + agreeq^2 * (sqrt(dfs/qchisq(1-conf2,dfs))-1)^2)
       ) %>%
       mutate(
         lower_loa = bias - agree_int,
@@ -399,9 +400,10 @@ calc_loa_reps = function(df,
 
   n_sub = nrow(df2)
   n_obs = nrow(df)
+  infl = if(prop_bias) bias_inflation(model, bias_values$avg) else 1
 
   # LoA Variance ----
-  loa_var = (between_variance/n_sub) + agreeq^2 / (2*total_variance) *
+  loa_var = (between_variance*infl/n_sub) + agreeq^2 / (2*total_variance) *
     ((between_variance)^2/(n_sub-1) + (1 - 1/mxh)^2 *
        (sxw2)^2/dfx + (1 - 1/myh)^2 *
        (syw2)^2/dfy)
@@ -436,7 +438,7 @@ calc_loa_reps = function(df,
     move_u = total_variance + sqrt(move_u_1+move_u_2+move_u_3)
 
     # LME -----
-    LME = sqrt(confq2^2*(d_var/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
+    LME = sqrt(confq2^2*(d_var*infl/nrow(df2))+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
     df_loa = bias_values %>%
       mutate(
@@ -507,10 +509,6 @@ calc_loa_nest = function(df,
   mh = n_sub/sum(1/m_i)
   n_obs = nrow(df)
 
-  # LoA Variance ----
-  loa_var = (between_variance/n_sub) + agreeq^2 / (2*total_variance) *
-    ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
-
   if (prop_bias == FALSE) {
     if(n_obs <= lmer_limit & lmer_df == "satterthwaite"){
     bias_values = emmeans(model, ~1, lmer.df = "satterthwaite",
@@ -566,6 +564,11 @@ calc_loa_nest = function(df,
 
 
   }
+  infl = if(prop_bias) bias_inflation(model, bias_values$avg) else 1
+
+  # LoA Variance ----
+  loa_var = (between_variance*infl/n_sub) + agreeq^2 / (2*total_variance) *
+    ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
   if(loa_calc == "blandaltman"){
 
@@ -593,7 +596,7 @@ calc_loa_nest = function(df,
     move_u = total_variance + sqrt(move_u_1+move_u_2)
 
     # LME -----
-    LME = sqrt(confq2^2*(between_variance/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
+    LME = sqrt(confq2^2*(between_variance*infl/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
     df_loa <- bias_values %>%
       mutate(
@@ -611,4 +614,18 @@ calc_loa_nest = function(df,
   }
 
   return(df_loa)
+}
+
+# Bias variance away from the center of avg ----
+# With prop_bias the variance of the fitted bias at avg = a is
+# v00 + 2*v01*a + v11*a^2, smallest at a = -v01/v11 (the mean of avg for lm).
+# The LoA formulas use the variance at that point (e.g., s^2/n), so it is
+# scaled by the ratio of the variance at each grid value to that minimum. For
+# lm this is 1 + n * (a - mean(avg))^2 / Sxx.
+bias_inflation = function(model, avg){
+  cf = c("(Intercept)", "avg")
+  V = as.matrix(vcov(model))[cf, cf]
+  v_avg = V[1, 1] + 2 * V[1, 2] * avg + V[2, 2] * avg^2
+  v_min = V[1, 1] - V[1, 2]^2 / V[2, 2]
+  v_avg / v_min
 }

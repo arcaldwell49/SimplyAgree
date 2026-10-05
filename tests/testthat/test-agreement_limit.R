@@ -163,3 +163,33 @@ test_that("reps within-subject variances are pooled over each method's own repli
                                data_type = "reps"),
                "requires replicate measurements")
 })
+
+test_that("prop_bias LoA margins grow away from the mean of avg", {
+  data(reps)
+  for(dt in c("simple", "reps", "nest")){
+    for(lc in c("mover", "blandaltman")){
+      a = agreement_limit(x = "x", y = "y", id = "id", data = reps,
+                          data_type = dt, loa_calc = lc, prop_bias = TRUE)
+      # grid rows are min, mean, max of avg; the margin is smallest at the mean
+      expect_true(a$loa$lme[2] < a$loa$lme[1])
+      expect_true(a$loa$lme[2] < a$loa$lme[3])
+    }
+  }
+})
+
+test_that("simple prop_bias LoA margin uses the SE of the fitted bias", {
+  set.seed(1)
+  d = data.frame(x = rnorm(30, 50, 10))
+  d$y = d$x * 1.05 + rnorm(30, 0, 3)
+  a = agreement_limit(x = "x", y = "y", data = d, prop_bias = TRUE,
+                      loa_calc = "mover")
+  avg = (d$x + d$y) / 2
+  fit = lm(I(d$x - d$y) ~ avg)
+  se = unname(predict(fit, newdata = data.frame(avg = a$loa$avg),
+                      se.fit = TRUE)$se.fit)
+  s = sigma(fit)
+  dfs = df.residual(fit)
+  lme = sqrt(qnorm(0.95)^2 * se^2 +
+               qnorm(0.975)^2 * s^2 * (sqrt(dfs / qchisq(0.05, dfs)) - 1)^2)
+  expect_equal(a$loa$lme, lme, tolerance = 1e-8)
+})
