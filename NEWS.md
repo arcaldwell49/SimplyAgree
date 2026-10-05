@@ -4,6 +4,7 @@
 
 - Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).
   - The data needed by the `plot` and `check` methods are now stored in the returned object itself, rather than as a formula that pointed back at the environment the analysis was run in.
+- Fixed `plot()` and `print()` failing for `agree_test()`, `agree_reps()`, `agree_nest()`, and `agree_np()` when `delta` (or `conf.level`, `agree.level`, `TOST`, `prop_bias`) was supplied as an expression (e.g., `delta = log(1.10)`) or from inside another function (#50). The stored call now holds the evaluated values of these settings rather than the code as typed; the data arguments are still not copied into the object.
 - Fixed `tolerance_limit()` prediction and tolerance limits when the model has a variance function (from `condition` or a user-supplied `weights`). The limits previously used `sigma(model)`, which is only the residual SD at the reference level of the variance function, so they were too narrow for other conditions or covariate values. The residual SD is now evaluated for each row of the limits (funnily caught when reviewing another manuscript!).
   - `limits` gains an `SD` column with the residual SD used for each row.
   - If the variance depends on `avg` (e.g., `weights = nlme::varPower(form = ~avg)`), the limits are reported at the minimum, median, and maximum of `avg`, even when `prop_bias = FALSE`.
