@@ -14,7 +14,10 @@
 #' @param conf.level The confidence level required. Default is 95%.
 #' @param weighted Logical indicator (TRUE/FALSE) for whether to use weighted Deming regression. Default is FALSE.
 #' @param weights an optional vector of weights to be used in the fitting process. Should be NULL or a numeric vector.
-#' @param error.ratio Ratio of the two error variances. Default is 1. This argument is ignored if subject identifiers are provided.
+#' @param error.ratio Ratio of the measurement error variance of x to that of y, i.e., var(x)/var(y),
+#'   where var() denotes the error (not total) variance of each method. Default is 1 (equal error variances).
+#'   Values greater than 1 indicate that x is measured with more error than y.
+#'   This argument is ignored if subject identifiers are provided.
 #' @param model Logical. If TRUE (default), the model frame is stored in the returned object.
 #'   This is needed for methods like `plot()`, `fitted()`, `residuals()`, and `predict()` to work
 #'   without supplying `data`. If FALSE, the model frame is not stored (saves memory for large datasets),
@@ -35,7 +38,9 @@
 #' If the data are measured in replicates, then the measurement error can be directly derived from the data.
 #' This can be accomplished by indicating the subject identifier with the id argument.
 #' When the replicates are not available in the data,
-#' then the ratio of error variances (y/x) can be provided with the error.ratio argument.
+#' then the ratio of error variances, var(x)/var(y), can be provided with the error.ratio argument.
+#' When subject identifiers are provided, the error ratio is instead estimated from the replicates
+#' as the within-subject variance of x divided by the within-subject variance of y.
 #'
 #'
 #' @section Interface Change:

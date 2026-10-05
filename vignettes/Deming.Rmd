@@ -44,7 +44,7 @@ dat = data.frame(
 )
 ```
 
-Also, we will assume, based on historical data, that the measurement error ratio is equal to 2.
+Also, we will assume, based on historical data, that the measurement error ratio is equal to 2 (i.e., the error variance of x is twice the error variance of y).
 
 The data can be run through the `dem_reg` function and the results printed. 
 
@@ -292,7 +292,7 @@ This forms an ellipse in parameter space that accounts for the correlation betwe
 
 ## Measurement Error
 
-A Deming regression model also assumes the measurement error ($\sigma^2$) ratio is constant.
+A Deming regression model also assumes the measurement error ($\sigma^2$) ratio is constant. In `SimplyAgree`, the error ratio is always the error variance of x divided by the error variance of y.
 
 $$
 \lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta} 
@@ -303,7 +303,7 @@ In `SimplyAgree`, the error ratio can be set with the `error.ratio` argument. It
 If the data was not measured in replicate then the error ratio ($\lambda$) can be estimated from the coefficient of variation (if that data is available) and the mean of x and y ($\bar x, \space \bar y$).
 
 $$
-\lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2}
+\lambda = \frac{(CV_x \cdot \bar x)^2}{(CV_y \cdot \bar y)^2}
 $$
 
 ## Weights

@@ -36,3 +36,4 @@
 ^.*-manual\.tex$
 ^CLAUDE\.md$
 ^references$
+^\.claude$

@@ -56,12 +56,12 @@ options:
             intervals
 
     - name: testValue
-      title: Error Ratio between X & Y
+      title: Error Ratio (Method 1 / Method 2)
       type: Number
       default: 1
       description:
-          ui: Ratio of the two error variances. Default is 1.
-          R: Ratio of the two error variances. Default is 1.
+          ui: Ratio of the error variances, Method 1 (x) / Method 2 (y). Default is 1.
+          R: Ratio of the error variances, Method 1 (x) / Method 2 (y). Default is 1.
 
     - name: plotcon
       title: Line-of-Identity plot

@@ -194,7 +194,7 @@ jmvdemingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param method2 Name of column containing Vector of data
 #' @param ciWidth a number between 50 and 99.9 (default: 95), the width of
 #'   confidence intervals
-#' @param testValue Ratio of the two error variances. Default is 1.
+#' @param testValue Ratio of the error variances, Method 1 (x) / Method 2 (y). Default is 1.
 #' @param plotcon \code{TRUE} or \code{FALSE} (default), for Bland-Altman plot
 #' @param plotcheck \code{TRUE} or \code{FALSE} (default), assumptions plots
 #' @param weighted \code{TRUE} or \code{FALSE} (default), use weighted Deming regression

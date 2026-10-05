@@ -445,3 +445,40 @@ test_that("dem_reg weighted validates against NCSS results", {
                tolerance = 0.01)
 })
 
+
+# Direction of error.ratio (var(x)/var(y)) ----------------------------------
+
+sim_unequal_error <- function(n, b0 = 2, b1 = 1.5, sd_x = 4, sd_y = 1,
+                              reps = 1, seed = 1234) {
+  set.seed(seed)
+  true_x <- rnorm(n, mean = 50, sd = 10)
+  data.frame(
+    id = rep(seq_len(n), each = reps),
+    x = rep(true_x, each = reps) + rnorm(n * reps, sd = sd_x),
+    y = b0 + b1 * rep(true_x, each = reps) + rnorm(n * reps, sd = sd_y)
+  )
+}
+
+test_that("error.ratio = var(x)/var(y) recovers the true slope", {
+  # Error variance of x is 16 times that of y
+  dat <- sim_unequal_error(n = 1000)
+
+  correct <- dem_reg(y ~ x, data = dat, error.ratio = 4^2 / 1^2)
+  reciprocal <- dem_reg(y ~ x, data = dat, error.ratio = 1^2 / 4^2)
+
+  expect_equal(unname(coef(correct)["x"]), 1.5, tolerance = 0.03)
+  # The reciprocal treats x as nearly error-free, so the slope is attenuated
+  # toward the OLS value: 1.5 * 100 / (100 + 16) ~= 1.29
+  expect_lt(unname(coef(reciprocal)["x"]), 1.4)
+  expect_gt(abs(coef(reciprocal)["x"] - 1.5),
+            5 * abs(coef(correct)["x"] - 1.5))
+})
+
+test_that("error.ratio estimated from replicates is var(x)/var(y)", {
+  dat <- sim_unequal_error(n = 300, reps = 3)
+
+  fit <- dem_reg(y ~ x, data = dat, id = "id")
+
+  expect_equal(fit$error.ratio, 16, tolerance = 0.15)
+  expect_equal(unname(coef(fit)["x"]), 1.5, tolerance = 0.03)
+})
