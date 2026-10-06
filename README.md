@@ -1,8 +1,6 @@
 
 # SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree/"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
-*Artwork courtesy of Chelsea Parlett Pelleriti*
-
 <!-- badges: start -->
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.04148/status.svg)](https://doi.org/10.21105/joss.04148)
@@ -12,9 +10,32 @@ coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/bad
 [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
 <!-- badges: end -->
 
-Please see the package’s
-[website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes,
-and other details about the package.
+`SimplyAgree` is an R package and [jamovi](https://www.jamovi.org/)
+module for method comparison, agreement, and reliability studies. It
+estimates Bland-Altman limits of agreement, tolerance limits,
+concordance correlation coefficients (CCC), intraclass correlation
+coefficients (ICC), and Deming/Passing-Bablok regression, and plans
+sample sizes for agreement studies. Simple paired data, replicate
+measurements, and nested (repeated measures) designs are supported. Full
+documentation and vignettes are on the [package
+website](https://aaroncaldwell.us/SimplyAgree/).
+
+## Which function should I use?
+
+| Goal | Function | Data |
+|----|----|----|
+| Bland-Altman limits of agreement | `agreement_limit()` | simple, replicate, or nested |
+| Tolerance limits (prediction-oriented agreement) | `tolerance_limit()` | simple, repeated, or nested; optional conditions |
+| Concordance correlation coefficient (CCC) | `ccc_test()` | simple, replicate, or nested |
+| Non-parametric limits of agreement | `agree_np()` | simple or replicate |
+| Reliability: ICC, SEM, coefficient of variation | `reli_stats()`, `reli_aov()` | repeated measures (long or wide) |
+| Deming / Passing-Bablok regression | `dem_reg()`, `pb_reg()` | paired, optionally with replicates |
+| Power and sample size | `power_agreement_exact()`, `blandPowerCurve()`, `agree_expected_half()`, `agree_assurance()`, `deming_sample_size()` | study planning |
+
+`agree_test()`, `agree_reps()`, and `agree_nest()` still work but are
+superseded by `agreement_limit()`. The `jmv*()` functions exist for the
+jamovi module and are not intended for use in R. `loa_mixed()` is
+defunct; use `loa_lme()` for mixed-model limits of agreement.
 
 # Background
 
@@ -69,7 +90,7 @@ Beyond the two core functions, `SimplyAgree` provides:
 
 - **Reliability Analysis**: `reli_stats()` and `reli_aov()` functions
   for comprehensive reliability assessment
-- **Power Analysis**: `power_exact_agreement()` and related functions
+- **Power Analysis**: `power_agreement_exact()` and related functions
   for sample size determination in agreement studies
 - **Error-in-Variables**: supports “Deming” and “Passing-Bablok”
   regression methods for method comparison
@@ -80,8 +101,14 @@ Beyond the two core functions, `SimplyAgree` provides:
 
 ## Installing SimplyAgree
 
-You can install the most up-to-date version of `SimplyAgree` from
-[GitHub](https://github.com/arcaldwell49/SimplyAgree) with:
+Install the released version from CRAN:
+
+``` r
+install.packages("SimplyAgree")
+```
+
+Or the development version from
+[GitHub](https://github.com/arcaldwell49/SimplyAgree):
 
 ``` r
 devtools::install_github("arcaldwell49/SimplyAgree")
@@ -89,28 +116,66 @@ devtools::install_github("arcaldwell49/SimplyAgree")
 
 ## Quick Start Example
 
+The `temps` data set has rectal (`trec_pre`) and esophageal (`teso_pre`)
+temperatures measured on the same participants across several trials
+(`id` identifies the participant).
+
 ``` r
 library(SimplyAgree)
-
-# Load example data
 data(temps)
 
-# Limits of agreement analysis
-agree_results <- agreement_limit(x = "method1", 
-                                  y = "method2", 
-                                  data = temps,
-                                  agree.level = 0.95)
-
-# Tolerance interval analysis  
-tol_results <- tolerance_limit(x = "method1",
-                                y = "method2", 
-                                data = temps,
-                                prop = 0.95)
-
-# Reliability analysis
-reli_results <- reli_stats(data = temps,
-                           wide = TRUE)
+# Bland-Altman limits of agreement for nested (repeated measures) data
+agreement_limit(x = "trec_pre", y = "teso_pre", id = "id",
+                data = temps, data_type = "nest")
 ```
+
+    ## MOVER Limits of Agreement (LoA)
+    ## 95% LoA @ 5% Alpha-Level
+    ## Nested Data
+    ## 
+    ##    Bias          Bias CI Lower LoA Upper LoA            LoA CI
+    ##  0.1908 [0.1191, 0.2625]   -0.1507    0.5324 [-0.2307, 0.6124]
+    ## 
+    ## LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
+    ##   not a joint 95% interval for the LoA
+    ## SD of Differences = 0.1743
+
+``` r
+# Tolerance limits, allowing the differences to vary by time of day
+tolerance_limit(data = temps, x = "trec_pre", y = "teso_pre",
+                id = "id", condition = "tod")
+```
+
+    ## Agreement between Measures (Difference: x-y)
+    ## 95% CI for Bias; 95% Prediction Interval
+    ## Tolerance Limits: at least 95% of differences with 95% confidence
+    ## Model: GLS, compound symmetry within id; residual SD by condition
+    ## 
+    ##  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits
+    ##         AM 0.1537 [0.0595, 0.2478] 0.1878   [-0.2919, 0.5993] [-0.3674, 0.6748]
+    ##         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]
+
+``` r
+# Concordance correlation coefficient
+ccc_test(x = "trec_pre", y = "teso_pre", id = "id",
+         data = temps, data_type = "nest")
+```
+
+    ## 
+    ##  Concordance Correlation Coefficient (U-statistics)
+    ## 
+    ## data:  trec_pre and teso_pre
+    ## Z = 8.8359, n = 10, p-value < 2.2e-16
+    ## alternative hypothesis: true CCC is  0
+    ## 95 percent confidence interval:
+    ##  0.4392869 0.6291813
+    ## sample estimates:
+    ##       CCC 
+    ## 0.5410955
+
+The `agreement_limit()` and `tolerance_limit()` results have `plot()`
+methods for Bland-Altman plots and `check()` methods for assumption
+checks.
 
 # Contributing
 
@@ -132,6 +197,10 @@ Please note that the SimplyAgree project is released with a [Contributor
 Code of
 Conduct](https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html). By
 contributing to this project, you agree to abide by its terms.
+
+## Acknowledgements
+
+Logo artwork courtesy of Chelsea Parlett Pelleriti.
 
 # References
 

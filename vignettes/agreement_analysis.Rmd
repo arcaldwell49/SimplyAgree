@@ -1,5 +1,6 @@
 ---
 title: "Agreement & Tolerance Limits"
+description: "Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 

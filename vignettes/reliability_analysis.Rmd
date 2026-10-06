@@ -1,5 +1,6 @@
 ---
 title: "Reliability Analysis"
+description: "Test-retest reliability in R: intraclass correlation coefficients (ICC), standard error of measurement (SEM), and coefficient of variation with reli_stats()."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 

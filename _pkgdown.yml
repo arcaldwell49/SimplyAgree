@@ -1,6 +1,10 @@
 home:
-  title: SimplyAgree R package
-  description: An R package for agreement and reliability estimation
+  title: "SimplyAgree: Bland-Altman, Tolerance Limits & Reliability (ICC) in R"
+  description: >
+    R package and jamovi module for method comparison studies: Bland-Altman
+    limits of agreement, tolerance limits, concordance correlation (CCC),
+    ICCs, and Deming/Passing-Bablok regression for simple, repeated, and
+    nested data.
 
 url: https://aaroncaldwell.us/SimplyAgree
 
@@ -64,7 +68,7 @@ reference:
 
 - title: "Power"
   desc: >
-    Fucntions for power calculations
+    Functions for power calculations
   contents:
   - blandPowerCurve
   - powerCurve-methods

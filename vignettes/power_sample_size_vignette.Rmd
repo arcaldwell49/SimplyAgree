@@ -1,5 +1,6 @@
 ---
 title: "Power Analysis and Sample Size Determination for Agreement Studies"
+description: "Power analysis and sample size planning for Bland-Altman agreement studies: exact agreement tests, power curves, expected CI half-width, and assurance."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 bibliography: refs.bib

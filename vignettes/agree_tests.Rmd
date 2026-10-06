@@ -1,5 +1,6 @@
 ---
 title: "Agreement Tests"
+description: "Legacy agreement tests in SimplyAgree (agree_test, agree_reps, agree_nest), plus concordance correlation (CCC) and non-parametric limits of agreement with agree_np."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 

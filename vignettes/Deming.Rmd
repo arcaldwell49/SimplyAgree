@@ -1,5 +1,6 @@
 ---
 title: "Errors-in-Variables Regression"
+description: "Errors-in-variables regression for method comparison in R: Deming regression with dem_reg() and Passing-Bablok regression with pb_reg()."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
