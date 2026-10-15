@@ -331,6 +331,17 @@ mc_conv_ba_plot = function(x,
     lines = data.frame(avg = grid, bias = par$alpha,
                        lo = par$alpha - z * par$sd,
                        hi = par$alpha + z * par$sd)
+  } else if (par$type == "scaled") {
+    # y_m = alpha + beta y_k (sd) implies D = y_m - y_k =
+    # 2 alpha / (1 + beta) + 2 (beta - 1) / (1 + beta) A, SD 2 sd / (1 + beta)
+    # (MethComp::y2DA)
+    slope = 2 * (par$beta - 1) / (1 + par$beta)
+    int = 2 * par$alpha / (1 + par$beta)
+    sd_d = 2 * par$sd / (1 + par$beta)
+    lines = data.frame(avg = grid,
+                       bias = int + slope * grid,
+                       lo = int - z * sd_d + slope * grid,
+                       hi = int + z * sd_d + slope * grid)
   } else {
     sgn = if (par$m1 == m) 1 else -1
     lo = sgn * ((par$a - z * par$c_sd) + (par$b - z * par$d_sd) * grid)

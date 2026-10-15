@@ -18,7 +18,8 @@ sim_methods(
   replicates = c("exchangeable", "linked"),
   p_missing = 0,
   transform = "none",
-  seed = NULL
+  seed = NULL,
+  mu_values = NULL
 )
 }
 \arguments{
@@ -52,12 +53,17 @@ share the effect \code{a_ir}.}
 \item{p_missing}{Probability that each measurement is removed at random.
 At least one measurement of each item by each method is kept.}
 
-\item{transform}{Transformation (see \code{method_vc()}). If not "none", the
+\item{transform}{Transformation (see \code{\link[=method_vc]{method_vc()}}). If not "none", the
 data are simulated on the transformed scale and back-transformed, so all
 parameters refer to the transformed scale.}
 
 \item{seed}{Optional seed. The global random number generator state is
 restored afterwards.}
+
+\item{mu_values}{Optional numeric vector of length \code{n_items} with fixed
+true item values \code{mu_i}, used instead of drawing them (\code{mu_mean} and
+\code{mu_sd} are then ignored). Used for the parametric bootstrap in
+\code{\link[=method_convert]{method_convert()}}.}
 }
 \value{
 A tibble with columns \code{id}, \code{method} (a factor, levels in the
@@ -80,7 +86,7 @@ with \eqn{\mu_i \sim N(\mu, \sigma_\mu^2)},
 \eqn{c_{mi} \sim N(0, \tau_m^2)}, and
 \eqn{e_{mir} \sim N(0, \sigma_m^2)} (Carstensen, 2010, eq. 7.1). With all
 \eqn{\beta_m = 1}, this is the constant bias model (eq. 5.1/5.2) used by
-\code{method_vc()}.
+\code{\link[=method_vc]{method_vc()}}.
 
 The \code{truth} attribute holds the parameters and the quantities derived from
 them, on the (transformed) analysis scale:
@@ -115,5 +121,5 @@ Carstensen, B. (2010). Comparing Clinical Measurement Methods: A Practical
 Guide. Wiley.
 }
 \seealso{
-\code{method_vc()}, \code{\link[=mc_long]{mc_long()}}
+\code{\link[=method_vc]{method_vc()}}, \code{\link[=method_convert]{method_convert()}}, \code{\link[=mc_long]{mc_long()}}
 }

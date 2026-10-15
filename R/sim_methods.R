@@ -28,9 +28,13 @@
 #'   share the effect `a_ir`.
 #' @param p_missing Probability that each measurement is removed at random.
 #'   At least one measurement of each item by each method is kept.
-#' @param transform Transformation (see `method_vc()`). If not "none", the
+#' @param transform Transformation (see [method_vc()]). If not "none", the
 #'   data are simulated on the transformed scale and back-transformed, so all
 #'   parameters refer to the transformed scale.
+#' @param mu_values Optional numeric vector of length `n_items` with fixed
+#'   true item values `mu_i`, used instead of drawing them (`mu_mean` and
+#'   `mu_sd` are then ignored). Used for the parametric bootstrap in
+#'   [method_convert()].
 #' @param seed Optional seed. The global random number generator state is
 #'   restored afterwards.
 #'
@@ -42,7 +46,7 @@
 #' \eqn{c_{mi} \sim N(0, \tau_m^2)}, and
 #' \eqn{e_{mir} \sim N(0, \sigma_m^2)} (Carstensen, 2010, eq. 7.1). With all
 #' \eqn{\beta_m = 1}, this is the constant bias model (eq. 5.1/5.2) used by
-#' `method_vc()`.
+#' [method_vc()].
 #'
 #' The `truth` attribute holds the parameters and the quantities derived from
 #' them, on the (transformed) analysis scale:
@@ -78,7 +82,7 @@
 #' Carstensen, B. (2010). Comparing Clinical Measurement Methods: A Practical
 #' Guide. Wiley.
 #'
-#' @seealso `method_vc()`, [mc_long()]
+#' @seealso [method_vc()], [method_convert()], [mc_long()]
 #' @importFrom stats rnorm runif
 #' @export
 
@@ -95,7 +99,8 @@ sim_methods = function(n_items = 50,
                        replicates = c("exchangeable", "linked"),
                        p_missing = 0,
                        transform = "none",
-                       seed = NULL) {
+                       seed = NULL,
+                       mu_values = NULL) {
   replicates = match.arg(replicates)
   tf = mc_transform(transform)
 
@@ -112,6 +117,12 @@ sim_methods = function(n_items = 50,
   }
   chk_count(n_items, "n_items")
   chk_count(n_reps, "n_reps")
+  if (!is.null(mu_values) && (!is.numeric(mu_values) ||
+                             length(mu_values) != n_items ||
+                             anyNA(mu_values))) {
+    stop("`mu_values` must be a numeric vector of length `n_items`.",
+         call. = FALSE)
+  }
   if (n_items < 2) {
     stop("`n_items` must be at least 2.", call. = FALSE)
   }
@@ -153,7 +164,7 @@ sim_methods = function(n_items = 50,
 
   ## simulate ----
   dat = mc_with_seed(seed, {
-    mu = rnorm(n_items, mu_mean, mu_sd)
+    mu = if (is.null(mu_values)) rnorm(n_items, mu_mean, mu_sd) else mu_values
     a_ir = matrix(rnorm(n_items * n_reps, 0, omega), n_items, n_reps)
     c_mi = matrix(rnorm(M * n_items, 0, rep(tau, n_items)), M, n_items)
 

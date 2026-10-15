@@ -208,9 +208,6 @@ test_that("input validation", {
   expect_error(method_convert(y = "y", method = "method", id = "id"),
                "Supply `data`")
   expect_error(method_convert(dat, y = "y", method = "method", id = "id",
-                              replicate = "repl", bias = "scaled"),
-               "not available yet")
-  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
                               replicate = "repl", ci_method = "boot"),
                "only available")
   expect_error(method_convert(object = list()), "simple_mvc")
@@ -230,4 +227,136 @@ test_that("objects survive saveRDS/readRDS", {
   expect_s3_class(plot(cv2), "ggplot")
   expect_equal(nrow(predict(cv2, newdata = c(5, 10))), 2)
   unlink(f)
+})
+
+# scaled model ----
+test_that("oximetry, scaled model, reproduces MethComp AltReg", {
+  skip_if_not(file.exists(test_path("fixtures", "ox.rds")))
+  ox = readRDS(test_path("fixtures", "ox.rds"))
+  sc = method_convert(ox, y = "y", method = "meth", id = "item",
+                      replicate = "repl", replicates = "linked",
+                      bias = "scaled")
+  expect_true(sc$fit_info$converged)
+  cv = sc$conversion
+  get = function(to, from, col) cv[[col]][cv$to == to & cv$from == from]
+  close = function(x, y) expect_true(abs(x - y) <= 0.002,
+                                     info = paste(x, "vs", y))
+  close(get("CO", "pulse", "alpha"), -2.257)
+  close(get("CO", "pulse", "beta"), 1.065)
+  close(get("pulse", "CO", "alpha"), 2.120)
+  close(get("pulse", "CO", "beta"), 0.939)
+  close(get("CO", "CO", "sd_pred"), 2.899)
+  close(get("CO", "pulse", "sd_pred"), 6.390)
+  close(get("pulse", "CO", "sd_pred"), 6.002)
+  close(get("pulse", "pulse", "sd_pred"), 5.772)
+
+  vc = sc$varcomp
+  vget = function(comp, m) vc$sd[vc$component == comp & vc$method == m]
+  ref = list(omega = c(3.524, 3.310), tau = c(2.979, 2.798),
+             sigma = c(2.050, 4.081))
+  for (comp in names(ref)) {
+    close(vget(comp, "CO"), ref[[comp]][1])
+    close(vget(comp, "pulse"), ref[[comp]][2])
+  }
+  # y-scale components have the ratio of the slopes
+  expect_equal(vget("omega", "CO") / vget("omega", "pulse"),
+               get("CO", "pulse", "beta"))
+
+  # per-method parameters, first method as reference
+  expect_equal(sc$scaled$methods$beta, c(1, get("pulse", "CO", "beta")))
+  expect_equal(sc$scaled$methods$alpha[1], 0)
+})
+
+test_that("scaled model recovers non-unit slopes", {
+  dat = sim_methods(n_items = 200, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 3, tau = 0.2, sigma = c(0.2, 0.5), seed = 8)
+  sc = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled", tol = 1e-5)
+  cv = sc$conversion
+  expect_equal(cv$beta[cv$to == "B" & cv$from == "A"], 1.2,
+               tolerance = 0.03)
+  expect_equal(cv$alpha[cv$to == "B" & cv$from == "A"], 1,
+               tolerance = 0.3)
+  expect_equal(sc$varcomp$sd[sc$varcomp$component == "sigma"],
+               c(0.2, 0.5), tolerance = 0.1)
+  # delta-method intervals
+  expect_true(all(cv$beta_lower[cv$to != cv$from] <
+                    cv$beta[cv$to != cv$from]))
+  # conversions in both directions are inverse
+  b_ba = cv$beta[cv$to == "B" & cv$from == "A"]
+  b_ab = cv$beta[cv$to == "A" & cv$from == "B"]
+  expect_equal(b_ab, 1 / b_ba)
+  a_ba = cv$alpha[cv$to == "B" & cv$from == "A"]
+  expect_equal(cv$alpha[cv$to == "A" & cv$from == "B"], -a_ba / b_ba)
+  # prediction uses the conversion line
+  pr = predict(sc, newdata = 10, from = "A", to = "B")
+  expect_equal(pr$fit, a_ba + b_ba * 10)
+  sd_ba = cv$sd_pred[cv$to == "B" & cv$from == "A"]
+  expect_equal(pr$upper - pr$fit, qnorm(0.975) * sd_ba)
+})
+
+test_that("scaled conversions do not depend on the method order", {
+  dat = sim_methods(n_items = 30, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.1), mu_mean = 10,
+                    mu_sd = 2, tau = 0.2, sigma = 0.3, seed = 3)
+  s1 = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled")
+  dat$method = factor(dat$method, levels = c("B", "A"))
+  s2 = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled")
+  c1 = s1$conversion[order(s1$conversion$to, s1$conversion$from), ]
+  c2 = s2$conversion[order(s2$conversion$to, s2$conversion$from), ]
+  expect_equal(c1$beta, c2$beta, tolerance = 1e-4)
+  expect_equal(c1$alpha, c2$alpha, tolerance = 1e-3)
+  expect_equal(c1$sd_pred, c2$sd_pred, tolerance = 1e-4)
+})
+
+test_that("scaled model bootstrap", {
+  dat = sim_methods(n_items = 15, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 3, tau = 0.2, omega = 0.2, sigma = 0.3,
+                    replicates = "linked", seed = 2)
+  set.seed(10)
+  sb = suppressMessages(
+    method_convert(dat, y = "y", method = "method", id = "id",
+                   replicate = "repl", replicates = "linked",
+                   bias = "scaled", tol = 1e-4, ci_method = "boot",
+                   boot_reps = 8)
+  )
+  fi = sb$fit_info
+  expect_equal(fi$ci_method, "boot")
+  expect_equal(fi$boot_reps, 8)
+  expect_equal(nrow(sb$boot), 8 - fi$n_boot_fail)
+  cv = sb$conversion
+  off = cv$to != cv$from
+  expect_true(all(is.finite(c(cv$alpha_lower[off], cv$beta_upper[off],
+                              cv$sd_lower, sb$varcomp$upper))))
+  expect_true(all(cv$sd_lower <= cv$sd_upper))
+  expect_output(print(sb), "parametric bootstrap")
+})
+
+test_that("scaled model input checks and convergence warning", {
+  dat = sim_methods(n_items = 20, methods = c("A", "B"), seed = 1)
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              bias = "scaled"),
+               "requires replicate")
+  dat2 = sim_methods(n_items = 20, n_reps = 2, tau = 0.2, beta = c(1, 1.3),
+                     mu_mean = 10, mu_sd = 2, seed = 1)
+  expect_error(method_convert(dat2, y = "y", method = "method", id = "id",
+                              replicate = "repl", bias = "scaled",
+                              variance = "linear"),
+               "only available with bias")
+  expect_warning(method_convert(dat2, y = "y", method = "method", id = "id",
+                                replicate = "repl", bias = "scaled",
+                                max_iter = 2),
+                 "did not converge")
+})
+
+test_that("sim_methods uses fixed item values", {
+  mu = c(1, 5, 10)
+  d = sim_methods(n_items = 3, methods = c("A", "B"), sigma = 0,
+                  mu_values = mu, seed = 1)
+  expect_equal(d$y[d$method == "A"], mu)
+  expect_error(sim_methods(n_items = 3, mu_values = 1:2), "mu_values")
 })

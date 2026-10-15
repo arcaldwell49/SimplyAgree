@@ -4,7 +4,7 @@
 #' `r lifecycle::badge('experimental')`
 #'
 #' Converts data with one column per measurement method into the long format
-#' (one row per measurement) used by `method_vc()` and [sim_methods()].
+#' (one row per measurement) used by [method_vc()] and [sim_methods()].
 #'
 #' @param data A data frame in wide format, with one column per method.
 #' @param methods Character vector naming the method columns (at least two).
@@ -34,7 +34,7 @@
 #' reps_long = mc_long(reps, methods = c("x", "y"), id = "id")
 #' head(reps_long)
 #'
-#' @seealso `method_vc()`, [sim_methods()]
+#' @seealso [method_vc()], [sim_methods()]
 #' @importFrom tidyr pivot_longer
 #' @export
 

@@ -1,5 +1,26 @@
 # NEWS
 
+# SimplyAgree (development version)
+
+New functions for comparing two or more methods, with or without replicate measurements, following Carstensen (2010, *Comparing Clinical Measurement Methods*) and the MethComp package. All are marked experimental.
+
+- Added `method_vc()`, which fits the variance component model for method comparison (method-by-item, item-by-replicate, and method-specific residual variances) to two or more methods at once, with linked or exchangeable replicates.
+  - Reports the bias for every pair of methods, the variance components with confidence intervals, and limits of agreement (`interval = "agreement"`, MOVER bounds as in `agreement_limit()`) or tolerance limits (`interval = "tolerance"`, as in `tolerance_limit()`), with `bound_type = "iu"` or `"joint"`.
+  - Reports repeatability coefficients for each method and, with linked replicates, reproducibility coefficients.
+  - Supports transformations (`"log"`, `"logit"`, `"pctlogit"`, `"sqrt"`, `"asinsqrt"`, or a custom pair of functions).
+  - With one measurement per item by two methods it reproduces `agreement_limit(data_type = "simple")` and `tolerance_limit()`; on the oximetry data of Carstensen (2010) it reproduces MethComp's `BA.est()`.
+  - With one measurement per item and three or more methods, the items are random effects (with fixed item effects the likelihood is unbounded) and the method-specific residual SDs absorb the method-by-item variation.
+  - In simulations (15 to 60 items, 2 or 3 replicates, 2 or 3 methods; 95% targets), coverage of the bias CIs was 0.94 to 0.96 and of the confidence bounds of the limits 0.91 to 0.96, lowest (slightly liberal) with 15 items.
+  - Methods: `print()`, `summary()`, `coef()`, `confint()`, `vcov()`, `predict()`, `plot()` (`type = "ba"`, `"matrix"`, `"vc"`), and `check()`.
+- Added `method_convert()` for conversion equations between methods, with prediction limits:
+  - from a `method_vc()` fit (constant bias, `object = `);
+  - `bias = "linear"`: regression of the differences on the averages for each pair, with constant or linear SD of the differences, and cluster-robust standard errors with replicates;
+  - `bias = "scaled"`: the scaled model fit by alternating regression, which reproduces MethComp's `AltReg()` on the oximetry data, with delta-method (default) or parametric bootstrap (`ci_method = "boot"`) confidence intervals for the conversion parameters. The delta-method intervals treat the predicted true values as known and are much too narrow (53% to 73% coverage of 95% intervals in simulations with 15 to 60 items); the bootstrap may improve them but has not yet been checked by simulation. Intervals with the stated coverage likely need a Bayesian (MCMC) fit of the scaled model, which is planned for the future.
+  - Methods: `print()`, `summary()`, `coef()`, `confint()`, `predict()` (back-transformed to the original scale), `plot()` (`type = "conversion"`, `"ba"`), and `check()`.
+- Added `sim_methods()` to simulate method comparison data from the scaled variance component model, with the true limits, repeatability coefficients, and conversions in the `truth` attribute.
+- Added `mc_long()` to convert data with one column per method to the long format.
+- New vignettes: "Comparing Several Methods with Replicate Measurements" and "Converting Between Methods".
+
 # SimplyAgree 0.3.1
 
 - Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).

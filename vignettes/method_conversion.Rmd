@@ -1,0 +1,195 @@
+---
+title: "Converting Between Methods"
+author: "Aaron R. Caldwell"
+date: "Last Updated: `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+bibliography: refs.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Converting Between Methods}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4.5
+)
+```
+
+```{r}
+library(SimplyAgree)
+```
+
+Limits of agreement answer "how far apart are two methods?". When the methods do not agree, the next question is often "what would method B have read, given a measurement by method A?". `method_convert()` estimates **conversion equations** between every pair of methods,
+
+$$
+y_{\text{to}} = \alpha_{\text{to}|\text{from}} + \beta_{\text{to}|\text{from}}\, y_{\text{from}},
+$$
+
+with a prediction SD and prediction limits, under three models for the bias between methods [@carstensen2010]. The data are in the long format used by `method_vc()` (see `vignette("method_comparison_vc")`).
+
+We use simulated data throughout. Method B reads about 1 unit higher and 20% steeper than method A ($\beta_B = 1.2$), so the bias is not constant:
+
+```{r}
+dat = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
+                  alpha = c(0, 1), beta = c(1, 1.2),
+                  mu_mean = 10, mu_sd = 3, tau = 0.2,
+                  sigma = c(0.3, 0.5), seed = 101)
+attr(dat, "truth")$conversion
+```
+
+# Constant bias: from a variance component fit
+
+If the bias is constant, the conversion has slope 1 and its intercept is the bias, so it follows directly from `method_vc()`. The prediction SD is the SD of the difference between single measurements, and, for a method converted to itself, $\sqrt{2}\sigma_m$ (two measurements by the same method).
+
+```{r}
+fit_vc = method_vc(dat, y = "y", method = "method", id = "id",
+                   replicate = "repl")
+conv_const = method_convert(object = fit_vc)
+conv_const
+```
+
+`predict()` on the `method_vc()` fit does the same thing:
+
+```{r}
+predict(fit_vc, newdata = c(5, 10, 15), from = "A", to = "B")
+```
+
+Here the constant bias is a poor description: `check(fit_vc)` shows the differences changing with the level.
+
+# Linear bias: differences on averages
+
+The classical approach [@bland1999; @carstensen2010, section 4.7] regresses the differences $D = y_1 - y_2$ on the averages $A = (y_1 + y_2)/2$ for each pair,
+
+$$
+D = a + bA + e,
+$$
+
+and rearranges the fitted line into a conversion equation, $y_1 = a/(1 - b/2) + y_2 (1 + b/2)/(1 - b/2)$. The prediction limits are the limits of the differences, transformed the same way.
+
+```{r}
+conv_lin = method_convert(dat, y = "y", method = "method", id = "id",
+                          replicate = "repl", pair_seed = 1)
+conv_lin
+```
+
+With replicates, each item contributes several pairs (exchangeable replicates are paired at random within item; `pair_seed` makes this reproducible), so the standard errors are cluster-robust by item.
+
+If the spread of the differences also changes with the level, `variance = "linear"` models the SD of the differences as a linear function of the average:
+
+```{r}
+method_convert(dat, y = "y", method = "method", id = "id",
+               replicate = "repl", pair_seed = 1, variance = "linear")
+```
+
+**A caveat.** The slope $b$ is biased whenever the two methods have different measurement errors, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$: two methods with the same scale but different precision show a "proportional bias" on this plot. In these data method B is noisier than A, which pushes $b$ away from its true value. The scaled model below, or errors-in-variables regression (`dem_reg()`, `pb_reg()`), accounts for the measurement errors.
+
+# The scaled model
+
+The scaled model [@carstensen2010, ch. 7] assumes that every method measures the same true value $\mu_i$ on its own linear scale,
+
+$$
+y_{mir} = \alpha_m + \beta_m(\mu_i + a_{ir} + c_{mi}) + e_{mir},
+$$
+
+with the variance components of `method_vc()`: method-by-item effects $c_{mi}$, item-by-replicate effects $a_{ir}$ (linked replicates), and measurement errors $e_{mir}$ with a separate SD for each method. The conversion from method $m$ to method $k$ is
+
+$$
+\beta_{k|m} = \beta_k/\beta_m, \qquad \alpha_{k|m} = \alpha_k - \alpha_m \beta_k/\beta_m .
+$$
+
+`method_convert(bias = "scaled")` fits this model by alternating regression, as in MethComp's `AltReg()`: it alternates between regressing each method on the current predicted true values and refitting the variance component model to the rescaled measurements, until the conversions stop changing. It needs replicates, to separate the measurement errors from the method-by-item variation.
+
+```{r}
+conv_sc = method_convert(dat, y = "y", method = "method", id = "id",
+                         replicate = "repl", bias = "scaled")
+conv_sc
+```
+
+The slope of B on A is close to the true 1.2. `summary()` shows the per-method intercepts and slopes, with the first method as the reference ($\alpha = 0$, $\beta = 1$); only the conversions between methods are identified, not the scale of the true values.
+
+```{r}
+summary(conv_sc)$scaled$methods
+```
+
+`check()` shows the residuals of the final variance component model and how the estimates converged:
+
+```{r, fig.width = 8, fig.height = 6}
+check(conv_sc)
+```
+
+The conversion plot shows the conversion and its prediction limits with the observed pairs; the dashed line is the line of identity.
+
+```{r}
+plot(conv_sc)
+```
+
+The Bland-Altman plot shows the bias line and limits that the model implies for the differences:
+
+```{r}
+plot(conv_sc, type = "ba")
+```
+
+# Transformed scales
+
+All three models are fit on the scale set by `transform` (see `vignette("method_comparison_vc")`). The conversions are then linear on that scale, and `predict()` and the conversion plot back-transform the converted value and its prediction limits to the original scale [@carstensen2010, ch. 8]. For percentages (e.g., oxygen saturation), `transform = "pctlogit"` keeps the conversions and limits inside 0 to 100:
+
+```{r}
+sat = sim_methods(n_items = 40, n_reps = 2, methods = c("Ref", "New"),
+                  alpha = c(0, 0.15), beta = c(1, 1.1), mu_mean = 1.2,
+                  mu_sd = 0.8, tau = 0.1, sigma = c(0.1, 0.15),
+                  transform = "pctlogit", seed = 7)
+conv_sat = method_convert(sat, y = "y", method = "method", id = "id",
+                          replicate = "repl", bias = "scaled",
+                          transform = "pctlogit")
+predict(conv_sat, newdata = c(60, 80, 95, 99), from = "Ref", to = "New")
+plot(conv_sat, pair = c("Ref", "New"))
+```
+
+# Prediction
+
+`predict()` converts values of one method to another on the original scale, with prediction limits at any level:
+
+```{r}
+predict(conv_sc, newdata = c(5, 10, 15), from = "A", to = "B",
+        level = 0.90)
+predict(conv_sc, newdata = data.frame(B = c(6, 12)), from = "B", to = "A")
+```
+
+# Confidence intervals for the scaled model
+
+The default intervals (`ci_method = "delta"`) use the standard errors from the final regressions of each method on the predicted true values. These treat the predicted true values as known, so they ignore part of the uncertainty and are much too narrow (see below). `ci_method = "boot"` instead simulates data from the fitted model with the observed design, refits the model to each, and reports percentile intervals, including for the prediction SDs and the variance components. Each replicate refits the model, so this takes a while; use many more replicates in practice (the default is 999):
+
+```{r}
+set.seed(2024)
+conv_boot = method_convert(dat, y = "y", method = "method", id = "id",
+                           replicate = "repl", bias = "scaled",
+                           ci_method = "boot", boot_reps = 39)
+conv_boot
+```
+
+How narrow are the delta-method intervals? In simulations of the scaled model (true slopes 1, 1.2, and 0.9; 3 replicates; 500 data sets per setting), the 95% delta-method intervals for the conversion slopes covered the true slope far less often than 95%:
+
+| Items | Methods | Linked | Exchangeable |
+|------:|--------:|-------:|-------------:|
+| 15 | 2 | 57% | 66% |
+| 30 | 2 | 53% | 65% |
+| 60 | 2 | 54% | 65% |
+| 15 | 3 | 70% | 73% |
+| 30 | 3 | 67% | 71% |
+| 60 | 3 | 64% | 70% |
+
+The intercepts were similar (53% to 72%). More items do not help, because the problem is not the sample size but treating the predicted true values as known. The point estimates themselves were accurate (the slopes were essentially unbiased and the prediction SDs within 1% to 2%), so the conversions and prediction limits can be used; it is only the confidence intervals for the conversion parameters that should not be taken at face value.
+
+The bootstrap accounts for more of the uncertainty and may do better, but its coverage has not yet been checked by simulation (it requires hundreds of refits per data set). Intervals with the stated coverage most likely need a Bayesian (MCMC) fit of the scaled model, as recommended by @carstensen2010 [ch. 7] and implemented in MethComp's `MCmcmc()`; this is planned for a future version. Until then, treat the confidence intervals from the scaled model as rough indications of precision, and prefer the bootstrap when they matter.
+
+# References

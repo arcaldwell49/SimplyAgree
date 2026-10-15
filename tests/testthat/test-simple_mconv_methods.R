@@ -68,3 +68,48 @@ test_that("conversion and Bland-Altman plots", {
   expect_equal(unique(pc$layers[[2]]$data$bias), fit$bias$bias)
   expect_s3_class(plot(cc), "ggplot")
 })
+
+test_that("summary and check", {
+  cv = mconv_fit()
+  s = summary(cv)
+  expect_s3_class(s, "summary.simple_mconv")
+  out = capture.output(print(s))
+  expect_true(any(grepl("Regressions of differences", out)))
+  expect_true(any(grepl("Pairs of measurements", out)))
+  expect_s3_class(check(cv), "patchwork")
+
+  dat = sim_methods(n_items = 25, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 2, tau = 0.2, sigma = 0.3, seed = 5)
+  sc = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled", tol = 1e-4)
+  out_s = capture.output(print(summary(sc)))
+  expect_true(any(grepl("Alternating regression", out_s)))
+  expect_true(any(grepl("Methods on the scale", out_s)))
+  out_p = capture.output(print(sc))
+  expect_true(any(grepl("Scaled Model", out_p)))
+  expect_true(any(grepl("delta method", out_p)))
+  ch = check(sc)
+  expect_s3_class(ch, "patchwork")
+  expect_equal(nrow(sc$scaled$trace), 2 * sc$fit_info$iterations)
+
+  fit = method_vc(dat, y = "y", method = "method", id = "id",
+                  replicate = "repl")
+  expect_error(check(method_convert(object = fit)), "use check")
+})
+
+test_that("Bland-Altman plot for the scaled model", {
+  dat = sim_methods(n_items = 25, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 2, tau = 0.2, sigma = 0.3, seed = 5)
+  sc = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled", tol = 1e-4)
+  p = plot(sc, type = "ba")
+  l = p$layers[[2]]$data
+  cv = sc$conversion
+  b = cv$beta[cv$to == "A" & cv$from == "B"]
+  a = cv$alpha[cv$to == "A" & cv$from == "B"]
+  # D = A - B = 2a/(1+b) + 2(b-1)/(1+b) * avg
+  expect_equal(l$bias, 2 * a / (1 + b) + 2 * (b - 1) / (1 + b) * l$avg)
+  expect_s3_class(plot(sc), "ggplot")
+})

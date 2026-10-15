@@ -60,6 +60,7 @@ Beyond the two core functions, `SimplyAgree` provides:
 - **Reliability Analysis**: `reli_stats()` and `reli_aov()` functions for comprehensive reliability assessment
 - **Power Analysis**: `power_exact_agreement()` and related functions for sample size determination in agreement studies
 - **Error-in-Variables**: supports "Deming" and "Passing-Bablok" regression methods for method comparison
+- **Several Methods and Replicates**: `method_vc()` fits the variance component model of Carstensen (2010) to two or more methods with linked or exchangeable replicates, giving limits of agreement or tolerance limits for every pair and repeatability coefficients; `method_convert()` gives conversion equations between methods with prediction limits (constant bias, regression of differences on averages, or the scaled model); `sim_methods()` simulates method comparison data
 - **Visualization**: Built-in plotting capabilities for Bland-Altman plots and related visualizations
 - **Flexible Design Support**: Handles simple, nested, and repeated measures designs with appropriate variance adjustments
 

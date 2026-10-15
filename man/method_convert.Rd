@@ -42,8 +42,8 @@ when an item is measured more than once by the same method.}
 
 \item{bias}{Model for the bias between methods. "linear" (default):
 regression of the differences on the averages for each pair of methods.
-"scaled": the scaled model fit by alternating regression (not yet
-available).}
+"scaled": the scaled model fit by alternating regression (requires
+replicates). See details.}
 
 \item{variance}{Model for the SD of the differences with
 \code{bias = "linear"}: "constant" (default) or "linear" in the average.}
@@ -64,22 +64,26 @@ percentage), "sqrt", "asinsqrt", or a list with functions \code{fun} and
 transformed scale.}
 
 \item{ci_method}{Method for the confidence intervals of the conversion
-parameters. Currently "delta" (delta method).}
+parameters: "delta" (default; delta method) or, for \code{bias = "scaled"},
+"boot" (parametric bootstrap). See details.}
 
-\item{boot_reps}{Number of bootstrap replicates (for \code{ci_method = "boot"},
-not yet available).}
+\item{boot_reps}{Number of bootstrap replicates for \code{ci_method = "boot"}.
+Default is 999. Each replicate refits the model, so this can take
+several minutes; set a seed with \code{\link[=set.seed]{set.seed()}} for reproducible
+intervals.}
 
 \item{pair_seed}{Seed for the random pairing of exchangeable replicates;
 the global random number generator state is restored afterwards.}
 
-\item{max_iter, tol}{Iteration limit and convergence tolerance for
-\code{bias = "scaled"} (not yet available).}
+\item{max_iter, tol}{Iteration limit and convergence tolerance (largest
+relative change in the conversion parameters and SDs) for
+\code{bias = "scaled"}. Bootstrap refits use a tolerance of at least 1e-4.}
 
 \item{object}{A \code{\link[=method_vc]{method_vc()}} fit (\code{simple_mvc}). If supplied, the data and
 column arguments are ignored and the conversions are derived from its
 estimates with a constant bias (slope 1).}
 
-\item{keep_model}{Logical. Whether to keep the fitted regressions. Default
+\item{keep_model}{Logical. Whether to keep the fitted models. Default
 is \code{TRUE}.}
 }
 \value{
@@ -88,19 +92,28 @@ An object of class \code{simple_mconv}, a list with:
 \item \code{conversion}: tibble with one row per ordered pair (\code{to}, \code{from}),
 including each method to itself: the intercept \code{alpha}, slope \code{beta},
 prediction SD \code{sd_pred}, their standard errors and df, and confidence
-limits (\code{alpha_lower}, \code{alpha_upper}, \code{beta_lower}, \code{beta_upper}).
+limits (\code{alpha_lower}, \code{alpha_upper}, \code{beta_lower}, \code{beta_upper}; and,
+for the scaled model, \code{sd_lower}, \code{sd_upper} with the bootstrap).
 \item \code{limits_par}: list, by ordered pair (named "to|from"), of the
 parameters used to evaluate the prediction limits at any level.
 \item \code{da}: for \code{bias = "linear"}, tibble of the DA regressions for each
 pair (\code{a}, \code{b} and their SEs, \code{s}, \code{c_sd}, \code{d_sd}, df, numbers of pairs
 and items, and whether the SEs are cluster-robust).
-\item \code{varcomp}: for a conversion from a \code{\link[=method_vc]{method_vc()}} fit, its variance
-components; otherwise \code{NULL}.
+\item \code{varcomp}: the variance components (for the scaled model, on each
+method's scale, with bootstrap intervals if requested; for a
+conversion from a \code{\link[=method_vc]{method_vc()}} fit, its variance components);
+otherwise \code{NULL}.
+\item \code{scaled}: for the scaled model, the per-method intercepts and slopes,
+the item values, the variance components on the scale of the true
+values, and the iteration history (\code{trace}).
+\item \code{boot}: for \code{ci_method = "boot"}, the matrix of bootstrap estimates.
 \item \code{data}: the processed data.
 \item \code{pairs}: list of the paired data used for each pair of methods.
 \item \code{transform}: the transformation (functions included).
-\item \code{model}: list of the fitted \code{lm} objects (or \code{NULL}).
-\item \code{fit_info}: list describing the fit and settings.
+\item \code{model}: list of the fitted \code{lm} objects (linear bias), or the final
+variance component model (scaled), or \code{NULL}.
+\item \code{fit_info}: list describing the fit and settings (including the
+number of iterations, convergence, and failed bootstrap refits).
 \item \code{call}: the matched call, with evaluated settings.
 }
 }
@@ -109,9 +122,11 @@ components; otherwise \code{NULL}.
 
 Estimates the linear relation between each pair of methods, as conversion
 equations from one method to another with prediction limits. The bias
-between methods may be constant (from a \code{\link[=method_vc]{method_vc()}} fit) or change
+between methods may be constant (from a \code{\link[=method_vc]{method_vc()}} fit), change
 linearly with the level of measurement (regression of the differences on
-the averages; Carstensen, 2010, section 4.7).
+the averages; Carstensen, 2010, section 4.7), or follow the scaled model,
+in which each method is a linear function of a common true value
+(Carstensen, 2010, ch. 7).
 }
 \details{
 \strong{Constant bias} (\code{object} supplied): the conversion from method \code{m} to
@@ -147,6 +162,47 @@ have unequal measurement error variances, cov(D, A) = (var(y1) - var(y2)) /
 The scaled model (\code{bias = "scaled"}) or errors-in-variables regression
 (\code{\link[=dem_reg]{dem_reg()}}, \code{\link[=pb_reg]{pb_reg()}}) account for the measurement errors.
 
+\strong{Scaled model} (\code{bias = "scaled"}): measurement \code{r} of item \code{i} by
+method \code{m} is
+\deqn{y_{mir} = \alpha_m + \beta_m(\mu_i + a_{ir} + c_{mi}) + e_{mir},}
+with the variance components of \code{\link[=method_vc]{method_vc()}} on the scale of the true
+values \eqn{\mu_i} (Carstensen, 2010, eq. 7.1). It is fit by alternating
+regression as in the \code{AltReg()} function of the MethComp package: each
+method is regressed on the current predicted true values
+\eqn{\mu_i + a_{ir} + c_{mi}} (with a random item intercept), and the
+variance component model is refit to \eqn{(y - \alpha_m)/\beta_m}, until
+the conversions converge. The conversion from method \code{m} to \code{k} is
+\eqn{\alpha_{k|m} = \alpha_k - \alpha_m\beta_k/\beta_m},
+\eqn{\beta_{k|m} = \beta_k/\beta_m}, with prediction SD
+\eqn{\sqrt{\tau_k^2 + \sigma_k^2 + \beta_{k|m}^2(\tau_m^2 + \sigma_m^2)}}
+from the variance components on each method's scale (\eqn{\omega} cancels),
+and \eqn{\sqrt{2}\sigma_m} for a method to itself. As in MethComp, the
+method-by-item SD is multiplied by \eqn{I/(I-2)}. The per-method
+\eqn{\alpha_m, \beta_m} are reported with the first method as reference
+(\eqn{\alpha = 0, \beta = 1}); the conversions do not depend on this
+choice.
+
+Confidence intervals for the scaled model: "delta" (default) uses the
+standard errors of \eqn{(\alpha_m, \beta_m)} from the final regressions of
+each method on the predicted true values. These treat the predicted true
+values as known, so they are much too narrow: in simulations (15 to 60
+items, 2 or 3 methods, 3 replicates, linked or exchangeable; 500 data sets
+each), 95\% intervals for the conversion intercepts and slopes covered the
+true values only 53\% to 73\% of the time, with no improvement with more
+items. They are useful only as a rough indication of precision. "boot"
+simulates data from the fitted model with the observed design (the same
+items, methods, and replicates, and the fitted item values), refits the
+model, and reports percentile intervals for the conversion parameters, the
+prediction SDs, and the variance components. The bootstrap may improve on
+the delta method, but its coverage has not yet been checked by simulation,
+and each replicate refits the model (999 replicates can take several
+minutes). MethComp itself gives no intervals for the alternating
+regression; Carstensen (2010, ch. 7) recommends a Bayesian (MCMC) fit of
+the scaled model for its uncertainty, which is likely needed for
+intervals with the stated coverage and is not yet available here. Treat
+the intervals from either method as approximate. The conversions and
+prediction limits themselves do not depend on \code{ci_method}.
+
 All estimates are on the transformed scale; \code{\link[=predict]{predict()}} and the
 conversion plot back-transform the conversions and limits to the original
 scale (Carstensen, 2010, ch. 8).
@@ -166,6 +222,18 @@ predict(conv, newdata = c(5, 10, 15), from = "A", to = "B")
 fit = method_vc(dat, y = "y", method = "method", id = "id",
                 replicate = "repl")
 method_convert(object = fit)
+
+# scaled model (alternating regression)
+sc = method_convert(dat, y = "y", method = "method", id = "id",
+                    replicate = "repl", bias = "scaled", tol = 1e-4)
+sc
+\donttest{
+# parametric bootstrap intervals (use more replicates in practice)
+set.seed(1)
+method_convert(dat, y = "y", method = "method", id = "id",
+               replicate = "repl", bias = "scaled", tol = 1e-4,
+               ci_method = "boot", boot_reps = 50)
+}
 
 }
 \references{

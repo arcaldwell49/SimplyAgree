@@ -3,6 +3,9 @@
 \name{simple_mconv-methods}
 \alias{simple_mconv-methods}
 \alias{print.simple_mconv}
+\alias{summary.simple_mconv}
+\alias{print.summary.simple_mconv}
+\alias{check.simple_mconv}
 \alias{coef.simple_mconv}
 \alias{confint.simple_mconv}
 \alias{predict.simple_mconv}
@@ -10,6 +13,12 @@
 \title{Methods for simple_mconv objects}
 \usage{
 \method{print}{simple_mconv}(x, digits = 4, ...)
+
+\method{summary}{simple_mconv}(object, ...)
+
+\method{print}{summary.simple_mconv}(x, digits = 4, ...)
+
+\method{check}{simple_mconv}(x, ...)
 
 \method{coef}{simple_mconv}(object, ...)
 
@@ -65,6 +74,21 @@ parameters.}
 \code{lower} and \code{upper}. Values outside the domain of the transformation give
 \code{NA}.}
 \item{\code{plot}}{A ggplot object.}
+\item{\code{summary}}{An object of class \code{summary.simple_mconv} whose
+print method shows the fit details (iterations and convergence for the
+scaled model, bootstrap failures), the design, the number of pairs used,
+the regressions of the differences on the averages (linear bias) or the
+per-method intercepts and slopes (scaled), the conversions, and the
+variance components.}
+\item{\code{check}}{A patchwork of diagnostic plots. Linear bias: the
+standardized residuals of the regressions of the differences on the
+averages, their normal QQ plot, and the absolute residuals against the
+averages (with p-values for a slope, i.e., a spread that changes with the
+level). Scaled model: the standardized residuals of the final variance
+component model against the fitted true values, their normal QQ plots by
+method, and the intercepts and slopes at each iteration of the
+alternating regression. Not available for conversions from
+\code{\link[=method_vc]{method_vc()}}; use \code{check()} on that fit.}
 }
 }
 \description{

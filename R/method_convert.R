@@ -5,17 +5,19 @@
 #'
 #' Estimates the linear relation between each pair of methods, as conversion
 #' equations from one method to another with prediction limits. The bias
-#' between methods may be constant (from a [method_vc()] fit) or change
+#' between methods may be constant (from a [method_vc()] fit), change
 #' linearly with the level of measurement (regression of the differences on
-#' the averages; Carstensen, 2010, section 4.7).
+#' the averages; Carstensen, 2010, section 4.7), or follow the scaled model,
+#' in which each method is a linear function of a common true value
+#' (Carstensen, 2010, ch. 7).
 #'
 #' @inheritParams method_vc
 #' @param data A data frame in long format (one row per measurement). Not
 #'   needed when `object` is supplied.
 #' @param bias Model for the bias between methods. "linear" (default):
 #'   regression of the differences on the averages for each pair of methods.
-#'   "scaled": the scaled model fit by alternating regression (not yet
-#'   available).
+#'   "scaled": the scaled model fit by alternating regression (requires
+#'   replicates). See details.
 #' @param variance Model for the SD of the differences with
 #'   `bias = "linear"`: "constant" (default) or "linear" in the average.
 #' @param replicates Whether replicates are "exchangeable" (default) or
@@ -25,17 +27,21 @@
 #' @param conf_level Confidence level for the conversion parameters. Default
 #'   is 0.95.
 #' @param ci_method Method for the confidence intervals of the conversion
-#'   parameters. Currently "delta" (delta method).
-#' @param boot_reps Number of bootstrap replicates (for `ci_method = "boot"`,
-#'   not yet available).
+#'   parameters: "delta" (default; delta method) or, for `bias = "scaled"`,
+#'   "boot" (parametric bootstrap). See details.
+#' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
+#'   Default is 999. Each replicate refits the model, so this can take
+#'   several minutes; set a seed with [set.seed()] for reproducible
+#'   intervals.
 #' @param pair_seed Seed for the random pairing of exchangeable replicates;
 #'   the global random number generator state is restored afterwards.
-#' @param max_iter,tol Iteration limit and convergence tolerance for
-#'   `bias = "scaled"` (not yet available).
+#' @param max_iter,tol Iteration limit and convergence tolerance (largest
+#'   relative change in the conversion parameters and SDs) for
+#'   `bias = "scaled"`. Bootstrap refits use a tolerance of at least 1e-4.
 #' @param object A [method_vc()] fit (`simple_mvc`). If supplied, the data and
 #'   column arguments are ignored and the conversions are derived from its
 #'   estimates with a constant bias (slope 1).
-#' @param keep_model Logical. Whether to keep the fitted regressions. Default
+#' @param keep_model Logical. Whether to keep the fitted models. Default
 #'   is `TRUE`.
 #'
 #' @details
@@ -72,6 +78,47 @@
 #' The scaled model (`bias = "scaled"`) or errors-in-variables regression
 #' ([dem_reg()], [pb_reg()]) account for the measurement errors.
 #'
+#' **Scaled model** (`bias = "scaled"`): measurement `r` of item `i` by
+#' method `m` is
+#' \deqn{y_{mir} = \alpha_m + \beta_m(\mu_i + a_{ir} + c_{mi}) + e_{mir},}
+#' with the variance components of [method_vc()] on the scale of the true
+#' values \eqn{\mu_i} (Carstensen, 2010, eq. 7.1). It is fit by alternating
+#' regression as in the `AltReg()` function of the MethComp package: each
+#' method is regressed on the current predicted true values
+#' \eqn{\mu_i + a_{ir} + c_{mi}} (with a random item intercept), and the
+#' variance component model is refit to \eqn{(y - \alpha_m)/\beta_m}, until
+#' the conversions converge. The conversion from method `m` to `k` is
+#' \eqn{\alpha_{k|m} = \alpha_k - \alpha_m\beta_k/\beta_m},
+#' \eqn{\beta_{k|m} = \beta_k/\beta_m}, with prediction SD
+#' \eqn{\sqrt{\tau_k^2 + \sigma_k^2 + \beta_{k|m}^2(\tau_m^2 + \sigma_m^2)}}
+#' from the variance components on each method's scale (\eqn{\omega} cancels),
+#' and \eqn{\sqrt{2}\sigma_m} for a method to itself. As in MethComp, the
+#' method-by-item SD is multiplied by \eqn{I/(I-2)}. The per-method
+#' \eqn{\alpha_m, \beta_m} are reported with the first method as reference
+#' (\eqn{\alpha = 0, \beta = 1}); the conversions do not depend on this
+#' choice.
+#'
+#' Confidence intervals for the scaled model: "delta" (default) uses the
+#' standard errors of \eqn{(\alpha_m, \beta_m)} from the final regressions of
+#' each method on the predicted true values. These treat the predicted true
+#' values as known, so they are much too narrow: in simulations (15 to 60
+#' items, 2 or 3 methods, 3 replicates, linked or exchangeable; 500 data sets
+#' each), 95% intervals for the conversion intercepts and slopes covered the
+#' true values only 53% to 73% of the time, with no improvement with more
+#' items. They are useful only as a rough indication of precision. "boot"
+#' simulates data from the fitted model with the observed design (the same
+#' items, methods, and replicates, and the fitted item values), refits the
+#' model, and reports percentile intervals for the conversion parameters, the
+#' prediction SDs, and the variance components. The bootstrap may improve on
+#' the delta method, but its coverage has not yet been checked by simulation,
+#' and each replicate refits the model (999 replicates can take several
+#' minutes). MethComp itself gives no intervals for the alternating
+#' regression; Carstensen (2010, ch. 7) recommends a Bayesian (MCMC) fit of
+#' the scaled model for its uncertainty, which is likely needed for
+#' intervals with the stated coverage and is not yet available here. Treat
+#' the intervals from either method as approximate. The conversions and
+#' prediction limits themselves do not depend on `ci_method`.
+#'
 #' All estimates are on the transformed scale; [predict()] and the
 #' conversion plot back-transform the conversions and limits to the original
 #' scale (Carstensen, 2010, ch. 8).
@@ -81,19 +128,28 @@
 #'   - `conversion`: tibble with one row per ordered pair (`to`, `from`),
 #'     including each method to itself: the intercept `alpha`, slope `beta`,
 #'     prediction SD `sd_pred`, their standard errors and df, and confidence
-#'     limits (`alpha_lower`, `alpha_upper`, `beta_lower`, `beta_upper`).
+#'     limits (`alpha_lower`, `alpha_upper`, `beta_lower`, `beta_upper`; and,
+#'     for the scaled model, `sd_lower`, `sd_upper` with the bootstrap).
 #'   - `limits_par`: list, by ordered pair (named "to|from"), of the
 #'     parameters used to evaluate the prediction limits at any level.
 #'   - `da`: for `bias = "linear"`, tibble of the DA regressions for each
 #'     pair (`a`, `b` and their SEs, `s`, `c_sd`, `d_sd`, df, numbers of pairs
 #'     and items, and whether the SEs are cluster-robust).
-#'   - `varcomp`: for a conversion from a [method_vc()] fit, its variance
-#'     components; otherwise `NULL`.
+#'   - `varcomp`: the variance components (for the scaled model, on each
+#'     method's scale, with bootstrap intervals if requested; for a
+#'     conversion from a [method_vc()] fit, its variance components);
+#'     otherwise `NULL`.
+#'   - `scaled`: for the scaled model, the per-method intercepts and slopes,
+#'     the item values, the variance components on the scale of the true
+#'     values, and the iteration history (`trace`).
+#'   - `boot`: for `ci_method = "boot"`, the matrix of bootstrap estimates.
 #'   - `data`: the processed data.
 #'   - `pairs`: list of the paired data used for each pair of methods.
 #'   - `transform`: the transformation (functions included).
-#'   - `model`: list of the fitted `lm` objects (or `NULL`).
-#'   - `fit_info`: list describing the fit and settings.
+#'   - `model`: list of the fitted `lm` objects (linear bias), or the final
+#'     variance component model (scaled), or `NULL`.
+#'   - `fit_info`: list describing the fit and settings (including the
+#'     number of iterations, convergence, and failed bootstrap refits).
 #'   - `call`: the matched call, with evaluated settings.
 #'
 #' @examples
@@ -111,6 +167,18 @@
 #' fit = method_vc(dat, y = "y", method = "method", id = "id",
 #'                 replicate = "repl")
 #' method_convert(object = fit)
+#'
+#' # scaled model (alternating regression)
+#' sc = method_convert(dat, y = "y", method = "method", id = "id",
+#'                     replicate = "repl", bias = "scaled", tol = 1e-4)
+#' sc
+#' \donttest{
+#' # parametric bootstrap intervals (use more replicates in practice)
+#' set.seed(1)
+#' method_convert(dat, y = "y", method = "method", id = "id",
+#'                replicate = "repl", bias = "scaled", tol = 1e-4,
+#'                ci_method = "boot", boot_reps = 50)
+#' }
 #'
 #' @references
 #' Carstensen, B. (2010). Comparing Clinical Measurement Methods: A Practical
@@ -175,12 +243,12 @@ method_convert = function(data = NULL,
     stop("Supply `data` (with `y`, `method`, and `id`) or a method_vc() ",
          "fit as `object`.", call. = FALSE)
   }
-  if (bias == "scaled") {
-    stop("bias = 'scaled' is not available yet; use bias = 'linear', or ",
-         "dem_reg() for errors-in-variables regression.", call. = FALSE)
-  }
-  if (ci_method == "boot") {
+  if (bias == "linear" && ci_method == "boot") {
     stop("ci_method = 'boot' is only available for bias = 'scaled'.",
+         call. = FALSE)
+  }
+  if (bias == "scaled" && variance == "linear") {
+    stop("variance = 'linear' is only available with bias = 'linear'.",
          call. = FALSE)
   }
 
@@ -203,6 +271,20 @@ method_convert = function(data = NULL,
   tf = attr(df, "transform")
   call2$transform = tf$name
   lv = levels(df$method)
+
+  if (bias == "scaled") {
+    call2$ci_method = ci_method
+    call2$boot_reps = boot_reps
+    call2$max_iter = max_iter
+    call2$tol = tol
+    return(mc_convert_scaled(df, replicates = replicates,
+                             pred_level = pred_level,
+                             conf_level = conf_level,
+                             ci_method = ci_method, boot_reps = boot_reps,
+                             pair_seed = pair_seed, max_iter = max_iter,
+                             tol = tol, keep_model = keep_model,
+                             call2 = call2))
+  }
 
   # DA regressions for each pair ----
   prs = mc_pairs(lv)
@@ -354,4 +436,132 @@ mc_convert_constant = function(object,
                                  n_boot_fail = NA_integer_),
                  call = call2),
             class = "simple_mconv")
+}
+
+# scaled model (alternating regression) ----
+mc_convert_scaled = function(df,
+                             replicates,
+                             pred_level,
+                             conf_level,
+                             ci_method,
+                             boot_reps,
+                             pair_seed,
+                             max_iter,
+                             tol,
+                             keep_model,
+                             call2) {
+  if (!attr(df, "has_reps")) {
+    stop("bias = 'scaled' requires replicate measurements by every method, ",
+         "to separate the method-by-item variation from the measurement ",
+         "error. Use bias = 'linear' or dem_reg().", call. = FALSE)
+  }
+  lv = levels(df$method)
+  linked = replicates == "linked"
+  alt = mc_altreg(df, linked = linked, max_iter = max_iter, tol = tol)
+  if (!alt$converged) {
+    warning("The alternating regression did not converge in ", max_iter,
+            " iterations (criterion ", signif(alt$criterion, 3), " > ",
+            tol, "). Consider increasing max_iter.", call. = FALSE)
+  }
+  conversion = mc_scaled_conversion(alt, conf_level = conf_level)
+  varcomp = mc_scaled_varcomp(alt)
+  varcomp$lower = NA_real_
+  varcomp$upper = NA_real_
+  conversion$sd_lower = NA_real_
+  conversion$sd_upper = NA_real_
+
+  n_boot_fail = NA_integer_
+  boot = NULL
+  if (ci_method == "boot") {
+    boot = mc_scaled_boot(alt, df, boot_reps = boot_reps,
+                          conf_level = conf_level, max_iter = max_iter,
+                          tol = max(tol, 1e-4))
+    n_boot_fail = boot$n_fail
+    off = conversion$to != conversion$from
+    conversion$alpha_lower[off] = boot$alpha[off, 1]
+    conversion$alpha_upper[off] = boot$alpha[off, 2]
+    conversion$beta_lower[off] = boot$beta[off, 1]
+    conversion$beta_upper[off] = boot$beta[off, 2]
+    conversion$sd_lower = boot$sd_pred[, 1]
+    conversion$sd_upper = boot$sd_pred[, 2]
+    varcomp$lower = boot$varcomp[, 1]
+    varcomp$upper = boot$varcomp[, 2]
+    if (n_boot_fail > 0) {
+      message(n_boot_fail, " of ", boot_reps, " bootstrap refits failed or ",
+              "did not converge and were dropped.")
+    }
+  }
+
+  limits_par = list()
+  for (j in seq_len(nrow(conversion))) {
+    cv = conversion[j, ]
+    limits_par[[paste0(cv$to, "|", cv$from)]] = if (cv$to == cv$from) {
+      mc_limits_par("self", to = cv$to, from = cv$from)
+    } else {
+      mc_limits_par("scaled", to = cv$to, from = cv$from, alpha = cv$alpha,
+                    beta = cv$beta, sd = cv$sd_pred)
+    }
+  }
+
+  prs = mc_pairs(lv)
+  pairs = list()
+  for (j in seq_len(nrow(prs))) {
+    pairs[[paste0(prs$method1[j], "-", prs$method2[j])]] =
+      mc_pair(df, prs$method1[j], prs$method2[j], replicates = replicates,
+              seed = pair_seed)
+  }
+
+  methods_tab = dplyr::tibble(method = lv,
+                              alpha = unname(alt$a - alt$b * alt$a[1] /
+                                               alt$b[1]),
+                              beta = unname(alt$b / alt$b[1]))
+  methods_tab$alpha[1] = 0
+  methods_tab$beta[1] = 1
+
+  structure(list(conversion = conversion,
+                 limits_par = limits_par,
+                 da = NULL,
+                 varcomp = varcomp,
+                 scaled = list(methods = methods_tab,
+                               mu = alt$mu,
+                               trace = alt$trace,
+                               mu_scale = c(tau = alt$tau_z,
+                                            omega = alt$omega_z,
+                                            stats::setNames(alt$sigma_z,
+                                                            paste0("sigma_",
+                                                                   lv)))),
+                 boot = if (!is.null(boot)) boot$reps else NULL,
+                 data = df,
+                 pairs = pairs,
+                 transform = attr(df, "transform"),
+                 model = if (keep_model) alt$model else NULL,
+                 diagnostics = mc_scaled_diag(alt, df),
+                 fit_info = list(bias = "scaled",
+                                 variance = "constant",
+                                 replicates = replicates,
+                                 has_reps = TRUE,
+                                 pred_level = pred_level,
+                                 conf_level = conf_level,
+                                 ci_method = ci_method,
+                                 boot_reps = if (ci_method == "boot")
+                                   boot_reps else NA_integer_,
+                                 iterations = alt$iterations,
+                                 converged = alt$converged,
+                                 criterion = alt$criterion,
+                                 n_boot_fail = n_boot_fail),
+                 call = call2),
+            class = "simple_mconv")
+}
+
+# residuals of the final variance component fit (mu scale), stored for
+# check()
+mc_scaled_diag = function(alt,
+                          df) {
+  vc = alt$model
+  lvl = ncol(vc$fitted) - 1
+  dplyr::tibble(method = df$method,
+                id = df$id,
+                fitted = unname(stats::fitted(vc, level = lvl)),
+                resid = unname(stats::residuals(vc, type = "pearson",
+                                                level = lvl)))
 }

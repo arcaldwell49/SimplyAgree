@@ -1,0 +1,27 @@
+Elapsed: 48.01297 mins 
+   cell  I M   replicates  part delta_alpha delta_beta boot_alpha boot_beta
+1     1 15 2       linked delta       0.558      0.568         NA        NA
+2     2 30 2       linked delta       0.536      0.534         NA        NA
+3     3 60 2       linked delta       0.536      0.544         NA        NA
+4     4 15 3       linked delta       0.707      0.702         NA        NA
+5     5 30 3       linked delta       0.672      0.667         NA        NA
+6     6 60 3       linked delta       0.642      0.640         NA        NA
+7     7 15 2 exchangeable delta       0.664      0.664         NA        NA
+8     8 30 2 exchangeable delta       0.662      0.651         NA        NA
+9     9 60 2 exchangeable delta       0.646      0.651         NA        NA
+10   10 15 3 exchangeable delta       0.723      0.729         NA        NA
+11   11 30 3 exchangeable delta       0.712      0.709         NA        NA
+12   12 60 3 exchangeable delta       0.704      0.695         NA        NA
+   boot_sd converged beta_bias sd_ratio fail_rate
+1       NA         1  2.69e-03     1.01         0
+2       NA         1  6.55e-04     1.01         0
+3       NA         1  1.12e-03     1.01         0
+4       NA         1  1.57e-03     1.01         0
+5       NA         1  1.59e-04     1.01         0
+6       NA         1 -4.33e-04     1.00         0
+7       NA         1  2.87e-03     1.02         0
+8       NA         1  1.32e-03     1.01         0
+9       NA         1  3.02e-04     1.01         0
+10      NA         1  2.77e-03     1.00         0
+11      NA         1  3.61e-05     1.00         0
+12      NA         1 -2.37e-04     1.00         0

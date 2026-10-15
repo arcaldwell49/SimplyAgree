@@ -46,7 +46,7 @@ with a missing measurement are kept.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Converts data with one column per measurement method into the long format
-(one row per measurement) used by \code{method_vc()} and \code{\link[=sim_methods]{sim_methods()}}.
+(one row per measurement) used by \code{\link[=method_vc]{method_vc()}} and \code{\link[=sim_methods]{sim_methods()}}.
 }
 \examples{
 data("reps")
@@ -56,5 +56,5 @@ head(reps_long)
 
 }
 \seealso{
-\code{method_vc()}, \code{\link[=sim_methods]{sim_methods()}}
+\code{\link[=method_vc]{method_vc()}}, \code{\link[=sim_methods]{sim_methods()}}
 }

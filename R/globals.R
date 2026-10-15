@@ -83,4 +83,4 @@ utils::globalVariables(c("boot_bias",
                          "y2", "to", "from", "component", "text",
                          "est", "label", "lwr", "upr", "fit", "resid",
                          "fitted", "panel", "sample", "lower", "upper",
-                         "from_value", "lo", "hi"))
+                         "from_value", "lo", "hi", "std", "iteration"))

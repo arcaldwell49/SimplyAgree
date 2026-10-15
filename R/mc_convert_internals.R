@@ -141,6 +141,11 @@ mc_conv_lines = function(par,
                 lim1 = c(par$alpha - z * par$sd, 1),
                 lim2 = c(par$alpha + z * par$sd, 1)))
   }
+  if (par$type == "scaled") {
+    return(list(fit = c(par$alpha, par$beta),
+                lim1 = c(par$alpha - z * par$sd, par$beta),
+                lim2 = c(par$alpha + z * par$sd, par$beta)))
+  }
   da_to_y = function(a, b) {
     if (abs(b) >= 2) {
       stop("The prediction limits are not defined at this level: the ",
@@ -204,4 +209,264 @@ mc_conv_grid = function(x,
                 fit = tf$inv(fit),
                 lower = tf$inv(lo),
                 upper = tf$inv(hi))
+}
+
+# scaled model: alternating regression ----
+# Model SC (Carstensen 2010, eq. 7.1; MethComp::AltReg):
+#   y_mir = alpha_m + beta_m (mu_i + a_ir + c_mi) + e_mir
+# Iterates between
+#   1. for each method, a regression of y on the current "true values"
+#      zeta_mir = mu_i + a_ir + c_mi (with a random item intercept), giving
+#      alpha_m and beta_m;
+#   2. the variance component model (no method effects) fit to
+#      (y - alpha_m) / beta_m, giving mu_i, the variance components on the
+#      mu scale, and predicted a_ir and c_mi, which update zeta.
+# As in MethComp, the regressor in step 1 includes the predicted random
+# effects (regressing on mu_i alone did not reproduce AltReg), and the
+# method-by-item SD on the y scale is multiplied by I / (I - 2).
+# Convergence: largest relative change in the conversion intercepts (at the
+# grand mean), slopes, and the y-scale SDs (SDs below sd_lim ignored).
+mc_altreg = function(df,
+                     linked,
+                     max_iter = 100,
+                     tol = 1e-6,
+                     sd_lim = 0.01,
+                     control = nlme::lmeControl(returnObject = TRUE)) {
+  y = df$y_t
+  meth = df$method
+  item = df$id
+  repl = factor(df$repl)
+  lv = levels(meth)
+  M = length(lv)
+  I = nlevels(item)
+  mi = as.integer(meth)
+  GM = mean(y)
+
+  # starting values for the true values: item (linked: item-by-replicate)
+  # means after removing the method means, common to all methods. MethComp
+  # starts from the method-specific fitted values, which makes the first
+  # slopes close to 1 and convergence slow when the slopes differ.
+  y_c = y - stats::ave(y, meth)
+  zeta = if (linked) {
+    stats::fitted(stats::lm(y_c ~ item * repl))
+  } else {
+    stats::fitted(stats::lm(y_c ~ item))
+  }
+  rnd = if (linked) {
+    list(id = nlme::pdIdent(~ method - 1), repl = ~ 1)
+  } else {
+    list(id = nlme::pdIdent(~ method - 1))
+  }
+  vf = nlme::varIdent(form = ~ 1 | method)
+
+  cr_old = NULL
+  crit = Inf
+  iter = 0
+  trace = list()
+  while (crit > tol && iter < max_iter) {
+    iter = iter + 1
+
+    ## step 1: regress each method on zeta ----
+    a = b = numeric(M)
+    V = vector("list", M)
+    dfx = numeric(M)
+    for (m in seq_len(M)) {
+      s = mi == m
+      d1 = data.frame(yy = y[s], xx = zeta[s], ii = factor(item[s]))
+      f1 = nlme::lme(yy ~ xx, random = ~ 1 | ii, data = d1,
+                     control = control)
+      cf = nlme::fixef(f1)
+      a[m] = cf[[1]]
+      b[m] = cf[[2]]
+      V[[m]] = unname(as.matrix(stats::vcov(f1)))
+      dfx[m] = f1$fixDF$X[["xx"]]
+    }
+    names(a) = names(b) = lv
+
+    ## step 2: variance components on the mu scale ----
+    d2 = data.frame(wk = (y - a[mi]) / b[mi], method = meth, id = item,
+                    repl = repl)
+    vc = nlme::lme(wk ~ -1 + id, random = rnd, weights = vf, data = d2,
+                   control = control)
+    re = as.matrix(vc$modelStruct$reStruct)
+    sig = vc$sigma
+    ratio = stats::coef(vc$modelStruct$varStruct, unconstrained = FALSE,
+                        allCoef = TRUE)[lv]
+    tau_z = sqrt(re$id[1, 1]) * sig
+    om_z = if (linked) sqrt(re$repl[1, 1]) * sig else 0
+    sig_z = unname(sig * ratio)
+
+    r = stats::residuals(vc, level = 0:(if (linked) 2 else 1))
+    cmi = r[, "fixed"] - r[, "id"]
+    air = if (linked) r[, "id"] - r[, "repl"] else 0
+    mu = nlme::fixef(vc)
+    mu = stats::setNames(unname(mu), sub("^id", "", names(mu)))
+    zeta = unname(mu[as.character(item)]) + air + cmi
+
+    ## y-scale components and convergence ----
+    tau_y = tau_z * b * I / (I - 2)
+    om_y = om_z * b
+    sig_y = sig_z * b
+    slp = outer(b, b, "/")
+    int = outer(a, rep(1, M)) - outer(rep(1, M), a) * slp + slp * GM
+    cr = c(int, slp, om_y, tau_y, sig_y)
+    if (!is.null(cr_old)) {
+      chg = abs((cr - cr_old) / cr)
+      sd_part = (2 * M * M + 1):length(cr)
+      chg[sd_part] = chg[sd_part] * (cr_old[sd_part] > sd_lim)
+      crit = max(chg, na.rm = TRUE)
+    }
+    cr_old = cr
+    trace[[iter]] = data.frame(iteration = iter, method = lv,
+                               alpha = unname(a - b * a[1] / b[1]),
+                               beta = unname(b / b[1]),
+                               criterion = if (iter == 1) NA_real_ else crit)
+  }
+  converged = crit <= tol
+
+  list(a = a, b = b, vcov = V, df_x = dfx,
+       mu = mu, tau_z = tau_z * I / (I - 2), omega_z = om_z, sigma_z = sig_z,
+       tau_y = unname(tau_y), omega_y = unname(om_y), sigma_y = unname(sig_y),
+       iterations = iter, converged = converged, criterion = crit,
+       trace = do.call(rbind, trace), model = vc, lv = lv, linked = linked)
+}
+
+# conversion table from an mc_altreg() fit ----
+# alpha_{k|m} = a_k - a_m b_k / b_m, beta_{k|m} = b_k / b_m,
+# sd_{k|m} = sqrt(tau_k^2 + sigma_k^2 + beta_{k|m}^2 (tau_m^2 + sigma_m^2))
+# (y scale; omega cancels), and sqrt(2) sigma_m for a method to itself.
+# Delta-method SEs use the covariance of (a, b) from the step 1 regressions
+# of the final iteration, which condition on the predicted true values.
+#
+# TODO: These intervals are much too narrow (they ignore the uncertainty in
+# the predicted true values; 53-73% coverage of 95% intervals in
+# data-raw/sims/sim_method_convert_coverage.R), and the parametric bootstrap in
+# mc_scaled_boot() may improve them but its coverage has not been checked by
+# simulation (the run was too slow: ~200 refits per data set). Intervals with
+# the stated coverage likely need a Bayesian (MCMC) fit of the scaled model,
+# as in MethComp::MCmcmc (Carstensen 2010, ch. 7), which was out of scope.
+mc_scaled_conversion = function(alt,
+                                conf_level) {
+  lv = alt$lv
+  a = alt$a
+  b = alt$b
+  v_y = alt$tau_y^2 + alt$sigma_y^2
+  rows = list()
+  for (k in seq_along(lv)) {
+    for (m in seq_along(lv)) {
+      if (k == m) {
+        rows[[length(rows) + 1]] = dplyr::tibble(
+          to = lv[k], from = lv[m], alpha = 0, beta = 1,
+          sd_pred = sqrt(2) * alt$sigma_y[m],
+          alpha_se = NA_real_, beta_se = NA_real_, df = NA_real_)
+        next
+      }
+      beta = b[[k]] / b[[m]]
+      alpha = a[[k]] - a[[m]] * beta
+      # gradients with respect to (a_m, b_m, a_k, b_k)
+      g_alpha = c(-beta, a[[m]] * b[[k]] / b[[m]]^2, 1, -a[[m]] / b[[m]])
+      g_beta = c(0, -b[[k]] / b[[m]]^2, 0, 1 / b[[m]])
+      Vmk = matrix(0, 4, 4)
+      Vmk[1:2, 1:2] = alt$vcov[[m]]
+      Vmk[3:4, 3:4] = alt$vcov[[k]]
+      rows[[length(rows) + 1]] = dplyr::tibble(
+        to = lv[k], from = lv[m], alpha = alpha, beta = beta,
+        sd_pred = sqrt(v_y[k] + beta^2 * v_y[m]),
+        alpha_se = sqrt(drop(t(g_alpha) %*% Vmk %*% g_alpha)),
+        beta_se = sqrt(drop(t(g_beta) %*% Vmk %*% g_beta)),
+        df = min(alt$df_x[c(m, k)]))
+    }
+  }
+  out = dplyr::bind_rows(rows)
+  q = qt((1 + conf_level) / 2, out$df)
+  out$alpha_lower = out$alpha - q * out$alpha_se
+  out$alpha_upper = out$alpha + q * out$alpha_se
+  out$beta_lower = out$beta - q * out$beta_se
+  out$beta_upper = out$beta + q * out$beta_se
+  out
+}
+
+# y-scale variance components of an mc_altreg() fit
+mc_scaled_varcomp = function(alt) {
+  lv = alt$lv
+  out = dplyr::tibble(component = rep(c("tau", "omega", "sigma"),
+                                      each = length(lv)),
+                      method = rep(lv, 3),
+                      sd = c(alt$tau_y, alt$omega_y, alt$sigma_y))
+  if (!alt$linked) {
+    out = out[out$component != "omega", ]
+  }
+  out
+}
+
+# parametric bootstrap ----
+# Data are simulated from the fitted model with the observed design (the
+# same items, methods, and replicates), using the fitted item values, and the
+# model is refit to each. Percentile intervals for the conversion
+# parameters, prediction SDs, and variance components.
+mc_scaled_boot = function(alt,
+                          df,
+                          boot_reps,
+                          conf_level,
+                          max_iter,
+                          tol) {
+  lv = alt$lv
+  M = length(lv)
+  linked = alt$linked
+  # observed design, with replicate numbers 1..n
+  des = data.frame(id = as.character(df$id),
+                   method = as.character(df$method))
+  des$repl = if (linked) {
+    match(df$repl, sort(unique(df$repl)))
+  } else {
+    stats::ave(seq_len(nrow(df)), des$id, des$method, FUN = seq_along)
+  }
+  n_reps = max(des$repl)
+  items = names(alt$mu)
+  key_obs = paste(des$id, des$method, des$repl)
+  rep_type = if (linked) "linked" else "exchangeable"
+
+  one = function() {
+    sim = sim_methods(n_items = length(items), n_reps = n_reps,
+                      methods = lv, alpha = unname(alt$a),
+                      beta = unname(alt$b), tau = alt$tau_z,
+                      omega = alt$omega_z, sigma = alt$sigma_y,
+                      replicates = rep_type,
+                      mu_values = unname(alt$mu))
+    sim$id = items[sim$id]
+    sim = sim[paste(sim$id, sim$method, sim$repl) %in% key_obs, ]
+    sim$id = factor(sim$id, levels = items)
+    d_b = suppressMessages(
+      mc_data_org(as.data.frame(sim), y = "y", method = "method",
+                  id = "id", replicate = "repl", replicates = rep_type)
+    )
+    fit_b = mc_altreg(d_b, linked = linked, max_iter = max_iter, tol = tol)
+    if (!fit_b$converged) {
+      return(NULL)
+    }
+    cv = mc_scaled_conversion(fit_b, conf_level = conf_level)
+    c(cv$alpha, cv$beta, cv$sd_pred, mc_scaled_varcomp(fit_b)$sd)
+  }
+
+  res = vector("list", boot_reps)
+  for (r in seq_len(boot_reps)) {
+    res[[r]] = tryCatch(suppressWarnings(one()), error = function(e) NULL)
+  }
+  ok = !vapply(res, is.null, logical(1))
+  n_cv = M * M
+  n_par = 3 * n_cv + (if (linked) 3 else 2) * M
+  probs = c((1 - conf_level) / 2, (1 + conf_level) / 2)
+  if (sum(ok) > 1) {
+    mat = do.call(rbind, res[ok])
+    ci = t(apply(mat, 2, stats::quantile, probs = probs, na.rm = TRUE))
+  } else {
+    mat = NULL
+    ci = matrix(NA_real_, n_par, 2)
+  }
+  list(alpha = ci[seq_len(n_cv), , drop = FALSE],
+       beta = ci[n_cv + seq_len(n_cv), , drop = FALSE],
+       sd_pred = ci[2 * n_cv + seq_len(n_cv), , drop = FALSE],
+       varcomp = ci[-seq_len(3 * n_cv), , drop = FALSE],
+       n_fail = sum(!ok),
+       reps = mat)
 }
