@@ -345,6 +345,17 @@ mc_altreg = function(df,
 # simulation (the run was too slow: ~200 refits per data set). Intervals with
 # the stated coverage likely need a Bayesian (MCMC) fit of the scaled model,
 # as in MethComp::MCmcmc (Carstensen 2010, ch. 7), which was out of scope.
+# A feasibility check with brms (nonlinear formula
+#   y ~ alpha + beta * eta, alpha ~ 0 + method, beta ~ 0 + method,
+#   eta ~ 0 + id + (1 | method:id) + (1 | id:repl), sigma ~ 0 + method,
+# reference method fixed with constant(0)/constant(1) priors) ran on the
+# oximetry data but sampled poorly (divergences or max treedepth, low ESS),
+# took 1.5-4 minutes per fit, and the posterior put the CO residual SD near
+# zero (median ~0.2 vs 2.05 from AltReg), shifting the slope (0.81 vs 0.94).
+# The residual SD and the item-by-replicate SD are weakly identified, so the
+# priors or parameterization need work before any sampler gives usable
+# intervals. If added, the sampler package should go in Suggests and be
+# required only for that ci_method (requireNamespace() with a message).
 mc_scaled_conversion = function(alt,
                                 conf_level) {
   lv = alt$lv
