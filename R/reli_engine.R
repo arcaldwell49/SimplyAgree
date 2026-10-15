@@ -605,29 +605,47 @@
   .reli_prep_from_long(new_df, data.name = prep$data.name)
 }
 
+#' Hybrid bootstrap step for random items
+#'
+#' Resampling subjects keeps the same items, so it leaves out the sampling
+#' variation of the item mean square that comes from drawing the items. This
+#' adds it back under normal theory: MSJ is multiplied by an independent
+#' chi-square(k - 1) / (k - 1) draw. Applied to bootstrap replicates of the
+#' two-way agreement forms only.
+#' @noRd
+.hybrid_item_ms <- function(fit) {
+  df_j <- fit$df[["dfJ"]]
+  fit$ms[["MSJ"]] <- fit$ms[["MSJ"]] * stats::rchisq(1, df_j) / df_j
+  fit
+}
+
 #' Run the subject bootstrap (and optionally the jackknife)
 #'
-#' `stat_fun(prep)` must return a named numeric vector with elements `est`,
-#' `z` and `se_z` (`z` and `se_z` may be `NA` when not needed). Replicates
-#' that error, warn, or draw fewer than 2 distinct subjects are dropped and
-#' counted.
+#' `stat_fun(prep, resample)` must return a named numeric vector with
+#' elements `est`, `z` and `se_z` (`z` and `se_z` may be `NA` when not
+#' needed). `resample` is `TRUE` for bootstrap replicates and `FALSE` for the
+#' original data and the jackknife, so a statistic can add variation that
+#' subject resampling does not capture (the hybrid bootstrap for agreement
+#' ICCs). Replicates that error, warn, or draw fewer than 2 distinct subjects
+#' are dropped and counted.
 #'
 #' @return A list with `t0` (statistics on the original data), `t` (matrix of
 #'   usable replicates), `R`, `n_failed`, and `jack` (matrix of
 #'   leave-one-subject-out statistics, or `NULL`).
 #' @noRd
 .reli_boot <- function(prep, stat_fun, R = 1999, jackknife = FALSE) {
-  safe_stat <- function(p) {
+  safe_stat <- function(p, resample) {
     if (is.null(p)) {
       return(c(est = NA_real_, z = NA_real_, se_z = NA_real_))
     }
-    tryCatch(stat_fun(p),
+    tryCatch(stat_fun(p, resample),
              error = function(e) c(est = NA_real_, z = NA_real_, se_z = NA_real_),
              warning = function(w) c(est = NA_real_, z = NA_real_, se_z = NA_real_))
   }
 
-  t0 <- stat_fun(prep)
-  t_all <- t(vapply(seq_len(R), function(i) safe_stat(.reli_resample(prep)),
+  t0 <- stat_fun(prep, FALSE)
+  t_all <- t(vapply(seq_len(R),
+                    function(i) safe_stat(.reli_resample(prep), TRUE),
                     numeric(3)))
   colnames(t_all) <- c("est", "z", "se_z")
   usable <- is.finite(t_all[, "est"])
@@ -639,7 +657,7 @@
       kept <- prep$df[prep$df$id != i, , drop = FALSE]
       p <- tryCatch(.reli_prep_from_long(kept, prep$data.name),
                     error = function(e) NULL)
-      safe_stat(p)
+      safe_stat(p, FALSE)
     }, numeric(3)))
     colnames(jack) <- c("est", "z", "se_z")
   }

@@ -407,7 +407,7 @@ test_that("subject resampling keeps whole subjects and renumbers duplicates", {
 test_that("bootstrap drops and counts failed replicates; jackknife leaves out subjects", {
   set.seed(10)
   p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
-  stat <- function(pp) {
+  stat <- function(pp, resample) {
     f <- SimplyAgree:::.reli_fit(pp, keep_fit = FALSE)
     r <- SimplyAgree:::.icc_estimate(f, "C1")
     if (r > 0.85) stop("fail")
@@ -422,6 +422,26 @@ test_that("bootstrap drops and counts failed replicates; jackknife leaves out su
     SimplyAgree:::.icc_estimate(f, "C1")
   }, 1)
   expect_equal(unname(bo$jack[, "est"]), manual)
+})
+
+test_that("the resample flag is TRUE only for bootstrap replicates", {
+  set.seed(2)
+  p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
+  stat <- function(pp, resample) c(est = as.numeric(resample), z = NA, se_z = NA)
+  bo <- SimplyAgree:::.reli_boot(p, stat, R = 20, jackknife = TRUE)
+  expect_equal(bo$t0[["est"]], 0)
+  expect_true(all(bo$t[, "est"] == 1))
+  expect_true(all(bo$jack[, "est"] == 0))
+})
+
+test_that("the hybrid step rescales only the item mean square by a chi-square draw", {
+  f <- fit_wide(sf_wide)
+  set.seed(8)
+  h <- SimplyAgree:::.hybrid_item_ms(f)
+  set.seed(8)
+  draw <- rchisq(1, 3) / 3
+  expect_equal(h$ms[["MSJ"]], f$ms[["MSJ"]] * draw)
+  expect_equal(h$ms[c("MSB", "MSE", "MSW")], f$ms[c("MSB", "MSE", "MSW")])
 })
 
 # Slow simulation checks (set SIMPLYAGREE_SLOW_TESTS=true to run) ----------------

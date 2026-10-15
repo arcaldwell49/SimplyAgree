@@ -31,6 +31,8 @@ reference:
 
 - title: "Reliability"
   contents:
+  - icc_test
+  - reli_htest-methods
   - reli_stats
   - reli_aov
   - simple_reli-methods

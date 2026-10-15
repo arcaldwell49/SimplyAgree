@@ -1,0 +1,376 @@
+#' Intraclass Correlation Coefficient Test
+#'
+#' @description
+#' `r lifecycle::badge('maturing')`
+#'
+#' Estimates one intraclass correlation coefficient (ICC), with a confidence
+#' interval and a test against a null value, and returns an object of class
+#' \code{"htest"}. The ICC form is chosen with `model`, `type` and `unit`,
+#' following McGraw and Wong (1996).
+#'
+#' @param x A formula of the form `values ~ item | id`, where `values` is the
+#'   measurement, `item` identifies the trial, rater or occasion, and `id`
+#'   identifies the subject. Use either `x`, the `measure`/`item`/`id`
+#'   arguments, or `col.names`.
+#' @param data A data frame containing the variables.
+#' @param measure,item,id Column names (character) of the measurement, the
+#'   item (trial, rater, or occasion) and the subject identifier, for data in
+#'   long format.
+#' @param col.names Column names (character) of the items, for data in wide
+#'   format (one row per subject).
+#' @param model `"twoway"` (default) when every subject is measured on the
+#'   same set of items (e.g. test-retest trials), or `"oneway"` when each
+#'   subject is measured by a different set of items (e.g. different raters).
+#' @param type `"consistency"` (default) excludes systematic differences
+#'   between items from the ICC; `"agreement"` includes them (absolute
+#'   agreement). Only `"agreement"` is defined for `model = "oneway"`.
+#' @param unit `"single"` (default) for the reliability of a single
+#'   measurement, or `"average"` for the reliability of the mean of all k
+#'   items.
+#' @param method `"anova"` (default) estimates the variance components from
+#'   the analysis of variance and requires complete, balanced data. `"reml"`
+#'   fits a linear mixed model and allows missing measurements.
+#' @param conf.level Confidence level of the interval (default 0.95).
+#' @param null.value The ICC under the null hypothesis (default 0).
+#' @param alternative `"two.sided"` (default), `"greater"`, or `"less"`. A
+#'   one-sided alternative gives a one-sided interval (see Details).
+#' @param boot If `TRUE`, use a nonparametric bootstrap that resamples
+#'   subjects for the interval and p-value. Default `FALSE`.
+#' @param boot_ci Bootstrap interval type: `"perc"` (percentile, default),
+#'   `"bca"`, `"stud"` (studentized), or `"basic"`. Used only when
+#'   `boot = TRUE`.
+#' @param replicates Number of bootstrap replicates (default 1999).
+#'
+#' @details
+#' **ICC forms.** McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
+#' forms differently:
+#'
+#' | `model` | `type` | `unit` | McGraw & Wong | Shrout & Fleiss |
+#' |---|---|---|---|---|
+#' | oneway | agreement | single | ICC(1) | ICC(1,1) |
+#' | oneway | agreement | average | ICC(k) | ICC(1,k) |
+#' | twoway | agreement | single | ICC(A,1) | ICC(2,1) |
+#' | twoway | agreement | average | ICC(A,k) | ICC(2,k) |
+#' | twoway | consistency | single | ICC(C,1) | ICC(3,1) |
+#' | twoway | consistency | average | ICC(C,k) | ICC(3,k) |
+#'
+#' Whether items are treated as random or fixed changes the interpretation
+#' but not the calculation (McGraw & Wong, 1996). Average-measure forms are
+#' not defined for McGraw and Wong's two-way mixed model with an interaction.
+#'
+#' **Default form.** The default, ICC(C,1), follows Hopkins (2000) and Weir
+#' (2005): check for systematic change between trials separately (for
+#' example with the trials F test, or [t.test()] for two trials), then report
+#' the consistency ICC, which is tied to the standard error of measurement
+#' (\eqn{\sqrt{MS_E}}). Others, such as Koo and Li (2016), recommend absolute
+#' agreement (`type = "agreement"`) for test-retest studies. Which form is
+#' appropriate depends on whether systematic differences between trials
+#' should count as error.
+#'
+#' **Average-measure forms** are computed as the Spearman-Brown projection of
+#' the single-measure form to all k items. With complete data this is
+#' identical to the McGraw and Wong formulas; with missing data it keeps the
+#' estimand the reliability of the mean of all k items.
+#'
+#' **Confidence intervals** are the F-based intervals of Shrout and Fleiss
+#' (1979) and McGraw and Wong (1996, Table 7), with \eqn{\alpha/2} in each
+#' tail. They are exact for the one-way and consistency forms and
+#' approximate (Satterthwaite degrees of freedom) for the agreement forms.
+#' With `alternative = "greater"` the interval is one-sided, `[L, 1]`, where L
+#' is the one-sided `conf.level` lower bound; with `"less"` it is
+#' `[-Inf, U]`.
+#'
+#' **Tests** are the F tests of McGraw and Wong (1996, Table 8) of
+#' \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency
+#' forms, and invert exactly to the interval. For the agreement forms the
+#' test and the interval are separate Satterthwaite approximations (degrees
+#' of freedom evaluated at \eqn{\rho_0} for the test and at the estimate for
+#' the interval), so with few subjects they can disagree near the interval
+#' limits; McGraw and Wong note that their power cannot be determined
+#' exactly.
+#'
+#' **Missing data.** `method = "reml"` estimates the variance components from
+#' a linear mixed model and uses degrees of freedom based on the observed
+#' data (subject df \eqn{n - 1}, error df \eqn{N - n - k + 1}, with N the
+#' number of observations). The intervals and p-values are then approximate
+#' and a warning is given. In simulations with 20 subjects and 3 trials,
+#' 95% intervals covered 0.93 to 0.97 with 15% of measurements missing and
+#' 0.91 to 0.95 with 30% missing; coverage depends on the design and the
+#' pattern of missingness. `boot = TRUE` is an alternative.
+#'
+#' **Bootstrap.** With `boot = TRUE`, subjects are resampled with replacement
+#' (keeping all of each subject's measurements) and the model is refitted.
+#' The BCa interval uses a leave-one-subject-out jackknife for the
+#' acceleration; the studentized interval works on the scale
+#' \eqn{0.5 \log F}. The p-value is obtained by inverting the chosen
+#' interval (as in the TOSTER package), so it is approximate and consistent
+#' with the interval. With `method = "reml"` each replicate refits the mixed
+#' model, which can be slow.
+#'
+#' For the two-way agreement forms, resampling subjects alone would treat the
+#' items as fixed and ignore the uncertainty from sampling the items, which
+#' under-covered badly in simulations (0.70 to 0.80 with an ICC of 0.9). Each
+#' replicate therefore also multiplies the item mean square by an independent
+#' \eqn{\chi^2_{k-1}/(k-1)} draw, its normal-theory sampling variation (a
+#' hybrid bootstrap developed for this package). Like the F interval, this
+#' treats the items as a random sample; when the items are fixed it is
+#' conservative.
+#'
+#' The bootstrap is mainly useful when the data are clearly non-normal and
+#' there are at least about 30 subjects. In simulations (3 or 6 trials), the
+#' F intervals were best with normal data (coverage about 0.91 to 0.97) but
+#' fell to about 0.80 to 0.90 with skewed or heavy-tailed data, where the
+#' percentile bootstrap with 30 subjects covered about 0.87 to 0.93 (lowest
+#' at moderate ICCs). With 10 subjects, percentile bootstrap coverage was
+#' mostly below nominal (about 0.80 to 0.95).
+#'
+#' **Interpreting the ICC.** No qualitative labels (such as "good" or
+#' "excellent") are given: published cutoffs disagree, and the ICC depends on
+#' how much subjects differ from each other (Weir, 2005). To claim that
+#' reliability exceeds a threshold, test against it, e.g.
+#' `null.value = 0.75, alternative = "greater"`.
+#'
+#' @return A list of class `c("reli_htest", "htest")` containing:
+#'   \item{statistic}{The F statistic (omitted for bootstrap results).}
+#'   \item{parameter}{The numerator and denominator degrees of freedom
+#'   (omitted for bootstrap results).}
+#'   \item{p.value}{The p-value of the test.}
+#'   \item{conf.int}{The confidence interval for the ICC.}
+#'   \item{estimate}{The estimated ICC, named by its McGraw and Wong form.}
+#'   \item{null.value}{The hypothesized ICC.}
+#'   \item{alternative}{The alternative hypothesis.}
+#'   \item{method}{A description of the ICC and the inference.}
+#'   \item{data.name}{A description of the data.}
+#'   \item{fit}{The fitted variance components, mean squares and model.}
+#'   \item{data}{The data in long format.}
+#'   \item{settings}{The settings used, for the methods.}
+#'   \item{boot}{Bootstrap details (`NULL` unless `boot = TRUE`).}
+#'
+#' @examples
+#' # Shrout & Fleiss (1979) example: 6 subjects rated by 4 judges
+#' sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
+#'                  J3 = c(5, 3, 6, 2, 6, 4), J4 = c(8, 2, 8, 6, 9, 7))
+#' icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
+#'
+#' # Absolute agreement, tested against 0.5
+#' icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf,
+#'          type = "agreement", null.value = 0.5, alternative = "greater")
+#'
+#' # Long data with a formula
+#' sf_long <- data.frame(id = rep(1:6, times = 4),
+#'                       judge = rep(c("J1", "J2", "J3", "J4"), each = 6),
+#'                       score = c(sf$J1, sf$J2, sf$J3, sf$J4))
+#' res <- icc_test(score ~ judge | id, data = sf_long)
+#' summary(res)
+#'
+#' @references
+#' Hopkins, W. G. (2000). Measures of reliability in sports medicine and
+#' science. Sports Medicine, 30(1), 1-15. \doi{10.2165/00007256-200030010-00001}
+#'
+#' Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting
+#' intraclass correlation coefficients for reliability research. Journal of
+#' Chiropractic Medicine, 15(2), 155-163. \doi{10.1016/j.jcm.2016.02.012}
+#'
+#' McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+#' intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+#' \doi{10.1037/1082-989X.1.1.30}
+#'
+#' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+#' assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+#' \doi{10.1037/0033-2909.86.2.420}
+#'
+#' Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+#' Non-parametric bootstrap confidence intervals for the intraclass
+#' correlation coefficient. Statistics in Medicine, 22(24), 3805-3821.
+#' \doi{10.1002/sim.1643}
+#'
+#' Weir, J. P. (2005). Quantifying test-retest reliability using the
+#' intraclass correlation coefficient and the SEM. Journal of Strength and
+#' Conditioning Research, 19(1), 231-240. \doi{10.1519/15184.1}
+#'
+#' @seealso [reli_htest-methods] for `summary()`, `plot()` and `check()`.
+#' @export
+icc_test <- function(x = NULL,
+                     data = NULL,
+                     measure = NULL,
+                     item = NULL,
+                     id = NULL,
+                     col.names = NULL,
+                     model = c("twoway", "oneway"),
+                     type = c("consistency", "agreement"),
+                     unit = c("single", "average"),
+                     method = c("anova", "reml"),
+                     conf.level = 0.95,
+                     null.value = 0,
+                     alternative = c("two.sided", "greater", "less"),
+                     boot = FALSE,
+                     boot_ci = c("perc", "bca", "stud", "basic"),
+                     replicates = 1999) {
+  model <- match.arg(model)
+  type_given <- !missing(type)
+  type <- match.arg(type)
+  if (model == "oneway") {
+    if (type_given && type == "consistency") {
+      stop("type = \"consistency\" is not defined for model = \"oneway\".",
+           call. = FALSE)
+    }
+    type <- "agreement"
+  }
+  unit <- match.arg(unit)
+  method <- match.arg(method)
+  alternative <- match.arg(alternative)
+  boot_ci <- match.arg(boot_ci)
+  .check_conf_level(conf.level)
+  .check_boot_args(boot, replicates)
+
+  prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
+                        id = id, col.names = col.names)
+  form <- .icc_form(model, type, unit)
+  .check_icc_null(null.value, form, prep$k)
+
+  fit <- .reli_fit(prep, method = method, model = model)
+  if (method == "reml" && !prep$balanced && !boot) {
+    .reli_warn_unbalanced(prep)
+  }
+
+  estimate <- .icc_estimate(fit, form)
+  label <- .icc_label(form)
+
+  if (!boot) {
+    test <- .icc_ftest(fit, form, null.value, alternative)
+    conf.int <- .icc_ci(fit, form, conf.level, alternative)
+    boot_info <- NULL
+  } else {
+    k_z <- if (.icc_is_average(form)) prep$k else fit$kbar
+    agreement <- form %in% c("A1", "Ak")
+    stat_fun <- function(p, resample) {
+      f <- .reli_fit(p, method = method, model = model, keep_fit = FALSE)
+      if (resample && agreement) {
+        f <- .hybrid_item_ms(f)
+      }
+      r <- .icc_estimate(f, form)
+      kz <- if (.icc_is_average(form)) f$k else f$kbar
+      c(est = r,
+        z = .icc_z(r, form, kz),
+        se_z = if (boot_ci == "stud") .icc_z_se(f, form) else NA_real_)
+    }
+    bo <- .reli_boot(prep, stat_fun, R = replicates,
+                     jackknife = boot_ci == "bca")
+    .check_boot_failures(bo)
+    bounds <- c(if (.icc_is_average(form)) -Inf else -1 / (prep$k - 1), 1)
+    conf.int <- .boot_interval(bo, boot_ci, conf.level, alternative,
+                               back = function(z) .icc_z_inv(z, form, k_z),
+                               bounds = bounds)
+    test <- list(statistic = NULL, parameter = NULL,
+                 p.value = .boot_pvalue(bo, boot_ci, null.value, alternative,
+                                        fwd = function(r) .icc_z(r, form, k_z)))
+    boot_info <- list(boot_ci = boot_ci,
+                      replicates = replicates,
+                      n_used = nrow(bo$t),
+                      n_failed = bo$n_failed,
+                      boot_se = stats::sd(bo$t[, "est"]),
+                      estimates = bo$t[, "est"])
+  }
+
+  settings <- list(statistic = "icc",
+                   form = form,
+                   model = model,
+                   type = type,
+                   unit = unit,
+                   method = method,
+                   conf.level = conf.level,
+                   boot = boot,
+                   boot_ci = if (boot) boot_ci else NULL,
+                   label = label)
+
+  structure(list(statistic = test$statistic,
+                 parameter = test$parameter,
+                 p.value = test$p.value,
+                 conf.int = conf.int,
+                 estimate = stats::setNames(estimate, label),
+                 null.value = c(ICC = null.value),
+                 alternative = alternative,
+                 method = .icc_method_text(form, method, boot, boot_ci),
+                 data.name = prep$data.name,
+                 fit = fit,
+                 data = prep$df,
+                 settings = settings,
+                 boot = boot_info),
+            class = c("reli_htest", "htest"))
+}
+
+# Helpers --------------------------------------------------------------------
+
+.icc_label <- function(form) {
+  switch(form,
+         "1" = "ICC(1)", "k" = "ICC(k)",
+         "C1" = "ICC(C,1)", "Ck" = "ICC(C,k)",
+         "A1" = "ICC(A,1)", "Ak" = "ICC(A,k)")
+}
+
+.icc_shrout_fleiss <- function(form) {
+  switch(form,
+         "1" = "ICC(1,1)", "k" = "ICC(1,k)",
+         "C1" = "ICC(3,1)", "Ck" = "ICC(3,k)",
+         "A1" = "ICC(2,1)", "Ak" = "ICC(2,k)")
+}
+
+.icc_description <- function(form) {
+  model <- if (form %in% c("1", "k")) "One-way" else "Two-way"
+  type <- if (form %in% c("C1", "Ck")) "consistency" else "absolute agreement"
+  unit <- if (.icc_is_average(form)) "average-measure" else "single-measure"
+  paste0(model, ", ", type, ", ", unit, " ICC")
+}
+
+.icc_method_text <- function(form, method, boot, boot_ci) {
+  base <- paste0(.icc_description(form), " [Shrout & Fleiss ",
+                 .icc_shrout_fleiss(form), "]")
+  fit <- if (method == "reml") " (REML)" else ""
+  inference <- if (boot) {
+    paste0(" with nonparametric (subject) bootstrap ",
+           switch(boot_ci, bca = "BCa", stud = "studentized",
+                  perc = "percentile", basic = "basic"),
+           " interval")
+  } else ""
+  paste0(base, fit, inference)
+}
+
+.check_conf_level <- function(conf.level) {
+  if (!is.numeric(conf.level) || length(conf.level) != 1 ||
+      is.na(conf.level) || conf.level <= 0 || conf.level >= 1) {
+    stop("'conf.level' must be a single number between 0 and 1.",
+         call. = FALSE)
+  }
+}
+
+.check_boot_args <- function(boot, replicates) {
+  if (!is.logical(boot) || length(boot) != 1 || is.na(boot)) {
+    stop("'boot' must be TRUE or FALSE.", call. = FALSE)
+  }
+  if (!is.numeric(replicates) || length(replicates) != 1 ||
+      replicates < 2 || replicates != round(replicates)) {
+    stop("'replicates' must be a whole number of at least 2.", call. = FALSE)
+  }
+}
+
+.check_icc_null <- function(null.value, form, k) {
+  lower <- if (.icc_is_average(form)) -Inf else -1 / (k - 1)
+  if (!is.numeric(null.value) || length(null.value) != 1 ||
+      is.na(null.value) || null.value >= 1 || null.value <= lower) {
+    stop("'null.value' must be a single number below 1",
+         if (is.finite(lower)) sprintf(" and above %s (-1/(k - 1))",
+                                       format(signif(lower, 3))),
+         ".", call. = FALSE)
+  }
+}
+
+.check_boot_failures <- function(bo) {
+  if (nrow(bo$t) < 2) {
+    stop("Fewer than 2 bootstrap replicates could be computed.", call. = FALSE)
+  }
+  if (bo$n_failed > 0.1 * bo$R) {
+    warning(sprintf(paste0("%d of %d bootstrap replicates failed and were ",
+                           "dropped; the bootstrap interval may be unreliable."),
+                    bo$n_failed, bo$R), call. = FALSE)
+  }
+}
