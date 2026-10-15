@@ -42,6 +42,15 @@ reference:
   - joint_test
   - simple_eiv-methods
 
+- title: "Method Comparison (Several Methods)"
+  contents:
+  - method_vc
+  - method_convert
+  - simple_mvc-methods
+  - simple_mconv-methods
+  - sim_methods
+  - mc_long
+
 - subtitle: "Other Miscellaneous Functions"
   contents:
   - ccc_test

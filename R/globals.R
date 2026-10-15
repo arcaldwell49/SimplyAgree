@@ -77,4 +77,10 @@ utils::globalVariables(c("boot_bias",
                          "id",
                          "index", "residual", "cusum", "lwr", "upr", "rank_x", "rank_y",
                          "the_int", "the_slope", "slope", "intercept", "xmin", "xmax",
-                         "ymin", "ymax"))
+                         "ymin", "ymax",
+                         # multi-method comparison
+                         "y_t", "repl", "ir", "n_reps", "y1_orig", "y2_orig",
+                         "y2", "to", "from", "component", "text",
+                         "est", "label", "lwr", "upr", "fit", "resid",
+                         "fitted", "panel", "sample", "lower", "upper",
+                         "from_value", "lo", "hi"))

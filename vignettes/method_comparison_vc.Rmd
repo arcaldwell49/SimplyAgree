@@ -1,0 +1,204 @@
+---
+title: "Comparing Several Methods with Replicate Measurements"
+author: "Aaron R. Caldwell"
+date: "Last Updated: `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+bibliography: refs.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Comparing Several Methods with Replicate Measurements}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+```{r}
+library(SimplyAgree)
+```
+
+`agreement_limit()` and `tolerance_limit()` compare **two** methods supplied as paired columns. When a study measures each item with **several methods**, or measures it **more than once with each method**, the variance component model of @carstensen2008 and @carstensen2010 uses all of the data in one model. `method_vc()` fits that model and reports, for every pair of methods, the bias, the limits of agreement (or tolerance limits), the variance components behind them, and the repeatability of each method.
+
+The data must be in the long format: one row per measurement, with columns for the value, the method, the item (subject), and, with replicates, the replicate. `mc_long()` converts data with one column per method.
+
+# Why paired differences are not enough with replicates
+
+Limits of agreement describe the difference between **a single measurement** by each method on a new item. With replicates, two shortcuts are tempting, and both get this wrong:
+
+- **Averaging the replicates** within each item before taking differences removes part of the measurement error, so the SD of the differences of the means is too *small* for single measurements.
+- **Treating every replicate pair as an independent item** gets the SD about right, but the pairs from the same item are correlated, so the confidence intervals (and the bias SE) are too narrow, and the pairing of exchangeable replicates is arbitrary.
+
+A small simulation shows the first problem. Two methods measure 40 items 3 times each. The `truth` attribute of simulated data holds the true SD of the difference between single measurements.
+
+```{r}
+dat = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
+                  alpha = c(0, 0.2), tau = 0.3, sigma = c(0.5, 0.7),
+                  seed = 42)
+attr(dat, "truth")$pairs
+
+# SD of the differences of the item means: too small
+item_means = tapply(dat$y, list(dat$id, dat$method), mean)
+sd(item_means[, "A"] - item_means[, "B"])
+
+# the variance component model
+fit_ab = method_vc(dat, y = "y", method = "method", id = "id",
+                   replicate = "repl")
+fit_ab$limits[, c("bias", "sd", "lower_loa", "upper_loa")]
+```
+
+The model separates the variation of the method-by-item effects (`tau`) from the measurement error of each method (`sigma`), and recombines them for single measurements.
+
+# Linked or exchangeable replicates?
+
+This is a question about the **design**, not something to test from the data [@carstensen2010, ch. 5]:
+
+- **Exchangeable** (`replicates = "exchangeable"`, the default): the replicates of an item by one method are interchangeable, and replicate 1 by method A has nothing more to do with replicate 1 by method B than with replicate 2. For example, each method measures a sample in random order, or on different days.
+- **Linked** (`replicates = "linked"`): all methods measure the item on the same occasion, so replicate `r` is a shared occasion. For example, two oximeters read at the same time, three times per patient. Measurements on the same occasion share an item-by-replicate effect (`omega`) that does not affect the difference between methods on that occasion.
+
+With linked replicates, `replicate` must identify the occasion in the same way for all methods.
+
+# The variance component model
+
+For method $m$, item $i$, and replicate $r$,
+
+$$
+y_{mir} = \alpha_m + \mu_i + a_{ir} + c_{mi} + e_{mir},
+$$
+
+where
+
+- $\alpha_m$ is the method mean, so $\alpha_m - \alpha_k$ is the **bias** between methods $m$ and $k$;
+- $\mu_i$ are fixed item effects (no assumption about the distribution of the true values);
+- $c_{mi} \sim N(0, \tau_m^2)$ is the **method-by-item** interaction: the persistent deviation of method $m$ for item $i$ (a "matrix effect"); `tau = "common"` assumes one $\tau$ for all methods, `tau = "method"` (three or more methods) a separate one for each;
+- $a_{ir} \sim N(0, \omega^2)$ is the **item-by-replicate** effect (linked replicates only), shared by all methods on the same occasion;
+- $e_{mir} \sim N(0, \sigma_m^2)$ is the **measurement error** of method $m$.
+
+The variance of the difference between single measurements by methods $m$ and $k$ on a new item, on the same occasion, is
+
+$$
+V_{mk} = \tau_m^2 + \tau_k^2 + \sigma_m^2 + \sigma_k^2 ,
+$$
+
+and the limits of agreement are $\alpha_m - \alpha_k \pm z \sqrt{V_{mk}}$. With linked replicates $\omega$ cancels, because both methods share the occasion. If the methods would be applied on different occasions in practice, `include_omega = TRUE` adds $2\omega^2$.
+
+Without replicates, the method-by-item variation cannot be separated from the measurement error: with two methods only $V_{12}$ can be estimated (the classical paired-difference analysis, identical to `agreement_limit()`), and with three or more methods the method-specific residual SDs absorb $\tau_m$.
+
+# A worked example: three methods, linked replicates
+
+```{r}
+dat3 = sim_methods(n_items = 30, n_reps = 3,
+                   methods = c("Ref", "DevA", "DevB"),
+                   alpha = c(0, 0.6, -0.3), mu_mean = 50, mu_sd = 8,
+                   tau = 0.5, omega = 0.6, sigma = c(0.4, 0.8, 0.6),
+                   replicates = "linked", seed = 2024)
+head(dat3)
+
+fit = method_vc(dat3, y = "y", method = "method", id = "id",
+                replicate = "repl", replicates = "linked")
+fit
+```
+
+The printed table has one row per pair (first minus second method in the order of the factor levels; the first level is the reference). `summary()` adds the design, the standard errors and degrees of freedom:
+
+```{r}
+summary(fit)
+```
+
+`confint()` gives the intervals for the biases and the SDs, at any level:
+
+```{r}
+confint(fit, level = 0.90)
+```
+
+The matrix plot shows every pair. Above the diagonal each method is plotted against the other, with the line of identity (dashed) and the constant-bias conversion line with its prediction limits; below the diagonal are the Bland-Altman plots.
+
+```{r, fig.height = 7}
+plot(fit, type = "matrix", pair_seed = 1)
+```
+
+A single pair can be plotted in either direction:
+
+```{r}
+plot(fit, pair = c("DevA", "Ref"))
+```
+
+The variance components, with confidence intervals, and the repeatability coefficients:
+
+```{r, fig.height = 4}
+plot(fit, type = "vc")
+```
+
+The confidence intervals for the SDs come from the approximate covariance of the variance parameters of the fitted model (Wald intervals on the log scale). The SD of each difference gets Satterthwaite degrees of freedom (`df_sd`) from the same covariance, which accounts for the correlation between the estimated components.
+
+# Agreement or tolerance limits
+
+`interval = "agreement"` (default) gives the limits of agreement with confidence bounds computed by the MOVER [@donner2012closed], as in `agreement_limit()`. `interval = "tolerance"` gives tolerance limits as in `tolerance_limit()`. `bound_type` has the same meaning in both:
+
+- `"iu"`: a one-sided `conf_level` bound on each limit; use for an intersection-union test of whether both limits lie within a maximal allowable difference. These are not a joint interval. The default for agreement.
+- `"joint"`: joint confidence for both limits (agreement), or a `pred_level`-content, `conf_level`-confidence tolerance interval: with confidence `conf_level`, at least `pred_level` of the differences lie within the limits. The default for tolerance.
+
+```{r}
+method_vc(dat3, y = "y", method = "method", id = "id",
+          replicate = "repl", replicates = "linked",
+          interval = "tolerance")
+```
+
+The bounds rely on large-sample approximations for the variance components. In simulations with 15 to 60 items, 2 or 3 replicates, and 2 or 3 methods (95% targets), the one-sided bounds of the limits of agreement covered the true limits 92% to 96% of the time, and the joint tolerance limits 92% to 96%. Coverage was lowest (about 91% to 93%) with only 15 items, so with few items the bounds should be read as slightly optimistic.
+
+# Repeatability and reproducibility
+
+With replicates, each method's measurement error gives its **repeatability coefficient** [@carstensen2010, ch. 9],
+
+$$
+RC_m = z \sqrt{2}\, \sigma_m ,
+$$
+
+the value that the absolute difference between two measurements by the method on the same item, under the same conditions, should not exceed with probability `pred_level` (about $2.77\sigma_m$ for 95%). With linked replicates, the **reproducibility coefficient** $RpC_m = z\sqrt{2}\sqrt{\sigma_m^2 + \omega^2}$ is the same limit for two measurements on different occasions.
+
+```{r}
+fit$repeatability
+```
+
+The confidence limits of $RC_m$ are those of $\sigma_m$, scaled. When $\omega$ is large relative to $\sigma_m$, the two are hard to separate and the interval for $\sigma_m$ is wide.
+
+# Transformations
+
+All estimates are computed on the scale set by `transform`. With `transform = "log"`, the differences are log ratios: the biases and limits are printed as ratios, and the SD is approximately the coefficient of variation.
+
+```{r}
+dat_log = sim_methods(n_items = 40, n_reps = 2, methods = c("A", "B"),
+                      alpha = c(0, 0.05), mu_mean = 4, mu_sd = 0.5,
+                      tau = 0.04, sigma = c(0.05, 0.08),
+                      transform = "log", seed = 3)
+method_vc(dat_log, y = "y", method = "method", id = "id",
+          replicate = "repl", transform = "log")
+```
+
+For measurements bounded between 0 and 100 (e.g., oxygen saturation), `transform = "pctlogit"` analyzes the logit of the proportion [@carstensen2010, ch. 8]. Other options are `"logit"`, `"sqrt"`, `"asinsqrt"`, or a custom pair of functions, `list(fun = ..., inv = ..., name = ...)`. The Bland-Altman and matrix plots back-transform the conversion lines to the original scale.
+
+# Checking the model
+
+`check()` returns diagnostic plots: the residuals against the fitted values, normal QQ plots of the residuals and of the predicted random effects, and the differences against the averages for each pair.
+
+```{r, fig.height = 7, fig.width = 8}
+check(fit, pair_seed = 1)
+```
+
+The caption gives, for each pair, p-values for the slope of the differences on the averages (bias that depends on the level) and for the slope of the absolute residuals on the averages (spread that depends on the level). These use the item means, so replicates are not counted more than once.
+
+- If the **spread** of the differences grows with the level, try a transformation, such as `transform = "log"`.
+- If the **bias** depends on the level, a constant bias is not adequate, and the methods are related by a slope as well as an intercept. Be careful, though: a slope of the differences on the averages also appears when the two methods have unequal measurement error alone, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$ [@bland1999]. Errors-in-variables methods such as `dem_reg()` and `pb_reg()`, or the scaled model of @carstensen2010 [ch. 7], are better suited to estimating such a relation.
+
+# References
