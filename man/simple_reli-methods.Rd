@@ -14,18 +14,23 @@
 \method{check}{simple_reli}(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{simple_reli} as returned from the reli_stats function}
+\item{x}{object of class \code{simple_reli} as returned from
+\code{\link[=reli_stats]{reli_stats()}} or \code{\link[=reli_aov]{reli_aov()}}.}
 
-\item{...}{further arguments passed through, see description of return value
-for details.
-\code{\link{reli_stats}}.}
+\item{...}{further arguments passed through, see description of return
+value for details.}
 }
 \value{
 \describe{
-\item{\code{print}}{Prints short summary of the Limits of Agreement}
-\item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
+\item{\code{print}}{Prints a short summary of the reliability
+statistics.}
+\item{\code{plot}}{Returns a plot of the data points used in the
+reliability analysis.}
+\item{\code{check}}{Returns diagnostic plots (normality and
+heteroskedasticity) of the model residuals.}
 }
 }
 \description{
-Methods defined for objects returned from the agree functions.
+Methods defined for objects returned from \code{\link[=reli_stats]{reli_stats()}} and
+\code{\link[=reli_aov]{reli_aov()}}.
 }

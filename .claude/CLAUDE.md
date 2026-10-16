@@ -74,7 +74,11 @@ R/
 ├── agree_np.R             # Non-parametric agreement
 ├── agree_coef.R           # Agreement coefficients
 ├── ccc_test.R             # CCC hypothesis test (htest)
-├── reli_stats.R           # Reliability (ICC, SEM, CV)
+├── icc_test.R             # ICC test (htest; recommended)
+├── reli_err_test.R        # SEM/SEE/SEP and CV (htest; recommended)
+├── power_icc.R            # power_icc(), precision_icc()
+├── reli_engine.R          # Internal reliability engine
+├── reli_stats.R           # reli_stats(), reli_aov() (superseded)
 ├── tolerance_limit.R      # Tolerance intervals
 ├── dem_reg.R              # Deming regression
 ├── pb_reg.R               # Passing-Bablok regression
@@ -204,7 +208,8 @@ Not extensively used, but consider for grouping related functions.
 | Bland-Altman LoA | `agreement_limit()` | Simple, repeated, nested |
 | Tolerance Intervals | `tolerance_limit()` | Simple, repeated, nested |
 | CCC | `ccc_test()` | Simple, repeated, nested |
-| ICC | `reli_stats()`, `reli_aov()` | Repeated measures |
+| ICC | `icc_test()` (`reli_stats()`, `reli_aov()` superseded) | Repeated measures |
+| SEM / CV | `reli_err_test()` | Repeated measures |
 | Deming Regression | `dem_reg()` | Paired |
 | Passing-Bablok | `pb_reg()` | Paired |
 

@@ -1,8 +1,9 @@
 # Reliability Suite Redesign
 
-Branch: `reli-update` · Status: phases 1–5 done (engine, `icc_test()`,
+Branch: `reli-update` · Status: phases 1–6 done (engine, `icc_test()`,
 `reli_err_test()` with raw/log/mean scales, methods, `power_icc()`,
-`precision_icc()`); phases 6–7 pending · Last updated: 2026-10-16
+`precision_icc()`, legacy rewire, jamovi, NEWS, vignette); phase 7 pending
+· Last updated: 2026-10-16
 
 ## 0. Handoff: current state and next steps
 
@@ -23,7 +24,7 @@ are current.
 | Tests | `tests/testthat/test-reli_engine.R`, `test-icc_test.R`, `test-reli_err_test.R`, snapshots in `tests/testthat/_snaps/` (all passing on 2026-10-16) |
 | Simulation scripts behind every table here | `references/general/reli_sims/` (run from the package root) |
 | pkgdown reference entry | `_pkgdown.yml`, "Reliability" section |
-| Legacy functions (not yet touched) | `R/reli_stats.R`, `R/reli_functions.R`, `R/methods.simple_reli.R`, `R/jmvreli.b.R` |
+| Legacy functions (superseded, rewired onto the engine) | `R/reli_stats.R`, `R/methods.simple_reli.R`, `R/jmvreli.b.R` (jamovi, now on `icc_test()`/`reli_err_test()`) |
 
 Commits on `reli-update` since `master`: `3826d5d` (phase 1), then
 `f7fcc97`, `7b685ee`, `f6768b4`, `ae74d46`, `8fd0d35`, `aec1a82` (phase 2).
@@ -91,23 +92,13 @@ bootstrapping), `parameter`, `p.value`, `conf.int`, `estimate`, `stderr`
 
 ### Next steps
 
-**Phase 6: legacy functions, jamovi, NEWS, vignette.** Spec in Section 7
-and the documentation-error list in Section 2:
-
-1. `reli_stats()` and `reli_aov()`: `superseded` badge pointing to
-   `icc_test()`/`reli_err_test()` (`scale = "log"`/`"mean"` for the CV);
-   rewire onto the engine keeping the `simple_reli` output structure; fix
-   bugs 1–7 (two-sided ICC CIs, with the `conf.level` mapping that
-   reproduces old numbers); keep SEE/SEP and `se_type`/`cv_calc`
-   (`"residuals"` → `"MSE"` with a warning; legacy keeps the observed SD).
-2. `simple_reli` methods: store evaluated settings (bug 2).
-3. `jmvreli`: call the engine and new functions directly.
-4. NEWS: new functions; legacy ICC CI change and the mapping; the
-   `icc_test()` `null.value = NULL` default.
-5. Vignette rewrite, including "Coefficient of variation" and "MDC, SDD
-   and the repeatability coefficient" sections, and power/precision.
-
-Then phase 7 (check and coverage ≥ 90% on new files). Section 9.
+**Phase 7: check and coverage.** `devtools::check()` clean (the known
+environment NOTEs aside) and `covr` coverage ≥ 90% on the new files
+(`R/reli_engine.R`, `R/icc_test.R`, `R/reli_err_test.R`, `R/power_icc.R`,
+`R/methods.reli_htest.R`, `R/reli_stats.R`). `covr` is not installed on the
+Windows work machine. Also: run the slow tests
+(`SIMPLYAGREE_SLOW_TESTS=true`), check the jamovi module in jamovi itself,
+and review the rendered vignette.
 
 ### Open TODOs
 
@@ -1464,7 +1455,51 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette
    rewrite (including "Coefficient of variation" and "MDC, SDD and the
    repeatability coefficient" sections); fix all documentation errors in
-   Section 2.
+   Section 2. **Done 2026-10-16.** Decisions (user, 2026-10-16):
+   - **Legacy bootstrap → engine subject bootstrap** in both functions
+     (`.legacy_other_boot()`: subject resampling with the hybrid step,
+     `.hybrid_item_ms(shift_mean = TRUE)`; `type` = perc / basic / norm,
+     norm = est − bias ± z·SE as `boot.ci`). `bootMer`, the duplicated
+     `boot::boot` loop, `reli_mod_mse()` (`R/reli_functions.R`, deleted),
+     `cv_ci()` and `sigma_ci()` are gone. Bug 9 is moot.
+   - **`type = "chisq"` = analytic, name kept:** exact χ² for √MSE;
+     log-scale delta method (MSB, MSJ, MSE and the grand mean, with
+     Var(ȳ) = MSB/(nk)) for the CV, ICC-based SEM, SEE and SEP
+     (`.legacy_other_analytic()`).
+   - **`reli_aov()` drops incomplete subjects with a message**
+     (`.complete_subjects()`), catching missing rows too (bug 3).
+   - **jamovi switched to the new functions:** six `icc_test()` calls
+     (ANOVA, or REML with a note when cells are missing), variance
+     components from the ICC(C,1) fit, SEM/SEE/SEP from `reli_err_test()`
+     with intervals (matched SD), CV in sympercents (`% of mean` if any
+     value ≤ 0; omitted if the mean ≤ 0); plot state = the ICC(C,1)
+     `reli_htest`. Table definitions (`.r.yaml`, `jmvreli.h.R`) unchanged.
+   - Legacy definitions kept: observed SD √(SS_total/(N − 1)) for
+     SEE/SEP/ICC-based SEM, written in mean squares
+     (dfB·MSB + dfJ·MSJ + dfE·MSE, so the delta method applies);
+     `se_type = "MSE"` uses ICC3 for SEE/SEP (now documented); negative
+     ICCs truncated at 0. `cv_calc = "residuals"` → `"MSE"` with a warning.
+   - Output structure kept (`icc`, `lmer`, `anova`, `var_comp`, `n.id`,
+     `n.item`, `call`, `cv`, `SEM`, `SEE`, `SEP`). `lmer` is now an `lm`
+     (not `aov`) for `reli_aov()`; the call stores evaluated
+     `conf.level`/`other_ci` (bug 2). Variance components now come from
+     the engine (fixes `reli_aov()`'s item variance MSW − MSE and the
+     missing truncation of the subject variance).
+   - Long data with duplicate subject × item cells now errors (engine
+     rule); noted in NEWS. The `reps` data have 5% missing cells, so
+     `reli_stats(reps)` now warns; `test-plot_state.R` suppresses it.
+   - Tests: `test-reli_stats.R` rewritten in edition 3 (structure, S&F
+     two-sided CIs, conf.level mapping, REML = ANOVA, Weir SEM/SEE/SEP,
+     cv_calc, analytic and bootstrap intervals, missing data, print with
+     variables, jamovi). The `agree_coef()` assertions moved unchanged to
+     `test-agree_coef.R`. jmvcore resolves `vars` as a quosure: pass a
+     literal vector in tests.
+   - NEWS: "Reliability" section at the top of 0.3.1. Vignette rewritten
+     around `icc_test()`/`reli_err_test()`/`power_icc()`; corrected
+     formulas (α/2, ICC(2,k) numerator, Satterthwaite a/b form); new refs
+     in `vignettes/refs.bib` (Hopkins, Koo & Li, Cole, Atkinson & Nevill,
+     Greenland, Rafi & Greenland, Walter et al., Zou, Mondal et al.).
+     `agree_tests.Rmd` now points to the new functions.
 7. `devtools::check()` clean; coverage ≥ 90% on new files.
 
 ## 10. TODO (future, not this branch)

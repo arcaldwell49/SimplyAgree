@@ -2,6 +2,26 @@
 
 # SimplyAgree 0.3.1
 
+## Reliability
+
+- New `icc_test()`: one intraclass correlation coefficient (ICC), chosen with `model`, `type` and `unit` (McGraw & Wong forms, with the Shrout & Fleiss names), returned as an `htest`. Two-sided F-based intervals, optional F test against `null.value` (default `NULL`: estimate and interval only, since testing against an ICC of 0 is rarely informative), `method = "reml"` for missing data (observed-data degrees of freedom, with a warning), and an optional subject bootstrap (`boot = TRUE`) whose interval type and standard error were chosen from simulations.
+- New `reli_err_test()`: the standard error of measurement (SEM), of the estimate (SEE) or of prediction (SEP), with intervals and an optional test against an acceptable error. `scale = "log"` (sympercents) and `scale = "mean"` give coefficients of variation.
+- New `power_icc()` and `precision_icc()`: power and sample size for the ICC F test, and sample size for an ICC confidence interval of a given width with a given assurance (exact F-based calculations, plus the Walter et al. and Zou approximations).
+- New `summary()`, `plot()` and `check()` methods for these results. `summary(style = "estimation")` describes the interval as a compatibility interval and converts any p-value to an S-value; `style = "hypothesis"` gives the usual test decision.
+- `reli_stats()` and `reli_aov()` are superseded by these functions. They still work and keep their output structure, but now use the same engine, which fixes several problems. **Results change:**
+  - **The ICC confidence intervals are now two-sided.** They previously used `conf.level` in each tail (`qf(1 - alpha)`), so a "95%" interval was really a 90% interval (each limit was a one-sided 95% bound). The intervals now match Shrout & Fleiss (1979), McGraw & Wong (1996), psych, irr, SPSS and Stata. To reproduce the old numbers at `conf.level = c`, use `conf.level = 1 - 2 * (1 - c)` (e.g. old 0.95 = new 0.90). For a one-sided lower bound on an ICC, use `icc_test(alternative = "greater")`.
+  - `reli_stats()` with missing data now uses degrees of freedom based on the observed data (and warns that the intervals are approximate), instead of complete-data degrees of freedom.
+  - `reli_aov()` now drops every subject not measured on every item (including subjects with a missing row in long data, which were previously analysed with the wrong degrees of freedom), with a message.
+  - The variance components of `reli_aov()` now use the ANOVA estimates (the item variance was previously MSW - MSE).
+  - With `other_ci = TRUE` and `type = "chisq"`, the intervals for the SEE, SEP, ICC-based SEM and CV now use the delta method (log scale); the chi-square interval with the error degrees of freedom and Vangel's CV interval did not apply to these statistics. The SEM from the error mean square keeps its exact chi-square interval.
+  - The bootstrap intervals (`type = "perc"`, `"norm"` or `"basic"`) now resample subjects in both functions (`reli_stats()` previously used a parametric bootstrap).
+  - `cv_calc = "residuals"` (a downward-biased version of `"MSE"`) is replaced by `"MSE"` with a warning.
+  - `print()` no longer fails when `conf.level` or `other_ci` is passed as a variable.
+  - Long data with more than one measurement per subject and item is now an error (aggregate first).
+- The jamovi reliability analysis now uses `icc_test()` and `reli_err_test()`: two-sided ICC intervals, intervals for the SEM, SEE and SEP (the SEE and SEP now use the SD matched to the ICC's denominator), the CV in sympercents, and REML when measurements are missing.
+
+## Other changes
+
 - Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).
   - The data needed by the `plot` and `check` methods are now stored in the returned object itself, rather than as a formula that pointed back at the environment the analysis was run in.
 - Fixed `plot()` and `print()` failing for `agree_test()`, `agree_reps()`, `agree_nest()`, and `agree_np()` when `delta` (or `conf.level`, `agree.level`, `TOST`, `prop_bias`) was supplied as an expression (e.g., `delta = log(1.10)`) or from inside another function (#50). The stored call now holds the evaluated values of these settings rather than the code as typed; the data arguments are still not copied into the object.

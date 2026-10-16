@@ -6,9 +6,9 @@
 \title{Reliability Statistics}
 \usage{
 reli_stats(
-  measure,
-  item,
-  id,
+  measure = NULL,
+  item = NULL,
+  id = NULL,
   data,
   wide = FALSE,
   col.names = NULL,
@@ -21,9 +21,9 @@ reli_stats(
 )
 
 reli_aov(
-  measure,
-  item,
-  id,
+  measure = NULL,
+  item = NULL,
+  id = NULL,
   data,
   wide = FALSE,
   col.names = NULL,
@@ -38,92 +38,142 @@ reli_aov(
 \arguments{
 \item{measure}{Name of column containing the measurement of interest.}
 
-\item{item}{Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.).}
+\item{item}{Name of column containing the items. If this is a test-retest
+reliability study then this would indicate the time point (e.g., time1,
+time2, time3, etc.).}
 
 \item{id}{Column with subject identifier.}
 
 \item{data}{Data frame with all data.}
 
-\item{wide}{Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.}
+\item{wide}{Logical value (TRUE or FALSE) indicating if data is in a
+"wide" format. Default is FALSE.}
 
-\item{col.names}{If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.}
+\item{col.names}{If wide is equal to TRUE then col.names is a list of the
+column names containing the measurements for reliability analysis.}
 
-\item{se_type}{Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.}
+\item{se_type}{Type of standard error calculation. The default, \code{"MSE"},
+uses the error mean square for the SEM, and ICC3 (ICC(C,1)) for the SEE
+and SEP. Otherwise, the SD of all the measurements and the named ICC are
+used for all three (see Details).}
 
-\item{cv_calc}{Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.}
+\item{cv_calc}{Coefficient of variation (CV) calculation: \code{"MSE"}
+(default), the square root of the error mean square divided by the
+grand mean, or \code{"SEM"}, the SEM (see \code{se_type}) divided by the grand
+mean. \code{"residuals"} is no longer supported and is replaced by \code{"MSE"}
+with a warning.}
 
-\item{conf.level}{the confidence level required. Default is 95\%.}
+\item{conf.level}{The confidence level required. Default is 95\%. The ICC
+intervals are two-sided (see Details).}
 
-\item{other_ci}{Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.}
+\item{other_ci}{Logical value (TRUE or FALSE) indicating whether to
+calculate confidence intervals for the CV, SEM, SEP, and SEE.}
 
-\item{type}{A character string representing the type of confidence intervals for the CV, SEM, SEP, and SEE. Only "norm", "basic", and "perc" currently supported for parametric bootstrap CI. An approximate method, chisq, is the default. See ?boot::boot.ci for more details on bootstrap methods.}
+\item{type}{The type of confidence intervals for the CV, SEM, SEP, and SEE:
+\code{"chisq"} (default; analytic intervals, see Details), or a bootstrap
+interval, \code{"perc"} (percentile), \code{"norm"} (normal, with bias correction)
+or \code{"basic"}.}
 
-\item{replicates}{The number of bootstrap replicates. Passed on to the boot function. Default is 1999.}
+\item{replicates}{The number of bootstrap replicates. Default is 1999.}
 }
 \value{
-Returns single list with the results of the agreement analysis.
+Returns single list with the results of the reliability analysis.
 \itemize{
 \item \code{icc}: Table of ICC results
-\item \code{lmer}: Linear mixed model from lme4
-\item \code{anova}: Analysis of Variance table
+\item \code{lmer}: The fitted model: a linear mixed model from lme4
+(\code{reli_stats()}), or a linear model of subjects and items
+(\code{reli_aov()})
+\item \code{anova}: Analysis of Variance table (mean squares reconstructed from
+the variance components for \code{reli_stats()})
 \item \code{var_comp}: Table of Variance Components
 \item \code{n.id}: Number of subjects/participants
-\item \code{n.items}: Number of items/time points
-\item \code{cv}: Coefficient of Variation
-\item \code{SEM}: List with Standard MSE of Measurement estimate (est)
-\item \code{SEE}: List with Standard MSE of the Estimate estimate (est)
-\item \code{SEP}: List with Standard MSE of Predictions (est)
-\item \code{call}: the matched call
+\item \code{n.item}: Number of items/time points
+\item \code{cv}: Coefficient of Variation (a one-row data frame)
+\item \code{SEM}: Standard Error of Measurement (a one-row data frame)
+\item \code{SEE}: Standard Error of the Estimate (a one-row data frame)
+\item \code{SEP}: Standard Error of Prediction (a one-row data frame)
+\item \code{call}: the matched call, with the settings used
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 
-The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
-This includes intraclass correlation coefficients, the coefficient of variation,
-and the standard MSE of measurement.
+\code{reli_stats()} and \code{reli_aov()} return the intraclass correlation
+coefficients (ICCs), the coefficient of variation (CV), and the standard
+errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+described by Weir (2005), all at once.
+
+These functions are superseded: they still work, but new code should use
+\code{\link[=icc_test]{icc_test()}} for an ICC (with a test against a meaningful null value and
+optional bootstrap inference) and \code{\link[=reli_err_test]{reli_err_test()}} for the SEM, SEE or
+SEP, including the CV via \code{scale = "log"} (sympercents) or
+\code{scale = "mean"}. See Details for how the two sets of functions differ.
 }
 \details{
-These functions return intraclass correlation coefficients
-and other measures of reliability (CV, SEM, SEE, and SEP).
-The estimates of variances for any of the measures are derived from linear mixed models.
-When other_ci is set to TRUE,
-then a parametric bootstrap approach to calculating confidence intervals is used for the
-CV, SEM, SEE, and SEP.
+\strong{Estimation.} Both functions use the engine of \code{\link[=icc_test]{icc_test()}}:
+\code{reli_stats()} fits a linear mixed model by REML (crossed random effects
+for subjects and items) and allows missing measurements; \code{reli_aov()}
+uses the analysis of variance and keeps only subjects measured on every
+item (incomplete subjects are dropped with a message). With complete data
+the two give the same results (unless a variance component is estimated
+at zero). With missing data, \code{reli_stats()} uses degrees of freedom based
+on the observed data and warns that its intervals are approximate.
 
-reli_stats uses a linear mixed model to estimate variance components.
-In some cases there are convergence issues.
-When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
-The results may differ slightly between the functions.
-If reli_aov is used then rows with missing observations
-(e.g., if a participant has a missing observation) will be dropped.
+\strong{ICCs.} The six forms of Shrout and Fleiss (1979) are returned, with
+the F-based intervals of McGraw and Wong (1996). The intervals are
+two-sided \code{conf.level} intervals, as in those papers (and in the psych,
+irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+used \code{conf.level} in each tail, so each limit was a one-sided
+\code{conf.level} bound and the pair covered only \code{1 - 2 * (1 - conf.level)};
+the old output at \code{conf.level = c} is reproduced by
+\code{conf.level = 1 - 2 * (1 - c)} (e.g. old 0.95 = new 0.90). For a one-sided
+lower bound on a single ICC, use \code{icc_test(alternative = "greater")}.
 
-The CV calculation has 3 versions. The "MSE" uses the "mean squared error"
-from the linear mixed model used to calculate the ICCs.
-The "SEM" option instead uses the SEM calculation and
-expresses CV as a ratio of the SEM to the overall mean.
-The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+\strong{SEM, SEE and SEP.} With \code{se_type = "MSE"}, SEM = \eqn{\sqrt{MS_E}}
+(Weir, 2005, preferred), and SEE = \eqn{SD\sqrt{ICC(1 - ICC)}} and
+SEP = \eqn{SD\sqrt{1 - ICC^2}} with ICC3. With another \code{se_type}, the
+named ICC is used for all three, and SEM = \eqn{SD\sqrt{1 - ICC}}. Here SD
+is the SD of all the measurements, \eqn{\sqrt{SS_{total}/(N - 1)}}, as in
+Weir (2005). \code{\link[=reli_err_test]{reli_err_test()}} instead uses the SD matched to the ICC's
+denominator, so its SEE and SEP differ slightly. A negative ICC is
+treated as zero.
 
-The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
-For the CV, the default method (\code{type = "chisq"}) is Vangal's modification of the McKay approximation.
-For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
-All other methods are bootstrapping based methods (see \code{?boot::boot}).
-The reli_stats functions utilizes a parametric bootstrap while the reli_aov
-function utilizes an ordinary (non-parametric) bootstrap method.
+\strong{CV.} The CV is the SEM (or \eqn{\sqrt{MS_E}}) divided by the grand
+mean, as a proportion (printed as a percentage).
+
+\strong{Intervals for the CV, SEM, SEE and SEP} (\code{other_ci = TRUE}). With
+\code{type = "chisq"}, the SEM from \eqn{MS_E} has the exact
+\eqn{\chi^2} interval; every other statistic has a Wald interval on the
+log scale with a delta-method standard error from the normal-theory
+variances of the mean squares (and of the grand mean, for the CV). Before
+version 0.3.1 these used \eqn{\chi^2} intervals with the error degrees of
+freedom (and Vangel's interval for the CV), which do not apply to these
+statistics. The bootstrap types resample subjects (as \code{\link[=icc_test]{icc_test()}} does,
+including its hybrid step for the item mean square); before version 0.3.1
+\code{reli_stats()} used a parametric bootstrap.
 }
 \examples{
 data('reps')
 reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 
+# The recommended replacements (reps has missing measurements, so REML)
+icc_test(data = reps, col.names = c("x", "y"), method = "reml")
+reli_err_test(data = reps, col.names = c("x", "y"), method = "reml")
+
 }
 \references{
-Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
+Weir, J. P. (2005). Quantifying test-retest reliability using the
+intraclass correlation coefficient and the SEM. Journal of Strength and
+Conditioning Research, 19(1), 231-240. \doi{10.1519/15184.1}
 
-Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
+Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+\doi{10.1037/0033-2909.86.2.420}
 
-McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
-
-Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
-
-Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
+McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+\doi{10.1037/1082-989X.1.1.30}
+}
+\seealso{
+\code{\link[=icc_test]{icc_test()}}, \code{\link[=reli_err_test]{reli_err_test()}}
 }

@@ -1,15 +1,20 @@
 #' Methods for simple_reli objects
 #'
-#' Methods defined for objects returned from the agree functions.
+#' Methods defined for objects returned from [reli_stats()] and
+#' [reli_aov()].
 #'
-#' @param x object of class \code{simple_reli} as returned from the reli_stats function
-#' @param ... further arguments passed through, see description of return value
-#'   for details.
-#'   \code{\link{reli_stats}}.
+#' @param x object of class \code{simple_reli} as returned from
+#'   [reli_stats()] or [reli_aov()].
+#' @param ... further arguments passed through, see description of return
+#'   value for details.
 #' @return
 #' \describe{
-#'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
-#'   \item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
+#'   \item{\code{print}}{Prints a short summary of the reliability
+#'   statistics.}
+#'   \item{\code{plot}}{Returns a plot of the data points used in the
+#'   reliability analysis.}
+#'   \item{\code{check}}{Returns diagnostic plots (normality and
+#'   heteroskedasticity) of the model residuals.}
 #' }
 #'
 #' @name simple_reli-methods

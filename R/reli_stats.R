@@ -2,96 +2,139 @@
 #'
 #' @description
 #'
-#' `r lifecycle::badge('stable')`
+#' `r lifecycle::badge('superseded')`
 #'
-#' The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
-#' This includes intraclass correlation coefficients, the coefficient of variation,
-#'  and the standard MSE of measurement.
+#' `reli_stats()` and `reli_aov()` return the intraclass correlation
+#' coefficients (ICCs), the coefficient of variation (CV), and the standard
+#' errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+#' described by Weir (2005), all at once.
+#'
+#' These functions are superseded: they still work, but new code should use
+#' [icc_test()] for an ICC (with a test against a meaningful null value and
+#' optional bootstrap inference) and [reli_err_test()] for the SEM, SEE or
+#' SEP, including the CV via `scale = "log"` (sympercents) or
+#' `scale = "mean"`. See Details for how the two sets of functions differ.
 #'
 #' @param measure Name of column containing the measurement of interest.
-#' @param item Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.).
+#' @param item Name of column containing the items. If this is a test-retest
+#'   reliability study then this would indicate the time point (e.g., time1,
+#'   time2, time3, etc.).
 #' @param id Column with subject identifier.
 #' @param data Data frame with all data.
-#' @param wide Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.
-#' @param col.names If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.
-#' @param conf.level the confidence level required. Default is 95%.
-#' @param cv_calc Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.
-#' @param other_ci Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.
-#' @param se_type Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.
-#' @param type A character string representing the type of confidence intervals for the CV, SEM, SEP, and SEE. Only "norm", "basic", and "perc" currently supported for parametric bootstrap CI. An approximate method, chisq, is the default. See ?boot::boot.ci for more details on bootstrap methods.
-#' @param replicates 	The number of bootstrap replicates. Passed on to the boot function. Default is 1999.
+#' @param wide Logical value (TRUE or FALSE) indicating if data is in a
+#'   "wide" format. Default is FALSE.
+#' @param col.names If wide is equal to TRUE then col.names is a list of the
+#'   column names containing the measurements for reliability analysis.
+#' @param conf.level The confidence level required. Default is 95%. The ICC
+#'   intervals are two-sided (see Details).
+#' @param cv_calc Coefficient of variation (CV) calculation: `"MSE"`
+#'   (default), the square root of the error mean square divided by the
+#'   grand mean, or `"SEM"`, the SEM (see `se_type`) divided by the grand
+#'   mean. `"residuals"` is no longer supported and is replaced by `"MSE"`
+#'   with a warning.
+#' @param other_ci Logical value (TRUE or FALSE) indicating whether to
+#'   calculate confidence intervals for the CV, SEM, SEP, and SEE.
+#' @param se_type Type of standard error calculation. The default, `"MSE"`,
+#'   uses the error mean square for the SEM, and ICC3 (ICC(C,1)) for the SEE
+#'   and SEP. Otherwise, the SD of all the measurements and the named ICC are
+#'   used for all three (see Details).
+#' @param type The type of confidence intervals for the CV, SEM, SEP, and SEE:
+#'   `"chisq"` (default; analytic intervals, see Details), or a bootstrap
+#'   interval, `"perc"` (percentile), `"norm"` (normal, with bias correction)
+#'   or `"basic"`.
+#' @param replicates The number of bootstrap replicates. Default is 1999.
 #'
 #' @details
-#' These functions return intraclass correlation coefficients
-#' and other measures of reliability (CV, SEM, SEE, and SEP).
-#' The estimates of variances for any of the measures are derived from linear mixed models.
-#' When other_ci is set to TRUE,
-#' then a parametric bootstrap approach to calculating confidence intervals is used for the
-#' CV, SEM, SEE, and SEP.
+#' **Estimation.** Both functions use the engine of [icc_test()]:
+#' `reli_stats()` fits a linear mixed model by REML (crossed random effects
+#' for subjects and items) and allows missing measurements; `reli_aov()`
+#' uses the analysis of variance and keeps only subjects measured on every
+#' item (incomplete subjects are dropped with a message). With complete data
+#' the two give the same results (unless a variance component is estimated
+#' at zero). With missing data, `reli_stats()` uses degrees of freedom based
+#' on the observed data and warns that its intervals are approximate.
 #'
-#' reli_stats uses a linear mixed model to estimate variance components.
-#' In some cases there are convergence issues.
-#' When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
-#' The results may differ slightly between the functions.
-#' If reli_aov is used then rows with missing observations
-#' (e.g., if a participant has a missing observation) will be dropped.
+#' **ICCs.** The six forms of Shrout and Fleiss (1979) are returned, with
+#' the F-based intervals of McGraw and Wong (1996). The intervals are
+#' two-sided `conf.level` intervals, as in those papers (and in the psych,
+#' irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+#' used `conf.level` in each tail, so each limit was a one-sided
+#' `conf.level` bound and the pair covered only `1 - 2 * (1 - conf.level)`;
+#' the old output at `conf.level = c` is reproduced by
+#' `conf.level = 1 - 2 * (1 - c)` (e.g. old 0.95 = new 0.90). For a one-sided
+#' lower bound on a single ICC, use `icc_test(alternative = "greater")`.
 #'
-#' The CV calculation has 3 versions. The "MSE" uses the "mean squared error"
-#' from the linear mixed model used to calculate the ICCs.
-#' The "SEM" option instead uses the SEM calculation and
-#' expresses CV as a ratio of the SEM to the overall mean.
-#' The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.
+#' **SEM, SEE and SEP.** With `se_type = "MSE"`, SEM = \eqn{\sqrt{MS_E}}
+#' (Weir, 2005, preferred), and SEE = \eqn{SD\sqrt{ICC(1 - ICC)}} and
+#' SEP = \eqn{SD\sqrt{1 - ICC^2}} with ICC3. With another `se_type`, the
+#' named ICC is used for all three, and SEM = \eqn{SD\sqrt{1 - ICC}}. Here SD
+#' is the SD of all the measurements, \eqn{\sqrt{SS_{total}/(N - 1)}}, as in
+#' Weir (2005). [reli_err_test()] instead uses the SD matched to the ICC's
+#' denominator, so its SEE and SEP differ slightly. A negative ICC is
+#' treated as zero.
 #'
-#' The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
-#' For the CV, the default method (`type = "chisq"`) is Vangal's modification of the McKay approximation.
-#' For the other measures, a simple chi-squared approximation is utilized (Hann & Meeker, 1991).
-#' All other methods are bootstrapping based methods (see `?boot::boot`).
-#' The reli_stats functions utilizes a parametric bootstrap while the reli_aov
-#' function utilizes an ordinary (non-parametric) bootstrap method.
+#' **CV.** The CV is the SEM (or \eqn{\sqrt{MS_E}}) divided by the grand
+#' mean, as a proportion (printed as a percentage).
 #'
-#' @return Returns single list with the results of the agreement analysis.
+#' **Intervals for the CV, SEM, SEE and SEP** (`other_ci = TRUE`). With
+#' `type = "chisq"`, the SEM from \eqn{MS_E} has the exact
+#' \eqn{\chi^2} interval; every other statistic has a Wald interval on the
+#' log scale with a delta-method standard error from the normal-theory
+#' variances of the mean squares (and of the grand mean, for the CV). Before
+#' version 0.3.1 these used \eqn{\chi^2} intervals with the error degrees of
+#' freedom (and Vangel's interval for the CV), which do not apply to these
+#' statistics. The bootstrap types resample subjects (as [icc_test()] does,
+#' including its hybrid step for the item mean square); before version 0.3.1
+#' `reli_stats()` used a parametric bootstrap.
+#'
+#' @return Returns single list with the results of the reliability analysis.
 #'
 #'   - `icc`: Table of ICC results
-#'   - `lmer`: Linear mixed model from lme4
-#'   - `anova`: Analysis of Variance table
+#'   - `lmer`: The fitted model: a linear mixed model from lme4
+#'     (`reli_stats()`), or a linear model of subjects and items
+#'     (`reli_aov()`)
+#'   - `anova`: Analysis of Variance table (mean squares reconstructed from
+#'     the variance components for `reli_stats()`)
 #'   - `var_comp`: Table of Variance Components
 #'   - `n.id`: Number of subjects/participants
-#'   - `n.items`: Number of items/time points
-#'   - `cv`: Coefficient of Variation
-#'   - `SEM`: List with Standard MSE of Measurement estimate (est)
-#'   - `SEE`: List with Standard MSE of the Estimate estimate (est)
-#'   - `SEP`: List with Standard MSE of Predictions (est)
-#'   - `call`: the matched call
-
+#'   - `n.item`: Number of items/time points
+#'   - `cv`: Coefficient of Variation (a one-row data frame)
+#'   - `SEM`: Standard Error of Measurement (a one-row data frame)
+#'   - `SEE`: Standard Error of the Estimate (a one-row data frame)
+#'   - `SEP`: Standard Error of Prediction (a one-row data frame)
+#'   - `call`: the matched call, with the settings used
+#'
 #' @examples
 #' data('reps')
 #' reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 #'
+#' # The recommended replacements (reps has missing measurements, so REML)
+#' icc_test(data = reps, col.names = c("x", "y"), method = "reml")
+#' reli_err_test(data = reps, col.names = c("x", "y"), method = "reml")
+#'
 #' @references
 #'
-#' Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength & Conditioning Research, 19(1), 231-240.
+#' Weir, J. P. (2005). Quantifying test-retest reliability using the
+#' intraclass correlation coefficient and the SEM. Journal of Strength and
+#' Conditioning Research, 19(1), 231-240. \doi{10.1519/15184.1}
 #'
-#' Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.
+#' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+#' assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+#' \doi{10.1037/0033-2909.86.2.420}
 #'
-#' McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.
+#' McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+#' intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+#' \doi{10.1037/1082-989X.1.1.30}
 #'
-#' Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
-#'
-#' Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.
-#'
+#' @seealso [icc_test()], [reli_err_test()]
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var residuals aov
-#' @importFrom tidyselect all_of
-#' @importFrom insight get_response
-#' @importFrom tidyr pivot_wider
-#' @import dplyr
 #' @import ggplot2
 #' @import lme4
 #' @export
 
-
-reli_stats = function(measure,
-                      item,
-                      id,
+reli_stats = function(measure = NULL,
+                      item = NULL,
+                      id = NULL,
                       data,
                       wide = FALSE,
                       col.names = NULL,
@@ -104,258 +147,25 @@ reli_stats = function(measure,
   se_type = match.arg(se_type)
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
-  alpha = 1-conf.level
-  # Organize Data ----
-  x = data
-  if(wide == TRUE){
-    if(is.null(col.names)){
-      stop("Must provide column names (col.names) if wide = TRUE")
-    }
-    x = x[,col.names]
-    n_id <- dim(x)[1]
-    n_items <- dim(x)[2]
-    x.s <- stack(as.data.frame(x))
-    x.df <- data.frame(x.s, subs = rep(paste("S", 1:n_id, sep = ""),
-                                       n_items))
-  } else {
-    if(is.null(measure) || is.null(item) ||is.null(id)){
-      stop("Must provide measure, item, and id column names if wide = FALSE")
-    }
-    x.df = x %>%
-      select(all_of(measure),all_of(item),all_of(id))
-  }
-
-  colnames(x.df) <- c("values", "items", "id")
-
-  mod.lmer <- lmer(values ~ 1 + (1 | id) + (1 | items),
-                   data = x.df,
-                   na.action = na.omit)
-  if(length(unique(x.df$items)) == 2){
+  prep = .legacy_prepare(measure, item, id, data, wide, col.names)
+  if (prep$k == 2) {
     message("Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.")
   }
-  num_lvls = ngrps(mod.lmer)
-  n_items = num_lvls["items"]
-  n_id = num_lvls["id"]
-  n_obs = nrow(na.omit(x.df))
-  vc <- VarCorr(mod.lmer) # Get Variance Components
-  MS_id <- vc$id[1, 1] # var by id
-  MS_items <- vc$items[1, 1] # var by item
-  MSE <- (attributes(vc)$sc)^2
-  # Create variance table ------
-  MS.df <- data.frame(variance = c(MS_id, MS_items, MSE,
-                                   NA))
-  rownames(MS.df) <- c("ID", "Items", "Residual", "Total")
-  MS.df["Total", ] <- sum(MS.df[1:3, 1], na.rm = TRUE)
-  MS.df["percent"] <- MS.df/MS.df["Total", 1]
-
-  MSB <- n_items * MS_id + MSE
-  MSJ <- n_id * MS_items + MSE
-  MSW <- MSE + MS_items
-  stats <- matrix(NA, ncol = 3, nrow = 5)
-  stats[1, 1] <- dfB <- n_id - 1
-  stats[1, 2] <- dfJ <- n_items - 1
-  stats[1, 3] <- dfE <- (n_id - 1) * (n_items - 1)
-  stats[2, 1] <- MSB * (n_id - 1)
-  stats[2, 2] <- MSJ * (n_items - 1)
-  stats[2, 3] <- MSE * (n_id - 1) * (n_items - 1)
-  stats[3, 1] <- MSB
-  stats[3, 2] <- MSJ
-  stats[3, 3] <- MSE
-  stats[4, 1] <- FB <- MSB/MSE
-  stats[4, 2] <- FJ <- MSJ/MSE
-  stats[5, 1] <- -expm1(pf(FB, dfB, dfE, log.p = TRUE))
-  stats[5, 2] <- -expm1(pf(FJ, dfJ, dfE, log.p = TRUE))
-
-  colnames(stats) <- c("Subjects", "items", "Residual")
-  rownames(stats) <- c("df", "SumSq", "MS", "F", "p")
-  # transpose
-  stat.final = t(stats)
-  # Calculate ICCs ----
-  ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
-  ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
-                                                      MSE)/n_id)
-  ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-  ICC_1_k <- (MSB - MSW)/(MSB)
-  ICC_2_k <- (MSB - MSE)/(MSB + (MSJ - MSE)/n_id)
-  ICC_3_k <- (MSB - MSE)/MSB
-  F11 <- MSB/MSW
-  df11n <- n_id - 1
-  df11d <- n_id * (n_items - 1)
-  p11 <- -expm1(pf(F11, df11n, df11d, log.p = TRUE))
-  F21 <- MSB/MSE
-  df21n <- n_id - 1
-  df21d <- (n_id - 1) * (n_items - 1)
-  p21 <- -expm1(pf(F21, df21n, df21d, log.p = TRUE))
-  F31 <- F21
-  results <- data.frame(matrix(NA, ncol = 6, nrow = 6))
-  colnames(results) <- c("model","measures","type", "icc","lower.ci", "upper.ci")
-
-  results$model = c("one-way random","two-way random", "two-way fixed",
-                    "one-way random","two-way random", "two-way fixed")
-  results$measures = c("Agreement", "Agreement", "Consistency",
-                       "Avg. Agreement", "Avg. Agreement", "Avg. Consistency")
-  results$type = c("ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k")
-  results$icc = c(ICC1,ICC2,ICC3,ICC_1_k,ICC_2_k,ICC_3_k)
-
-  F1L <- F11/qf(1 - alpha, df11n, df11d)
-  F1U <- F11 * qf(1 - alpha, df11d, df11n)
-  L1 <- (F1L - 1)/(F1L + (n_items - 1))
-  U1 <- (F1U - 1)/(F1U + n_items - 1)
-  F3L <- F31/qf(1 - alpha, df21n, df21d)
-  F3U <- F31 * qf(1 - alpha, df21d, df21n)
-  results[1, 5] <- L1
-  results[1, 6] <- U1
-  results[3, 5] <- (F3L - 1)/(F3L + n_items - 1)
-  results[3, 6] <- (F3U - 1)/(F3U + n_items - 1)
-  results[4, 5] <- 1 - 1/F1L
-  results[4, 6] <- 1 - 1/F1U
-  results[6, 5] <- 1 - 1/F3L
-  results[6, 6] <- 1 - 1/F3U
-  Fj <- MSJ/MSE
-  vn <- (n_items - 1) * (n_id - 1) * ((n_items * ICC2 * Fj + n_id *
-                                     (1 + (n_items - 1) * ICC2) - n_items * ICC2))^2
-  vd <- (n_id - 1) * n_items^2 * ICC2^2 * Fj^2 + (n_id * (1 +
-                                                         (n_items - 1) * ICC2) - n_items * ICC2)^2
-  v <- vn/vd
-  F3U <- qf(1 - alpha, n_id - 1, v)
-  F3L <- qf(1 - alpha, v, n_id - 1)
-  L3 <- n_id * (MSB - F3U * MSE)/(F3U * (n_items * MSJ + (n_items *
-                                                        n_id - n_items - n_id) * MSE) + n_id * MSB)
-  results[2, 5] <- L3
-  U3 <- n_id * (F3L * MSB - MSE)/(n_items * MSJ + (n_items * n_id -
-                                                 n_items - n_id) * MSE + n_id * F3L * MSB)
-  results[2, 6] <- U3
-  L3k <- L3 * n_items/(1 + L3 * (n_items - 1))
-  U3k <- U3 * n_items/(1 + U3 * (n_items - 1))
-  results[5, 5] <- L3k
-  results[5, 6] <- U3k
-
-  # Other stats -----
-  sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
-  if(se_type == "MSE"){
-    SEM = sqrt(MSE)
-  } else{
-    SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
-  }
-
-  if(se_type == "MSE"){
-    ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-    SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-    SEP = sd_tots*sqrt(1-ICC3^2)
-  } else {
-    SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
-    SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
-  }
-
-  mw <- mean(x.df$values, na.rm = TRUE)
-  if(cv_calc == "residuals"){
-    stddev <- sqrt(mean(residuals(mod.lmer)^2))
-  }
-  if(cv_calc == "MSE"){
-    stddev <- sqrt(MSE)
-  }
-  if(cv_calc == "SEM"){
-    stddev <- SEM
-  }
-  cv_out = stddev/mw
-# Other CIs -----
-  if(other_ci == TRUE){
-    if(type != "chisq"){
-    boot_reli <- function(.) {
-      reli_mod_mse(., cv_calc = cv_calc,
-                   se_type = se_type)
-    }
-
-    boo2 <- bootMer(mod.lmer, boot_reli, nsim = replicates,
-                    type = "parametric", use.u = FALSE)
-    res_other = tidy_boot(boo2,
-                         conf.int = TRUE,
-                         conf.level = conf.level,
-                         conf.method = type) %>%
-      rename(estimate = statistic,
-             se = std.error,
-             lower.ci = conf.low,
-             upper.ci = conf.high) %>%
-      as.data.frame()
-      row.names(res_other) = res_other$term
-      res_other = res_other %>%
-        select(estimate,bias,se,lower.ci,upper.ci)
-    } else {
-        ## chisq ----
-      cv_ci = cv_ci(cv_out,
-                    df = dfE,
-                    alpha = alpha)
-      sem_ci = sigma_ci(SEM,
-                        df = dfE,
-                        alpha = alpha)
-      sep_ci = sigma_ci(SEP,
-                        df = dfE,
-                        alpha = alpha)
-      see_ci = sigma_ci(SEE,
-                        df = dfE,
-                        alpha = alpha)
-
-      res_other = data.frame(
-        estimate = c(cv_out, SEM, SEP, SEE),
-        bias = NA,
-        se = NA,
-        lower.ci = c(cv_ci[1],sem_ci[1],
-                     sep_ci[1],see_ci[1]),
-        upper.ci = c(cv_ci[2],sem_ci[2],
-                     sep_ci[2],see_ci[2]),
-        row.names = c("cv", "SEM", "SEP", "SEE")
-      )
-      }
-
-  } else{
-
-    res_other = data.frame(
-      estimate = c(cv_out, SEM, SEP, SEE),
-      bias = NA,
-      se = NA,
-      lower.ci = NA,
-      upper.ci = NA,
-      row.names = c("cv", "SEM", "SEP", "SEE")
-    )
-  }
-
-
-  # Save call
-  lm_mod = plot_frame(values = x.df$values, id = x.df$id, items = x.df$items)
-  call2 = match.call()
-
-  call2$lm_mod = lm_mod
-  if(is.null(call2$conf.level)){
-    call2$conf.level = conf.level
-  }
-
-  if(is.null(call2$other_ci)){
-    call2$other_ci = other_ci
-  }
-
-  result <- list(icc = results,
-                 lmer = mod.lmer,
-                 anova = stats,
-                 var_comp = MS.df,
-                 n.id = nrow(ranef(mod.lmer)$id),
-                 n.item = nrow(ranef(mod.lmer)$item),
-                 call = call2,
-                 cv = res_other["cv",],
-                 SEM = res_other["SEM",],
-                 SEE = res_other["SEE",],
-                 SEP = res_other["SEP",])
-
-
-  structure(result,
-            class = "simple_reli")
+  result = .reli_legacy(prep, method = "reml", se_type = se_type,
+                        cv_calc = cv_calc, conf.level = conf.level,
+                        other_ci = other_ci, type = type,
+                        replicates = replicates)
+  result$call = .legacy_call(match.call(), result, conf.level, other_ci)
+  result$prep = NULL
+  structure(result, class = "simple_reli")
 }
 
 #' @rdname reli_stats
 #' @export
 #'
-reli_aov = function(measure,
-                    item,
-                    id,
+reli_aov = function(measure = NULL,
+                    item = NULL,
+                    id = NULL,
                     data,
                     wide = FALSE,
                     col.names = NULL,
@@ -368,419 +178,227 @@ reli_aov = function(measure,
   se_type = match.arg(se_type)
   cv_calc = match.arg(cv_calc)
   type = match.arg(type)
+  prep = .legacy_prepare(measure, item, id, data, wide, col.names)
+  prep = .complete_subjects(prep)
+  result = .reli_legacy(prep, method = "anova", se_type = se_type,
+                        cv_calc = cv_calc, conf.level = conf.level,
+                        other_ci = other_ci, type = type,
+                        replicates = replicates)
+  result$call = .legacy_call(match.call(), result, conf.level, other_ci)
+  result$prep = NULL
+  structure(result, class = "simple_reli")
+}
 
-  # Organize Data ----
-  alpha = 1-conf.level
-  x = data
-  if(wide == TRUE){
-    if(is.null(col.names)){
+# Legacy engine ----------------------------------------------------------------
+
+.legacy_prepare = function(measure, item, id, data, wide, col.names) {
+  if (isTRUE(wide)) {
+    if (is.null(col.names)) {
       stop("Must provide column names (col.names) if wide = TRUE")
     }
-    x = x[,col.names]
-    n_id <- dim(x)[1]
-    n_items <- dim(x)[2]
-    x.s <- stack(as.data.frame(x))
-    x.df <- data.frame(x.s, subs = rep(paste("S", 1:n_id, sep = ""),
-                                       n_items))
-  } else {
-    if(is.null(measure) || is.null(item) ||is.null(id)){
-      stop("Must provide measure, item, and id column names if wide = FALSE")
+    return(.reli_prepare(data = data, col.names = col.names))
+  }
+  if (is.null(measure) || is.null(item) || is.null(id)) {
+    stop("Must provide measure, item, and id column names if wide = FALSE")
+  }
+  .reli_prepare(data = data, measure = measure, item = item, id = id)
+}
+
+# Keep only subjects measured on every item (complete-case ANOVA).
+.complete_subjects = function(prep) {
+  if (prep$balanced) {
+    return(prep)
+  }
+  counts = table(prep$df$id)
+  keep = names(counts)[counts == prep$k]
+  dropped = length(counts) - length(keep)
+  if (length(keep) < 2) {
+    stop("Fewer than 2 subjects were measured on every item. ",
+         "Use reli_stats() or icc_test(method = \"reml\") for incomplete data.",
+         call. = FALSE)
+  }
+  message(sprintf(paste0("%d subject(s) without a measurement on every item ",
+                         "were dropped. Use reli_stats() or ",
+                         "icc_test(method = \"reml\") to keep them."), dropped))
+  .reli_prep_from_long(prep$df[prep$df$id %in% keep, , drop = FALSE],
+                       data.name = prep$data.name)
+}
+
+# Store evaluated settings (not the code typed) so print() works when they
+# were passed as variables, and the data the plot needs.
+.legacy_call = function(call2, result, conf.level, other_ci) {
+  df = result$prep$df
+  call2$lm_mod = plot_frame(values = df$values, id = df$id, items = df$items)
+  call2$conf.level = conf.level
+  call2$other_ci = other_ci
+  call2
+}
+
+.legacy_forms = c(ICC1 = "1", ICC2 = "A1", ICC3 = "C1",
+                  ICC1k = "k", ICC2k = "Ak", ICC3k = "Ck")
+
+.reli_legacy = function(prep, method, se_type, cv_calc, conf.level,
+                        other_ci, type, replicates) {
+  .check_conf_level(conf.level)
+  if (cv_calc == "residuals") {
+    warning("cv_calc = \"residuals\" is no longer supported (it was a ",
+            "downward-biased version of \"MSE\"); using cv_calc = \"MSE\".",
+            call. = FALSE)
+    cv_calc = "MSE"
+  }
+  fit = .reli_fit(prep, method = method, model = "twoway")
+  if (method == "reml" && !prep$balanced) {
+    pct = 100 * prep$n_missing / (prep$n * prep$k)
+    warning(sprintf(paste0(
+      "%.1f%% of subject-by-item cells are missing. Intervals use ",
+      "observed-data degrees of freedom and are approximate; consider ",
+      "icc_test(method = \"reml\", boot = TRUE)."), pct), call. = FALSE)
+  }
+  ms = fit$ms
+  dfs = fit$df
+
+  # ANOVA table (subjects, items, residual)
+  stats = matrix(NA, ncol = 3, nrow = 5)
+  stats[1, ] = c(dfs[["dfB"]], dfs[["dfJ"]], dfs[["dfE"]])
+  stats[3, ] = c(ms[["MSB"]], ms[["MSJ"]], ms[["MSE"]])
+  stats[2, ] = stats[1, ] * stats[3, ]
+  stats[4, 1:2] = stats[3, 1:2] / ms[["MSE"]]
+  stats[5, 1:2] = stats::pf(stats[4, 1:2], stats[1, 1:2], dfs[["dfE"]],
+                            lower.tail = FALSE)
+  colnames(stats) = c("Subjects", "items", "Residual")
+  rownames(stats) = c("df", "SumSq", "MS", "F", "p")
+
+  # Variance components
+  vc = fit$vc
+  MS.df = data.frame(variance = c(vc[["id"]], vc[["items"]], vc[["resid"]],
+                                  sum(vc)))
+  rownames(MS.df) = c("ID", "Items", "Residual", "Total")
+  MS.df$percent = MS.df$variance / sum(vc)
+
+  # ICCs with two-sided F-based intervals
+  results = data.frame(
+    model = c("one-way random","two-way random", "two-way fixed",
+              "one-way random","two-way random", "two-way fixed"),
+    measures = c("Agreement", "Agreement", "Consistency",
+                 "Avg. Agreement", "Avg. Agreement", "Avg. Consistency"),
+    type = names(.legacy_forms),
+    icc = NA_real_, lower.ci = NA_real_, upper.ci = NA_real_)
+  for (i in seq_along(.legacy_forms)) {
+    results$icc[i] = .icc_estimate(fit, .legacy_forms[[i]])
+    results[i, c("lower.ci", "upper.ci")] =
+      as.numeric(.icc_ci(fit, .legacy_forms[[i]], conf.level))
+  }
+
+  # CV, SEM, SEE, SEP
+  est = .legacy_other(fit, se_type, cv_calc)
+  res_other = data.frame(estimate = est, bias = NA_real_, se = NA_real_,
+                         lower.ci = NA_real_, upper.ci = NA_real_,
+                         row.names = names(est))
+  if (isTRUE(other_ci)) {
+    res_other = if (type == "chisq") {
+      .legacy_other_analytic(fit, se_type, cv_calc, conf.level, res_other)
+    } else {
+      .legacy_other_boot(prep, fit, method, se_type, cv_calc, conf.level,
+                         type, replicates, res_other)
     }
-    x.df = x %>%
-      select(all_of(measure),all_of(item),all_of(id))
   }
 
-  colnames(x.df) <- c("values", "items", "id")
-  na_df = subset(x.df, is.na(values))
-  na_drops = unique(na_df$id)
-  if(any(is.na(x.df$items)) || any(is.na(x.df$id))){
-    stop("Missing values found in item label and/or id labels.")
-  }
-  x.df =  subset(x.df, !(x.df$id %in% na_drops))
+  list(icc = results,
+       lmer = fit$fit,
+       anova = stats,
+       var_comp = MS.df,
+       n.id = prep$n,
+       n.item = prep$k,
+       call = NULL,
+       cv = res_other["cv", ],
+       SEM = res_other["SEM", ],
+       SEE = res_other["SEE", ],
+       SEP = res_other["SEP", ],
+       prep = prep)
+}
 
-  n_id <- length(unique(x.df$id))
-  n_items <- length(unique(x.df$items))
-  n_obs = nrow(x.df)
+# The four legacy statistics from a reli_fit (MSW recomputed from MSJ and
+# MSE, so the function depends only on MSB, MSJ, MSE and the grand mean).
+.legacy_other = function(fit, se_type, cv_calc) {
+  ms = fit$ms
+  n = fit$n
+  fit$ms[["MSW"]] = (ms[["MSJ"]] + (n - 1) * ms[["MSE"]]) / n
+  # SD of all measurements: sqrt(SS_total / (N - 1))
+  sd_tots = sqrt(sum(fit$df[c("dfB", "dfJ", "dfE")] *
+                       fit$ms[c("MSB", "MSJ", "MSE")]) / (fit$N - 1))
+  icc_of = function(nm) max(.icc_estimate(fit, .legacy_forms[[nm]]), 0)
+  rho = icc_of(if (se_type == "MSE") "ICC3" else se_type)
+  SEM = if (se_type == "MSE") sqrt(fit$ms[["MSE"]]) else
+    sd_tots * sqrt(1 - rho)
+  SEE = sd_tots * sqrt(rho * (1 - rho))
+  SEP = sd_tots * sqrt(1 - rho^2)
+  stddev = if (cv_calc == "MSE") sqrt(fit$ms[["MSE"]]) else SEM
+  c(cv = stddev / fit$grand_mean, SEM = SEM, SEP = SEP, SEE = SEE)
+}
 
-  aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
-  s.aov <- summary(aov.x)
-
-  stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
-  MSB <- stats[3,1]
-  MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
-  MSJ <- stats[3,2]
-  MSE <- stats[3,3]
-
-
-  # Create variance table -----
-  MS_items = MSW - MSE
-  MS_id = (MSB-MSE)/n_items
-  MS.df <- data.frame(variance = c(MS_id,
-                                   ifelse(MS_items < 0 , 0,MS_items),
-                                   MSE,
-                                   NA))
-  rownames(MS.df) <- c("ID",
-                       "Items",
-                       "Residual",
-                       "Total")
-  MS.df["Total", ] <- sum(MS.df[1:3, 1], na.rm = TRUE)
-  MS.df["percent"] <- MS.df/MS.df["Total", 1]
-
-  stats <- matrix(NA, ncol = 3, nrow = 5)
-  stats[1, 1] <- dfB <- n_id - 1
-  stats[1, 2] <- dfJ <- n_items - 1
-  stats[1, 3] <- dfE <- (n_id - 1) * (n_items - 1)
-  stats[2, 1] <- MSB * (n_id - 1)
-  stats[2, 2] <- MSJ * (n_items - 1)
-  stats[2, 3] <- MSE * (n_id - 1) * (n_items - 1)
-  stats[3, 1] <- MSB
-  stats[3, 2] <- MSJ
-  stats[3, 3] <- MSE
-  stats[4, 1] <- FB <- MSB/MSE
-  stats[4, 2] <- FJ <- MSJ/MSE
-  stats[5, 1] <- -expm1(pf(FB, dfB, dfE, log.p = TRUE))
-  stats[5, 2] <- -expm1(pf(FJ, dfJ, dfE, log.p = TRUE))
-
-  colnames(stats) <- c("Subjects", "items", "Residual")
-  rownames(stats) <- c("df", "SumSq", "MS", "F", "p")
-  # transpose
-  stat.final = t(stats)
-  # Calculate ICCs-----
-  ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
-  ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
-                                                                MSE)/n_id)
-  ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-  ICC_1_k <- (MSB - MSW)/(MSB)
-  ICC_2_k <- (MSB - MSE)/(MSB + (MSJ - MSE)/n_id)
-  ICC_3_k <- (MSB - MSE)/MSB
-  F11 <- MSB/MSW
-  df11n <- n_id - 1
-  df11d <- n_id * (n_items - 1)
-  p11 <- -expm1(pf(F11, df11n, df11d, log.p = TRUE))
-  F21 <- MSB/MSE
-  df21n <- n_id - 1
-  df21d <- (n_id - 1) * (n_items - 1)
-  p21 <- -expm1(pf(F21, df21n, df21d, log.p = TRUE))
-  F31 <- F21
-  results <- data.frame(matrix(NA, ncol = 6, nrow = 6))
-  colnames(results) <- c("model","measures","type", "icc","lower.ci", "upper.ci")
-
-  results$model = c("one-way random","two-way random", "two-way fixed",
-                    "one-way random","two-way random", "two-way fixed")
-  results$measures = c("Agreement", "Agreement", "Consistency",
-                       "Avg. Agreement", "Avg. Agreement", "Avg. Consistency")
-  results$type = c("ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k")
-  results$icc = c(ICC1,ICC2,ICC3,ICC_1_k,ICC_2_k,ICC_3_k)
-
-  # F-tests ------
-  F1L <- F11/qf(1 - alpha, df11n, df11d)
-  F1U <- F11 * qf(1 - alpha, df11d, df11n)
-  L1 <- (F1L - 1)/(F1L + (n_items - 1))
-  U1 <- (F1U - 1)/(F1U + n_items - 1)
-  F3L <- F31/qf(1 - alpha, df21n, df21d)
-  F3U <- F31 * qf(1 - alpha, df21d, df21n)
-  results[1, 5] <- L1
-  results[1, 6] <- U1
-  results[3, 5] <- (F3L - 1)/(F3L + n_items - 1)
-  results[3, 6] <- (F3U - 1)/(F3U + n_items - 1)
-  results[4, 5] <- 1 - 1/F1L
-  results[4, 6] <- 1 - 1/F1U
-  results[6, 5] <- 1 - 1/F3L
-  results[6, 6] <- 1 - 1/F3U
-  Fj <- MSJ/MSE
-  vn <- (n_items - 1) * (n_id - 1) * ((n_items * ICC2 * Fj + n_id *
-                                         (1 + (n_items - 1) * ICC2) - n_items * ICC2))^2
-  vd <- (n_id - 1) * n_items^2 * ICC2^2 * Fj^2 + (n_id * (1 +
-                                                            (n_items - 1) * ICC2) - n_items * ICC2)^2
-  v <- vn/vd
-  F3U <- qf(1 - alpha, n_id - 1, v)
-  F3L <- qf(1 - alpha, v, n_id - 1)
-  L3 <- n_id * (MSB - F3U * MSE)/(F3U * (n_items * MSJ + (n_items *
-                                                            n_id - n_items - n_id) * MSE) + n_id * MSB)
-  results[2, 5] <- L3
-  U3 <- n_id * (F3L * MSB - MSE)/(n_items * MSJ + (n_items * n_id -
-                                                     n_items - n_id) * MSE + n_id * F3L * MSB)
-  results[2, 6] <- U3
-  L3k <- L3 * n_items/(1 + L3 * (n_items - 1))
-  U3k <- U3 * n_items/(1 + U3 * (n_items - 1))
-  results[5, 5] <- L3k
-  results[5, 6] <- U3k
-
-
-  # Other stats -----
-  sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
-  if(se_type == "MSE"){
-    SEM = sqrt(MSE)
-  } else{
-    SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
-  }
-
-  if(se_type == "MSE"){
-  ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-  SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-  SEP = sd_tots*sqrt(1-ICC3^2)
-  } else {
-    SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
-    SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
-  }
-
-  mw <- mean(x.df$values, na.rm = TRUE)
-  if(cv_calc == "residuals"){
-    stddev <- sqrt(mean(residuals(aov.x)^2))
-  }
-  if(cv_calc == "MSE"){
-    stddev <- sqrt(MSE)
-  }
-  if(cv_calc == "SEM"){
-    stddev <- SEM
-  }
-  cv_out = stddev/mw
-  # Other CIs-----
-  if(other_ci == TRUE){
-    if(type != "chisq"){
-      #stop("Bootstrapping for these statistics is currently not supported for this function.")
-
-      wide_df = x.df %>%
-        pivot_wider(values_from = values,
-                    names_from = items,
-                    names_prefix = "item_")
-
-      boot_function <- function(data, indices,
-                                cv_calc = cv_calc,
-                                se_type = se_type) {
-        d <- data[indices, ] # allows boot to select sample
-        d$id = 1:nrow(d)
-
-        x.df = d %>%
-          pivot_longer(cols = starts_with("item"),
-                       names_to = "items",
-                       values_to = "values") %>%
-          mutate(id = factor(id),
-                 items = factor(items))
-
-        n_id <- length(unique(x.df$id))
-        n_items <- length(unique(x.df$items))
-        n_obs = nrow(x.df)
-
-        aov.x <- aov(values~as.factor(id)+as.factor(items),data=x.df)
-        s.aov <- summary(aov.x)
-
-        stats <- matrix(unlist(s.aov),ncol=3,byrow=TRUE)
-        MSB <- stats[3,1]
-        MSW <- (stats[2,2] + stats[2,3])/(stats[1,2] + stats[1,3])
-        MSJ <- stats[3,2]
-        MSE <- stats[3,3]
-
-        # Calculate ICCs-----
-        ICC1 <- (MSB - MSW)/(MSB + (n_items - 1) * MSW)
-        ICC2 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE + n_items * (MSJ -
-                                                                      MSE)/n_id)
-        ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-        ICC_1_k <- (MSB - MSW)/(MSB)
-        ICC_2_k <- (MSB - MSE)/(MSB + (MSJ - MSE)/n_id)
-        ICC_3_k <- (MSB - MSE)/MSB
-        F11 <- MSB/MSW
-        df11n <- n_id - 1
-        df11d <- n_id * (n_items - 1)
-        p11 <- -expm1(pf(F11, df11n, df11d, log.p = TRUE))
-        F21 <- MSB/MSE
-        df21n <- n_id - 1
-        df21d <- (n_id - 1) * (n_items - 1)
-        p21 <- -expm1(pf(F21, df21n, df21d, log.p = TRUE))
-        F31 <- F21
-        results <- data.frame(matrix(NA, ncol = 6, nrow = 6))
-        colnames(results) <- c("model","measures","type", "icc","lower.ci", "upper.ci")
-
-        results$model = c("one-way random","two-way random", "two-way fixed",
-                          "one-way random","two-way random", "two-way fixed")
-        results$measures = c("Agreement", "Agreement", "Consistency",
-                             "Avg. Agreement", "Avg. Agreement", "Avg. Consistency")
-        results$type = c("ICC1","ICC2","ICC3","ICC1k","ICC2k","ICC3k")
-        results$icc = c(ICC1,ICC2,ICC3,ICC_1_k,ICC_2_k,ICC_3_k)
-
-        # F-tests ------
-        F1L <- F11/qf(1 - alpha, df11n, df11d)
-        F1U <- F11 * qf(1 - alpha, df11d, df11n)
-        L1 <- (F1L - 1)/(F1L + (n_items - 1))
-        U1 <- (F1U - 1)/(F1U + n_items - 1)
-        F3L <- F31/qf(1 - alpha, df21n, df21d)
-        F3U <- F31 * qf(1 - alpha, df21d, df21n)
-        results[1, 5] <- L1
-        results[1, 6] <- U1
-        results[3, 5] <- (F3L - 1)/(F3L + n_items - 1)
-        results[3, 6] <- (F3U - 1)/(F3U + n_items - 1)
-        results[4, 5] <- 1 - 1/F1L
-        results[4, 6] <- 1 - 1/F1U
-        results[6, 5] <- 1 - 1/F3L
-        results[6, 6] <- 1 - 1/F3U
-        Fj <- MSJ/MSE
-        vn <- (n_items - 1) * (n_id - 1) * ((n_items * ICC2 * Fj + n_id *
-                                               (1 + (n_items - 1) * ICC2) - n_items * ICC2))^2
-        vd <- (n_id - 1) * n_items^2 * ICC2^2 * Fj^2 + (n_id * (1 +
-                                                                  (n_items - 1) * ICC2) - n_items * ICC2)^2
-        v <- vn/vd
-        F3U <- qf(1 - alpha, n_id - 1, v)
-        F3L <- qf(1 - alpha, v, n_id - 1)
-        L3 <- n_id * (MSB - F3U * MSE)/(F3U * (n_items * MSJ + (n_items *
-                                                                  n_id - n_items - n_id) * MSE) + n_id * MSB)
-        results[2, 5] <- L3
-        U3 <- n_id * (F3L * MSB - MSE)/(n_items * MSJ + (n_items * n_id -
-                                                           n_items - n_id) * MSE + n_id * F3L * MSB)
-        results[2, 6] <- U3
-        L3k <- L3 * n_items/(1 + L3 * (n_items - 1))
-        U3k <- U3 * n_items/(1 + U3 * (n_items - 1))
-        results[5, 5] <- L3k
-        results[5, 6] <- U3k
-
-        sd_tots = sqrt(sum(stats[2,])/(n_obs-1))
-        if(se_type == "MSE"){
-          SEM = sqrt(MSE)
-        } else{
-          SEM = sd_tots * sqrt(1-subset(results, type == se_type)$icc)
-        }
-
-        if(se_type == "MSE"){
-          ICC3 <- (MSB - MSE)/(MSB + (n_items - 1) * MSE)
-          SEE = sd_tots*sqrt(ICC3*(1-ICC3))
-          SEP = sd_tots*sqrt(1-ICC3^2)
-        } else {
-          SEE = sd_tots*sqrt(subset(results, type == se_type)$icc*(1-subset(results, type == se_type)$icc))
-          SEP = sd_tots*sqrt(1-subset(results, type == se_type)$icc^2)
-        }
-
-        mw <- mean(x.df$values, na.rm = TRUE)
-        if(cv_calc == "residuals"){
-          stddev <- sqrt(mean(residuals(aov.x)^2))
-        } else if(cv_calc == "MSE"){
-          stddev <- sqrt(MSE)
-        } else if(cv_calc == "SEM"){
-          stddev <- SEM
-        } else {
-          stop("cv_calc must be SEM, MSE, or residuals")
-        }
-        cv_out = stddev/mw
-
-        res = c(
-          cv = cv_out,
-          SEM = SEM,
-          SEE = SEE,
-          SEP = SEP
-        )
-        return(res)
+# Analytic intervals: exact chi-square for sqrt(MSE), log-scale delta method
+# for everything else.
+.legacy_other_analytic = function(fit, se_type, cv_calc, conf.level, res) {
+  alpha = 1 - conf.level
+  names_ms = c("MSB", "MSJ", "MSE")
+  theta = c(fit$ms[names_ms], mean = fit$grand_mean)
+  var_theta = c(.ms_var(fit)[names_ms],
+                mean = .grand_mean_var(fit, "twoway", "consistency"))
+  for (stat in rownames(res)) {
+    exact_sem = stat == "SEM" && se_type == "MSE"
+    if (exact_sem) {
+      ci = sqrt(.var_ci(fit$ms[["MSE"]], fit$df[["dfE"]], conf.level))
+    } else {
+      g = function(th) {
+        f = fit
+        f$ms[names_ms] = th[names_ms]
+        f$grand_mean = th[["mean"]]
+        log(.legacy_other(f, se_type, cv_calc)[[stat]])
       }
-
-      boo2 = boot::boot(wide_df, boot_function,  R = replicates,
-                        cv_calc = cv_calc,
-                        se_type = se_type)
-
-      res_other = tidy_boot(boo2,
-                            conf.int = TRUE,
-                            conf.level = conf.level,
-                            conf.method = type) %>%
-        rename(estimate = statistic,
-               se = std.error,
-               lower.ci = conf.low,
-               upper.ci = conf.high) %>%
-        as.data.frame()
-      row.names(res_other) = res_other$term
-      res_other = res_other %>%
-        select(estimate,bias,se,lower.ci,upper.ci)
-    } else{
-      ## chisq ----
-      cv_ci = cv_ci(cv_out,
-                    df = dfE,
-                    alpha = alpha)
-      sem_ci = sigma_ci(SEM,
-                        df = dfE,
-                        alpha = alpha)
-      sep_ci = sigma_ci(SEP,
-                        df = dfE,
-                        alpha = alpha)
-      see_ci = sigma_ci(SEE,
-                        df = dfE,
-                        alpha = alpha)
-
-      res_other = data.frame(
-        estimate = c(cv_out, SEM, SEP, SEE),
-        bias = NA,
-        se = NA,
-        lower.ci = c(cv_ci[1],sem_ci[1],
-                     sep_ci[1],see_ci[1]),
-        upper.ci = c(cv_ci[2],sem_ci[2],
-                     sep_ci[2],see_ci[2]),
-        row.names = c("cv", "SEM", "SEP", "SEE")
-      )
-
+      se = .delta_se(g, theta, var_theta)
+      ci = res[stat, "estimate"] * exp(c(-1, 1) * stats::qnorm(1 - alpha / 2) * se)
+      res[stat, "se"] = res[stat, "estimate"] * se
     }
-
-  } else{
-    res_other = data.frame(
-      estimate = c(cv_out, SEM, SEP, SEE),
-      bias = NA,
-      se = NA,
-      lower.ci = NA,
-      upper.ci = NA,
-      row.names = c("cv", "SEM", "SEP", "SEE")
-    )
+    res[stat, c("lower.ci", "upper.ci")] = as.numeric(ci)
   }
-
-
-  # Save call
-  lm_mod = plot_frame(values = x.df$values, id = x.df$id, items = x.df$items)
-  call2 = match.call()
-
-  call2$lm_mod = lm_mod
-  if(is.null(call2$conf.level)){
-    call2$conf.level = conf.level
-  }
-
-  if(is.null(call2$other_ci)){
-    call2$other_ci = other_ci
-  }
-
-  result <- list(icc = results,
-                 lmer = aov.x,
-                 anova = stats,
-                 var_comp = MS.df,
-                 n.id = n_id,
-                 n.item = n_items,
-                 call = call2,
-                 cv = res_other["cv",],
-                 SEM = res_other["SEM",],
-                 SEE = res_other["SEE",],
-                 SEP = res_other["SEP",])
-
-
-  structure(result,
-            class = "simple_reli")
+  res
 }
 
-# other functions ----
-
-cv_ci = function(cv,
-                 df,
-                 alpha){
-  u1 <- qchisq(1-alpha/2,df)
-  u2 <- qchisq(alpha/2,df)
-  u = c(u1,u2)
-  #lower <- cv/sqrt(( (u1+2)/(df+1) -1)*cv*cv + u1/df)
-  #upper <- cv/sqrt(( (u2+2)/(df+1) -1)*cv*cv + u2/df)
-
-  res_vec = cv/sqrt(( (u+2)/(df+1) -1)*cv*cv + u/df)
-
-  return(res_vec)
+# Subject bootstrap (hybrid step for the item mean square and grand mean),
+# percentile, basic or normal intervals.
+.legacy_other_boot = function(prep, fit, method, se_type, cv_calc,
+                              conf.level, type, replicates, res) {
+  alpha = 1 - conf.level
+  stats = rownames(res)
+  boots = t(vapply(seq_len(replicates), function(i) {
+    p = tryCatch(.reli_resample(prep), error = function(e) NULL)
+    if (is.null(p)) {
+      return(rep(NA_real_, length(stats)))
+    }
+    tryCatch(suppressWarnings({
+      f = .reli_fit(p, method = method, model = "twoway", keep_fit = FALSE)
+      .legacy_other(.hybrid_item_ms(f, shift_mean = TRUE), se_type,
+                    cv_calc)[stats]
+    }), error = function(e) rep(NA_real_, length(stats)))
+  }, numeric(length(stats))))
+  colnames(boots) = stats
+  ok = stats::complete.cases(boots)
+  .check_boot_failures(list(t = boots[ok, , drop = FALSE], R = replicates,
+                            n_failed = sum(!ok)))
+  boots = boots[ok, , drop = FALSE]
+  for (stat in stats) {
+    b = boots[, stat]
+    est = res[stat, "estimate"]
+    res[stat, "bias"] = mean(b) - est
+    res[stat, "se"] = stats::sd(b)
+    ci = switch(type,
+                perc = stats::quantile(b, c(alpha / 2, 1 - alpha / 2),
+                                       names = FALSE),
+                basic = 2 * est - stats::quantile(b, c(1 - alpha / 2, alpha / 2),
+                                                  names = FALSE),
+                norm = est - res[stat, "bias"] +
+                  c(-1, 1) * stats::qnorm(1 - alpha / 2) * res[stat, "se"])
+    res[stat, c("lower.ci", "upper.ci")] = ci
+  }
+  res
 }
-
-sigma_ci = function(sigma,
-                    df,
-                    alpha){
-
-  lcl <-  sqrt( (df*sigma^2) / qchisq(p = 1-alpha/2, df = df) )
-  ucl <-  sqrt( (df*sigma^2) / qchisq(p = alpha/2, df = df) )
-  res_vec <- c(lcl,ucl)
-
-  return(res_vec)
-}
-
-
-
