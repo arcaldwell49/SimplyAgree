@@ -19,7 +19,7 @@ icc_test(
   null.value = 0,
   alternative = c("two.sided", "greater", "less"),
   boot = FALSE,
-  boot_ci = c("perc", "bca", "stud", "basic"),
+  boot_ci = c("auto", "perc", "bca", "stud", "basic"),
   replicates = 1999,
   se_method = c("jackknife", "influence", "normal")
 )
@@ -65,8 +65,10 @@ one-sided alternative gives a one-sided interval (see Details).}
 \item{boot}{If \code{TRUE}, use a nonparametric bootstrap that resamples
 subjects for the interval and p-value. Default \code{FALSE}.}
 
-\item{boot_ci}{Bootstrap interval type: \code{"perc"} (percentile, default),
-\code{"bca"}, \code{"stud"} (studentized), or \code{"basic"}. Used only when
+\item{boot_ci}{Bootstrap interval type: \code{"auto"} (default), \code{"perc"}
+(percentile), \code{"bca"}, \code{"stud"} (studentized), or \code{"basic"}. \code{"auto"}
+uses \code{"stud"} for \code{method = "anova"} and \code{"perc"} for \code{method = "reml"}
+(and \code{"perc"} when \code{se_method = "normal"}); see Details. Used only when
 \code{boot = TRUE}.}
 
 \item{replicates}{Number of bootstrap replicates (default 1999).}
@@ -165,8 +167,11 @@ pattern of missingness. \code{boot = TRUE} is an alternative.
 \strong{Bootstrap.} With \code{boot = TRUE}, subjects are resampled with replacement
 (keeping all of each subject's measurements) and the model is refitted.
 The BCa interval uses a leave-one-subject-out jackknife for the
-acceleration; the studentized interval works on the scale
-\eqn{0.5 \log F}. The p-value is obtained by inverting the chosen
+acceleration. The studentized interval works on the scale
+\eqn{z = 0.5 \log F} and divides each replicate by its own standard error
+from \code{se_method}; a normal-theory SE cannot be used because it depends
+only on the degrees of freedom, which would reduce the studentized
+interval to the basic interval on the z scale. The p-value is obtained by inverting the chosen
 interval (as in the TOSTER package), so it is approximate and consistent
 with the interval. With \code{method = "reml"} each replicate refits the mixed
 model, which can be slow.
@@ -180,13 +185,21 @@ hybrid bootstrap developed for this package). Like the F interval, this
 treats the items as a random sample; when the items are fixed it is
 conservative.
 
-The bootstrap is mainly useful when the data are clearly non-normal and
-there are at least about 30 subjects. In simulations (3 or 6 trials), the
-F intervals were best with normal data (coverage about 0.91 to 0.97) but
-fell to about 0.80 to 0.90 with skewed or heavy-tailed data, where the
-percentile bootstrap with 30 subjects covered about 0.87 to 0.93 (lowest
-at moderate ICCs). With 10 subjects, percentile bootstrap coverage was
-mostly below nominal (about 0.80 to 0.95).
+The bootstrap is mainly useful when the data are clearly non-normal. In
+simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9), the F
+intervals covered about 0.92 to 0.97 with normal, complete data but only
+0.80 to 0.93 with skewed or heavy-tailed data. With complete data, the
+studentized bootstrap with the jackknife SE covered 0.90 to 0.965 for the
+consistency ICC, including 0.94 to 0.955 with skewed data and 30
+subjects, and was the best method overall; for the agreement ICC it was
+roughly tied with the percentile interval (0.89 to 0.955), whose lower
+bound was too high less often. With 20\% of measurements missing and
+\code{method = "reml"}, the studentized interval (which then needs the
+influence SE) was unreliable at moderate ICCs (as low as 0.80), while the
+percentile interval covered 0.87 to 0.96. Hence \code{boot_ci = "auto"}, and a
+warning when \code{"stud"} is requested with \code{method = "reml"}. BCa never
+improved on the percentile interval. Every method under-covered with 10
+subjects, skewed data and an ICC of 0.9 (0.84 to 0.91).
 
 \strong{Standard errors.} \code{stderr} gives the standard error of
 \eqn{z = 0.5 \log F} (the scale of the studentized bootstrap) and, by the

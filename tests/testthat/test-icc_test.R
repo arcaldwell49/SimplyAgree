@@ -244,6 +244,36 @@ test_that("REML bootstrap with missing data runs without the unbalanced warning"
   expect_true(is.finite(res$conf.int[1]))
 })
 
+test_that("boot_ci = 'auto' picks studentized for ANOVA and percentile for REML", {
+  set.seed(31)
+  a <- icc_test(col.names = sf_cols, data = sf_wide, boot = TRUE,
+                replicates = 60)
+  expect_equal(a$settings$boot_ci, "stud")
+  expect_match(a$method, "studentized interval")
+
+  w <- sf_wide
+  w$J2[1] <- NA
+  set.seed(31)
+  r <- icc_test(col.names = sf_cols, data = w, method = "reml", boot = TRUE,
+                replicates = 30)
+  expect_equal(r$settings$boot_ci, "perc")
+
+  set.seed(31)
+  n <- icc_test(col.names = sf_cols, data = sf_wide, boot = TRUE,
+                replicates = 60, se_method = "normal")
+  expect_equal(n$settings$boot_ci, "perc")
+})
+
+test_that("requesting the studentized bootstrap with REML warns", {
+  w <- sf_wide
+  w$J2[1] <- NA
+  set.seed(32)
+  expect_warning(icc_test(col.names = sf_cols, data = w, method = "reml",
+                          boot = TRUE, boot_ci = "stud",
+                          se_method = "influence", replicates = 30),
+                 "studentized bootstrap with method = \"reml\" can be unreliable")
+})
+
 # Methods ------------------------------------------------------------------------------------------
 
 test_that("summary describes the result in words", {
