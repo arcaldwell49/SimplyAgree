@@ -389,6 +389,28 @@ test_that("influence SE works for REML fits with missing data", {
   }
 })
 
+test_that("jackknife and bootstrap survive deletions that leave too few items", {
+  # items J2 and J3 are observed only for subject 1, so dropping subject 1
+  # leaves a single item
+  w <- sf_wide[, c("J1", "J2", "J3")]
+  w$J2[-1] <- NA
+  w$J3[-1] <- NA
+  p <- SimplyAgree:::.reli_prepare(col.names = names(w), data = w)
+  f <- suppressWarnings(SimplyAgree:::.reli_fit(p, "reml"))
+  expect_warning(se <- SimplyAgree:::.icc_se_z(p, f, "C1", "jackknife"),
+                 "1 of 6 leave-one-subject-out fits failed")
+  expect_true(is.finite(se))
+
+  set.seed(4)
+  stat <- function(pp, resample) {
+    ff <- suppressWarnings(SimplyAgree:::.reli_fit(pp, "reml", keep_fit = FALSE))
+    c(est = SimplyAgree:::.icc_estimate(ff, "C1"), z = NA, se_z = NA)
+  }
+  bo <- SimplyAgree:::.reli_boot(p, stat, R = 40)
+  expect_gt(bo$n_failed, 0)
+  expect_equal(nrow(bo$t) + bo$n_failed, 40)
+})
+
 # Bootstrap ----------------------------------------------------------------------
 
 # Fixed bootstrap output, matching the inputs used for the TOSTER 0.9.0

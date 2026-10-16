@@ -631,11 +631,26 @@
   } else {
     ids <- levels(prep$df$id)
     z_i <- vapply(ids, function(i) {
-      p <- .reli_prep_from_long(prep$df[prep$df$id != i, , drop = FALSE])
-      f <- .reli_fit(p, method = fit$method, model = fit$model, keep_fit = FALSE)
-      if (form %in% c("A1", "Ak")) f$ms[["MSJ"]] <- fit$ms[["MSJ"]]
-      .icc_z_fit(f, form)
+      # deleting a subject can leave too few items (e.g. the only subject
+      # observed on an item); such deletions are skipped
+      tryCatch({
+        p <- .reli_prep_from_long(prep$df[prep$df$id != i, , drop = FALSE])
+        f <- .reli_fit(p, method = fit$method, model = fit$model,
+                       keep_fit = FALSE)
+        if (form %in% c("A1", "Ak")) f$ms[["MSJ"]] <- fit$ms[["MSJ"]]
+        .icc_z_fit(f, form)
+      }, error = function(e) NA_real_)
     }, numeric(1))
+    z_i <- z_i[is.finite(z_i)]
+    if (length(z_i) < n) {
+      warning(sprintf(paste0("%d of %d leave-one-subject-out fits failed and ",
+                             "were skipped in the jackknife standard error."),
+                      n - length(z_i), n), call. = FALSE)
+    }
+    n <- length(z_i)
+    if (n < 2) {
+      return(NA_real_)
+    }
   }
   (n - 1) / n * sum((z_i - mean(z_i))^2)
 }
@@ -825,9 +840,12 @@
   }
 
   t0 <- stat_fun(prep, FALSE)
-  t_all <- t(vapply(seq_len(R),
-                    function(i) safe_stat(.reli_resample(prep), TRUE),
-                    numeric(3)))
+  # a resample with missing data can lose items; .reli_resample() then errors
+  # and the replicate is counted as failed
+  t_all <- t(vapply(seq_len(R), function(i) {
+    p <- tryCatch(.reli_resample(prep), error = function(e) NULL)
+    safe_stat(p, TRUE)
+  }, numeric(3)))
   colnames(t_all) <- c("est", "z", "se_z")
   usable <- is.finite(t_all[, "est"])
 
