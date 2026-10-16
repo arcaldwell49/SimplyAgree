@@ -318,6 +318,77 @@ test_that("z working scale is 0.5 * log F and inverts", {
   expect_true(is.finite(SimplyAgree:::.icc_z_se(f, "A1")))
 })
 
+# Standard errors ------------------------------------------------------------------
+
+test_that("closed-form leave-one-out mean squares equal refits", {
+  p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
+  loo <- SimplyAgree:::.loo_ms(SimplyAgree:::.reli_matrix(p))
+  for (i in 1:6) {
+    expect_equal(loo[i, ], fit_wide(sf_wide[-i, ])$ms, tolerance = 1e-10)
+  }
+})
+
+test_that("jackknife SE of z matches deleting each subject and refitting", {
+  p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  for (fm in c("C1", "1", "Ck")) {
+    model <- if (fm == "1") "oneway" else "twoway"
+    z_i <- vapply(1:6, function(i) {
+      SimplyAgree:::.icc_z_fit(fit_wide(sf_wide[-i, ], model = model), fm)
+    }, 1)
+    manual <- sqrt(5 / 6 * sum((z_i - mean(z_i))^2))
+    expect_equal(SimplyAgree:::.icc_se_z(p, f, fm, "jackknife"), manual,
+                 tolerance = 1e-8)
+  }
+})
+
+test_that("influence SE matches the per-subject formula for ICC(C,1)", {
+  p <- SimplyAgree:::.reli_prepare(col.names = names(weir$A), data = weir$A)
+  f <- SimplyAgree:::.reli_fit(p)
+  Y <- as.matrix(weir$A)
+  n <- 8; k <- 2
+  D <- sweep(Y, 2, colMeans(Y))
+  m <- rowMeans(D)
+  r <- D - m
+  psi_b <- k * m^2 * n / (n - 1)
+  psi_e <- rowSums(r^2) * n / ((n - 1) * (k - 1))
+  psi <- 0.5 * ((psi_b - mean(psi_b)) / f$ms[["MSB"]] -
+                  (psi_e - mean(psi_e)) / f$ms[["MSE"]])
+  expect_equal(SimplyAgree:::.icc_se_z(p, f, "C1", "influence"),
+               sqrt(sum(psi^2)) / n, tolerance = 1e-6)
+  infl <- SimplyAgree:::.icc_influence(p, f)
+  expect_equal(unname(colMeans(infl)), c(0, 0, 0))
+})
+
+test_that("normal-theory SE is the trigamma form", {
+  p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  expect_equal(SimplyAgree:::.icc_se_z(p, f, "C1", "normal"),
+               0.5 * sqrt(trigamma(5 / 2) + trigamma(15 / 2)))
+})
+
+test_that("agreement SEs add the normal-theory item mean-square variance", {
+  p <- SimplyAgree:::.reli_prepare(col.names = names(sf_wide), data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  f_no_items <- f
+  f_no_items$df[["dfJ"]] <- Inf   # removes the MSJ term
+  for (m in c("influence", "jackknife")) {
+    expect_gt(SimplyAgree:::.icc_se_z(p, f, "A1", m),
+              SimplyAgree:::.icc_se_z(p, f_no_items, "A1", m))
+  }
+})
+
+test_that("influence SE works for REML fits with missing data", {
+  w <- sf_wide
+  w$J2[c(1, 4)] <- NA
+  p <- SimplyAgree:::.reli_prepare(col.names = names(w), data = w)
+  for (spec in list(c("twoway", "C1"), c("twoway", "A1"), c("oneway", "1"))) {
+    f <- SimplyAgree:::.reli_fit(p, "reml", spec[1])
+    se <- SimplyAgree:::.icc_se_z(p, f, spec[2], "influence")
+    expect_true(is.finite(se) && se > 0)
+  }
+})
+
 # Bootstrap ----------------------------------------------------------------------
 
 # Fixed bootstrap output, matching the inputs used for the TOSTER 0.9.0

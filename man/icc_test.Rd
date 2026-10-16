@@ -20,7 +20,8 @@ icc_test(
   alternative = c("two.sided", "greater", "less"),
   boot = FALSE,
   boot_ci = c("perc", "bca", "stud", "basic"),
-  replicates = 1999
+  replicates = 1999,
+  se_method = c("influence", "jackknife", "normal")
 )
 }
 \arguments{
@@ -69,6 +70,12 @@ subjects for the interval and p-value. Default \code{FALSE}.}
 \code{boot = TRUE}.}
 
 \item{replicates}{Number of bootstrap replicates (default 1999).}
+
+\item{se_method}{How the standard error is estimated: \code{"influence"}
+(default; per-subject influence, or sandwich, estimate), \code{"jackknife"}
+(delete one subject at a time), or \code{"normal"} (normal theory). The SE is
+reported in \code{stderr} and is used by the studentized bootstrap; it does
+not change the F-based interval or test. See Details.}
 }
 \value{
 A list of class \code{c("reli_htest", "htest")} containing:
@@ -78,6 +85,8 @@ A list of class \code{c("reli_htest", "htest")} containing:
 \item{p.value}{The p-value of the test.}
 \item{conf.int}{The confidence interval for the ICC.}
 \item{estimate}{The estimated ICC, named by its McGraw and Wong form.}
+\item{stderr}{Standard errors of the ICC and of
+\eqn{z = 0.5 \log F}, from \code{se_method}.}
 \item{null.value}{The hypothesized ICC.}
 \item{alternative}{The alternative hypothesis.}
 \item{method}{A description of the ICC and the inference.}

@@ -216,6 +216,7 @@
             MSW = (SSJ + SSE) / dfs[["dfW"]])
     kbar <- k
     singular <- FALSE
+    effects <- NULL
     fit <- if (keep_fit) {
       if (model == "twoway") stats::lm(values ~ id + items, data = df) else
         stats::lm(values ~ id, data = df)
@@ -247,6 +248,13 @@
       dfs <- c(dfB = n - 1, dfJ = NA_real_, dfE = NA_real_, dfW = N - n)
     }
     singular <- lme4::isSingular(fit)
+    # intercept and item effects, used by the influence-function SE
+    effects <- list(
+      mu = unname(lme4::fixef(fit)[1]),
+      items = if (model == "twoway") {
+        stats::setNames(lme4::ranef(fit)$items[, 1],
+                        rownames(lme4::ranef(fit)$items))
+      } else NULL)
     if (!keep_fit) fit <- NULL
   }
 
@@ -272,6 +280,7 @@
                  vc = vc,
                  grand_mean = mean(df$values),
                  singular = singular,
+                 effects = effects,
                  fit = fit),
             class = "reli_fit")
 }
@@ -472,13 +481,185 @@
     df2 <- dfs[[if (form %in% c("1", "k")) "dfW" else "dfE"]]
     return(0.5 * sqrt(trigamma(dfs[["dfB"]] / 2) + trigamma(df2 / 2)))
   }
-  z_of_ms <- function(ms) {
-    fit_ms <- fit
-    fit_ms$ms[c("MSB", "MSJ", "MSE")] <- ms
-    .icc_z(.icc_estimate(fit_ms, form), form, fit$kbar)
-  }
   ms <- fit$ms[c("MSB", "MSJ", "MSE")]
-  .delta_se(z_of_ms, ms, .ms_var(fit)[c("MSB", "MSJ", "MSE")])
+  .delta_se(.icc_z_of_ms(fit, form, c("MSB", "MSJ", "MSE")), ms,
+            .ms_var(fit)[c("MSB", "MSJ", "MSE")])
+}
+
+# z for a fit: the single-measure forms use the observed items per subject,
+# the average-measure forms all k items (matching .icc_estimate()).
+.icc_z_fit <- function(fit, form) {
+  k_z <- if (.icc_is_average(form)) fit$k else fit$kbar
+  .icc_z(.icc_estimate(fit, form), form, k_z)
+}
+
+# Function of the named mean squares returning z, for numerical derivatives.
+.icc_z_of_ms <- function(fit, form, names) {
+  function(ms) {
+    fit$ms[names] <- ms
+    .icc_z_fit(fit, form)
+  }
+}
+
+# Mean squares whose subject-level influence drives each form; the agreement
+# forms also depend on MSJ, handled separately (normal theory, random items).
+.icc_ms_names <- function(form) {
+  if (form %in% c("1", "k")) c("MSB", "MSW") else c("MSB", "MSE")
+}
+
+#' Standard error of the ICC on the z scale
+#'
+#' `"influence"`: per-subject influence (sandwich) SE, sqrt(sum(psi^2)) / n,
+#' with psi the influence of each subject on z. `"jackknife"`: delete one
+#' subject at a time. `"normal"`: normal-theory SE (`.icc_z_se()`). For the
+#' two-way agreement forms, the influence and jackknife SEs cover the subject
+#' part (MSB, MSE) and add the normal-theory variance of MSJ,
+#' 2 MSJ^2 / (k - 1), treating the items as random (as the F interval and the
+#' hybrid bootstrap do).
+#' @noRd
+.icc_se_z <- function(prep, fit, form,
+                      se_method = c("influence", "jackknife", "normal")) {
+  se_method <- match.arg(se_method)
+  if (se_method == "normal") {
+    return(.icc_z_se(fit, form))
+  }
+  names <- .icc_ms_names(form)
+  ms <- fit$ms[names]
+  z_fun <- .icc_z_of_ms(fit, form, names)
+
+  if (se_method == "influence") {
+    psi <- .icc_influence(prep, fit)[, names, drop = FALSE]
+    grad <- .num_grad(z_fun, ms)
+    var_z <- sum((psi %*% grad)^2) / prep$n^2
+  } else {
+    var_z <- .icc_jackknife_var(prep, fit, form)
+  }
+
+  if (form %in% c("A1", "Ak")) {
+    msj <- fit$ms[["MSJ"]]
+    g_j <- .num_grad(.icc_z_of_ms(fit, form, "MSJ"), c(MSJ = msj))
+    var_z <- var_z + g_j^2 * 2 * msj^2 / fit$df[["dfJ"]]
+  }
+  sqrt(var_z)
+}
+
+.num_grad <- function(f, theta) {
+  vapply(seq_along(theta), function(i) {
+    h <- max(abs(theta[[i]]), 1e-8) * 1e-5
+    up <- dn <- theta
+    up[[i]] <- theta[[i]] + h
+    dn[[i]] <- theta[[i]] - h
+    (f(up) - f(dn)) / (2 * h)
+  }, numeric(1))
+}
+
+#' Per-subject influence on the mean squares
+#'
+#' Returns an n x 3 matrix with columns MSB, MSE and MSW, each centred to
+#' mean zero. Complete data: exact influence of each subject on the ANOVA mean
+#' squares. Missing data (REML): moment approximation from each subject's
+#' observed cells, adjusted for the estimated intercept and item effects.
+#' @noRd
+.icc_influence <- function(prep, fit) {
+  psi <- if (prep$balanced) .influence_balanced(prep, fit) else
+    .influence_unbalanced(prep, fit)
+  sweep(psi, 2, colMeans(psi))
+}
+
+.reli_matrix <- function(prep) {
+  df <- prep$df
+  Y <- matrix(NA_real_, prep$n, prep$k)
+  Y[cbind(as.integer(df$id), as.integer(df$items))] <- df$values
+  Y
+}
+
+.influence_balanced <- function(prep, fit) {
+  Y <- .reli_matrix(prep)
+  n <- nrow(Y)
+  k <- ncol(Y)
+  D <- sweep(Y, 2, colMeans(Y))   # remove item means
+  m <- rowMeans(D)                # subject mean deviations
+  r <- D - m                      # residuals after subject and item effects
+  w <- rowSums((Y - rowMeans(Y))^2) / (k - 1)
+  cbind(MSB = k * m^2 * n / (n - 1),
+        MSE = rowSums(r^2) * n / ((n - 1) * (k - 1)),
+        MSW = w)
+}
+
+# Moment approximation for REML fits to incomplete data. With a_ij the
+# measurements adjusted for the intercept and item effects, subject i's mean
+# m_i estimates sigma2_id + sigma2_e / n_i and its within-subject variance e_i
+# estimates sigma2_e. MSB = kbar * sigma2_id + sigma2_e and MSE (or MSW) =
+# sigma2_e, so their influences follow. With complete data this reduces to the
+# exact influence (up to the item effects being REML predictions).
+.influence_unbalanced <- function(prep, fit) {
+  df <- prep$df
+  eff <- fit$effects
+  item_eff <- if (is.null(eff$items)) 0 else eff$items[as.character(df$items)]
+  adj <- df$values - eff$mu - item_eff
+  n_i <- as.vector(table(df$id))
+  m_i <- as.vector(tapply(adj, df$id, mean))
+  ss_i <- as.vector(tapply(adj, df$id, function(a) sum((a - mean(a))^2)))
+  e_i <- ifelse(n_i > 1, ss_i / pmax(n_i - 1, 1), 0)
+
+  v_e <- fit$vc[["resid"]]
+  v_id <- fit$vc[["id"]]
+  wts <- n_i - 1
+  psi_e <- prep$n * wts * (e_i - v_e) / sum(wts)
+  psi_id <- (m_i^2 - v_e / n_i - v_id) - mean(1 / n_i) * psi_e
+  psi_b <- fit$kbar * psi_id + psi_e
+  cbind(MSB = psi_b, MSE = psi_e, MSW = psi_e)
+}
+
+#' Jackknife variance of z, deleting one subject at a time
+#'
+#' ANOVA fits use closed-form leave-one-out mean squares; REML fits are
+#' refitted. For the agreement forms MSJ is held at its full-data value (its
+#' variance is added separately in `.icc_se_z()`).
+#' @noRd
+.icc_jackknife_var <- function(prep, fit, form) {
+  n <- prep$n
+  if (fit$method == "anova") {
+    loo <- .loo_ms(.reli_matrix(prep))
+    z_i <- vapply(seq_len(n), function(i) {
+      f <- fit
+      f$n <- n - 1
+      f$ms <- loo[i, ]
+      if (form %in% c("A1", "Ak")) f$ms[["MSJ"]] <- fit$ms[["MSJ"]]
+      .icc_z_fit(f, form)
+    }, numeric(1))
+  } else {
+    ids <- levels(prep$df$id)
+    z_i <- vapply(ids, function(i) {
+      p <- .reli_prep_from_long(prep$df[prep$df$id != i, , drop = FALSE])
+      f <- .reli_fit(p, method = fit$method, model = fit$model, keep_fit = FALSE)
+      if (form %in% c("A1", "Ak")) f$ms[["MSJ"]] <- fit$ms[["MSJ"]]
+      .icc_z_fit(f, form)
+    }, numeric(1))
+  }
+  (n - 1) / n * sum((z_i - mean(z_i))^2)
+}
+
+#' Leave-one-subject-out ANOVA mean squares for a complete n x k matrix
+#'
+#' Row i holds the mean squares with subject i removed, computed by
+#' downdating the sums rather than refitting.
+#' @noRd
+.loo_ms <- function(Y) {
+  n <- nrow(Y)
+  k <- ncol(Y)
+  n1 <- n - 1
+  m <- rowMeans(Y)
+  g <- (sum(Y) - rowSums(Y)) / (n1 * k)
+  SSB <- k * (sum(m^2) - m^2 - n1 * g^2)
+  SST <- (sum(Y^2) - rowSums(Y^2)) - n1 * k * g^2
+  col_means <- (matrix(colSums(Y), n, k, byrow = TRUE) - Y) / n1
+  SSJ <- n1 * (rowSums(col_means^2) - k * g^2)
+  SSE <- SST - SSB - SSJ
+  cbind(MSB = SSB / (n1 - 1),
+        MSJ = SSJ / (k - 1),
+        MSE = SSE / ((n1 - 1) * (k - 1)),
+        MSW = (SSJ + SSE) / (n1 * (k - 1)))
 }
 
 # Measurement error (SEM) and total SD ---------------------------------------

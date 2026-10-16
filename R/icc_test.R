@@ -40,6 +40,11 @@
 #'   `"bca"`, `"stud"` (studentized), or `"basic"`. Used only when
 #'   `boot = TRUE`.
 #' @param replicates Number of bootstrap replicates (default 1999).
+#' @param se_method How the standard error is estimated: `"influence"`
+#'   (default; per-subject influence, or sandwich, estimate), `"jackknife"`
+#'   (delete one subject at a time), or `"normal"` (normal theory). The SE is
+#'   reported in `stderr` and is used by the studentized bootstrap; it does
+#'   not change the F-based interval or test. See Details.
 #'
 #' @details
 #' **ICC forms.** McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
@@ -137,6 +142,8 @@
 #'   \item{p.value}{The p-value of the test.}
 #'   \item{conf.int}{The confidence interval for the ICC.}
 #'   \item{estimate}{The estimated ICC, named by its McGraw and Wong form.}
+#'   \item{stderr}{Standard errors of the ICC and of
+#'   \eqn{z = 0.5 \log F}, from `se_method`.}
 #'   \item{null.value}{The hypothesized ICC.}
 #'   \item{alternative}{The alternative hypothesis.}
 #'   \item{method}{A description of the ICC and the inference.}
@@ -205,7 +212,8 @@ icc_test <- function(x = NULL,
                      alternative = c("two.sided", "greater", "less"),
                      boot = FALSE,
                      boot_ci = c("perc", "bca", "stud", "basic"),
-                     replicates = 1999) {
+                     replicates = 1999,
+                     se_method = c("influence", "jackknife", "normal")) {
   model <- match.arg(model)
   type_given <- !missing(type)
   type <- match.arg(type)
@@ -220,8 +228,23 @@ icc_test <- function(x = NULL,
   method <- match.arg(method)
   alternative <- match.arg(alternative)
   boot_ci <- match.arg(boot_ci)
+  se_method <- match.arg(se_method)
   .check_conf_level(conf.level)
   .check_boot_args(boot, replicates)
+  if (boot && boot_ci == "stud") {
+    if (se_method == "normal") {
+      stop("boot_ci = \"stud\" needs a standard error estimated from each ",
+           "resample; the normal-theory SE depends only on the degrees of ",
+           "freedom and cannot studentize. Use se_method = \"influence\" or ",
+           "\"jackknife\".", call. = FALSE)
+    }
+    if (se_method == "jackknife" && method == "reml") {
+      stop("boot_ci = \"stud\" with se_method = \"jackknife\" and ",
+           "method = \"reml\" refits the mixed model n times in every ",
+           "bootstrap replicate. Use se_method = \"influence\".",
+           call. = FALSE)
+    }
+  }
 
   prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
                         id = id, col.names = col.names)
@@ -235,24 +258,27 @@ icc_test <- function(x = NULL,
 
   estimate <- .icc_estimate(fit, form)
   label <- .icc_label(form)
+  k_z <- if (.icc_is_average(form)) prep$k else fit$kbar
+  se_z <- .icc_se_z(prep, fit, form, se_method)
+  z_obs <- .icc_z(estimate, form, k_z)
+  drho_dz <- .num_grad(function(z) .icc_z_inv(z[[1]], form, k_z), c(z = z_obs))
+  stderr <- c(ICC = abs(drho_dz) * se_z, z = se_z)
 
   if (!boot) {
     test <- .icc_ftest(fit, form, null.value, alternative)
     conf.int <- .icc_ci(fit, form, conf.level, alternative)
     boot_info <- NULL
   } else {
-    k_z <- if (.icc_is_average(form)) prep$k else fit$kbar
     agreement <- form %in% c("A1", "Ak")
     stat_fun <- function(p, resample) {
       f <- .reli_fit(p, method = method, model = model, keep_fit = FALSE)
       if (resample && agreement) {
         f <- .hybrid_item_ms(f)
       }
-      r <- .icc_estimate(f, form)
-      kz <- if (.icc_is_average(form)) f$k else f$kbar
-      c(est = r,
-        z = .icc_z(r, form, kz),
-        se_z = if (boot_ci == "stud") .icc_z_se(f, form) else NA_real_)
+      c(est = .icc_estimate(f, form),
+        z = .icc_z_fit(f, form),
+        se_z = if (boot_ci == "stud") .icc_se_z(p, f, form, se_method) else
+          NA_real_)
     }
     bo <- .reli_boot(prep, stat_fun, R = replicates,
                      jackknife = boot_ci == "bca")
@@ -281,6 +307,7 @@ icc_test <- function(x = NULL,
                    conf.level = conf.level,
                    boot = boot,
                    boot_ci = if (boot) boot_ci else NULL,
+                   se_method = se_method,
                    label = label)
 
   structure(list(statistic = test$statistic,
@@ -288,6 +315,7 @@ icc_test <- function(x = NULL,
                  p.value = test$p.value,
                  conf.int = conf.int,
                  estimate = stats::setNames(estimate, label),
+                 stderr = stderr,
                  null.value = c(ICC = null.value),
                  alternative = alternative,
                  method = .icc_method_text(form, method, boot, boot_ci),

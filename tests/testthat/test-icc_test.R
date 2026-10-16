@@ -95,6 +95,53 @@ test_that("conf.level passed as a variable is stored evaluated", {
   expect_match(summary(res)$text, "90% CI")
 })
 
+# Standard errors ----------------------------------------------------------------------------
+
+test_that("stderr is reported on the ICC and z scales", {
+  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  expect_named(res$stderr, c("ICC", "z"))
+  # ICC(C,1) = (F - 1) / (F + k - 1) with F = exp(2 z): d rho / d z = 2 k F / (F + k - 1)^2
+  k <- 4
+  F_obs <- exp(2 * 0.5 * log(res$statistic[[1]]))
+  expect_equal(res$stderr[["ICC"]],
+               res$stderr[["z"]] * 2 * k * F_obs / (F_obs + k - 1)^2,
+               tolerance = 1e-6)
+  expect_equal(res$settings$se_method, "influence")
+})
+
+test_that("se_method changes stderr but not the F interval or test", {
+  infl <- icc_test(col.names = sf_cols, data = sf_wide)
+  jack <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "jackknife")
+  norm <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "normal")
+  expect_false(isTRUE(all.equal(infl$stderr, jack$stderr)))
+  expect_equal(infl$conf.int, jack$conf.int)
+  expect_equal(infl$p.value, norm$p.value)
+  expect_equal(norm$stderr[["z"]], 0.5 * sqrt(trigamma(5 / 2) + trigamma(15 / 2)))
+})
+
+test_that("studentized bootstrap rejects SEs that cannot studentize", {
+  expect_error(icc_test(col.names = sf_cols, data = sf_wide, boot = TRUE,
+                        boot_ci = "stud", se_method = "normal"),
+               "cannot studentize")
+  w <- sf_wide
+  w$J2[1] <- NA
+  expect_error(icc_test(col.names = sf_cols, data = w, method = "reml",
+                        boot = TRUE, boot_ci = "stud", se_method = "jackknife"),
+               "se_method = \"influence\"")
+})
+
+test_that("studentized bootstrap is no longer the basic interval on the z scale", {
+  set.seed(21)
+  res <- icc_test(col.names = c("t1", "t2"), data = weir_a, boot = TRUE,
+                  boot_ci = "stud", replicates = 300)
+  set.seed(21)
+  basic <- icc_test(col.names = c("t1", "t2"), data = weir_a, boot = TRUE,
+                    boot_ci = "basic", replicates = 300)
+  expect_false(isTRUE(all.equal(as.numeric(res$conf.int),
+                                as.numeric(basic$conf.int))))
+  expect_true(res$conf.int[1] < res$estimate && res$estimate < res$conf.int[2])
+})
+
 # Argument checks --------------------------------------------------------------------------
 
 test_that("invalid arguments are rejected with informative errors", {
