@@ -2,7 +2,7 @@
 #
 # Internal data preparation, model fitting and inference helpers shared by the
 # reliability functions (icc_test(), reli_err_test(), power_icc(),
-# precision_icc()). Design notes and sources: references/working/reli_redesign.md
+# precision_icc()). Design notes and sources: references/general/reli_redesign.md
 #
 # Notation follows McGraw & Wong (1996): n subjects (rows), k items/trials
 # (columns), mean squares MSB (subjects), MSJ (items), MSE (residual) and
