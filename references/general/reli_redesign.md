@@ -1,8 +1,8 @@
 # Reliability Suite Redesign
 
-Branch: `reli-update` · Status: phases 1–4 done (engine, `icc_test()`,
-`reli_err_test()` with raw/log/mean scales, methods); phases 5–7 pending ·
-Last updated: 2026-10-16
+Branch: `reli-update` · Status: phases 1–5 done (engine, `icc_test()`,
+`reli_err_test()` with raw/log/mean scales, methods, `power_icc()`,
+`precision_icc()`); phases 6–7 pending · Last updated: 2026-10-16
 
 ## 0. Handoff: current state and next steps
 
@@ -18,6 +18,7 @@ are current.
 | Engine (data prep, ANOVA/REML fits, ICC/SEM/SD helpers, CIs and tests, SEs, bootstrap) | `R/reli_engine.R` (internal, `@noRd`) |
 | `icc_test()` | `R/icc_test.R`, `man/icc_test.Rd` |
 | `reli_err_test()` (SEM/SEE/SEP; raw, log, mean scales) | `R/reli_err_test.R`, `man/reli_err_test.Rd` |
+| `power_icc()`, `precision_icc()` | `R/power_icc.R`, `man/power_icc.Rd`, `man/precision_icc.Rd`, `tests/testthat/test-power_icc.R` |
 | `summary()`, `plot()`, `check()` for `reli_htest` | `R/methods.reli_htest.R`, `man/reli_htest-methods.Rd` |
 | Tests | `tests/testthat/test-reli_engine.R`, `test-icc_test.R`, `test-reli_err_test.R`, snapshots in `tests/testthat/_snaps/` (all passing on 2026-10-16) |
 | Simulation scripts behind every table here | `references/general/reli_sims/` (run from the package root) |
@@ -90,16 +91,23 @@ bootstrapping), `parameter`, `p.value`, `conf.int`, `estimate`, `stderr`
 
 ### Next steps
 
-**Phase 5: `power_icc()` and `precision_icc()`.** Spec and test targets in
-Section 6.3 (exact scaled-central-F power; Walter et al. and Zou
-approximations; PASS values). Read Mondal et al. (2024) on Zou's eq. 3
-before implementing `precision_icc(method = "approximate")`. Independent of
-phases 3–4.
+**Phase 6: legacy functions, jamovi, NEWS, vignette.** Spec in Section 7
+and the documentation-error list in Section 2:
 
-Then phase 6 (supersede and
-rewire `reli_stats()`, `reli_aov()`, jamovi; NEWS, including the
-`icc_test()` null default being new; vignette), phase 7 (check and
-coverage). Section 9.
+1. `reli_stats()` and `reli_aov()`: `superseded` badge pointing to
+   `icc_test()`/`reli_err_test()` (`scale = "log"`/`"mean"` for the CV);
+   rewire onto the engine keeping the `simple_reli` output structure; fix
+   bugs 1–7 (two-sided ICC CIs, with the `conf.level` mapping that
+   reproduces old numbers); keep SEE/SEP and `se_type`/`cv_calc`
+   (`"residuals"` → `"MSE"` with a warning; legacy keeps the observed SD).
+2. `simple_reli` methods: store evaluated settings (bug 2).
+3. `jmvreli`: call the engine and new functions directly.
+4. NEWS: new functions; legacy ICC CI change and the mapping; the
+   `icc_test()` `null.value = NULL` default.
+5. Vignette rewrite, including "Coefficient of variation" and "MDC, SDD
+   and the repeatability coefficient" sections, and power/precision.
+
+Then phase 7 (check and coverage ≥ 90% on new files). Section 9.
 
 ### Open TODOs
 
@@ -798,10 +806,10 @@ precision_icc(n = NULL, k = 2, rho = NULL, width = NULL,
     `A = (1 - ρ)(1 + (K - 1)ρ)`, `B = K - 2 + 2ρ(1 - K)` (`|B|` needed to
     reproduce the table). Lower one-sided limit: same closed form as
     Walter et al. with assurance in place of power.
-  - **Caveat:** Mondal et al. (2024, SMMR, doi:10.1177/09622802231224657)
-    report that the variance expression in Zou's equation (3) is incorrect.
-    Read it before implementing `"approximate"` for `precision_icc()`; the
-    `"exact"` default avoids the issue.
+  - **Caveat (resolved 2026-10-16):** Mondal et al. (2024) report that the
+    variance expression in Zou's equation (3) is incorrect; it is the log-F
+    (ZFρ) variance, which the Zou sample-size formula used here does not
+    involve. See Section 9, phase 5.
   - Our `width` is the full CI width; Zou's ω is the half-width
     (`width = 2 * omega`). Document the conversion.
 - Validation: exact power formula matches simulation (pre-check: 0.563 vs
@@ -1410,7 +1418,49 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      as on the raw scale. The hybrid with the grand-mean shift beats
      subject-only resampling for SEM_A in every cell. **No changes needed;
      phase 4 accepted** (pending the user's review).
-5. `power_icc()` and `precision_icc()`.
+5. `power_icc()` and `precision_icc()`. **Done 2026-10-16:**
+   `R/power_icc.R`, `tests/testthat/test-power_icc.R`, Rd files, pkgdown
+   entries. Signatures as in Section 6.3.
+   - **Exact power:** the scaled central F (one `pf()` per tail; two-sided
+     = both tails at α/2). **Exact assurance:** the interval width is
+     unimodal in log F, so P(width ≤ w) = P(F ≤ f_lo) + P(F ≥ f_hi), found
+     with `optimize()` and two `uniroot()`s (`.icc_assurance_exact()`).
+     A deterministic test checks it against a dense grid over the F
+     distribution.
+   - **Approximate:** the Walter closed form inverted for power (α/2 for
+     two-sided); Zou's n formula, with assurance from its algebraic
+     inverse (`.icc_assurance_zou()`; below the median-width n it returns
+     0.5 with a warning, since the formula does not cover assurance < 0.5).
+     Solving `width` or `k` with `"approximate"` inverts through n.
+   - **Solving:** `uniroot()` for n (lower end 2; if the target is already
+     met at n = 2, 2 is returned), rho1, sig.level and width; integer
+     search 2–1000 for k (tolerance 1e-8 so round trips at the boundary
+     work). NOTE lines: round up n; two-sided rho1 root above rho0; n/k
+     meaning (and width = upper − lower for `precision_icc()`).
+   - **Mondal et al. (2024), read 2026-10-16** (PMC10981208; authors
+     Mondal, Vanbelle, Cassese & Candel; metadata checked on CrossRef):
+     the error they report is in Zou's eq. 3, the variance of the log-F
+     (ZFρ) statistic, which our approximate method does not use. They also
+     note that Zou derived his formula with n − 1 and the half-width, so
+     their own Wald/Fisher coefficients differ slightly (e.g. 469 vs 470
+     for ρ .7, width .1, assurance .9). They recommend the Searle (F)
+     interval, which is our exact method. Zou's formula is kept as
+     published (it reproduces Zou's and PASS's tables).
+   - **All Section 6.3 targets reproduced:** Walter 543.16 and the five
+     closed-form values; PASS exact power .18333, .29534, .45522, .74538,
+     and .8003 at n = 544; Zou n = 183; PASS assurance .9 n = 196, 96, 77,
+     70 (Zou formula); lower limit 300 (approximate) and 301 (exact).
+     **Additional targets from Mondal et al. (Searle/F, full width):**
+     assurance .9: n = 473 (ρ .7, width .1) and 81 (ρ .8, width .2);
+     median width: 403 (ρ .7, width .1); testing: 162 (ρ₀ .7, ρ₁ .8,
+     power .9, one-sided). Exact n for the PASS assurance table: 195.3,
+     93.8, 74.8, 67.0 (k = 2, 4, 6, 8), i.e. the Zou approximation is
+     slightly conservative for k > 2.
+   - Slow tests (`SIMPLYAGREE_SLOW_TESTS=true`): exact power vs simulated
+     `icc_test()` rejection rate; median width vs simulated `icc_test()`
+     interval widths (a first 2000-rep run gave .527, 2.4 MC SE; reruns
+     gave .499 with simulated F ratios and .504 with 6000 fits, so the
+     test uses 4000 reps).
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette
    rewrite (including "Coefficient of variation" and "MDC, SDD and the
    repeatability coefficient" sections); fix all documentation errors in
@@ -1511,8 +1561,6 @@ Still unverified:
 - McGraw & Wong correction (p. 390): not in the supplied PDF. Our intervals
   match psych and Stata, so it is unlikely to matter.
 - Cicchetti (1994) cutoffs (secondary sources only; not used).
-- Mondal et al. (2024) critique of Zou (read before `precision_icc()`
-  approximate method).
 
 ## 13. References
 
@@ -1540,7 +1588,8 @@ All metadata below checked against CrossRef on 2026-10-15 unless noted.
   check whether it is an erratum)
 - Donner, A., & Eliasziw, M. (1987). Sample size requirements for
   reliability studies. Statistics in Medicine, 6(4), 441-448. (Source of the
-  exact power used by Walter et al.; metadata not yet checked.)
+  doi:10.1002/sim.4780060404 (source of the exact power used by Walter et
+  al.; metadata checked on CrossRef 2026-10-16)
 - Greenland, S. (2019). Valid p-values behave exactly as they should: Some
   misleading criticisms of p-values and their resolution with S-values. The
   American Statistician, 73(sup1), 106-114.
@@ -1570,9 +1619,11 @@ All metadata below checked against CrossRef on 2026-10-15 unless noted.
   doi:10.1002/9781118594841. (The 1991 1st edition is Hahn & Meeker,
   "Statistical Intervals: A Guide for Practitioners", doi:10.1002/9780470316771;
   the legacy Rd's "Hahn & Meeker (2011)" matches neither.)
-- Mondal, D., et al. (2024). Statistical Methods in Medical Research.
-  doi:10.1177/09622802231224657 (reports an error in Zou 2012 eq. 3; full
-  metadata not yet checked)
+- Mondal, D., Vanbelle, S., Cassese, A., & Candel, M. J. J. M. (2024).
+  Review of sample size determination methods for the intraclass
+  correlation coefficient in the one-way analysis of variance model.
+  Statistical Methods in Medical Research, 33(3), 532-553.
+  doi:10.1177/09622802231224657 (read 2026-10-16; see phase 5 notes)
 - Qin, S., et al. (2019). Quality of Life Research, 28(4), 1029-1033.
   doi:10.1007/s11136-018-2076-0 (recommends ICC(A,1); full metadata not yet
   checked)
