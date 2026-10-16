@@ -16,7 +16,7 @@ icc_test(
   unit = c("single", "average"),
   method = c("anova", "reml"),
   conf.level = 0.95,
-  null.value = 0,
+  null.value = NULL,
   alternative = c("two.sided", "greater", "less"),
   boot = FALSE,
   boot_ci = c("auto", "perc", "bca", "stud", "basic"),
@@ -57,10 +57,13 @@ fits a linear mixed model and allows missing measurements.}
 
 \item{conf.level}{Confidence level of the interval (default 0.95).}
 
-\item{null.value}{The ICC under the null hypothesis (default 0).}
+\item{null.value}{The ICC under the null hypothesis. The default, \code{NULL},
+gives the estimate and interval without a test.}
 
-\item{alternative}{\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}. A
-one-sided alternative gives a one-sided interval (see Details).}
+\item{alternative}{\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}. Used
+only when \code{null.value} is given (without a test the interval is
+two-sided). A one-sided alternative gives a one-sided interval (see
+Details).}
 
 \item{boot}{If \code{TRUE}, use a nonparametric bootstrap that resamples
 subjects for the interval and p-value. Default \code{FALSE}.}
@@ -146,8 +149,11 @@ With \code{alternative = "greater"} the interval is one-sided, \verb{[L, 1]}, wh
 is the one-sided \code{conf.level} lower bound; with \code{"less"} it is
 \verb{[-Inf, U]}.
 
-\strong{Tests} are the F tests of McGraw and Wong (1996, Table 8) of
-\eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency
+\strong{Tests.} By default (\code{null.value = NULL}) no test is done: the result is
+the estimate and a two-sided interval. Testing against an ICC of 0, the
+default in many programs, is rarely informative for reliability. When
+\code{null.value} is given, the tests are the F tests of McGraw and Wong (1996,
+Table 8) of \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency
 forms, and invert exactly to the interval. For the agreement forms the
 test and the interval are separate Satterthwaite approximations (degrees
 of freedom evaluated at \eqn{\rho_0} for the test and at the estimate for

@@ -15,7 +15,7 @@ weir_a <- data.frame(t1 = c(146, 148, 170, 90, 157, 156, 176, 205),
 # Structure ------------------------------------------------------------------------
 
 test_that("icc_test returns a reli_htest with the htest elements", {
-  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  res <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0)
   expect_s3_class(res, c("reli_htest", "htest"))
   expect_named(res$estimate, "ICC(C,1)")
   expect_named(res$statistic, "F")
@@ -30,9 +30,9 @@ test_that("icc_test returns a reli_htest with the htest elements", {
 })
 
 test_that("the three input interfaces give the same result", {
-  wide <- icc_test(col.names = sf_cols, data = sf_wide)
+  wide <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0)
   long <- icc_test(measure = "score", item = "judge", id = "id", data = sf_long)
-  form <- icc_test(score ~ judge | id, data = sf_long)
+  form <- icc_test(score ~ judge | id, data = sf_long, null.value = 0)
   expect_equal(long$estimate, wide$estimate)
   expect_equal(form$conf.int, wide$conf.int)
   expect_equal(form$p.value, wide$p.value)
@@ -57,7 +57,7 @@ test_that("all six forms match Shrout & Fleiss (1979) and psych 2.6.3", {
 })
 
 test_that("consistency ICC matches Weir (2005) data set A", {
-  res <- icc_test(col.names = c("t1", "t2"), data = weir_a)
+  res <- icc_test(col.names = c("t1", "t2"), data = weir_a, null.value = 0)
   expect_equal(round(unname(res$estimate), 2), 0.95)
   # F for subjects = MSB / MSE = 2098.54 / 57.11
   expect_equal(round(unname(res$statistic), 1), round(2098.5375 / (399.8 / 7), 1))
@@ -73,8 +73,22 @@ test_that("one-sided alternatives give one-sided intervals consistent with the t
                        null.value = res$conf.int[[1]], alternative = "greater")
   expect_equal(at_bound$p.value, 0.05, tolerance = 1e-6)
 
-  less <- icc_test(col.names = sf_cols, data = sf_wide, alternative = "less")
+  less <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0.9,
+                   alternative = "less")
   expect_equal(less$conf.int[1], -Inf)
+})
+
+test_that("by default there is no test and the interval is two-sided", {
+  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  expect_null(res$statistic)
+  expect_null(res$parameter)
+  expect_null(res$p.value)
+  expect_null(res$null.value)
+  expect_equal(res$alternative, "two.sided")
+  expect_output(print(res), "95 percent confidence interval")
+  # a one-sided alternative without a null value still gives a two-sided interval
+  g <- icc_test(col.names = sf_cols, data = sf_wide, alternative = "greater")
+  expect_equal(g$conf.int, res$conf.int)
 })
 
 test_that("a two-sided test equals twice the smaller one-sided p-value", {
@@ -92,13 +106,13 @@ test_that("conf.level passed as a variable is stored evaluated", {
   res <- icc_test(col.names = sf_cols, data = sf_wide, conf.level = cl)
   expect_equal(attr(res$conf.int, "conf.level"), 0.9)
   expect_equal(res$settings$conf.level, 0.9)
-  expect_match(summary(res)$text, "90% CI")
+  expect_match(summary(res)$text, "90% compatibility interval")
 })
 
 # Standard errors ----------------------------------------------------------------------------
 
 test_that("stderr is reported on the ICC and z scales", {
-  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  res <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0)
   expect_named(res$stderr, c("ICC", "z"))
   # ICC(C,1) = (F - 1) / (F + k - 1) with F = exp(2 z): d rho / d z = 2 k F / (F + k - 1)^2
   k <- 4
@@ -110,9 +124,12 @@ test_that("stderr is reported on the ICC and z scales", {
 })
 
 test_that("se_method changes stderr but not the F interval or test", {
-  infl <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "influence")
-  jack <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "jackknife")
-  norm <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "normal")
+  infl <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "influence",
+                   null.value = 0)
+  jack <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "jackknife",
+                   null.value = 0)
+  norm <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "normal",
+                   null.value = 0)
   expect_false(isTRUE(all.equal(infl$stderr, jack$stderr)))
   expect_equal(infl$conf.int, jack$conf.int)
   expect_equal(infl$p.value, norm$p.value)
@@ -173,7 +190,8 @@ test_that("missing data need REML, which warns and reports observed-data df", {
   w <- sf_wide
   w$J2[1] <- NA
   expect_error(icc_test(col.names = sf_cols, data = w), "method = \"reml\"")
-  expect_warning(res <- icc_test(col.names = sf_cols, data = w, method = "reml"),
+  expect_warning(res <- icc_test(col.names = sf_cols, data = w, method = "reml",
+                                 null.value = 0),
                  "4.2% of subject-by-item cells are missing")
   expect_equal(unname(res$parameter), c(5, 23 - 6 - 4 + 1))
   expect_match(summary(res)$text, "1 of 24 subject-by-item cells missing")
@@ -192,7 +210,7 @@ test_that("REML on complete data matches ANOVA", {
 test_that("bootstrap results omit the statistic and report replicates", {
   set.seed(123)
   res <- icc_test(col.names = c("t1", "t2"), data = weir_a, boot = TRUE,
-                  boot_ci = "perc", replicates = 200)
+                  boot_ci = "perc", replicates = 200, null.value = 0)
   expect_null(res$statistic)
   expect_null(res$parameter)
   expect_named(res$stderr, c("ICC", "z", "boot"))
@@ -207,7 +225,8 @@ test_that("each bootstrap interval type runs and respects the parameter bounds",
   for (type in c("bca", "stud", "perc", "basic")) {
     set.seed(7)
     res <- icc_test(col.names = sf_cols, data = sf_wide, boot = TRUE,
-                    boot_ci = type, replicates = 199, alternative = "greater")
+                    boot_ci = type, replicates = 199, null.value = 0,
+                    alternative = "greater")
     expect_equal(res$conf.int[2], 1)
     expect_gte(res$conf.int[1], -1 / 3)
     expect_true(res$p.value >= 0 && res$p.value <= 1)
@@ -277,9 +296,10 @@ test_that("requesting the studentized bootstrap with REML warns", {
 # Methods ------------------------------------------------------------------------------------------
 
 test_that("summary describes the result in words", {
-  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  res <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0)
   s <- summary(res)
   expect_s3_class(s, "summary.reli_htest")
+  expect_equal(s$style, "hypothesis")
   expect_match(s$text, "statistically significant")
   expect_match(s$text, "Shrout & Fleiss ICC\\(3,1\\)")
   expect_match(s$text, "excluding systematic differences between items")
@@ -299,6 +319,44 @@ test_that("summary words one-sided intervals as bounds", {
                   alternative = "greater")
   expect_match(summary(res)$text, "95% lower bound")
   expect_match(summary(res)$text, "greater than 0.5")
+})
+
+test_that("summary style 'auto' follows whether a test was requested", {
+  est <- summary(icc_test(col.names = sf_cols, data = sf_wide))
+  expect_equal(est$style, "estimation")
+  expect_null(est$s.value)
+  expect_match(est$text, "95% compatibility interval")
+  expect_match(est$text, "F-based interval is exact")
+  expect_no_match(est$text, "significant|reject|alpha|F test")
+
+  expect_message(fallback <- summary(icc_test(col.names = sf_cols, data = sf_wide),
+                                     style = "hypothesis"),
+                 "No test was requested")
+  expect_equal(fallback$style, "estimation")
+})
+
+test_that("estimation style reports the S-value for the tested hypothesis", {
+  res <- icc_test(col.names = sf_cols, data = sf_wide, null.value = 0.5,
+                  alternative = "greater")
+  s <- summary(res, style = "estimation")
+  expect_equal(s$s.value, -log2(res$p.value))
+  expect_match(s$text, "95% lower compatibility bound")
+  expect_match(s$text, "hypothesis that the true ICC\\(C,1\\) is at most 0.5")
+  expect_match(s$text, "3 heads in a row from 3 tosses")
+  expect_no_match(s$text, "significant|reject")
+
+  two <- summary(icc_test(col.names = sf_cols, data = sf_wide, null.value = 0.7),
+                 style = "estimation")
+  expect_match(two$text, "is equal to 0.7")
+  expect_match(two$text, "less surprising than a single head")
+})
+
+test_that("summary paragraphs are stable", {
+  expect_snapshot(summary(icc_test(col.names = sf_cols, data = sf_wide)))
+  res <- icc_test(col.names = sf_cols, data = sf_wide, type = "agreement",
+                  null.value = 0.5, alternative = "greater")
+  expect_snapshot(summary(res))
+  expect_snapshot(summary(res, style = "estimation"))
 })
 
 test_that("plot and check return plots", {

@@ -31,9 +31,12 @@
 #'   the analysis of variance and requires complete, balanced data. `"reml"`
 #'   fits a linear mixed model and allows missing measurements.
 #' @param conf.level Confidence level of the interval (default 0.95).
-#' @param null.value The ICC under the null hypothesis (default 0).
-#' @param alternative `"two.sided"` (default), `"greater"`, or `"less"`. A
-#'   one-sided alternative gives a one-sided interval (see Details).
+#' @param null.value The ICC under the null hypothesis. The default, `NULL`,
+#'   gives the estimate and interval without a test.
+#' @param alternative `"two.sided"` (default), `"greater"`, or `"less"`. Used
+#'   only when `null.value` is given (without a test the interval is
+#'   two-sided). A one-sided alternative gives a one-sided interval (see
+#'   Details).
 #' @param boot If `TRUE`, use a nonparametric bootstrap that resamples
 #'   subjects for the interval and p-value. Default `FALSE`.
 #' @param boot_ci Bootstrap interval type: `"auto"` (default), `"perc"`
@@ -87,8 +90,11 @@
 #' is the one-sided `conf.level` lower bound; with `"less"` it is
 #' `[-Inf, U]`.
 #'
-#' **Tests** are the F tests of McGraw and Wong (1996, Table 8) of
-#' \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency
+#' **Tests.** By default (`null.value = NULL`) no test is done: the result is
+#' the estimate and a two-sided interval. Testing against an ICC of 0, the
+#' default in many programs, is rarely informative for reliability. When
+#' `null.value` is given, the tests are the F tests of McGraw and Wong (1996,
+#' Table 8) of \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency
 #' forms, and invert exactly to the interval. For the agreement forms the
 #' test and the interval are separate Satterthwaite approximations (degrees
 #' of freedom evaluated at \eqn{\rho_0} for the test and at the estimate for
@@ -242,7 +248,7 @@ icc_test <- function(x = NULL,
                      unit = c("single", "average"),
                      method = c("anova", "reml"),
                      conf.level = 0.95,
-                     null.value = 0,
+                     null.value = NULL,
                      alternative = c("two.sided", "greater", "less"),
                      boot = FALSE,
                      boot_ci = c("auto", "perc", "bca", "stud", "basic"),
@@ -266,6 +272,10 @@ icc_test <- function(x = NULL,
   .check_conf_level(conf.level)
   .check_boot_args(boot, replicates)
   boot_ci <- .resolve_boot_ci(boot, boot_ci, method, se_method)
+  # without a test the interval is two-sided
+  if (is.null(null.value)) {
+    alternative <- "two.sided"
+  }
 
   prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
                         id = id, col.names = col.names)
@@ -286,7 +296,11 @@ icc_test <- function(x = NULL,
   stderr <- c(ICC = abs(drho_dz) * se_z, z = se_z)
 
   if (!boot) {
-    test <- .icc_ftest(fit, form, null.value, alternative)
+    test <- if (is.null(null.value)) {
+      list(statistic = NULL, parameter = NULL, p.value = NULL)
+    } else {
+      .icc_ftest(fit, form, null.value, alternative)
+    }
     conf.int <- .icc_ci(fit, form, conf.level, alternative)
     boot_info <- NULL
   } else {
@@ -309,8 +323,9 @@ icc_test <- function(x = NULL,
                                back = function(z) .icc_z_inv(z, form, k_z),
                                bounds = bounds)
     test <- list(statistic = NULL, parameter = NULL,
-                 p.value = .boot_pvalue(bo, boot_ci, null.value, alternative,
-                                        fwd = function(r) .icc_z(r, form, k_z)))
+                 p.value = if (is.null(null.value)) NULL else
+                   .boot_pvalue(bo, boot_ci, null.value, alternative,
+                                fwd = function(r) .icc_z(r, form, k_z)))
     boot_info <- list(boot_ci = boot_ci,
                       replicates = replicates,
                       n_used = nrow(bo$t),
@@ -338,7 +353,8 @@ icc_test <- function(x = NULL,
                  conf.int = conf.int,
                  estimate = stats::setNames(estimate, label),
                  stderr = stderr,
-                 null.value = c(ICC = null.value),
+                 null.value = if (is.null(null.value)) NULL else
+                   c(ICC = null.value),
                  alternative = alternative,
                  method = .icc_method_text(form, method, boot, boot_ci),
                  data.name = prep$data.name,
@@ -391,11 +407,22 @@ icc_test <- function(x = NULL,
 #' Resolve `boot_ci = "auto"` and check the studentized bootstrap settings
 #'
 #' "auto" was chosen from simulations: studentized (with a resample-based SE)
-#' for complete data, percentile for REML fits.
+#' for complete data, percentile for REML fits. With `agreement_bca = TRUE`
+#' (two-way agreement error statistics in `reli_err_test()`), complete data
+#' use BCa, which covered best for those statistics.
 #' @noRd
-.resolve_boot_ci <- function(boot, boot_ci, method, se_method) {
+.resolve_boot_ci <- function(boot, boot_ci, method, se_method,
+                             agreement_bca = FALSE) {
   if (boot_ci == "auto") {
-    boot_ci <- if (method == "anova" && se_method != "normal") "stud" else "perc"
+    boot_ci <- if (method == "reml") {
+      "perc"
+    } else if (agreement_bca) {
+      "bca"
+    } else if (se_method != "normal") {
+      "stud"
+    } else {
+      "perc"
+    }
   }
   if (boot && boot_ci == "stud") {
     if (se_method == "normal") {
@@ -440,6 +467,9 @@ icc_test <- function(x = NULL,
 
 .check_icc_null <- function(null.value, form, k) {
   lower <- if (.icc_is_average(form)) -Inf else -1 / (k - 1)
+  if (is.null(null.value)) {
+    return(invisible())
+  }
   if (!is.numeric(null.value) || length(null.value) != 1 ||
       is.na(null.value) || null.value >= 1 || null.value <= lower) {
     stop("'null.value' must be a single number below 1",

@@ -6,18 +6,47 @@
 #' `plot()` shows the data, and `check()` gives model diagnostics.
 #'
 #' @param x,object An object of class \code{reli_htest}.
+#' @param style How `summary()` words the result: `"auto"` (default),
+#'   `"hypothesis"`, or `"estimation"`. `"auto"` uses `"hypothesis"` when the
+#'   result has a p-value (a `null.value` was given) and `"estimation"`
+#'   otherwise. See Details.
 #' @param ... Not used.
 #'
 #' @details
-#' `summary()` describes the estimate, its interval and (when a test was
-#' requested) the test decision, what was estimated, the design, and how the
-#' inference was done. It does not attach qualitative labels such as "good"
-#' or "excellent" to an ICC; see [icc_test()] for why.
+#' `summary()` describes the estimate and its interval, what was estimated,
+#' the design, and how the inference was done, in one of two styles:
+#'
+#' - **`"hypothesis"`** (Neyman-Pearson; as in the TOSTER package): the test
+#'   decision at \eqn{\alpha = 1 -} `conf.level`, i.e. whether the null
+#'   hypothesis can be rejected. Requires a p-value; without one, `summary()`
+#'   falls back to `"estimation"` with a message.
+#' - **`"estimation"`** (following Greenland and colleagues): the interval is
+#'   described as a compatibility interval, the range of values most
+#'   compatible with the data under the model, with no decision and no
+#'   \eqn{\alpha}. If there is a p-value, it is converted to an S-value
+#'   (surprisal), \eqn{s = -\log_2 p}: the bits of information the data
+#'   provide against the tested hypothesis, comparable to the surprise of
+#'   getting s heads in a row from s tosses of a fair coin.
+#'
+#' Qualitative labels such as "good" or "excellent" are never attached to an
+#' ICC; see [icc_test()] for why.
+#'
+#' @references
+#' Greenland, S. (2019). Valid p-values behave exactly as they should: Some
+#' misleading criticisms of p-values and their resolution with S-values. The
+#' American Statistician, 73(sup1), 106-114.
+#' \doi{10.1080/00031305.2018.1529625}
+#'
+#' Rafi, Z., & Greenland, S. (2020). Semantic and cognitive tools to aid
+#' statistical science: replace confidence and significance by compatibility
+#' and surprise. BMC Medical Research Methodology, 20, 244.
+#' \doi{10.1186/s12874-020-01105-9}
 #'
 #' @return
 #' \describe{
 #'   \item{\code{summary}}{An object of class \code{summary.reli_htest}: a
-#'   list with the description in `text` and the parts used to build it. It
+#'   list with the description in `text`, the `style` used, the S-value
+#'   (`s.value`, when there is a p-value) and the parts used to build it. It
 #'   prints as a paragraph.}
 #'   \item{\code{plot}}{A ggplot2 plot of each subject's measurements across
 #'   the items.}
@@ -32,22 +61,41 @@
 #' summary(res)
 #' plot(res)
 #'
+#' # A test against a threshold, in both styles
+#' res2 <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf,
+#'                  null.value = 0.5, alternative = "greater")
+#' summary(res2)
+#' summary(res2, style = "estimation")
+#'
 #' @name reli_htest-methods
 NULL
 
 #' @rdname reli_htest-methods
 #' @method summary reli_htest
 #' @export
-summary.reli_htest <- function(object, ...) {
+summary.reli_htest <- function(object,
+                               style = c("auto", "hypothesis", "estimation"),
+                               ...) {
+  style <- match.arg(style)
   s <- object$settings
+  tested <- !is.null(object$p.value)
+  if (style == "auto") {
+    style <- if (tested) "hypothesis" else "estimation"
+  }
+  if (style == "hypothesis" && !tested) {
+    message("No test was requested (null.value = NULL); ",
+            "describing the result in the estimation style.")
+    style <- "estimation"
+  }
   alpha <- 1 - s$conf.level
-  estimate_text <- paste0(names(object$estimate), " = ",
-                          .fmt_num(unname(object$estimate)), ", ",
-                          .fmt_interval(object$conf.int, object$alternative))
+  s_value <- if (tested) -log2(object$p.value) else NULL
 
-  if (is.null(object$p.value)) {
-    result_text <- paste0("The estimate was ", estimate_text, ".")
+  if (style == "estimation") {
+    result_text <- .describe_estimation(object, s_value)
   } else {
+    estimate_text <- paste0(names(object$estimate), " = ",
+                            .fmt_num(unname(object$estimate)), ", ",
+                            .fmt_interval(object$conf.int, object$alternative))
     significant <- object$p.value < alpha
     stat_text <- if (!is.null(object$statistic)) {
       paste0(names(object$statistic), "(",
@@ -75,9 +123,11 @@ summary.reli_htest <- function(object, ...) {
                 .describe_inference(object))
 
   structure(list(text = text,
+                 style = style,
                  estimate = object$estimate,
                  conf.int = object$conf.int,
                  p.value = object$p.value,
+                 s.value = s_value,
                  settings = s),
             class = "summary.reli_htest")
 }
@@ -116,6 +166,50 @@ check.reli_htest <- function(x, ...) {
 }
 
 # Description helpers ------------------------------------------------------------
+
+# Estimation style: compatibility interval and, with a p-value, its S-value.
+.describe_estimation <- function(object, s_value) {
+  name <- names(object$estimate)
+  ci <- object$conf.int
+  level <- paste0(format(100 * attr(ci, "conf.level")), "%")
+  interval <- switch(object$alternative,
+                     two.sided = paste0(level, " compatibility interval [",
+                                        .fmt_num(ci[1]), ", ",
+                                        .fmt_num(ci[2]), "]"),
+                     greater = paste0(level, " lower compatibility bound ",
+                                      .fmt_num(ci[1])),
+                     less = paste0(level, " upper compatibility bound ",
+                                   .fmt_num(ci[2])))
+  values <- switch(object$alternative,
+                   two.sided = "Values in this interval",
+                   greater = "Values above this bound",
+                   less = "Values below this bound")
+  text <- paste0("The estimated ", name, " was ",
+                 .fmt_num(unname(object$estimate)), " (", interval, "). ",
+                 values, " are the most compatible with the data, given the ",
+                 "model and its assumptions.")
+  if (is.null(s_value)) {
+    return(text)
+  }
+  null <- format(unname(object$null.value))
+  hypothesis <- switch(object$alternative,
+                       two.sided = paste0("equal to ", null),
+                       greater = paste0("at most ", null),
+                       less = paste0("at least ", null))
+  heads <- round(s_value)
+  coin <- if (heads < 1) {
+    "less surprising than a single head from one toss of a fair coin"
+  } else {
+    paste0("about as surprising as getting ", heads,
+           if (heads == 1) " head" else " heads in a row", " from ", heads,
+           " toss", if (heads == 1) "" else "es", " of a fair coin")
+  }
+  approx <- if (isTRUE(object$settings$boot)) " (approximate, from the bootstrap)" else ""
+  paste0(text, " Against the hypothesis that the true ", name, " is ",
+         hypothesis, ", ", .fmt_p(object$p.value), approx,
+         ", an S-value of ", .fmt_num(s_value), " bits of information ",
+         "(S = -log2 p): ", coin, ".")
+}
 
 .describe_estimand <- function(object) {
   s <- object$settings
@@ -204,15 +298,19 @@ check.reli_htest <- function(x, ...) {
   if (identical(s$statistic, "error")) {
     return(.describe_error_inference(object, tested))
   }
+  what <- if (tested) "The interval and F test" else "The F-based interval"
   if (!fit$balanced) {
-    return(paste0("The interval and F test (McGraw & Wong, 1996) use ",
-                  "degrees of freedom based on the observed data; with ",
-                  "missing data they are approximate and may be liberal."))
+    return(paste0(what, " (McGraw & Wong, 1996) use",
+                  if (tested) "" else "s",
+                  " degrees of freedom based on the observed data; with ",
+                  "missing data ", if (tested) "they are" else "it is",
+                  " approximate and may be liberal."))
   }
   if (s$form %in% c("1", "k", "C1", "Ck")) {
-    "The interval and F test are exact (McGraw & Wong, 1996)."
+    paste0(what, if (tested) " are" else " is", " exact (McGraw & Wong, 1996).")
   } else {
-    "The interval and F test use Satterthwaite approximations (McGraw & Wong, 1996)."
+    paste0(what, if (tested) " use" else " uses",
+           " Satterthwaite approximations (McGraw & Wong, 1996).")
   }
 }
 
@@ -231,10 +329,14 @@ check.reli_htest <- function(x, ...) {
   } else {
     " are exact under normality (chi-square distribution of the error variance)"
   }
+  if (!tested) {
+    # singular subject: "The interval uses ..." / "is exact ..."
+    how <- sub("^ use ", " uses ", sub("^ are ", " is ", how))
+  }
   if (!fit$balanced) {
     how <- paste0(how, ", with degrees of freedom based on the observed ",
-                  "data; with missing data they are approximate and may be ",
-                  "liberal")
+                  "data; with missing data ", if (tested) "they are" else
+                    "it is", " approximate and may be liberal")
   }
   paste0(what, how, ".")
 }

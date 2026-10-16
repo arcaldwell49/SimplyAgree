@@ -67,9 +67,10 @@ when \code{null.value} is given; without a test the interval is two-sided.}
 subjects for the interval and p-value. Default \code{FALSE}.}
 
 \item{boot_ci}{Bootstrap interval type: \code{"auto"} (default), \code{"perc"}
-(percentile), \code{"bca"}, \code{"stud"} (studentized), or \code{"basic"}. \code{"auto"}
-uses \code{"stud"} for \code{method = "anova"} and \code{"perc"} for \code{method = "reml"}
-(and \code{"perc"} when \code{se_method = "normal"}); see Details. Used only when
+(percentile), \code{"bca"}, \code{"stud"} (studentized), or \code{"basic"}. With
+\code{method = "anova"}, \code{"auto"} uses \code{"bca"} for the two-way agreement
+statistics and \code{"stud"} otherwise (\code{"perc"} when \code{se_method = "normal"});
+with \code{method = "reml"} it uses \code{"perc"}. See Details. Used only when
 \code{boot = TRUE}.}
 
 \item{replicates}{Number of bootstrap replicates (default 1999).}
@@ -164,6 +165,29 @@ including the hybrid step for the two-way agreement statistics (the item
 mean square of each replicate is multiplied by an independent
 \eqn{\chi^2_{k-1}/(k-1)} draw). The studentized interval works on the log
 scale. The p-value inverts the interval and is approximate.
+
+In simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9, normal or
+skewed and heavy-tailed data, complete data), the analytic intervals
+covered 0.93 to 0.97 with normal data for the consistency and one-way
+statistics, but only 0.79 to 0.90 with non-normal data (the
+\eqn{\chi^2} interval for a variance is sensitive to heavy tails). The
+studentized bootstrap was the best method for the consistency SEM, the SEP
+and the one-way SEM (0.89 to 0.96 throughout), and BCa for the agreement
+SEM and SEP (mean 0.91), hence \code{boot_ci = "auto"}. The percentile
+interval was too narrow with 10 subjects (as low as 0.54). For the SEE the
+analytic interval was best with normal data (0.93 to 0.97); no bootstrap
+interval was reliable near an ICC of 0.5, where the SEE hardly changes
+with the ICC.
+
+\strong{Agreement statistics with few items.} The agreement SEM and SEP
+include the variance between items, which is estimated from only k - 1
+degrees of freedom. When it is a large part of the error and k is small,
+every interval under-covers: with 3 trials and an item variance about
+as large as the error variance (ICC 0.9), the Satterthwaite interval
+covered 0.81 to 0.91 with normal data and BCa 0.91 to 0.95 (0.80 with 30
+subjects and skewed data). Resampling subjects without the hybrid step
+covered only 0.39 to 0.63 in those settings. More items help more than
+more subjects.
 
 \strong{Minimal detectable change.} The minimal detectable change (MDC),
 smallest real difference, or repeatability coefficient is a scaled SEM:

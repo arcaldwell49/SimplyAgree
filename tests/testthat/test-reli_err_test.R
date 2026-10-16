@@ -334,11 +334,44 @@ test_that("summary describes error statistics in words", {
 
   e <- summary(reli_err_test(col.names = wcols, data = weir_a, stat = "SEP",
                              type = "agreement"))
-  expect_match(e$text, "^The estimate was SEP = ")
-  expect_match(e$text, "95% CI")
+  expect_match(e$text, "^The estimated SEP was ")
+  expect_match(e$text, "95% compatibility interval")
   expect_match(e$text, "ICC\\(A,1\\)")
-  expect_match(e$text, "delta method")
+  expect_match(e$text, "The interval uses the delta method")
   expect_match(e$text, "including systematic differences")
+})
+
+test_that("summary styles for error statistics", {
+  res <- reli_err_test(col.names = wcols, data = weir_a, null.value = 10)
+  est <- summary(res, style = "estimation")
+  expect_match(est$text, "95% upper compatibility bound")
+  expect_match(est$text, "hypothesis that the true SEM is at least 10")
+  expect_equal(est$s.value, -log2(res$p.value))
+  set.seed(4)
+  b <- reli_err_test(col.names = wcols, data = weir_a, null.value = 10,
+                     boot = TRUE, replicates = 100)
+  expect_match(summary(b, style = "estimation")$text, "approximate, from the bootstrap")
+  expect_snapshot(summary(res))
+  expect_snapshot(est)
+  expect_snapshot(summary(reli_err_test(col.names = wcols, data = weir_a,
+                                        stat = "SEE")))
+})
+
+test_that("boot_ci = 'auto' uses BCa for the agreement statistics", {
+  set.seed(2)
+  a <- reli_err_test(col.names = sf_cols, data = sf_wide, type = "agreement",
+                     boot = TRUE, replicates = 60)
+  expect_equal(a$settings$boot_ci, "bca")
+  set.seed(2)
+  c1 <- reli_err_test(col.names = sf_cols, data = sf_wide, boot = TRUE,
+                      replicates = 60)
+  expect_equal(c1$settings$boot_ci, "stud")
+  w <- sf_wide
+  w$J2[1] <- NA
+  set.seed(2)
+  r <- reli_err_test(col.names = sf_cols, data = w, type = "agreement",
+                     method = "reml", boot = TRUE, replicates = 20)
+  expect_equal(r$settings$boot_ci, "perc")
 })
 
 test_that("plot and check work for error results", {

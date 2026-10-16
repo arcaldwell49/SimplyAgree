@@ -8,7 +8,7 @@
 \alias{check.reli_htest}
 \title{Methods for reli_htest objects}
 \usage{
-\method{summary}{reli_htest}(object, ...)
+\method{summary}{reli_htest}(object, style = c("auto", "hypothesis", "estimation"), ...)
 
 \method{print}{summary.reli_htest}(x, ...)
 
@@ -17,6 +17,11 @@
 \method{check}{reli_htest}(x, ...)
 }
 \arguments{
+\item{style}{How \code{summary()} words the result: \code{"auto"} (default),
+\code{"hypothesis"}, or \code{"estimation"}. \code{"auto"} uses \code{"hypothesis"} when the
+result has a p-value (a \code{null.value} was given) and \code{"estimation"}
+otherwise. See Details.}
+
 \item{...}{Not used.}
 
 \item{x, object}{An object of class \code{reli_htest}.}
@@ -24,7 +29,8 @@
 \value{
 \describe{
 \item{\code{summary}}{An object of class \code{summary.reli_htest}: a
-list with the description in \code{text} and the parts used to build it. It
+list with the description in \code{text}, the \code{style} used, the S-value
+(\code{s.value}, when there is a p-value) and the parts used to build it. It
 prints as a paragraph.}
 \item{\code{plot}}{A ggplot2 plot of each subject's measurements across
 the items.}
@@ -39,10 +45,24 @@ print as standard
 \code{plot()} shows the data, and \code{check()} gives model diagnostics.
 }
 \details{
-\code{summary()} describes the estimate, its interval and (when a test was
-requested) the test decision, what was estimated, the design, and how the
-inference was done. It does not attach qualitative labels such as "good"
-or "excellent" to an ICC; see \code{\link[=icc_test]{icc_test()}} for why.
+\code{summary()} describes the estimate and its interval, what was estimated,
+the design, and how the inference was done, in one of two styles:
+\itemize{
+\item \strong{\code{"hypothesis"}} (Neyman-Pearson; as in the TOSTER package): the test
+decision at \eqn{\alpha = 1 -} \code{conf.level}, i.e. whether the null
+hypothesis can be rejected. Requires a p-value; without one, \code{summary()}
+falls back to \code{"estimation"} with a message.
+\item \strong{\code{"estimation"}} (following Greenland and colleagues): the interval is
+described as a compatibility interval, the range of values most
+compatible with the data under the model, with no decision and no
+\eqn{\alpha}. If there is a p-value, it is converted to an S-value
+(surprisal), \eqn{s = -\log_2 p}: the bits of information the data
+provide against the tested hypothesis, comparable to the surprise of
+getting s heads in a row from s tosses of a fair coin.
+}
+
+Qualitative labels such as "good" or "excellent" are never attached to an
+ICC; see \code{\link[=icc_test]{icc_test()}} for why.
 }
 \examples{
 sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
@@ -51,4 +71,21 @@ res <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
 summary(res)
 plot(res)
 
+# A test against a threshold, in both styles
+res2 <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf,
+                 null.value = 0.5, alternative = "greater")
+summary(res2)
+summary(res2, style = "estimation")
+
+}
+\references{
+Greenland, S. (2019). Valid p-values behave exactly as they should: Some
+misleading criticisms of p-values and their resolution with S-values. The
+American Statistician, 73(sup1), 106-114.
+\doi{10.1080/00031305.2018.1529625}
+
+Rafi, Z., & Greenland, S. (2020). Semantic and cognitive tools to aid
+statistical science: replace confidence and significance by compatibility
+and surprise. BMC Medical Research Methodology, 20, 244.
+\doi{10.1186/s12874-020-01105-9}
 }

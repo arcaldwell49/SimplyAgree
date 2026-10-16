@@ -1,7 +1,8 @@
 # Reliability Suite Redesign
 
-Branch: `reli-update` · Status: phases 1–2 done and committed (engine,
-`icc_test()` + methods); phases 3–7 pending · Last updated: 2026-10-16
+Branch: `reli-update` · Status: phases 1–3 done (engine, `icc_test()`,
+`reli_err_test()` raw scale, methods); phases 4–7 pending · Last updated:
+2026-10-16
 
 ## 0. Handoff: current state and next steps
 
@@ -16,8 +17,9 @@ are current.
 |---|---|
 | Engine (data prep, ANOVA/REML fits, ICC/SEM/SD helpers, CIs and tests, SEs, bootstrap) | `R/reli_engine.R` (internal, `@noRd`) |
 | `icc_test()` | `R/icc_test.R`, `man/icc_test.Rd` |
+| `reli_err_test()` (SEM/SEE/SEP, raw scale) | `R/reli_err_test.R`, `man/reli_err_test.Rd` |
 | `summary()`, `plot()`, `check()` for `reli_htest` | `R/methods.reli_htest.R`, `man/reli_htest-methods.Rd` |
-| Tests | `tests/testthat/test-reli_engine.R`, `tests/testthat/test-icc_test.R` (296 passing on 2026-10-16) |
+| Tests | `tests/testthat/test-reli_engine.R`, `test-icc_test.R`, `test-reli_err_test.R`, snapshots in `tests/testthat/_snaps/` (all passing on 2026-10-16) |
 | Simulation scripts behind every table here | `references/general/reli_sims/` (run from the package root) |
 | pkgdown reference entry | `_pkgdown.yml`, "Reliability" section |
 | Legacy functions (not yet touched) | `R/reli_stats.R`, `R/reli_functions.R`, `R/methods.simple_reli.R`, `R/jmvreli.b.R` |
@@ -35,7 +37,7 @@ icc_test(x = NULL, data = NULL, measure = NULL, item = NULL, id = NULL,
          col.names = NULL,
          model = c("twoway", "oneway"), type = c("consistency", "agreement"),
          unit = c("single", "average"), method = c("anova", "reml"),
-         conf.level = 0.95, null.value = 0,
+         conf.level = 0.95, null.value = NULL,
          alternative = c("two.sided", "greater", "less"),
          boot = FALSE, boot_ci = c("auto", "perc", "bca", "stud", "basic"),
          replicates = 1999, se_method = c("jackknife", "influence", "normal"))
@@ -75,31 +77,32 @@ bootstrapping), `parameter`, `p.value`, `conf.int`, `estimate`, `stderr`
   not deprecated, with their ICC CIs corrected to two-sided.** Sections 6,
   7, 11.
 
+- **`null.value = NULL` default in both functions** (estimate + two-sided
+  interval; a test only against a stated null). `summary(style = )`:
+  hypothesis (Neyman–Pearson) vs estimation (Greenland: compatibility
+  intervals, S-values); `"auto"` picks by whether there is a p-value.
+  Section 9, phase 3.
+- **`reli_err_test()`:** SEM χ² intervals, SEE/SEP log-Wald (normal-theory
+  delta); hybrid bootstrap for agreement statistics; `boot_ci = "auto"` =
+  `bca` (agreement) / `stud` (otherwise) for ANOVA, `perc` for REML.
+  Section 9, phase 3.
+
 ### Next steps
 
-**Phase 3: `reli_err_test()` (raw scale).** Spec in Section 6.2. Building
-blocks already in the engine: `.sem_var()` (error variance and df for the
-three SEM rows), `.sd_total()` (matched SD), `.var_ci()`, `.var_test()`,
-`.satterthwaite_df()`, `.delta_se()`, `.reli_boot()` and the bootstrap
-interval and p-value helpers. First tasks:
+**Phase 4: `reli_err_test(scale = c("raw", "log", "mean"))`.** Spec in
+Section 6.2 ("`scale`"). `"log"`: fit the engine on `log(values)` and
+report 100 × the log-scale statistic (sympercents); SEM rows keep χ²
+inference; error on values ≤ 0. `"mean"`: 100 × statistic / grand mean,
+delta method including Var(ȳ) (Section 6.2 formulas, verified by
+simulation in Section 12); bootstrap as now. `null.value` on the reported
+scale; estimate names such as `"SEM (sympercent)"`; summary wording;
+`@concept coefficient of variation`. Consider a coverage check for
+`"mean"` (the delta method there is new).
 
-1. Write `reli_err_test()` with the shared input interface, `stat`
-   (SEM/SEE/SEP), `model`/`type`, χ² inference for the SEM rows and delta
-   method for SEE/SEP, `null.value` tests (default `alternative = "less"`),
-   and `se_method`/`boot` consistent with `icc_test()`.
-2. Decide how the hybrid bootstrap applies to the agreement SEM (its
-   variance includes MSJ, so the same multiplier should apply) and confirm
-   by simulation before adopting.
-3. Generalise `summary.reli_htest()`: `.describe_estimand()` and
-   `.describe_inference()` are ICC-specific at the moment
-   (`settings$statistic == "icc"`).
-4. Tests against Weir (2005): SEM √MSE 7.6 (data set A) and 2.2 (C); matched
-   SEE 7.35 and SEP 10.54 (A); see Section 8 for the data and targets.
-
-Then phase 4 (`scale = "log"`/`"mean"`), phase 5 (`power_icc()`,
-`precision_icc()`), phase 6 (supersede and rewire `reli_stats()`,
-`reli_aov()`, jamovi; NEWS; vignette), phase 7 (check and coverage).
-Section 9.
+Then phase 5 (`power_icc()`, `precision_icc()`), phase 6 (supersede and
+rewire `reli_stats()`, `reli_aov()`, jamovi; NEWS, including the
+`icc_test()` null default being new; vignette), phase 7 (check and
+coverage). Section 9.
 
 ### Open TODOs
 
@@ -1193,6 +1196,133 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      (A), 11.15 (C); matched SEE 7.35 and SEP 10.54 (A). (His SS table is
      rounded: error SS is 399.75 in the data, not 399.8; tests compute the
      mean squares from the data.)
+   - **Error-statistic coverage study (2026-10-16)**, k = 3, σ²_id = 1,
+     σ²_items = 0.1, σ²_e from ICC(C,1); ANOVA, complete data; 300 sims ×
+     499 replicates per cell (MC SE .013); non-normal = chi-square(3)
+     subject and item effects, t(5) errors; SEM_1 uses one-way data (a
+     random item effect in every cell). Script
+     `reli_sims/err_boot_coverage.R` (about 10 minutes on 10 cores).
+     Columns: `an` = analytic (χ² for SEM, log-Wald normal-theory delta for
+     SEE/SEP); `waldjk` = log-Wald with the jackknife SE (not an option,
+     recorded for information); bootstrap `perc`, `bca`, `stud` (jackknife
+     SE, log scale), all hybrid for the agreement rows; `subj` =
+     subject-only percentile.
+
+     **Pre-set criteria:** (1) hybrid ≥ subject-only − 0.02 in every cell
+     and ≥ .92 with normal data at n = 30; (2) keep `auto` = `stud` for
+     ANOVA if stud mean coverage ≥ perc mean − 0.01 and no n = 30 cell
+     below .88; (3) analytic SEE/SEP log-Wald ≥ .92 with normal data at
+     n = 30.
+
+     | stat | n | ICC | data | an | waldjk | perc | bca | stud | subj |
+     |---|---|---|---|---|---|---|---|---|---|
+     | SEM_C | 10 | .5 | normal | .953 | .943 | .823 | .897 | .947 | — |
+     | SEM_C | 30 | .5 | normal | .960 | .920 | .893 | .883 | .933 | — |
+     | SEM_C | 10 | .9 | normal | .943 | .940 | .793 | .827 | .937 | — |
+     | SEM_C | 30 | .9 | normal | .933 | .940 | .907 | .910 | .947 | — |
+     | SEM_C | 10 | .5 | non-normal | .867 | .853 | .720 | .757 | .907 | — |
+     | SEM_C | 30 | .5 | non-normal | .810 | .903 | .827 | .877 | .917 | — |
+     | SEM_C | 10 | .9 | non-normal | .847 | .870 | .707 | .740 | .893 | — |
+     | SEM_C | 30 | .9 | non-normal | .847 | .923 | .850 | .900 | .950 | — |
+     | SEM_A | 10 | .5 | normal | .963 | .947 | .947 | .967 | .937 | .870 |
+     | SEM_A | 30 | .5 | normal | .950 | .947 | .917 | .947 | .917 | .857 |
+     | SEM_A | 10 | .9 | normal | .910 | .867 | .870 | .950 | .903 | .627 |
+     | SEM_A | 30 | .9 | normal | .837 | .827 | .833 | .920 | .853 | .453 |
+     | SEM_A | 10 | .5 | non-normal | .873 | .880 | .877 | .910 | .903 | .763 |
+     | SEM_A | 30 | .5 | non-normal | .857 | .897 | .903 | .933 | .920 | .810 |
+     | SEM_A | 10 | .9 | non-normal | .840 | .853 | .853 | .897 | .887 | .550 |
+     | SEM_A | 30 | .9 | non-normal | .683 | .720 | .730 | .800 | .763 | .400 |
+     | SEM_1 | 10 | .5 | normal | .947 | .880 | .847 | .847 | .910 | — |
+     | SEM_1 | 30 | .5 | normal | .937 | .910 | .900 | .877 | .907 | — |
+     | SEM_1 | 10 | .9 | normal | .930 | .897 | .867 | .880 | .913 | — |
+     | SEM_1 | 30 | .9 | normal | .960 | .957 | .913 | .943 | .963 | — |
+     | SEM_1 | 10 | .5 | non-normal | .890 | .877 | .787 | .823 | .897 | — |
+     | SEM_1 | 30 | .5 | non-normal | .837 | .907 | .863 | .877 | .927 | — |
+     | SEM_1 | 10 | .9 | non-normal | .897 | .860 | .813 | .827 | .910 | — |
+     | SEM_1 | 30 | .9 | non-normal | .880 | .920 | .870 | .877 | .923 | — |
+     | SEE_C | 10 | .5 | normal | .966 | .965 | .680 | .737 | .845 | — |
+     | SEE_C | 30 | .5 | normal | .970 | .970 | .847 | .877 | .870 | — |
+     | SEE_C | 10 | .9 | normal | .933 | .953 | .737 | .793 | .937 | — |
+     | SEE_C | 30 | .9 | normal | .940 | .933 | .897 | .900 | .923 | — |
+     | SEE_C | 10 | .5 | non-normal | .900 | .934 | .543 | .638 | .861 | — |
+     | SEE_C | 30 | .5 | non-normal | .860 | .933 | .717 | .800 | .839 | — |
+     | SEE_C | 10 | .9 | non-normal | .857 | .872 | .627 | .687 | .902 | — |
+     | SEE_C | 30 | .9 | non-normal | .847 | .923 | .813 | .887 | .930 | — |
+     | SEP_C | 10 | .5 | normal | .943 | .940 | .757 | .837 | .933 | — |
+     | SEP_C | 30 | .5 | normal | .953 | .937 | .867 | .893 | .923 | — |
+     | SEP_C | 10 | .9 | normal | .937 | .943 | .773 | .800 | .930 | — |
+     | SEP_C | 30 | .9 | normal | .947 | .940 | .907 | .917 | .930 | — |
+     | SEP_C | 10 | .5 | non-normal | .803 | .850 | .637 | .700 | .907 | — |
+     | SEP_C | 30 | .5 | non-normal | .787 | .890 | .800 | .847 | .913 | — |
+     | SEP_C | 10 | .9 | non-normal | .837 | .873 | .653 | .713 | .890 | — |
+     | SEP_C | 30 | .9 | non-normal | .850 | .927 | .827 | .890 | .943 | — |
+     | SEP_A | 10 | .5 | normal | .950 | .957 | .930 | .973 | .937 | .833 |
+     | SEP_A | 30 | .5 | normal | .947 | .950 | .930 | .943 | .907 | .857 |
+     | SEP_A | 10 | .9 | normal | .853 | .860 | .850 | .950 | .903 | .583 |
+     | SEP_A | 30 | .9 | normal | .813 | .833 | .830 | .913 | .853 | .440 |
+     | SEP_A | 10 | .5 | non-normal | .817 | .853 | .843 | .927 | .900 | .717 |
+     | SEP_A | 30 | .5 | non-normal | .810 | .890 | .867 | .913 | .903 | .777 |
+     | SEP_A | 10 | .9 | non-normal | .830 | .857 | .840 | .890 | .880 | .537 |
+     | SEP_A | 30 | .9 | non-normal | .653 | .717 | .713 | .797 | .767 | .390 |
+
+     Mean coverage (an / waldjk / perc / bca / stud): SEM_C .895 / .912 /
+     .815 / .849 / .929; SEM_A .864 / .867 / .866 / .915 / .885; SEM_1
+     .910 / .901 / .858 / .869 / .919; SEE_C .909 / .936 / .733 / .790 /
+     .888; SEP_C .882 / .912 / .777 / .825 / .921; SEP_A .834 / .865 / .850
+     / .913 / .881. Subject-only percentile: SEM_A .666, SEP_A .642.
+
+     Against the criteria:
+     - (1) Hybrid vs subject-only: first part met everywhere (subject-only
+       collapses to .39–.87, worst at ICC .9 where the item variance is a
+       large share of the error). Second part fails at ICC .9 (SEM_A .833,
+       SEP_A .830), but the analytic Satterthwaite interval fails there
+       too (.837, .813): with k = 3 the item mean square has 2 df and
+       dominates the error variance, which no method captures well. BCa
+       (hybrid) is the best method for both agreement rows (.913–.950 with
+       normal data).
+     - (2) Fails as written: stud has n = 30 cells below .88 (SEM_A and
+       SEP_A at ICC .9: .853, .763–.767; SEE_C at ICC .5: .839, .870), but
+       perc is worse in each of those cells. stud beats perc on average for
+       every statistic and is the best method for SEM_C, SEM_1 and SEP_C;
+       BCa beats stud for SEM_A and SEP_A in 7 of 8 cells.
+     - (3) Met for SEE_C and SEP_C (.940–.970); fails for SEP_A at ICC .9
+       (.813), the same item-variance problem as (1).
+     - Not anticipated: the analytic intervals (including the exact χ² SEM
+       interval) under-cover with non-normal data (.79–.87; kurtosis of the
+       errors), while a log-Wald interval with the jackknife SE is close to
+       nominal for the consistency rows (.85–.97). SEE near ICC .5 is
+       poorly suited to the bootstrap (SEE is flat in the ICC there); the
+       analytic interval is best for SEE.
+     - **Decisions (user, 2026-10-16):** adopt the hybrid for the agreement
+       SEM/SEP and document the few-items limitation (Rd "Agreement
+       statistics with few items"); `reli_err_test()` `boot_ci = "auto"` =
+       `bca` for two-way agreement statistics and `stud` otherwise with
+       ANOVA, `perc` with REML (`.resolve_boot_ci(agreement_bca = )`);
+       `icc_test()` keeps its rule. Results summarised in the Rd Details.
+     - TODO (not decided): offer the log-Wald interval with the jackknife SE
+       as an analytic option for non-normal data (e.g. a `ci_method`
+       argument); it beat the χ²/normal-delta intervals with non-normal
+       data at little cost.
+   - **`null.value = NULL` default in `icc_test()` too** (user,
+     2026-10-16): no F test unless a null is given; without a test the
+     interval is two-sided whatever `alternative` says (same rule as
+     `reli_err_test()`). Tests that need the F test now pass
+     `null.value = 0`.
+   - **`summary(style = c("auto", "hypothesis", "estimation"))`** (user,
+     2026-10-16). `"hypothesis"`: the existing Neyman–Pearson / TOSTER
+     wording. `"estimation"` (Greenland): "compatibility interval" /
+     "compatibility bound", no α or decision; with a p-value, the S-value
+     s = −log₂ p for the tested hypothesis (the complement of
+     `alternative`: "at least", "at most" or "equal to" the null), with the
+     coin-toss analogy (round(s) heads in a row) and "(approximate, from
+     the bootstrap)" for bootstrap p-values. `"auto"` = hypothesis if
+     there is a p-value, else estimation; `"hypothesis"` without a p-value
+     falls back to estimation with a message. Returned object gains
+     `style` and `s.value`. Snapshot tests added (`tests/testthat/_snaps/`).
+     References: Greenland (2019), Rafi & Greenland (2020) (metadata
+     checked on CrossRef). TODO: a p-value function / S-values at several
+     nulls (e.g. `summary(null.values = )`); same summary for
+     `ccc_test()`.
 4. `reli_err_test()` `scale = "log"` / `"mean"`.
 5. `power_icc()` and `precision_icc()`.
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette
@@ -1235,10 +1365,12 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
 | Bootstrap | `boot`/`boot_ci`/`replicates` in both `icc_test()` and `reli_err_test()`; p-value by CI inversion (TOSTER style), documented as approximate; bootstrap-under-null is a TODO |
 | Bootstrap resampling | Nonparametric, by subject; no parametric option |
 | Bootstrap interval types | `auto`, `perc`, `bca`, `stud`, `basic` (as TOSTER); `stud` divides each replicate by its own `se_method` SE on the z = 0.5 log F scale (`"normal"` not allowed: constant SE); `bca` acceleration from leave-one-subject-out jackknife |
-| Default `boot_ci` | `"auto"` (2026-10-16): `stud` for ANOVA, `perc` for REML or `se_method = "normal"`; explicit `stud` + REML warns |
+| Default `boot_ci` | `"auto"` (2026-10-16): `stud` for ANOVA, `perc` for REML or `se_method = "normal"`; explicit `stud` + REML warns. `reli_err_test()`: `bca` for two-way agreement statistics with ANOVA (phase-3 study) |
 | Agreement-form bootstrap | Hybrid: subject resampling plus a chi-square(k − 1)/(k − 1) multiplier on MSJ per replicate (2026-10-15) |
 | `se_method` | `c("jackknife", "influence", "normal")`, default `"jackknife"` (2026-10-15, option A); `stderr = c(ICC, z)` always, plus `boot` (SD of bootstrap estimates) when `boot = TRUE`; `stud` + REML requires `"influence"`; TODO B (tuned influence correction) and C (`"auto"` SE) only if needed |
-| Plain-language description | `summary.reli_htest()`, internal `describe_htest()`-style describer; no TOSTER dependency |
+| Plain-language description | `summary.reli_htest()`, internal `describe_htest()`-style describer; no TOSTER dependency; `style = c("auto", "hypothesis", "estimation")`, estimation = compatibility intervals + S-values (2026-10-16) |
+| Default `null.value` | `NULL` in `icc_test()` and `reli_err_test()`: estimate and two-sided interval; test only when a null is given (2026-10-16) |
+| SEE/SEP analytic interval | Wald on the log scale, normal-theory delta SE; negative ICC truncated at 0 (2026-10-16) |
 | Qualitative benchmark labels | None (option A); docs point to testing against a threshold instead |
 | Input interface | Formula + long + wide (`col.names`) |
 | `reli_stats`/`reli_aov` | Supersede for now (changed from deprecate); deprecate later |
@@ -1323,6 +1455,10 @@ All metadata below checked against CrossRef on 2026-10-15 unless noted.
 - Donner, A., & Eliasziw, M. (1987). Sample size requirements for
   reliability studies. Statistics in Medicine, 6(4), 441-448. (Source of the
   exact power used by Walter et al.; metadata not yet checked.)
+- Greenland, S. (2019). Valid p-values behave exactly as they should: Some
+  misleading criticisms of p-values and their resolution with S-values. The
+  American Statistician, 73(sup1), 106-114.
+  doi:10.1080/00031305.2018.1529625
 - Haley, S. M., & Fragala-Pinkham, M. A. (2006). Interpreting change scores
   of tests and measures used in physical therapy. Physical Therapy, 86(5),
   735-743. doi:10.1093/ptj/86.5.735
@@ -1354,6 +1490,10 @@ All metadata below checked against CrossRef on 2026-10-15 unless noted.
 - Qin, S., et al. (2019). Quality of Life Research, 28(4), 1029-1033.
   doi:10.1007/s11136-018-2076-0 (recommends ICC(A,1); full metadata not yet
   checked)
+- Rafi, Z., & Greenland, S. (2020). Semantic and cognitive tools to aid
+  statistical science: replace confidence and significance by compatibility
+  and surprise. BMC Medical Research Methodology, 20, 244.
+  doi:10.1186/s12874-020-01105-9
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
   assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
   doi:10.1037/0033-2909.86.2.420 (interval formulas read from the paper)

@@ -25,6 +25,12 @@
 #' @param alternative `"less"` (default), `"greater"`, or `"two.sided"`. The
 #'   default tests whether the error is smaller than `null.value`. Used only
 #'   when `null.value` is given; without a test the interval is two-sided.
+#' @param boot_ci Bootstrap interval type: `"auto"` (default), `"perc"`
+#'   (percentile), `"bca"`, `"stud"` (studentized), or `"basic"`. With
+#'   `method = "anova"`, `"auto"` uses `"bca"` for the two-way agreement
+#'   statistics and `"stud"` otherwise (`"perc"` when `se_method = "normal"`);
+#'   with `method = "reml"` it uses `"perc"`. See Details. Used only when
+#'   `boot = TRUE`.
 #' @param se_method How the standard error of the log of the statistic is
 #'   estimated: `"jackknife"` (default), `"influence"`, or `"normal"`. It is
 #'   reported in `stderr` and used by the studentized bootstrap; it does not
@@ -84,6 +90,29 @@
 #' mean square of each replicate is multiplied by an independent
 #' \eqn{\chi^2_{k-1}/(k-1)} draw). The studentized interval works on the log
 #' scale. The p-value inverts the interval and is approximate.
+#'
+#' In simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9, normal or
+#' skewed and heavy-tailed data, complete data), the analytic intervals
+#' covered 0.93 to 0.97 with normal data for the consistency and one-way
+#' statistics, but only 0.79 to 0.90 with non-normal data (the
+#' \eqn{\chi^2} interval for a variance is sensitive to heavy tails). The
+#' studentized bootstrap was the best method for the consistency SEM, the SEP
+#' and the one-way SEM (0.89 to 0.96 throughout), and BCa for the agreement
+#' SEM and SEP (mean 0.91), hence `boot_ci = "auto"`. The percentile
+#' interval was too narrow with 10 subjects (as low as 0.54). For the SEE the
+#' analytic interval was best with normal data (0.93 to 0.97); no bootstrap
+#' interval was reliable near an ICC of 0.5, where the SEE hardly changes
+#' with the ICC.
+#'
+#' **Agreement statistics with few items.** The agreement SEM and SEP
+#' include the variance between items, which is estimated from only k - 1
+#' degrees of freedom. When it is a large part of the error and k is small,
+#' every interval under-covers: with 3 trials and an item variance about
+#' as large as the error variance (ICC 0.9), the Satterthwaite interval
+#' covered 0.81 to 0.91 with normal data and BCa 0.91 to 0.95 (0.80 with 30
+#' subjects and skewed data). Resampling subjects without the hybrid step
+#' covered only 0.39 to 0.63 in those settings. More items help more than
+#' more subjects.
 #'
 #' **Minimal detectable change.** The minimal detectable change (MDC),
 #' smallest real difference, or repeatability coefficient is a scaled SEM:
@@ -179,7 +208,8 @@ reli_err_test <- function(x = NULL,
   if (is.null(null.value)) {
     alternative <- "two.sided"
   }
-  boot_ci <- .resolve_boot_ci(boot, boot_ci, method, se_method)
+  boot_ci <- .resolve_boot_ci(boot, boot_ci, method, se_method,
+                              agreement_bca = .err_random_items(model, type))
 
   prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
                         id = id, col.names = col.names)
