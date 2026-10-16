@@ -106,11 +106,11 @@ test_that("stderr is reported on the ICC and z scales", {
   expect_equal(res$stderr[["ICC"]],
                res$stderr[["z"]] * 2 * k * F_obs / (F_obs + k - 1)^2,
                tolerance = 1e-6)
-  expect_equal(res$settings$se_method, "influence")
+  expect_equal(res$settings$se_method, "jackknife")
 })
 
 test_that("se_method changes stderr but not the F interval or test", {
-  infl <- icc_test(col.names = sf_cols, data = sf_wide)
+  infl <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "influence")
   jack <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "jackknife")
   norm <- icc_test(col.names = sf_cols, data = sf_wide, se_method = "normal")
   expect_false(isTRUE(all.equal(infl$stderr, jack$stderr)))

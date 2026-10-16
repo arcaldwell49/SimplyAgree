@@ -21,7 +21,7 @@ icc_test(
   boot = FALSE,
   boot_ci = c("perc", "bca", "stud", "basic"),
   replicates = 1999,
-  se_method = c("influence", "jackknife", "normal")
+  se_method = c("jackknife", "influence", "normal")
 )
 }
 \arguments{
@@ -71,10 +71,10 @@ subjects for the interval and p-value. Default \code{FALSE}.}
 
 \item{replicates}{Number of bootstrap replicates (default 1999).}
 
-\item{se_method}{How the standard error is estimated: \code{"influence"}
-(default; per-subject influence, or sandwich, estimate), \code{"jackknife"}
-(delete one subject at a time), or \code{"normal"} (normal theory). The SE is
-reported in \code{stderr} and is used by the studentized bootstrap; it does
+\item{se_method}{How the standard error is estimated: \code{"jackknife"}
+(default; delete one subject at a time), \code{"influence"} (per-subject
+influence, or sandwich, estimate), or \code{"normal"} (normal theory). The SE
+is reported in \code{stderr} and is used by the studentized bootstrap; it does
 not change the F-based interval or test. See Details.}
 }
 \value{
@@ -187,6 +187,26 @@ fell to about 0.80 to 0.90 with skewed or heavy-tailed data, where the
 percentile bootstrap with 30 subjects covered about 0.87 to 0.93 (lowest
 at moderate ICCs). With 10 subjects, percentile bootstrap coverage was
 mostly below nominal (about 0.80 to 0.95).
+
+\strong{Standard errors.} \code{stderr} gives the standard error of
+\eqn{z = 0.5 \log F} (the scale of the studentized bootstrap) and, by the
+delta method, of the ICC. The jackknife (default) deletes one subject at a
+time; with complete data it uses closed-form leave-one-out mean squares,
+and with \code{method = "reml"} it refits the model n times. The influence
+estimate is a sandwich estimate from each subject's influence on the mean
+squares (with missing data, an approximation from each subject's observed
+measurements); it is cheaper but too small with few subjects. The
+normal-theory SE depends only on the degrees of freedom. In simulations (3
+trials, 20 to 40 subjects, up to 30\% missing), the jackknife SE averaged
+0.89 to 1.08 times the true sampling SD, the influence SE 0.69 to 1.00
+(lowest with few subjects, skewed data, or data missing at random), and
+the normal-theory SE 0.87 to 1.04 with normal data but 0.60 to 0.80 with
+skewed or heavy-tailed data. For the agreement forms, the jackknife and
+influence SEs add the normal-theory variance of the item mean square,
+treating the items as random. The studentized bootstrap needs an SE
+estimated from each resample, so it cannot use \code{"normal"}; with
+\code{method = "reml"} it requires \code{"influence"}, because the jackknife would
+refit the model n times in every replicate.
 
 \strong{Interpreting the ICC.} No qualitative labels (such as "good" or
 "excellent") are given: published cutoffs disagree, and the ICC depends on

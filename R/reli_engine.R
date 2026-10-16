@@ -518,7 +518,7 @@
 #' hybrid bootstrap do).
 #' @noRd
 .icc_se_z <- function(prep, fit, form,
-                      se_method = c("influence", "jackknife", "normal")) {
+                      se_method = c("jackknife", "influence", "normal")) {
   se_method <- match.arg(se_method)
   if (se_method == "normal") {
     return(.icc_z_se(fit, form))
