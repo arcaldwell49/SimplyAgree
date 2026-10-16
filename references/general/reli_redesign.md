@@ -1,8 +1,8 @@
 # Reliability Suite Redesign
 
-Branch: `reli-update` · Status: phases 1–3 done (engine, `icc_test()`,
-`reli_err_test()` raw scale, methods); phases 4–7 pending · Last updated:
-2026-10-16
+Branch: `reli-update` · Status: phases 1–4 done (engine, `icc_test()`,
+`reli_err_test()` with raw/log/mean scales, methods); phases 5–7 pending ·
+Last updated: 2026-10-16
 
 ## 0. Handoff: current state and next steps
 
@@ -17,7 +17,7 @@ are current.
 |---|---|
 | Engine (data prep, ANOVA/REML fits, ICC/SEM/SD helpers, CIs and tests, SEs, bootstrap) | `R/reli_engine.R` (internal, `@noRd`) |
 | `icc_test()` | `R/icc_test.R`, `man/icc_test.Rd` |
-| `reli_err_test()` (SEM/SEE/SEP, raw scale) | `R/reli_err_test.R`, `man/reli_err_test.Rd` |
+| `reli_err_test()` (SEM/SEE/SEP; raw, log, mean scales) | `R/reli_err_test.R`, `man/reli_err_test.Rd` |
 | `summary()`, `plot()`, `check()` for `reli_htest` | `R/methods.reli_htest.R`, `man/reli_htest-methods.Rd` |
 | Tests | `tests/testthat/test-reli_engine.R`, `test-icc_test.R`, `test-reli_err_test.R`, snapshots in `tests/testthat/_snaps/` (all passing on 2026-10-16) |
 | Simulation scripts behind every table here | `references/general/reli_sims/` (run from the package root) |
@@ -83,23 +83,20 @@ bootstrapping), `parameter`, `p.value`, `conf.int`, `estimate`, `stderr`
   intervals, S-values); `"auto"` picks by whether there is a p-value.
   Section 9, phase 3.
 - **`reli_err_test()`:** SEM χ² intervals, SEE/SEP log-Wald (normal-theory
-  delta); hybrid bootstrap for agreement statistics; `boot_ci = "auto"` =
+  delta; `scale = "log"` (sympercents) or `"mean"` (with Var(ȳ))); hybrid
+  bootstrap for agreement statistics; `boot_ci = "auto"` =
   `bca` (agreement) / `stud` (otherwise) for ANOVA, `perc` for REML.
   Section 9, phase 3.
 
 ### Next steps
 
-**Phase 4: `reli_err_test(scale = c("raw", "log", "mean"))`.** Spec in
-Section 6.2 ("`scale`"). `"log"`: fit the engine on `log(values)` and
-report 100 × the log-scale statistic (sympercents); SEM rows keep χ²
-inference; error on values ≤ 0. `"mean"`: 100 × statistic / grand mean,
-delta method including Var(ȳ) (Section 6.2 formulas, verified by
-simulation in Section 12); bootstrap as now. `null.value` on the reported
-scale; estimate names such as `"SEM (sympercent)"`; summary wording;
-`@concept coefficient of variation`. Consider a coverage check for
-`"mean"` (the delta method there is new).
+**Phase 5: `power_icc()` and `precision_icc()`.** Spec and test targets in
+Section 6.3 (exact scaled-central-F power; Walter et al. and Zou
+approximations; PASS values). Read Mondal et al. (2024) on Zou's eq. 3
+before implementing `precision_icc(method = "approximate")`. Independent of
+phases 3–4.
 
-Then phase 5 (`power_icc()`, `precision_icc()`), phase 6 (supersede and
+Then phase 6 (supersede and
 rewire `reli_stats()`, `reli_aov()`, jamovi; NEWS, including the
 `icc_test()` null default being new; vignette), phase 7 (check and
 coverage). Section 9.
@@ -1351,6 +1348,68 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      variation`, Atkinson & Nevill (1998) and Cole (2000) references;
      summary says "in sympercents …" / "as a percentage of the grand mean"
      and mentions the grand mean in the inference sentence.
+   - **`scale = "mean"` coverage study (2026-10-16)**, same design as the
+     phase-3 study with population mean μ = 5 (truth = 100 × statistic /
+     μ); 300 sims × 499 replicates (MC SE .013); script
+     `reli_sims/err_mean_coverage.R` (about 10 minutes). Columns: `an` =
+     analytic log-Wald with Var(ȳ); `nogm` = the same without Var(ȳ) (for
+     information); `waldjk` = log-Wald with the jackknife SE; bootstrap
+     (hybrid with the grand-mean shift for SEM_A); `subj` = subject-only
+     percentile.
+
+     **Pre-set criteria:** (1) analytic ≥ .92 with normal data at n = 30
+     for SEM_C, SEP_C, SEM_1 and SEM_A at ICC .5; (2) keep the Var(ȳ) term
+     if dropping it lowers normal-data coverage; (3) keep the phase-3
+     `auto` rule unless another method beats it by > .02 in mean coverage.
+
+     | stat | n | ICC | data | an | nogm | waldjk | perc | bca | stud | subj |
+     |---|---|---|---|---|---|---|---|---|---|---|
+     | SEM_C | 10 | .5 | normal | .943 | .930 | .950 | .853 | .893 | .957 | — |
+     | SEM_C | 30 | .5 | normal | .933 | .897 | .903 | .873 | .883 | .930 | — |
+     | SEM_C | 10 | .9 | normal | .947 | .933 | .923 | .793 | .837 | .943 | — |
+     | SEM_C | 30 | .9 | normal | .950 | .927 | .947 | .917 | .923 | .940 | — |
+     | SEM_C | 10 | .5 | non-normal | .853 | .833 | .867 | .747 | .787 | .910 | — |
+     | SEM_C | 30 | .5 | non-normal | .833 | .783 | .910 | .843 | .877 | .917 | — |
+     | SEM_C | 10 | .9 | non-normal | .853 | .827 | .870 | .753 | .773 | .903 | — |
+     | SEM_C | 30 | .9 | non-normal | .850 | .827 | .917 | .867 | .880 | .930 | — |
+     | SEM_A | 10 | .5 | normal | .950 | .923 | .943 | .943 | .967 | .943 | .887 |
+     | SEM_A | 30 | .5 | normal | .943 | .937 | .953 | .943 | .950 | .943 | .887 |
+     | SEM_A | 10 | .9 | normal | .877 | .857 | .870 | .873 | .943 | .917 | .657 |
+     | SEM_A | 30 | .9 | normal | .833 | .827 | .847 | .857 | .920 | .867 | .487 |
+     | SEM_A | 10 | .5 | non-normal | .883 | .863 | .893 | .893 | .933 | .920 | .803 |
+     | SEM_A | 30 | .5 | non-normal | .880 | .843 | .930 | .927 | .947 | .930 | .843 |
+     | SEM_A | 10 | .9 | non-normal | .867 | .843 | .880 | .883 | .917 | .903 | .613 |
+     | SEM_A | 30 | .9 | non-normal | .713 | .690 | .767 | .773 | .857 | .800 | .447 |
+     | SEP_C | 10 | .5 | normal | .940 | .917 | .933 | .803 | .877 | .947 | — |
+     | SEP_C | 30 | .5 | normal | .927 | .877 | .910 | .853 | .883 | .913 | — |
+     | SEP_C | 10 | .9 | normal | .947 | .910 | .930 | .763 | .830 | .937 | — |
+     | SEP_C | 30 | .9 | normal | .943 | .923 | .947 | .907 | .903 | .930 | — |
+     | SEP_C | 10 | .5 | non-normal | .843 | .800 | .860 | .670 | .723 | .890 | — |
+     | SEP_C | 30 | .5 | non-normal | .837 | .777 | .877 | .803 | .853 | .903 | — |
+     | SEP_C | 10 | .9 | non-normal | .843 | .817 | .867 | .720 | .720 | .900 | — |
+     | SEP_C | 30 | .9 | non-normal | .850 | .823 | .903 | .853 | .873 | .927 | — |
+     | SEM_1 | 10 | .5 | normal | .947 | .907 | .900 | .860 | .867 | .930 | — |
+     | SEM_1 | 30 | .5 | normal | .960 | .913 | .920 | .890 | .900 | .920 | — |
+     | SEM_1 | 10 | .9 | normal | .943 | .913 | .903 | .863 | .863 | .917 | — |
+     | SEM_1 | 30 | .9 | normal | .953 | .940 | .947 | .930 | .950 | .960 | — |
+     | SEM_1 | 10 | .5 | non-normal | .890 | .843 | .890 | .813 | .840 | .927 | — |
+     | SEM_1 | 30 | .5 | non-normal | .857 | .813 | .907 | .873 | .887 | .933 | — |
+     | SEM_1 | 10 | .9 | non-normal | .910 | .880 | .867 | .823 | .837 | .910 | — |
+     | SEM_1 | 30 | .9 | non-normal | .887 | .873 | .927 | .903 | .907 | .923 | — |
+
+     Mean coverage (an / nogm / waldjk / perc / bca / stud): SEM_C .895 /
+     .870 / .911 / .831 / .857 / .929; SEM_A .868 / .848 / .885 / .887 /
+     .929 / .903 (subject-only .703); SEP_C .891 / .855 / .903 / .797 /
+     .833 / .918; SEM_1 .918 / .885 / .907 / .870 / .881 / .927.
+
+     Against the criteria: (1) met: .927–.960 (SEM_A at ICC .9 under-covers,
+     .833–.877, as in phase 3); (2) met: dropping Var(ȳ) lowers coverage in
+     15 of 16 normal cells, by up to .05, so the term stays; (3) met: stud is
+     best for SEM_C, SEP_C and SEM_1 and BCa for SEM_A, the phase-3 rule.
+     The analytic intervals again under-cover with non-normal data (.71–.91),
+     as on the raw scale. The hybrid with the grand-mean shift beats
+     subject-only resampling for SEM_A in every cell. **No changes needed;
+     phase 4 accepted** (pending the user's review).
 5. `power_icc()` and `precision_icc()`.
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette
    rewrite (including "Coefficient of variation" and "MDC, SDD and the

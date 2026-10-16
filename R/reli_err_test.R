@@ -138,6 +138,14 @@
 #'   variance is \eqn{MS_B/(nk)} with items fixed (consistency, one-way) and
 #'   \eqn{(MS_B + MS_J - MS_E)/(nk)} with items random (two-way agreement).
 #'
+#' In simulations like those below (population mean 5), the `"mean"`
+#' interval covered 0.93 to 0.96 with normal data and 30 subjects (except
+#' for the agreement SEM with few items, see below); leaving out the
+#' uncertainty in the grand mean lowered coverage by up to 0.05. With the
+#' bootstrap, the grand mean of each replicate of a two-way agreement
+#' statistic also gets the item mean's normal-theory variation, as in the
+#' hybrid step below.
+#'
 #' `null.value` is on the same scale as the estimate. The log scale is
 #' usually preferable: it treats the error as proportional to each
 #' measurement rather than to the overall mean.
