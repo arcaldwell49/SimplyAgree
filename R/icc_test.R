@@ -265,31 +265,7 @@ icc_test <- function(x = NULL,
   se_method <- match.arg(se_method)
   .check_conf_level(conf.level)
   .check_boot_args(boot, replicates)
-  if (boot_ci == "auto") {
-    # chosen from simulations: studentized (with a resample-based SE) for
-    # complete data, percentile for REML fits
-    boot_ci <- if (method == "anova" && se_method != "normal") "stud" else "perc"
-  }
-  if (boot && boot_ci == "stud") {
-    if (se_method == "normal") {
-      stop("boot_ci = \"stud\" needs a standard error estimated from each ",
-           "resample; the normal-theory SE depends only on the degrees of ",
-           "freedom and cannot studentize. Use se_method = \"influence\" or ",
-           "\"jackknife\".", call. = FALSE)
-    }
-    if (se_method == "jackknife" && method == "reml") {
-      stop("boot_ci = \"stud\" with se_method = \"jackknife\" and ",
-           "method = \"reml\" refits the mixed model n times in every ",
-           "bootstrap replicate. Use se_method = \"influence\".",
-           call. = FALSE)
-    }
-    if (method == "reml") {
-      warning("The studentized bootstrap with method = \"reml\" can be ",
-              "unreliable: in simulations with missing data it under-covered ",
-              "at moderate ICCs (0.80 to 0.88 for 95% intervals). Consider ",
-              "boot_ci = \"perc\".", call. = FALSE)
-    }
-  }
+  boot_ci <- .resolve_boot_ci(boot, boot_ci, method, se_method)
 
   prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
                         id = id, col.names = col.names)
@@ -402,11 +378,46 @@ icc_test <- function(x = NULL,
   fit <- if (method == "reml") " (REML)" else ""
   inference <- if (boot) {
     paste0(" with nonparametric (subject) bootstrap ",
-           switch(boot_ci, bca = "BCa", stud = "studentized",
-                  perc = "percentile", basic = "basic"),
-           " interval")
+           .boot_ci_name(boot_ci), " interval")
   } else ""
   paste0(base, fit, inference)
+}
+
+.boot_ci_name <- function(boot_ci) {
+  switch(boot_ci, bca = "BCa", stud = "studentized",
+         perc = "percentile", basic = "basic")
+}
+
+#' Resolve `boot_ci = "auto"` and check the studentized bootstrap settings
+#'
+#' "auto" was chosen from simulations: studentized (with a resample-based SE)
+#' for complete data, percentile for REML fits.
+#' @noRd
+.resolve_boot_ci <- function(boot, boot_ci, method, se_method) {
+  if (boot_ci == "auto") {
+    boot_ci <- if (method == "anova" && se_method != "normal") "stud" else "perc"
+  }
+  if (boot && boot_ci == "stud") {
+    if (se_method == "normal") {
+      stop("boot_ci = \"stud\" needs a standard error estimated from each ",
+           "resample; the normal-theory SE depends only on the degrees of ",
+           "freedom and cannot studentize. Use se_method = \"influence\" or ",
+           "\"jackknife\".", call. = FALSE)
+    }
+    if (se_method == "jackknife" && method == "reml") {
+      stop("boot_ci = \"stud\" with se_method = \"jackknife\" and ",
+           "method = \"reml\" refits the mixed model n times in every ",
+           "bootstrap replicate. Use se_method = \"influence\".",
+           call. = FALSE)
+    }
+    if (method == "reml") {
+      warning("The studentized bootstrap with method = \"reml\" can be ",
+              "unreliable: in simulations with missing data it under-covered ",
+              "at moderate ICCs (0.80 to 0.88 for 95% intervals). Consider ",
+              "boot_ci = \"perc\".", call. = FALSE)
+    }
+  }
+  boot_ci
 }
 
 .check_conf_level <- function(conf.level) {

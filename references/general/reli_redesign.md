@@ -1167,7 +1167,32 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      upper limit gives 0.052. Exact forms invert exactly (tested). Decide in
      phase 2 whether `icc_test()` reports this as is (McGraw & Wong) or
      documents the mismatch.
-3. `reli_err_test()` (raw scale).
+3. `reli_err_test()` (raw scale). **Done 2026-10-16:** `R/reli_err_test.R`,
+   `tests/testthat/test-reli_err_test.R`, `man/reli_err_test.Rd`, pkgdown
+   entry; `summary()` generalised (`.describe_error_estimand()`,
+   `.describe_error_inference()`). The `scale` argument is not in the
+   signature yet (phase 4). Decisions (user, 2026-10-16, unless noted):
+   - **Interval without a test is two-sided.** `alternative` defaults to
+     `"less"` but shapes the interval only when `null.value` is given; with
+     `null.value = NULL` the stored `alternative` is `"two.sided"`.
+   - **SEE/SEP analytic interval: Wald on the log scale** with the
+     normal-theory delta SE (`.err_se_log(..., "normal")`), back-transformed;
+     the z test uses the same SE, so test and interval invert exactly.
+   - `se_method` does not change the analytic interval or test (as in
+     `icc_test()`); it sets `stderr = c(<stat>, log)` and the SE used by the
+     studentized bootstrap (log scale). `"normal"` for the SEM rows is the
+     exact 0.5·√trigamma(ν/2).
+   - A negative ICC estimate is truncated at 0 in SEE/SEP (SEE = 0,
+     SEP = SD) (implementation choice; documented in the Rd).
+   - Refactor: `.icc_se_z()` now calls a generic `.subject_se()` and
+     `.jackknife_var()` (any statistic of the mean squares), and the
+     `boot_ci = "auto"` resolution and `stud` checks moved to
+     `.resolve_boot_ci()`, shared by both functions. ICC tests unchanged and
+     passing.
+   - Weir (2005) targets reproduced: SEM 7.56 (A), 2.17 (C); one-way 7.33
+     (A), 11.15 (C); matched SEE 7.35 and SEP 10.54 (A). (His SS table is
+     rounded: error SS is 399.75 in the data, not 399.8; tests compute the
+     mean squares from the data.)
 4. `reli_err_test()` `scale = "log"` / `"mean"`.
 5. `power_icc()` and `precision_icc()`.
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette

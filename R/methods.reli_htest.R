@@ -1,6 +1,7 @@
 #' Methods for reli_htest objects
 #'
-#' Methods for objects returned by [icc_test()]. They print as standard
+#' Methods for objects returned by [icc_test()] and [reli_err_test()]. They
+#' print as standard
 #' \code{"htest"} objects; `summary()` describes the result in words,
 #' `plot()` shows the data, and `check()` gives model diagnostics.
 #'
@@ -11,7 +12,7 @@
 #' `summary()` describes the estimate, its interval and (when a test was
 #' requested) the test decision, what was estimated, the design, and how the
 #' inference was done. It does not attach qualitative labels such as "good"
-#' or "excellent" to the estimate; see [icc_test()] for why.
+#' or "excellent" to an ICC; see [icc_test()] for why.
 #'
 #' @return
 #' \describe{
@@ -118,6 +119,9 @@ check.reli_htest <- function(x, ...) {
 
 .describe_estimand <- function(object) {
   s <- object$settings
+  if (identical(s$statistic, "error")) {
+    return(.describe_error_estimand(object))
+  }
   form <- s$form
   k <- object$fit$k
   what <- if (.icc_is_average(form)) {
@@ -138,6 +142,31 @@ check.reli_htest <- function(x, ...) {
   paste0("The estimate is the ", description,
          " (McGraw & Wong ", s$label, "; Shrout & Fleiss ",
          .icc_shrout_fleiss(form), "): ", what, ", ", treatment, ".")
+}
+
+.describe_error_estimand <- function(object) {
+  s <- object$settings
+  treatment <- if (s$model == "oneway") {
+    "with item effects not separable from error"
+  } else if (s$type == "consistency") {
+    "excluding systematic differences between items"
+  } else {
+    "including systematic differences between items"
+  }
+  what <- switch(
+    s$stat,
+    SEM = "the typical error of a single measurement",
+    SEE = paste0("the standard error of a subject's estimated true score, ",
+                 "SD * sqrt(ICC * (1 - ICC)) with ", .icc_label(s$form),
+                 " and the SD matched to its denominator"),
+    SEP = paste0("the standard error for judging change from a subject's ",
+                 "estimated true score, SD * sqrt(1 - ICC^2) with ",
+                 .icc_label(s$form), " and the SD matched to its denominator"))
+  description <- .err_description(s$stat, s$model, s$type)
+  description <- paste0(tolower(substr(description, 1, 1)),
+                        substring(description, 2))
+  paste0("The estimate is the ", description, ", in the units of the ",
+         "measurement: ", what, ", ", treatment, ".")
 }
 
 .describe_design <- function(fit) {
@@ -171,6 +200,10 @@ check.reli_htest <- function(x, ...) {
       if (is.null(object$p.value)) "." else
         "; the p-value inverts this interval and is approximate."))
   }
+  tested <- !is.null(object$p.value)
+  if (identical(s$statistic, "error")) {
+    return(.describe_error_inference(object, tested))
+  }
   if (!fit$balanced) {
     return(paste0("The interval and F test (McGraw & Wong, 1996) use ",
                   "degrees of freedom based on the observed data; with ",
@@ -181,6 +214,29 @@ check.reli_htest <- function(x, ...) {
   } else {
     "The interval and F test use Satterthwaite approximations (McGraw & Wong, 1996)."
   }
+}
+
+.describe_error_inference <- function(object, tested) {
+  s <- object$settings
+  fit <- object$fit
+  sem <- s$stat == "SEM"
+  what <- if (tested) {
+    if (sem) "The interval and chi-square test" else "The interval and z test"
+  } else "The interval"
+  how <- if (!sem) {
+    paste0(" use the delta method on the log scale with normal-theory ",
+           "variances of the mean squares")
+  } else if (s$model == "twoway" && s$type == "agreement") {
+    " use a chi-square distribution with Satterthwaite degrees of freedom"
+  } else {
+    " are exact under normality (chi-square distribution of the error variance)"
+  }
+  if (!fit$balanced) {
+    how <- paste0(how, ", with degrees of freedom based on the observed ",
+                  "data; with missing data they are approximate and may be ",
+                  "liberal")
+  }
+  paste0(what, how, ".")
 }
 
 .fmt_num <- function(x) {

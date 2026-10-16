@@ -33,7 +33,8 @@ the model residuals, combined with patchwork.}
 }
 }
 \description{
-Methods for objects returned by \code{\link[=icc_test]{icc_test()}}. They print as standard
+Methods for objects returned by \code{\link[=icc_test]{icc_test()}} and \code{\link[=reli_err_test]{reli_err_test()}}. They
+print as standard
 \code{"htest"} objects; \code{summary()} describes the result in words,
 \code{plot()} shows the data, and \code{check()} gives model diagnostics.
 }
@@ -41,7 +42,7 @@ Methods for objects returned by \code{\link[=icc_test]{icc_test()}}. They print 
 \code{summary()} describes the estimate, its interval and (when a test was
 requested) the test decision, what was estimated, the design, and how the
 inference was done. It does not attach qualitative labels such as "good"
-or "excellent" to the estimate; see \code{\link[=icc_test]{icc_test()}} for why.
+or "excellent" to an ICC; see \code{\link[=icc_test]{icc_test()}} for why.
 }
 \examples{
 sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
