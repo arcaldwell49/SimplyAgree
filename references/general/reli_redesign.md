@@ -1323,7 +1323,34 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      checked on CrossRef). TODO: a p-value function / S-values at several
      nulls (e.g. `summary(null.values = )`); same summary for
      `ccc_test()`.
-4. `reli_err_test()` `scale = "log"` / `"mean"`.
+4. `reli_err_test()` `scale = "log"` / `"mean"`. **Implemented
+   2026-10-16** (`scale = c("raw", "log", "mean")` after `stat`):
+   - `"log"`: the engine is fitted to `log(values)` (error if any value
+     ≤ 0); estimate, interval and `stderr` are 100 × the log-scale values,
+     so the SEM keeps exact/Satterthwaite χ² inference and the χ² test uses
+     `null.value / 100`. `data` keeps the original measurements (for
+     `plot()`); `fit` is on the log scale. Label `"SEM (sympercent)"`.
+   - `"mean"`: 100 × statistic / grand mean (error if the grand mean ≤ 0).
+     Every statistic (SEM too) uses the log-Wald interval and z test with
+     Var(log est) = Var(log stat) + Var(ȳ)/ȳ², `.grand_mean_var()`:
+     MSB/(nk) (consistency, one-way), (MSB + max(MSJ − MSE, 0))/(nk)
+     (two-way agreement); nk = N with missing data. Label
+     `"SEM (% of mean)"`.
+   - Subject-level SEs include the grand mean generically: `.subject_se()`
+     adds an influence column for ȳ (`.grand_mean_influence()`: n·nᵢ(ȳᵢ −
+     ȳ)/N) with the numerical gradient of g in ȳ, and `.jackknife_var()`
+     updates the leave-one-out grand mean; with random items it adds
+     g_ȳ²·(MSJ − MSE)/(nk). The gradient is exactly 0 for statistics that
+     do not use ȳ, so ICC SEs are unchanged (tested).
+   - Hybrid bootstrap for the mean scale (`.hybrid_item_ms(shift_mean =
+     TRUE)`): each replicate's grand mean also gets an independent
+     N(0, (MSJ − MSE)/(nk)) draw, the item-mean variation that subject
+     resampling misses.
+   - Docs: Rd "Coefficient of variation" section (sympercent ↔ CV%
+     conversion, Var(ȳ) formulas, log preferred), `@concept coefficient of
+     variation`, Atkinson & Nevill (1998) and Cole (2000) references;
+     summary says "in sympercents …" / "as a percentage of the grand mean"
+     and mentions the grand mean in the inference sentence.
 5. `power_icc()` and `precision_icc()`.
 6. Supersede and rewire `reli_stats()`/`reli_aov()`; jamovi; NEWS; vignette
    rewrite (including "Coefficient of variation" and "MDC, SDD and the

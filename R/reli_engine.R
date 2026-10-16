@@ -532,10 +532,13 @@
 #' Subject-level standard error of a statistic of the mean squares
 #'
 #' `g(fit)` returns the statistic on its working scale from a `reli_fit`
-#' (using `fit$ms`, `fit$n` and `fit$kbar`). `names` are the mean squares
-#' whose subject-level variation drives `g`. With `random_items = TRUE` the
-#' jackknife holds MSJ at its full-data value and the normal-theory variance
-#' of MSJ, 2 MSJ^2 / (k - 1), is added (items treated as random).
+#' (using `fit$ms`, `fit$n`, `fit$kbar` and, for statistics relative to the
+#' mean, `fit$grand_mean`). `names` are the mean squares whose subject-level
+#' variation drives `g`. With `random_items = TRUE` the jackknife holds MSJ at
+#' its full-data value and the normal-theory variance of MSJ,
+#' 2 MSJ^2 / (k - 1), is added (items treated as random); if `g` depends on
+#' the grand mean, the normal-theory variance of the item mean,
+#' (MSJ - MSE) / (n k), is added too.
 #' @noRd
 .subject_se <- function(prep, fit, g, names, random_items,
                         se_method = c("jackknife", "influence")) {
@@ -547,9 +550,17 @@
       g(f)
     }
   }
+  g_of_mean <- function(m) {
+    f <- fit
+    f$grand_mean <- m[[1]]
+    g(f)
+  }
+  # zero unless g depends on the grand mean
+  g_m <- .num_grad(g_of_mean, c(mean = fit$grand_mean))
   if (se_method == "influence") {
-    psi <- .icc_influence(prep, fit)[, names, drop = FALSE]
-    grad <- .num_grad(g_of_ms(names), fit$ms[names])
+    psi <- cbind(.icc_influence(prep, fit)[, names, drop = FALSE],
+                 mean = .grand_mean_influence(prep))
+    grad <- c(.num_grad(g_of_ms(names), fit$ms[names]), g_m)
     var_g <- sum((psi %*% grad)^2) / prep$n^2
   } else {
     var_g <- .jackknife_var(prep, fit, g, hold_msj = random_items)
@@ -557,9 +568,24 @@
   if (random_items) {
     msj <- fit$ms[["MSJ"]]
     g_j <- .num_grad(g_of_ms("MSJ"), c(MSJ = msj))
-    var_g <- var_g + g_j^2 * 2 * msj^2 / fit$df[["dfJ"]]
+    var_g <- var_g + g_j^2 * 2 * msj^2 / fit$df[["dfJ"]] +
+      g_m^2 * max(msj - fit$ms[["MSE"]], 0) / (fit$n * fit$kbar)
   }
   sqrt(var_g)
+}
+
+#' Per-subject influence on the grand mean
+#'
+#' The grand mean is sum(n_i * mean_i) / N, so subject i's influence is
+#' n * n_i * (mean_i - grand mean) / N (mean_i - grand mean with complete
+#' data), on the same footing as `.icc_influence()`.
+#' @noRd
+.grand_mean_influence <- function(prep) {
+  df <- prep$df
+  n_i <- as.vector(table(df$id))
+  m_i <- as.vector(tapply(df$values, df$id, mean))
+  psi <- prep$n * n_i * (m_i - mean(df$values)) / prep$N
+  psi - mean(psi)
 }
 
 .num_grad <- function(f, theta) {
@@ -639,11 +665,14 @@
 .jackknife_var <- function(prep, fit, g, hold_msj = FALSE) {
   n <- prep$n
   if (fit$method == "anova") {
-    loo <- .loo_ms(.reli_matrix(prep))
+    Y <- .reli_matrix(prep)
+    loo <- .loo_ms(Y)
+    loo_mean <- (sum(Y) - rowSums(Y)) / ((n - 1) * ncol(Y))
     z_i <- vapply(seq_len(n), function(i) {
       f <- fit
       f$n <- n - 1
       f$ms <- loo[i, ]
+      f$grand_mean <- loo_mean[i]
       if (hold_msj) f$ms[["MSJ"]] <- fit$ms[["MSJ"]]
       g(f)
     }, numeric(1))
@@ -748,15 +777,26 @@
 
 .err_icc_form <- function(model, type) .icc_form(model, type, "single")
 
-.err_estimate <- function(fit, stat, model, type) {
-  if (stat == "SEM") {
-    return(sqrt(.sem_var(fit, model, type)$var))
+#' SEM, SEE or SEP from a reli_fit, on the reported scale
+#'
+#' `scale = "raw"`: measurement units. `"log"`: the fit is to log(values),
+#' and the statistic is reported in sympercents, 100 times the log-scale
+#' value. `"mean"`: 100 times the statistic divided by the grand mean.
+#' @noRd
+.err_estimate <- function(fit, stat, model, type, scale = "raw") {
+  est <- if (stat == "SEM") {
+    sqrt(.sem_var(fit, model, type)$var)
+  } else {
+    rho <- max(.icc_estimate(fit, .err_icc_form(model, type)), 0)
+    sd <- .sd_total(fit, model, type)
+    switch(stat,
+           SEE = sd * sqrt(rho * (1 - rho)),
+           SEP = sd * sqrt(1 - rho^2))
   }
-  rho <- max(.icc_estimate(fit, .err_icc_form(model, type)), 0)
-  sd <- .sd_total(fit, model, type)
-  switch(stat,
-         SEE = sd * sqrt(rho * (1 - rho)),
-         SEP = sd * sqrt(1 - rho^2))
+  switch(scale,
+         raw = est,
+         log = 100 * est,
+         mean = 100 * est / fit$grand_mean)
 }
 
 # Mean squares whose subject-level variation drives the error statistics.
@@ -768,32 +808,58 @@
   model == "twoway" && type == "agreement"
 }
 
-#' Standard error of log(SEM), log(SEE) or log(SEP)
+#' Normal-theory variance of the grand mean
+#'
+#' Items fixed (consistency): MSB / (n k). Items random (two-way agreement):
+#' (MSB + MSJ - MSE) / (n k), adding the sampling variance of the item mean.
+#' One-way: MSB / (n k). With missing data, n k is the number of
+#' observations N.
+#' @noRd
+.grand_mean_var <- function(fit, model, type) {
+  ms <- fit$ms
+  v <- ms[["MSB"]]
+  if (.err_random_items(model, type)) {
+    v <- v + max(ms[["MSJ"]] - ms[["MSE"]], 0)
+  }
+  v / (fit$n * fit$kbar)
+}
+
+#' Standard error of the log of an error statistic
 #'
 #' `"normal"`: for the SEM, 0.5 * sqrt(trigamma(nu / 2)), exact for a variance
 #' with nu degrees of freedom (Satterthwaite nu for the agreement SEM); for
 #' SEE and SEP, the delta method over the mean squares with
 #' Var(MS) = 2 MS^2 / df. `"jackknife"` and `"influence"`: subject-level SEs
 #' as for the ICC, adding the normal-theory variance of MSJ for the two-way
-#' agreement forms.
+#' agreement forms. The log scale (`scale = "log"`) only multiplies by 100,
+#' so the SE of the log is unchanged. With `scale = "mean"` the normal-theory
+#' SE adds Var(grand mean) / mean^2 (the grand mean is independent of the
+#' mean squares under normality); the subject-level SEs include the grand
+#' mean through each subject's influence or deletion.
 #' @noRd
 .err_se_log <- function(prep, fit, stat, model, type,
-                        se_method = c("jackknife", "influence", "normal")) {
+                        se_method = c("jackknife", "influence", "normal"),
+                        scale = "raw") {
   se_method <- match.arg(se_method)
-  g <- function(f) log(.err_estimate(f, stat, model, type))
+  g <- function(f) log(.err_estimate(f, stat, model, type, scale))
   if (se_method == "normal") {
     if (stat == "SEM") {
       nu <- .sem_var(fit, model, type)$df
-      return(0.5 * sqrt(trigamma(nu / 2)))
+      se <- 0.5 * sqrt(trigamma(nu / 2))
+    } else {
+      names <- c(.err_ms_names(model),
+                 if (.err_random_items(model, type)) "MSJ")
+      g_ms <- function(ms) {
+        f <- fit
+        f$ms[names] <- ms
+        g(f)
+      }
+      se <- .delta_se(g_ms, fit$ms[names], .ms_var(fit)[names])
     }
-    names <- c(.err_ms_names(model),
-               if (model == "twoway" && type == "agreement") "MSJ")
-    g_ms <- function(ms) {
-      f <- fit
-      f$ms[names] <- ms
-      g(f)
+    if (scale == "mean") {
+      se <- sqrt(se^2 + .grand_mean_var(fit, model, type) / fit$grand_mean^2)
     }
-    return(.delta_se(g_ms, fit$ms[names], .ms_var(fit)[names]))
+    return(se)
   }
   .subject_se(prep, fit, g = g,
               names = .err_ms_names(model),
@@ -803,21 +869,25 @@
 
 #' Analytic confidence interval for an error statistic
 #'
-#' SEM: square root of the chi-square interval for the error variance (exact,
-#' or Satterthwaite for the agreement SEM). SEE and SEP: Wald interval on the
-#' log scale with the normal-theory delta-method SE, back-transformed.
+#' SEM on the raw or log scale: square root of the chi-square interval for
+#' the error variance (exact, or Satterthwaite for the agreement SEM), times
+#' 100 on the log scale. Otherwise (SEE, SEP, and every statistic with
+#' `scale = "mean"`): Wald interval on the log scale with the normal-theory
+#' delta-method SE, back-transformed.
 #' @noRd
 .err_ci <- function(fit, stat, model, type, conf.level = 0.95,
-                    alternative = c("two.sided", "greater", "less")) {
+                    alternative = c("two.sided", "greater", "less"),
+                    scale = "raw") {
   alternative <- match.arg(alternative)
-  if (stat == "SEM") {
+  if (stat == "SEM" && scale != "mean") {
     sv <- .sem_var(fit, model, type)
-    ci <- sqrt(.var_ci(sv$var, sv$df, conf.level, alternative))
+    mult <- if (scale == "log") 100 else 1
+    ci <- mult * sqrt(.var_ci(sv$var, sv$df, conf.level, alternative))
     attr(ci, "conf.level") <- conf.level
     return(ci)
   }
-  est <- .err_estimate(fit, stat, model, type)
-  se <- .err_se_log(NULL, fit, stat, model, type, "normal")
+  est <- .err_estimate(fit, stat, model, type, scale)
+  se <- .err_se_log(NULL, fit, stat, model, type, "normal", scale)
   alpha <- 1 - conf.level
   lim <- function(p) est * exp(stats::qnorm(p) * se)
   ci <- switch(alternative,
@@ -828,20 +898,23 @@
   ci
 }
 
-#' Test of H0: error statistic = null.value
+#' Test of H0: error statistic = null.value (on the reported scale)
 #'
-#' SEM: chi-square test on the variance, statistic nu * SEM^2 / null^2.
-#' SEE and SEP: z test on the log scale with the normal-theory delta SE.
+#' SEM on the raw or log scale: chi-square test on the variance, statistic
+#' nu * SEM^2 / null^2. Otherwise: z test on the log scale with the
+#' normal-theory delta SE.
 #' @noRd
 .err_test <- function(fit, stat, model, type, null.value,
-                      alternative = c("less", "greater", "two.sided")) {
+                      alternative = c("less", "greater", "two.sided"),
+                      scale = "raw") {
   alternative <- match.arg(alternative)
-  if (stat == "SEM") {
+  if (stat == "SEM" && scale != "mean") {
     sv <- .sem_var(fit, model, type)
-    return(.var_test(sv$var, sv$df, null.value^2, alternative))
+    null_raw <- if (scale == "log") null.value / 100 else null.value
+    return(.var_test(sv$var, sv$df, null_raw^2, alternative))
   }
-  est <- .err_estimate(fit, stat, model, type)
-  se <- .err_se_log(NULL, fit, stat, model, type, "normal")
+  est <- .err_estimate(fit, stat, model, type, scale)
+  se <- .err_se_log(NULL, fit, stat, model, type, "normal", scale)
   z <- (log(est) - log(null.value)) / se
   list(statistic = c(z = z),
        parameter = NULL,
@@ -936,9 +1009,15 @@
 #' variation of the item mean square that comes from drawing the items. This
 #' adds it back under normal theory: MSJ is multiplied by an independent
 #' chi-square(k - 1) / (k - 1) draw. Applied to bootstrap replicates of the
-#' two-way agreement forms only.
+#' two-way agreement forms only. With `shift_mean = TRUE` (statistics
+#' relative to the grand mean) the grand mean also gets an independent
+#' normal draw with the item mean's variance, (MSJ - MSE) / (n k).
 #' @noRd
-.hybrid_item_ms <- function(fit) {
+.hybrid_item_ms <- function(fit, shift_mean = FALSE) {
+  if (shift_mean) {
+    v_item_mean <- max(fit$ms[["MSJ"]] - fit$ms[["MSE"]], 0) / (fit$n * fit$kbar)
+    fit$grand_mean <- fit$grand_mean + stats::rnorm(1, 0, sqrt(v_item_mean))
+  }
   df_j <- fit$df[["dfJ"]]
   fit$ms[["MSJ"]] <- fit$ms[["MSJ"]] * stats::rchisq(1, df_j) / df_j
   fit

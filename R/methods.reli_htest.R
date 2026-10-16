@@ -259,8 +259,15 @@ check.reli_htest <- function(x, ...) {
   description <- .err_description(s$stat, s$model, s$type)
   description <- paste0(tolower(substr(description, 1, 1)),
                         substring(description, 2))
-  paste0("The estimate is the ", description, ", in the units of the ",
-         "measurement: ", what, ", ", treatment, ".")
+  units <- switch(if (is.null(s$scale)) "raw" else s$scale,
+                  raw = "in the units of the measurement",
+                  log = paste0("in sympercents (100 times the statistic of ",
+                               "the log-transformed measurements, a ",
+                               "coefficient of variation)"),
+                  mean = paste0("as a percentage of the grand mean (a ",
+                                "coefficient of variation)"))
+  paste0("The estimate is the ", description, ", ", units, ": ", what, ", ",
+         treatment, ".")
 }
 
 .describe_design <- function(fit) {
@@ -317,13 +324,15 @@ check.reli_htest <- function(x, ...) {
 .describe_error_inference <- function(object, tested) {
   s <- object$settings
   fit <- object$fit
-  sem <- s$stat == "SEM"
+  relative <- identical(s$scale, "mean")
+  sem <- s$stat == "SEM" && !relative
   what <- if (tested) {
     if (sem) "The interval and chi-square test" else "The interval and z test"
   } else "The interval"
   how <- if (!sem) {
     paste0(" use the delta method on the log scale with normal-theory ",
-           "variances of the mean squares")
+           "variances of the mean squares",
+           if (relative) " and the grand mean" else "")
   } else if (s$model == "twoway" && s$type == "agreement") {
     " use a chi-square distribution with Satterthwaite degrees of freedom"
   } else {

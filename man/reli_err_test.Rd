@@ -12,6 +12,7 @@ reli_err_test(
   id = NULL,
   col.names = NULL,
   stat = c("SEM", "SEE", "SEP"),
+  scale = c("raw", "log", "mean"),
   model = c("twoway", "oneway"),
   type = c("consistency", "agreement"),
   method = c("anova", "reml"),
@@ -41,6 +42,12 @@ format (one row per subject).}
 
 \item{stat}{\code{"SEM"} (default), \code{"SEE"}, or \code{"SEP"}. See Details.}
 
+\item{scale}{The scale the statistic is reported on: \code{"raw"} (default,
+units of the measurement), \code{"log"} (sympercents: 100 times the
+statistic of the log-transformed measurements), or \code{"mean"} (percentage
+of the grand mean). The last two are coefficients of variation; see
+Details.}
+
 \item{model}{\code{"twoway"} (default) when every subject is measured on the
 same set of items (e.g. test-retest trials), or \code{"oneway"} when each
 subject is measured by a different set of items.}
@@ -55,9 +62,9 @@ fits a linear mixed model and allows missing measurements.}
 
 \item{conf.level}{Confidence level of the interval (default 0.95).}
 
-\item{null.value}{An acceptable error, in the units of the measurement,
-to test against. The default, \code{NULL}, gives the estimate and interval
-without a test.}
+\item{null.value}{An acceptable error to test against, on the scale given
+by \code{scale} (units, sympercents, or percent of the mean). The default,
+\code{NULL}, gives the estimate and interval without a test.}
 
 \item{alternative}{\code{"less"} (default), \code{"greater"}, or \code{"two.sided"}. The
 default tests whether the error is smaller than \code{null.value}. Used only
@@ -189,6 +196,30 @@ subjects and skewed data). Resampling subjects without the hybrid step
 covered only 0.39 to 0.63 in those settings. More items help more than
 more subjects.
 
+\strong{Coefficient of variation.} When the error grows with the size of the
+measurements, it is better expressed relative to them (Hopkins, 2000;
+Atkinson and Nevill, 1998; Weir, 2005). Two scales are available:
+\itemize{
+\item \code{scale = "log"} fits the model to the natural logarithm of the
+measurements (all must be positive) and reports
+\eqn{100 \times} the statistic, in sympercents (Cole, 2000). Because
+this is a constant multiple of the log-scale statistic, the SEM keeps its
+exact (or Satterthwaite) \eqn{\chi^2} interval and test. A sympercent
+\eqn{s} converts to the conventional CV\% as
+\eqn{100\sqrt{\exp((s/100)^2) - 1}}; the two are nearly identical below
+about 15\% (e.g. 10 sympercents is a CV of 10.03\%). The conversion is
+monotone, so it can be applied to the interval limits too.
+\item \code{scale = "mean"} reports \eqn{100 \times} statistic / grand mean (the
+"pooled" CV). The interval and test use the delta method on the log
+scale, adding the uncertainty in the grand mean, whose normal-theory
+variance is \eqn{MS_B/(nk)} with items fixed (consistency, one-way) and
+\eqn{(MS_B + MS_J - MS_E)/(nk)} with items random (two-way agreement).
+}
+
+\code{null.value} is on the same scale as the estimate. The log scale is
+usually preferable: it treats the error as proportional to each
+measurement rather than to the overall mean.
+
 \strong{Minimal detectable change.} The minimal detectable change (MDC),
 smallest real difference, or repeatability coefficient is a scaled SEM:
 \eqn{1.96 \sqrt{2} SEM} for 95\% (Weir, 2005, eq. 13). Scale the estimate
@@ -205,12 +236,24 @@ reli_err_test(col.names = c("t1", "t2"), data = weir)
 # Is the typical error below 10 units?
 reli_err_test(col.names = c("t1", "t2"), data = weir, null.value = 10)
 
+# Typical error as a coefficient of variation (sympercents)
+reli_err_test(col.names = c("t1", "t2"), data = weir, scale = "log")
+
 # Standard error of prediction
 res <- reli_err_test(col.names = c("t1", "t2"), data = weir, stat = "SEP")
 summary(res)
 
 }
 \references{
+Atkinson, G., & Nevill, A. M. (1998). Statistical methods for assessing
+measurement error (reliability) in variables relevant to sports medicine.
+Sports Medicine, 26(4), 217-238. \doi{10.2165/00007256-199826040-00002}
+
+Cole, T. J. (2000). Sympercents: symmetric percentage differences on the
+100 log_e scale simplify the presentation of log transformed data.
+Statistics in Medicine, 19(22), 3109-3125.
+\doi{10.1002/1097-0258(20001130)19:22<3109::AID-SIM558>3.0.CO;2-F}
+
 Hopkins, W. G. (2000). Measures of reliability in sports medicine and
 science. Sports Medicine, 30(1), 1-15. \doi{10.2165/00007256-200030010-00001}
 
@@ -222,3 +265,4 @@ Conditioning Research, 19(1), 231-240. \doi{10.1519/15184.1}
 \code{\link[=icc_test]{icc_test()}}; \link{reli_htest-methods} for \code{summary()}, \code{plot()} and
 \code{check()}.
 }
+\concept{coefficient of variation}

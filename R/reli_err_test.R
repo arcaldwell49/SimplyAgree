@@ -19,9 +19,14 @@
 #' @param type `"consistency"` (default) excludes systematic differences
 #'   between items from the error; `"agreement"` includes them. Only
 #'   `"agreement"` is defined for `model = "oneway"`.
-#' @param null.value An acceptable error, in the units of the measurement,
-#'   to test against. The default, `NULL`, gives the estimate and interval
-#'   without a test.
+#' @param scale The scale the statistic is reported on: `"raw"` (default,
+#'   units of the measurement), `"log"` (sympercents: 100 times the
+#'   statistic of the log-transformed measurements), or `"mean"` (percentage
+#'   of the grand mean). The last two are coefficients of variation; see
+#'   Details.
+#' @param null.value An acceptable error to test against, on the scale given
+#'   by `scale` (units, sympercents, or percent of the mean). The default,
+#'   `NULL`, gives the estimate and interval without a test.
 #' @param alternative `"less"` (default), `"greater"`, or `"two.sided"`. The
 #'   default tests whether the error is smaller than `null.value`. Used only
 #'   when `null.value` is given; without a test the interval is two-sided.
@@ -114,6 +119,29 @@
 #' covered only 0.39 to 0.63 in those settings. More items help more than
 #' more subjects.
 #'
+#' **Coefficient of variation.** When the error grows with the size of the
+#' measurements, it is better expressed relative to them (Hopkins, 2000;
+#' Atkinson and Nevill, 1998; Weir, 2005). Two scales are available:
+#'
+#' - `scale = "log"` fits the model to the natural logarithm of the
+#'   measurements (all must be positive) and reports
+#'   \eqn{100 \times} the statistic, in sympercents (Cole, 2000). Because
+#'   this is a constant multiple of the log-scale statistic, the SEM keeps its
+#'   exact (or Satterthwaite) \eqn{\chi^2} interval and test. A sympercent
+#'   \eqn{s} converts to the conventional CV% as
+#'   \eqn{100\sqrt{\exp((s/100)^2) - 1}}; the two are nearly identical below
+#'   about 15% (e.g. 10 sympercents is a CV of 10.03%). The conversion is
+#'   monotone, so it can be applied to the interval limits too.
+#' - `scale = "mean"` reports \eqn{100 \times} statistic / grand mean (the
+#'   "pooled" CV). The interval and test use the delta method on the log
+#'   scale, adding the uncertainty in the grand mean, whose normal-theory
+#'   variance is \eqn{MS_B/(nk)} with items fixed (consistency, one-way) and
+#'   \eqn{(MS_B + MS_J - MS_E)/(nk)} with items random (two-way agreement).
+#'
+#' `null.value` is on the same scale as the estimate. The log scale is
+#' usually preferable: it treats the error as proportional to each
+#' measurement rather than to the overall mean.
+#'
 #' **Minimal detectable change.** The minimal detectable change (MDC),
 #' smallest real difference, or repeatability coefficient is a scaled SEM:
 #' \eqn{1.96 \sqrt{2} SEM} for 95% (Weir, 2005, eq. 13). Scale the estimate
@@ -149,11 +177,23 @@
 #' # Is the typical error below 10 units?
 #' reli_err_test(col.names = c("t1", "t2"), data = weir, null.value = 10)
 #'
+#' # Typical error as a coefficient of variation (sympercents)
+#' reli_err_test(col.names = c("t1", "t2"), data = weir, scale = "log")
+#'
 #' # Standard error of prediction
 #' res <- reli_err_test(col.names = c("t1", "t2"), data = weir, stat = "SEP")
 #' summary(res)
 #'
 #' @references
+#' Atkinson, G., & Nevill, A. M. (1998). Statistical methods for assessing
+#' measurement error (reliability) in variables relevant to sports medicine.
+#' Sports Medicine, 26(4), 217-238. \doi{10.2165/00007256-199826040-00002}
+#'
+#' Cole, T. J. (2000). Sympercents: symmetric percentage differences on the
+#' 100 log_e scale simplify the presentation of log transformed data.
+#' Statistics in Medicine, 19(22), 3109-3125.
+#' \doi{10.1002/1097-0258(20001130)19:22<3109::AID-SIM558>3.0.CO;2-F}
+#'
 #' Hopkins, W. G. (2000). Measures of reliability in sports medicine and
 #' science. Sports Medicine, 30(1), 1-15. \doi{10.2165/00007256-200030010-00001}
 #'
@@ -161,6 +201,7 @@
 #' intraclass correlation coefficient and the SEM. Journal of Strength and
 #' Conditioning Research, 19(1), 231-240. \doi{10.1519/15184.1}
 #'
+#' @concept coefficient of variation
 #' @seealso [icc_test()]; [reli_htest-methods] for `summary()`, `plot()` and
 #'   `check()`.
 #' @export
@@ -171,6 +212,7 @@ reli_err_test <- function(x = NULL,
                           id = NULL,
                           col.names = NULL,
                           stat = c("SEM", "SEE", "SEP"),
+                          scale = c("raw", "log", "mean"),
                           model = c("twoway", "oneway"),
                           type = c("consistency", "agreement"),
                           method = c("anova", "reml"),
@@ -182,6 +224,7 @@ reli_err_test <- function(x = NULL,
                           replicates = 1999,
                           se_method = c("jackknife", "influence", "normal")) {
   stat <- match.arg(stat)
+  scale <- match.arg(scale)
   model <- match.arg(model)
   type_given <- !missing(type)
   type <- match.arg(type)
@@ -213,21 +256,36 @@ reli_err_test <- function(x = NULL,
 
   prep <- .reli_prepare(x = x, data = data, measure = measure, item = item,
                         id = id, col.names = col.names)
-  fit <- .reli_fit(prep, method = method, model = model)
+  # the model is fitted to log(values) for scale = "log"; `prep` keeps the
+  # original data for plot()
+  prep_fit <- prep
+  if (scale == "log") {
+    if (any(prep$df$values <= 0)) {
+      stop("scale = \"log\" needs all measurements to be positive.",
+           call. = FALSE)
+    }
+    prep_fit$df$values <- log(prep$df$values)
+  }
+  if (scale == "mean" && mean(prep$df$values) <= 0) {
+    stop("scale = \"mean\" needs a positive grand mean.", call. = FALSE)
+  }
+  fit <- .reli_fit(prep_fit, method = method, model = model)
   if (method == "reml" && !prep$balanced && !boot) {
     .reli_warn_unbalanced(prep)
   }
 
-  estimate <- .err_estimate(fit, stat, model, type)
-  se_log <- .err_se_log(prep, fit, stat, model, type, se_method)
-  stderr <- stats::setNames(c(estimate * se_log, se_log), c(stat, "log"))
+  estimate <- .err_estimate(fit, stat, model, type, scale)
+  se_log <- .err_se_log(prep_fit, fit, stat, model, type, se_method, scale)
+  label <- .err_label(stat, scale)
+  stderr <- stats::setNames(c(estimate * se_log, se_log), c(label, "log"))
 
   if (!boot) {
-    conf.int <- .err_ci(fit, stat, model, type, conf.level, alternative)
+    conf.int <- .err_ci(fit, stat, model, type, conf.level, alternative,
+                        scale)
     test <- if (is.null(null.value)) {
       list(statistic = NULL, parameter = NULL, p.value = NULL)
     } else {
-      .err_test(fit, stat, model, type, null.value, alternative)
+      .err_test(fit, stat, model, type, null.value, alternative, scale)
     }
     boot_info <- NULL
   } else {
@@ -235,15 +293,16 @@ reli_err_test <- function(x = NULL,
     stat_fun <- function(p, resample) {
       f <- .reli_fit(p, method = method, model = model, keep_fit = FALSE)
       if (resample && random_items) {
-        f <- .hybrid_item_ms(f)
+        f <- .hybrid_item_ms(f, shift_mean = scale == "mean")
       }
-      est <- .err_estimate(f, stat, model, type)
+      est <- .err_estimate(f, stat, model, type, scale)
       c(est = est,
         z = log(est),
         se_z = if (boot_ci == "stud") .err_se_log(p, f, stat, model, type,
-                                                  se_method) else NA_real_)
+                                                  se_method, scale) else
+          NA_real_)
     }
-    bo <- .reli_boot(prep, stat_fun, R = replicates,
+    bo <- .reli_boot(prep_fit, stat_fun, R = replicates,
                      jackknife = boot_ci == "bca")
     .check_boot_failures(bo)
     conf.int <- .boot_interval(bo, boot_ci, conf.level, alternative,
@@ -263,6 +322,7 @@ reli_err_test <- function(x = NULL,
 
   settings <- list(statistic = "error",
                    stat = stat,
+                   scale = scale,
                    model = model,
                    type = type,
                    form = .err_icc_form(model, type),
@@ -271,19 +331,19 @@ reli_err_test <- function(x = NULL,
                    boot = boot,
                    boot_ci = if (boot) boot_ci else NULL,
                    se_method = se_method,
-                   label = stat)
+                   label = label)
 
   structure(list(statistic = test$statistic,
                  parameter = test$parameter,
                  p.value = test$p.value,
                  conf.int = conf.int,
-                 estimate = stats::setNames(estimate, stat),
+                 estimate = stats::setNames(estimate, label),
                  stderr = stderr,
                  null.value = if (is.null(null.value)) NULL else
-                   stats::setNames(null.value, stat),
+                   stats::setNames(null.value, label),
                  alternative = alternative,
                  method = .err_method_text(stat, model, type, method, boot,
-                                           boot_ci),
+                                           boot_ci, scale),
                  data.name = prep$data.name,
                  fit = fit,
                  data = prep$df,
@@ -305,11 +365,23 @@ reli_err_test <- function(x = NULL,
   paste0(what, " (", design, ")")
 }
 
-.err_method_text <- function(stat, model, type, method, boot, boot_ci) {
+.err_label <- function(stat, scale) {
+  switch(scale,
+         raw = stat,
+         log = paste0(stat, " (sympercent)"),
+         mean = paste0(stat, " (% of mean)"))
+}
+
+.err_method_text <- function(stat, model, type, method, boot, boot_ci,
+                             scale = "raw") {
   base <- .err_description(stat, model, type)
   if (stat != "SEM") {
     base <- paste0(base, " from ", .icc_label(.err_icc_form(model, type)))
   }
+  base <- paste0(base, switch(scale,
+                              raw = "",
+                              log = ", log scale (sympercents)",
+                              mean = ", as a percentage of the grand mean"))
   fit <- if (method == "reml") " (REML)" else ""
   inference <- if (boot) {
     paste0(" with nonparametric (subject) bootstrap ",

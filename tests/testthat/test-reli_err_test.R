@@ -320,6 +320,144 @@ test_that("agreement statistics use the hybrid bootstrap", {
   expect_gt(hyb$boot$boot_se, sd(subj$t[, "est"]))
 })
 
+# Coefficient of variation scales ------------------------------------------------------------------
+
+weir_log <- data.frame(t1 = log(weir_a$t1), t2 = log(weir_a$t2))
+
+test_that("scale = 'log' is 100 times the statistic of the log values", {
+  for (s in c("SEM", "SEE", "SEP")) {
+    lg <- reli_err_test(col.names = wcols, data = weir_a, stat = s, scale = "log")
+    raw_log <- reli_err_test(col.names = wcols, data = weir_log, stat = s)
+    expect_named(lg$estimate, paste0(s, " (sympercent)"))
+    expect_equal(unname(lg$estimate), 100 * unname(raw_log$estimate))
+    expect_equal(as.numeric(lg$conf.int), 100 * as.numeric(raw_log$conf.int))
+    expect_equal(lg$stderr[["log"]], raw_log$stderr[["log"]])
+  }
+  # the stored data are the original measurements (for plot())
+  lg <- reli_err_test(col.names = wcols, data = weir_a, scale = "log")
+  expect_equal(sort(lg$data$values), sort(c(weir_a$t1, weir_a$t2)))
+  expect_match(lg$method, "sympercents")
+})
+
+test_that("scale = 'log' tests the null on the sympercent scale", {
+  lg <- reli_err_test(col.names = wcols, data = weir_a, scale = "log",
+                      null.value = 5)
+  raw_log <- reli_err_test(col.names = wcols, data = weir_log,
+                           null.value = 0.05)
+  expect_equal(lg$statistic, raw_log$statistic)
+  expect_equal(lg$p.value, raw_log$p.value)
+  expect_named(lg$null.value, "SEM (sympercent)")
+  at_bound <- reli_err_test(col.names = wcols, data = weir_a, scale = "log",
+                            null.value = lg$conf.int[[2]])
+  expect_equal(at_bound$p.value, 0.05, tolerance = 1e-8)
+})
+
+test_that("scale = 'log' needs positive measurements", {
+  w <- weir_a
+  w$t1[1] <- 0
+  expect_error(reli_err_test(col.names = wcols, data = w, scale = "log"),
+               "positive")
+})
+
+test_that("scale = 'mean' divides by the grand mean and adds its uncertainty", {
+  res <- reli_err_test(col.names = wcols, data = weir_a, scale = "mean",
+                       se_method = "normal")
+  gm <- mean(ya)
+  expect_named(res$estimate, "SEM (% of mean)")
+  expect_equal(unname(res$estimate), 100 * sqrt(mse_a) / gm, tolerance = 1e-10)
+  se <- sqrt(0.25 * trigamma(7 / 2) + msb_a / (8 * 2) / gm^2)
+  expect_equal(res$stderr[["log"]], se, tolerance = 1e-8)
+  # analytic interval: log-Wald with the same SE
+  expect_equal(log(res$conf.int[2] / res$estimate[[1]]), qnorm(0.975) * se,
+               tolerance = 1e-8)
+  expect_match(res$method, "percentage of the grand mean")
+
+  # with random items the item mean adds (MSJ - MSE) / (n k) when positive
+  p <- SimplyAgree:::.reli_prepare(col.names = sf_cols, data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  expect_equal(SimplyAgree:::.grand_mean_var(f, "twoway", "agreement"),
+               (f$ms[["MSB"]] + f$ms[["MSJ"]] - f$ms[["MSE"]]) / 24)
+  expect_equal(SimplyAgree:::.grand_mean_var(f, "twoway", "consistency"),
+               f$ms[["MSB"]] / 24)
+})
+
+test_that("scale = 'mean' uses a z test that inverts the interval", {
+  res <- reli_err_test(col.names = wcols, data = weir_a, scale = "mean",
+                       null.value = 6)
+  expect_named(res$statistic, "z")
+  at_bound <- reli_err_test(col.names = wcols, data = weir_a, scale = "mean",
+                            null.value = res$conf.int[[2]])
+  expect_equal(at_bound$p.value, 0.05, tolerance = 1e-8)
+  expect_error(reli_err_test(col.names = wcols, data = weir_a - 500,
+                             scale = "mean"), "positive grand mean")
+})
+
+test_that("jackknife SE on the mean scale deletes subjects from the mean too", {
+  res <- reli_err_test(col.names = sf_cols, data = sf_wide, scale = "mean")
+  z_i <- vapply(1:6, function(i) {
+    Y <- as.matrix(sf_wide[-i, ])
+    r <- Y - outer(rowMeans(Y), colMeans(Y), "+") + mean(Y)
+    log(sqrt(sum(r^2) / (4 * 3)) / mean(Y))
+  }, numeric(1))
+  expect_equal(res$stderr[["log"]], sqrt(5 / 6 * sum((z_i - mean(z_i))^2)),
+               tolerance = 1e-8)
+})
+
+test_that("grand-mean influence is each subject's mean deviation", {
+  p <- SimplyAgree:::.reli_prepare(col.names = sf_cols, data = sf_wide)
+  Y <- as.matrix(sf_wide)
+  expect_equal(SimplyAgree:::.grand_mean_influence(p),
+               unname(rowMeans(Y) - mean(Y)))
+  infl <- reli_err_test(col.names = sf_cols, data = sf_wide, scale = "mean",
+                        se_method = "influence")
+  raw <- reli_err_test(col.names = sf_cols, data = sf_wide,
+                       se_method = "influence")
+  expect_gt(infl$stderr[["log"]], raw$stderr[["log"]])
+})
+
+test_that("ICC standard errors are unchanged by the grand-mean term", {
+  p <- SimplyAgree:::.reli_prepare(col.names = sf_cols, data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  for (m in c("jackknife", "influence")) {
+    se <- SimplyAgree:::.icc_se_z(p, f, "A1", m)
+    f2 <- f
+    f2$grand_mean <- f$grand_mean + 100
+    expect_equal(SimplyAgree:::.icc_se_z(p, f2, "A1", m), se)
+  }
+})
+
+test_that("bootstrap runs on the log and mean scales", {
+  set.seed(8)
+  lg <- reli_err_test(col.names = sf_cols, data = sf_wide, scale = "log",
+                      boot = TRUE, replicates = 100, null.value = 30)
+  expect_true(lg$conf.int[1] == 0 && lg$conf.int[2] > lg$estimate)
+  set.seed(8)
+  mn <- reli_err_test(col.names = sf_cols, data = sf_wide, scale = "mean",
+                      type = "agreement", boot = TRUE, replicates = 100)
+  expect_equal(mn$settings$boot_ci, "bca")
+  expect_true(mn$conf.int[1] < mn$estimate && mn$estimate < mn$conf.int[2])
+})
+
+test_that("the hybrid step shifts the grand mean only for the mean scale", {
+  p <- SimplyAgree:::.reli_prepare(col.names = sf_cols, data = sf_wide)
+  f <- SimplyAgree:::.reli_fit(p)
+  set.seed(1)
+  expect_equal(SimplyAgree:::.hybrid_item_ms(f)$grand_mean, f$grand_mean)
+  set.seed(1)
+  expect_false(SimplyAgree:::.hybrid_item_ms(f, shift_mean = TRUE)$grand_mean ==
+                 f$grand_mean)
+})
+
+test_that("summary describes the coefficient-of-variation scales", {
+  lg <- summary(reli_err_test(col.names = wcols, data = weir_a, scale = "log"))
+  expect_match(lg$text, "in sympercents")
+  expect_match(lg$text, "SEM \\(sympercent\\) was")
+  expect_match(lg$text, "is exact under normality")
+  mn <- summary(reli_err_test(col.names = wcols, data = weir_a, scale = "mean"))
+  expect_match(mn$text, "percentage of the grand mean")
+  expect_match(mn$text, "delta method on the log scale with normal-theory variances of the mean squares and the grand mean")
+})
+
 # Methods ------------------------------------------------------------------------------------------
 
 test_that("summary describes error statistics in words", {
