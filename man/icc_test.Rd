@@ -85,8 +85,9 @@ A list of class \code{c("reli_htest", "htest")} containing:
 \item{p.value}{The p-value of the test.}
 \item{conf.int}{The confidence interval for the ICC.}
 \item{estimate}{The estimated ICC, named by its McGraw and Wong form.}
-\item{stderr}{Standard errors of the ICC and of
-\eqn{z = 0.5 \log F}, from \code{se_method}.}
+\item{stderr}{Standard errors of the ICC (\code{ICC}) and of
+\eqn{z = 0.5 \log F} (\code{z}), from \code{se_method}. With \code{boot = TRUE}, also
+\code{boot}: the standard deviation of the bootstrap ICC estimates.}
 \item{null.value}{The hypothesized ICC.}
 \item{alternative}{The alternative hypothesis.}
 \item{method}{A description of the ICC and the inference.}

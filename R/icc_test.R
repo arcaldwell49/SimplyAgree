@@ -142,8 +142,9 @@
 #'   \item{p.value}{The p-value of the test.}
 #'   \item{conf.int}{The confidence interval for the ICC.}
 #'   \item{estimate}{The estimated ICC, named by its McGraw and Wong form.}
-#'   \item{stderr}{Standard errors of the ICC and of
-#'   \eqn{z = 0.5 \log F}, from `se_method`.}
+#'   \item{stderr}{Standard errors of the ICC (`ICC`) and of
+#'   \eqn{z = 0.5 \log F} (`z`), from `se_method`. With `boot = TRUE`, also
+#'   `boot`: the standard deviation of the bootstrap ICC estimates.}
 #'   \item{null.value}{The hypothesized ICC.}
 #'   \item{alternative}{The alternative hypothesis.}
 #'   \item{method}{A description of the ICC and the inference.}
@@ -296,6 +297,7 @@ icc_test <- function(x = NULL,
                       n_failed = bo$n_failed,
                       boot_se = stats::sd(bo$t[, "est"]),
                       estimates = bo$t[, "est"])
+    stderr <- c(stderr, boot = boot_info$boot_se)
   }
 
   settings <- list(statistic = "icc",

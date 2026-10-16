@@ -195,6 +195,8 @@ test_that("bootstrap results omit the statistic and report replicates", {
                   boot_ci = "perc", replicates = 200)
   expect_null(res$statistic)
   expect_null(res$parameter)
+  expect_named(res$stderr, c("ICC", "z", "boot"))
+  expect_equal(res$stderr[["boot"]], sd(res$boot$estimates))
   expect_equal(res$boot$n_used + res$boot$n_failed, 200)
   expect_match(res$method, "percentile interval")
   expect_true(res$conf.int[1] <= res$estimate && res$estimate <= res$conf.int[2])
