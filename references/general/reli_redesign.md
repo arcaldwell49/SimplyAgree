@@ -1,9 +1,10 @@
 # Reliability Suite Redesign
 
-Branch: `reli-update` · Status: phases 1–6 done (engine, `icc_test()`,
+Branch: `reli-update` · Status: phases 1–8 done (engine, `icc_test()`,
 `reli_err_test()` with raw/log/mean scales, methods, `power_icc()`,
-`precision_icc()`, legacy rewire, jamovi, NEWS, vignette); phase 7 pending
-· Last updated: 2026-10-16
+`precision_icc()`, legacy rewire, jamovi, NEWS, vignette, check and
+coverage, plot redesign); next: the PR
+· Last updated: 2026-10-17
 
 ## 0. Handoff: current state and next steps
 
@@ -28,7 +29,7 @@ are current.
 
 Commits on `reli-update` since `master`: `3826d5d` (phase 1), then
 `f7fcc97`, `7b685ee`, `f6768b4`, `ae74d46`, `8fd0d35`, `aec1a82` (phase 2).
-`R CMD check`: 0 errors, 0 warnings; one NOTE that predates this work
+`R CMD check` (phase 7): 0 errors, 0 warnings; environment NOTEs only. Phase 1–2 note, kept for the record: one NOTE that predated this work
 (`calc_loa_reps`: undefined globals `mxi`, `myi` in `R/agree_reps.R`), plus
 an occasional environment NOTE ("unable to verify current time").
 
@@ -92,13 +93,24 @@ bootstrapping), `parameter`, `p.value`, `conf.int`, `estimate`, `stderr`
 
 ### Next steps
 
-**Phase 7: check and coverage.** `devtools::check()` clean (the known
-environment NOTEs aside) and `covr` coverage ≥ 90% on the new files
-(`R/reli_engine.R`, `R/icc_test.R`, `R/reli_err_test.R`, `R/power_icc.R`,
-`R/methods.reli_htest.R`, `R/reli_stats.R`). `covr` is not installed on the
-Windows work machine. Also: run the slow tests
-(`SIMPLYAGREE_SLOW_TESTS=true`), check the jamovi module in jamovi itself,
-and review the rendered vignette.
+**Phase 8 done 2026-10-17** (decisions below in Section 9); next is the PR.
+
+**Phase 8: reassess the reliability plot** (user, 2026-10-16), before the
+PR. `plot.reli_htest()` (and `plot.simple_reli()`, jamovi) currently draws
+each subject's measurements across items, coloured by subject, with a
+legend. Explore alternatives on the Shrout & Fleiss and Weir data and
+decide with the user before implementing. Candidates: a refined profile
+plot (grey subject lines, item means with intervals, no legend); a
+trial-vs-trial scatter with the identity line (k = 2) or a pairs matrix;
+within-subject SD (or |difference|) against the subject mean, to show
+whether the error grows with the mean (the raw vs log `scale` choice);
+subject means ranked with ±SEM bars (between-subject spread against
+measurement error, i.e. the ICC); residuals by item (systematic trial
+effects, consistency vs agreement); a variance-component bar.
+
+Then the PR from `reli-update` to `master` (description from this doc and
+NEWS). Manual checks only the user can do: the jamovi module in jamovi,
+and a read of the rendered vignette.
 
 ### Open TODOs
 
@@ -1500,7 +1512,45 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
      in `vignettes/refs.bib` (Hopkins, Koo & Li, Cole, Atkinson & Nevill,
      Greenland, Rafi & Greenland, Walter et al., Zou, Mondal et al.).
      `agree_tests.Rmd` now points to the new functions.
-7. `devtools::check()` clean; coverage ≥ 90% on new files.
+7. `devtools::check()` clean; coverage ≥ 90% on new files. **Done
+   2026-10-16.** `covr` 3.6.5 installed on the Windows machine (user
+   approved). Line coverage from the fast tests: `reli_err_test.R` 100%,
+   `reli_engine.R` 98.0%, `methods.reli_htest.R` 97.8%, `reli_stats.R`
+   97.8%, `icc_test.R` 97.6%, `power_icc.R` 96.4%, `jmvreli.b.R` 90.1% before
+   a test of its CV fallbacks was added (the jamovi `.plot` render cannot be
+   reached from tests). All slow tests pass with
+   `SIMPLYAGREE_SLOW_TESTS=true`. The pre-existing `calc_loa_reps`
+   `mxi`/`myi` NOTE is fixed (`R/globals.R`). `R CMD check`: 0 errors, 0
+   warnings, 2 environment NOTEs (`ggeffects`/`deming` not installed;
+   "unable to verify current time").
+
+8. **Reliability plot (phase 8), done 2026-10-17.** Seven candidates were
+   rendered on the Shrout & Fleiss data, Weir data set A and a simulated
+   n = 30, k = 3 set with a learning effect and multiplicative error
+   (scratch script, not kept): A current (per-subject colours, legend: the
+   legend is useless at n = 30); B refined profile; C trial vs trial with
+   identity (clear for k = 2, busy for k = 4); D within-subject SD vs
+   subject mean (decisive at n = 30, noise at n = 6–8); E subjects ranked
+   by mean (closest picture of the ICC); F deviations by item (item
+   effects); G variance-component shares (unreadable small slices;
+   dropped). **Decisions (user):**
+   - `plot.reli_htest(type = c("profile", "subjects", "items", "pairs"))`,
+     default `"profile"` (B): grey subject lines and points, item means with
+     95% CIs, no legend. Item means are adjusted for subjects (average of
+     the fitted `lm(values ~ id + items)` over the full grid, SE from its
+     vcov), which equals the raw means with complete data and removes the
+     bias from who is missing otherwise. `"subjects"` (E; subject labels
+     hidden above 15 subjects), `"items"` (F), `"pairs"` (C; incomplete
+     pairs dropped).
+   - `check.reli_htest()` gains a third panel (D): within-subject SD
+     against the subject mean with a linear trend and Kendall's tau, on the
+     fitted scale (log values for `scale = "log"`, where the "consider
+     scale = log" hint is dropped). Omitted when fewer than 3 subjects have
+     2+ measurements.
+   - jamovi follows automatically (its plot state is an `icc_test()`
+     result). Legacy `plot.simple_reli()` unchanged.
+   - Tests in `test-icc_test.R`; vignette section "Plots and
+     diagnostics"; NEWS line.
 
 ## 10. TODO (future, not this branch)
 

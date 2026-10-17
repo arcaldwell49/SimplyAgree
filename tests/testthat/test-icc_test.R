@@ -359,6 +359,62 @@ test_that("summary paragraphs are stable", {
   expect_snapshot(summary(res, style = "estimation"))
 })
 
+test_that("each plot type returns a ggplot", {
+  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  for (tp in c("profile", "subjects", "items", "pairs")) {
+    expect_s3_class(plot(res, type = tp), "ggplot")
+  }
+  expect_error(plot(res, type = "bar"))
+  # pairs: one panel per pair of items
+  expect_equal(nlevels(plot(res, type = "pairs")$data$pair), choose(4, 2))
+  # subjects ordered by their mean
+  expect_equal(levels(plot(res, type = "subjects")$data$id),
+               as.character(order(rowMeans(sf_wide))))
+})
+
+test_that("profile item means are adjusted for subjects with missing data", {
+  df <- icc_test(col.names = sf_cols, data = sf_wide)$data
+  m <- SimplyAgree:::.adjusted_item_means(df)
+  expect_equal(m$values, unname(colMeans(sf_wide)))
+  # 95% CI from the two-way error mean square
+  mse <- sum(residuals(lm(values ~ id + items, data = df))^2) / 15
+  expect_equal(m$upper - m$values, rep(qt(0.975, 15) * sqrt(mse / 6), 4))
+
+  w <- sf_wide
+  w$J2[1] <- NA
+  res_na <- suppressWarnings(icc_test(col.names = sf_cols, data = w,
+                                      method = "reml"))
+  m_na <- SimplyAgree:::.adjusted_item_means(res_na$data)
+  # subject 1 is high, so the raw J2 mean without it is too low
+  expect_gt(m_na$values[2], mean(w$J2, na.rm = TRUE))
+  expect_s3_class(plot(res_na, type = "pairs"), "ggplot")
+})
+
+test_that("check adds the within-subject SD against the subject mean", {
+  res <- icc_test(col.names = sf_cols, data = sf_wide)
+  chk <- check(res)
+  expect_s3_class(chk, "patchwork")
+  expect_length(chk$patches$plots, 2)
+  p_err <- chk
+  expect_match(p_err$labels$caption, "Kendall's tau")
+  expect_match(p_err$labels$caption, "scale = \"log\"")
+  sd_i <- apply(sf_wide, 1, sd)
+  expect_equal(sort(p_err$data$sd), sort(unname(sd_i)))
+
+  # on the log scale the panel uses the log values and drops the hint
+  lg <- reli_err_test(col.names = sf_cols, data = sf_wide, scale = "log")
+  p_lg <- check(lg)
+  expect_equal(sort(p_lg$data$sd), sort(unname(apply(log(sf_wide), 1, sd))))
+  expect_no_match(p_lg$labels$caption, "consider")
+
+  # too few subjects with repeated measurements: the two residual panels only
+  two <- data.frame(a = c(1, 2), b = c(1.5, 2.6), c = c(0.7, 2.9),
+                    d = c(1.4, 1.8))
+  r2 <- icc_test(col.names = c("a", "b", "c", "d"), data = two)
+  expect_null(SimplyAgree:::.plot_error_vs_mean(r2$data$id, r2$data$values))
+  expect_s3_class(check(r2), "patchwork")
+})
+
 test_that("plot and check return plots", {
   res <- icc_test(col.names = sf_cols, data = sf_wide)
   expect_s3_class(plot(res), "ggplot")

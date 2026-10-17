@@ -12,7 +12,7 @@
 
 \method{print}{summary.reli_htest}(x, ...)
 
-\method{plot}{reli_htest}(x, ...)
+\method{plot}{reli_htest}(x, type = c("profile", "subjects", "items", "pairs"), ...)
 
 \method{check}{reli_htest}(x, ...)
 }
@@ -25,6 +25,18 @@ otherwise. See Details.}
 \item{...}{Not used.}
 
 \item{x, object}{An object of class \code{reli_htest}.}
+
+\item{type}{For \code{plot()}, the plot to draw: \code{"profile"} (default), each
+subject's measurements across the items in grey with the item means and
+their 95\% confidence intervals (adjusted for subjects when measurements
+are missing); \code{"subjects"}, the subjects ordered by their mean, with
+each subject's measurements, coloured by item, and their range, which
+compares the spread between subjects with the scatter within subjects
+(what the ICC summarises); \code{"items"}, the deviation of each measurement
+from its subject's mean, by item, which shows systematic differences
+between items (error for an agreement ICC, but not for a consistency
+ICC); or \code{"pairs"}, each pair of items plotted against each other with
+the line of identity.}
 }
 \value{
 \describe{
@@ -32,10 +44,13 @@ otherwise. See Details.}
 list with the description in \code{text}, the \code{style} used, the S-value
 (\code{s.value}, when there is a p-value) and the parts used to build it. It
 prints as a paragraph.}
-\item{\code{plot}}{A ggplot2 plot of each subject's measurements across
-the items.}
-\item{\code{check}}{Normality and heteroskedasticity diagnostic plots of
-the model residuals, combined with patchwork.}
+\item{\code{plot}}{A ggplot2 plot (see \code{type}).}
+\item{\code{check}}{Diagnostic plots combined with patchwork: normality
+and heteroskedasticity of the model residuals, and the within-subject SD
+against the subject mean (on the scale the model was fitted). A rising
+within-subject SD means the error grows with the size of the
+measurement, so a relative error (\code{\link[=reli_err_test]{reli_err_test()}} with
+\code{scale = "log"}) describes it better.}
 }
 }
 \description{
@@ -70,6 +85,8 @@ sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
 res <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
 summary(res)
 plot(res)
+plot(res, type = "subjects")
+check(res)
 
 # A test against a threshold, in both styles
 res2 <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf,

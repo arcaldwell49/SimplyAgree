@@ -10,6 +10,17 @@
 #'   `"hypothesis"`, or `"estimation"`. `"auto"` uses `"hypothesis"` when the
 #'   result has a p-value (a `null.value` was given) and `"estimation"`
 #'   otherwise. See Details.
+#' @param type For `plot()`, the plot to draw: `"profile"` (default), each
+#'   subject's measurements across the items in grey with the item means and
+#'   their 95% confidence intervals (adjusted for subjects when measurements
+#'   are missing); `"subjects"`, the subjects ordered by their mean, with
+#'   each subject's measurements, coloured by item, and their range, which
+#'   compares the spread between subjects with the scatter within subjects
+#'   (what the ICC summarises); `"items"`, the deviation of each measurement
+#'   from its subject's mean, by item, which shows systematic differences
+#'   between items (error for an agreement ICC, but not for a consistency
+#'   ICC); or `"pairs"`, each pair of items plotted against each other with
+#'   the line of identity.
 #' @param ... Not used.
 #'
 #' @details
@@ -48,10 +59,13 @@
 #'   list with the description in `text`, the `style` used, the S-value
 #'   (`s.value`, when there is a p-value) and the parts used to build it. It
 #'   prints as a paragraph.}
-#'   \item{\code{plot}}{A ggplot2 plot of each subject's measurements across
-#'   the items.}
-#'   \item{\code{check}}{Normality and heteroskedasticity diagnostic plots of
-#'   the model residuals, combined with patchwork.}
+#'   \item{\code{plot}}{A ggplot2 plot (see `type`).}
+#'   \item{\code{check}}{Diagnostic plots combined with patchwork: normality
+#'   and heteroskedasticity of the model residuals, and the within-subject SD
+#'   against the subject mean (on the scale the model was fitted). A rising
+#'   within-subject SD means the error grows with the size of the
+#'   measurement, so a relative error ([reli_err_test()] with
+#'   `scale = "log"`) describes it better.}
 #' }
 #'
 #' @examples
@@ -60,6 +74,8 @@
 #' res <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
 #' summary(res)
 #' plot(res)
+#' plot(res, type = "subjects")
+#' check(res)
 #'
 #' # A test against a threshold, in both styles
 #' res2 <- icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf,
@@ -144,25 +160,179 @@ print.summary.reli_htest <- function(x, ...) {
 #' @method plot reli_htest
 #' @import ggplot2
 #' @export
-plot.reli_htest <- function(x, ...) {
-  ggplot(x$data,
-         aes(x = items, y = values, color = id, group = id)) +
-    geom_point(position = position_dodge(width = 0.2)) +
-    geom_line(color = "black",
-              alpha = .2,
-              position = position_dodge(width = 0.2)) +
-    labs(y = "Measurement",
-         x = "Item",
-         color = "Subject") +
-    scale_color_viridis_d() +
-    theme_bw()
+plot.reli_htest <- function(x,
+                            type = c("profile", "subjects", "items", "pairs"),
+                            ...) {
+  type <- match.arg(type)
+  df <- x$data
+  switch(type,
+         profile = .plot_profile(df),
+         subjects = .plot_subjects(df),
+         items = .plot_items(df),
+         pairs = .plot_pairs(df))
 }
 
 #' @rdname reli_htest-methods
 #' @method check reli_htest
 #' @export
 check.reli_htest <- function(x, ...) {
-  check_reli(list(lmer = x$fit$fit))
+  checks <- check_reli(list(lmer = x$fit$fit))
+  # on the scale the model was fitted (log values for scale = "log")
+  values <- x$data$values
+  if (identical(x$settings$scale, "log")) {
+    values <- log(values)
+  }
+  p_err <- .plot_error_vs_mean(x$data$id, values,
+                               log_scale = identical(x$settings$scale, "log"))
+  if (is.null(p_err)) {
+    return(checks)
+  }
+  checks + p_err + patchwork::plot_layout(ncol = 3)
+}
+
+# Plot helpers ------------------------------------------------------------------
+
+.reli_plot_theme <- function() {
+  theme_bw() + theme(panel.grid.minor = element_blank())
+}
+
+# Item means adjusted for subjects (the average over all subjects of the fitted
+# two-way model), with 95% CIs; equal to the raw item means with complete data.
+.adjusted_item_means <- function(df) {
+  mod <- stats::lm(values ~ id + items, data = df)
+  grid <- expand.grid(id = levels(df$id), items = levels(df$items))
+  grid$id <- factor(grid$id, levels = levels(df$id))
+  grid$items <- factor(grid$items, levels = levels(df$items))
+  X <- stats::model.matrix(~ id + items, data = grid)
+  keep <- !is.na(stats::coef(mod))
+  V <- stats::vcov(mod)
+  t_crit <- stats::qt(0.975, stats::df.residual(mod))
+  do.call(rbind, lapply(levels(df$items), function(j) {
+    cvec <- colMeans(X[grid$items == j, keep, drop = FALSE])
+    est <- sum(cvec * stats::coef(mod)[keep])
+    se <- sqrt(drop(t(cvec) %*% V %*% cvec))
+    data.frame(items = factor(j, levels = levels(df$items)), values = est,
+               lower = est - t_crit * se, upper = est + t_crit * se)
+  }))
+}
+
+# Default: each subject's measurements across items (grey), with the item means
+# and their 95% CIs. Shows systematic differences between items (trial effects)
+# against the spread of subjects.
+.plot_profile <- function(df) {
+  means <- .adjusted_item_means(df)
+  ggplot(df, aes(x = items, y = values, group = id)) +
+    geom_line(colour = "grey70") +
+    geom_point(colour = "grey55", size = 1.3) +
+    geom_line(data = means, aes(x = items, y = values, group = 1),
+              inherit.aes = FALSE, colour = "#2166ac", linewidth = 0.9) +
+    geom_pointrange(data = means,
+                    aes(x = items, y = values, ymin = lower, ymax = upper),
+                    inherit.aes = FALSE, colour = "#2166ac", linewidth = 0.9,
+                    size = 0.5) +
+    labs(x = "Item", y = "Measurement",
+         caption = "Grey: subjects. Blue: item means with 95% CIs.") +
+    .reli_plot_theme()
+}
+
+# Subjects ordered by their mean: each subject's measurements (coloured by
+# item), the range, and the mean. Compares the spread between subjects with
+# the scatter within subjects, which is what the ICC summarises.
+.plot_subjects <- function(df) {
+  m <- tapply(df$values, df$id, mean)
+  ord <- names(sort(m))
+  rng <- data.frame(id = factor(names(m), levels = ord),
+                    lo = as.vector(tapply(df$values, df$id, min)),
+                    hi = as.vector(tapply(df$values, df$id, max)),
+                    m = as.vector(m))
+  df$id <- factor(df$id, levels = ord)
+  many <- length(ord) > 15
+  ggplot(df, aes(x = id, y = values)) +
+    geom_linerange(data = rng, aes(x = id, ymin = lo, ymax = hi),
+                   inherit.aes = FALSE, colour = "grey60", linewidth = 1.1) +
+    geom_point(data = rng, aes(x = id, y = m), inherit.aes = FALSE,
+               shape = 3, size = 2) +
+    geom_point(aes(colour = items), size = 1.8, alpha = 0.85) +
+    scale_colour_viridis_d(end = 0.85) +
+    labs(x = "Subject (ordered by mean)", y = "Measurement", colour = "Item",
+         caption = "+: subject mean. Bar: range of the subject's measurements.") +
+    .reli_plot_theme() +
+    if (many) {
+      theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+    } else {
+      theme()
+    }
+}
+
+# Deviation of each measurement from its subject's mean, by item: systematic
+# differences between items, which count as error for an agreement ICC but
+# not for a consistency ICC.
+.plot_items <- function(df) {
+  df$deviation <- df$values - stats::ave(df$values, df$id)
+  ggplot(df, aes(x = items, y = deviation)) +
+    geom_hline(yintercept = 0, colour = "grey40") +
+    geom_boxplot(width = 0.5, outlier.shape = NA, fill = "grey92") +
+    geom_jitter(width = 0.08, height = 0, colour = "#2166ac", size = 1.3) +
+    labs(x = "Item", y = "Deviation from subject mean",
+         caption = "Boxes away from zero: systematic differences between items.") +
+    .reli_plot_theme()
+}
+
+# Each pair of items against each other with the line of identity.
+.plot_pairs <- function(df) {
+  items <- levels(df$items)
+  wide <- stats::reshape(df[c("id", "items", "values")], idvar = "id",
+                         timevar = "items", direction = "wide")
+  names(wide) <- sub("^values\\.", "", names(wide))
+  pairs <- utils::combn(items, 2, simplify = FALSE)
+  pd <- do.call(rbind, lapply(pairs, function(p) {
+    data.frame(pair = paste(p[2], "vs", p[1]),
+               x = wide[[p[1]]], y = wide[[p[2]]])
+  }))
+  pd <- pd[stats::complete.cases(pd), , drop = FALSE]
+  pd$pair <- factor(pd$pair, levels = unique(pd$pair))
+  lim <- range(df$values)
+  ggplot(pd, aes(x = x, y = y)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+                colour = "grey40") +
+    geom_point(colour = "#2166ac") +
+    coord_equal(xlim = lim, ylim = lim) +
+    facet_wrap(~pair) +
+    labs(x = "Earlier item", y = "Later item",
+         caption = "Dashed: line of identity (perfect agreement).") +
+    .reli_plot_theme()
+}
+
+# Within-subject SD against the subject mean (subjects with 2 or more
+# measurements). A rising trend means the error grows with the size of the
+# measurement, so a relative error (scale = "log") describes it better.
+.plot_error_vs_mean <- function(id, values, log_scale = FALSE) {
+  n_i <- tapply(values, id, length)
+  keep <- names(n_i)[n_i >= 2]
+  if (length(keep) < 3) {
+    return(NULL)
+  }
+  d <- data.frame(mean = as.vector(tapply(values, id, mean)[keep]),
+                  sd = as.vector(tapply(values, id, stats::sd)[keep]))
+  tau <- suppressWarnings(stats::cor.test(d$mean, d$sd, method = "kendall"))
+  ggplot(d, aes(x = mean, y = sd)) +
+    geom_point(colour = "#0077B5", shape = 16, size = 2, alpha = 0.8) +
+    stat_smooth(method = "lm", formula = y ~ x, se = TRUE, alpha = 0.2,
+                linewidth = 0.8, colour = "#3aaf85") +
+    labs(title = "Error vs Mean",
+         subtitle = "Reference line should be flat",
+         x = if (log_scale) "Subject mean (log scale)" else "Subject mean",
+         y = "Within-subject SD",
+         caption = paste0("Error vs mean", " \n",
+                          "Kendall's tau = ", signif(tau$estimate, 3),
+                          ", p = ", signif(tau$p.value, 4),
+                          if (!log_scale) "; if rising, consider scale = \"log\"" else "")) +
+    theme(
+      panel.background = element_rect(fill = "transparent"),
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
 }
 
 # Description helpers ------------------------------------------------------------

@@ -156,6 +156,39 @@ set.seed(2026)
 icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 999)
 ```
 
+## Plots and diagnostics
+
+`plot()` shows each subject's measurements across the items (grey), with
+the item means and their 95% confidence intervals (blue), so systematic
+differences between items stand out against the spread of subjects.
+
+```{r, fig.width=5, fig.height=4}
+res <- icc_test(col.names = judges, data = dat)
+plot(res)
+```
+
+Other views are chosen with `type`: `"subjects"` orders the subjects by
+their mean and shows each subject's measurements, which compares the spread
+between subjects with the scatter within subjects (what the ICC
+summarises); `"items"` shows each measurement's deviation from its
+subject's mean by item (systematic item differences, which count as error
+for an agreement ICC but not for a consistency ICC); and `"pairs"` plots each
+pair of items against each other with the line of identity.
+
+```{r, fig.width=5, fig.height=4}
+plot(res, type = "subjects")
+```
+
+`check()` gives model diagnostics: the normality and homogeneity of the
+residuals, and the within-subject SD against the subject mean. An SD that
+rises with the mean means the error grows with the size of the measurement,
+and a coefficient of variation (`reli_err_test(scale = "log")`, below)
+describes it better than an error in units.
+
+```{r, fig.width=9, fig.height=3.5}
+check(res)
+```
+
 # Measurement error
 
 `reli_err_test()` estimates the standard error of measurement (SEM),

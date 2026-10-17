@@ -219,4 +219,14 @@ test_that("jmvreli uses icc_test() and reli_err_test()", {
   w$J2[1] <- NA
   jmv_na <- jmvreli(data = w, vars = c("J1", "J2", "J3", "J4"))
   expect_match(jmv_na$text$content, "REML")
+
+  # the CV falls back to % of the mean when a value is not positive, and is
+  # omitted when the mean is not positive
+  z <- sf
+  z$J2[2] <- 0
+  expect_match(jmvreli(data = z, vars = c("J1", "J2", "J3", "J4"))$text$content,
+               "% of mean")
+  neg <- sf - 20
+  expect_match(jmvreli(data = neg, vars = c("J1", "J2", "J3", "J4"))$text$content,
+               "not available")
 })
