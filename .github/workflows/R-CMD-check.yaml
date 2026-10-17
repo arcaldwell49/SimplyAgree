@@ -27,6 +27,11 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      # Run the full test suite, including tests skipped on CRAN
+      # (rcmdcheck does not set NOT_CRAN itself).
+      NOT_CRAN: "true"
+      # Slow simulation tests (reliability functions): one platform is enough.
+      SIMPLYAGREE_SLOW_TESTS: ${{ matrix.config.os == 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@v3

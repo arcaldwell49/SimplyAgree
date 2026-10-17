@@ -568,10 +568,18 @@ test_that("pb_reg handles id as vector directly",
 
             # Pass id as a vector directly (not column name)
             id_vector <- rep_data$subject
-            result <- pb_reg(y ~ x, data = rep_data, id = id_vector)
-
-
+            # pb_reg() advises bootstrap intervals for this design: keep the
+            # result without the advisory warnings, then check they are given
+            result <- suppressWarnings(pb_reg(y ~ x, data = rep_data,
+                                              id = id_vector))
             expect_s3_class(result, "simple_eiv")
+
+            expect_warning(pb_reg(y ~ x, data = rep_data, id = id_vector),
+                           "error.ratio != 1 or with case weights",
+                           fixed = TRUE)
+            expect_warning(pb_reg(y ~ x, data = rep_data, id = id_vector),
+                           "'invariant' and 'scissors' methods",
+                           fixed = TRUE)
           })
 
 # Weights with replicate data warning - Lines 286-287 -----------

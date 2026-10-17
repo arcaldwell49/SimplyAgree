@@ -444,10 +444,13 @@ tol_method_arg = function(tol_method){
   new = switch(old,
                approx = "analytic",
                perc = "boot_cal")
+  # user_env is the caller of tolerance_limit(); without it lifecycle sees
+  # this helper's caller (inside the package) and never warns users
   lifecycle::deprecate_soft(
     "0.3.1",
     I(paste0('tolerance_limit(tol_method = "', old, '")')),
-    I(paste0('tolerance_limit(tol_method = "', new, '")'))
+    I(paste0('tolerance_limit(tol_method = "', new, '")')),
+    user_env = parent.frame(2)
   )
   new
 }

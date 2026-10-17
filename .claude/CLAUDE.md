@@ -114,6 +114,14 @@ covr::package_coverage()            # Check coverage
 - **Validation**: Test against known published values where available
 - **Structure**: One `test_that()` per behavior; use descriptive test file names to provide context
 
+### Test Speed (CRAN vs CI)
+CRAN has complained about slow test suites, so the suite has three tiers:
+- **Runs on CRAN:** fast tests that still exercise every exported function (keep a cheap version, e.g. few bootstrap replicates, when a test is slow).
+- **`skip_on_cran()`:** slow tests (more than about 1–2 s): many-variant runs, bootstrap property checks, statistical-property simulations. GitHub Actions sets `NOT_CRAN: "true"` (R-CMD-check and test-coverage workflows) so these run there; `devtools::test()`/`check()` run them locally.
+- **`SIMPLYAGREE_SLOW_TESTS=true`:** long simulation checks (reliability functions); run on the Ubuntu CI job only.
+
+Time the suite as CRAN does with `NOT_CRAN` unset before adding heavy tests.
+
 ### Test Patterns
 ```r
 test_that("function returns correct class", {

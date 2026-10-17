@@ -3,7 +3,9 @@ context("tolerance_limit")
 # Test that the function returns a tolerance_delta class
 test_that("tolerance_limit returns a tolerance_delta class", {
   # generic
-  expect_s3_class(tolerance_limit(data = mtcars, x = "mpg", y = "disp"), "tolerance_delta")
+  tl_generic = tolerance_limit(data = mtcars, x = "mpg", y = "disp")
+  expect_s3_class(tl_generic, "tolerance_delta")
+  expect_s3_class(check(tl_generic), "patchwork")
 
   # all iterations
   data(temps)
@@ -108,6 +110,8 @@ test_that("tolerance_limit returns a tolerance_delta class", {
 })
 
 test_that("check methods",{
+  # many model variants; one check() also runs in the first test on CRAN
+  skip_on_cran()
 
   # all iterations
   data(temps)
@@ -453,6 +457,7 @@ test_that("gls simulation reproduces the fitted marginal covariance", {
 })
 
 test_that("parametric bootstrap does not inflate the SE of the bias", {
+  skip_on_cran()
   set.seed(3)
   n = 20; k = 19
   df = data.frame(id = rep(1:n, each = k))
@@ -600,6 +605,7 @@ test_that("effective df is used for other correlation structures", {
 })
 
 test_that("boot_cal limits agree with analytic limits where both are accurate", {
+  skip_on_cran()
   set.seed(6)
   gd = data.frame(id = rep(1:20, length.out = 366))
   gd$x = rnorm(366, 100, 10)
