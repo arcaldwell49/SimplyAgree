@@ -2,12 +2,116 @@
 
 ## SimplyAgree 0.3.1
 
+### Reliability
+
+- New
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md):
+  one intraclass correlation coefficient (ICC), chosen with `model`,
+  `type` and `unit` (McGraw & Wong forms, with the Shrout & Fleiss
+  names), returned as an `htest`. Two-sided F-based intervals, optional
+  F test against `null.value` (default `NULL`: estimate and interval
+  only, since testing against an ICC of 0 is rarely informative),
+  `method = "reml"` for missing data (observed-data degrees of freedom,
+  with a warning), and an optional subject bootstrap (`boot = TRUE`)
+  whose interval type and standard error were chosen from simulations.
+- New
+  [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md):
+  the standard error of measurement (SEM), of the estimate (SEE) or of
+  prediction (SEP), with intervals and an optional test against an
+  acceptable error. `scale = "log"` (sympercents) and `scale = "mean"`
+  give coefficients of variation.
+- New
+  [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
+  and
+  [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md):
+  power and sample size for the ICC F test, and sample size for an ICC
+  confidence interval of a given width with a given assurance (exact
+  F-based calculations, plus the Walter et al. and Zou approximations).
+- New [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  methods for these results. `summary(style = "estimation")` describes
+  the interval as a compatibility interval and converts any p-value to
+  an S-value; `style = "hypothesis"` gives the usual test decision.
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows the
+  subjects across items with the item means and 95% CIs, or, with
+  `type`, the subjects ordered by their mean (`"subjects"`), deviations
+  from the subject mean by item (`"items"`), or each pair of items
+  against the line of identity (`"pairs"`).
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  adds the within-subject SD against the subject mean, to show whether
+  the error grows with the mean.
+- [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  and
+  [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  are superseded by these functions. They still work and keep their
+  output structure, but now use the same engine, which fixes several
+  problems. **Results change:**
+  - **The ICC confidence intervals are now two-sided.** They previously
+    used `conf.level` in each tail (`qf(1 - alpha)`), so a “95%”
+    interval was really a 90% interval (each limit was a one-sided 95%
+    bound). The intervals now match Shrout & Fleiss (1979), McGraw &
+    Wong (1996), psych, irr, SPSS and Stata. To reproduce the old
+    numbers at `conf.level = c`, use `conf.level = 1 - 2 * (1 - c)`
+    (e.g. old 0.95 = new 0.90). For a one-sided lower bound on an ICC,
+    use `icc_test(alternative = "greater")`.
+  - [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+    with missing data now uses degrees of freedom based on the observed
+    data (and warns that the intervals are approximate), instead of
+    complete-data degrees of freedom.
+  - [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+    now drops every subject not measured on every item (including
+    subjects with a missing row in long data, which were previously
+    analysed with the wrong degrees of freedom), with a message.
+  - The variance components of
+    [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+    now use the ANOVA estimates (the item variance was previously MSW -
+    MSE).
+  - With `other_ci = TRUE` and `type = "chisq"`, the intervals for the
+    SEE, SEP, ICC-based SEM and CV now use the delta method (log scale);
+    the chi-square interval with the error degrees of freedom and
+    Vangel’s CV interval did not apply to these statistics. The SEM from
+    the error mean square keeps its exact chi-square interval.
+  - The bootstrap intervals (`type = "perc"`, `"norm"` or `"basic"`) now
+    resample subjects in both functions
+    ([`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+    previously used a parametric bootstrap).
+  - `cv_calc = "residuals"` (a downward-biased version of `"MSE"`) is
+    replaced by `"MSE"` with a warning.
+  - [`print()`](https://rdrr.io/r/base/print.html) no longer fails when
+    `conf.level` or `other_ci` is passed as a variable.
+  - Long data with more than one measurement per subject and item is now
+    an error (aggregate first).
+- The jamovi reliability analysis now uses
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+  and
+  [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md):
+  two-sided ICC intervals, intervals for the SEM, SEE and SEP (the SEE
+  and SEP now use the SD matched to the ICC’s denominator), the CV in
+  sympercents, and REML when measurements are missing.
+
+### Other changes
+
 - Fixed error in the jamovi module (and any other use where the analysis
   is saved and reloaded) where plots failed with “object ‘y’ not found”
   ([\#76](https://github.com/arcaldwell49/SimplyAgree/issues/76)).
   - The data needed by the `plot` and `check` methods are now stored in
     the returned object itself, rather than as a formula that pointed
     back at the environment the analysis was run in.
+- Fixed [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+  [`print()`](https://rdrr.io/r/base/print.html) failing for
+  [`agree_test()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_test.md),
+  [`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md),
+  [`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md),
+  and
+  [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  when `delta` (or `conf.level`, `agree.level`, `TOST`, `prop_bias`) was
+  supplied as an expression (e.g., `delta = log(1.10)`) or from inside
+  another function
+  ([\#50](https://github.com/arcaldwell49/SimplyAgree/issues/50)). The
+  stored call now holds the evaluated values of these settings rather
+  than the code as typed; the data arguments are still not copied into
+  the object.
 - Fixed
   [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
   prediction and tolerance limits when the model has a variance function
@@ -125,6 +229,28 @@
     alone as `id` gave limits that were too narrow (about 0.88 to 0.91
     coverage for a 95% target), while nested random intercepts had about
     0.96.
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+  results now reports the SD of the differences (coefficient of
+  variation when log-transformed), as
+  [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+  does. If the SD differs between rows (e.g., by `condition`), it is
+  shown as an `SD` column instead. Clustered models also print the
+  between- and within-subject SDs.
+- [`print()`](https://rdrr.io/r/base/print.html) for
+  `agreement_limit(data_type = "reps")` results now reports the
+  within-subject SDs of x and y. They were computed (as variances) but
+  never printed.
+- Fixed the pooled within-subject variances in
+  `agreement_limit(data_type = "reps")` for unbalanced data. A subject
+  with only one measurement of a method (or none) was still counted in
+  that method’s degrees of freedom, which biased the variance (and so
+  the SD of the differences and the LoA) low. A subject with a single
+  measurement of one method also had its replicates of the other method
+  dropped. Each method is now pooled over its own replicates (the
+  one-way ANOVA residual mean square), and the MOVER and Bland-Altman
+  confidence bounds use those degrees of freedom. Results for balanced
+  data are unchanged.
 - Fixed `predict_varFunc()` (used internally by
   [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md))
   returning `NA` residual SDs for some groups when the data were a
@@ -165,6 +291,50 @@
   [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
   for the confidence interval of the bias (`lower.CL`/`upper.CL`), which
   was previously fixed at 95%. The level is shown in the printed output.
+- Corrected the documentation of the `error.ratio` argument in
+  `dem_reg`. The documentation previously described it as the ratio of
+  error variances y/x, but `dem_reg` has always computed (and, with
+  replicate data via `id`, estimated) the error ratio as var(x)/var(y),
+  consistent with `pb_reg`. The documentation, the Deming vignette
+  (including the coefficient-of-variation formula for the error ratio),
+  and the jamovi module now consistently state var(x)/var(y). The
+  computation is unchanged, so results are unaffected for users who
+  supplied var(x)/var(y) or who estimated the ratio from replicates.
+  Anyone who supplied a y/x ratio following the old documentation should
+  invert it (use `1/error.ratio`) and refit. Thanks to Hugo Lachuer for
+  reporting this.
+- Fixed `plot(..., smooth_method = "gam")` raising an error instead of
+  an informative message when the suggested `ggeffects` package is not
+  installed (only `mgcv` was being checked). The Deming vignette now
+  also builds when the suggested `deming` package is unavailable.
+- Added `ccc_test` function for concordance correlation coefficient
+  hypothesis testing, returning an `htest` object.
+- Fixed the Passing-Bablok (`pb_reg`) bootstrap. The previous wild
+  bootstrap perturbed the observed values rather than the fitted values,
+  so resampled points never crossed the regression line; standard errors
+  were roughly 4-5 times too small and joint tests rejected a true null
+  hypothesis 80-95% of the time in simulations. `pb_reg` now uses a
+  nonparametric pairs (case) bootstrap by default.
+- Added a `se_method` argument to `pb_reg`: `"bootstrap"` (pairs
+  bootstrap, default), `"jackknife"` (delete-d jackknife with d = n/2;
+  Shao & Wu, 1989), and `"dufey"` (experimental; analytic
+  variance-covariance matrix for the scissors estimator; Dufey, 2020).
+  Standard errors in the model table are now taken from the
+  variance-covariance matrix when one is available.
+- Fixed the tie correction in the analytic `pb_reg` slope confidence
+  interval. The correction for tied x values was subtracted after taking
+  the square root of the variance of Kendall’s S rather than inside it,
+  which made intervals too narrow when x contained ties (simulated
+  coverage fell to 72% at n = 80 with rounded data; now ~95%). The same
+  tie-corrected variance is now also used for `ci_slopes`.
+- Fixed `pb_reg` reporting `reject_h0 = TRUE` when a confidence interval
+  collapsed onto the null value (common with coarsely rounded data), due
+  to floating-point error in `tan(pi/4)`.
+- Fixed `joint_test` and `plot_joint` to use the finite-sample F(2, n-2)
+  reference distribution (Sadler, 2010) instead of the asymptotic
+  chi-squared(2) approximation. The previous chi-squared approach was
+  anti-conservative for small samples. A `test_method` argument allows
+  selecting `"F"` (default) or `"asymptotic"` (old behavior).
 
 ## SimplyAgree 0.3.0
 

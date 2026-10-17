@@ -468,6 +468,7 @@ tolerance_limit(x = "x", y ="y", data = reps)
 #>    Bias           Bias CI Prediction Interval Tolerance Limits
 #>  0.4383 [-0.1669, 1.0436]   [-2.1998, 3.0764] [-2.993, 3.8697]
 #> 
+#> SD of Differences = 1.217
 #> 
 
 # Nested
@@ -480,6 +481,8 @@ tolerance_limit(x = "x", y ="y", data = reps, id = "id")
 #>    Bias           Bias CI Prediction Interval  Tolerance Limits
 #>  0.7046 [-1.5572, 2.9664]   [-4.4687, 5.8779] [-8.3471, 9.7562]
 #> 
+#> SD of Differences = 1.4581
+#> Between-Subject SD = 1.4048; Within-Subject SD = 0.3906
 #> 
 
 # Nested, random intercept (mixed) model
@@ -492,6 +495,8 @@ tolerance_limit(x = "x", y ="y", data = reps, id = "id", model = "lme")
 #>    Bias           Bias CI Prediction Interval  Tolerance Limits
 #>  0.7046 [-1.5511, 2.9603]    [-4.4548, 5.864] [-8.3471, 9.7562]
 #> 
+#> SD of Differences = 1.4581
+#> Between-Subject SD = 1.4048; Within-Subject SD = 0.3906
 #> 
 
 # Nested random intercepts (e.g., measurements within settings within subjects)
@@ -508,6 +513,8 @@ tolerance_limit(x = "x", y = "y", data = reps2, id = c("id", "setting"),
 #>    Bias           Bias CI Prediction Interval  Tolerance Limits
 #>  0.7046 [-1.5511, 2.9603]    [-4.4548, 5.864] [-8.3473, 9.7565]
 #> 
+#> SD of Differences = 1.4581
+#> Between-Subject SD = 1.4048; Nested SD = 0; Within-Subject SD = 0.3906
 #> 
 # }
 ```

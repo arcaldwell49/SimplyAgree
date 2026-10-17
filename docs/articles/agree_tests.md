@@ -7,7 +7,8 @@ expands upon the capabilities of currently available R packages (such as
 involve multiple observations (`agree_test` and `agree_reps` functions)
 2) provide robust tests of agreement even in simple studies
 (`shieh_test` output from the `agree_test` function) and 3) a robust set
-of reliability statistics (`reli_stats` function).
+of reliability statistics (`icc_test` and `reli_err_test` functions; see
+the “Reliability Analysis” vignette).
 
 In this vignette I will briefly demonstrate the implementation of the
 functions that include tests of agreement. *Please note*, I would

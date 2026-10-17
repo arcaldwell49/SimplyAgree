@@ -98,6 +98,7 @@
 <span>  ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  show_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_points <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  test_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"asymptotic"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -185,6 +186,11 @@ either a vector of numbers or a vector of names. If missing, all parameters are 
 
 <dt id="arg-show-intervals">show_intervals<a class="anchor" aria-label="anchor" href="#arg-show-intervals"></a></dt>
 <dd><p>Logical. If TRUE, shows individual confidence intervals as well.</p></dd>
+
+
+<dt id="arg-test-method">test_method<a class="anchor" aria-label="anchor" href="#arg-test-method"></a></dt>
+<dd><p>Reference distribution for the ellipse and test. <code>"F"</code> (default)
+uses the finite-sample F(2, n-2) distribution. <code>"asymptotic"</code> uses chi-squared(2).</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>

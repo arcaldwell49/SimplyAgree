@@ -154,7 +154,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 The <code>loa_calc</code> allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (<code>loa_calc = "blandaltman"</code>),
 or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (<code>loa_calc = "mover"</code>).</p>
 <p>The confidence bounds on the limits of agreement answer one of two questions, set by <code>bound_type</code>:</p><ul><li><p>"iu" (default): "Can I conclude agreement within plus or minus delta?" If <code>lower_loa_ci</code> &gt; -delta and <code>upper_loa_ci</code> &lt; delta, reject at level <code>alpha</code> that either limit of agreement lies outside plus or minus delta. <code>conf.level</code> (1 - <code>alpha</code>) applies to each side separately; both bounds hold together only about 1 - 2 * <code>alpha</code> of the time.</p></li>
-<li><p>"joint": "Where are the limits of agreement?" With at least 1 - <code>alpha</code> confidence, both limits of agreement lie within . Used as a test against plus or minus delta, the error rate is at most <code>alpha</code>/2 (conservative).</p></li>
+<li><p>"joint": "Where are the limits of agreement?" With at least 1 - <code>alpha</code> confidence, both limits of agreement lie between <code>lower_loa_ci</code> and <code>upper_loa_ci</code>. Used as a test against plus or minus delta, the error rate is at most <code>alpha</code>/2 (conservative).</p></li>
 </ul><p>Because a one-sided bound on the (1 - <code>agree.level</code>)/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as <code>tolerance_limit(bound_type = "iu")</code>.
 The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is always a two-sided 1 - <code>alpha</code> interval.</p>
     </div>
@@ -198,6 +198,7 @@ The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is al
 <span class="r-out co"><span class="r-pr">#&gt;</span> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   not a joint 95% interval for the LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SD of Differences = 1.5036</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within-Subject SDs of X &amp; Y = 0.4011 &amp; 0.4348</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Nested</span></span></span>
 <span class="r-in"><span><span class="fu">agreement_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span>, data_type <span class="op">=</span> <span class="st">"nest"</span><span class="op">)</span></span></span>

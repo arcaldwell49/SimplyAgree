@@ -1,19 +1,28 @@
 # Reliability Statistics
 
-**\[stable\]**
+**\[superseded\]**
 
-The reli_stats and reli_aov functions produce reliability statistics
-described by Weir (2005). This includes intraclass correlation
-coefficients, the coefficient of variation, and the standard MSE of
-measurement.
+`reli_stats()` and `reli_aov()` return the intraclass correlation
+coefficients (ICCs), the coefficient of variation (CV), and the standard
+errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+described by Weir (2005), all at once.
+
+These functions are superseded: they still work, but new code should use
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+for an ICC (with a test against a meaningful null value and optional
+bootstrap inference) and
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+for the SEM, SEE or SEP, including the CV via `scale = "log"`
+(sympercents) or `scale = "mean"`. See Details for how the two sets of
+functions differ.
 
 ## Usage
 
 ``` r
 reli_stats(
-  measure,
-  item,
-  id,
+  measure = NULL,
+  item = NULL,
+  id = NULL,
   data,
   wide = FALSE,
   col.names = NULL,
@@ -26,9 +35,9 @@ reli_stats(
 )
 
 reli_aov(
-  measure,
-  item,
-  id,
+  measure = NULL,
+  item = NULL,
+  id = NULL,
   data,
   wide = FALSE,
   col.names = NULL,
@@ -51,7 +60,7 @@ reli_aov(
 
   Name of column containing the items. If this is a test-retest
   reliability study then this would indicate the time point (e.g.,
-  time1,time2, time3, etc.).
+  time1, time2, time3, etc.).
 
 - id:
 
@@ -64,7 +73,7 @@ reli_aov(
 - wide:
 
   Logical value (TRUE or FALSE) indicating if data is in a "wide"
-  format. Default is TRUE.
+  format. Default is FALSE.
 
 - col.names:
 
@@ -73,113 +82,137 @@ reli_aov(
 
 - se_type:
 
-  Type of standard error calculation. The default is to use the mean
-  square error (MSE). Otherwise, the total sums of squares and the ICC
-  are utilized to estimate the SEM, SEE, and SEP.
+  Type of standard error calculation. The default, `"MSE"`, uses the
+  error mean square for the SEM, and ICC3 (ICC(C,1)) for the SEE and
+  SEP. Otherwise, the SD of all the measurements and the named ICC are
+  used for all three (see Details).
 
 - cv_calc:
 
-  Coefficient of variation (CV) calculation. This function allows for 3
-  versions of the CV. "MSE" is the default.
+  Coefficient of variation (CV) calculation: `"MSE"` (default), the
+  square root of the error mean square divided by the grand mean, or
+  `"SEM"`, the SEM (see `se_type`) divided by the grand mean.
+  `"residuals"` is no longer supported and is replaced by `"MSE"` with a
+  warning.
 
 - conf.level:
 
-  the confidence level required. Default is 95%.
+  The confidence level required. Default is 95%. The ICC intervals are
+  two-sided (see Details).
 
 - other_ci:
 
   Logical value (TRUE or FALSE) indicating whether to calculate
-  confidence intervals for the CV, SEM, SEP, and SEE. Note: this will
-  dramatically increase the computation time.
+  confidence intervals for the CV, SEM, SEP, and SEE.
 
 - type:
 
-  A character string representing the type of confidence intervals for
-  the CV, SEM, SEP, and SEE. Only "norm", "basic", and "perc" currently
-  supported for parametric bootstrap CI. An approximate method, chisq,
-  is the default. See ?boot::boot.ci for more details on bootstrap
-  methods.
+  The type of confidence intervals for the CV, SEM, SEP, and SEE:
+  `"chisq"` (default; analytic intervals, see Details), or a bootstrap
+  interval, `"perc"` (percentile), `"norm"` (normal, with bias
+  correction) or `"basic"`.
 
 - replicates:
 
-  The number of bootstrap replicates. Passed on to the boot function.
-  Default is 1999.
+  The number of bootstrap replicates. Default is 1999.
 
 ## Value
 
-Returns single list with the results of the agreement analysis.
+Returns single list with the results of the reliability analysis.
 
 - `icc`: Table of ICC results
 
-- `lmer`: Linear mixed model from lme4
+- `lmer`: The fitted model: a linear mixed model from lme4
+  (`reli_stats()`), or a linear model of subjects and items
+  (`reli_aov()`)
 
-- `anova`: Analysis of Variance table
+- `anova`: Analysis of Variance table (mean squares reconstructed from
+  the variance components for `reli_stats()`)
 
 - `var_comp`: Table of Variance Components
 
 - `n.id`: Number of subjects/participants
 
-- `n.items`: Number of items/time points
+- `n.item`: Number of items/time points
 
-- `cv`: Coefficient of Variation
+- `cv`: Coefficient of Variation (a one-row data frame)
 
-- `SEM`: List with Standard MSE of Measurement estimate (est)
+- `SEM`: Standard Error of Measurement (a one-row data frame)
 
-- `SEE`: List with Standard MSE of the Estimate estimate (est)
+- `SEE`: Standard Error of the Estimate (a one-row data frame)
 
-- `SEP`: List with Standard MSE of Predictions (est)
+- `SEP`: Standard Error of Prediction (a one-row data frame)
 
-- `call`: the matched call
+- `call`: the matched call, with the settings used
 
 ## Details
 
-These functions return intraclass correlation coefficients and other
-measures of reliability (CV, SEM, SEE, and SEP). The estimates of
-variances for any of the measures are derived from linear mixed models.
-When other_ci is set to TRUE, then a parametric bootstrap approach to
-calculating confidence intervals is used for the CV, SEM, SEE, and SEP.
+**Estimation.** Both functions use the engine of
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md):
+`reli_stats()` fits a linear mixed model by REML (crossed random effects
+for subjects and items) and allows missing measurements; `reli_aov()`
+uses the analysis of variance and keeps only subjects measured on every
+item (incomplete subjects are dropped with a message). With complete
+data the two give the same results (unless a variance component is
+estimated at zero). With missing data, `reli_stats()` uses degrees of
+freedom based on the observed data and warns that its intervals are
+approximate.
 
-reli_stats uses a linear mixed model to estimate variance components. In
-some cases there are convergence issues. When this occurs it is prudent
-to use reli_aov which instead utilizes sums of squares approach. The
-results may differ slightly between the functions. If reli_aov is used
-then rows with missing observations (e.g., if a participant has a
-missing observation) will be dropped.
+**ICCs.** The six forms of Shrout and Fleiss (1979) are returned, with
+the F-based intervals of McGraw and Wong (1996). The intervals are
+two-sided `conf.level` intervals, as in those papers (and in the psych,
+irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+used `conf.level` in each tail, so each limit was a one-sided
+`conf.level` bound and the pair covered only `1 - 2 * (1 - conf.level)`;
+the old output at `conf.level = c` is reproduced by
+`conf.level = 1 - 2 * (1 - c)` (e.g. old 0.95 = new 0.90). For a
+one-sided lower bound on a single ICC, use
+`icc_test(alternative = "greater")`.
 
-The CV calculation has 3 versions. The "MSE" uses the "mean squared
-error" from the linear mixed model used to calculate the ICCs. The "SEM"
-option instead uses the SEM calculation and expresses CV as a ratio of
-the SEM to the overall mean. The "residuals" option u uses the model
-residuals to calculate the root mean square error which is then divided
-by the grand mean.
+**SEM, SEE and SEP.** With `se_type = "MSE"`, SEM = \\\sqrt{MS_E}\\
+(Weir, 2005, preferred), and SEE = \\SD\sqrt{ICC(1 - ICC)}\\ and SEP =
+\\SD\sqrt{1 - ICC^2}\\ with ICC3. With another `se_type`, the named ICC
+is used for all three, and SEM = \\SD\sqrt{1 - ICC}\\. Here SD is the SD
+of all the measurements, \\\sqrt{SS\_{total}/(N - 1)}\\, as in Weir
+(2005).
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+instead uses the SD matched to the ICC's denominator, so its SEE and SEP
+differ slightly. A negative ICC is treated as zero.
 
-The CV, SEM, SEE, and SEP values can have confidence intervals produced
-if the other_ci argument is set to TRUE. For the CV, the default method
-(`type = "chisq"`) is Vangal's modification of the McKay approximation.
-For the other measures, a simple chi-squared approximation is utilized
-(Hann & Meeker, 1991). All other methods are bootstrapping based methods
-(see [`?boot::boot`](https://rdrr.io/pkg/boot/man/boot.html)). The
-reli_stats functions utilizes a parametric bootstrap while the reli_aov
-function utilizes an ordinary (non-parametric) bootstrap method.
+**CV.** The CV is the SEM (or \\\sqrt{MS_E}\\) divided by the grand
+mean, as a proportion (printed as a percentage).
+
+**Intervals for the CV, SEM, SEE and SEP** (`other_ci = TRUE`). With
+`type = "chisq"`, the SEM from \\MS_E\\ has the exact \\\chi^2\\
+interval; every other statistic has a Wald interval on the log scale
+with a delta-method standard error from the normal-theory variances of
+the mean squares (and of the grand mean, for the CV). Before version
+0.3.1 these used \\\chi^2\\ intervals with the error degrees of freedom
+(and Vangel's interval for the CV), which do not apply to these
+statistics. The bootstrap types resample subjects (as
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+does, including its hybrid step for the item mean square); before
+version 0.3.1 `reli_stats()` used a parametric bootstrap.
 
 ## References
 
 Weir, J. P. (2005). Quantifying test-retest reliability using the
-intraclass correlation coefficient and the SEM. The Journal of Strength
-& Conditioning Research, 19(1), 231-240.
+intraclass correlation coefficient and the SEM. Journal of Strength and
+Conditioning Research, 19(1), 231-240.
+[doi:10.1519/15184.1](https://doi.org/10.1519/15184.1)
 
-Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in
-assessing rater reliability. Psychological Bulletin, 86, 420-3428.
+Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+[doi:10.1037/0033-2909.86.2.420](https://doi.org/10.1037/0033-2909.86.2.420)
 
-McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some
-intraclass correlation coefficients. Psychological Methods, 1, 30-46.
-See errata on page 390 of same volume.
+McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+[doi:10.1037/1082-989X.1.1.30](https://doi.org/10.1037/1082-989X.1.1.30)
 
-Hahn, G. J., & Meeker, W. Q. (2011). Statistical intervals: a guide for
-practitioners (Vol. 92). John Wiley & Sons. pp. 55-56.
+## See also
 
-Vangel, M. G. (1996). Confidence intervals for a normal coefficient of
-variation. The American Statistician, 50(1), 21-26.
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
 
 ## Examples
 
@@ -187,19 +220,51 @@ variation. The American Statistician, 50(1), 21-26.
 data('reps')
 reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
 #> Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.
+#> Warning: 5.0% of subject-by-item cells are missing. Intervals use observed-data degrees of freedom and are approximate; consider icc_test(method = "reml", boot = TRUE).
 #> 
 #> Coefficient of Variation (%):  15.8
 #> Standard Error of Measurement (SEM):  0.863
-#> Standard Error of the Estimate (SEE):  0.655
-#> Standard Error of Prediction (SEP):  1.11
+#> Standard Error of the Estimate (SEE):  0.639
+#> Standard Error of Prediction (SEP):  1.08
 #> 
 #> Intraclass Correlation Coefficients with  95 % C.I.
 #>            Model         Measures  Type    ICC Lower CI Upper CI
-#> 1 one-way random        Agreement  ICC1 0.4963   0.1632   0.7299
-#> 2 two-way random        Agreement  ICC2 0.5097   0.1911   0.7355
-#> 3  two-way fixed      Consistency  ICC3 0.5384   0.2117   0.7569
-#> 4 one-way random   Avg. Agreement ICC1k 0.6634   0.2806   0.8438
-#> 5 two-way random   Avg. Agreement ICC2k 0.6753   0.3209   0.8476
-#> 6  two-way fixed Avg. Consistency ICC3k 0.7000   0.3495   0.8616
+#> 1 one-way random        Agreement  ICC1 0.4956  0.05599   0.7682
+#> 2 two-way random        Agreement  ICC2 0.5097  0.09605   0.7726
+#> 3  two-way fixed      Consistency  ICC3 0.5384  0.10441   0.7925
+#> 4 one-way random   Avg. Agreement ICC1k 0.6627  0.10603   0.8689
+#> 5 two-way random   Avg. Agreement ICC2k 0.6753  0.17526   0.8717
+#> 6  two-way fixed Avg. Consistency ICC3k 0.7000  0.18908   0.8842
+#> 
+
+# The recommended replacements (reps has missing measurements, so REML)
+icc_test(data = reps, col.names = c("x", "y"), method = "reml")
+#> Warning: 5.0% of subject-by-item cells are missing. Intervals and p-values use observed-data degrees of freedom and are approximate; they may be liberal as missingness increases. Consider boot = TRUE.
+#> 
+#>  Two-way, consistency, single-measure ICC [Shrout & Fleiss ICC(3,1)]
+#>  (REML)
+#> 
+#> data:  x, y
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  0.1044136 0.7924971
+#> sample estimates:
+#>  ICC(C,1) 
+#> 0.5384325 
+#> 
+reli_err_test(data = reps, col.names = c("x", "y"), method = "reml")
+#> Warning: 5.0% of subject-by-item cells are missing. Intervals and p-values use observed-data degrees of freedom and are approximate; they may be liberal as missingness increases. Consider boot = TRUE.
+#> 
+#>  Standard error of measurement (two-way, consistency) (REML)
+#> 
+#> data:  x, y
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  0.6478589 1.2943096
+#> sample estimates:
+#>       SEM 
+#> 0.8633657 
 #> 
 ```

@@ -224,9 +224,24 @@ limits of agreement with multiple observations per individual.
 
 ## Reliability
 
+- [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+  **\[maturing\]** : Intraclass Correlation Coefficient Test
+- [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+  **\[maturing\]** : Measurement Error Test
+- [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
+  **\[maturing\]** : Power and Sample Size for an Intraclass Correlation
+  Test
+- [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md)
+  **\[maturing\]** : Sample Size for the Precision of an Intraclass
+  Correlation
+- [`summary(`*`<reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
+  [`print(`*`<summary.reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
+  [`plot(`*`<reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
+  [`check(`*`<reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
+  : Methods for reli_htest objects
 - [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
   [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
-  **\[stable\]** : Reliability Statistics
+  **\[superseded\]** : Reliability Statistics
 - [`print(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
   [`plot(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
   [`check(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)

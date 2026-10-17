@@ -5,13 +5,25 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reliability Statistics — reli_stats"><meta name="description" content="
-The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
-This includes intraclass correlation coefficients, the coefficient of variation,
-and the standard MSE of measurement."><meta property="og:description" content="
-The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
-This includes intraclass correlation coefficients, the coefficient of variation,
-and the standard MSE of measurement."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reliability Statistics — reli_stats"><meta name="description" content='
+reli_stats() and reli_aov() return the intraclass correlation
+coefficients (ICCs), the coefficient of variation (CV), and the standard
+errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+described by Weir (2005), all at once.
+These functions are superseded: they still work, but new code should use
+icc_test() for an ICC (with a test against a meaningful null value and
+optional bootstrap inference) and reli_err_test() for the SEM, SEE or
+SEP, including the CV via scale = "log" (sympercents) or
+scale = "mean". See Details for how the two sets of functions differ.'><meta property="og:description" content='
+reli_stats() and reli_aov() return the intraclass correlation
+coefficients (ICCs), the coefficient of variation (CV), and the standard
+errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+described by Weir (2005), all at once.
+These functions are superseded: they still work, but new code should use
+icc_test() for an ICC (with a test against a meaningful null value and
+optional bootstrap inference) and reli_err_test() for the SEM, SEE or
+SEP, including the CV via scale = "log" (sympercents) or
+scale = "mean". See Details for how the two sets of functions differ.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -60,18 +72,24 @@ and the standard MSE of measurement."><meta property="og:image" content="https:/
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
-<p>The reli_stats and reli_aov functions produce reliability statistics described by Weir (2005).
-This includes intraclass correlation coefficients, the coefficient of variation,
-and the standard MSE of measurement.</p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#superseded" class="external-link"><img src="figures/lifecycle-superseded.svg" alt="[Superseded]"></a></p>
+<p><code>reli_stats()</code> and <code>reli_aov()</code> return the intraclass correlation
+coefficients (ICCs), the coefficient of variation (CV), and the standard
+errors of measurement (SEM), estimate (SEE) and prediction (SEP)
+described by Weir (2005), all at once.</p>
+<p>These functions are superseded: they still work, but new code should use
+<code><a href="icc_test.html">icc_test()</a></code> for an ICC (with a test against a meaningful null value and
+optional bootstrap inference) and <code><a href="reli_err_test.html">reli_err_test()</a></code> for the SEM, SEE or
+SEP, including the CV via <code>scale = "log"</code> (sympercents) or
+<code>scale = "mean"</code>. See Details for how the two sets of functions differ.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reli_stats</span><span class="op">(</span></span>
-<span>  <span class="va">measure</span>,</span>
-<span>  <span class="va">item</span>,</span>
-<span>  <span class="va">id</span>,</span>
+<span>  measure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  col.names <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -84,9 +102,9 @@ and the standard MSE of measurement.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">reli_aov</span><span class="op">(</span></span>
-<span>  <span class="va">measure</span>,</span>
-<span>  <span class="va">item</span>,</span>
-<span>  <span class="va">id</span>,</span>
+<span>  measure <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  item <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">data</span>,</span>
 <span>  wide <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  col.names <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -108,7 +126,9 @@ and the standard MSE of measurement.</p>
 
 
 <dt id="arg-item">item<a class="anchor" aria-label="anchor" href="#arg-item"></a></dt>
-<dd><p>Name of column containing the items. If this is a test-retest reliability study then this would indicate the time point (e.g., time1,time2, time3, etc.).</p></dd>
+<dd><p>Name of column containing the items. If this is a test-retest
+reliability study then this would indicate the time point (e.g., time1,
+time2, time3, etc.).</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
@@ -120,84 +140,123 @@ and the standard MSE of measurement.</p>
 
 
 <dt id="arg-wide">wide<a class="anchor" aria-label="anchor" href="#arg-wide"></a></dt>
-<dd><p>Logical value (TRUE or FALSE) indicating if data is in a "wide" format. Default is TRUE.</p></dd>
+<dd><p>Logical value (TRUE or FALSE) indicating if data is in a
+"wide" format. Default is FALSE.</p></dd>
 
 
 <dt id="arg-col-names">col.names<a class="anchor" aria-label="anchor" href="#arg-col-names"></a></dt>
-<dd><p>If wide is equal to TRUE then col.names is a list of the column names containing the measurements for reliability analysis.</p></dd>
+<dd><p>If wide is equal to TRUE then col.names is a list of the
+column names containing the measurements for reliability analysis.</p></dd>
 
 
 <dt id="arg-se-type">se_type<a class="anchor" aria-label="anchor" href="#arg-se-type"></a></dt>
-<dd><p>Type of standard error calculation. The default is to use the mean square error (MSE). Otherwise, the total sums of squares and the ICC are utilized to estimate the SEM, SEE, and SEP.</p></dd>
+<dd><p>Type of standard error calculation. The default, <code>"MSE"</code>,
+uses the error mean square for the SEM, and ICC3 (ICC(C,1)) for the SEE
+and SEP. Otherwise, the SD of all the measurements and the named ICC are
+used for all three (see Details).</p></dd>
 
 
 <dt id="arg-cv-calc">cv_calc<a class="anchor" aria-label="anchor" href="#arg-cv-calc"></a></dt>
-<dd><p>Coefficient of variation (CV) calculation. This function allows for 3 versions of the CV. "MSE" is the default.</p></dd>
+<dd><p>Coefficient of variation (CV) calculation: <code>"MSE"</code>
+(default), the square root of the error mean square divided by the
+grand mean, or <code>"SEM"</code>, the SEM (see <code>se_type</code>) divided by the grand
+mean. <code>"residuals"</code> is no longer supported and is replaced by <code>"MSE"</code>
+with a warning.</p></dd>
 
 
 <dt id="arg-conf-level">conf.level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
-<dd><p>the confidence level required. Default is 95%.</p></dd>
+<dd><p>The confidence level required. Default is 95%. The ICC
+intervals are two-sided (see Details).</p></dd>
 
 
 <dt id="arg-other-ci">other_ci<a class="anchor" aria-label="anchor" href="#arg-other-ci"></a></dt>
-<dd><p>Logical value (TRUE or FALSE) indicating whether to calculate confidence intervals for the CV, SEM, SEP, and SEE. Note: this will dramatically increase the computation time.</p></dd>
+<dd><p>Logical value (TRUE or FALSE) indicating whether to
+calculate confidence intervals for the CV, SEM, SEP, and SEE.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>A character string representing the type of confidence intervals for the CV, SEM, SEP, and SEE. Only "norm", "basic", and "perc" currently supported for parametric bootstrap CI. An approximate method, chisq, is the default. See ?boot::boot.ci for more details on bootstrap methods.</p></dd>
+<dd><p>The type of confidence intervals for the CV, SEM, SEP, and SEE:
+<code>"chisq"</code> (default; analytic intervals, see Details), or a bootstrap
+interval, <code>"perc"</code> (percentile), <code>"norm"</code> (normal, with bias correction)
+or <code>"basic"</code>.</p></dd>
 
 
 <dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
-<dd><p>The number of bootstrap replicates. Passed on to the boot function. Default is 1999.</p></dd>
+<dd><p>The number of bootstrap replicates. Default is 1999.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns single list with the results of the agreement analysis.</p><ul><li><p><code>icc</code>: Table of ICC results</p></li>
-<li><p><code>lmer</code>: Linear mixed model from lme4</p></li>
-<li><p><code>anova</code>: Analysis of Variance table</p></li>
+    <p>Returns single list with the results of the reliability analysis.</p><ul><li><p><code>icc</code>: Table of ICC results</p></li>
+<li><p><code>lmer</code>: The fitted model: a linear mixed model from lme4
+(<code>reli_stats()</code>), or a linear model of subjects and items
+(<code>reli_aov()</code>)</p></li>
+<li><p><code>anova</code>: Analysis of Variance table (mean squares reconstructed from
+the variance components for <code>reli_stats()</code>)</p></li>
 <li><p><code>var_comp</code>: Table of Variance Components</p></li>
 <li><p><code>n.id</code>: Number of subjects/participants</p></li>
-<li><p><code>n.items</code>: Number of items/time points</p></li>
-<li><p><code>cv</code>: Coefficient of Variation</p></li>
-<li><p><code>SEM</code>: List with Standard MSE of Measurement estimate (est)</p></li>
-<li><p><code>SEE</code>: List with Standard MSE of the Estimate estimate (est)</p></li>
-<li><p><code>SEP</code>: List with Standard MSE of Predictions (est)</p></li>
-<li><p><code>call</code>: the matched call</p></li>
+<li><p><code>n.item</code>: Number of items/time points</p></li>
+<li><p><code>cv</code>: Coefficient of Variation (a one-row data frame)</p></li>
+<li><p><code>SEM</code>: Standard Error of Measurement (a one-row data frame)</p></li>
+<li><p><code>SEE</code>: Standard Error of the Estimate (a one-row data frame)</p></li>
+<li><p><code>SEP</code>: Standard Error of Prediction (a one-row data frame)</p></li>
+<li><p><code>call</code>: the matched call, with the settings used</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>These functions return intraclass correlation coefficients
-and other measures of reliability (CV, SEM, SEE, and SEP).
-The estimates of variances for any of the measures are derived from linear mixed models.
-When other_ci is set to TRUE,
-then a parametric bootstrap approach to calculating confidence intervals is used for the
-CV, SEM, SEE, and SEP.</p>
-<p>reli_stats uses a linear mixed model to estimate variance components.
-In some cases there are convergence issues.
-When this occurs it is prudent to use reli_aov which instead utilizes sums of squares approach.
-The results may differ slightly between the functions.
-If reli_aov is used then rows with missing observations
-(e.g., if a participant has a missing observation) will be dropped.</p>
-<p>The CV calculation has 3 versions. The "MSE" uses the "mean squared error"
-from the linear mixed model used to calculate the ICCs.
-The "SEM" option instead uses the SEM calculation and
-expresses CV as a ratio of the SEM to the overall mean.
-The "residuals" option u uses the model residuals to calculate the root mean square error which is then divided by the grand mean.</p>
-<p>The CV, SEM, SEE, and SEP values can have confidence intervals produced if the other_ci argument is set to TRUE.
-For the CV, the default method (<code>type = "chisq"</code>) is Vangal's modification of the McKay approximation.
-For the other measures, a simple chi-squared approximation is utilized (Hann &amp; Meeker, 1991).
-All other methods are bootstrapping based methods (see <code><a href="https://rdrr.io/pkg/boot/man/boot.html" class="external-link">?boot::boot</a></code>).
-The reli_stats functions utilizes a parametric bootstrap while the reli_aov
-function utilizes an ordinary (non-parametric) bootstrap method.</p>
+    <p><strong>Estimation.</strong> Both functions use the engine of <code><a href="icc_test.html">icc_test()</a></code>:
+<code>reli_stats()</code> fits a linear mixed model by REML (crossed random effects
+for subjects and items) and allows missing measurements; <code>reli_aov()</code>
+uses the analysis of variance and keeps only subjects measured on every
+item (incomplete subjects are dropped with a message). With complete data
+the two give the same results (unless a variance component is estimated
+at zero). With missing data, <code>reli_stats()</code> uses degrees of freedom based
+on the observed data and warns that its intervals are approximate.</p>
+<p><strong>ICCs.</strong> The six forms of Shrout and Fleiss (1979) are returned, with
+the F-based intervals of McGraw and Wong (1996). The intervals are
+two-sided <code>conf.level</code> intervals, as in those papers (and in the psych,
+irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+used <code>conf.level</code> in each tail, so each limit was a one-sided
+<code>conf.level</code> bound and the pair covered only <code>1 - 2 * (1 - conf.level)</code>;
+the old output at <code>conf.level = c</code> is reproduced by
+<code>conf.level = 1 - 2 * (1 - c)</code> (e.g. old 0.95 = new 0.90). For a one-sided
+lower bound on a single ICC, use <code>icc_test(alternative = "greater")</code>.</p>
+<p><strong>SEM, SEE and SEP.</strong> With <code>se_type = "MSE"</code>, SEM = \(\sqrt{MS_E}\)
+(Weir, 2005, preferred), and SEE = \(SD\sqrt{ICC(1 - ICC)}\) and
+SEP = \(SD\sqrt{1 - ICC^2}\) with ICC3. With another <code>se_type</code>, the
+named ICC is used for all three, and SEM = \(SD\sqrt{1 - ICC}\). Here SD
+is the SD of all the measurements, \(\sqrt{SS_{total}/(N - 1)}\), as in
+Weir (2005). <code><a href="reli_err_test.html">reli_err_test()</a></code> instead uses the SD matched to the ICC's
+denominator, so its SEE and SEP differ slightly. A negative ICC is
+treated as zero.</p>
+<p><strong>CV.</strong> The CV is the SEM (or \(\sqrt{MS_E}\)) divided by the grand
+mean, as a proportion (printed as a percentage).</p>
+<p><strong>Intervals for the CV, SEM, SEE and SEP</strong> (<code>other_ci = TRUE</code>). With
+<code>type = "chisq"</code>, the SEM from \(MS_E\) has the exact
+\(\chi^2\) interval; every other statistic has a Wald interval on the
+log scale with a delta-method standard error from the normal-theory
+variances of the mean squares (and of the grand mean, for the CV). Before
+version 0.3.1 these used \(\chi^2\) intervals with the error degrees of
+freedom (and Vangel's interval for the CV), which do not apply to these
+statistics. The bootstrap types resample subjects (as <code><a href="icc_test.html">icc_test()</a></code> does,
+including its hybrid step for the item mean square); before version 0.3.1
+<code>reli_stats()</code> used a parametric bootstrap.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Weir, J. P. (2005). Quantifying test-retest reliability using the intraclass correlation coefficient and the SEM. The Journal of Strength &amp; Conditioning Research, 19(1), 231-240.</p>
-<p>Shrout, P.E. and Fleiss, J.L. (1976). Intraclass correlations: uses in assessing rater reliability. Psychological Bulletin, 86, 420-3428.</p>
-<p>McGraw, K. O. and Wong, S. P. (1996). Forming inferences about some intraclass correlation coefficients. Psychological Methods, 1, 30-46. See errata on page 390 of same volume.</p>
-<p>Hahn, G. J., &amp; Meeker, W. Q. (2011). Statistical intervals: a guide for practitioners (Vol. 92). John Wiley &amp; Sons. pp. 55-56.</p>
-<p>Vangel, M. G. (1996). Confidence intervals for a normal coefficient of variation. The American Statistician, 50(1), 21-26.</p>
+    <p>Weir, J. P. (2005). Quantifying test-retest reliability using the
+intraclass correlation coefficient and the SEM. Journal of Strength and
+Conditioning Research, 19(1), 231-240. <a href="https://doi.org/10.1519/15184.1" class="external-link">doi:10.1519/15184.1</a></p>
+<p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: Uses in
+assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
+<a href="https://doi.org/10.1037/0033-2909.86.2.420" class="external-link">doi:10.1037/0033-2909.86.2.420</a></p>
+<p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about some
+intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
+<a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">doi:10.1037/1082-989X.1.1.30</a></p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="icc_test.html">icc_test()</a></code>, <code><a href="reli_err_test.html">reli_err_test()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -205,20 +264,52 @@ function utilizes an ordinary (non-parametric) bootstrap method.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'reps'</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">reli_stats</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"y"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Only 2 items in data. It is recommended to use reli_aov instead of reli_stats.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>5.0% of subject-by-item cells are missing. Intervals use observed-data degrees of freedom and are approximate; consider icc_test(method = "reml", boot = TRUE).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coefficient of Variation (%):  15.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Measurement (SEM):  0.863</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of the Estimate (SEE):  0.655</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Prediction (SEP):  1.11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of the Estimate (SEE):  0.639</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Standard Error of Prediction (SEP):  1.08</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Intraclass Correlation Coefficients with  95 % C.I.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Model         Measures  Type    ICC Lower CI Upper CI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 one-way random        Agreement  ICC1 0.4963   0.1632   0.7299</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 two-way random        Agreement  ICC2 0.5097   0.1911   0.7355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  two-way fixed      Consistency  ICC3 0.5384   0.2117   0.7569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 one-way random   Avg. Agreement ICC1k 0.6634   0.2806   0.8438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 two-way random   Avg. Agreement ICC2k 0.6753   0.3209   0.8476</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  two-way fixed Avg. Consistency ICC3k 0.7000   0.3495   0.8616</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 one-way random        Agreement  ICC1 0.4956  0.05599   0.7682</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 two-way random        Agreement  ICC2 0.5097  0.09605   0.7726</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  two-way fixed      Consistency  ICC3 0.5384  0.10441   0.7925</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 one-way random   Avg. Agreement ICC1k 0.6627  0.10603   0.8689</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 two-way random   Avg. Agreement ICC2k 0.6753  0.17526   0.8717</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  two-way fixed Avg. Consistency ICC3k 0.7000  0.18908   0.8842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The recommended replacements (reps has missing measurements, so REML)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="icc_test.html">icc_test</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"reml"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>5.0% of subject-by-item cells are missing. Intervals and p-values use observed-data degrees of freedom and are approximate; they may be liberal as missingness increases. Consider boot = TRUE.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Two-way, consistency, single-measure ICC [Shrout &amp; Fleiss ICC(3,1)]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	(REML)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data:  x, y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1044136 0.7924971</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ICC(C,1) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.5384325 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="reli_err_test.html">reli_err_test</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>, col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"reml"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>5.0% of subject-by-item cells are missing. Intervals and p-values use observed-data degrees of freedom and are approximate; they may be liberal as missingness increases. Consider boot = TRUE.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Standard error of measurement (two-way, consistency) (REML)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data:  x, y</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6478589 1.2943096</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       SEM </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8633657 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

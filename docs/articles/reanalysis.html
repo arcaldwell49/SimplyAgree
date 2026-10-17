@@ -237,10 +237,10 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]     [-0.324, 0.834] [-0.6109, 1.1209]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.2687, 0.7767] [-0.5366, 1.0446]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.3497, 0.7117] [-0.3188, 0.6808]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296] 0.2561     [-0.324, 0.834] [-0.6109, 1.1209]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2687, 0.7767] [-0.5366, 1.0446]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3497, 0.7117] [-0.3188, 0.6808]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -275,10 +275,14 @@ researchers.</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3062, 0.2682]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]     [-0.242, 0.272] [-0.3615, 0.3915]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.4055, 0.2875] [-0.5692, 0.4512]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113     [-0.242, 0.272]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-0.3062, 0.2682]</span></span>
+<span><span class="co">#&gt;  [-0.3615, 0.3915]</span></span>
+<span><span class="co">#&gt;  [-0.5692, 0.4512]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
@@ -321,10 +325,14 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104]     [-0.432, 0.072] [-0.5265, 0.1665]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.5996, 0.1756] [-0.7976, 0.3736]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622]   [-0.4238, 0.1318]   [-0.505, 0.213]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias            Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104] 0.1025     [-0.432, 0.072]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951] 0.1732   [-0.5996, 0.1756]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622] 0.1062   [-0.4238, 0.1318]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-0.5265, 0.1665]</span></span>
+<span><span class="co">#&gt;  [-0.7976, 0.3736]</span></span>
+<span><span class="co">#&gt;    [-0.505, 0.213]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -339,10 +347,14 @@ Limits of Agreement for Teso Post Exercise
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347]   [-0.2013, 0.1613]   [-0.285, 0.245]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.2277, 0.2177] [-0.3402, 0.3302]</span></span>
-<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]     [-0.321, 0.355] [-0.4803, 0.5143]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347] 0.0783   [-0.2013, 0.1613]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622] 0.0991   [-0.2277, 0.2177]</span></span>
+<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189] 0.1470     [-0.321, 0.355]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;    [-0.285, 0.245]</span></span>
+<span><span class="co">#&gt;  [-0.3402, 0.3302]</span></span>
+<span><span class="co">#&gt;  [-0.4803, 0.5143]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,</span>
 <span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>

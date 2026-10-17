@@ -40,7 +40,8 @@ jmvdeming(
 
 - testValue:
 
-  Ratio of the two error variances. Default is 1.
+  Ratio of the error variances, Method 1 (x) / Method 2 (y). Default is
+  1.
 
 - plotcon:
 

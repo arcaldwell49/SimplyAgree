@@ -35,7 +35,8 @@ dat = data.frame(
 ```
 
 Also, we will assume, based on historical data, that the measurement
-error ratio is equal to 2.
+error ratio is equal to 2 (i.e., the error variance of x is twice the
+error variance of y).
 
 The data can be run through the `dem_reg` function and the results
 printed.
@@ -320,14 +321,14 @@ summary(pb2)
 #> 
 #> Coefficients:
 #>        term    coef       se lower.ci upper.ci df null_value reject_h0
-#> 1 Intercept 0.09622 0.088205 -0.09182   0.2539 28          0     FALSE
-#> 2   method1 0.99440 0.001291  0.99198   0.9970 28          1      TRUE
+#> 1 Intercept 0.09622 0.498965  -0.9118   0.8647 28          0     FALSE
+#> 2   method1 0.99440 0.006917   0.9836   1.0075 28          1     FALSE
 #> 
 #> 28 degrees of freedom
 #> Error variance ratio (lambda): 1.0000
 #> 
 #> 
-#> Bootstrap CIs based on 999 resamples
+#> Pairs bootstrap CIs based on 999 resamples
 ```
 
 ## Joint Confidence Regions
@@ -404,10 +405,10 @@ function provides a formal hypothesis test for whether the identity line
 
 joint_test(dem1)
 #> 
-#>  Joint Confidence Region Test (H0: intercept = 0, slope = 1)
+#>  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)
 #> 
 #> data:  y ~ x
-#> X-squared = 0.21666, df = 2, p-value = 0.8973
+#> X-squared = 0.21666, df1 = 2, df2 = 8, p-value = 0.8986
 #> alternative hypothesis: true intercept and slope are not equal to the null values
 #> null values:
 #> intercept     slope 
@@ -425,10 +426,10 @@ Passing-Bablok models fitted with bootstrap:
 
 joint_test(pb2)
 #> 
-#>  Joint Confidence Region Test (H0: intercept = 0, slope = 1)
+#>  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)
 #> 
 #> data:  method2 ~ method1
-#> X-squared = 905.61, df = 2, p-value < 2.2e-16
+#> X-squared = 7.7659, df1 = 2, df2 = 28, p-value = 0.03248
 #> alternative hypothesis: true intercept and slope are not equal to the null values
 #> null values:
 #> intercept     slope 
@@ -487,7 +488,8 @@ correlation between slope and intercept.
 ### Measurement Error
 
 A Deming regression model also assumes the measurement error
-(\\\sigma^2\\) ratio is constant.
+(\\\sigma^2\\) ratio is constant. In `SimplyAgree`, the error ratio is
+always the error variance of x divided by the error variance of y.
 
 \\ \lambda = \frac{\sigma^2\_\epsilon}{\sigma^2\_\delta} \\
 
@@ -502,7 +504,7 @@ If the data was not measured in replicate then the error ratio
 that data is available) and the mean of x and y (\\\bar x, \space \bar
 y\\).
 
-\\ \lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2} \\
+\\ \lambda = \frac{(CV_x \cdot \bar x)^2}{(CV_y \cdot \bar y)^2} \\
 
 ### Weights
 

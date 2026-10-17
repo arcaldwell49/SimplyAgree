@@ -73,6 +73,7 @@ and slope=1 for method comparison studies).</p>
 <span>  ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  ideal_slope <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  test_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"asymptotic"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -100,14 +101,22 @@ and slope=1 for method comparison studies).</p>
 <dt id="arg-conf-level">conf.level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
 <dd><p>Confidence level for the test (default: 0.95).</p></dd>
 
+
+<dt id="arg-test-method">test_method<a class="anchor" aria-label="anchor" href="#arg-test-method"></a></dt>
+<dd><p>Reference distribution for the test. <code>"F"</code> (default)
+uses the finite-sample F(2, n-2) distribution per Sadler (2010).
+<code>"asymptotic"</code> uses the chi-squared(2) distribution, which is the
+large-sample approximation. The two converge for large n.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>htest</code> containing:</p><dl><dt>statistic</dt>
-<dd><p>The Mahalanobis distance (chi-squared distributed with df=2).</p></dd>
+<dd><p>The Mahalanobis distance.</p></dd>
 
 <dt>parameter</dt>
-<dd><p>Degrees of freedom (always 2).</p></dd>
+<dd><p>Degrees of freedom. For the F-based test, <code>df1</code> and
+<code>df2</code>; for the asymptotic test, <code>df</code> (always 2).</p></dd>
 
 <dt>p.value</dt>
 <dd><p>The p-value for the test.</p></dd>
@@ -136,11 +145,18 @@ and slope=1 for method comparison studies).</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The test computes the Mahalanobis distance between the estimated coefficients
 and the hypothesized values using the variance-covariance matrix of the
-estimates. Under the null hypothesis, this distance follows a chi-squared
-distribution with 2 degrees of freedom.</p>
+estimates. By default, the finite-sample F(2, n-2) reference distribution
+is used (Sadler, 2010), which is more conservative than the asymptotic
+chi-squared(2) approximation for small samples.</p>
 <p>For Deming regression, the variance-covariance matrix is computed via
 jackknife. For Passing-Bablok regression, bootstrap resampling must have
 been performed (i.e., <code>boot_ci = TRUE</code> in the original call).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
+parametric regression in method-comparison studies. <em>Accreditation and Quality
+Assurance</em>, 15, 547-554.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

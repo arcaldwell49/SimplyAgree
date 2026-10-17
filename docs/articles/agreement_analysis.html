@@ -83,7 +83,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-01</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -364,11 +364,13 @@ correlation.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478]   [-0.2919, 0.5993] [-0.4982, 0.8055]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218]   [-0.3162, 0.7722] [-0.6982, 1.1542]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2478] 0.1878   [-0.2919, 0.5993] [-0.3674, 0.6748]</span></span>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -1016,11 +1018,16 @@ controlling for time of day (<code>tod</code>).</p>
 <span></span>
 <span><span class="va">test1</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM -0.1537 [-0.2478, -0.0595]   [-0.5993, 0.2919] [-0.8055, 0.4982]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342]   [-0.7722, 0.3162] [-1.1542, 0.6982]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition    Bias            Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;         AM -0.1537 [-0.2478, -0.0595] 0.1878   [-0.5993, 0.2919]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342] 0.1520     [-0.672, 0.216]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-0.6748, 0.3674]</span></span>
+<span><span class="co">#&gt;  [-0.6498, 0.1938]</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -1100,6 +1107,8 @@ subject/participant that is uncorrelated with other pairs.</p>
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
 <span><span class="co">#&gt;  0.4383 [-0.1669, 1.0436]    -1.947     2.824 [-3.0117, 3.8884]</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
 <span><span class="co">#&gt; SD of Differences = 1.217</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculation-steps">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps"></a>
@@ -1188,7 +1197,10 @@ identifier (<code>id</code>) must also be provided.</p>
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA           LoA CI</span></span>
 <span><span class="co">#&gt;  0.7152 [-1.5287, 2.9591]    -1.212     2.642 [-4.797, 6.2274]</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; SD of Differences = 1.5036</span></span></code></pre></div>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
+<span><span class="co">#&gt; SD of Differences = 1.5036</span></span>
+<span><span class="co">#&gt; Within-Subject SDs of X &amp; Y = 0.4011 &amp; 0.4348</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculative-steps">Calculative Steps<a class="anchor" aria-label="anchor" href="#calculative-steps"></a>
 </h4>
@@ -1320,6 +1332,8 @@ provide estimates that are very close to those described by <span class="citatio
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
 <span><span class="co">#&gt;  0.7046 [-1.5572, 2.9664]    -2.153     3.562 [-7.4979, 8.9071]</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
+<span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
 <span><span class="co">#&gt; SD of Differences = 1.4581</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="calculation-steps-1">Calculation Steps<a class="anchor" aria-label="anchor" href="#calculation-steps-1"></a>
@@ -1479,7 +1493,9 @@ data should always be inspected.</p>
 <span>                           prop_bias <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, independent differences</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Average of Both Methods    Bias           Bias CI Prediction Interval</span></span>
 <span><span class="co">#&gt;                    3.905 -0.4670 [-1.3842, 0.4502]   [-2.8876, 1.9537]</span></span>
@@ -1489,6 +1505,8 @@ data should always be inspected.</p>
 <span><span class="co">#&gt;  [-3.6396, 2.7057]</span></span>
 <span><span class="co">#&gt;  [-2.6667, 3.3694]</span></span>
 <span><span class="co">#&gt;  [-1.6284, 4.9729]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; SD of Differences = 1.0567</span></span>
 <span></span>
 <span><span class="co"># See effect of proportional bias on limits</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
@@ -1519,11 +1537,13 @@ argument.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Ratio: x/y)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068]    [0.9921, 1.0165] [0.9865, 1.0222]</span></span>
-<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088]    [0.9913, 1.0213]  [0.981, 1.0321]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition  Bias          Bias CI CV (%) Prediction Interval Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068] 0.5137    [0.9921, 1.0165]   [0.99, 1.0186]</span></span>
+<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0185] [0.9947, 1.0178]</span></span></code></pre></div>
 <p>If you prefer to interpret the differences as a percentage
 difference, you can do this by setting the <code>log_tf_display</code>
 argument to “sympercent”. This stands for the “symmetric percentage
@@ -1543,11 +1563,13 @@ difference between the two paired measures.</p>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Sympercent Difference between Methods (s%)</span></span>
-<span><span class="co">#&gt; 95% Prediction Interval with 95% Tolerance Limits</span></span>
+<span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
+<span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
+<span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188 [0.1615, 0.6761]   [-0.7959, 1.6335] [-1.3562, 2.1938]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8747]   [-0.8705, 2.1074] [-1.9196, 3.1564]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;         AM 0.4188 [0.1615, 0.6761] 0.5123   [-0.7959, 1.6335] [-1.0041, 1.8417]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8747] 0.4131   [-0.5916, 1.8285] [-0.5288, 1.7656]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>

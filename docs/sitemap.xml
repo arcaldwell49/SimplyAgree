@@ -28,6 +28,7 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/deming_power.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/deming_sample_size.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/icc_test.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/index.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/jmvagree.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/jmvagreemulti.html</loc></url>
@@ -42,6 +43,10 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/power_icc.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.html</loc></url>
