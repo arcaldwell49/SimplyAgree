@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for reli_htest objects — reli_htest-methods"><meta name="description" content='Methods for objects returned by icc_test() and reli_err_test(). They
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for reli_htest objects — reli_htest-methods"><meta name="description" content='Methods for objects returned by icc_test() and reli_err_test(). They
 print as standard
 "htest" objects; summary() describes the result in words,
 plot() shows the data, and check() gives model diagnostics.'><meta property="og:description" content='Methods for objects returned by icc_test() and reli_err_test(). They
@@ -32,6 +32,7 @@ plot() shows the data, and check() gives model diagnostics.'><meta property="og:
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -128,11 +129,11 @@ prints as a paragraph.</p></dd>
 
 <dt><code>check</code></dt>
 <dd><p>Diagnostic plots combined with patchwork: normality
-and heteroskedasticity of the model residuals, and the within-subject SD
-against the subject mean (on the scale the model was fitted). A rising
-within-subject SD means the error grows with the size of the
-measurement, so a relative error (<code><a href="reli_err_test.html">reli_err_test()</a></code> with
-<code>scale = "log"</code>) describes it better.</p></dd>
+and heteroskedasticity of the model residuals; for two-way models,
+additivity (residuals of the additive subjects + items model against
+the estimated subject effect, one line per item, with Mandel's test for
+non-additivity); and the within-subject SD against the subject mean (on
+the scale the model was fitted). See Details.</p></dd>
 
 
 </dl></div>
@@ -152,10 +153,40 @@ provide against the tested hypothesis, comparable to the surprise of
 getting s heads in a row from s tosses of a fair coin.</p></li>
 </ul><p>Qualitative labels such as "good" or "excellent" are never attached to an
 ICC; see <code><a href="icc_test.html">icc_test()</a></code> for why.</p>
+<p><strong>Diagnostics.</strong> The two-way model assumes that subject and item effects
+add. A subject-by-item interaction, for example items (raters, devices,
+occasions) that differ in scale, is absorbed into the error: it lowers
+the consistency ICC and inflates the SEM. <code><a href="simple_agree-methods.html">check()</a></code> tests for it with
+Mandel's (1961) column-regression test: each item gets its own slope on
+the estimated subject effects, and the k - 1 extra slopes are F-tested.
+The panel plots the residuals of the additive model against the
+estimated subject effect with one line per item, so items whose lines
+slope are those that differ in scale. Mandel's test includes the
+alternative of Tukey's (1949) one-degree-of-freedom test (scale growing
+with the item mean, the multiplicative pattern) and also detects items
+that differ in scale but not in location, which Tukey's test misses; for
+two items the two tests are identical. The covariates are built from the
+fitted additive model, as in Milliken and Graybill (1970), so the F test
+remains exact with missing measurements. In simulations (30 subjects, 3
+items, 3 missing cells, additive normal data), its type I error was
+0.0525 at the 0.05 level. It uses the fixed-effects fit (subjects and
+items as factors) even when the ICC came from REML, and it has little
+power with few subjects. A rising within-subject SD against the subject
+mean means the error grows with the size of the measurement, so a
+relative error (<code><a href="reli_err_test.html">reli_err_test()</a></code> with <code>scale = "log"</code>) describes it
+better.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Greenland, S. (2019). Valid p-values behave exactly as they should: Some
+    <p>Mandel, J. (1961). Non-additivity in two-way analysis of variance.
+Journal of the American Statistical Association, 56(296), 878-888.
+<a href="https://doi.org/10.1080/01621459.1961.10482132" class="external-link">doi:10.1080/01621459.1961.10482132</a></p>
+<p>Milliken, G. A., &amp; Graybill, F. A. (1970). Extensions of the general
+linear hypothesis model. Journal of the American Statistical Association,
+65(330), 797-807. <a href="https://doi.org/10.1080/01621459.1970.10481125" class="external-link">doi:10.1080/01621459.1970.10481125</a></p>
+<p>Tukey, J. W. (1949). One degree of freedom for non-additivity.
+Biometrics, 5(3), 232-242. <a href="https://doi.org/10.2307/3001938" class="external-link">doi:10.2307/3001938</a></p>
+<p>Greenland, S. (2019). Valid p-values behave exactly as they should: Some
 misleading criticisms of p-values and their resolution with S-values. The
 American Statistician, 73(sup1), 106-114.
 <a href="https://doi.org/10.1080/00031305.2018.1529625" class="external-link">doi:10.1080/00031305.2018.1529625</a></p>
@@ -226,7 +257,7 @@ and surprise. BMC Medical Research Methodology, 20, 244.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

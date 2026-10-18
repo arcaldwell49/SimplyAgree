@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Concordance Correlation Coefficient — ccc_test"><meta name="description" content="Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Concordance Correlation Coefficient — ccc_test"><meta name="description" content="Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
 hypothesis test, returning an object of class &quot;htest&quot;."><meta property="og:description" content="Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
 hypothesis test, returning an object of class &quot;htest&quot;."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -28,6 +28,7 @@ hypothesis test, returning an object of class &quot;htest&quot;."><meta property
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -69,7 +70,7 @@ hypothesis test, returning an object of class <code>"htest"</code>.</p>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  data_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"simple"</span>, <span class="st">"reps"</span>, <span class="st">"nest"</span><span class="op">)</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  null.value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  null.value <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"less"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -110,29 +111,35 @@ identifiers. Required when <code>data_type</code> is <code>"reps"</code> or <cod
 
 
 <dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
-<dd><p>The hypothesized value of CCC under the null hypothesis,
-default is 0.</p></dd>
+<dd><p>The CCC under the null hypothesis. The default, <code>NULL</code>,
+gives the estimate and interval without a test.</p></dd>
 
 
 <dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
 <dd><p>Character string specifying the alternative hypothesis:
-<code>"two.sided"</code> (default), <code>"greater"</code>, or <code>"less"</code>.</p></dd>
+<code>"two.sided"</code> (default), <code>"greater"</code>, or <code>"less"</code>. Used
+only when <code>null.value</code> is given (without a test the interval is
+two-sided); a one-sided alternative gives a one-sided interval, as in
+<code><a href="icc_test.html">icc_test()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with class <code>"htest"</code> containing the following components:</p>
+    <p>A list with class <code>c("ccc_htest", "htest")</code> containing the
+following components:</p>
 <dl><dt>statistic</dt>
-<dd><p>The Z-statistic (Fisher-transformed).</p></dd>
+<dd><p>The Z-statistic (Fisher-transformed), when a test was
+requested.</p></dd>
 
 <dt>parameter</dt>
-<dd><p>The sample size (n for simple data, number of subjects for reps/nest).</p></dd>
+<dd><p>The sample size (n for simple data, number of subjects
+for reps/nest), when a test was requested.</p></dd>
 
 <dt>stderr</dt>
 <dd><p>The standard errors for CCC and Z-transformed CCC.</p></dd>
 
 <dt>p.value</dt>
-<dd><p>The p-value for the test.</p></dd>
+<dd><p>The p-value for the test, when a test was requested.</p></dd>
 
 <dt>conf.int</dt>
 <dd><p>A confidence interval for the CCC.</p></dd>
@@ -141,16 +148,28 @@ default is 0.</p></dd>
 <dd><p>The estimated CCC.</p></dd>
 
 <dt>null.value</dt>
-<dd><p>The specified hypothesized value of CCC.</p></dd>
+<dd><p>The specified hypothesized value of CCC, if any.</p></dd>
 
 <dt>alternative</dt>
-<dd><p>A character string describing the alternative hypothesis.</p></dd>
+<dd><p>The alternative hypothesis.</p></dd>
 
 <dt>method</dt>
 <dd><p>A character string indicating the method used.</p></dd>
 
 <dt>data.name</dt>
 <dd><p>A character string giving the names of the data.</p></dd>
+
+<dt>data</dt>
+<dd><p>The data used (<code>x</code>, <code>y</code>, and <code>id</code> for reps/nest), for the
+methods.</p></dd>
+
+<dt>components</dt>
+<dd><p>For simple data, Lin's decomposition: the Pearson
+correlation <code>r</code> (precision) and the bias correction factor <code>C_b</code>
+(accuracy), with CCC = r x C_b. <code>NULL</code> for reps/nest.</p></dd>
+
+<dt>settings</dt>
+<dd><p>The settings used, for the methods.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -162,18 +181,42 @@ observed data deviate from the line of perfect concordance (45-degree line
 through the origin).</p>
 <p>For simple paired data, Lin's original method is used. For replicate or nested
 data, U-statistics are employed following King, Chinchilli, and Carrasco.</p>
-<p>The hypothesis test is performed using Fisher's Z-transformation of the CCC:
-$$Z = 0.5 \times \log\left(\frac{1 + CCC}{1 - CCC}\right)$$</p>
+<p>The confidence interval and the hypothesis test use Fisher's
+Z-transformation of the CCC:
+$$Z = 0.5 \times \log\left(\frac{1 + CCC}{1 - CCC}\right)$$
+By default (<code>null.value = NULL</code>) no test is done.</p>
+<p><strong>Relation to the ICC.</strong> For two methods, the CCC is close to the
+absolute-agreement intraclass correlation, ICC(A,1)
+(<code>icc_test(type = "agreement")</code>); Lin's estimator uses n rather than
+n - 1 in the variances, and the difference vanishes as n grows
+(Nickerson, 1997; Carrasco &amp; Jover, 2003). <code>ccc_test()</code> is meant for
+method-comparison (agreement) studies; <code><a href="icc_test.html">icc_test()</a></code> for reliability
+studies (see its "Choosing the form" and "Related coefficients"
+sections).</p>
+<p><strong>Methods.</strong> <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> describes the result in words (including, for
+simple data, whether a low CCC comes from poor precision or poor
+accuracy), <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the identity or Bland-Altman plot, and
+<code><a href="simple_agree-methods.html">check()</a></code> gives diagnostics; see <a href="ccc_htest-methods.html">ccc_htest-methods</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268.</p>
+<p>Carrasco, J. L., &amp; Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858. <a href="https://doi.org/10.1111/j.0006-341x.2003.00099.x" class="external-link">doi:10.1111/j.0006-341x.2003.00099.x</a></p>
+<p>Nickerson, C. A. E. (1997). A note on "A concordance correlation
+coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
+<a href="https://doi.org/10.2307/2533516" class="external-link">doi:10.2307/2533516</a></p>
 <p>King, T. S., &amp; Chinchilli, V. M. (2001). A generalized concordance correlation
 coefficient for continuous and categorical data. Statistics in Medicine,
 20(14), 2131-2147.</p>
 <p>King, T. S., Chinchilli, V. M., &amp; Carrasco, J. L. (2007). A repeated measures
 concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><a href="ccc_htest-methods.html">ccc_htest-methods</a>, <code><a href="icc_test.html">icc_test()</a></code>, <code><a href="agreement_limit.html">agreement_limit()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -186,8 +229,8 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	Lin's Concordance Correlation Coefficient</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  x and y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Z = 5.4582, n = 5, p-value = 4.809e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.9556798 0.9993495</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
@@ -203,8 +246,8 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	Lin's Concordance Correlation Coefficient</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  x and y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Z = 2.5303, n = 18, p-value = 0.0114</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.1275808 0.7236639</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
@@ -219,10 +262,10 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	Lin's Concordance Correlation Coefficient</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  x and y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Z = -2.7972, n = 18, p-value = 0.9974</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is  0.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Z = -2.873, n = 18, p-value = 0.998</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is greater than 0.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1275808 0.7236639</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1892367 1.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       CCC </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.4790783 </span>
@@ -234,8 +277,8 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	Concordance Correlation Coefficient (U-statistics)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  x and y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Z = 0.7841, n = 4, p-value = 0.433</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  -0.1595543  0.3588391</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
@@ -249,14 +292,31 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	Concordance Correlation Coefficient (U-statistics)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  x and y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Z = 3.7336, n = 4, p-value = 0.0001888</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true CCC is  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: two.sided</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.2429167 0.6616278</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       CCC </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.4790783 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Describe, plot and check</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">ccc_test</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The estimated CCC was 0.479 (95% compatibility interval [0.128,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.724]). Values in this interval are the most compatible with the data,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> given the model and its assumptions. The estimate is Lin's concordance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> correlation coefficient between x and y: how closely the pairs fall on</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> the line of identity. It combines precision (Pearson r = 0.577) and</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> accuracy (bias correction factor C_b = 0.831), CCC = r x C_b. The data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> had 18 complete pairs. The interval uses Fisher's z transformation with</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Lin's (1989) delta-method standard error, which assumes the two</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> measurements are bivariate normal.</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="ccc_test-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="ccc_test-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -269,7 +329,7 @@ concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.<
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

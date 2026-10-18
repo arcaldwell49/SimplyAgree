@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Measurement Error Test — reli_err_test"><meta name="description" content='
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Measurement Error Test — reli_err_test"><meta name="description" content='
 Estimates one measurement error statistic, the standard error of
 measurement (SEM), the standard error of estimate (SEE), or the standard
 error of prediction (SEP), with a confidence interval and an optional test
@@ -40,6 +40,7 @@ excluded, \(\sqrt{MS_E}\).'><meta property="og:image" content="https://aaroncald
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -194,9 +195,16 @@ with <code>method = "reml"</code> it uses <code>"perc"</code>. See Details. Used
 
 <dt id="arg-se-method">se_method<a class="anchor" aria-label="anchor" href="#arg-se-method"></a></dt>
 <dd><p>How the standard error of the log of the statistic is
-estimated: <code>"jackknife"</code> (default), <code>"influence"</code>, or <code>"normal"</code>. It is
-reported in <code>stderr</code> and used by the studentized bootstrap; it does not
-change the analytic interval or test. See <code><a href="icc_test.html">icc_test()</a></code>.</p></dd>
+estimated: <code>"jackknife"</code> (default; delete one subject at a time,
+accurate in simulations but n refits with <code>method = "reml"</code>),
+<code>"influence"</code> (a per-subject sandwich estimate; cheap but too small with
+few subjects), or <code>"normal"</code> (normal theory; too small with skewed or
+heavy-tailed data, and cannot be used by the studentized bootstrap). It
+is reported in <code>stderr</code> and used by the studentized bootstrap; it does
+not change the analytic interval or test. For the two-way agreement
+statistics, the jackknife and influence SEs add the normal-theory
+variance of the item mean square, treating the items as random (as the
+hybrid bootstrap does). See <code><a href="icc_test.html">icc_test()</a></code> for the simulations.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -250,7 +258,12 @@ standard deviation of the bootstrap estimates.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Statistics.</strong> With \(MS\) the mean squares of the subjects-by-items
+    <p><strong>Choosing <code>model</code> and <code>type</code>.</strong> Choose them as for the ICC (see
+"Choosing the form" in <code><a href="icc_test.html">icc_test()</a></code>): <code>type = "agreement"</code> when
+systematic differences between items count as error, <code>"consistency"</code>
+when they are checked and reported separately. Report the error
+statistic that matches the ICC.</p>
+<p><strong>Statistics.</strong> With \(MS\) the mean squares of the subjects-by-items
 analysis of variance (n subjects, k items):</p><table class="table table"><tr><td><code>stat</code></td><td><code>model</code></td><td><code>type</code></td><td>Estimate</td><td>Analytic inference</td></tr><tr><td>SEM</td><td>twoway</td><td>consistency</td><td>\(\sqrt{MS_E}\)</td><td>exact \(\chi^2\), df \((n-1)(k-1)\)</td></tr><tr><td>SEM</td><td>twoway</td><td>agreement</td><td>\(\sqrt{(MS_J + (n-1) MS_E)/n}\)</td><td>Satterthwaite \(\chi^2\)</td></tr><tr><td>SEM</td><td>oneway</td><td>agreement</td><td>\(\sqrt{MS_W}\)</td><td>exact \(\chi^2\), df \(n(k-1)\)</td></tr><tr><td>SEE</td><td>any</td><td>any</td><td>\(SD \sqrt{ICC(1 - ICC)}\)</td><td>delta method, log scale</td></tr><tr><td>SEP</td><td>any</td><td>any</td><td>\(SD \sqrt{1 - ICC^2}\)</td><td>delta method, log scale</td></tr></table><p>The consistency SEM is the typical error of Hopkins (2000) and the
 \(\sqrt{MS_E}\) preferred by Weir (2005); the one-way SEM is the
 within-subject SD of Bland and Altman. The agreement SEM adds the
@@ -440,7 +453,7 @@ Conditioning Research, 19(1), 231-240. <a href="https://doi.org/10.1519/15184.1"
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

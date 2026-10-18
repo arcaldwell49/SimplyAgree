@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Power and Sample Size for an Intraclass Correlation Test — power_icc"><meta name="description" content="
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Power and Sample Size for an Intraclass Correlation Test — power_icc"><meta name="description" content="
 Computes the power of the F test of an intraclass correlation
 coefficient (ICC) used by icc_test(), or solves for the number of
 subjects, the number of measurements per subject, the ICC under the
@@ -38,6 +38,7 @@ is computed from the others, as in stats::power.t.test()."><meta property="og:im
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -85,6 +86,8 @@ is computed from the others, as in <code><a href="https://rdrr.io/r/stats/power.
 <span>  sig.level <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  power <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"oneway"</span>, <span class="st">"twoway"</span><span class="op">)</span>,</span>
+<span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  missing <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"less"</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exact"</span>, <span class="st">"approximate"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -124,6 +127,22 @@ reaches the target is returned.</p></dd>
 <dd><p><code>"oneway"</code> (default) or <code>"twoway"</code>. <code>"twoway"</code> means the
 consistency ICC, ICC(C,1) of <code><a href="icc_test.html">icc_test()</a></code>; the absolute agreement ICC
 is not supported (see Details).</p></dd>
+
+
+<dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
+<dd><p><code>"single"</code> (default) for the reliability of a single
+measurement, or <code>"average"</code> for the reliability of the mean of the <code>k</code>
+measurements (ICC(k) or ICC(C,k)), as in <code><a href="icc_test.html">icc_test()</a></code>. With
+<code>"average"</code>, the ICC values are on the average-measure scale and <code>k</code>
+cannot be solved for. See Details.</p></dd>
+
+
+<dt id="arg-missing">missing<a class="anchor" aria-label="anchor" href="#arg-missing"></a></dt>
+<dd><p>The expected proportion of measurements (subject-by-item
+cells) that will be missing, analysed with <code>icc_test(method = "reml")</code>.
+The default, 0, gives the exact complete-data calculation; values above
+0 give an approximation (see Details). For subjects who will be lost
+entirely, reduce <code>n</code> instead.</p></dd>
 
 
 <dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
@@ -170,12 +189,57 @@ preferred; the approximation is provided to reproduce published tables.</p>
 <code>alternative = "two.sided"</code>, the solution above <code>rho0</code> is returned; use
 <code>alternative = "less"</code> (with the significance level halved) for the one
 below.</p>
-<p><strong>Agreement ICC.</strong> The absolute agreement ICC (ICC(A,1)) is not
-supported: its test has no exact F distribution, and because its
-denominator degrees of freedom depend on the sample, its power "cannot be
-determined exactly" (McGraw &amp; Wong, 1996, footnote 3). Power for that
-ICC would need simulation.</p>
-    </div>
+<p><strong>Average-measure ICCs.</strong> The average-measure ICC is the Spearman-Brown
+projection of the single-measure ICC to k measurements,
+\(k\rho / (1 + (k-1)\rho)\), so a test about ICC(k) or ICC(C,k) is the
+same F test as the test about the corresponding single-measure ICC, and
+its interval is the projection of the single-measure interval. With
+<code>unit = "average"</code> the calculations are therefore exact, not
+approximations; <code>k</code> must be given because it defines the quantity being
+planned for.</p>
+<p><strong>Missing measurements (approximate).</strong> With <code>missing = p &gt; 0</code>, the
+calculation uses the observed-data quantities that
+<code>icc_test(method = "reml")</code> uses for incomplete data:
+\(N = nk(1 - p)\) observations, \(\bar{k} = N/n\) measurements per
+subject in the scale factor of the F ratio and in the interval, and error
+degrees of freedom \(N - n - k + 1\) (two-way) or \(N - n\) (one-way).
+This is an approximation: the F distribution is exact only for complete
+data. In simulations of the REML analysis (one-way and two-way ICCs, 15
+or 40 subjects, 3 or 5 items, 15% or 30% of measurements missing
+completely at random or 30% at random depending on the first
+measurement; 1000 replicates per setting), the approximate power was
+within 0.035 of the simulated power (Monte Carlo SE 0.016) and the
+approximate median interval width within 2.2% of the simulated median.
+The REML test itself was slightly liberal with 30% missing (type I error
+up to 0.069 missing completely at random and 0.073 at random, for a
+nominal 0.05), which the simulated power includes. A warning is given
+above 30% missing. The calculation assumes each subject keeps at least
+one measurement.</p>
+<p><strong>Planning other designs.</strong> These functions are exact only for the
+one-way and two-way consistency ICCs with complete, normally distributed
+data. They can still guide the planning of other ICC studies, as long as
+the direction of the error is kept in mind:</p><ul><li><p><em>Absolute agreement ICC (ICC(A,1), and the CCC for two methods).</em>
+Not supported exactly: its test has no exact F distribution, and
+because its denominator degrees of freedom depend on the sample, its
+power "cannot be determined exactly" (McGraw &amp; Wong, 1996, footnote 3).
+When the items (trials, raters, methods) differ little systematically,
+ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good
+guide. When they differ, the agreement test and interval also depend on
+the item mean square, which has only k - 1 degrees of freedom: power is
+lower and intervals wider than the consistency calculation says, most
+of all with 2 or 3 items. Treat the consistency result as a lower bound
+on the number of subjects; simulation would be needed for a precise
+answer.</p></li>
+<li><p><em>Missing measurements.</em> Use <code>missing</code> for measurements missing here and
+there (see below). For subjects who will be lost entirely, plan for the
+subjects who complete the study and recruit \(n / (1 - d)\) for an
+expected dropout d.</p></li>
+<li><p><em>Non-normal data.</em> The exact calculations assume normality. With
+skewed or heavy-tailed data the F-based intervals are wider and cover
+less than planned (see <code><a href="icc_test.html">icc_test()</a></code> and <code><a href="reli_err_test.html">reli_err_test()</a></code> for
+simulations), so allow a margin or plan for the bootstrap with a larger
+sample.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Donner, A., &amp; Eliasziw, M. (1987). Sample size requirements for
@@ -259,7 +323,7 @@ of a given width; <code><a href="icc_test.html">icc_test()</a></code> for the an
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

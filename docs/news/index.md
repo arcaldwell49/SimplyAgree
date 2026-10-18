@@ -26,7 +26,14 @@
   [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md):
   power and sample size for the ICC F test, and sample size for an ICC
   confidence interval of a given width with a given assurance (exact
-  F-based calculations, plus the Walter et al. and Zou approximations).
+  F-based calculations for the one-way and consistency ICCs, single or
+  average measures (`unit`), plus the Walter et al. and Zou
+  approximations). With `missing`, the expected proportion of missing
+  measurements, they give an approximate calculation for a REML analysis
+  of incomplete data, checked by simulation up to 30% missing. The
+  documentation explains how to use them as a guide for agreement ICCs
+  (an optimistic lower bound on the sample size), missing data and
+  non-normal data.
 - New [`summary()`](https://rdrr.io/r/base/summary.html),
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
   [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
@@ -39,8 +46,11 @@
   from the subject mean by item (`"items"`), or each pair of items
   against the line of identity (`"pairs"`).
   [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
-  adds the within-subject SD against the subject mean, to show whether
-  the error grows with the mean.
+  adds an additivity panel with Mandel’s test for non-additivity (items
+  that differ in scale; built from the fitted additive model as in
+  Milliken & Graybill, so it also works with missing measurements) and
+  the within-subject SD against the subject mean, to show whether the
+  error grows with the mean.
 - [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
   and
   [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
@@ -89,6 +99,75 @@
   two-sided ICC intervals, intervals for the SEM, SEE and SEP (the SEE
   and SEP now use the SD matched to the ICC’s denominator), the CV in
   sympercents, and REML when measurements are missing.
+- The power and sample size vignette has a new section on planning
+  reliability studies with
+  [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
+  and
+  [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md)
+  (tests and interval widths, trading subjects for trials, average
+  measures, missing measurements, and using the calculations as a guide
+  for agreement ICCs).
+
+### Categorical ratings
+
+- New
+  [`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md):
+  one chance-corrected agreement coefficient for categorical ratings
+  (Gwet’s AC1/AC2, Fleiss’ kappa, Krippendorff’s alpha, or percent
+  agreement), returned as an `htest` with an optional t test against
+  `null.value`. It takes the same formula, long and wide interfaces as
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+  accepts numeric, character or factor ratings, and offers all of Gwet’s
+  weighting schemes (`"quadratic"`, `"linear"`, `"ordinal"`,
+  `"radical"`, `"ratio"`, `"circular"`, `"bipolar"`) or a custom weight
+  matrix. Results match the irrCAC package.
+- New
+  [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md):
+  the model-based kappa of Nelson & Edwards (2015) and Nelson, Mitani &
+  Edwards (2017) for ordinal ratings from many raters
+  ([\#63](https://github.com/arcaldwell49/SimplyAgree/issues/63)). It is
+  computed from a cumulative probit mixed model with crossed subject and
+  rater random effects (fitted with
+  [`ordinal::clmm()`](https://rdrr.io/pkg/ordinal/man/clmm.html);
+  `ordinal` is now in Suggests), is not affected by category prevalence,
+  and returns the rater effects (conditional modes). The interval is
+  formed on the logit of the subject variance share, so it stays within
+  \[0, 1\]. With `group`, it compares two groups of raters
+  (e.g. experienced and inexperienced) or subjects (e.g. younger and
+  older patients): the group is a fixed effect with its own rater (or
+  subject) variance, and the result gives kappa_m in each group, an
+  interval for their difference, the kappa between a rater from each
+  group, and a likelihood ratio test of equal variances. The model is
+  the identified form of the random-slope model of Nelson et al. (2017),
+  whose intercept-slope covariance is not identified when the group is
+  constant within raters or subjects.
+- New [`summary()`](https://rdrr.io/r/base/summary.html) and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods for
+  both: category use by rater, ratings by subject, and (for
+  [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md))
+  rater effects.
+- New vignette, “Agreement for Categorical and Ordinal Ratings”,
+  covering how to choose a coefficient (including the kappa paradox),
+  weights for ordinal scales, the rating scale, the model-based kappa,
+  rater effects, and group comparisons. The inter-rater section of the
+  reliability vignette now points to it.
+- [`agree_coef()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_coef.md)
+  is superseded by
+  [`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md).
+  It keeps its output but now uses the same engine, which fixes several
+  problems:
+  - It no longer fails when all ratings are in one category (the
+    chance-corrected coefficients are returned as `NA`, with a warning).
+  - New `categories` argument for scale points that were never used.
+    Gwet’s AC1/AC2 and the weights depend on the full set of categories,
+    so they were wrong when a category was unused.
+  - New `weights` argument for the other weighting schemes
+    (`weighted = TRUE` still means quadratic weights).
+  - Long data with more than one rating per subject and rater is now an
+    error; the extra ratings were silently dropped.
+  - Lower confidence limits are clipped to the possible range of the
+    coefficient (they were only clipped at 1).
+  - The row name “Kririppendorff’s Alpha” is now “Krippendorff’s Alpha”.
 
 ### Other changes
 
@@ -307,8 +386,22 @@
   an informative message when the suggested `ggeffects` package is not
   installed (only `mgcv` was being checked). The Deming vignette now
   also builds when the suggested `deming` package is unavailable.
-- Added `ccc_test` function for concordance correlation coefficient
-  hypothesis testing, returning an `htest` object.
+- Added
+  [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
+  for the concordance correlation coefficient (CCC), returning an
+  `htest` object (class `ccc_htest`) with a Fisher-z confidence interval
+  and, when `null.value` is given, a z test. As in
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+  no test is done by default, a one-sided alternative gives a one-sided
+  interval, and [`summary()`](https://rdrr.io/r/base/summary.html)
+  (hypothesis or estimation style, with Lin’s precision and accuracy
+  components for simple data),
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) (identity or
+  Bland-Altman plot) and
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  (normality and heteroskedasticity of the differences, linearity with a
+  RESET test, and bivariate normality for simple data) methods are
+  provided.
 - Fixed the Passing-Bablok (`pb_reg`) bootstrap. The previous wild
   bootstrap perturbed the observed values rather than the fitted values,
   so resampled points never crossed the regression line; standard errors

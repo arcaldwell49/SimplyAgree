@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sample Size for the Precision of an Intraclass Correlation — precision_icc"><meta name="description" content="
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sample Size for the Precision of an Intraclass Correlation — precision_icc"><meta name="description" content="
 Plans a reliability study so that the confidence interval for an
 intraclass correlation coefficient (ICC) from icc_test() is narrow
 enough. Computes the assurance (the probability that the interval is no
@@ -38,6 +38,7 @@ and assurance must be NULL."><meta property="og:image" content="https://aaroncal
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -85,6 +86,8 @@ and <code>assurance</code> must be <code>NULL</code>.</p>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  assurance <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"oneway"</span>, <span class="st">"twoway"</span><span class="op">)</span>,</span>
+<span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  missing <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exact"</span>, <span class="st">"approximate"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -128,6 +131,22 @@ consistency ICC, ICC(C,1) of <code><a href="icc_test.html">icc_test()</a></code>
 is not supported (see Details).</p></dd>
 
 
+<dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
+<dd><p><code>"single"</code> (default) for the reliability of a single
+measurement, or <code>"average"</code> for the reliability of the mean of the <code>k</code>
+measurements (ICC(k) or ICC(C,k)), as in <code><a href="icc_test.html">icc_test()</a></code>. With
+<code>"average"</code>, the ICC values are on the average-measure scale and <code>k</code>
+cannot be solved for. See Details.</p></dd>
+
+
+<dt id="arg-missing">missing<a class="anchor" aria-label="anchor" href="#arg-missing"></a></dt>
+<dd><p>The expected proportion of measurements (subject-by-item
+cells) that will be missing, analysed with <code>icc_test(method = "reml")</code>.
+The default, 0, gives the exact complete-data calculation; values above
+0 give an approximation (see Details). For subjects who will be lost
+entirely, reduce <code>n</code> instead.</p></dd>
+
+
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p><code>"exact"</code> (default) computes the assurance from the exact
 distribution of the interval width. <code>"approximate"</code> uses the closed form
@@ -162,7 +181,18 @@ paper (the variance of the log-F statistic, not used here) is incorrect;
 the exact method avoids both issues. For a one-sided lower limit, the
 assurance that the lower limit exceeds a value \(\rho_0\) is the power
 of the one-sided test: use <code>power_icc(alternative = "greater")</code>.</p>
-<p>The absolute agreement ICC is not supported (see <code><a href="power_icc.html">power_icc()</a></code>).</p>
+<p><strong>Average-measure ICCs</strong> (<code>unit = "average"</code>): the interval for ICC(k) or
+ICC(C,k) has limits \(1 - a/F\) and \(1 - 1/(bF)\) (with a and b the
+F quantiles), so its width, \((a - 1/b)/F\), decreases with F and the
+assurance is a single F probability. <code>width</code> is on the average-measure
+scale. The approximate method is for single measures only.</p>
+<p><strong>Missing measurements</strong> (<code>missing &gt; 0</code>): the interval width uses the
+observed-data quantities described in <code><a href="power_icc.html">power_icc()</a></code>, an approximation
+whose median widths were within 2.2% of simulated REML intervals with up
+to 30% of measurements missing.</p>
+<p>The absolute agreement ICC is not supported exactly; see "Planning other
+designs" in <code><a href="power_icc.html">power_icc()</a></code> for using these calculations as a guide for it,
+for missing data, and for non-normal data.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -248,7 +278,7 @@ Medicine, 31(29), 3972-3981. <a href="https://doi.org/10.1002/sim.5466" class="e
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

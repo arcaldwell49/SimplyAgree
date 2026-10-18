@@ -19,8 +19,8 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Power Analysis and Sample Size Determination for Agreement Studies">
 </head>
 <body>
@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -83,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-17</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/power_sample_size_vignette.Rmd" class="external-link"><code>vignettes/power_sample_size_vignette.Rmd</code></a></small>
       <div class="d-none name"><code>power_sample_size_vignette.Rmd</code></div>
@@ -101,7 +102,7 @@ using the <code>SimplyAgree</code> package.</p>
 <h3 id="available-methods">Available Methods<a class="anchor" aria-label="anchor" href="#available-methods"></a>
 </h3>
 <p><code>SimplyAgree</code> implements four approaches to power/sample
-size calculations:</p>
+size calculations for agreement (limits of agreement) studies:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong><code><a href="../reference/power_agreement_exact.html">power_agreement_exact()</a></code></strong> - Exact
@@ -120,6 +121,21 @@ half-width criterion <span class="citation">(<a href="#ref-JanShieh2018">Jan and
 <li>
 <strong><code><a href="../reference/agree_assurance.html">agree_assurance()</a></code></strong> - Assurance
 probability criterion <span class="citation">(<a href="#ref-JanShieh2018">Jan and Shieh 2018</a>)</span>
+</li>
+</ol>
+<p>and two for reliability studies that estimate an intraclass
+correlation coefficient (ICC; see <a href="#planning-a-reliability-study-icc">Planning a Reliability
+Study</a>):</p>
+<ol start="5" style="list-style-type: decimal">
+<li>
+<strong><code><a href="../reference/power_icc.html">power_icc()</a></code></strong> - Power of the ICC test
+<span class="citation">(<a href="#ref-walter1998">Walter et al.
+1998</a>)</span>
+</li>
+<li>
+<strong><code><a href="../reference/precision_icc.html">precision_icc()</a></code></strong> - Width of the ICC
+confidence interval <span class="citation">(<a href="#ref-zou2012">Zou
+2012</a>; <a href="#ref-mondal2024">Mondal et al. 2024</a>)</span>
 </li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -256,7 +272,7 @@ exploring power across sample sizes.</p>
 <span></span>
 <span><span class="co"># Plot</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pc</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="power_sample_size_vignette_files/figure-html/bland_ex1-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="power_sample_size_vignette_files/figure-html/bland_ex1-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Find n for 80% power</span></span>
@@ -377,7 +393,12 @@ probability of achieving target precision.</p>
 |
 \- Precision Estimation -&gt;
     |- Average precision sufficient -&gt; Expected Half-Width
-    \- Need probabilistic guarantee -&gt; Assurance Probability</code></pre>
+    \- Need probabilistic guarantee -&gt; Assurance Probability
+
+Reliability (ICC) study?
+|
+|- Show the ICC exceeds a threshold -&gt; power_icc()
+\- Estimate the ICC precisely -&gt; precision_icc()</code></pre>
 </div>
 <div class="section level2">
 <h2 id="handling-clusterednested-data">Handling Clustered/Nested Data<a class="anchor" aria-label="anchor" href="#handling-clusterednested-data"></a>
@@ -550,6 +571,237 @@ consult a statistician.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="planning-a-reliability-study-icc">Planning a Reliability Study (ICC)<a class="anchor" aria-label="anchor" href="#planning-a-reliability-study-icc"></a>
+</h2>
+<p>A reliability study asks whether a measurement ranks subjects
+consistently, summarised by an intraclass correlation coefficient (ICC)
+and analysed with <code><a href="../reference/icc_test.html">icc_test()</a></code> (see the reliability analysis
+vignette). The same two goals apply as for agreement:</p>
+<ul>
+<li>
+<strong>Hypothesis testing:</strong> show that the ICC is above a
+threshold (e.g. 0.6), with <code><a href="../reference/power_icc.html">power_icc()</a></code>.</li>
+<li>
+<strong>Estimation:</strong> make the confidence interval for the
+ICC narrow enough, with <code><a href="../reference/precision_icc.html">precision_icc()</a></code>.</li>
+</ul>
+<p>Both work like <code><a href="https://rdrr.io/r/stats/power.t.test.html" class="external-link">stats::power.t.test()</a></code>: leave exactly one
+argument as <code>NULL</code> (by default the number of subjects,
+<code>n</code>) and it is solved for. <code>k</code> is the number of
+measurements per subject (trials, occasions or raters).
+<code>model</code> is <code>"oneway"</code> (the default) or
+<code>"twoway"</code>, which is the consistency ICC, ICC(C,1), of
+<code><a href="../reference/icc_test.html">icc_test()</a></code>. With complete, normally distributed data, both
+calculations are exact: the F ratio behind the ICC test and interval is
+a scaled central F variable whatever the true ICC <span class="citation">(<a href="#ref-mcgraw1996">McGraw and Wong
+1996</a>)</span>.</p>
+<div class="section level3">
+<h3 id="power-for-an-icc-test">Power for an ICC test<a class="anchor" aria-label="anchor" href="#power-for-an-icc-test"></a>
+</h3>
+<p>How many subjects are needed to show, with two trials and 80% power,
+that the consistency ICC is above 0.6 when it is really 0.8?</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">2</span>, power <span class="op">=</span> <span class="fl">0.80</span>,</span>
+<span>          model <span class="op">=</span> <span class="st">"twoway"</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Power calculation for the two-way consistency ICC, ICC(C,1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 39.43736</span></span>
+<span><span class="co">#&gt;               k = 2</span></span>
+<span><span class="co">#&gt;            rho0 = 0.6</span></span>
+<span><span class="co">#&gt;            rho1 = 0.8</span></span>
+<span><span class="co">#&gt;       sig.level = 0.05</span></span>
+<span><span class="co">#&gt;           power = 0.8</span></span>
+<span><span class="co">#&gt;     alternative = greater</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject</span></span></code></pre></div>
+<p>Round up: 40 subjects. The same test would then be run with
+<code>icc_test(..., null.value = 0.6, alternative = "greater")</code>.</p>
+<p>Subjects can be traded for measurements. With only 20 subjects
+available, solve for <code>k</code> instead:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span>, k <span class="op">=</span> <span class="cn">NULL</span>, rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, power <span class="op">=</span> <span class="fl">0.80</span>,</span>
+<span>          model <span class="op">=</span> <span class="st">"twoway"</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Power calculation for the two-way consistency ICC, ICC(C,1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 20</span></span>
+<span><span class="co">#&gt;               k = 5</span></span>
+<span><span class="co">#&gt;            rho0 = 0.6</span></span>
+<span><span class="co">#&gt;            rho1 = 0.8</span></span>
+<span><span class="co">#&gt;       sig.level = 0.05</span></span>
+<span><span class="co">#&gt;           power = 0.8</span></span>
+<span><span class="co">#&gt;     alternative = greater</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n = number of subjects, k = measurements per subject</span></span></code></pre></div>
+<p>Five trials per subject would be needed.</p>
+<p>A power curve over a range of sample sizes is a useful sensitivity
+analysis, here for an ICC of 0.75 or 0.8 under the alternative:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">80</span>, by <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">pw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0.80</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">n_seq</span>, <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n</span>, k <span class="op">=</span> <span class="fl">2</span>, rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="va">r1</span>, model <span class="op">=</span> <span class="st">"twoway"</span>,</span>
+<span>              alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">power</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">n_seq</span>, <span class="va">pw</span>, type <span class="op">=</span> <span class="st">"l"</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, col <span class="op">=</span> <span class="fl">1</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>        xlab <span class="op">=</span> <span class="st">"Number of subjects"</span>, ylab <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">0.8</span>, col <span class="op">=</span> <span class="st">"grey"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICC = 0.75"</span>, <span class="st">"ICC = 0.80"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="power_sample_size_vignette_files/figure-html/icc_power_curve-1.png" class="r-plt" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="precision-of-an-icc">Precision of an ICC<a class="anchor" aria-label="anchor" href="#precision-of-an-icc"></a>
+</h3>
+<p>When the goal is to estimate the ICC rather than to test it, plan for
+the width of its 95% confidence interval (upper minus lower limit).
+Because the width varies from sample to sample, <code>assurance</code>
+sets the probability that the interval is no wider than planned; the
+default, 0.5, plans for the median width.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Median width of 0.2 around an ICC of 0.8, with three trials</span></span>
+<span><span class="fu"><a href="../reference/precision_icc.html">precision_icc</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">0.2</span>, model <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Precision (confidence interval width) calculation for the two-way consistency ICC, ICC(C,1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 36.74614</span></span>
+<span><span class="co">#&gt;               k = 3</span></span>
+<span><span class="co">#&gt;             rho = 0.8</span></span>
+<span><span class="co">#&gt;           width = 0.2</span></span>
+<span><span class="co">#&gt;      conf.level = 0.95</span></span>
+<span><span class="co">#&gt;       assurance = 0.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject; width = upper minus lower limit</span></span>
+<span></span>
+<span><span class="co"># The same width with 80% assurance</span></span>
+<span><span class="fu"><a href="../reference/precision_icc.html">precision_icc</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">0.2</span>, assurance <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>              model <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Precision (confidence interval width) calculation for the two-way consistency ICC, ICC(C,1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 48.68426</span></span>
+<span><span class="co">#&gt;               k = 3</span></span>
+<span><span class="co">#&gt;             rho = 0.8</span></span>
+<span><span class="co">#&gt;           width = 0.2</span></span>
+<span><span class="co">#&gt;      conf.level = 0.95</span></span>
+<span><span class="co">#&gt;       assurance = 0.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject; width = upper minus lower limit</span></span></code></pre></div>
+<p>Planning for the median width needs 37 subjects; a guarantee that the
+interval will be that narrow 80% of the time needs 49. For a one-sided
+goal (a lower confidence limit above some value), use
+<code><a href="../reference/power_icc.html">power_icc()</a></code> with <code>alternative = "greater"</code>: the
+probability that the lower limit exceeds <code>rho0</code> is the power
+of the one-sided test.</p>
+</div>
+<div class="section level3">
+<h3 id="average-measures">Average measures<a class="anchor" aria-label="anchor" href="#average-measures"></a>
+</h3>
+<p>If the measurement used in practice will be the mean of the
+<code>k</code> trials, plan for the average-measure ICC, ICC(k) or
+ICC(C,k), with <code>unit = "average"</code>. The ICC values and the
+width are then on the average-measure scale, and the calculations remain
+exact (the average-measure ICC is the Spearman-Brown projection of the
+single-measure ICC):</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/precision_icc.html">precision_icc</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.9</span>, k <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">0.1</span>, assurance <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>              model <span class="op">=</span> <span class="st">"twoway"</span>, unit <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Precision (confidence interval width) calculation for the two-way consistency average-measure ICC, ICC(C,k) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 70.17474</span></span>
+<span><span class="co">#&gt;               k = 3</span></span>
+<span><span class="co">#&gt;             rho = 0.9</span></span>
+<span><span class="co">#&gt;           width = 0.1</span></span>
+<span><span class="co">#&gt;      conf.level = 0.95</span></span>
+<span><span class="co">#&gt;       assurance = 0.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject; width = upper minus lower limit</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="missing-measurements-and-dropout">Missing measurements and dropout<a class="anchor" aria-label="anchor" href="#missing-measurements-and-dropout"></a>
+</h3>
+<p>If some measurements will be missing here and there (a missed trial,
+a rater who skipped a subject), give the expected proportion of missing
+subject-by-item cells in <code>missing</code>. The calculation then
+follows the REML analysis of <code>icc_test(method = "reml")</code>,
+using the observed-data degrees of freedom. This is an approximation,
+but in simulations with up to 30% missing the approximate power was
+within 0.035 of the simulated power.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">2</span>, power <span class="op">=</span> <span class="fl">0.80</span>, model <span class="op">=</span> <span class="st">"twoway"</span>,</span>
+<span>          alternative <span class="op">=</span> <span class="st">"greater"</span>, missing <span class="op">=</span> <span class="fl">0.15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Power calculation for the two-way consistency ICC, ICC(C,1) (F distribution with observed-data df; approximate) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 51.49918</span></span>
+<span><span class="co">#&gt;               k = 2</span></span>
+<span><span class="co">#&gt;            rho0 = 0.6</span></span>
+<span><span class="co">#&gt;            rho1 = 0.8</span></span>
+<span><span class="co">#&gt;       sig.level = 0.05</span></span>
+<span><span class="co">#&gt;           power = 0.8</span></span>
+<span><span class="co">#&gt;     alternative = greater</span></span>
+<span><span class="co">#&gt;         missing = 0.15</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       approximate: 15% of measurements missing at random, analysed with icc_test(method = "reml")</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject</span></span></code></pre></div>
+<p>With 15% of measurements missing, 52 subjects are needed instead of
+40.</p>
+<p>Subjects lost entirely are different: plan for the subjects who
+complete the study and recruit n / (1 - d) for an expected dropout
+d.</p>
+</div>
+<div class="section level3">
+<h3 id="other-designs">Other designs<a class="anchor" aria-label="anchor" href="#other-designs"></a>
+</h3>
+<p>The exact calculations cover the one-way and two-way consistency
+ICCs. They can still guide other designs, as long as the direction of
+the error is known:</p>
+<ul>
+<li>
+<strong>Absolute agreement ICC, ICC(A,1), and the CCC.</strong>
+These have no exact F distribution. When the trials or raters differ
+little systematically, ICC(A,1) is close to ICC(C,1) and the consistency
+calculation is a good guide. When they differ, power is lower and
+intervals are wider, most of all with 2 or 3 items. Treat the
+consistency result as a <strong>lower bound</strong> on the number of
+subjects.</li>
+<li>
+<strong>Non-normal data.</strong> With skewed or heavy-tailed data
+the F-based intervals are wider and cover less than planned. Allow a
+margin, or plan for a bootstrap analysis with a larger sample.</li>
+<li>
+<strong>Published tables.</strong>
+<code>method = "approximate"</code> reproduces the closed forms of <span class="citation">Walter et al. (<a href="#ref-walter1998">1998</a>)</span> (power) and <span class="citation">Zou (<a href="#ref-zou2012">2012</a>)</span>
+(precision), for the one-way ICC only. The exact method is preferred
+<span class="citation">(<a href="#ref-mondal2024">Mondal et al.
+2024</a>)</span>.</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">2</span>, power <span class="op">=</span> <span class="fl">0.80</span>,</span>
+<span>          alternative <span class="op">=</span> <span class="st">"greater"</span>, method <span class="op">=</span> <span class="st">"approximate"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Power calculation for the one-way ICC, ICC(1) (approximate closed form) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 38.60635</span></span>
+<span><span class="co">#&gt;               k = 2</span></span>
+<span><span class="co">#&gt;            rho0 = 0.6</span></span>
+<span><span class="co">#&gt;            rho1 = 0.8</span></span>
+<span><span class="co">#&gt;       sig.level = 0.05</span></span>
+<span><span class="co">#&gt;           power = 0.8</span></span>
+<span><span class="co">#&gt;     alternative = greater</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="practical-recommendations">Practical Recommendations<a class="anchor" aria-label="anchor" href="#practical-recommendations"></a>
 </h2>
 <div class="section level3">
@@ -609,11 +861,33 @@ and Mu-Huo Ji. 2016. <span>“Sample Size for Assessing Agreement Between
 Two Methods of Measurement by Bland-Altman Method.”</span> <em>The
 International Journal of Biostatistics</em> 12 (2). <a href="https://doi.org/10.1515/ijb-2015-0039" class="external-link">https://doi.org/10.1515/ijb-2015-0039</a>.
 </div>
+<div id="ref-mcgraw1996" class="csl-entry">
+McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences
+about Some Intraclass Correlation Coefficients.”</span>
+<em>Psychological Methods</em> 1 (1): 30. <a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">https://doi.org/10.1037/1082-989X.1.1.30</a>.
+</div>
+<div id="ref-mondal2024" class="csl-entry">
+Mondal, Dipro, Sophie Vanbelle, Alberto Cassese, and Math J. J. M.
+Candel. 2024. <span>“Review of Sample Size Determination Methods for the
+Intraclass Correlation Coefficient in the One-Way Analysis of Variance
+Model.”</span> <em>Statistical Methods in Medical Research</em> 33 (3):
+532–53. <a href="https://doi.org/10.1177/09622802231224657" class="external-link">https://doi.org/10.1177/09622802231224657</a>.
+</div>
 <div id="ref-shieh2019" class="csl-entry">
 Shieh, Gwowen. 2019. <span>“Assessing Agreement Between Two Methods of
 Quantitative Measurements: Exact Test Procedure and Sample Size
 Calculation.”</span> <em>Statistics in Biopharmaceutical Research</em>
 12 (3): 352–59. <a href="https://doi.org/10.1080/19466315.2019.1677495" class="external-link">https://doi.org/10.1080/19466315.2019.1677495</a>.
+</div>
+<div id="ref-walter1998" class="csl-entry">
+Walter, S. D., M. Eliasziw, and A. Donner. 1998. <span>“Sample Size and
+Optimal Designs for Reliability Studies.”</span> <em>Statistics in
+Medicine</em> 17 (1): 101–10. <a href="https://doi.org/10.1002/(SICI)1097-0258(19980115)17:1%3C101::AID-SIM727%3E3.0.CO;2-E" class="external-link">https://doi.org/10.1002/(SICI)1097-0258(19980115)17:1&lt;101::AID-SIM727&gt;3.0.CO;2-E</a>.
+</div>
+<div id="ref-zou2012" class="csl-entry">
+Zou, G. Y. 2012. <span>“Sample Size Formulas for Estimating Intraclass
+Correlation Coefficients with Precision and Assurance.”</span>
+<em>Statistics in Medicine</em> 31 (29): 3972–81. <a href="https://doi.org/10.1002/sim.5466" class="external-link">https://doi.org/10.1002/sim.5466</a>.
 </div>
 </div>
 </div>
@@ -629,7 +903,7 @@ Calculation.”</span> <em>Statistics in Biopharmaceutical Research</em>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

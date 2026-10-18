@@ -22,6 +22,8 @@ power_icc(
   sig.level = 0.05,
   power = NULL,
   model = c("oneway", "twoway"),
+  unit = c("single", "average"),
+  missing = 0,
   alternative = c("two.sided", "greater", "less"),
   method = c("exact", "approximate")
 )
@@ -61,6 +63,23 @@ power_icc(
   ICC, ICC(C,1) of
   [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md);
   the absolute agreement ICC is not supported (see Details).
+
+- unit:
+
+  `"single"` (default) for the reliability of a single measurement, or
+  `"average"` for the reliability of the mean of the `k` measurements
+  (ICC(k) or ICC(C,k)), as in
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
+  With `"average"`, the ICC values are on the average-measure scale and
+  `k` cannot be solved for. See Details.
+
+- missing:
+
+  The expected proportion of measurements (subject-by-item cells) that
+  will be missing, analysed with `icc_test(method = "reml")`. The
+  default, 0, gives the exact complete-data calculation; values above 0
+  give an approximation (see Details). For subjects who will be lost
+  entirely, reduce `n` instead.
 
 - alternative:
 
@@ -111,11 +130,63 @@ tables.
 `alternative = "less"` (with the significance level halved) for the one
 below.
 
-**Agreement ICC.** The absolute agreement ICC (ICC(A,1)) is not
-supported: its test has no exact F distribution, and because its
-denominator degrees of freedom depend on the sample, its power "cannot
-be determined exactly" (McGraw & Wong, 1996, footnote 3). Power for that
-ICC would need simulation.
+**Average-measure ICCs.** The average-measure ICC is the Spearman-Brown
+projection of the single-measure ICC to k measurements, \\k\rho / (1 +
+(k-1)\rho)\\, so a test about ICC(k) or ICC(C,k) is the same F test as
+the test about the corresponding single-measure ICC, and its interval is
+the projection of the single-measure interval. With `unit = "average"`
+the calculations are therefore exact, not approximations; `k` must be
+given because it defines the quantity being planned for.
+
+**Missing measurements (approximate).** With `missing = p > 0`, the
+calculation uses the observed-data quantities that
+`icc_test(method = "reml")` uses for incomplete data: \\N = nk(1 - p)\\
+observations, \\\bar{k} = N/n\\ measurements per subject in the scale
+factor of the F ratio and in the interval, and error degrees of freedom
+\\N - n - k + 1\\ (two-way) or \\N - n\\ (one-way). This is an
+approximation: the F distribution is exact only for complete data. In
+simulations of the REML analysis (one-way and two-way ICCs, 15 or 40
+subjects, 3 or 5 items, 15% or 30% of measurements missing completely at
+random or 30% at random depending on the first measurement; 1000
+replicates per setting), the approximate power was within 0.035 of the
+simulated power (Monte Carlo SE 0.016) and the approximate median
+interval width within 2.2% of the simulated median. The REML test itself
+was slightly liberal with 30% missing (type I error up to 0.069 missing
+completely at random and 0.073 at random, for a nominal 0.05), which the
+simulated power includes. A warning is given above 30% missing. The
+calculation assumes each subject keeps at least one measurement.
+
+**Planning other designs.** These functions are exact only for the
+one-way and two-way consistency ICCs with complete, normally distributed
+data. They can still guide the planning of other ICC studies, as long as
+the direction of the error is kept in mind:
+
+- *Absolute agreement ICC (ICC(A,1), and the CCC for two methods).* Not
+  supported exactly: its test has no exact F distribution, and because
+  its denominator degrees of freedom depend on the sample, its power
+  "cannot be determined exactly" (McGraw & Wong, 1996, footnote 3). When
+  the items (trials, raters, methods) differ little systematically,
+  ICC(A,1) is close to ICC(C,1) and the consistency calculation is a
+  good guide. When they differ, the agreement test and interval also
+  depend on the item mean square, which has only k - 1 degrees of
+  freedom: power is lower and intervals wider than the consistency
+  calculation says, most of all with 2 or 3 items. Treat the consistency
+  result as a lower bound on the number of subjects; simulation would be
+  needed for a precise answer.
+
+- *Missing measurements.* Use `missing` for measurements missing here
+  and there (see below). For subjects who will be lost entirely, plan
+  for the subjects who complete the study and recruit \\n / (1 - d)\\
+  for an expected dropout d.
+
+- *Non-normal data.* The exact calculations assume normality. With
+  skewed or heavy-tailed data the F-based intervals are wider and cover
+  less than planned (see
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+  and
+  [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+  for simulations), so allow a margin or plan for the bootstrap with a
+  larger sample.
 
 ## References
 

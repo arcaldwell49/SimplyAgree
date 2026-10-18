@@ -21,6 +21,8 @@ precision_icc(
   conf.level = 0.95,
   assurance = 0.5,
   model = c("oneway", "twoway"),
+  unit = c("single", "average"),
+  missing = 0,
   method = c("exact", "approximate")
 )
 ```
@@ -62,6 +64,23 @@ precision_icc(
   [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md);
   the absolute agreement ICC is not supported (see Details).
 
+- unit:
+
+  `"single"` (default) for the reliability of a single measurement, or
+  `"average"` for the reliability of the mean of the `k` measurements
+  (ICC(k) or ICC(C,k)), as in
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
+  With `"average"`, the ICC values are on the average-measure scale and
+  `k` cannot be solved for. See Details.
+
+- missing:
+
+  The expected proportion of measurements (subject-by-item cells) that
+  will be missing, analysed with `icc_test(method = "reml")`. The
+  default, 0, gives the exact complete-data calculation; values above 0
+  give an approximation (see Details). For subjects who will be lost
+  entirely, reduce `n` instead.
+
 - method:
 
   `"exact"` (default) computes the assurance from the exact distribution
@@ -102,8 +121,23 @@ method avoids both issues. For a one-sided lower limit, the assurance
 that the lower limit exceeds a value \\\rho_0\\ is the power of the
 one-sided test: use `power_icc(alternative = "greater")`.
 
-The absolute agreement ICC is not supported (see
-[`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)).
+**Average-measure ICCs** (`unit = "average"`): the interval for ICC(k)
+or ICC(C,k) has limits \\1 - a/F\\ and \\1 - 1/(bF)\\ (with a and b the
+F quantiles), so its width, \\(a - 1/b)/F\\, decreases with F and the
+assurance is a single F probability. `width` is on the average-measure
+scale. The approximate method is for single measures only.
+
+**Missing measurements** (`missing > 0`): the interval width uses the
+observed-data quantities described in
+[`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md),
+an approximation whose median widths were within 2.2% of simulated REML
+intervals with up to 30% of measurements missing.
+
+The absolute agreement ICC is not supported exactly; see "Planning other
+designs" in
+[`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
+for using these calculations as a guide for it, for missing data, and
+for non-normal data.
 
 ## References
 

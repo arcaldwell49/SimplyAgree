@@ -100,6 +100,7 @@ tests/testthat/
 vignettes/
 ├── agreement_analysis.Rmd
 ├── reliability_analysis.Rmd
+├── categorical_agreement.Rmd
 ├── power_sample_size_vignette.Rmd
 ├── Deming.Rmd
 └── agree_tests.Rmd

@@ -124,10 +124,18 @@ reli_err_test(
 - se_method:
 
   How the standard error of the log of the statistic is estimated:
-  `"jackknife"` (default), `"influence"`, or `"normal"`. It is reported
+  `"jackknife"` (default; delete one subject at a time, accurate in
+  simulations but n refits with `method = "reml"`), `"influence"` (a
+  per-subject sandwich estimate; cheap but too small with few subjects),
+  or `"normal"` (normal theory; too small with skewed or heavy-tailed
+  data, and cannot be used by the studentized bootstrap). It is reported
   in `stderr` and used by the studentized bootstrap; it does not change
-  the analytic interval or test. See
-  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
+  the analytic interval or test. For the two-way agreement statistics,
+  the jackknife and influence SEs add the normal-theory variance of the
+  item mean square, treating the items as random (as the hybrid
+  bootstrap does). See
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+  for the simulations.
 
 ## Value
 
@@ -193,6 +201,13 @@ A list of class `c("reli_htest", "htest")` containing:
   Bootstrap details (`NULL` unless `boot = TRUE`).
 
 ## Details
+
+**Choosing `model` and `type`.** Choose them as for the ICC (see
+"Choosing the form" in
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)):
+`type = "agreement"` when systematic differences between items count as
+error, `"consistency"` when they are checked and reported separately.
+Report the error statistic that matches the ICC.
 
 **Statistics.** With \\MS\\ the mean squares of the subjects-by-items
 analysis of variance (n subjects, k items):

@@ -73,12 +73,11 @@ check(x, ...)
 - `check`:
 
   Diagnostic plots combined with patchwork: normality and
-  heteroskedasticity of the model residuals, and the within-subject SD
-  against the subject mean (on the scale the model was fitted). A rising
-  within-subject SD means the error grows with the size of the
-  measurement, so a relative error
-  ([`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
-  with `scale = "log"`) describes it better.
+  heteroskedasticity of the model residuals; for two-way models,
+  additivity (residuals of the additive subjects + items model against
+  the estimated subject effect, one line per item, with Mandel's test
+  for non-additivity); and the within-subject SD against the subject
+  mean (on the scale the model was fitted). See Details.
 
 ## Details
 
@@ -105,7 +104,45 @@ an ICC; see
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 for why.
 
+**Diagnostics.** The two-way model assumes that subject and item effects
+add. A subject-by-item interaction, for example items (raters, devices,
+occasions) that differ in scale, is absorbed into the error: it lowers
+the consistency ICC and inflates the SEM.
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+tests for it with Mandel's (1961) column-regression test: each item gets
+its own slope on the estimated subject effects, and the k - 1 extra
+slopes are F-tested. The panel plots the residuals of the additive model
+against the estimated subject effect with one line per item, so items
+whose lines slope are those that differ in scale. Mandel's test includes
+the alternative of Tukey's (1949) one-degree-of-freedom test (scale
+growing with the item mean, the multiplicative pattern) and also detects
+items that differ in scale but not in location, which Tukey's test
+misses; for two items the two tests are identical. The covariates are
+built from the fitted additive model, as in Milliken and Graybill
+(1970), so the F test remains exact with missing measurements. In
+simulations (30 subjects, 3 items, 3 missing cells, additive normal
+data), its type I error was 0.0525 at the 0.05 level. It uses the
+fixed-effects fit (subjects and items as factors) even when the ICC came
+from REML, and it has little power with few subjects. A rising
+within-subject SD against the subject mean means the error grows with
+the size of the measurement, so a relative error
+([`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+with `scale = "log"`) describes it better.
+
 ## References
+
+Mandel, J. (1961). Non-additivity in two-way analysis of variance.
+Journal of the American Statistical Association, 56(296), 878-888.
+[doi:10.1080/01621459.1961.10482132](https://doi.org/10.1080/01621459.1961.10482132)
+
+Milliken, G. A., & Graybill, F. A. (1970). Extensions of the general
+linear hypothesis model. Journal of the American Statistical
+Association, 65(330), 797-807.
+[doi:10.1080/01621459.1970.10481125](https://doi.org/10.1080/01621459.1970.10481125)
+
+Tukey, J. W. (1949). One degree of freedom for non-additivity.
+Biometrics, 5(3), 232-242.
+[doi:10.2307/3001938](https://doi.org/10.2307/3001938)
 
 Greenland, S. (2019). Valid p-values behave exactly as they should: Some
 misleading criticisms of p-values and their resolution with S-values.

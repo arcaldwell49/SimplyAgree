@@ -45,6 +45,21 @@
   [`check(`*`<simple_reli>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.md)
   : Methods for simple_reli objects
 
+### Categorical Ratings
+
+- [`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md)
+  **\[experimental\]** : Chance-Corrected Agreement Coefficients for
+  Categorical Ratings
+- [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md)
+  **\[experimental\]** : Model-Based Kappa for Ordinal Ratings from Many
+  Raters
+- [`summary(`*`<cac_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/cac_htest-methods.md)
+  [`print(`*`<summary.cac_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/cac_htest-methods.md)
+  [`plot(`*`<cac_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/cac_htest-methods.md)
+  : Methods for cac_htest objects
+- [`agree_coef()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_coef.md)
+  **\[superseded\]** : Agreement Coefficients
+
 ## Error-in-Variables Regression
 
 - [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
@@ -72,6 +87,10 @@
 
 - [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
   : Concordance Correlation Coefficient
+- [`summary(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
+  [`plot(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
+  [`check(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
+  : Methods for ccc_htest objects
 
 ## Agreement Tests
 
@@ -85,8 +104,6 @@
   **\[superseded\]** : Tests for Absolute Agreement with Replicates
 - [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
   **\[stable\]** : Nonparametric Test for Limits of Agreement
-- [`agree_coef()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_coef.md)
-  **\[maturing\]** : Agreement Coefficents
 - [`print(`*`<simple_agree>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
   [`plot(`*`<simple_agree>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
   [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)

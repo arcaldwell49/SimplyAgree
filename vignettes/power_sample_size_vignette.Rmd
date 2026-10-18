@@ -29,12 +29,17 @@ This vignette provides comprehensive guidance on power analysis and sample size 
 
 ## Available Methods
 
-`SimplyAgree` implements four approaches to power/sample size calculations:
+`SimplyAgree` implements four approaches to power/sample size calculations for agreement (limits of agreement) studies:
 
 1. **`power_agreement_exact()`** - Exact agreement test [@shieh2019]
 2. **`blandPowerCurve()`** - Bland-Altman power curves [@lu2016]
 3. **`agree_expected_half()`** - Expected half-width criterion [@JanShieh2018]
 4. **`agree_assurance()`** - Assurance probability criterion [@JanShieh2018]
+
+and two for reliability studies that estimate an intraclass correlation coefficient (ICC; see [Planning a Reliability Study](#planning-a-reliability-study-icc)):
+
+5. **`power_icc()`** - Power of the ICC test [@walter1998]
+6. **`precision_icc()`** - Width of the ICC confidence interval [@zou2012; @mondal2024]
 
 ```{r load}
 library(SimplyAgree)
@@ -222,6 +227,11 @@ Research Goal?
 \- Precision Estimation ->
     |- Average precision sufficient -> Expected Half-Width
     \- Need probabilistic guarantee -> Assurance Probability
+
+Reliability (ICC) study?
+|
+|- Show the ICC exceeds a threshold -> power_icc()
+\- Estimate the ICC precisely -> precision_icc()
 ```
 
 # Handling Clustered/Nested Data
@@ -353,6 +363,101 @@ cat("Design effect:", round(DEFF, 3), "\n")
 cat("Participants (no dropout):", K_pre, "\n")
 cat("Participants to recruit:", K_final, "\n")
 cat("Total measurements:", K_final * m, "\n")
+```
+
+# Planning a Reliability Study (ICC)
+
+A reliability study asks whether a measurement ranks subjects consistently, summarised by an intraclass correlation coefficient (ICC) and analysed with `icc_test()` (see the reliability analysis vignette). The same two goals apply as for agreement:
+
+- **Hypothesis testing:** show that the ICC is above a threshold (e.g. 0.6), with `power_icc()`.
+- **Estimation:** make the confidence interval for the ICC narrow enough, with `precision_icc()`.
+
+Both work like `stats::power.t.test()`: leave exactly one argument as `NULL` (by default the number of subjects, `n`) and it is solved for. `k` is the number of measurements per subject (trials, occasions or raters). `model` is `"oneway"` (the default) or `"twoway"`, which is the consistency ICC, ICC(C,1), of `icc_test()`. With complete, normally distributed data, both calculations are exact: the F ratio behind the ICC test and interval is a scaled central F variable whatever the true ICC [@mcgraw1996].
+
+## Power for an ICC test
+
+How many subjects are needed to show, with two trials and 80% power, that the consistency ICC is above 0.6 when it is really 0.8?
+
+```{r icc_power}
+power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80,
+          model = "twoway", alternative = "greater")
+```
+
+Round up: 40 subjects. The same test would then be run with `icc_test(..., null.value = 0.6, alternative = "greater")`.
+
+Subjects can be traded for measurements. With only 20 subjects available, solve for `k` instead:
+
+```{r icc_power_k}
+power_icc(n = 20, k = NULL, rho0 = 0.6, rho1 = 0.8, power = 0.80,
+          model = "twoway", alternative = "greater")
+```
+
+Five trials per subject would be needed.
+
+A power curve over a range of sample sizes is a useful sensitivity analysis, here for an ICC of 0.75 or 0.8 under the alternative:
+
+```{r icc_power_curve}
+n_seq <- seq(10, 80, by = 5)
+pw <- sapply(c(0.75, 0.80), function(r1) {
+  sapply(n_seq, function(n) {
+    power_icc(n = n, k = 2, rho0 = 0.6, rho1 = r1, model = "twoway",
+              alternative = "greater")$power
+  })
+})
+matplot(n_seq, pw, type = "l", lty = 1:2, col = 1, ylim = c(0, 1),
+        xlab = "Number of subjects", ylab = "Power")
+abline(h = 0.8, col = "grey")
+legend("bottomright", legend = c("ICC = 0.75", "ICC = 0.80"), lty = 1:2)
+```
+
+## Precision of an ICC
+
+When the goal is to estimate the ICC rather than to test it, plan for the width of its 95% confidence interval (upper minus lower limit). Because the width varies from sample to sample, `assurance` sets the probability that the interval is no wider than planned; the default, 0.5, plans for the median width.
+
+```{r icc_precision}
+# Median width of 0.2 around an ICC of 0.8, with three trials
+precision_icc(rho = 0.8, k = 3, width = 0.2, model = "twoway")
+
+# The same width with 80% assurance
+precision_icc(rho = 0.8, k = 3, width = 0.2, assurance = 0.8,
+              model = "twoway")
+```
+
+Planning for the median width needs 37 subjects; a guarantee that the interval will be that narrow 80% of the time needs 49. For a one-sided goal (a lower confidence limit above some value), use `power_icc()` with `alternative = "greater"`: the probability that the lower limit exceeds `rho0` is the power of the one-sided test.
+
+## Average measures
+
+If the measurement used in practice will be the mean of the `k` trials, plan for the average-measure ICC, ICC(k) or ICC(C,k), with `unit = "average"`. The ICC values and the width are then on the average-measure scale, and the calculations remain exact (the average-measure ICC is the Spearman-Brown projection of the single-measure ICC):
+
+```{r icc_average}
+precision_icc(rho = 0.9, k = 3, width = 0.1, assurance = 0.8,
+              model = "twoway", unit = "average")
+```
+
+## Missing measurements and dropout
+
+If some measurements will be missing here and there (a missed trial, a rater who skipped a subject), give the expected proportion of missing subject-by-item cells in `missing`. The calculation then follows the REML analysis of `icc_test(method = "reml")`, using the observed-data degrees of freedom. This is an approximation, but in simulations with up to 30% missing the approximate power was within 0.035 of the simulated power.
+
+```{r icc_missing}
+power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80, model = "twoway",
+          alternative = "greater", missing = 0.15)
+```
+
+With 15% of measurements missing, 52 subjects are needed instead of 40.
+
+Subjects lost entirely are different: plan for the subjects who complete the study and recruit n / (1 - d) for an expected dropout d.
+
+## Other designs
+
+The exact calculations cover the one-way and two-way consistency ICCs. They can still guide other designs, as long as the direction of the error is known:
+
+- **Absolute agreement ICC, ICC(A,1), and the CCC.** These have no exact F distribution. When the trials or raters differ little systematically, ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good guide. When they differ, power is lower and intervals are wider, most of all with 2 or 3 items. Treat the consistency result as a **lower bound** on the number of subjects.
+- **Non-normal data.** With skewed or heavy-tailed data the F-based intervals are wider and cover less than planned. Allow a margin, or plan for a bootstrap analysis with a larger sample.
+- **Published tables.** `method = "approximate"` reproduces the closed forms of @walter1998 (power) and @zou2012 (precision), for the one-way ICC only. The exact method is preferred [@mondal2024].
+
+```{r icc_approx}
+power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80,
+          alternative = "greater", method = "approximate")
 ```
 
 # Practical Recommendations

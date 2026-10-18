@@ -13,7 +13,7 @@ ccc_test(
   data = NULL,
   data_type = c("simple", "reps", "nest"),
   conf.level = 0.95,
-  null.value = 0,
+  null.value = NULL,
   alternative = c("two.sided", "greater", "less")
 )
 ```
@@ -53,24 +53,30 @@ ccc_test(
 
 - null.value:
 
-  The hypothesized value of CCC under the null hypothesis, default is 0.
+  The CCC under the null hypothesis. The default, `NULL`, gives the
+  estimate and interval without a test.
 
 - alternative:
 
   Character string specifying the alternative hypothesis: `"two.sided"`
-  (default), `"greater"`, or `"less"`.
+  (default), `"greater"`, or `"less"`. Used only when `null.value` is
+  given (without a test the interval is two-sided); a one-sided
+  alternative gives a one-sided interval, as in
+  [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
 
 ## Value
 
-A list with class `"htest"` containing the following components:
+A list with class `c("ccc_htest", "htest")` containing the following
+components:
 
 - statistic:
 
-  The Z-statistic (Fisher-transformed).
+  The Z-statistic (Fisher-transformed), when a test was requested.
 
 - parameter:
 
-  The sample size (n for simple data, number of subjects for reps/nest).
+  The sample size (n for simple data, number of subjects for reps/nest),
+  when a test was requested.
 
 - stderr:
 
@@ -78,7 +84,7 @@ A list with class `"htest"` containing the following components:
 
 - p.value:
 
-  The p-value for the test.
+  The p-value for the test, when a test was requested.
 
 - conf.int:
 
@@ -90,11 +96,11 @@ A list with class `"htest"` containing the following components:
 
 - null.value:
 
-  The specified hypothesized value of CCC.
+  The specified hypothesized value of CCC, if any.
 
 - alternative:
 
-  A character string describing the alternative hypothesis.
+  The alternative hypothesis.
 
 - method:
 
@@ -103,6 +109,20 @@ A list with class `"htest"` containing the following components:
 - data.name:
 
   A character string giving the names of the data.
+
+- data:
+
+  The data used (`x`, `y`, and `id` for reps/nest), for the methods.
+
+- components:
+
+  For simple data, Lin's decomposition: the Pearson correlation `r`
+  (precision) and the bias correction factor `C_b` (accuracy), with CCC
+  = r x C_b. `NULL` for reps/nest.
+
+- settings:
+
+  The settings used, for the methods.
 
 ## Details
 
@@ -116,13 +136,43 @@ For simple paired data, Lin's original method is used. For replicate or
 nested data, U-statistics are employed following King, Chinchilli, and
 Carrasco.
 
-The hypothesis test is performed using Fisher's Z-transformation of the
-CCC: \$\$Z = 0.5 \times \log\left(\frac{1 + CCC}{1 - CCC}\right)\$\$
+The confidence interval and the hypothesis test use Fisher's
+Z-transformation of the CCC: \$\$Z = 0.5 \times \log\left(\frac{1 +
+CCC}{1 - CCC}\right)\$\$ By default (`null.value = NULL`) no test is
+done.
+
+**Relation to the ICC.** For two methods, the CCC is close to the
+absolute-agreement intraclass correlation, ICC(A,1)
+(`icc_test(type = "agreement")`); Lin's estimator uses n rather than n -
+1 in the variances, and the difference vanishes as n grows (Nickerson,
+1997; Carrasco & Jover, 2003). `ccc_test()` is meant for
+method-comparison (agreement) studies;
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+for reliability studies (see its "Choosing the form" and "Related
+coefficients" sections).
+
+**Methods.** [`summary()`](https://rdrr.io/r/base/summary.html)
+describes the result in words (including, for simple data, whether a low
+CCC comes from poor precision or poor accuracy),
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+identity or Bland-Altman plot, and
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+gives diagnostics; see
+[ccc_htest-methods](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md).
 
 ## References
 
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268.
+
+Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858.
+[doi:10.1111/j.0006-341x.2003.00099.x](https://doi.org/10.1111/j.0006-341x.2003.00099.x)
+
+Nickerson, C. A. E. (1997). A note on "A concordance correlation
+coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
+[doi:10.2307/2533516](https://doi.org/10.2307/2533516)
 
 King, T. S., & Chinchilli, V. M. (2001). A generalized concordance
 correlation coefficient for continuous and categorical data. Statistics
@@ -131,6 +181,12 @@ in Medicine, 20(14), 2131-2147.
 King, T. S., Chinchilli, V. M., & Carrasco, J. L. (2007). A repeated
 measures concordance correlation coefficient. Statistics in Medicine,
 26(16), 3095-3113.
+
+## See also
+
+[ccc_htest-methods](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md),
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
 
 ## Examples
 
@@ -143,8 +199,8 @@ ccc_test(x, y)
 #>  Lin's Concordance Correlation Coefficient
 #> 
 #> data:  x and y
-#> Z = 5.4582, n = 5, p-value = 4.809e-08
-#> alternative hypothesis: true CCC is  0
+#> 
+#> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
 #>  0.9556798 0.9993495
 #> sample estimates:
@@ -160,8 +216,8 @@ ccc_test(x = "x", y = "y", data = reps)
 #>  Lin's Concordance Correlation Coefficient
 #> 
 #> data:  x and y
-#> Z = 2.5303, n = 18, p-value = 0.0114
-#> alternative hypothesis: true CCC is  0
+#> 
+#> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
 #>  0.1275808 0.7236639
 #> sample estimates:
@@ -176,10 +232,10 @@ ccc_test(x = "x", y = "y", data = reps,
 #>  Lin's Concordance Correlation Coefficient
 #> 
 #> data:  x and y
-#> Z = -2.7972, n = 18, p-value = 0.9974
-#> alternative hypothesis: true CCC is  0.8
+#> Z = -2.873, n = 18, p-value = 0.998
+#> alternative hypothesis: true CCC is greater than 0.8
 #> 95 percent confidence interval:
-#>  0.1275808 0.7236639
+#>  0.1892367 1.0000000
 #> sample estimates:
 #>       CCC 
 #> 0.4790783 
@@ -191,8 +247,8 @@ ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 #>  Concordance Correlation Coefficient (U-statistics)
 #> 
 #> data:  x and y
-#> Z = 0.7841, n = 4, p-value = 0.433
-#> alternative hypothesis: true CCC is  0
+#> 
+#> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
 #>  -0.1595543  0.3588391
 #> sample estimates:
@@ -206,12 +262,29 @@ ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 #>  Concordance Correlation Coefficient (U-statistics)
 #> 
 #> data:  x and y
-#> Z = 3.7336, n = 4, p-value = 0.0001888
-#> alternative hypothesis: true CCC is  0
+#> 
+#> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
 #>  0.2429167 0.6616278
 #> sample estimates:
 #>       CCC 
 #> 0.4790783 
 #> 
+
+# Describe, plot and check
+res <- ccc_test(x = "x", y = "y", data = reps)
+summary(res)
+#> The estimated CCC was 0.479 (95% compatibility interval [0.128,
+#> 0.724]). Values in this interval are the most compatible with the data,
+#> given the model and its assumptions. The estimate is Lin's concordance
+#> correlation coefficient between x and y: how closely the pairs fall on
+#> the line of identity. It combines precision (Pearson r = 0.577) and
+#> accuracy (bias correction factor C_b = 0.831), CCC = r x C_b. The data
+#> had 18 complete pairs. The interval uses Fisher's z transformation with
+#> Lin's (1989) delta-method standard error, which assumes the two
+#> measurements are bivariate normal.
+plot(res)
+
+check(res)
+
 ```

@@ -2,6 +2,7 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/404.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/agreement_analysis.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/agree_tests.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/articles/categorical_agreement.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/Deming.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/index.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/intro_vignette.html</loc></url>
@@ -23,6 +24,9 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/agree_test.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/cac_htest-methods.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/cac_test.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/Data.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/deming_power.html</loc></url>
@@ -40,6 +44,7 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed_bs-methods.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.html</loc></url>

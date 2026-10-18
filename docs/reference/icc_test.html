@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Intraclass Correlation Coefficient Test — icc_test"><meta name="description" content='
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Intraclass Correlation Coefficient Test — icc_test"><meta name="description" content='
 Estimates one intraclass correlation coefficient (ICC), with a confidence
 interval and a test against a null value, and returns an object of class
 "htest". The ICC form is chosen with model, type and unit,
@@ -34,6 +34,7 @@ following McGraw and Wong (1996).'><meta property="og:image" content="https://aa
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -238,6 +239,23 @@ not change the F-based interval or test. See Details.</p></dd>
 forms differently:</p><table class="table table"><tr><td><code>model</code></td><td><code>type</code></td><td><code>unit</code></td><td>McGraw &amp; Wong</td><td>Shrout &amp; Fleiss</td></tr><tr><td>oneway</td><td>agreement</td><td>single</td><td>ICC(1)</td><td>ICC(1,1)</td></tr><tr><td>oneway</td><td>agreement</td><td>average</td><td>ICC(k)</td><td>ICC(1,k)</td></tr><tr><td>twoway</td><td>agreement</td><td>single</td><td>ICC(A,1)</td><td>ICC(2,1)</td></tr><tr><td>twoway</td><td>agreement</td><td>average</td><td>ICC(A,k)</td><td>ICC(2,k)</td></tr><tr><td>twoway</td><td>consistency</td><td>single</td><td>ICC(C,1)</td><td>ICC(3,1)</td></tr><tr><td>twoway</td><td>consistency</td><td>average</td><td>ICC(C,k)</td><td>ICC(3,k)</td></tr></table><p>Whether items are treated as random or fixed changes the interpretation
 but not the calculation (McGraw &amp; Wong, 1996). Average-measure forms are
 not defined for McGraw and Wong's two-way mixed model with an interaction.</p>
+<p><strong>Choosing the form.</strong> Answer three questions in order:
+(1) is every subject measured by the same items? Yes: <code>"twoway"</code>; no,
+each subject by different items: <code>"oneway"</code>. (2) Should systematic
+differences between items count as error? Yes, when measurements from
+different items will be used interchangeably or on their absolute values
+(for example compared with a cut-off): <code>"agreement"</code>; no, when only the
+subjects' relative standing matters or systematic differences are
+reported separately: <code>"consistency"</code>. (3) Will one measurement or the mean
+of the k items be used in practice? <code>"single"</code> or <code>"average"</code>. The
+"Reliability Analysis" vignette has a table of common designs
+(<code><a href="../articles/reliability_analysis.html">vignette("reliability_analysis", package = "SimplyAgree")</a></code>).</p>
+<p><strong>Related coefficients.</strong> With complete data, Cronbach's (1951) alpha
+equals ICC(C,k), the average-measure consistency ICC (McGraw &amp; Wong,
+1996): it describes the mean of the k items, not a single item. For two
+methods, Lin's concordance correlation coefficient (<code><a href="ccc_test.html">ccc_test()</a></code>) is
+essentially ICC(A,1); the estimators differ only in using n rather than
+n - 1 in the variances (Nickerson, 1997; Carrasco &amp; Jover, 2003).</p>
 <p><strong>Default form.</strong> The default, ICC(C,1), follows Hopkins (2000) and Weir
 (2005): check for systematic change between trials separately (for
 example with the trials F test, or <code><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test()</a></code> for two trials), then report
@@ -337,7 +355,12 @@ reliability exceeds a threshold, test against it, e.g.
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Hopkins, W. G. (2000). Measures of reliability in sports medicine and
+    <p>Carrasco, J. L., &amp; Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858. <a href="https://doi.org/10.1111/j.0006-341x.2003.00099.x" class="external-link">doi:10.1111/j.0006-341x.2003.00099.x</a></p>
+<p>Cronbach, L. J. (1951). Coefficient alpha and the internal structure of
+tests. Psychometrika, 16(3), 297-334. <a href="https://doi.org/10.1007/BF02310555" class="external-link">doi:10.1007/BF02310555</a></p>
+<p>Hopkins, W. G. (2000). Measures of reliability in sports medicine and
 science. Sports Medicine, 30(1), 1-15. <a href="https://doi.org/10.2165/00007256-200030010-00001" class="external-link">doi:10.2165/00007256-200030010-00001</a></p>
 <p>Koo, T. K., &amp; Li, M. Y. (2016). A guideline of selecting and reporting
 intraclass correlation coefficients for reliability research. Journal of
@@ -345,6 +368,9 @@ Chiropractic Medicine, 15(2), 155-163. <a href="https://doi.org/10.1016/j.jcm.20
 <p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about some
 intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
 <a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">doi:10.1037/1082-989X.1.1.30</a></p>
+<p>Nickerson, C. A. E. (1997). A note on "A concordance correlation
+coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
+<a href="https://doi.org/10.2307/2533516" class="external-link">doi:10.2307/2533516</a></p>
 <p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: Uses in
 assessing rater reliability. Psychological Bulletin, 86(2), 420-428.
 <a href="https://doi.org/10.1037/0033-2909.86.2.420" class="external-link">doi:10.1037/0033-2909.86.2.420</a></p>
@@ -424,7 +450,7 @@ Conditioning Research, 19(1), 231-240. <a href="https://doi.org/10.1519/15184.1"
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

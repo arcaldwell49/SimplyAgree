@@ -151,12 +151,11 @@ plot.cac_htest <- function(x, type = c("raters", "subjects", "effects"), ...) {
     geom_vline(xintercept = 0, colour = "grey50", linetype = "dashed")
   p <- if (grouped) {
     p + geom_pointrange(aes(colour = group)) +
-      scale_colour_viridis_d(end = 0.75)
+      scale_colour_viridis_d(end = 0.75, name = "Rater group")
   } else {
     p + geom_pointrange(colour = "#2166ac")
   }
   p + labs(x = "Rater effect (latent scale)", y = "Rater",
-           colour = "Rater group",
            caption = paste0("Conditional modes with 95% intervals.\n",
                             "Positive: rates higher than the typical rater",
                             if (grouped) " of the same group." else ".")) +
@@ -262,8 +261,8 @@ plot.cac_htest <- function(x, type = c("raters", "subjects", "effects"), ...) {
     paste0("The likelihood ratio test is ", if (significant) "" else "not ",
            "statistically significant (", test, ") at the ", format(alpha),
            " alpha level: it ", if (significant) "can" else "cannot",
-           " be stated that agreement differs between the ", unit, " groups ",
-           "of ", fit$group, " (null hypothesis: ", null, "). ",
+           " be stated that agreement differs between the ", unit, " groups (",
+           fit$group, "; null hypothesis: ", null, "). ",
            "In this model, ", kappas, between)
   } else {
     heads <- round(s_value)

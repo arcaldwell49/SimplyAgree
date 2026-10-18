@@ -69,12 +69,49 @@ icc_test(col.names = judges, data = dat)
 
 ### Choosing the ICC
 
-The form is set by three arguments. `model` says whether every subject
-is measured on the same items (`"twoway"`) or each subject by different
-items (`"oneway"`); `type` says whether systematic differences between
-items count as error (`"agreement"`) or not (`"consistency"`); and
-`unit` says whether the reliability of a single measurement (`"single"`)
-or of the mean of all k items (`"average"`) is wanted.
+The form is set by three arguments, each answering one question about
+the study and how its results will be used. Answer them in order.
+
+1.  **Is every subject measured by the same items** (the same trials,
+    raters, or devices)? Yes: `model = "twoway"`. No, each subject is
+    measured by different items (for example, raters drawn from a pool):
+    `model = "oneway"`, which only has an absolute-agreement form.
+2.  **Should systematic differences between items count as error?** Yes,
+    `type = "agreement"`, when measurements from different items will be
+    used interchangeably or on their absolute values: any rater’s score
+    is taken as it is, scores are compared with a fixed cut-off, or
+    sessions are pooled. No, `type = "consistency"`, when only the
+    subjects’ relative standing matters, or when systematic differences
+    (a learning or fatigue effect, a rater who scores high) are checked
+    and reported separately.
+3.  **Will a single measurement or the mean of k be used in practice?**
+    One measurement: `unit = "single"`. The mean of the same k items as
+    in the study: `unit = "average"`.
+
+Some common designs:
+
+| Study | ICC | Arguments | Matching error statistic |
+|----|----|----|----|
+| Test-retest, trial effects checked separately ([Hopkins 2000](#ref-hopkins2000); [Weir 2005](#ref-weir2005)) | ICC(C,1) | defaults | [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md) (\\\sqrt{MS_E}\\) |
+| Test-retest, absolute values used (e.g. compared with a threshold) | ICC(A,1) | `type = "agreement"` | `reli_err_test(type = "agreement")` |
+| Inter-rater, the same raters rate every subject, scores used interchangeably | ICC(A,1) | `type = "agreement"` | `reli_err_test(type = "agreement")` |
+| Inter-rater, the same raters, only rank order matters | ICC(C,1) | defaults | [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md) |
+| Each subject rated by different raters | ICC(1) | `model = "oneway"` | `reli_err_test(model = "oneway")` |
+| The score used in practice is the mean of the k ratings or trials | ICC(C,k), ICC(A,k), ICC(k) | `unit = "average"` | — |
+| Two methods measuring the same quantity (method comparison) | — | [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md), [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md) | limits of agreement |
+
+Whether the items are thought of as fixed (these particular raters) or
+random (a sample of possible raters) changes how widely the result
+generalises, not how it is calculated ([McGraw and Wong
+1996](#ref-mcgraw1996)). The average-measure forms describe the mean of
+the k items in this study; other values of k would need a Spearman-Brown
+projection. Whatever the form, report the matching error statistic, and
+test against a meaningful threshold rather than labelling the estimate
+“good” or “poor”.
+
+The three arguments map onto the names used by McGraw and Wong
+([1996](#ref-mcgraw1996)) and Shrout and Fleiss
+([1979](#ref-shrout1979)):
 
 | `model` | `type`      | `unit`  | McGraw & Wong | Shrout & Fleiss |
 |---------|-------------|---------|---------------|-----------------|
@@ -109,6 +146,57 @@ icc_test(col.names = judges, data = dat, type = "agreement")
 #>  ICC(A,1) 
 #> 0.2897638
 ```
+
+### Related coefficients: Cronbach’s alpha and the CCC
+
+Two other widely used coefficients are ICCs in disguise.
+
+**Cronbach’s alpha is ICC(C,k).** With complete data, Cronbach’s
+([1951](#ref-cronbach1951)) alpha for k items equals the average-measure
+consistency ICC, \\(MS_B - MS_E)/MS_B\\ ([McGraw and Wong
+1996](#ref-mcgraw1996)). So alpha is the reliability of the *mean* (or
+sum) of the k items when systematic differences between items do not
+count, not the reliability of a single item; ICC(C,1) is the
+corresponding single-item figure. Here alpha computed from its usual
+formula matches `icc_test(unit = "average")`:
+
+``` r
+
+k <- length(judges)
+alpha <- k / (k - 1) * (1 - sum(apply(dat, 2, var)) / var(rowSums(dat)))
+c(alpha = alpha,
+  icc_C_k = unname(icc_test(col.names = judges, data = dat,
+                            unit = "average")$estimate))
+#>     alpha   icc_C_k 
+#> 0.9093155 0.9093155
+```
+
+**The CCC is close to ICC(A,1) for two methods.** Lin’s concordance
+correlation coefficient ([Lin 1989](#ref-Lin1989)) measures how closely
+pairs fall on the line of identity, so systematic differences between
+the methods count as disagreement, as in an absolute-agreement ICC. For
+two methods it is essentially ICC(A,1): the estimators differ only in
+using n rather than n - 1 in the variances, and the difference vanishes
+as n grows ([Nickerson 1997](#ref-nickerson1997); [Carrasco and Jover
+2003](#ref-carrasco2003)). The two answer different questions in
+practice:
+[`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
+is meant for comparing two methods (alongside limits of agreement),
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+for the reliability of a measurement across trials or raters.
+
+``` r
+
+two <- dat[c("judge1", "judge4")]
+c(CCC = unname(ccc_test(x = "judge1", y = "judge4", data = two)$estimate),
+  ICC_A_1 = unname(icc_test(col.names = c("judge1", "judge4"), data = two,
+                            type = "agreement")$estimate))
+#>       CCC   ICC_A_1 
+#> 0.6052632 0.6478873
+```
+
+With only 6 subjects the n versus n - 1 difference is visible; with a
+few dozen subjects the two estimates agree to about two decimal places.
 
 ### Testing against a threshold
 
@@ -184,7 +272,7 @@ summary(res, style = "estimation")
 #> (McGraw & Wong, 1996).
 ```
 
-### Missing data and the bootstrap
+### Missing data
 
 `method = "anova"` (the default) needs every subject measured on every
 item. With missing measurements, `method = "reml"` fits a linear mixed
@@ -213,16 +301,37 @@ icc_test(col.names = judges, data = dat_na, method = "reml")
 #> 0.7499675
 ```
 
-With clearly non-normal data, `boot = TRUE` gives a bootstrap interval
-that resamples subjects. The interval type (`boot_ci`) and the standard
-error used to studentize it (`se_method`) were chosen from simulations
-described in
-[`?icc_test`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
+### Bootstrap intervals and standard errors
+
+**When to bootstrap.** The F-based intervals assume normal data. In
+simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9), they covered
+0.92 to 0.97 of the time with normal data but only 0.80 to 0.93 with
+skewed or heavy-tailed data. With `boot = TRUE`, the interval comes from
+a nonparametric bootstrap instead, which helps with clearly non-normal
+data and about 30 or more subjects. With 10 subjects every method, the
+bootstrap included, falls short of its nominal coverage, so a bootstrap
+is no cure for a small sample.
+
+**How it works.** Each replicate resamples subjects with replacement,
+keeping all of each subject’s measurements, and refits the model
+(`replicates` times, 1999 by default; with `method = "reml"` this means
+refitting the mixed model each time, which is slow). The interval type
+is set by `boot_ci`; the default, `"auto"`, picks the type that did best
+in the simulations:
+
+| Estimate | `method = "anova"` | `method = "reml"` |
+|----|----|----|
+| ICC ([`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)) | studentized | percentile |
+| SEM, SEE, SEP, consistency or one-way ([`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)) | studentized | percentile |
+| SEM, SEP, two-way agreement ([`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)) | BCa | percentile |
+
+Any p-value comes from inverting the bootstrap interval, so it is
+approximate and always agrees with the interval.
 
 ``` r
 
 set.seed(2026)
-icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 999)
+icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 499)
 #> 
 #>  Two-way, consistency, single-measure ICC [Shrout & Fleiss ICC(3,1)]
 #>  with nonparametric (subject) bootstrap studentized interval
@@ -231,11 +340,79 @@ icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 999)
 #> 
 #> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
-#>  0.3739154 0.8993188
+#>  0.3814147 0.9313985
 #> sample estimates:
 #>  ICC(C,1) 
 #> 0.7148407
 ```
+
+**The hybrid step for agreement.** Resampling subjects keeps the same
+items (judges, trials) in every replicate, so on its own it treats the
+items as fixed. An absolute-agreement ICC (and the agreement SEM and
+SEP) treats the items as a sample, and their systematic differences
+count as error, so plain subject resampling misses the uncertainty that
+comes from which items happened to be used. In simulations it covered
+only 0.70 to 0.80 for an agreement ICC of 0.9. Each replicate therefore
+also multiplies the item mean square by an independent
+\\\chi^2\_{k-1}/(k-1)\\ draw, its sampling variation under normal
+theory. This “hybrid” bootstrap restored coverage to about 0.94 to 0.96
+with normal data and 30 subjects. It is applied automatically to the
+two-way agreement forms; when the items really are fixed it is somewhat
+conservative, like the F interval.
+
+``` r
+
+set.seed(2026)
+icc_test(col.names = judges, data = dat, type = "agreement", boot = TRUE,
+         replicates = 499)
+#> 
+#>  Two-way, absolute agreement, single-measure ICC [Shrout & Fleiss
+#>  ICC(2,1)] with nonparametric (subject) bootstrap studentized interval
+#> 
+#> data:  judge1, judge2, judge3, judge4
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  -0.0459796  0.8763492
+#> sample estimates:
+#>  ICC(A,1) 
+#> 0.2897638
+```
+
+**Standard errors (`se_method`).** Every result reports standard errors
+in `stderr`, and the studentized bootstrap divides each replicate by its
+own standard error. Three estimates are available:
+
+- `"jackknife"` (default): delete one subject at a time. It averaged
+  0.89 to 1.08 times the true sampling SD in simulations, including
+  skewed data and missing measurements. It is cheap with complete data
+  and needs n refits with `method = "reml"`.
+- `"influence"`: a sandwich estimate from each subject’s influence. It
+  is cheap everywhere but too small with few subjects (0.69 to 1.00
+  times the true SD), and it is the only option for the studentized
+  bootstrap with `method = "reml"`.
+- `"normal"`: normal theory. It is accurate with normal data (0.87 to
+  1.04) but too small with skewed or heavy-tailed data (0.60 to 0.80).
+  It depends only on the degrees of freedom, so it cannot be used to
+  studentize.
+
+`se_method` changes `stderr` and the studentized bootstrap, never the
+F-based (or chi-square) interval and test.
+
+``` r
+
+res_j <- icc_test(col.names = judges, data = dat)
+res_n <- icc_test(col.names = judges, data = dat, se_method = "normal")
+rbind(jackknife = res_j$stderr, normal = res_n$stderr)
+#>                 ICC         z
+#> jackknife 0.1290509 0.2878384
+#> normal    0.1783508 0.3977982
+```
+
+More detail, including the full simulation results, is in
+[`?icc_test`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+and
+[`?reli_err_test`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md).
 
 ### Plots and diagnostics
 
@@ -250,7 +427,7 @@ res <- icc_test(col.names = judges, data = dat)
 plot(res)
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-9-1.png)
+![](reliability_analysis_files/figure-html/unnamed-chunk-13-1.png)
 
 Other views are chosen with `type`: `"subjects"` orders the subjects by
 their mean and shows each subject’s measurements, which compares the
@@ -265,7 +442,7 @@ plots each pair of items against each other with the line of identity.
 plot(res, type = "subjects")
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-10-1.png)
+![](reliability_analysis_files/figure-html/unnamed-chunk-14-1.png)
 
 [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
 gives model diagnostics: the normality and homogeneity of the residuals,
@@ -279,7 +456,7 @@ describes it better than an error in units.
 check(res)
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-11-1.png)
+![](reliability_analysis_files/figure-html/unnamed-chunk-15-1.png)
 
 ## Measurement error
 
@@ -490,7 +667,10 @@ Both are exact for the one-way and consistency ICCs;
 `method = "approximate"` reproduces the published formulas of Walter et
 al. ([1998](#ref-walter1998)) and Zou ([2012](#ref-zou2012)) (see also
 Mondal et al. ([2024](#ref-mondal2024))). The agreement ICC has no exact
-distribution and is not supported.
+distribution and is not supported. See
+[`vignette("power_sample_size_vignette", package = "SimplyAgree")`](https://aaroncaldwell.us/SimplyAgree/articles/power_sample_size_vignette.md)
+for more examples, including average measures, missing measurements, and
+how to use these calculations as a guide for agreement ICCs.
 
 ## Legacy functions
 
@@ -609,81 +789,42 @@ MS_E / \chi^2\_{1-\alpha/2;\\\nu}}\\ to \\\sqrt{\nu MS_E /
 
 ## Inter-Rater Reliability
 
-In some cases, the reliability of a categorical or ordinal scale may be
-worth investigating. For example, physicians may want to develop a
-diagnosis tool and ensure that the diagnosis is reliable (i.e.,
-categorical designation) or severity of the disease (i.e., a Likert-type
-scale). Coefficients can be calculated to assess the degree of
-inter-rater reliability. In its simplest form, the percent agreement
-between all the raters can be calculated. All other coefficients of
-agreement are essentially trying to “correct” for random guessing of the
-rater. The function to make these calculations in the `SimplyAgree` is
-`agree_coef`, and it produces 4 estimates: percent agreement, Gwet’s AC,
-Fleiss’ Kappa, and Krippendorff’s Alpha. However, other packages provide
-much a much greater breadth of calculative approaches ([Gwet
-2019](#ref-irrCAC)).
-
-In the `agree_coef` function, the user can specify `weighted = TRUE`. If
-this argument is set to true than the ratings have quadratic weights
-applied to them. Essentially, this penalizes values farther away from
-each other more than those close to each other. For example, a pair of
-values equal to 3 and 4 would be penalized less than a pair of values to
-1 and 4. For more details, on these “agreement coefficients” I refer all
-users to Gwet’s textbook on inter-rater agreement ([Gwet
-2014](#ref-gwet)).
-
-As a demonstration, we can create a matrix of ratings.
+The ICC is for continuous measurements. For categorical or ordinal
+ratings (a diagnosis, a grade, a severity scale), agreement between
+raters is summarised instead by chance-corrected agreement coefficients
+such as Gwet’s AC1, Fleiss’ kappa or Krippendorff’s alpha
+([`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md)),
+or, for ordinal ratings from many raters, by the model-based kappa of
+Nelson and Edwards ([2015](#ref-nelson2015))
+([`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md)).
+For example, with 4 raters on a 5-point scale:
 
 ``` r
 
-  ratermat1 = ("Rater1 Rater2 Rater3 Rater4
-1       1      1     NA      1
-2       2      2      3      2
-3       3      3      3      3
-4       3      3      3      3
-5       2      2      2      2
-6       1      2      3      4
-7       4      4      4      4
-8       1      1      2      1
-9       2      2      2      2
-10     NA      5      5      5
-11     NA     NA      1      1
-12     NA     NA      3     NA")
-
-  ratermat2 = as.matrix(read.table(textConnection(ratermat1),
-                       header=TRUE,
-                       row.names=1))
+ratings <- data.frame(
+  Rater1 = c(1, 2, 3, 3, 2, 1, 4, 1, 2, NA, NA, NA),
+  Rater2 = c(1, 2, 3, 3, 2, 2, 4, 1, 2, 5, NA, NA),
+  Rater3 = c(NA, 3, 3, 3, 2, 3, 4, 2, 2, 5, 1, 3),
+  Rater4 = c(1, 2, 3, 3, 2, 4, 4, 1, 2, 5, 1, NA))
+cac_test(col.names = c("Rater1", "Rater2", "Rater3", "Rater4"),
+         data = ratings, weights = "quadratic")
+#> 
+#>  Weighted (quadratic) Gwet's AC2 for 4 raters
+#> 
+#> data:  Rater1, Rater2, Rater3, Rater4
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  0.6851814 1.0000000
+#> sample estimates:
+#> Gwet's AC2 
+#>  0.9140007
 ```
 
-We can then perform the analysis without the weights.
-
-``` r
-
-agree_coef(data = ratermat2,
-                     wide = TRUE,
-                     weighted = FALSE,
-                     col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
-#>                              est        se  lower.ci upper.ci
-#> Percent Agreement      0.8181818 0.1256090 0.5417184        1
-#> Gwet's AC1             0.7754441 0.1429500 0.4608133        1
-#> Fleiss' Kappa          0.7611693 0.1530192 0.4243763        1
-#> Kririppendorff's Alpha 0.7434211 0.1454787 0.4192743        1
-```
-
-Or, perform it with weighting.
-
-``` r
-
-agree_coef(data = ratermat2,
-                    wide = TRUE,
-                    weighted = TRUE,
-                    col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
-#>                              est         se  lower.ci upper.ci
-#> Percent Agreement      0.9753788 0.09061628 0.7759337        1
-#> Gwet's AC2             0.9140007 0.10396224 0.6851814        1
-#> Fleiss' Kappa          0.8649351 0.14603361 0.5435173        1
-#> Kririppendorff's Alpha 0.8491071 0.12905120 0.5615632        1
-```
+See
+[`vignette("categorical_agreement", package = "SimplyAgree")`](https://aaroncaldwell.us/SimplyAgree/articles/categorical_agreement.md)
+for how to choose a coefficient, weights for ordinal scales, the
+model-based kappa, and comparisons between groups of raters or subjects.
 
 ## References
 
@@ -692,21 +833,24 @@ Assessing Measurement Error (Reliability) in Variables Relevant to
 Sports Medicine.” *Sports Medicine* 26 (4): 217–38.
 <https://doi.org/10.2165/00007256-199826040-00002>.
 
+Carrasco, Josep L., and Lluı́s Jover. 2003. “Estimating the Generalized
+Concordance Correlation Coefficient Through Variance Components.”
+*Biometrics* 59 (4): 849–58.
+<https://doi.org/10.1111/j.0006-341x.2003.00099.x>.
+
 Cole, T. J. 2000. “Sympercents: Symmetric Percentage Differences on the
 100 Log\\\_e\\ Scale Simplify the Presentation of Log Transformed Data.”
 *Statistics in Medicine* 19 (22): 3109–25.
 <https://doi.org/10.1002/1097-0258(20001130)19:22%3C3109::AID-SIM558%3E3.0.CO;2-F>.
 
+Cronbach, Lee J. 1951. “Coefficient Alpha and the Internal Structure of
+Tests.” *Psychometrika* 16 (3): 297–334.
+<https://doi.org/10.1007/BF02310555>.
+
 Greenland, Sander. 2019. “Valid p-Values Behave Exactly as They Should:
 Some Misleading Criticisms of p-Values and Their Resolution with
 s-Values.” *The American Statistician* 73 (sup1): 106–14.
 <https://doi.org/10.1080/00031305.2018.1529625>.
-
-Gwet, Kilem L. 2014. *Handbook of Inter-Rater Reliability*. Advanced
-Analytics, LLC. <https://www.agreestat.com/book4/>.
-
-Gwet, Kilem L. 2019. *irrCAC: Computing Chance-Corrected Agreement
-Coefficients (CAC)*. <https://CRAN.R-project.org/package=irrCAC>.
 
 Hopkins, Will G. 2000. “Measures of Reliability in Sports Medicine and
 Science.” *Sports Medicine* 30 (1): 1–15.
@@ -717,6 +861,10 @@ Reporting Intraclass Correlation Coefficients for Reliability Research.”
 *Journal of Chiropractic Medicine* 15 (2): 155–63.
 <https://doi.org/10.1016/j.jcm.2016.02.012>.
 
+Lin, Lawrence I-Kuei. 1989. “A Concordance Correlation Coefficient to
+Evaluate Reproducibility.” *Biometrics* 45 (1): 255.
+<https://doi.org/10.2307/2532051>.
+
 McGraw, Kenneth O, and Seok P Wong. 1996. “Forming Inferences about Some
 Intraclass Correlation Coefficients.” *Psychological Methods* 1 (1): 30.
 <https://doi.org/10.1037/1082-989X.1.1.30>.
@@ -726,6 +874,14 @@ Candel. 2024. “Review of Sample Size Determination Methods for the
 Intraclass Correlation Coefficient in the One-Way Analysis of Variance
 Model.” *Statistical Methods in Medical Research* 33 (3): 532–53.
 <https://doi.org/10.1177/09622802231224657>.
+
+Nelson, Kerrie P., and Don Edwards. 2015. “Measures of Agreement Between
+Many Raters for Ordinal Classifications.” *Statistics in Medicine* 34
+(23): 3116–32. <https://doi.org/10.1002/sim.6546>.
+
+Nickerson, Carol A. E. 1997. “A Note on "a Concordance Correlation
+Coefficient to Evaluate Reproducibility".” *Biometrics* 53 (4): 1503–7.
+<https://doi.org/10.2307/2533516>.
 
 Rafi, Zad, and Sander Greenland. 2020. “Semantic and Cognitive Tools to
 Aid Statistical Science: Replace Confidence and Significance by

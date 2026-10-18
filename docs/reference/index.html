@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Package index"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Package index"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -26,6 +26,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -161,6 +162,43 @@
         </dt>
         <dd>Methods for simple_reli objects</dd>
       </dl></div><div class="section level2">
+
+      <h3 id="categorical-ratings">Categorical Ratings<a class="anchor" aria-label="anchor" href="#categorical-ratings"></a></h3>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="cac_test.html">cac_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Chance-Corrected Agreement Coefficients for Categorical Ratings</dd>
+
+        <dt>
+
+          <code><a href="ord_kappa_test.html">ord_kappa_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Model-Based Kappa for Ordinal Ratings from Many Raters</dd>
+
+        <dt>
+
+          <code><a href="cac_htest-methods.html">summary(<i>&lt;cac_htest&gt;</i>)</a></code> <code><a href="cac_htest-methods.html">print(<i>&lt;summary.cac_htest&gt;</i>)</a></code> <code><a href="cac_htest-methods.html">plot(<i>&lt;cac_htest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for cac_htest objects</dd>
+
+        <dt>
+
+          <code><a href="agree_coef.html">agree_coef()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
+        </dt>
+        <dd>Agreement Coefficients</dd>
+      </dl></div><div class="section level2">
       <h2 id="error-in-variables-regression">Error-in-Variables Regression<a class="anchor" aria-label="anchor" href="#error-in-variables-regression"></a></h2>
 
 
@@ -213,6 +251,13 @@
 
         </dt>
         <dd>Concordance Correlation Coefficient</dd>
+
+        <dt>
+
+          <code><a href="ccc_htest-methods.html">summary(<i>&lt;ccc_htest&gt;</i>)</a></code> <code><a href="ccc_htest-methods.html">plot(<i>&lt;ccc_htest&gt;</i>)</a></code> <code><a href="ccc_htest-methods.html">check(<i>&lt;ccc_htest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for ccc_htest objects</dd>
       </dl></div><div class="section level2">
       <h2 id="agreement-tests">Agreement Tests<a class="anchor" aria-label="anchor" href="#agreement-tests"></a></h2>
 
@@ -255,13 +300,6 @@
           <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Nonparametric Test for Limits of Agreement</dd>
-
-        <dt>
-
-          <code><a href="agree_coef.html">agree_coef()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
-        </dt>
-        <dd>Agreement Coefficents</dd>
 
         <dt>
 
@@ -443,7 +481,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
