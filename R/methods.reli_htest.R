@@ -42,7 +42,41 @@
 #' Qualitative labels such as "good" or "excellent" are never attached to an
 #' ICC; see [icc_test()] for why.
 #'
+#' **Diagnostics.** The two-way model assumes that subject and item effects
+#' add. A subject-by-item interaction, for example items (raters, devices,
+#' occasions) that differ in scale, is absorbed into the error: it lowers
+#' the consistency ICC and inflates the SEM. `check()` tests for it with
+#' Mandel's (1961) column-regression test: each item gets its own slope on
+#' the estimated subject effects, and the k - 1 extra slopes are F-tested.
+#' The panel plots the residuals of the additive model against the
+#' estimated subject effect with one line per item, so items whose lines
+#' slope are those that differ in scale. Mandel's test includes the
+#' alternative of Tukey's (1949) one-degree-of-freedom test (scale growing
+#' with the item mean, the multiplicative pattern) and also detects items
+#' that differ in scale but not in location, which Tukey's test misses; for
+#' two items the two tests are identical. The covariates are built from the
+#' fitted additive model, as in Milliken and Graybill (1970), so the F test
+#' remains exact with missing measurements. In simulations (30 subjects, 3
+#' items, 3 missing cells, additive normal data), its type I error was
+#' 0.0525 at the 0.05 level. It uses the fixed-effects fit (subjects and
+#' items as factors) even when the ICC came from REML, and it has little
+#' power with few subjects. A rising within-subject SD against the subject
+#' mean means the error grows with the size of the measurement, so a
+#' relative error ([reli_err_test()] with `scale = "log"`) describes it
+#' better.
+#'
 #' @references
+#' Mandel, J. (1961). Non-additivity in two-way analysis of variance.
+#' Journal of the American Statistical Association, 56(296), 878-888.
+#' \doi{10.1080/01621459.1961.10482132}
+#'
+#' Milliken, G. A., & Graybill, F. A. (1970). Extensions of the general
+#' linear hypothesis model. Journal of the American Statistical Association,
+#' 65(330), 797-807. \doi{10.1080/01621459.1970.10481125}
+#'
+#' Tukey, J. W. (1949). One degree of freedom for non-additivity.
+#' Biometrics, 5(3), 232-242. \doi{10.2307/3001938}
+#'
 #' Greenland, S. (2019). Valid p-values behave exactly as they should: Some
 #' misleading criticisms of p-values and their resolution with S-values. The
 #' American Statistician, 73(sup1), 106-114.
@@ -61,11 +95,11 @@
 #'   prints as a paragraph.}
 #'   \item{\code{plot}}{A ggplot2 plot (see `type`).}
 #'   \item{\code{check}}{Diagnostic plots combined with patchwork: normality
-#'   and heteroskedasticity of the model residuals, and the within-subject SD
-#'   against the subject mean (on the scale the model was fitted). A rising
-#'   within-subject SD means the error grows with the size of the
-#'   measurement, so a relative error ([reli_err_test()] with
-#'   `scale = "log"`) describes it better.}
+#'   and heteroskedasticity of the model residuals; for two-way models,
+#'   additivity (residuals of the additive subjects + items model against
+#'   the estimated subject effect, one line per item, with Mandel's test for
+#'   non-additivity); and the within-subject SD against the subject mean (on
+#'   the scale the model was fitted). See Details.}
 #' }
 #'
 #' @examples
@@ -92,46 +126,11 @@ NULL
 summary.reli_htest <- function(object,
                                style = c("auto", "hypothesis", "estimation"),
                                ...) {
-  style <- match.arg(style)
+  style <- .resolve_summary_style(match.arg(style), !is.null(object$p.value))
   s <- object$settings
-  tested <- !is.null(object$p.value)
-  if (style == "auto") {
-    style <- if (tested) "hypothesis" else "estimation"
-  }
-  if (style == "hypothesis" && !tested) {
-    message("No test was requested (null.value = NULL); ",
-            "describing the result in the estimation style.")
-    style <- "estimation"
-  }
-  alpha <- 1 - s$conf.level
-  s_value <- if (tested) -log2(object$p.value) else NULL
-
-  if (style == "estimation") {
-    result_text <- .describe_estimation(object, s_value)
-  } else {
-    estimate_text <- paste0(names(object$estimate), " = ",
-                            .fmt_num(unname(object$estimate)), ", ",
-                            .fmt_interval(object$conf.int, object$alternative))
-    significant <- object$p.value < alpha
-    stat_text <- if (!is.null(object$statistic)) {
-      paste0(names(object$statistic), "(",
-             paste(.fmt_df(object$parameter), collapse = ", "), ") = ",
-             .fmt_num(unname(object$statistic)), ", ")
-    } else ""
-    alt_text <- switch(object$alternative,
-                       two.sided = "not equal to",
-                       greater = "greater than",
-                       less = "less than")
-    result_text <- paste0(
-      "The test is ", if (significant) "" else "not ",
-      "statistically significant (", stat_text, .fmt_p(object$p.value), "; ",
-      estimate_text, ") at the ", format(alpha), " alpha level. ",
-      "The null hypothesis ", if (significant) "can" else "cannot",
-      " be rejected: at the desired error rate, it ",
-      if (significant) "can" else "cannot", " be stated that the true ",
-      names(object$null.value), " is ", alt_text, " ",
-      format(unname(object$null.value)), ".")
-  }
+  s_value <- if (!is.null(object$p.value)) -log2(object$p.value) else NULL
+  result_text <- .htest_result_text(object, style, s_value,
+                                    alpha = 1 - s$conf.level)
 
   text <- paste(result_text,
                 .describe_estimand(object),
@@ -184,10 +183,52 @@ check.reli_htest <- function(x, ...) {
   }
   p_err <- .plot_error_vs_mean(x$data$id, values,
                                log_scale = identical(x$settings$scale, "log"))
-  if (is.null(p_err)) {
+  # additivity only makes sense with crossed items (two-way model)
+  p_add <- if (identical(x$fit$model, "twoway")) {
+    .plot_additivity(data.frame(values = values, id = x$data$id,
+                                items = x$data$items))
+  } else NULL
+  extra <- Filter(Negate(is.null), list(p_add, p_err))
+  if (length(extra) == 0) {
     return(checks)
   }
-  checks + p_err + patchwork::plot_layout(ncol = 3)
+  out <- checks
+  for (p in extra) {
+    out <- out + p
+  }
+  out + patchwork::plot_layout(ncol = 2)
+}
+
+# Residuals of the additive two-way model against the estimated subject
+# effect, with one line per item, and Mandel's test for non-additivity
+# (items with different slopes, i.e. different scales). A subject-by-item
+# interaction is absorbed into the error by the ICC model, lowering the
+# consistency ICC and inflating the SEM.
+.plot_additivity <- function(df) {
+  df <- df[stats::complete.cases(df), , drop = FALSE]
+  df$id <- droplevels(factor(df$id))
+  df$items <- droplevels(factor(df$items))
+  tst <- .mandel_test(df)
+  d <- tst$data
+  d$residual <- stats::residuals(tst$fit)
+  ggplot(d, aes(x = subject_effect, y = residual, colour = items)) +
+    geom_hline(yintercept = 0, colour = "grey50") +
+    geom_point(shape = 16, size = 2, alpha = 0.8) +
+    geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 0.8) +
+    scale_colour_viridis_d(end = 0.85) +
+    labs(title = "Additivity",
+         subtitle = "Lines should be flat (items on the same scale)",
+         x = "Estimated subject effect", y = "Residuals", colour = "Item",
+         caption = paste0("Subject-by-item interaction \n",
+                          "Mandel's test (items differ in scale): ",
+                          .fmt_test_p(tst$p.value))) +
+    theme_bw() +
+    theme(
+      panel.background = element_rect(fill = "transparent"),
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
 }
 
 # Plot helpers ------------------------------------------------------------------
@@ -336,6 +377,54 @@ check.reli_htest <- function(x, ...) {
 }
 
 # Description helpers ------------------------------------------------------------
+
+# "auto" is "hypothesis" when there is a p-value and "estimation" otherwise;
+# "hypothesis" without a p-value falls back to "estimation" with a message.
+.resolve_summary_style <- function(style, tested) {
+  if (style == "auto") {
+    style <- if (tested) "hypothesis" else "estimation"
+  }
+  if (style == "hypothesis" && !tested) {
+    message("No test was requested (null.value = NULL); ",
+            "describing the result in the estimation style.")
+    style <- "estimation"
+  }
+  style
+}
+
+# First sentence(s) of a summary: the test decision (hypothesis style) or the
+# compatibility interval and S-value (estimation style). Shared by the
+# reli_htest and ccc_htest summaries.
+.htest_result_text <- function(object, style, s_value, alpha) {
+  if (style == "estimation") {
+    return(.describe_estimation(object, s_value))
+  }
+  estimate_text <- paste0(names(object$estimate), " = ",
+                          .fmt_num(unname(object$estimate)), ", ",
+                          .fmt_interval(object$conf.int, object$alternative))
+  significant <- object$p.value < alpha
+  stat_text <- if (!is.null(object$statistic)) {
+    paste0(names(object$statistic),
+           if (!is.null(object$parameter) &&
+               !identical(names(object$parameter), "n")) {
+             paste0("(", paste(.fmt_df(object$parameter), collapse = ", "), ")")
+           } else "",
+           " = ", .fmt_num(unname(object$statistic)), ", ")
+  } else ""
+  alt_text <- switch(object$alternative,
+                     two.sided = "not equal to",
+                     greater = "greater than",
+                     less = "less than")
+  paste0(
+    "The test is ", if (significant) "" else "not ",
+    "statistically significant (", stat_text, .fmt_p(object$p.value), "; ",
+    estimate_text, ") at the ", format(alpha), " alpha level. ",
+    "The null hypothesis ", if (significant) "can" else "cannot",
+    " be rejected: at the desired error rate, it ",
+    if (significant) "can" else "cannot", " be stated that the true ",
+    names(object$null.value), " is ", alt_text, " ",
+    format(unname(object$null.value)), ".")
+}
 
 # Estimation style: compatibility interval and, with a p-value, its S-value.
 .describe_estimation <- function(object, s_value) {

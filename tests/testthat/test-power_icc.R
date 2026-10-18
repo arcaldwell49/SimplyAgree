@@ -1,6 +1,8 @@
 testthat::local_edition(3)
 
 g <- "greater"
+sf_avg <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
+                     J3 = c(5, 3, 6, 2, 6, 4), J4 = c(8, 2, 8, 6, 9, 7))
 
 # power_icc: published values --------------------------------------------------------
 
@@ -245,4 +247,73 @@ test_that("precision_icc checks its arguments and prints", {
   expect_s3_class(res, "power.htest")
   expect_output(print(res), "width = 0.2")
   expect_match(res$note, "upper minus lower")
+})
+
+# Average-measure ICCs ---------------------------------------------------------------
+
+sb <- function(r, k) k * r / (1 + (k - 1) * r)
+
+test_that("average-measure power equals single-measure power at the projected ICCs", {
+  k <- 3
+  avg <- power_icc(n = 25, k = k, rho0 = sb(0.5, k), rho1 = sb(0.7, k),
+                   alternative = g, unit = "average", model = "twoway")
+  one <- power_icc(n = 25, k = k, rho0 = 0.5, rho1 = 0.7, alternative = g,
+                   model = "twoway")
+  expect_equal(avg$power, one$power, tolerance = 1e-12)
+  expect_match(avg$method, "ICC(C,k)", fixed = TRUE)
+  # solving for rho1 returns it on the average-measure scale
+  r1 <- power_icc(n = 25, k = k, rho0 = sb(0.5, k), power = avg$power,
+                  alternative = g, unit = "average", model = "twoway")$rho1
+  expect_equal(r1, sb(0.7, k), tolerance = 1e-6)
+  # and the approximate method works on the single-measure scale too
+  expect_equal(
+    power_icc(n = 40, k = 2, rho0 = sb(0.4, 2), rho1 = sb(0.6, 2),
+              alternative = g, unit = "average", method = "approximate")$power,
+    power_icc(n = 40, k = 2, rho0 = 0.4, rho1 = 0.6, alternative = g,
+              method = "approximate")$power, tolerance = 1e-12)
+})
+
+test_that("the average-measure interval width is (a - 1/b) / F", {
+  res <- icc_test(col.names = names(sf_avg), data = sf_avg, unit = "average")
+  ms <- res$fit$ms
+  F_obs <- ms[["MSB"]] / ms[["MSE"]]
+  a <- qf(0.975, 5, 15)
+  b <- qf(0.975, 15, 5)
+  expect_equal(diff(as.numeric(res$conf.int)), (a - 1 / b) / F_obs,
+               tolerance = 1e-10)
+})
+
+test_that("average-measure assurance matches the F distribution of the width", {
+  n <- 20; k <- 3; rho_avg <- 0.85; w <- 0.2
+  asr <- precision_icc(n = n, k = k, rho = rho_avg, width = w, assurance = NULL,
+                       model = "twoway", unit = "average")$assurance
+  df1 <- n - 1; df2 <- (n - 1) * (k - 1)
+  r1 <- rho_avg / (k - (k - 1) * rho_avg)
+  scale <- (1 + (k - 1) * r1) / (1 - r1)
+  u <- seq(1e-6, 1 - 1e-6, length.out = 200001)
+  Fr <- scale * qf(u, df1, df2)
+  width <- (qf(0.975, df1, df2) - 1 / qf(0.975, df2, df1)) / Fr
+  expect_equal(asr, mean(width <= w), tolerance = 1e-3)
+  # solving round-trips
+  n_back <- precision_icc(k = k, rho = rho_avg, width = w, assurance = asr,
+                          model = "twoway", unit = "average")$n
+  expect_equal(n_back, n, tolerance = 1e-5)
+  w_back <- precision_icc(n = n, k = k, rho = rho_avg, width = NULL,
+                          assurance = asr, model = "twoway",
+                          unit = "average")$width
+  expect_equal(w_back, w, tolerance = 1e-6)
+})
+
+test_that("unit = 'average' checks its arguments", {
+  expect_error(power_icc(n = 20, k = NULL, rho0 = 0.5, rho1 = 0.8, power = 0.8,
+                         unit = "average"), "cannot be solved for")
+  expect_error(precision_icc(n = 20, k = NULL, rho = 0.8, width = 0.2,
+                             unit = "average"), "cannot be solved for")
+  expect_error(precision_icc(rho = 0.8, width = 0.2, unit = "average",
+                             method = "approximate"), "unit = \"single\"")
+  # no lower bound on the average-measure scale
+  expect_s3_class(power_icc(n = 20, k = 4, rho0 = -2, rho1 = 0.5,
+                            unit = "average", alternative = g), "power.htest")
+  expect_error(power_icc(n = 20, rho0 = 0, rho1 = 1, unit = "average"),
+               "below 1")
 })

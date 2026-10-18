@@ -3,7 +3,7 @@ test_that("ccc_test returns htest class for simple data (vector interface)", {
   x <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
   y <- c(1.1, 2.2, 2.9, 4.1, 5.2, 5.8, 7.1, 8.0, 9.2, 10.1)
 
-  result <- ccc_test(x, y)
+  result <- ccc_test(x, y, null.value = 0)
 
   expect_s3_class(result, "htest")
   expect_true("statistic" %in% names(result))
@@ -22,7 +22,7 @@ test_that("ccc_test returns htest class for simple data (data frame interface)",
   # Use first observation per subject for simple data
   reps_simple <- reps[!duplicated(reps$id), ]
 
-  result <- ccc_test(x = "x", y = "y", data = reps_simple)
+  result <- ccc_test(x = "x", y = "y", data = reps_simple, null.value = 0)
 
   expect_s3_class(result, "htest")
   expect_equal(names(result$estimate), "CCC")
@@ -167,8 +167,8 @@ test_that("input validation works correctly", {
   expect_error(ccc_test(x, y, conf.level = c(0.9, 0.95)), "'conf.level' must be a single number between 0 and 1")
 
   # Invalid null.value
-  expect_error(ccc_test(x, y, null.value = -2), "'null.value' must be a single number between -1 and 1")
-  expect_error(ccc_test(x, y, null.value = 2), "'null.value' must be a single number between -1 and 1")
+  expect_error(ccc_test(x, y, null.value = -2), "'null.value' must be NULL or a single number between -1 and 1")
+  expect_error(ccc_test(x, y, null.value = 2), "'null.value' must be NULL or a single number between -1 and 1")
 
   # Mismatched lengths
   expect_error(ccc_test(x, c(1, 2, 3)), "'x' and 'y' must have the same length")
@@ -254,7 +254,7 @@ test_that("p-values are within valid range", {
   data("reps")
   reps_simple <- reps[!duplicated(reps$id), ]
 
-  result <- ccc_test(x = "x", y = "y", data = reps_simple)
+  result <- ccc_test(x = "x", y = "y", data = reps_simple, null.value = 0)
 
   expect_true(result$p.value >= 0 && result$p.value <= 1)
 })
@@ -263,8 +263,9 @@ test_that("parameter n is correctly computed", {
   data("reps")
   reps_simple <- reps[!duplicated(reps$id), ]
 
-  result_simple <- ccc_test(x = "x", y = "y", data = reps_simple)
-  result_reps <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  result_simple <- ccc_test(x = "x", y = "y", data = reps_simple, null.value = 0)
+  result_reps <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
+                          null.value = 0)
 
   # For simple data, n should equal number of complete (non-missing) x-y pairs
   expected_n_simple <- sum(complete.cases(reps_simple[, c("x", "y")]))
@@ -272,4 +273,163 @@ test_that("parameter n is correctly computed", {
 
   # For reps data, n should equal number of unique subjects
   expect_equal(unname(result_reps$parameter), length(unique(reps$id)))
+})
+
+# ccc_htest class, defaults and intervals (0.3.1) -------------------------------
+
+test_that("ccc_test returns a ccc_htest with no test by default", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "x", y = "y", data = reps)
+  expect_s3_class(res, c("ccc_htest", "htest"))
+  expect_null(res$statistic)
+  expect_null(res$p.value)
+  expect_null(res$null.value)
+  expect_equal(res$alternative, "two.sided")
+  # alternative without a null value: still a two-sided interval
+  g <- ccc_test(x = "x", y = "y", data = reps, alternative = "greater")
+  expect_equal(g$conf.int, res$conf.int)
+  expect_equal(res$settings$data_type, "simple")
+  expect_named(res$data, c("x", "y"))
+  expect_equal(nrow(res$data), sum(complete.cases(reps$x, reps$y)))
+})
+
+test_that("two-sided intervals are unchanged (Fisher z)", {
+  testthat::local_edition(3)
+  old <- SimplyAgree:::ccc.xy(reps$x, reps$y, conf.level = 0.95,
+                              agree.level = 0.95, TOST = FALSE,
+                              prop_bias = FALSE)$rho.c
+  res <- ccc_test(x = "x", y = "y", data = reps)
+  expect_equal(as.numeric(res$conf.int), c(old$lower.ci, old$upper.ci))
+  long <- tidyr::drop_na(tidyr::pivot_longer(
+    data.frame(id = reps$id, x = reps$x, y = reps$y), !id,
+    names_to = "method", values_to = "measure"))
+  u <- SimplyAgree:::cccUst(long, ry = "measure", rmet = "method", cl = 0.95)
+  r <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  expect_equal(as.numeric(r$conf.int), unname(u[2:3]))
+})
+
+test_that("the SE uses the complete pairs, matching the CCC and interval", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "x", y = "y", data = reps)
+  # the half-width of the Fisher z interval is qnorm(0.975) * SE(z)
+  z_ci <- atanh(as.numeric(res$conf.int))
+  expect_equal(diff(z_ci) / 2, qnorm(0.975) * res$stderr[["SE Z"]])
+})
+
+test_that("one-sided alternatives give one-sided intervals matching the test", {
+  testthat::local_edition(3)
+  g <- ccc_test(x = "x", y = "y", data = reps, null.value = 0.2,
+                alternative = "greater")
+  expect_equal(g$alternative, "greater")
+  expect_equal(g$conf.int[2], 1)
+  at_bound <- ccc_test(x = "x", y = "y", data = reps,
+                       null.value = g$conf.int[[1]], alternative = "greater")
+  expect_equal(at_bound$p.value, 0.05, tolerance = 1e-8)
+  l <- ccc_test(x = "x", y = "y", data = reps, null.value = 0.8,
+                alternative = "less")
+  expect_equal(l$conf.int[1], -1)
+  expect_output(print(g), "true CCC is greater than 0.2")
+})
+
+test_that("components decompose the CCC into precision and accuracy", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "x", y = "y", data = reps)
+  d <- res$data
+  expect_equal(res$components[["r"]], cor(d$x, d$y))
+  expect_equal(res$components[["r"]] * res$components[["C_b"]],
+               unname(res$estimate))
+  expect_null(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                       data_type = "reps")$components)
+})
+
+test_that("the CCC is close to the absolute-agreement ICC for two methods", {
+  testthat::local_edition(3)
+  d <- stats::na.omit(reps[c("x", "y")])
+  ccc <- unname(ccc_test(x = "x", y = "y", data = d)$estimate)
+  icc <- unname(icc_test(col.names = c("x", "y"), data = d,
+                         type = "agreement")$estimate)
+  expect_equal(ccc, icc, tolerance = 0.05)
+})
+
+# Methods --------------------------------------------------------------------------
+
+test_that("summary describes the CCC in both styles", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "x", y = "y", data = reps, null.value = 0.2,
+                  alternative = "greater")
+  h <- summary(res)
+  expect_s3_class(h, "summary.ccc_htest")
+  expect_equal(h$style, "hypothesis")
+  expect_match(h$text, "Z = ")
+  expect_match(h$text, "greater than 0.2")
+  expect_match(h$text, "Pearson r = ")
+  expect_match(h$text, "bivariate normal")
+  e <- summary(res, style = "estimation")
+  expect_equal(e$s.value, -log2(res$p.value))
+  expect_match(e$text, "lower compatibility bound")
+  expect_no_match(e$text, "significant")
+
+  est <- summary(ccc_test(x = "x", y = "y", data = reps))
+  expect_equal(est$style, "estimation")
+  expect_message(summary(ccc_test(x = "x", y = "y", data = reps),
+                         style = "hypothesis"), "No test was requested")
+
+  r <- summary(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                        data_type = "nest"))
+  expect_match(r$text, "nested measurements")
+  expect_match(r$text, "U-statistic standard error")
+
+  expect_snapshot(summary(res))
+  expect_snapshot(summary(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                                   data_type = "reps")))
+})
+
+test_that("plot draws the identity and Bland-Altman plots", {
+  testthat::local_edition(3)
+  s <- ccc_test(x = "x", y = "y", data = reps)
+  r <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  for (res in list(s, r)) {
+    expect_s3_class(plot(res), "ggplot")
+    expect_s3_class(plot(res, type = "ba"), "ggplot")
+  }
+  expect_match(plot(s)$labels$caption, "line of identity")
+  expect_equal(plot(r)$labels$colour, "Subject")
+  expect_error(plot(s, type = "bar"))
+})
+
+test_that("check gives agreement diagnostics plus bivariate normality", {
+  testthat::local_edition(3)
+  s <- ccc_test(x = "x", y = "y", data = reps)
+  chk <- check(s)
+  expect_s3_class(chk, "patchwork")
+  expect_equal(chk$labels$title, "Bivariate Normality")
+  expect_length(chk$patches$plots, 3)
+  r <- check(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                      data_type = "reps"))
+  expect_s3_class(r, "patchwork")
+  expect_equal(r$labels$title, "Linearity")
+})
+
+test_that("check shows linearity instead of proportional bias", {
+  testthat::local_edition(3)
+  titles <- function(p) {
+    c(vapply(p$patches$plots, function(q) q$labels$title, character(1)),
+      p$labels$title)
+  }
+  s <- check(ccc_test(x = "x", y = "y", data = reps))
+  expect_equal(titles(s), c("Normality of Residuals", "Homogeneity of Variance",
+                            "Linearity", "Bivariate Normality"))
+  r <- check(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                      data_type = "reps"))
+  expect_equal(titles(r), c("Normality of Residuals", "Homogeneity of Variance",
+                            "Linearity"))
+  expect_match(r$labels$caption, "approximate")
+  # the RESET test is the F test of a quadratic term in y ~ x
+  d <- stats::na.omit(reps[c("x", "y")])
+  tst <- SimplyAgree:::.fitted_square_test(y ~ x, d)
+  ref <- anova(lm(y ~ x, d), lm(y ~ x + I(x^2), d))
+  expect_equal(tst$p.value, ref$`Pr(>F)`[2], tolerance = 1e-8)
+  # check.loa() itself is unchanged
+  loa <- check(agreement_limit(x = "x", y = "y", data = reps))
+  expect_equal(loa$labels$title, "Proportional Bias")
 })

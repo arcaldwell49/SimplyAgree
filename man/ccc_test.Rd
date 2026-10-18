@@ -11,7 +11,7 @@ ccc_test(
   data = NULL,
   data_type = c("simple", "reps", "nest"),
   conf.level = 0.95,
-  null.value = 0,
+  null.value = NULL,
   alternative = c("two.sided", "greater", "less")
 )
 }
@@ -35,24 +35,36 @@ identifiers. Required when \code{data_type} is \code{"reps"} or \code{"nest"}.}
 
 \item{conf.level}{Confidence level for the interval, default is 0.95.}
 
-\item{null.value}{The hypothesized value of CCC under the null hypothesis,
-default is 0.}
+\item{null.value}{The CCC under the null hypothesis. The default, \code{NULL},
+gives the estimate and interval without a test.}
 
 \item{alternative}{Character string specifying the alternative hypothesis:
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}. Used
+only when \code{null.value} is given (without a test the interval is
+two-sided); a one-sided alternative gives a one-sided interval, as in
+\code{\link[=icc_test]{icc_test()}}.}
 }
 \value{
-A list with class \code{"htest"} containing the following components:
-\item{statistic}{The Z-statistic (Fisher-transformed).}
-\item{parameter}{The sample size (n for simple data, number of subjects for reps/nest).}
+A list with class \code{c("ccc_htest", "htest")} containing the
+following components:
+\item{statistic}{The Z-statistic (Fisher-transformed), when a test was
+requested.}
+\item{parameter}{The sample size (n for simple data, number of subjects
+for reps/nest), when a test was requested.}
 \item{stderr}{The standard errors for CCC and Z-transformed CCC.}
-\item{p.value}{The p-value for the test.}
+\item{p.value}{The p-value for the test, when a test was requested.}
 \item{conf.int}{A confidence interval for the CCC.}
 \item{estimate}{The estimated CCC.}
-\item{null.value}{The specified hypothesized value of CCC.}
-\item{alternative}{A character string describing the alternative hypothesis.}
+\item{null.value}{The specified hypothesized value of CCC, if any.}
+\item{alternative}{The alternative hypothesis.}
 \item{method}{A character string indicating the method used.}
 \item{data.name}{A character string giving the names of the data.}
+\item{data}{The data used (\code{x}, \code{y}, and \code{id} for reps/nest), for the
+methods.}
+\item{components}{For simple data, Lin's decomposition: the Pearson
+correlation \code{r} (precision) and the bias correction factor \code{C_b}
+(accuracy), with CCC = r x C_b. \code{NULL} for reps/nest.}
+\item{settings}{The settings used, for the methods.}
 }
 \description{
 Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
@@ -68,8 +80,21 @@ through the origin).
 For simple paired data, Lin's original method is used. For replicate or nested
 data, U-statistics are employed following King, Chinchilli, and Carrasco.
 
-The hypothesis test is performed using Fisher's Z-transformation of the CCC:
+The confidence interval and the hypothesis test use Fisher's
+Z-transformation of the CCC:
 \deqn{Z = 0.5 \times \log\left(\frac{1 + CCC}{1 - CCC}\right)}
+By default (\code{null.value = NULL}) no test is done.
+
+\strong{Relation to the ICC.} For two methods, the CCC is close to the
+absolute-agreement intraclass correlation, ICC(A,1)
+(\code{icc_test(type = "agreement")}); Lin's estimator uses n rather than
+n - 1 in the variances. \code{ccc_test()} is meant for method-comparison
+(agreement) studies; \code{\link[=icc_test]{icc_test()}} for reliability studies.
+
+\strong{Methods.} \code{summary()} describes the result in words (including, for
+simple data, whether a low CCC comes from poor precision or poor
+accuracy), \code{plot()} draws the identity or Bland-Altman plot, and
+\code{check()} gives diagnostics; see \link{ccc_htest-methods}.
 }
 \examples{
 # Simple paired data using vectors
@@ -92,6 +117,12 @@ ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 # Nested data
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 
+# Describe, plot and check
+res <- ccc_test(x = "x", y = "y", data = reps)
+summary(res)
+plot(res)
+check(res)
+
 }
 \references{
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
@@ -103,4 +134,7 @@ coefficient for continuous and categorical data. Statistics in Medicine,
 
 King, T. S., Chinchilli, V. M., & Carrasco, J. L. (2007). A repeated measures
 concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.
+}
+\seealso{
+\link{ccc_htest-methods}, \code{\link[=icc_test]{icc_test()}}, \code{\link[=agreement_limit]{agreement_limit()}}
 }

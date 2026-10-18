@@ -17,22 +17,34 @@
 #'   \code{"reps"} for replicate data where subjects are measured multiple times,
 #'   \code{"nest"} for nested data structures.
 #' @param conf.level Confidence level for the interval, default is 0.95.
-#' @param null.value The hypothesized value of CCC under the null hypothesis,
-#'   default is 0.
+#' @param null.value The CCC under the null hypothesis. The default, `NULL`,
+#'   gives the estimate and interval without a test.
 #' @param alternative Character string specifying the alternative hypothesis:
-#'   \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#'   \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}. Used
+#'   only when `null.value` is given (without a test the interval is
+#'   two-sided); a one-sided alternative gives a one-sided interval, as in
+#'   [icc_test()].
 #'
-#' @return A list with class \code{"htest"} containing the following components:
-#'   \item{statistic}{The Z-statistic (Fisher-transformed).}
-#'   \item{parameter}{The sample size (n for simple data, number of subjects for reps/nest).}
+#' @return A list with class \code{c("ccc_htest", "htest")} containing the
+#'   following components:
+#'   \item{statistic}{The Z-statistic (Fisher-transformed), when a test was
+#'   requested.}
+#'   \item{parameter}{The sample size (n for simple data, number of subjects
+#'   for reps/nest), when a test was requested.}
 #'   \item{stderr}{The standard errors for CCC and Z-transformed CCC.}
-#'   \item{p.value}{The p-value for the test.}
+#'   \item{p.value}{The p-value for the test, when a test was requested.}
 #'   \item{conf.int}{A confidence interval for the CCC.}
 #'   \item{estimate}{The estimated CCC.}
-#'   \item{null.value}{The specified hypothesized value of CCC.}
-#'   \item{alternative}{A character string describing the alternative hypothesis.}
+#'   \item{null.value}{The specified hypothesized value of CCC, if any.}
+#'   \item{alternative}{The alternative hypothesis.}
 #'   \item{method}{A character string indicating the method used.}
 #'   \item{data.name}{A character string giving the names of the data.}
+#'   \item{data}{The data used (`x`, `y`, and `id` for reps/nest), for the
+#'   methods.}
+#'   \item{components}{For simple data, Lin's decomposition: the Pearson
+#'   correlation `r` (precision) and the bias correction factor `C_b`
+#'   (accuracy), with CCC = r x C_b. `NULL` for reps/nest.}
+#'   \item{settings}{The settings used, for the methods.}
 #'
 #' @details
 #' The concordance correlation coefficient measures the agreement between two
@@ -44,8 +56,21 @@
 #' For simple paired data, Lin's original method is used. For replicate or nested
 #' data, U-statistics are employed following King, Chinchilli, and Carrasco.
 #'
-#' The hypothesis test is performed using Fisher's Z-transformation of the CCC:
+#' The confidence interval and the hypothesis test use Fisher's
+#' Z-transformation of the CCC:
 #' \deqn{Z = 0.5 \times \log\left(\frac{1 + CCC}{1 - CCC}\right)}
+#' By default (`null.value = NULL`) no test is done.
+#'
+#' **Relation to the ICC.** For two methods, the CCC is close to the
+#' absolute-agreement intraclass correlation, ICC(A,1)
+#' (`icc_test(type = "agreement")`); Lin's estimator uses n rather than
+#' n - 1 in the variances. `ccc_test()` is meant for method-comparison
+#' (agreement) studies; [icc_test()] for reliability studies.
+#'
+#' **Methods.** `summary()` describes the result in words (including, for
+#' simple data, whether a low CCC comes from poor precision or poor
+#' accuracy), `plot()` draws the identity or Bland-Altman plot, and
+#' `check()` gives diagnostics; see [ccc_htest-methods].
 #'
 #' @references
 #' Lin, L. I. (1989). A concordance correlation coefficient to evaluate
@@ -79,6 +104,13 @@
 #' # Nested data
 #' ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 #'
+#' # Describe, plot and check
+#' res <- ccc_test(x = "x", y = "y", data = reps)
+#' summary(res)
+#' plot(res)
+#' check(res)
+#'
+#' @seealso [ccc_htest-methods], [icc_test()], [agreement_limit()]
 #' @importFrom stats pnorm qnorm complete.cases cor sd var
 #' @importFrom tidyr pivot_longer drop_na
 #' @importFrom tidyselect all_of
@@ -91,7 +123,7 @@ ccc_test <- function(x,
                      data = NULL,
                      data_type = c("simple", "reps", "nest"),
                      conf.level = 0.95,
-                     null.value = 0,
+                     null.value = NULL,
                      alternative = c("two.sided", "greater", "less")) {
 
   # Match arguments
@@ -106,9 +138,14 @@ ccc_test <- function(x,
   }
 
   # Validate null.value
-  if (!is.numeric(null.value) || length(null.value) != 1 ||
-      null.value < -1 || null.value > 1) {
-    stop("'null.value' must be a single number between -1 and 1")
+  if (!is.null(null.value) &&
+      (!is.numeric(null.value) || length(null.value) != 1 ||
+       is.na(null.value) || null.value <= -1 || null.value >= 1)) {
+    stop("'null.value' must be NULL or a single number between -1 and 1")
+  }
+  # without a test the interval is two-sided
+  if (is.null(null.value)) {
+    alternative <- "two.sided"
   }
 
   # Prepare data
@@ -119,6 +156,9 @@ ccc_test <- function(x,
   id_vec <- prepared$id
   data_name <- prepared$data_name
   effective_data_type <- prepared$data_type
+  labels <- strsplit(data_name, " and ", fixed = TRUE)[[1]]
+  x_label <- labels[1]
+  y_label <- if (length(labels) > 1) labels[2] else "y"
 
   # Compute CCC based on data type
   if (effective_data_type == "simple") {
@@ -130,8 +170,6 @@ ccc_test <- function(x,
                          prop_bias = FALSE)
 
     ccc_est <- ccc_result$rho.c$est.ccc
-    ccc_lower <- ccc_result$rho.c$lower.ci
-    ccc_upper <- ccc_result$rho.c$upper.ci
 
     # Standard errors: prefer values computed by ccc.xy, fall back to
     # local computation only if necessary to avoid duplication.
@@ -147,13 +185,17 @@ ccc_test <- function(x,
     }
 
     if (is.null(sep) || is.null(se_z)) {
-      # Recompute SEs only if they are not available from ccc.xy
-      k <- sum(complete.cases(data.frame(x_vec, y_vec)))
-      sx2 <- var(x_vec, na.rm = TRUE) * (k - 1) / k
-      sy2 <- var(y_vec, na.rm = TRUE) * (k - 1) / k
-      r <- cor(x_vec, y_vec, use = "complete.obs")
-      xb <- mean(x_vec, na.rm = TRUE)
-      yb <- mean(y_vec, na.rm = TRUE)
+      # Recompute SEs only if they are not available from ccc.xy, from the
+      # complete pairs (as ccc.xy computes the CCC)
+      pairs <- complete.cases(x_vec, y_vec)
+      xc <- x_vec[pairs]
+      yc <- y_vec[pairs]
+      k <- length(xc)
+      sx2 <- var(xc) * (k - 1) / k
+      sy2 <- var(yc) * (k - 1) / k
+      r <- cor(xc, yc)
+      xb <- mean(xc)
+      yb <- mean(yc)
       u <- (yb - xb) / ((sx2 * sy2)^0.25)
 
       # SE of CCC on original scale
@@ -168,6 +210,9 @@ ccc_test <- function(x,
     }
     n_param <- sum(complete.cases(data.frame(x_vec, y_vec)))
     method <- "Lin's Concordance Correlation Coefficient"
+    # CCC = precision (Pearson r) x accuracy (bias correction factor C_b)
+    c_b <- unname(ccc_result$bias)
+    components <- c(r = unname(ccc_est) / c_b, C_b = c_b)
 
   } else {
     # Use cccUst for reps/nest data
@@ -198,65 +243,73 @@ ccc_test <- function(x,
     sep <- ccc_ust_result["SE CCC"]  # SE of CCC
     se_z <- ccc_ust_result["SE Z"]  # SE of Z-transformed CCC
     ccc_est <- ccc_ust_result["CCC"]  # CCC
-    lower_name <- grep("^LL CI", names(ccc_ust_result), value = TRUE)
-    upper_name <- grep("^UL CI", names(ccc_ust_result), value = TRUE)
-    ccc_lower <- ccc_ust_result[lower_name]  # Lower CI
-    ccc_upper <- ccc_ust_result[upper_name]  # Upper CI
 
     # Number of subjects
     n_param <- length(unique(id_vec))
 
     method <- "Concordance Correlation Coefficient (U-statistics)"
+    components <- NULL
   }
 
-  # Perform hypothesis test
-  test_result <- .ccc_hypothesis_test(ccc_est = ccc_est,
-                                       se_z = se_z,
-                                       null.value = null.value,
-                                       alternative = alternative)
+  ccc_est <- unname(ccc_est)
+  se_z <- unname(se_z)
 
-  # Build confidence interval with attribute
-  ci <- c(ccc_lower, ccc_upper)
-  attr(ci, "conf.level") <- conf.level
+  # Confidence interval on the Fisher z scale (one-sided with a one-sided
+  # alternative, as in icc_test())
+  ci <- .ccc_ci(ccc_est, se_z, conf.level, alternative)
 
-  # Build alternative hypothesis description
-  alt_text <- switch(alternative,
-                     "two.sided" = paste("true CCC is not equal to", null.value),
-                     "less" = paste("true CCC is less than", null.value),
-                     "greater" = paste("true CCC is greater than", null.value))
+  # Hypothesis test only when a null value is given
+  if (is.null(null.value)) {
+    test_result <- list(z_stat = NULL, p_value = NULL)
+  } else {
+    test_result <- .ccc_hypothesis_test(ccc_est = ccc_est,
+                                         se_z = se_z,
+                                         null.value = null.value,
+                                         alternative = alternative)
+  }
 
-  # Name the statistic
-  statistic <- test_result$z_stat
-  names(statistic) <- "Z"
+  # Data kept for summary(), plot() and check()
+  stored <- if (effective_data_type == "simple") {
+    keep <- complete.cases(x_vec, y_vec)
+    data.frame(x = x_vec[keep], y = y_vec[keep])
+  } else {
+    df_wide
+  }
 
-  # Name the parameter
-  parameter <- n_param
-  names(parameter) <- "n"
-
-  # Name the estimate
-  estimate <- ccc_est
-  names(estimate) <- "CCC"
-
-  # Name the null value
-  null_val <- null.value
-  names(null_val) <- "CCC"
-
-  # Construct htest object
   structure(
     list(
-      statistic = statistic,
-      parameter = parameter,
-      stderr = c(sep, se_z),
+      statistic = if (is.null(null.value)) NULL else c(Z = test_result$z_stat),
+      parameter = if (is.null(null.value)) NULL else c(n = n_param),
+      stderr = c("SE CCC" = unname(sep), "SE Z" = se_z),
       p.value = test_result$p_value,
       conf.int = ci,
-      estimate = estimate,
-      null.value = null_val,
-      alternative = alt_text,
+      estimate = c(CCC = ccc_est),
+      null.value = if (is.null(null.value)) NULL else c(CCC = null.value),
+      alternative = alternative,
       method = method,
-      data.name = data_name
+      data.name = data_name,
+      data = stored,
+      components = components,
+      settings = list(data_type = effective_data_type,
+                      conf.level = conf.level,
+                      n = n_param,
+                      x_name = x_label,
+                      y_name = y_label)
     ),
-    class = "htest"
+    class = c("ccc_htest", "htest")
   )
+}
+
+# Internal helper: confidence interval for the CCC on the Fisher z scale
+.ccc_ci <- function(ccc_est, se_z, conf.level, alternative) {
+  alpha <- 1 - conf.level
+  z <- atanh(ccc_est)
+  ci <- switch(alternative,
+               two.sided = tanh(z + c(-1, 1) * qnorm(1 - alpha / 2) * se_z),
+               greater = c(tanh(z - qnorm(1 - alpha) * se_z), 1),
+               less = c(-1, tanh(z + qnorm(1 - alpha) * se_z)))
+  attr(ci, "conf.level") <- conf.level
+  ci
 }
 
 

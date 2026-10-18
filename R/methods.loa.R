@@ -225,7 +225,23 @@ plot.loa <- function(x,
 #' @export
 
 check.loa <- function(x, ...) {
+  panels = .loa_check_panels(x)
+  wrap_plots(panels$p_norm, panels$p_het,
+             panels$p_bias, ncol = 2) & plot_annotation(
+               theme = theme(
+                 panel.background = element_rect(fill='transparent'), #transparent panel bg
+                 plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+                 panel.grid.major = element_blank(), #remove major gridlines
+                 panel.grid.minor = element_blank(), #remove minor gridlines
+                 legend.background = element_rect(fill='transparent'), #transparent legend bg
+                 legend.box.background = element_rect(fill='transparent') #transparent legend panel
+               ))
+}
 
+# The three diagnostic panels of check.loa() (normality, heteroskedasticity,
+# proportional bias), returned separately so other methods (ccc_test) can
+# reuse some of them.
+.loa_check_panels <- function(x) {
 
   call2 = x$call
   df = model.frame(x$call$lm_mod)
@@ -345,19 +361,7 @@ check.loa <- function(x, ...) {
       legend.box.background = element_rect(fill='transparent') #transparent legend panel
     )
 
-  #return(list(p_norm = p_norm,
-  #            p_het = p_het,
-  #            p_bias = p_bias))
-
-  wrap_plots(p_norm, p_het,
-             p_bias, ncol = 2) & plot_annotation(
-               theme = theme(
-                 panel.background = element_rect(fill='transparent'), #transparent panel bg
-                 plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-                 panel.grid.major = element_blank(), #remove major gridlines
-                 panel.grid.minor = element_blank(), #remove minor gridlines
-                 legend.background = element_rect(fill='transparent'), #transparent legend bg
-                 legend.box.background = element_rect(fill='transparent') #transparent legend panel
-               ))
-
+  list(p_norm = p_norm,
+       p_het = p_het,
+       p_bias = p_bias)
 }

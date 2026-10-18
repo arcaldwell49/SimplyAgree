@@ -46,11 +46,11 @@ list with the description in \code{text}, the \code{style} used, the S-value
 prints as a paragraph.}
 \item{\code{plot}}{A ggplot2 plot (see \code{type}).}
 \item{\code{check}}{Diagnostic plots combined with patchwork: normality
-and heteroskedasticity of the model residuals, and the within-subject SD
-against the subject mean (on the scale the model was fitted). A rising
-within-subject SD means the error grows with the size of the
-measurement, so a relative error (\code{\link[=reli_err_test]{reli_err_test()}} with
-\code{scale = "log"}) describes it better.}
+and heteroskedasticity of the model residuals; for two-way models,
+additivity (residuals of the additive subjects + items model against
+the estimated subject effect, one line per item, with Mandel's test for
+non-additivity); and the within-subject SD against the subject mean (on
+the scale the model was fitted). See Details.}
 }
 }
 \description{
@@ -78,6 +78,29 @@ getting s heads in a row from s tosses of a fair coin.
 
 Qualitative labels such as "good" or "excellent" are never attached to an
 ICC; see \code{\link[=icc_test]{icc_test()}} for why.
+
+\strong{Diagnostics.} The two-way model assumes that subject and item effects
+add. A subject-by-item interaction, for example items (raters, devices,
+occasions) that differ in scale, is absorbed into the error: it lowers
+the consistency ICC and inflates the SEM. \code{check()} tests for it with
+Mandel's (1961) column-regression test: each item gets its own slope on
+the estimated subject effects, and the k - 1 extra slopes are F-tested.
+The panel plots the residuals of the additive model against the
+estimated subject effect with one line per item, so items whose lines
+slope are those that differ in scale. Mandel's test includes the
+alternative of Tukey's (1949) one-degree-of-freedom test (scale growing
+with the item mean, the multiplicative pattern) and also detects items
+that differ in scale but not in location, which Tukey's test misses; for
+two items the two tests are identical. The covariates are built from the
+fitted additive model, as in Milliken and Graybill (1970), so the F test
+remains exact with missing measurements. In simulations (30 subjects, 3
+items, 3 missing cells, additive normal data), its type I error was
+0.0525 at the 0.05 level. It uses the fixed-effects fit (subjects and
+items as factors) even when the ICC came from REML, and it has little
+power with few subjects. A rising within-subject SD against the subject
+mean means the error grows with the size of the measurement, so a
+relative error (\code{\link[=reli_err_test]{reli_err_test()}} with \code{scale = "log"}) describes it
+better.
 }
 \examples{
 sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
@@ -96,6 +119,17 @@ summary(res2, style = "estimation")
 
 }
 \references{
+Mandel, J. (1961). Non-additivity in two-way analysis of variance.
+Journal of the American Statistical Association, 56(296), 878-888.
+\doi{10.1080/01621459.1961.10482132}
+
+Milliken, G. A., & Graybill, F. A. (1970). Extensions of the general
+linear hypothesis model. Journal of the American Statistical Association,
+65(330), 797-807. \doi{10.1080/01621459.1970.10481125}
+
+Tukey, J. W. (1949). One degree of freedom for non-additivity.
+Biometrics, 5(3), 232-242. \doi{10.2307/3001938}
+
 Greenland, S. (2019). Valid p-values behave exactly as they should: Some
 misleading criticisms of p-values and their resolution with S-values. The
 American Statistician, 73(sup1), 106-114.

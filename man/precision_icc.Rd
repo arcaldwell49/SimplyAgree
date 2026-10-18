@@ -12,6 +12,7 @@ precision_icc(
   conf.level = 0.95,
   assurance = 0.5,
   model = c("oneway", "twoway"),
+  unit = c("single", "average"),
   method = c("exact", "approximate")
 )
 }
@@ -36,6 +37,12 @@ than \code{width}. The default, 0.5, plans for the median width.}
 \item{model}{\code{"oneway"} (default) or \code{"twoway"}. \code{"twoway"} means the
 consistency ICC, ICC(C,1) of \code{\link[=icc_test]{icc_test()}}; the absolute agreement ICC
 is not supported (see Details).}
+
+\item{unit}{\code{"single"} (default) for the reliability of a single
+measurement, or \code{"average"} for the reliability of the mean of the \code{k}
+measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. With
+\code{"average"}, the ICC values are on the average-measure scale and \code{k}
+cannot be solved for. See Details.}
 
 \item{method}{\code{"exact"} (default) computes the assurance from the exact
 distribution of the interval width. \code{"approximate"} uses the closed form
@@ -79,7 +86,15 @@ the exact method avoids both issues. For a one-sided lower limit, the
 assurance that the lower limit exceeds a value \eqn{\rho_0} is the power
 of the one-sided test: use \code{power_icc(alternative = "greater")}.
 
-The absolute agreement ICC is not supported (see \code{\link[=power_icc]{power_icc()}}).
+\strong{Average-measure ICCs} (\code{unit = "average"}): the interval for ICC(k) or
+ICC(C,k) has limits \eqn{1 - a/F} and \eqn{1 - 1/(bF)} (with a and b the
+F quantiles), so its width, \eqn{(a - 1/b)/F}, decreases with F and the
+assurance is a single F probability. \code{width} is on the average-measure
+scale. The approximate method is for single measures only.
+
+The absolute agreement ICC is not supported exactly; see "Planning other
+designs" in \code{\link[=power_icc]{power_icc()}} for using these calculations as a guide for it,
+for missing data, and for non-normal data.
 }
 \examples{
 # Subjects for a median 95\% CI width of 0.2 around an ICC of 0.8, 3 trials

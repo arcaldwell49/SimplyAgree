@@ -50,6 +50,7 @@ reference:
 - subtitle: "Other Miscellaneous Functions"
   contents:
   - ccc_test
+  - ccc_htest-methods
 
 - title: "Agreement Tests"
 

@@ -1552,7 +1552,78 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
    - Tests in `test-icc_test.R`; vignette section "Plots and
      diagnostics"; NEWS line.
 
+9. **`ccc_test()` methods (2026-10-17).** For consistency with `icc_test()`
+   (the CCC is close to ICC(A,1) for two methods; kept separate because it
+   is meant for agreement studies). Decisions (user): class
+   `c("ccc_htest", "htest")` storing `data`, `settings` and, for simple
+   data, Lin's `components` (r, C_b); `null.value = NULL` default, keyword
+   `alternative` (it was stored as a sentence, so `print()` showed "true CCC
+   is  0.5"), one-sided Fisher-z interval for a one-sided alternative
+   (`.ccc_ci()`; two-sided values unchanged, tested). `summary.ccc_htest()`
+   reuses the shared `.resolve_summary_style()`/`.htest_result_text()`
+   (factored out of `summary.reli_htest()`; its snapshots unchanged);
+   `plot(type = c("identity", "ba"))` (identity: line of identity plus
+   Deming line; ba: `plot()` of an `agreement_limit()` refit);
+   `check()`: normality and heteroskedasticity of the differences
+   (`.loa_check_panels()`, split out of `check.loa()`), linearity (residuals
+   of y on x vs fitted, quadratic RESET test), and for simple data a Q-Q of
+   squared Mahalanobis distances against chi-square(2). Proportional bias
+   was dropped from the CCC check (user, 2026-10-18): a slope ≠ 1 lowers
+   C_b, so it is part of what the CCC measures, not an assumption.
+   `check()` for `reli_htest` (two-way models) gained an additivity panel
+   with **Mandel's (1961) column-regression test** (user, 2026-10-18):
+   item-specific slopes on the estimated subject effects of
+   `lm(values ~ id + items)`, k − 1 df, built from fitted values as in
+   Milliken & Graybill (1970) so it stays exact with missing cells
+   (`.mandel_test()`); the panel plots additive-model residuals against the
+   subject effect, one line per item. Tukey's 1-df test was tried first
+   and rejected: it only detects the multiplicative pattern (slope ∝ item
+   mean) and missed an item with 1.6× scale but the same mean (p = 0.80 vs
+   Mandel p ≈ 5e-28). Check (scratch script; 2000 reps, n = 30, k = 3, 3
+   missing cells, additive normal data): type I error Tukey 0.051, Mandel
+   0.0525; multiplicative items: both detect; k = 2: identical p-values.
+   Shared helpers in `R/other_functions.R`: `.mandel_test()`,
+   `.fitted_square_test()` (RESET, used by the CCC linearity panel),
+   `plot_resid_fitted()`. No `se_method` or
+   bootstrap (TODO below). Bug fixed on the way: the fallback SE for simple
+   data used all non-missing x and y rather than complete pairs, so with
+   missing values the reported SE and z test did not match the CCC and its
+   interval.
+
+10. **`unit = "average"` for `power_icc()`/`precision_icc()` (user,
+    2026-10-18).** Exact, via Spearman-Brown: the ICC(k)/ICC(C,k) test is
+    the single-measure F test at the projected values (power computed on
+    the single scale; `rho1` solved there and projected back), and the
+    average-measure interval has limits 1 − a/F and 1 − 1/(bF), so its
+    width (a − 1/b)/F is monotone in F and the assurance is one F
+    probability (tested against a dense grid and against `icc_test()`'s
+    interval width). `k` cannot be solved for with `"average"` (it defines
+    the estimand); the Zou approximation is single-measure only. The Rd
+    gained "Planning other designs": agreement ICC (consistency result is
+    an optimistic lower bound on n, worst with 2–3 items), missing data
+    (inflate n by 1/(1 − p)), non-normal data (allow a margin).
+    Simulation-based power for the agreement ICC stays a TODO (below).
+
 ## 10. TODO (future, not this branch)
+
+- **Cell-level missingness in `power_icc()`/`precision_icc()`** (user,
+  2026-10-18). Wanted: planning for scattered missing measurements
+  (analysed by REML), not whole-subject dropout (a `dropout` argument was
+  considered and declined). A single proportion argument would be
+  misleading: the information lost depends on the pattern (cells spread
+  across subjects vs concentrated) and the mechanism (REML F intervals
+  were slightly liberal at 30% MAR in the phase-1 study). Options: plug
+  observed-data df (error df N − n − k + 1 with N = nk(1 − p)) into the
+  scaled-F calculation as an explicitly approximate method, or, better,
+  simulate with the missingness pattern as an input, together with the
+  agreement-ICC simulation TODO below.
+
+- **`se_method` and subject bootstrap for `ccc_test()`.** Lin's SE (simple
+  data) is a normal-theory delta method and probably under-covers with
+  non-normal data and few subjects, as the F interval did for the ICC; the
+  U-statistic SE (reps/nest) is already nonparametric. A jackknife SE and
+  a subject bootstrap (reusing `.reli_boot()`-style helpers) would need a
+  coverage study before choosing defaults.
 
 - **Bootstrap under the null** for `boot = TRUE`: resample data transformed
   so the parameter equals `null.value` (or simulate from a model constrained

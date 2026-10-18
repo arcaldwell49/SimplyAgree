@@ -12,6 +12,7 @@ power_icc(
   sig.level = 0.05,
   power = NULL,
   model = c("oneway", "twoway"),
+  unit = c("single", "average"),
   alternative = c("two.sided", "greater", "less"),
   method = c("exact", "approximate")
 )
@@ -34,6 +35,12 @@ reaches the target is returned.}
 \item{model}{\code{"oneway"} (default) or \code{"twoway"}. \code{"twoway"} means the
 consistency ICC, ICC(C,1) of \code{\link[=icc_test]{icc_test()}}; the absolute agreement ICC
 is not supported (see Details).}
+
+\item{unit}{\code{"single"} (default) for the reliability of a single
+measurement, or \code{"average"} for the reliability of the mean of the \code{k}
+measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. With
+\code{"average"}, the ICC values are on the average-measure scale and \code{k}
+cannot be solved for. See Details.}
 
 \item{alternative}{\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}, as
 in \code{\link[=icc_test]{icc_test()}}. A design planned with the defaults matches the analysis
@@ -86,11 +93,41 @@ preferred; the approximation is provided to reproduce published tables.
 \code{alternative = "less"} (with the significance level halved) for the one
 below.
 
-\strong{Agreement ICC.} The absolute agreement ICC (ICC(A,1)) is not
-supported: its test has no exact F distribution, and because its
-denominator degrees of freedom depend on the sample, its power "cannot be
-determined exactly" (McGraw & Wong, 1996, footnote 3). Power for that
-ICC would need simulation.
+\strong{Average-measure ICCs.} The average-measure ICC is the Spearman-Brown
+projection of the single-measure ICC to k measurements,
+\eqn{k\rho / (1 + (k-1)\rho)}, so a test about ICC(k) or ICC(C,k) is the
+same F test as the test about the corresponding single-measure ICC, and
+its interval is the projection of the single-measure interval. With
+\code{unit = "average"} the calculations are therefore exact, not
+approximations; \code{k} must be given because it defines the quantity being
+planned for.
+
+\strong{Planning other designs.} These functions are exact only for the
+one-way and two-way consistency ICCs with complete, normally distributed
+data. They can still guide the planning of other ICC studies, as long as
+the direction of the error is kept in mind:
+\itemize{
+\item \emph{Absolute agreement ICC (ICC(A,1), and the CCC for two methods).}
+Not supported exactly: its test has no exact F distribution, and
+because its denominator degrees of freedom depend on the sample, its
+power "cannot be determined exactly" (McGraw & Wong, 1996, footnote 3).
+When the items (trials, raters, methods) differ little systematically,
+ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good
+guide. When they differ, the agreement test and interval also depend on
+the item mean square, which has only k - 1 degrees of freedom: power is
+lower and intervals wider than the consistency calculation says, most
+of all with 2 or 3 items. Treat the consistency result as a lower bound
+on the number of subjects; simulation would be needed for a precise
+answer.
+\item \emph{Missing measurements.} Plan for complete data, then inflate the
+number of subjects for the expected loss, roughly \eqn{n / (1 - p)} for
+a proportion p of subjects or measurements lost.
+\item \emph{Non-normal data.} The exact calculations assume normality. With
+skewed or heavy-tailed data the F-based intervals are wider and cover
+less than planned (see \code{\link[=icc_test]{icc_test()}} and \code{\link[=reli_err_test]{reli_err_test()}} for
+simulations), so allow a margin or plan for the bootstrap with a larger
+sample.
+}
 }
 \examples{
 # Subjects needed to show an ICC above 0.6 when it is 0.8, with 2 trials

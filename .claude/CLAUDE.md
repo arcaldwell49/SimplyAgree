@@ -50,6 +50,8 @@ Methods are organized in `R/methods.*.R` files:
 | simple_eiv | Yes | Yes | Yes | coef, confint, fitted, predict, residuals, summary, vcov |
 | loa, loa_mermod | Yes | Yes (ggplot2) | Yes | - |
 | tolerance_delta | Yes | Yes (ggplot2) | Yes | - |
+| reli_htest (icc_test, reli_err_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
+| ccc_htest (ccc_test) | htest | Yes (identity, `type = "ba"`) | Yes | summary (`style`) |
 | htest | Inherited from stats | - | - | - |
 
 ### Plot Methods

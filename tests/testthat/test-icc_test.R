@@ -394,7 +394,8 @@ test_that("check adds the within-subject SD against the subject mean", {
   res <- icc_test(col.names = sf_cols, data = sf_wide)
   chk <- check(res)
   expect_s3_class(chk, "patchwork")
-  expect_length(chk$patches$plots, 2)
+  # normality, homogeneity (check_reli), additivity, then error vs mean last
+  expect_length(chk$patches$plots, 3)
   p_err <- chk
   expect_match(p_err$labels$caption, "Kendall's tau")
   expect_match(p_err$labels$caption, "scale = \"log\"")
@@ -424,4 +425,76 @@ test_that("plot and check return plots", {
   res_reml <- suppressWarnings(icc_test(col.names = sf_cols, data = w,
                                         method = "reml"))
   expect_s3_class(check(res_reml), "patchwork")
+})
+
+# Diagnostics: non-additivity ------------------------------------------------------
+
+panel_titles <- function(p) {
+  c(vapply(p$patches$plots, function(q) {
+    t <- q$labels$title
+    if (is.null(t)) NA_character_ else t
+  }, character(1)), if (is.null(p$labels$title)) NA_character_ else p$labels$title)
+}
+
+to_long <- function(w) {
+  data.frame(values = unlist(w, use.names = FALSE),
+             id = factor(rep(seq_len(nrow(w)), ncol(w))),
+             items = factor(rep(names(w), each = nrow(w)), levels = names(w)))
+}
+
+tukey_F <- function(Y) {
+  n <- nrow(Y); k <- ncol(Y)
+  gm <- mean(Y)
+  a <- rowMeans(Y) - gm
+  b <- colMeans(Y) - gm
+  r <- Y - outer(rowMeans(Y), colMeans(Y), "+") + gm
+  ss_n <- sum(Y * outer(a, b))^2 / (sum(a^2) * sum(b^2))
+  ss_n / ((sum(r^2) - ss_n) / ((n - 1) * (k - 1) - 1))
+}
+
+test_that("the fitted-value test equals Tukey's test with complete data", {
+  Y <- as.matrix(sf_wide)
+  tst <- SimplyAgree:::.fitted_square_test(values ~ id + items, to_long(sf_wide))
+  expect_equal(tst$statistic, tukey_F(Y), tolerance = 1e-8)
+  expect_equal(tst$df, c(1, 14))
+})
+
+test_that("Mandel's test has k - 1 df and equals Tukey's test for two items", {
+  m <- SimplyAgree:::.mandel_test(to_long(sf_wide))
+  expect_equal(m$df, c(3, 15 - 3))
+  expect_true(is.finite(m$p.value))
+  two <- weir_a
+  m2 <- SimplyAgree:::.mandel_test(to_long(two))
+  expect_equal(m2$statistic, tukey_F(as.matrix(two)), tolerance = 1e-8)
+  expect_equal(m2$df, c(1, 6))
+})
+
+test_that("Mandel's test detects items that differ in scale; Tukey's does not", {
+  set.seed(4)
+  s <- rnorm(30, 50, 10)
+  scaled <- data.frame(a = s + rnorm(30), b = 1.6 * s - 30 + rnorm(30),
+                       c = s + 5 + rnorm(30))
+  d <- to_long(scaled)
+  expect_lt(SimplyAgree:::.mandel_test(d)$p.value, 1e-6)
+  expect_gt(SimplyAgree:::.fitted_square_test(values ~ id + items, d)$p.value,
+            0.05)
+})
+
+test_that("check shows the additivity panel for two-way models only", {
+  chk <- check(icc_test(col.names = sf_cols, data = sf_wide))
+  expect_true("Additivity" %in% panel_titles(chk))
+  expect_match(chk$patches$plots[[3]]$labels$caption,
+               "Mandel's test (items differ in scale): p = ", fixed = TRUE)
+  one <- check(icc_test(col.names = sf_cols, data = sf_wide, model = "oneway"))
+  expect_false("Additivity" %in% panel_titles(one))
+
+  # missing data: the regression form still gives an exact F test
+  w <- sf_wide
+  w$J2[1] <- NA
+  res_na <- suppressWarnings(icc_test(col.names = sf_cols, data = w,
+                                      method = "reml"))
+  m <- SimplyAgree:::.mandel_test(res_na$data)
+  expect_equal(m$df, c(3, 23 - 6 - 4 + 1 - 3))
+  expect_true(is.finite(m$p.value))
+  expect_true("Additivity" %in% panel_titles(check(res_na)))
 })

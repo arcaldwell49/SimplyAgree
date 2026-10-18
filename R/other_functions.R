@@ -245,6 +245,87 @@ plot_het = function (x,
 }
 
 
+# Test of a linear model's functional form: add the squared fitted values to
+# the model and F-test their coefficient (1 df). For the additive two-way
+# model (values ~ id + items) this is Tukey's (1949) one-degree-of-freedom
+# test for non-additivity, in the regression form of Milliken and Graybill
+# (1970), which remains an exact F test with missing cells; for y ~ x it is
+# Ramsey's (1969) RESET test with a quadratic term. `data` must be complete.
+.fitted_square_test = function(formula, data) {
+  fit = lm(formula, data = data)
+  data$.fitted_sq = fitted(fit)^2
+  fit2 = lm(update(formula, . ~ . + .fitted_sq), data = data)
+  if (is.na(coef(fit2)[[".fitted_sq"]]) || df.residual(fit2) < 1) {
+    return(list(fit = fit, statistic = NA_real_, df = c(NA, NA),
+                p.value = NA_real_))
+  }
+  a = anova(fit, fit2)
+  list(fit = fit,
+       statistic = a$F[2],
+       df = c(a$Df[2], a$Res.Df[2]),
+       p.value = a$`Pr(>F)`[2])
+}
+
+# Mandel's (1961) column-regression test for non-additivity in a two-way
+# subjects x items layout: each item gets its own slope on the estimated
+# subject effects (from the additive fit), and the k - 1 extra slopes are
+# F-tested. It detects items that differ in scale (with or without a
+# difference in location) and includes Tukey's one-degree-of-freedom
+# alternative as a special case; for k = 2 the two tests are identical.
+# Built from fitted values of the additive model, as in Milliken and Graybill
+# (1970), so it remains an exact F test with missing cells. `data` (columns
+# values, id, items) must be complete.
+.mandel_test = function(data) {
+  fit = lm(values ~ id + items, data = data)
+  # estimated subject effects (up to a constant): fitted values at one item
+  ref = data.frame(id = factor(levels(data$id), levels = levels(data$id)),
+                   items = factor(levels(data$items)[1],
+                                  levels = levels(data$items)))
+  a_hat = predict(fit, newdata = ref)
+  a_hat = a_hat - mean(a_hat)
+  data$subject_effect = a_hat[as.integer(data$id)]
+  fit2 = lm(values ~ id + items + items:subject_effect, data = data)
+  out = list(fit = fit, data = data, statistic = NA_real_, df = c(NA, NA),
+             p.value = NA_real_)
+  if (df.residual(fit2) < 1 || df.residual(fit2) == df.residual(fit)) {
+    return(out)
+  }
+  a = anova(fit, fit2)
+  out$statistic = a$F[2]
+  out$df = c(a$Df[2], a$Res.Df[2])
+  out$p.value = a$`Pr(>F)`[2]
+  out
+}
+
+# Residuals against fitted values with a loess smooth, styled like plot_het().
+plot_resid_fitted = function(fitted, resid, title, subtitle, caption,
+                             size_point = 2,
+                             size_line = .8,
+                             alpha_level = 0.2,
+                             colors = c("#3aaf85","#0077B5","#cd201f"),
+                             dot_alpha_level = 0.8) {
+  dat = data.frame(x = fitted, y = resid)
+  ggplot(dat, aes(x = .data$x, y = .data$y)) +
+    geom_hline(yintercept = 0, colour = "grey50") +
+    geom_point(colour = colors[2], stroke = 0, shape = 16,
+               size = size_point, alpha = dot_alpha_level) +
+    stat_smooth(method = "loess", se = TRUE, alpha = alpha_level,
+                formula = y ~ x, linewidth = size_line, colour = colors[1]) +
+    labs(title = title, subtitle = subtitle, x = "Fitted values",
+         y = "Residuals", caption = caption) +
+    theme_bw() +
+    theme(
+      panel.background = element_rect(fill = 'transparent'),
+      plot.background = element_rect(fill = 'transparent', color = NA),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+}
+
+.fmt_test_p = function(p) {
+  if (is.na(p)) "not estimable" else paste0("p = ", signif(p, 4))
+}
+
 plot_qq = function (x,
                     size_line = .8,
                     size_point = 2,

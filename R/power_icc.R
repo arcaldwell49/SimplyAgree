@@ -21,6 +21,11 @@
 #' @param model `"oneway"` (default) or `"twoway"`. `"twoway"` means the
 #'   consistency ICC, ICC(C,1) of [icc_test()]; the absolute agreement ICC
 #'   is not supported (see Details).
+#' @param unit `"single"` (default) for the reliability of a single
+#'   measurement, or `"average"` for the reliability of the mean of the `k`
+#'   measurements (ICC(k) or ICC(C,k)), as in [icc_test()]. With
+#'   `"average"`, the ICC values are on the average-measure scale and `k`
+#'   cannot be solved for. See Details.
 #' @param alternative `"two.sided"` (default), `"greater"`, or `"less"`, as
 #'   in [icc_test()]. A design planned with the defaults matches the analysis
 #'   run with the defaults.
@@ -56,11 +61,40 @@
 #' `alternative = "less"` (with the significance level halved) for the one
 #' below.
 #'
-#' **Agreement ICC.** The absolute agreement ICC (ICC(A,1)) is not
-#' supported: its test has no exact F distribution, and because its
-#' denominator degrees of freedom depend on the sample, its power "cannot be
-#' determined exactly" (McGraw & Wong, 1996, footnote 3). Power for that
-#' ICC would need simulation.
+#' **Average-measure ICCs.** The average-measure ICC is the Spearman-Brown
+#' projection of the single-measure ICC to k measurements,
+#' \eqn{k\rho / (1 + (k-1)\rho)}, so a test about ICC(k) or ICC(C,k) is the
+#' same F test as the test about the corresponding single-measure ICC, and
+#' its interval is the projection of the single-measure interval. With
+#' `unit = "average"` the calculations are therefore exact, not
+#' approximations; `k` must be given because it defines the quantity being
+#' planned for.
+#'
+#' **Planning other designs.** These functions are exact only for the
+#' one-way and two-way consistency ICCs with complete, normally distributed
+#' data. They can still guide the planning of other ICC studies, as long as
+#' the direction of the error is kept in mind:
+#'
+#' - *Absolute agreement ICC (ICC(A,1), and the CCC for two methods).*
+#'   Not supported exactly: its test has no exact F distribution, and
+#'   because its denominator degrees of freedom depend on the sample, its
+#'   power "cannot be determined exactly" (McGraw & Wong, 1996, footnote 3).
+#'   When the items (trials, raters, methods) differ little systematically,
+#'   ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good
+#'   guide. When they differ, the agreement test and interval also depend on
+#'   the item mean square, which has only k - 1 degrees of freedom: power is
+#'   lower and intervals wider than the consistency calculation says, most
+#'   of all with 2 or 3 items. Treat the consistency result as a lower bound
+#'   on the number of subjects; simulation would be needed for a precise
+#'   answer.
+#' - *Missing measurements.* Plan for complete data, then inflate the
+#'   number of subjects for the expected loss, roughly \eqn{n / (1 - p)} for
+#'   a proportion p of subjects or measurements lost.
+#' - *Non-normal data.* The exact calculations assume normality. With
+#'   skewed or heavy-tailed data the F-based intervals are wider and cover
+#'   less than planned (see [icc_test()] and [reli_err_test()] for
+#'   simulations), so allow a margin or plan for the bootstrap with a larger
+#'   sample.
 #'
 #' @return An object of class \code{"power.htest"}, printed by
 #'   [stats::print.power.htest()], with elements `n`, `k`, `rho0`, `rho1`,
@@ -102,20 +136,23 @@ power_icc <- function(n = NULL,
                       sig.level = 0.05,
                       power = NULL,
                       model = c("oneway", "twoway"),
+                      unit = c("single", "average"),
                       alternative = c("two.sided", "greater", "less"),
                       method = c("exact", "approximate")) {
   model <- match.arg(model)
+  unit <- match.arg(unit)
   alternative <- match.arg(alternative)
   method <- match.arg(method)
   .check_one_null(list(n = n, k = k, rho1 = rho1, power = power,
                        sig.level = sig.level))
   .check_approx_model(method, model)
   .check_n_k(n, k)
+  .check_average_k(unit, k)
   .check_unit(sig.level, "sig.level")
   .check_unit(power, "power")
   k_min <- if (is.null(k)) 2 else k
-  .check_rho(rho0, k_min, "rho0")
-  .check_rho(rho1, k_min, "rho1")
+  .check_rho(rho0, k_min, "rho0", unit)
+  .check_rho(rho1, k_min, "rho1", unit)
   if (!is.null(rho1)) {
     if (rho1 == rho0) {
       stop("'rho1' must differ from 'rho0'.", call. = FALSE)
@@ -130,12 +167,22 @@ power_icc <- function(n = NULL,
     }
   }
 
-  pfun <- function(n, k, rho1, sig.level) {
+  # Average-measure ICCs are the Spearman-Brown projection of the
+  # single-measure ICC, so tests about them are tests about the single-measure
+  # ICC: compute on that scale (exact, not an approximation).
+  to_single <- function(r, k) {
+    if (unit == "average") .spearman_brown_inv(r, k) else r
+  }
+  pfun_single <- function(n, k, r1, sig.level) {
+    r0 <- to_single(rho0, k)
     if (method == "exact") {
-      .icc_power_exact(n, k, rho0, rho1, sig.level, alternative, model)
+      .icc_power_exact(n, k, r0, r1, sig.level, alternative, model)
     } else {
-      .icc_power_walter(n, k, rho0, rho1, sig.level, alternative)
+      .icc_power_walter(n, k, r0, r1, sig.level, alternative)
     }
+  }
+  pfun <- function(n, k, rho1, sig.level) {
+    pfun_single(n, k, to_single(rho1, k), sig.level)
   }
   notes <- character()
 
@@ -149,14 +196,19 @@ power_icc <- function(n = NULL,
     k <- .solve_integer(function(x) pfun(n, x, rho1, sig.level) >= power - 1e-8,
                         "k")
   } else if (is.null(rho1)) {
+    # solve on the single-measure scale, then project back
     lower <- -1 / (k - 1)
+    r0 <- to_single(rho0, k)
     eps <- 1e-10
     interval <- switch(alternative,
-                       greater = c(rho0 + eps, 1 - eps),
-                       two.sided = c(rho0 + eps, 1 - eps),
-                       less = c(lower + eps, rho0 - eps))
-    rho1 <- .solve_continuous(function(r) pfun(n, k, r, sig.level) - power,
+                       greater = c(r0 + eps, 1 - eps),
+                       two.sided = c(r0 + eps, 1 - eps),
+                       less = c(lower + eps, r0 - eps))
+    rho1 <- .solve_continuous(function(r) pfun_single(n, k, r, sig.level) - power,
                               interval, "rho1")
+    if (unit == "average") {
+      rho1 <- .spearman_brown(rho1, k)
+    }
     if (alternative == "two.sided") {
       notes <- c(notes, paste0("rho1 is the solution above rho0; use ",
                                "alternative = \"less\" for the one below."))
@@ -177,7 +229,7 @@ power_icc <- function(n = NULL,
                  alternative = alternative,
                  note = paste(notes, collapse = "\n      "),
                  method = .icc_design_method("Power calculation for the",
-                                             model, method)),
+                                             model, method, unit)),
             class = "power.htest")
 }
 
@@ -228,7 +280,15 @@ power_icc <- function(n = NULL,
 #' assurance that the lower limit exceeds a value \eqn{\rho_0} is the power
 #' of the one-sided test: use `power_icc(alternative = "greater")`.
 #'
-#' The absolute agreement ICC is not supported (see [power_icc()]).
+#' **Average-measure ICCs** (`unit = "average"`): the interval for ICC(k) or
+#' ICC(C,k) has limits \eqn{1 - a/F} and \eqn{1 - 1/(bF)} (with a and b the
+#' F quantiles), so its width, \eqn{(a - 1/b)/F}, decreases with F and the
+#' assurance is a single F probability. `width` is on the average-measure
+#' scale. The approximate method is for single measures only.
+#'
+#' The absolute agreement ICC is not supported exactly; see "Planning other
+#' designs" in [power_icc()] for using these calculations as a guide for it,
+#' for missing data, and for non-normal data.
 #'
 #' @return An object of class \code{"power.htest"}, printed by
 #'   [stats::print.power.htest()], with elements `n`, `k`, `rho`, `width`,
@@ -273,18 +333,25 @@ precision_icc <- function(n = NULL,
                           conf.level = 0.95,
                           assurance = 0.5,
                           model = c("oneway", "twoway"),
+                          unit = c("single", "average"),
                           method = c("exact", "approximate")) {
   model <- match.arg(model)
+  unit <- match.arg(unit)
   method <- match.arg(method)
   if (is.null(rho)) {
     stop("'rho' (the anticipated ICC) must be given.", call. = FALSE)
   }
   .check_one_null(list(n = n, k = k, width = width, assurance = assurance))
   .check_approx_model(method, model)
+  if (method == "approximate" && unit == "average") {
+    stop("method = \"approximate\" (Zou, 2012) is only available for ",
+         "unit = \"single\".", call. = FALSE)
+  }
   .check_n_k(n, k)
+  .check_average_k(unit, k)
   .check_conf_level(conf.level)
   .check_unit(assurance, "assurance")
-  .check_rho(rho, if (is.null(k)) 2 else k, "rho")
+  .check_rho(rho, if (is.null(k)) 2 else k, "rho", unit)
   if (!is.null(width) && (!is.numeric(width) || length(width) != 1 ||
                           is.na(width) || width <= 0)) {
     stop("'width' must be a single positive number.", call. = FALSE)
@@ -296,7 +363,7 @@ precision_icc <- function(n = NULL,
 
   afun <- function(n, k, width) {
     if (method == "exact") {
-      .icc_assurance_exact(n, k, rho, width, conf.level, model)
+      .icc_assurance_exact(n, k, rho, width, conf.level, model, unit)
     } else {
       .icc_assurance_zou(n, k, rho, width, conf.level)
     }
@@ -327,7 +394,9 @@ precision_icc <- function(n = NULL,
     } else {
       function(w) afun(n, k, w) - assurance
     }
-    width <- .solve_continuous(gap, c(1e-8, 1 + 1 / (k - 1)), "width")
+    # an average-measure interval can be arbitrarily wide (no lower bound)
+    max_width <- if (unit == "average") 1e4 else 1 + 1 / (k - 1)
+    width <- .solve_continuous(gap, c(1e-8, max_width), "width")
   }
 
   notes <- c(notes, paste0("n = number of subjects, k = measurements per ",
@@ -341,18 +410,33 @@ precision_icc <- function(n = NULL,
                  note = paste(notes, collapse = "\n      "),
                  method = .icc_design_method(
                    "Precision (confidence interval width) calculation for the",
-                   model, method)),
+                   model, method, unit)),
             class = "power.htest")
 }
 
 # Helpers --------------------------------------------------------------------
 
-.icc_design_method <- function(what, model, method) {
-  icc <- if (model == "oneway") "one-way ICC, ICC(1)" else
-    "two-way consistency ICC, ICC(C,1)"
+.icc_design_method <- function(what, model, method, unit = "single") {
+  icc <- if (model == "oneway") {
+    if (unit == "single") "one-way ICC, ICC(1)" else
+      "one-way average-measure ICC, ICC(k)"
+  } else {
+    if (unit == "single") "two-way consistency ICC, ICC(C,1)" else
+      "two-way consistency average-measure ICC, ICC(C,k)"
+  }
   how <- if (method == "exact") "exact F distribution" else
     "approximate closed form"
   paste0(what, " ", icc, " (", how, ")")
+}
+
+# The average-measure ICC is defined for the mean of k measurements, so k is
+# part of what is being planned for and cannot be solved for.
+.check_average_k <- function(unit, k) {
+  if (unit == "average" && is.null(k)) {
+    stop("'k' cannot be solved for with unit = \"average\": the ",
+         "average-measure ICC is the reliability of the mean of k ",
+         "measurements, so k must be given.", call. = FALSE)
+  }
 }
 
 .icc_df2 <- function(n, k, model) {
@@ -404,9 +488,20 @@ precision_icc <- function(n = NULL,
 #' The width is unimodal in log F, so {width <= w} is {F <= f_lo} or
 #' {F >= f_hi}, with F ~ c(rho) * F(df1, df2).
 #' @noRd
-.icc_assurance_exact <- function(n, k, rho, width, conf.level, model) {
+.icc_assurance_exact <- function(n, k, rho, width, conf.level, model,
+                                 unit = "single") {
   df1 <- n - 1
   df2 <- .icc_df2(n, k, model)
+  if (unit == "average") {
+    # Limits 1 - a/F and 1 - 1/(b F): width (a - 1/b) / F decreases in F,
+    # so {width <= w} = {F >= (a - 1/b) / w}.
+    alpha <- 1 - conf.level
+    a <- stats::qf(1 - alpha / 2, df1, df2)
+    b <- stats::qf(1 - alpha / 2, df2, df1)
+    f_star <- (a - 1 / b) / width
+    scale <- .icc_f_scale(.spearman_brown_inv(rho, k), k)
+    return(stats::pf(f_star / scale, df1, df2, lower.tail = FALSE))
+  }
   w_fun <- .icc_width_fun(n, k, conf.level, model)
   w_log <- function(t) w_fun(exp(t))
   peak <- stats::optimize(w_log, c(-60, 60), maximum = TRUE, tol = 1e-10)
@@ -519,10 +614,21 @@ precision_icc <- function(n = NULL,
   }
 }
 
-.check_rho <- function(rho, k, name) {
+.check_rho <- function(rho, k, name, unit = "single") {
+  if (is.null(rho)) {
+    return(invisible())
+  }
+  if (unit == "average") {
+    # the average-measure ICC has no lower bound
+    if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho >= 1) {
+      stop(sprintf("'%s' must be a single number below 1.", name),
+           call. = FALSE)
+    }
+    return(invisible())
+  }
   lower <- -1 / (k - 1)
-  if (!is.null(rho) && (!is.numeric(rho) || length(rho) != 1 ||
-                        is.na(rho) || rho <= lower || rho >= 1)) {
+  if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho <= lower ||
+      rho >= 1) {
     stop(sprintf("'%s' must be a single number between %s and 1.", name,
                  format(signif(lower, 3))), call. = FALSE)
   }
