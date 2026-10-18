@@ -20,6 +20,19 @@
   - Long data with more than one measurement per subject and item is now an error (aggregate first).
 - The jamovi reliability analysis now uses `icc_test()` and `reli_err_test()`: two-sided ICC intervals, intervals for the SEM, SEE and SEP (the SEE and SEP now use the SD matched to the ICC's denominator), the CV in sympercents, and REML when measurements are missing.
 
+## Categorical ratings
+
+- New `cac_test()`: one chance-corrected agreement coefficient for categorical ratings (Gwet's AC1/AC2, Fleiss' kappa, Krippendorff's alpha, or percent agreement), returned as an `htest` with an optional t test against `null.value`. It takes the same formula, long and wide interfaces as `icc_test()`, accepts numeric, character or factor ratings, and offers all of Gwet's weighting schemes (`"quadratic"`, `"linear"`, `"ordinal"`, `"radical"`, `"ratio"`, `"circular"`, `"bipolar"`) or a custom weight matrix. Results match the irrCAC package.
+- New `ord_kappa_test()`: the model-based kappa of Nelson & Edwards (2015) and Nelson, Mitani & Edwards (2017) for ordinal ratings from many raters (#63). It is computed from a cumulative probit mixed model with crossed subject and rater random effects (fitted with `ordinal::clmm()`; `ordinal` is now in Suggests), is not affected by category prevalence, and returns the rater effects (conditional modes). The interval is formed on the logit of the subject variance share, so it stays within [0, 1]. With `group`, it compares two groups of raters (e.g. experienced and inexperienced) or subjects (e.g. younger and older patients): the group is a fixed effect with its own rater (or subject) variance, and the result gives kappa_m in each group, an interval for their difference, the kappa between a rater from each group, and a likelihood ratio test of equal variances. The model is the identified form of the random-slope model of Nelson et al. (2017), whose intercept-slope covariance is not identified when the group is constant within raters or subjects.
+- New `summary()` and `plot()` methods for both: category use by rater, ratings by subject, and (for `ord_kappa_test()`) rater effects.
+- `agree_coef()` is superseded by `cac_test()`. It keeps its output but now uses the same engine, which fixes several problems:
+  - It no longer fails when all ratings are in one category (the chance-corrected coefficients are returned as `NA`, with a warning).
+  - New `categories` argument for scale points that were never used. Gwet's AC1/AC2 and the weights depend on the full set of categories, so they were wrong when a category was unused.
+  - New `weights` argument for the other weighting schemes (`weighted = TRUE` still means quadratic weights).
+  - Long data with more than one rating per subject and rater is now an error; the extra ratings were silently dropped.
+  - Lower confidence limits are clipped to the possible range of the coefficient (they were only clipped at 1).
+  - The row name "Kririppendorff's Alpha" is now "Krippendorff's Alpha".
+
 ## Other changes
 
 - Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).

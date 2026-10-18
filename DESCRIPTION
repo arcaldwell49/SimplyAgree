@@ -40,7 +40,8 @@ Suggests:
     mgcv,
     ggeffects,
     deming,
-    pbkrtest
+    pbkrtest,
+    ordinal
 VignetteBuilder:
     knitr
 Depends: 

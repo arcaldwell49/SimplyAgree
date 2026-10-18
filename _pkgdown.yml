@@ -40,6 +40,13 @@ reference:
   - reli_aov
   - simple_reli-methods
 
+- subtitle: "Categorical Ratings"
+  contents:
+  - cac_test
+  - ord_kappa_test
+  - cac_htest-methods
+  - agree_coef
+
 - title: "Error-in-Variables Regression"
   contents:
   - dem_reg
@@ -60,7 +67,6 @@ reference:
   - agree_nest
   - agree_reps
   - agree_np
-  - agree_coef
   - simple_agree-methods
 
 - subtitle: "Mixed"

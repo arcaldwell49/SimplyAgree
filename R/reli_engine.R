@@ -25,7 +25,8 @@
                           measure = NULL,
                           item = NULL,
                           id = NULL,
-                          col.names = NULL) {
+                          col.names = NULL,
+                          allow_categorical = FALSE) {
   use_formula <- !is.null(x)
   use_long <- !is.null(measure) || !is.null(item) || !is.null(id)
   use_wide <- !is.null(col.names)
@@ -86,7 +87,7 @@
     data.name <- paste(col.names, collapse = ", ")
   }
 
-  if (!is.numeric(df$values)) {
+  if (!allow_categorical && !is.numeric(df$values)) {
     stop("The measurement column must be numeric.", call. = FALSE)
   }
   if (anyNA(df$items) || anyNA(df$id)) {

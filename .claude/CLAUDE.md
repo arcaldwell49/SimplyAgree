@@ -38,7 +38,7 @@ No Makefile. RStudio shortcuts: Ctrl+Shift+L (load), Ctrl+Shift+D (document), Ct
 ### Base R Class Conventions
 - **htest class**: Use for hypothesis tests (see `ccc_test.R` for example)
   - Required elements: `statistic`, `parameter`, `p.value`, `conf.int`, `estimate`, `null.value`, `alternative`, `method`, `data.name`
-- **Custom classes**: `simple_agree`, `simple_reli`, `simple_eiv`, `loa`, `loa_mermod`, `tolerance_delta`
+- **Custom classes**: `simple_agree`, `simple_reli`, `simple_eiv`, `loa`, `loa_mermod`, `tolerance_delta`, `cac_htest`
 
 ## S3 Methods
 Methods are organized in `R/methods.*.R` files:
@@ -52,6 +52,7 @@ Methods are organized in `R/methods.*.R` files:
 | tolerance_delta | Yes | Yes (ggplot2) | Yes | - |
 | reli_htest (icc_test, reli_err_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
 | ccc_htest (ccc_test) | htest | Yes (identity, `type = "ba"`) | Yes | summary (`style`) |
+| cac_htest (cac_test, ord_kappa_test) | htest | Yes (ggplot2, `type`) | - | summary (`style`) |
 | htest | Inherited from stats | - | - | - |
 
 ### Plot Methods
@@ -74,7 +75,10 @@ R/
 ├── agree_reps.R           # Repeated measures agreement
 ├── agree_nest.R           # Nested data agreement
 ├── agree_np.R             # Non-parametric agreement
-├── agree_coef.R           # Agreement coefficients
+├── agree_coef.R           # Agreement coefficients table (superseded)
+├── cac_test.R             # Chance-corrected agreement coefficients (htest)
+├── ord_kappa_test.R       # Model-based kappa, ordinal GLMM (htest)
+├── coef_funcs.R           # Internal engine for cac_test/agree_coef
 ├── ccc_test.R             # CCC hypothesis test (htest)
 ├── icc_test.R             # ICC test (htest; recommended)
 ├── reli_err_test.R        # SEM/SEE/SEP and CV (htest; recommended)
@@ -190,6 +194,7 @@ Not extensively used, but consider for grouping related functions.
 - **knitr/rmarkdown**: Vignettes
 - **deming**: Reference implementation
 - **pbkrtest**: Kenward-Roger df
+- **ordinal**: `clmm()` for `ord_kappa_test()`
 
 ### Key Internal Uses
 - `lme4::lmer()` for mixed-effects reliability models
@@ -219,6 +224,8 @@ Not extensively used, but consider for grouping related functions.
 | Tolerance Intervals | `tolerance_limit()` | Simple, repeated, nested |
 | CCC | `ccc_test()` | Simple, repeated, nested |
 | ICC | `icc_test()` (`reli_stats()`, `reli_aov()` superseded) | Repeated measures |
+| Categorical agreement (AC1, kappa, alpha) | `cac_test()` (`agree_coef()` superseded) | Categorical ratings |
+| Model-based kappa | `ord_kappa_test()` | Ordinal ratings, many raters |
 | SEM / CV | `reli_err_test()` | Repeated measures |
 | Deming Regression | `dem_reg()` | Paired |
 | Passing-Bablok | `pb_reg()` | Paired |

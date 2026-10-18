@@ -551,49 +551,73 @@ For example, the exact interval for the consistency SEM is
 
 # Inter-Rater Reliability
 
-In some cases, the reliability of a categorical or ordinal scale may be worth investigating. For example, physicians may want to develop a diagnosis tool and ensure that the diagnosis is reliable (i.e., categorical designation) or severity of the disease (i.e., a Likert-type scale). Coefficients can be calculated to assess the degree of inter-rater reliability. In its simplest form, the percent agreement between all the raters can be calculated. All other coefficients of agreement are essentially trying to "correct" for random guessing of the rater. The function to make these calculations in the `SimplyAgree` is `agree_coef`, and it produces 4 estimates: percent agreement, Gwet's AC, Fleiss' Kappa, and Krippendorff's Alpha. However, other packages provide much a much greater breadth of calculative approaches [@irrCAC].
+In some cases, the reliability of a categorical or ordinal scale may be worth investigating. For example, physicians may want to develop a diagnosis tool and ensure that the diagnosis is reliable (i.e., categorical designation) or severity of the disease (i.e., a Likert-type scale). Coefficients can be calculated to assess the degree of inter-rater reliability. In its simplest form, the percent agreement between all the raters can be calculated. All other coefficients of agreement are essentially trying to "correct" for random guessing of the rater. The function to make these calculations in `SimplyAgree` is `cac_test`, which estimates one of 4 coefficients: percent agreement, Gwet's AC1 (the default), Fleiss' kappa, or Krippendorff's alpha. Other packages provide a much greater breadth of calculative approaches [@irrCAC], and the results of `cac_test` match those of the irrCAC package.
 
-In the `agree_coef` function, the user can specify `weighted = TRUE`. If this argument is set to true than the ratings have quadratic weights applied to them. Essentially, this penalizes values farther away from each other more than those close to each other. For example, a pair of values equal to 3 and 4 would be penalized less than a pair of values to 1 and 4. For more details, on these "agreement coefficients" I refer all users to Gwet's textbook on inter-rater agreement [@gwet].
+The coefficients differ in how they define chance agreement. Fleiss' kappa and Krippendorff's alpha use the overall proportion of ratings in each category, so they can be low when one category dominates even though raters rarely disagree (the "kappa paradox"). Gwet's AC1 is stable in that situation.
 
-As a demonstration, we can create a matrix of ratings.
-
-```{r}
-  ratermat1 = ("Rater1 Rater2 Rater3 Rater4
-1       1      1     NA      1
-2       2      2      3      2
-3       3      3      3      3
-4       3      3      3      3
-5       2      2      2      2
-6       1      2      3      4
-7       4      4      4      4
-8       1      1      2      1
-9       2      2      2      2
-10     NA      5      5      5
-11     NA     NA      1      1
-12     NA     NA      3     NA")
-
-  ratermat2 = as.matrix(read.table(textConnection(ratermat1),
-                       header=TRUE,
-                       row.names=1))
-```
-
-We can then perform the analysis without the weights.
+As a demonstration, we can create a data set of ratings: 12 subjects rated by 4 raters on a 5-point scale, with some ratings missing.
 
 ```{r}
-agree_coef(data = ratermat2,
-                     wide = TRUE,
-                     weighted = FALSE,
-                     col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
+ratings <- data.frame(
+  Rater1 = c(1, 2, 3, 3, 2, 1, 4, 1, 2, NA, NA, NA),
+  Rater2 = c(1, 2, 3, 3, 2, 2, 4, 1, 2, 5, NA, NA),
+  Rater3 = c(NA, 3, 3, 3, 2, 3, 4, 2, 2, 5, 1, 3),
+  Rater4 = c(1, 2, 3, 3, 2, 4, 4, 1, 2, 5, 1, NA))
+raters <- c("Rater1", "Rater2", "Rater3", "Rater4")
 ```
 
-Or, perform it with weighting.
+We can then estimate Gwet's AC1, without weights.
 
 ```{r}
-agree_coef(data = ratermat2,
-                    wide = TRUE,
-                    weighted = TRUE,
-                    col.names = c("Rater1", "Rater2", "Rater3", "Rater4"))
+cac_test(col.names = raters, data = ratings)
 ```
 
+For ordinal ratings, `weights` gives partial credit to ratings that are close but not identical. For example, with quadratic weights a pair of ratings equal to 3 and 4 is penalized less than a pair equal to 1 and 4. Other weighting schemes (e.g., `"linear"` or `"ordinal"`) are available; for more details on these "agreement coefficients" I refer all users to Gwet's textbook on inter-rater agreement [@gwet]. If some categories of the scale were never used, list the full scale in `categories`: Gwet's AC1/AC2 and the weights depend on it. Here we test whether the weighted Fleiss' kappa is greater than 0.6.
+
+```{r}
+res_cac <- cac_test(col.names = raters, data = ratings,
+                    coef = "fleiss", weights = "quadratic",
+                    null.value = 0.6, alternative = "greater")
+res_cac
+summary(res_cac)
+```
+
+The `plot` method shows how each rater used the scale (or, with `type = "subjects"`, the ratings of each subject).
+
+```{r, fig.width = 6, fig.height = 4}
+plot(res_cac)
+```
+
+The older `agree_coef` function (superseded) still reports all 4 coefficients in one table.
+
+```{r}
+agree_coef(data = ratings, wide = TRUE, weighted = TRUE,
+           col.names = raters)
+```
+
+## Model-based kappa for ordinal ratings
+
+When many raters, sampled from a population of raters, classify subjects on an ordinal scale, the model-based kappa of @nelson2015 and @nelson2017 is another option. It fits an ordinal (cumulative probit) mixed model with crossed random effects for subjects and raters, and measures chance-corrected exact agreement between two raters from the population on a subject from the population. Unlike Cohen's or Fleiss' kappa, it does not depend on how common each category is. `ord_kappa_test` requires the `ordinal` package, and at least 3 raters (preferably many more) are needed to estimate the rater variance.
+
+```{r, eval = requireNamespace("ordinal", quietly = TRUE), fig.width = 6, fig.height = 4}
+set.seed(42)
+d <- expand.grid(id = 1:60, rater = paste0("R", 1:8))
+latent <- rnorm(60, sd = 1.5)[d$id] + rnorm(8, sd = 0.5)[d$rater] +
+  rnorm(nrow(d))
+d$rating <- cut(latent, c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf), labels = FALSE)
+
+res_km <- ord_kappa_test(rating ~ rater | id, data = d)
+res_km
+plot(res_km, type = "effects")
+```
+
+The rater effects (conditional modes) show which raters tend to give higher or lower ratings than the typical rater.
+
+To ask whether a rater characteristic (such as experience) or a subject characteristic (such as age) affects agreement, give its column in `group` (with `group_type = "subject"` for subjects). The result gives kappa_m in each group, an interval for their difference, and a likelihood ratio test of whether the groups differ [@nelson2017].
+
+```{r, eval = requireNamespace("ordinal", quietly = TRUE)}
+d$exp <- ifelse(d$rater %in% c("R1", "R2", "R3", "R4"), "exp", "inexp")
+ord_kappa_test(rating ~ rater | id, data = d, group = "exp")
+```
 
 # References

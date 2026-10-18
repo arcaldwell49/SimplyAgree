@@ -1,4 +1,5 @@
 utils::globalVariables(c("boot_bias",
+                         "Freq", "rater", "group",
                          "boot_within_sd",
                          "boot_between_sd",
                          "boot_total_sd",

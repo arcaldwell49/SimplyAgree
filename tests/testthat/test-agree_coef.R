@@ -102,3 +102,34 @@ testthat::test_that("agree_coef runs on long data", {
   expect_true(is.data.frame(coeftest2))
   expect_true(is.data.frame(coeftest3))
 })
+
+testthat::test_that("agree_coef bug fixes", {
+  r <- data.frame(R1 = c(1, 2, 3, 3, 2, 1, 4, 1, 2, NA, NA, NA),
+                  R2 = c(1, 2, 3, 3, 2, 2, 4, 1, 2, 5, NA, NA),
+                  R3 = c(NA, 3, 3, 3, 2, 3, 4, 2, 2, 5, 1, 3),
+                  R4 = c(1, 2, 3, 3, 2, 4, 4, 1, 2, 5, 1, NA))
+  cn <- c("R1", "R2", "R3", "R4")
+  res <- agree_coef(data = r, col.names = cn)
+  expect_equal(rownames(res), c("Percent Agreement", "Gwet's AC1",
+                                "Fleiss' Kappa", "Krippendorff's Alpha"))
+  # same engine as cac_test()
+  expect_equal(res["Fleiss' Kappa", "se"],
+               cac_test(col.names = cn, data = r, coef = "fleiss")$stderr)
+  # weights and categories are passed through (irrCAC values)
+  expect_equal(agree_coef(data = r, col.names = cn, weights = "linear")$est[2],
+               0.85874, tolerance = 1e-4)
+  expect_equal(agree_coef(data = r, col.names = cn, weighted = TRUE,
+                          categories = 1:6)$est[2],
+               0.94741, tolerance = 1e-4)
+  # a single category no longer crashes
+  same <- data.frame(a = rep(2, 4), b = rep(2, 4))
+  expect_warning(one <- agree_coef(data = same, col.names = c("a", "b")),
+                 "one category")
+  expect_equal(one$est[1], 1)
+  expect_true(all(is.na(one$est[-1])))
+  # replicate measurements are no longer silently dropped
+  dup <- data.frame(id = c(1, 1, 1, 2, 2), r = c("a", "a", "b", "a", "b"),
+                    y = c(1, 2, 1, 2, 2))
+  expect_error(agree_coef(wide = FALSE, data = dup, measure = "y", item = "r",
+                          id = "id"), "at most one measurement")
+})
