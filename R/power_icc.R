@@ -26,6 +26,11 @@
 #'   measurements (ICC(k) or ICC(C,k)), as in [icc_test()]. With
 #'   `"average"`, the ICC values are on the average-measure scale and `k`
 #'   cannot be solved for. See Details.
+#' @param missing The expected proportion of measurements (subject-by-item
+#'   cells) that will be missing, analysed with `icc_test(method = "reml")`.
+#'   The default, 0, gives the exact complete-data calculation; values above
+#'   0 give an approximation (see Details). For subjects who will be lost
+#'   entirely, reduce `n` instead.
 #' @param alternative `"two.sided"` (default), `"greater"`, or `"less"`, as
 #'   in [icc_test()]. A design planned with the defaults matches the analysis
 #'   run with the defaults.
@@ -70,6 +75,25 @@
 #' approximations; `k` must be given because it defines the quantity being
 #' planned for.
 #'
+#' **Missing measurements (approximate).** With `missing = p > 0`, the
+#' calculation uses the observed-data quantities that
+#' `icc_test(method = "reml")` uses for incomplete data:
+#' \eqn{N = nk(1 - p)} observations, \eqn{\bar{k} = N/n} measurements per
+#' subject in the scale factor of the F ratio and in the interval, and error
+#' degrees of freedom \eqn{N - n - k + 1} (two-way) or \eqn{N - n} (one-way).
+#' This is an approximation: the F distribution is exact only for complete
+#' data. In simulations of the REML analysis (one-way and two-way ICCs, 15
+#' or 40 subjects, 3 or 5 items, 15% or 30% of measurements missing
+#' completely at random or 30% at random depending on the first
+#' measurement; 1000 replicates per setting), the approximate power was
+#' within 0.035 of the simulated power (Monte Carlo SE 0.016) and the
+#' approximate median interval width within 2.2% of the simulated median.
+#' The REML test itself was slightly liberal with 30% missing (type I error
+#' up to 0.069 missing completely at random and 0.073 at random, for a
+#' nominal 0.05), which the simulated power includes. A warning is given
+#' above 30% missing. The calculation assumes each subject keeps at least
+#' one measurement.
+#'
 #' **Planning other designs.** These functions are exact only for the
 #' one-way and two-way consistency ICCs with complete, normally distributed
 #' data. They can still guide the planning of other ICC studies, as long as
@@ -87,9 +111,10 @@
 #'   of all with 2 or 3 items. Treat the consistency result as a lower bound
 #'   on the number of subjects; simulation would be needed for a precise
 #'   answer.
-#' - *Missing measurements.* Plan for complete data, then inflate the
-#'   number of subjects for the expected loss, roughly \eqn{n / (1 - p)} for
-#'   a proportion p of subjects or measurements lost.
+#' - *Missing measurements.* Use `missing` for measurements missing here and
+#'   there (see below). For subjects who will be lost entirely, plan for the
+#'   subjects who complete the study and recruit \eqn{n / (1 - d)} for an
+#'   expected dropout d.
 #' - *Non-normal data.* The exact calculations assume normality. With
 #'   skewed or heavy-tailed data the F-based intervals are wider and cover
 #'   less than planned (see [icc_test()] and [reli_err_test()] for
@@ -137,6 +162,7 @@ power_icc <- function(n = NULL,
                       power = NULL,
                       model = c("oneway", "twoway"),
                       unit = c("single", "average"),
+                      missing = 0,
                       alternative = c("two.sided", "greater", "less"),
                       method = c("exact", "approximate")) {
   model <- match.arg(model)
@@ -148,6 +174,7 @@ power_icc <- function(n = NULL,
   .check_approx_model(method, model)
   .check_n_k(n, k)
   .check_average_k(unit, k)
+  .check_missing(missing, method)
   .check_unit(sig.level, "sig.level")
   .check_unit(power, "power")
   k_min <- if (is.null(k)) 2 else k
@@ -176,7 +203,7 @@ power_icc <- function(n = NULL,
   pfun_single <- function(n, k, r1, sig.level) {
     r0 <- to_single(rho0, k)
     if (method == "exact") {
-      .icc_power_exact(n, k, r0, r1, sig.level, alternative, model)
+      .icc_power_exact(n, k, r0, r1, sig.level, alternative, model, missing)
     } else {
       .icc_power_walter(n, k, r0, r1, sig.level, alternative)
     }
@@ -218,18 +245,20 @@ power_icc <- function(n = NULL,
                                    c(1e-10, 1 - 1e-10), "sig.level")
   }
 
+  notes <- c(notes, .missing_note(missing))
   notes <- c(notes, paste0("n = number of subjects, k = measurements per ",
                            "subject"))
-  structure(list(n = n,
+  structure(Filter(Negate(is.null), list(n = n,
                  k = k,
                  rho0 = rho0,
                  rho1 = rho1,
                  sig.level = sig.level,
                  power = power,
                  alternative = alternative,
+                 missing = if (missing > 0) missing else NULL,
                  note = paste(notes, collapse = "\n      "),
                  method = .icc_design_method("Power calculation for the",
-                                             model, method, unit)),
+                                             model, method, unit, missing))),
             class = "power.htest")
 }
 
@@ -286,6 +315,11 @@ power_icc <- function(n = NULL,
 #' assurance is a single F probability. `width` is on the average-measure
 #' scale. The approximate method is for single measures only.
 #'
+#' **Missing measurements** (`missing > 0`): the interval width uses the
+#' observed-data quantities described in [power_icc()], an approximation
+#' whose median widths were within 2.2% of simulated REML intervals with up
+#' to 30% of measurements missing.
+#'
 #' The absolute agreement ICC is not supported exactly; see "Planning other
 #' designs" in [power_icc()] for using these calculations as a guide for it,
 #' for missing data, and for non-normal data.
@@ -334,6 +368,7 @@ precision_icc <- function(n = NULL,
                           assurance = 0.5,
                           model = c("oneway", "twoway"),
                           unit = c("single", "average"),
+                          missing = 0,
                           method = c("exact", "approximate")) {
   model <- match.arg(model)
   unit <- match.arg(unit)
@@ -349,6 +384,7 @@ precision_icc <- function(n = NULL,
   }
   .check_n_k(n, k)
   .check_average_k(unit, k)
+  .check_missing(missing, method)
   .check_conf_level(conf.level)
   .check_unit(assurance, "assurance")
   .check_rho(rho, if (is.null(k)) 2 else k, "rho", unit)
@@ -363,7 +399,7 @@ precision_icc <- function(n = NULL,
 
   afun <- function(n, k, width) {
     if (method == "exact") {
-      .icc_assurance_exact(n, k, rho, width, conf.level, model, unit)
+      .icc_assurance_exact(n, k, rho, width, conf.level, model, unit, missing)
     } else {
       .icc_assurance_zou(n, k, rho, width, conf.level)
     }
@@ -395,28 +431,32 @@ precision_icc <- function(n = NULL,
       function(w) afun(n, k, w) - assurance
     }
     # an average-measure interval can be arbitrarily wide (no lower bound)
-    max_width <- if (unit == "average") 1e4 else 1 + 1 / (k - 1)
+    kbar <- k * (1 - missing)
+    max_width <- if (unit == "average" || kbar <= 1) 1e4 else 1 + 1 / (kbar - 1)
     width <- .solve_continuous(gap, c(1e-8, max_width), "width")
   }
 
+  notes <- c(notes, .missing_note(missing))
   notes <- c(notes, paste0("n = number of subjects, k = measurements per ",
                            "subject; width = upper minus lower limit"))
-  structure(list(n = n,
+  structure(Filter(Negate(is.null), list(n = n,
                  k = k,
                  rho = rho,
                  width = width,
                  conf.level = conf.level,
                  assurance = assurance,
+                 missing = if (missing > 0) missing else NULL,
                  note = paste(notes, collapse = "\n      "),
                  method = .icc_design_method(
                    "Precision (confidence interval width) calculation for the",
-                   model, method, unit)),
+                   model, method, unit, missing))),
             class = "power.htest")
 }
 
 # Helpers --------------------------------------------------------------------
 
-.icc_design_method <- function(what, model, method, unit = "single") {
+.icc_design_method <- function(what, model, method, unit = "single",
+                               missing = 0) {
   icc <- if (model == "oneway") {
     if (unit == "single") "one-way ICC, ICC(1)" else
       "one-way average-measure ICC, ICC(k)"
@@ -424,9 +464,38 @@ precision_icc <- function(n = NULL,
     if (unit == "single") "two-way consistency ICC, ICC(C,1)" else
       "two-way consistency average-measure ICC, ICC(C,k)"
   }
-  how <- if (method == "exact") "exact F distribution" else
+  how <- if (missing > 0) {
+    "F distribution with observed-data df; approximate"
+  } else if (method == "exact") {
+    "exact F distribution"
+  } else {
     "approximate closed form"
+  }
   paste0(what, " ", icc, " (", how, ")")
+}
+
+.check_missing <- function(missing, method) {
+  if (!is.numeric(missing) || length(missing) != 1 || is.na(missing) ||
+      missing < 0 || missing >= 1) {
+    stop("'missing' must be a single proportion in [0, 1).", call. = FALSE)
+  }
+  if (missing > 0 && method == "approximate") {
+    stop("'missing' is only available with method = \"exact\".",
+         call. = FALSE)
+  }
+  if (missing > 0.3) {
+    warning("missing = ", missing, " is beyond the 30% checked by ",
+            "simulation (see Details); the calculation may be less accurate.",
+            call. = FALSE)
+  }
+}
+
+.missing_note <- function(missing) {
+  if (missing == 0) {
+    return(character())
+  }
+  paste0("approximate: ", format(100 * missing), "% of measurements missing ",
+         "at random, analysed with icc_test(method = \"reml\")")
 }
 
 # The average-measure ICC is defined for the mean of k measurements, so k is
@@ -443,15 +512,38 @@ precision_icc <- function(n = NULL,
   if (model == "oneway") n * (k - 1) else (n - 1) * (k - 1)
 }
 
+#' Design quantities for the F calculations
+#'
+#' With a proportion `missing` of measurements missing, the observed-data
+#' quantities used by `icc_test(method = "reml")`: N = n k (1 - missing)
+#' observations, kbar = N / n measurements per subject, and error df
+#' N - n - k + 1 (two-way) or N - n (one-way). With `missing = 0` these are
+#' the complete-data values (kbar = k, df2 = (n - 1)(k - 1) or n (k - 1)).
+#' @noRd
+.icc_design <- function(n, k, model, missing = 0) {
+  N <- n * k * (1 - missing)
+  list(kbar = N / n,
+       df1 = n - 1,
+       df2 = if (model == "oneway") N - n else N - n - k + 1)
+}
+
 # Scale factor of the F ratio: F ~ c(rho) * F(df1, df2)
 .icc_f_scale <- function(rho, k) (1 + (k - 1) * rho) / (1 - rho)
 
-#' Exact power of the McGraw & Wong F test of H0: rho = rho0
+#' Power of the McGraw & Wong F test of H0: rho = rho0
+#'
+#' Exact with complete data; with `missing > 0`, approximate (observed-data
+#' design quantities, see `.icc_design()`).
 #' @noRd
-.icc_power_exact <- function(n, k, rho0, rho1, sig.level, alternative, model) {
-  df1 <- n - 1
-  df2 <- .icc_df2(n, k, model)
-  r <- .icc_f_scale(rho0, k) / .icc_f_scale(rho1, k)
+.icc_power_exact <- function(n, k, rho0, rho1, sig.level, alternative, model,
+                             missing = 0) {
+  d <- .icc_design(n, k, model, missing)
+  df1 <- d$df1
+  df2 <- d$df2
+  if (df2 <= 0) {
+    return(0)
+  }
+  r <- .icc_f_scale(rho0, d$kbar) / .icc_f_scale(rho1, d$kbar)
   upper <- function(a) stats::pf(stats::qf(1 - a, df1, df2) * r, df1, df2,
                                  lower.tail = FALSE)
   lower <- function(a) stats::pf(stats::qf(a, df1, df2) * r, df1, df2)
@@ -473,13 +565,12 @@ precision_icc <- function(n = NULL,
 
 #' Width of the two-sided F-based ICC interval as a function of the F ratio
 #' @noRd
-.icc_width_fun <- function(n, k, conf.level, model) {
-  df1 <- n - 1
-  df2 <- .icc_df2(n, k, model)
+.icc_width_fun <- function(n, k, conf.level, model, missing = 0) {
+  d <- .icc_design(n, k, model, missing)
   alpha <- 1 - conf.level
-  a <- stats::qf(1 - alpha / 2, df1, df2)
-  b <- stats::qf(1 - alpha / 2, df2, df1)
-  g <- function(x) (x - 1) / (x + k - 1)
+  a <- stats::qf(1 - alpha / 2, d$df1, d$df2)
+  b <- stats::qf(1 - alpha / 2, d$df2, d$df1)
+  g <- function(x) (x - 1) / (x + d$kbar - 1)
   function(F_ratio) g(F_ratio * b) - g(F_ratio / a)
 }
 
@@ -489,20 +580,26 @@ precision_icc <- function(n = NULL,
 #' {F >= f_hi}, with F ~ c(rho) * F(df1, df2).
 #' @noRd
 .icc_assurance_exact <- function(n, k, rho, width, conf.level, model,
-                                 unit = "single") {
-  df1 <- n - 1
-  df2 <- .icc_df2(n, k, model)
+                                 unit = "single", missing = 0) {
+  d <- .icc_design(n, k, model, missing)
+  df1 <- d$df1
+  df2 <- d$df2
+  if (df2 <= 0) {
+    return(0)
+  }
   if (unit == "average") {
     # Limits 1 - a/F and 1 - 1/(b F): width (a - 1/b) / F decreases in F,
-    # so {width <= w} = {F >= (a - 1/b) / w}.
+    # so {width <= w} = {F >= (a - 1/b) / w}. The average-measure ICC is
+    # the projection to all k items; F is scaled by the single-measure ICC
+    # with kbar observed items per subject.
     alpha <- 1 - conf.level
     a <- stats::qf(1 - alpha / 2, df1, df2)
     b <- stats::qf(1 - alpha / 2, df2, df1)
     f_star <- (a - 1 / b) / width
-    scale <- .icc_f_scale(.spearman_brown_inv(rho, k), k)
+    scale <- .icc_f_scale(.spearman_brown_inv(rho, k), d$kbar)
     return(stats::pf(f_star / scale, df1, df2, lower.tail = FALSE))
   }
-  w_fun <- .icc_width_fun(n, k, conf.level, model)
+  w_fun <- .icc_width_fun(n, k, conf.level, model, missing)
   w_log <- function(t) w_fun(exp(t))
   peak <- stats::optimize(w_log, c(-60, 60), maximum = TRUE, tol = 1e-10)
   if (peak$objective <= width) {
@@ -514,7 +611,7 @@ precision_icc <- function(n = NULL,
   }
   t_lo <- root(c(-60, peak$maximum))
   t_hi <- root(c(peak$maximum, 60))
-  scale <- .icc_f_scale(rho, k)
+  scale <- .icc_f_scale(rho, d$kbar)
   stats::pf(exp(t_lo) / scale, df1, df2) +
     stats::pf(exp(t_hi) / scale, df1, df2, lower.tail = FALSE)
 }

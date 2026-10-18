@@ -1604,19 +1604,51 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
     (inflate n by 1/(1 − p)), non-normal data (allow a margin).
     Simulation-based power for the agreement ICC stays a TODO (below).
 
+11. **Cell missingness in power/precision: approximate method checked
+    (2026-10-18).** Method: the exact scaled-F calculation with observed-data
+    quantities, N = nk(1 − p), kbar = N/n, error df N − n − k + 1 (two-way)
+    or N − n (one-way), as `icc_test(method = "reml")` uses. Script
+    `reli_sims/power_missing.R`: 32 cells (one-way ICC(1) and two-way
+    ICC(C,1); n 15/40; k 3/5; none, 15% MCAR, 30% MCAR, 30% MAR, item 1
+    always observed), 1000 reps of the REML analysis under ρ₁ (complete-data
+    power 0.60 against ρ₀ = 0.6, one-sided α = .05) and under ρ₀. Pre-set
+    criteria: power within ±0.03 (MCAR), size 0.035–0.065, median 95% CI
+    width within 5%.
+
+    | | two-way | one-way |
+    |---|---|---|
+    | approx − sim power, MCAR 15–30% | −0.018 to +0.006 | −0.024 to +0.033 |
+    | approx − sim power, MAR 30% | +0.004 to +0.017 | −0.020 to +0.016 |
+    | approx − sim power, no missing (approx exact) | −0.010 to −0.002 | −0.011 to +0.019 |
+    | median width approx / sim | 0.979–1.017 | 0.978–1.018 |
+    | sim size, MCAR 15–30% | 0.051–0.065 | 0.043–0.069 |
+    | sim size, MAR 30% | 0.058–0.073 | 0.055–0.071 |
+
+    Power: met within MC error (MC SE 0.016; one cell 0.033, and the
+    complete-data cells, where the approximation is exact, scatter by up to
+    0.019). Width: met easily, MAR included. Size: the REML analysis itself
+    is slightly liberal at 30% missing (as in the phase-1 coverage study);
+    the approximation predicts power for the test as it behaves. MAR here
+    removed ~31–33% of cells for a nominal 30%; using the observed
+    proportion changes the approximation by < 0.01. Conclusion: good enough
+    to offer as an explicitly approximate option without simulation.
+    **Implemented (user, 2026-10-18):** `missing = 0` in `power_icc()` and
+    `precision_icc()` (`.icc_design()` gives kbar, df1, df2; used by the
+    power, width and assurance helpers; with `unit = "average"` the
+    projection uses all k items and the F scale uses kbar, as
+    `icc_test()` does). With `missing > 0`: the method string says
+    "observed-data df; approximate", a NOTE describes the assumption, the
+    result gains a `missing` element, `method = "approximate"` (Walter/Zou)
+    is refused, and a warning is given above 30% (the studied range).
+    Whole-subject loss is planned by reducing n (documented).
+
 ## 10. TODO (future, not this branch)
 
-- **Cell-level missingness in `power_icc()`/`precision_icc()`** (user,
-  2026-10-18). Wanted: planning for scattered missing measurements
-  (analysed by REML), not whole-subject dropout (a `dropout` argument was
-  considered and declined). A single proportion argument would be
-  misleading: the information lost depends on the pattern (cells spread
-  across subjects vs concentrated) and the mechanism (REML F intervals
-  were slightly liberal at 30% MAR in the phase-1 study). Options: plug
-  observed-data df (error df N − n − k + 1 with N = nk(1 − p)) into the
-  scaled-F calculation as an explicitly approximate method, or, better,
-  simulate with the missingness pattern as an input, together with the
-  agreement-ICC simulation TODO below.
+- ~~Cell-level missingness in `power_icc()`/`precision_icc()`~~ — done
+  2026-10-18 as `missing = 0` (approximate method, validated in Section 9,
+  item 11). Remaining: patterns beyond the study (more than 30% missing;
+  missingness concentrated in some subjects or items; MNAR) would still
+  need simulation, alongside the agreement-ICC simulation TODO.
 
 - **`se_method` and subject bootstrap for `ccc_test()`.** Lin's SE (simple
   data) is a normal-theory delta method and probably under-covers with

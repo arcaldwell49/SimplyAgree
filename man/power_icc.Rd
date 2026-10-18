@@ -13,6 +13,7 @@ power_icc(
   power = NULL,
   model = c("oneway", "twoway"),
   unit = c("single", "average"),
+  missing = 0,
   alternative = c("two.sided", "greater", "less"),
   method = c("exact", "approximate")
 )
@@ -41,6 +42,12 @@ measurement, or \code{"average"} for the reliability of the mean of the \code{k}
 measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. With
 \code{"average"}, the ICC values are on the average-measure scale and \code{k}
 cannot be solved for. See Details.}
+
+\item{missing}{The expected proportion of measurements (subject-by-item
+cells) that will be missing, analysed with \code{icc_test(method = "reml")}.
+The default, 0, gives the exact complete-data calculation; values above
+0 give an approximation (see Details). For subjects who will be lost
+entirely, reduce \code{n} instead.}
 
 \item{alternative}{\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}, as
 in \code{\link[=icc_test]{icc_test()}}. A design planned with the defaults matches the analysis
@@ -102,6 +109,25 @@ its interval is the projection of the single-measure interval. With
 approximations; \code{k} must be given because it defines the quantity being
 planned for.
 
+\strong{Missing measurements (approximate).} With \code{missing = p > 0}, the
+calculation uses the observed-data quantities that
+\code{icc_test(method = "reml")} uses for incomplete data:
+\eqn{N = nk(1 - p)} observations, \eqn{\bar{k} = N/n} measurements per
+subject in the scale factor of the F ratio and in the interval, and error
+degrees of freedom \eqn{N - n - k + 1} (two-way) or \eqn{N - n} (one-way).
+This is an approximation: the F distribution is exact only for complete
+data. In simulations of the REML analysis (one-way and two-way ICCs, 15
+or 40 subjects, 3 or 5 items, 15\% or 30\% of measurements missing
+completely at random or 30\% at random depending on the first
+measurement; 1000 replicates per setting), the approximate power was
+within 0.035 of the simulated power (Monte Carlo SE 0.016) and the
+approximate median interval width within 2.2\% of the simulated median.
+The REML test itself was slightly liberal with 30\% missing (type I error
+up to 0.069 missing completely at random and 0.073 at random, for a
+nominal 0.05), which the simulated power includes. A warning is given
+above 30\% missing. The calculation assumes each subject keeps at least
+one measurement.
+
 \strong{Planning other designs.} These functions are exact only for the
 one-way and two-way consistency ICCs with complete, normally distributed
 data. They can still guide the planning of other ICC studies, as long as
@@ -119,9 +145,10 @@ lower and intervals wider than the consistency calculation says, most
 of all with 2 or 3 items. Treat the consistency result as a lower bound
 on the number of subjects; simulation would be needed for a precise
 answer.
-\item \emph{Missing measurements.} Plan for complete data, then inflate the
-number of subjects for the expected loss, roughly \eqn{n / (1 - p)} for
-a proportion p of subjects or measurements lost.
+\item \emph{Missing measurements.} Use \code{missing} for measurements missing here and
+there (see below). For subjects who will be lost entirely, plan for the
+subjects who complete the study and recruit \eqn{n / (1 - d)} for an
+expected dropout d.
 \item \emph{Non-normal data.} The exact calculations assume normality. With
 skewed or heavy-tailed data the F-based intervals are wider and cover
 less than planned (see \code{\link[=icc_test]{icc_test()}} and \code{\link[=reli_err_test]{reli_err_test()}} for

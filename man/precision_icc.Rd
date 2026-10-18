@@ -13,6 +13,7 @@ precision_icc(
   assurance = 0.5,
   model = c("oneway", "twoway"),
   unit = c("single", "average"),
+  missing = 0,
   method = c("exact", "approximate")
 )
 }
@@ -43,6 +44,12 @@ measurement, or \code{"average"} for the reliability of the mean of the \code{k}
 measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. With
 \code{"average"}, the ICC values are on the average-measure scale and \code{k}
 cannot be solved for. See Details.}
+
+\item{missing}{The expected proportion of measurements (subject-by-item
+cells) that will be missing, analysed with \code{icc_test(method = "reml")}.
+The default, 0, gives the exact complete-data calculation; values above
+0 give an approximation (see Details). For subjects who will be lost
+entirely, reduce \code{n} instead.}
 
 \item{method}{\code{"exact"} (default) computes the assurance from the exact
 distribution of the interval width. \code{"approximate"} uses the closed form
@@ -91,6 +98,11 @@ ICC(C,k) has limits \eqn{1 - a/F} and \eqn{1 - 1/(bF)} (with a and b the
 F quantiles), so its width, \eqn{(a - 1/b)/F}, decreases with F and the
 assurance is a single F probability. \code{width} is on the average-measure
 scale. The approximate method is for single measures only.
+
+\strong{Missing measurements} (\code{missing > 0}): the interval width uses the
+observed-data quantities described in \code{\link[=power_icc]{power_icc()}}, an approximation
+whose median widths were within 2.2\% of simulated REML intervals with up
+to 30\% of measurements missing.
 
 The absolute agreement ICC is not supported exactly; see "Planning other
 designs" in \code{\link[=power_icc]{power_icc()}} for using these calculations as a guide for it,

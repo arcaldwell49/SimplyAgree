@@ -133,7 +133,7 @@ coin.
 summary(res, style = "estimation")
 ```
 
-## Missing data and the bootstrap
+## Missing data
 
 `method = "anova"` (the default) needs every subject measured on every
 item. With missing measurements, `method = "reml"` fits a linear mixed
@@ -146,15 +146,84 @@ dat_na$judge2[1] <- NA
 icc_test(col.names = judges, data = dat_na, method = "reml")
 ```
 
-With clearly non-normal data, `boot = TRUE` gives a bootstrap interval that
-resamples subjects. The interval type (`boot_ci`) and the standard error
-used to studentize it (`se_method`) were chosen from simulations described
-in `?icc_test`.
+## Bootstrap intervals and standard errors
+
+**When to bootstrap.** The F-based intervals assume normal data. In
+simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9), they covered
+0.92 to 0.97 of the time with normal data but only 0.80 to 0.93 with skewed
+or heavy-tailed data. With `boot = TRUE`, the interval comes from a
+nonparametric bootstrap instead, which helps with clearly non-normal data
+and about 30 or more subjects. With 10 subjects every method, the bootstrap
+included, falls short of its nominal coverage, so a bootstrap is no cure
+for a small sample.
+
+**How it works.** Each replicate resamples subjects with replacement,
+keeping all of each subject's measurements, and refits the model
+(`replicates` times, 1999 by default; with `method = "reml"` this means
+refitting the mixed model each time, which is slow). The interval type is
+set by `boot_ci`; the default, `"auto"`, picks the type that did best in the
+simulations:
+
+| Estimate | `method = "anova"` | `method = "reml"` |
+|---|---|---|
+| ICC (`icc_test()`) | studentized | percentile |
+| SEM, SEE, SEP, consistency or one-way (`reli_err_test()`) | studentized | percentile |
+| SEM, SEP, two-way agreement (`reli_err_test()`) | BCa | percentile |
+
+Any p-value comes from inverting the bootstrap interval, so it is
+approximate and always agrees with the interval.
 
 ```{r}
 set.seed(2026)
-icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 999)
+icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 499)
 ```
+
+**The hybrid step for agreement.** Resampling subjects keeps the same items
+(judges, trials) in every replicate, so on its own it treats the items as
+fixed. An absolute-agreement ICC (and the agreement SEM and SEP) treats the
+items as a sample, and their systematic differences count as error, so
+plain subject resampling misses the uncertainty that comes from which items
+happened to be used. In simulations it covered only 0.70 to 0.80 for an
+agreement ICC of 0.9. Each replicate therefore also multiplies the item mean
+square by an independent \(\chi^2_{k-1}/(k-1)\) draw, its sampling variation
+under normal theory. This "hybrid" bootstrap restored coverage to about
+0.94 to 0.96 with normal data and 30 subjects. It is applied automatically to
+the two-way agreement forms; when the items really are fixed it is somewhat
+conservative, like the F interval.
+
+```{r}
+set.seed(2026)
+icc_test(col.names = judges, data = dat, type = "agreement", boot = TRUE,
+         replicates = 499)
+```
+
+**Standard errors (`se_method`).** Every result reports standard errors in
+`stderr`, and the studentized bootstrap divides each replicate by its own
+standard error. Three estimates are available:
+
+- `"jackknife"` (default): delete one subject at a time. It averaged 0.89 to
+  1.08 times the true sampling SD in simulations, including skewed data and
+  missing measurements. It is cheap with complete data and needs n refits
+  with `method = "reml"`.
+- `"influence"`: a sandwich estimate from each subject's influence. It is
+  cheap everywhere but too small with few subjects (0.69 to 1.00 times the
+  true SD), and it is the only option for the studentized bootstrap with
+  `method = "reml"`.
+- `"normal"`: normal theory. It is accurate with normal data (0.87 to 1.04)
+  but too small with skewed or heavy-tailed data (0.60 to 0.80). It depends
+  only on the degrees of freedom, so it cannot be used to studentize.
+
+`se_method` changes `stderr` and the studentized bootstrap, never the
+F-based (or chi-square) interval and test.
+
+```{r}
+res_j <- icc_test(col.names = judges, data = dat)
+res_n <- icc_test(col.names = judges, data = dat, se_method = "normal")
+rbind(jackknife = res_j$stderr, normal = res_n$stderr)
+```
+
+More detail, including the full simulation results, is in `?icc_test` and
+`?reli_err_test`.
 
 ## Plots and diagnostics
 

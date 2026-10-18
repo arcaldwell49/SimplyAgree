@@ -317,3 +317,94 @@ test_that("unit = 'average' checks its arguments", {
   expect_error(power_icc(n = 20, rho0 = 0, rho1 = 1, unit = "average"),
                "below 1")
 })
+
+# Missing measurements (approximate) -----------------------------------------------------
+
+test_that("missing = 0 is the complete-data calculation", {
+  expect_equal(power_icc(n = 20, k = 3, rho0 = 0.5, rho1 = 0.8,
+                         alternative = g, missing = 0)$power,
+               power_icc(n = 20, k = 3, rho0 = 0.5, rho1 = 0.8,
+                         alternative = g)$power)
+  expect_null(power_icc(n = 20, k = 3, rho0 = 0.5, rho1 = 0.8,
+                        alternative = g)$missing)
+})
+
+test_that("missing uses observed-data N, kbar and error df", {
+  n <- 20; k <- 4; p <- 0.2; r0 <- 0.5; r1 <- 0.75
+  N <- n * k * (1 - p); kbar <- N / n
+  scale <- function(r) (1 + (kbar - 1) * r) / (1 - r)
+  for (model in c("twoway", "oneway")) {
+    df2 <- if (model == "twoway") N - n - k + 1 else N - n
+    expected <- pf(qf(0.95, n - 1, df2) * scale(r0) / scale(r1), n - 1, df2,
+                   lower.tail = FALSE)
+    res <- power_icc(n = n, k = k, rho0 = r0, rho1 = r1, alternative = g,
+                     model = model, missing = p)
+    expect_equal(res$power, expected, tolerance = 1e-12)
+  }
+  complete <- power_icc(n = n, k = k, rho0 = r0, rho1 = r1, alternative = g,
+                        model = "twoway")$power
+  expect_lt(res$power, complete)
+})
+
+test_that("the approximate width matches icc_test()'s REML interval", {
+  w <- sf_avg
+  w$J2[1] <- NA
+  w$J3[4] <- NA
+  res <- suppressWarnings(icc_test(col.names = names(w), data = w,
+                                   method = "reml"))
+  ms <- res$fit$ms
+  p <- res$fit$n_missing / (6 * 4)
+  width <- SimplyAgree:::.icc_width_fun(6, 4, 0.95, "twoway", missing = p)
+  expect_equal(width(ms[["MSB"]] / ms[["MSE"]]),
+               diff(as.numeric(res$conf.int)), tolerance = 1e-8)
+})
+
+test_that("missing works with unit = 'average' and when solving", {
+  k <- 3; p <- 0.15
+  avg <- power_icc(n = 30, k = k, rho0 = sb(0.5, k), rho1 = sb(0.7, k),
+                   alternative = g, unit = "average", missing = p)
+  one <- power_icc(n = 30, k = k, rho0 = 0.5, rho1 = 0.7, alternative = g,
+                   missing = p)
+  expect_equal(avg$power, one$power, tolerance = 1e-12)
+  n_miss <- power_icc(k = k, rho0 = 0.5, rho1 = 0.7, power = 0.8,
+                      alternative = g, missing = p)$n
+  n_full <- power_icc(k = k, rho0 = 0.5, rho1 = 0.7, power = 0.8,
+                      alternative = g)$n
+  expect_gt(n_miss, n_full)
+  expect_equal(power_icc(n = n_miss, k = k, rho0 = 0.5, rho1 = 0.7,
+                         alternative = g, missing = p)$power, 0.8,
+               tolerance = 1e-6)
+  pr <- precision_icc(k = k, rho = 0.8, width = 0.2, missing = p,
+                      model = "twoway")
+  expect_gt(pr$n, precision_icc(k = k, rho = 0.8, width = 0.2,
+                                model = "twoway")$n)
+  expect_equal(precision_icc(n = pr$n, k = k, rho = 0.8, width = 0.2,
+                             assurance = NULL, missing = p,
+                             model = "twoway")$assurance, 0.5,
+               tolerance = 1e-6)
+  w_avg <- precision_icc(n = 30, k = k, rho = 0.9, width = NULL,
+                         unit = "average", missing = p)$width
+  expect_true(is.finite(w_avg) && w_avg > 0)
+})
+
+test_that("missing is labelled approximate and checked", {
+  res <- power_icc(n = 20, k = 3, rho0 = 0.5, rho1 = 0.8, alternative = g,
+                   missing = 0.2)
+  expect_equal(res$missing, 0.2)
+  expect_match(res$method, "approximate", fixed = TRUE)
+  expect_match(res$note, "20% of measurements missing", fixed = TRUE)
+  expect_output(print(res), "missing = 0.2", fixed = TRUE)
+  expect_error(power_icc(n = 20, rho0 = 0.5, rho1 = 0.8, missing = 1),
+               "proportion", fixed = TRUE)
+  expect_error(power_icc(n = 20, rho0 = 0.5, rho1 = 0.8, missing = -0.1),
+               "proportion", fixed = TRUE)
+  expect_error(power_icc(n = 20, rho0 = 0.5, rho1 = 0.8, missing = 0.1,
+                         method = "approximate"), "method = \"exact\"",
+               fixed = TRUE)
+  expect_warning(power_icc(n = 40, k = 4, rho0 = 0.5, rho1 = 0.8,
+                           missing = 0.4), "beyond the 30%", fixed = TRUE)
+  # too few observations for any error df: no power
+  expect_equal(suppressWarnings(power_icc(n = 2, k = 2, rho0 = 0.5, rho1 = 0.8,
+                                          alternative = g, missing = 0.5))$power,
+               0)
+})

@@ -83,9 +83,16 @@ with \code{method = "reml"} it uses \code{"perc"}. See Details. Used only when
 \item{replicates}{Number of bootstrap replicates (default 1999).}
 
 \item{se_method}{How the standard error of the log of the statistic is
-estimated: \code{"jackknife"} (default), \code{"influence"}, or \code{"normal"}. It is
-reported in \code{stderr} and used by the studentized bootstrap; it does not
-change the analytic interval or test. See \code{\link[=icc_test]{icc_test()}}.}
+estimated: \code{"jackknife"} (default; delete one subject at a time,
+accurate in simulations but n refits with \code{method = "reml"}),
+\code{"influence"} (a per-subject sandwich estimate; cheap but too small with
+few subjects), or \code{"normal"} (normal theory; too small with skewed or
+heavy-tailed data, and cannot be used by the studentized bootstrap). It
+is reported in \code{stderr} and used by the studentized bootstrap; it does
+not change the analytic interval or test. For the two-way agreement
+statistics, the jackknife and influence SEs add the normal-theory
+variance of the item mean square, treating the items as random (as the
+hybrid bootstrap does). See \code{\link[=icc_test]{icc_test()}} for the simulations.}
 }
 \value{
 A list of class \code{c("reli_htest", "htest")} containing:

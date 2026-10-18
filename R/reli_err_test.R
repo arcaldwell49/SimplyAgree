@@ -37,9 +37,16 @@
 #'   with `method = "reml"` it uses `"perc"`. See Details. Used only when
 #'   `boot = TRUE`.
 #' @param se_method How the standard error of the log of the statistic is
-#'   estimated: `"jackknife"` (default), `"influence"`, or `"normal"`. It is
-#'   reported in `stderr` and used by the studentized bootstrap; it does not
-#'   change the analytic interval or test. See [icc_test()].
+#'   estimated: `"jackknife"` (default; delete one subject at a time,
+#'   accurate in simulations but n refits with `method = "reml"`),
+#'   `"influence"` (a per-subject sandwich estimate; cheap but too small with
+#'   few subjects), or `"normal"` (normal theory; too small with skewed or
+#'   heavy-tailed data, and cannot be used by the studentized bootstrap). It
+#'   is reported in `stderr` and used by the studentized bootstrap; it does
+#'   not change the analytic interval or test. For the two-way agreement
+#'   statistics, the jackknife and influence SEs add the normal-theory
+#'   variance of the item mean square, treating the items as random (as the
+#'   hybrid bootstrap does). See [icc_test()] for the simulations.
 #'
 #' @details
 #' **Statistics.** With \eqn{MS} the mean squares of the subjects-by-items
