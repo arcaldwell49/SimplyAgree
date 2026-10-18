@@ -126,6 +126,12 @@ the SEM from a two-way model with systematic differences between items
 excluded, \eqn{\sqrt{MS_E}}.
 }
 \details{
+\strong{Choosing \code{model} and \code{type}.} Choose them as for the ICC (see
+"Choosing the form" in \code{\link[=icc_test]{icc_test()}}): \code{type = "agreement"} when
+systematic differences between items count as error, \code{"consistency"}
+when they are checked and reported separately. Report the error
+statistic that matches the ICC.
+
 \strong{Statistics.} With \eqn{MS} the mean squares of the subjects-by-items
 analysis of variance (n subjects, k items):\tabular{lllll}{
    \code{stat} \tab \code{model} \tab \code{type} \tab Estimate \tab Analytic inference \cr

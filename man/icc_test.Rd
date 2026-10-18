@@ -127,6 +127,25 @@ Whether items are treated as random or fixed changes the interpretation
 but not the calculation (McGraw & Wong, 1996). Average-measure forms are
 not defined for McGraw and Wong's two-way mixed model with an interaction.
 
+\strong{Choosing the form.} Answer three questions in order:
+(1) is every subject measured by the same items? Yes: \code{"twoway"}; no,
+each subject by different items: \code{"oneway"}. (2) Should systematic
+differences between items count as error? Yes, when measurements from
+different items will be used interchangeably or on their absolute values
+(for example compared with a cut-off): \code{"agreement"}; no, when only the
+subjects' relative standing matters or systematic differences are
+reported separately: \code{"consistency"}. (3) Will one measurement or the mean
+of the k items be used in practice? \code{"single"} or \code{"average"}. The
+"Reliability Analysis" vignette has a table of common designs
+(\code{vignette("reliability_analysis", package = "SimplyAgree")}).
+
+\strong{Related coefficients.} With complete data, Cronbach's (1951) alpha
+equals ICC(C,k), the average-measure consistency ICC (McGraw & Wong,
+1996): it describes the mean of the k items, not a single item. For two
+methods, Lin's concordance correlation coefficient (\code{\link[=ccc_test]{ccc_test()}}) is
+essentially ICC(A,1); the estimators differ only in using n rather than
+n - 1 in the variances (Nickerson, 1997; Carrasco & Jover, 2003).
+
 \strong{Default form.} The default, ICC(C,1), follows Hopkins (2000) and Weir
 (2005): check for systematic change between trials separately (for
 example with the trials F test, or \code{\link[=t.test]{t.test()}} for two trials), then report
@@ -252,6 +271,13 @@ summary(res)
 
 }
 \references{
+Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
+
+Cronbach, L. J. (1951). Coefficient alpha and the internal structure of
+tests. Psychometrika, 16(3), 297-334. \doi{10.1007/BF02310555}
+
 Hopkins, W. G. (2000). Measures of reliability in sports medicine and
 science. Sports Medicine, 30(1), 1-15. \doi{10.2165/00007256-200030010-00001}
 
@@ -262,6 +288,10 @@ Chiropractic Medicine, 15(2), 155-163. \doi{10.1016/j.jcm.2016.02.012}
 McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
 intraclass correlation coefficients. Psychological Methods, 1(1), 30-46.
 \doi{10.1037/1082-989X.1.1.30}
+
+Nickerson, C. A. E. (1997). A note on "A concordance correlation
+coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
+\doi{10.2307/2533516}
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
 assessing rater reliability. Psychological Bulletin, 86(2), 420-428.

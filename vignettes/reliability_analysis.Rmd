@@ -71,12 +71,46 @@ icc_test(col.names = judges, data = dat)
 
 ## Choosing the ICC
 
-The form is set by three arguments. `model` says whether every subject is
-measured on the same items (`"twoway"`) or each subject by different items
-(`"oneway"`); `type` says whether systematic differences between items
-count as error (`"agreement"`) or not (`"consistency"`); and `unit` says
-whether the reliability of a single measurement (`"single"`) or of the mean
-of all k items (`"average"`) is wanted.
+The form is set by three arguments, each answering one question about the
+study and how its results will be used. Answer them in order.
+
+1. **Is every subject measured by the same items** (the same trials,
+   raters, or devices)? Yes: `model = "twoway"`. No, each subject is
+   measured by different items (for example, raters drawn from a pool):
+   `model = "oneway"`, which only has an absolute-agreement form.
+2. **Should systematic differences between items count as error?**
+   Yes, `type = "agreement"`, when measurements from different items will be
+   used interchangeably or on their absolute values: any rater's score is
+   taken as it is, scores are compared with a fixed cut-off, or sessions are
+   pooled. No, `type = "consistency"`, when only the subjects' relative
+   standing matters, or when systematic differences (a learning or fatigue
+   effect, a rater who scores high) are checked and reported separately.
+3. **Will a single measurement or the mean of k be used in practice?**
+   One measurement: `unit = "single"`. The mean of the same k items as in
+   the study: `unit = "average"`.
+
+Some common designs:
+
+| Study | ICC | Arguments | Matching error statistic |
+|---|---|---|---|
+| Test-retest, trial effects checked separately [@hopkins2000; @weir2005] | ICC(C,1) | defaults | `reli_err_test()` (\(\sqrt{MS_E}\)) |
+| Test-retest, absolute values used (e.g. compared with a threshold) | ICC(A,1) | `type = "agreement"` | `reli_err_test(type = "agreement")` |
+| Inter-rater, the same raters rate every subject, scores used interchangeably | ICC(A,1) | `type = "agreement"` | `reli_err_test(type = "agreement")` |
+| Inter-rater, the same raters, only rank order matters | ICC(C,1) | defaults | `reli_err_test()` |
+| Each subject rated by different raters | ICC(1) | `model = "oneway"` | `reli_err_test(model = "oneway")` |
+| The score used in practice is the mean of the k ratings or trials | ICC(C,k), ICC(A,k), ICC(k) | `unit = "average"` | — |
+| Two methods measuring the same quantity (method comparison) | — | `agreement_limit()`, `ccc_test()` | limits of agreement |
+
+Whether the items are thought of as fixed (these particular raters) or
+random (a sample of possible raters) changes how widely the result
+generalises, not how it is calculated [@mcgraw1996]. The average-measure
+forms describe the mean of the k items in this study; other values of k
+would need a Spearman-Brown projection. Whatever the form, report the
+matching error statistic, and test against a meaningful threshold rather
+than labelling the estimate "good" or "poor".
+
+The three arguments map onto the names used by @mcgraw1996 and
+@shrout1979:
 
 | `model` | `type` | `unit` | McGraw & Wong | Shrout & Fleiss |
 |---|---|---|---|---|
@@ -96,6 +130,47 @@ test-retest studies:
 ```{r}
 icc_test(col.names = judges, data = dat, type = "agreement")
 ```
+
+## Related coefficients: Cronbach's alpha and the CCC
+
+Two other widely used coefficients are ICCs in disguise.
+
+**Cronbach's alpha is ICC(C,k).** With complete data, Cronbach's
+[-@cronbach1951] alpha for k items equals the average-measure consistency
+ICC, \((MS_B - MS_E)/MS_B\) [@mcgraw1996]. So alpha is the reliability of
+the *mean* (or sum) of the k items when systematic differences between
+items do not count, not the reliability of a single item; ICC(C,1) is the
+corresponding single-item figure. Here alpha computed from its usual
+formula matches `icc_test(unit = "average")`:
+
+```{r}
+k <- length(judges)
+alpha <- k / (k - 1) * (1 - sum(apply(dat, 2, var)) / var(rowSums(dat)))
+c(alpha = alpha,
+  icc_C_k = unname(icc_test(col.names = judges, data = dat,
+                            unit = "average")$estimate))
+```
+
+**The CCC is close to ICC(A,1) for two methods.** Lin's concordance
+correlation coefficient [@Lin1989] measures how closely pairs fall on the
+line of identity, so systematic differences between the methods count as
+disagreement, as in an absolute-agreement ICC. For two methods it is
+essentially ICC(A,1): the estimators differ only in using n rather than
+n - 1 in the variances, and the difference vanishes as n grows
+[@nickerson1997; @carrasco2003]. The two answer different questions in
+practice: `ccc_test()` is meant for comparing two methods (alongside
+limits of agreement), `icc_test()` for the reliability of a measurement
+across trials or raters.
+
+```{r}
+two <- dat[c("judge1", "judge4")]
+c(CCC = unname(ccc_test(x = "judge1", y = "judge4", data = two)$estimate),
+  ICC_A_1 = unname(icc_test(col.names = c("judge1", "judge4"), data = two,
+                            type = "agreement")$estimate))
+```
+
+With only 6 subjects the n versus n - 1 difference is visible; with a few
+dozen subjects the two estimates agree to about two decimal places.
 
 ## Testing against a threshold
 

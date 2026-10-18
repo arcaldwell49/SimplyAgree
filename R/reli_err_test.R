@@ -49,6 +49,12 @@
 #'   hybrid bootstrap does). See [icc_test()] for the simulations.
 #'
 #' @details
+#' **Choosing `model` and `type`.** Choose them as for the ICC (see
+#' "Choosing the form" in [icc_test()]): `type = "agreement"` when
+#' systematic differences between items count as error, `"consistency"`
+#' when they are checked and reported separately. Report the error
+#' statistic that matches the ICC.
+#'
 #' **Statistics.** With \eqn{MS} the mean squares of the subjects-by-items
 #' analysis of variance (n subjects, k items):
 #'

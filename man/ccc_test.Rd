@@ -88,8 +88,11 @@ By default (\code{null.value = NULL}) no test is done.
 \strong{Relation to the ICC.} For two methods, the CCC is close to the
 absolute-agreement intraclass correlation, ICC(A,1)
 (\code{icc_test(type = "agreement")}); Lin's estimator uses n rather than
-n - 1 in the variances. \code{ccc_test()} is meant for method-comparison
-(agreement) studies; \code{\link[=icc_test]{icc_test()}} for reliability studies.
+n - 1 in the variances, and the difference vanishes as n grows
+(Nickerson, 1997; Carrasco & Jover, 2003). \code{ccc_test()} is meant for
+method-comparison (agreement) studies; \code{\link[=icc_test]{icc_test()}} for reliability
+studies (see its "Choosing the form" and "Related coefficients"
+sections).
 
 \strong{Methods.} \code{summary()} describes the result in words (including, for
 simple data, whether a low CCC comes from poor precision or poor
@@ -127,6 +130,14 @@ check(res)
 \references{
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268.
+
+Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
+
+Nickerson, C. A. E. (1997). A note on "A concordance correlation
+coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
+\doi{10.2307/2533516}
 
 King, T. S., & Chinchilli, V. M. (2001). A generalized concordance correlation
 coefficient for continuous and categorical data. Statistics in Medicine,

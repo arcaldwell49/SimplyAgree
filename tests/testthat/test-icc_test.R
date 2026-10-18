@@ -498,3 +498,26 @@ test_that("check shows the additivity panel for two-way models only", {
   expect_true(is.finite(m$p.value))
   expect_true("Additivity" %in% panel_titles(check(res_na)))
 })
+
+# Related coefficients ------------------------------------------------------------
+
+test_that("Cronbach's alpha equals ICC(C,k) with complete data", {
+  k <- ncol(sf_wide)
+  alpha <- k / (k - 1) *
+    (1 - sum(apply(sf_wide, 2, var)) / var(rowSums(sf_wide)))
+  res <- icc_test(col.names = sf_cols, data = sf_wide, unit = "average")
+  expect_equal(unname(res$estimate), alpha, tolerance = 1e-10)
+})
+
+test_that("the CCC approaches ICC(A,1) as n grows (Nickerson, 1997)", {
+  set.seed(9)
+  gap <- vapply(c(10, 1000), function(n) {
+    s <- rnorm(n)
+    d <- data.frame(x = s + rnorm(n, 0, 0.5), y = 0.3 + s + rnorm(n, 0, 0.5))
+    unname(ccc_test(x = "x", y = "y", data = d)$estimate) -
+      unname(icc_test(col.names = c("x", "y"), data = d,
+                      type = "agreement")$estimate)
+  }, numeric(1))
+  expect_lt(abs(gap[2]), 0.001)
+  expect_lt(abs(gap[2]), abs(gap[1]))
+})
