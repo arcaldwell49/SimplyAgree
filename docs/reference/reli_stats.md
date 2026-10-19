@@ -161,7 +161,7 @@ approximate.
 **ICCs.** The six forms of Shrout and Fleiss (1979) are returned, with
 the F-based intervals of McGraw and Wong (1996). The intervals are
 two-sided `conf.level` intervals, as in those papers (and in the psych,
-irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+irr, SPSS and Stata implementations). Before version 0.4.0 the intervals
 used `conf.level` in each tail, so each limit was a one-sided
 `conf.level` bound and the pair covered only `1 - 2 * (1 - conf.level)`;
 the old output at `conf.level = c` is reproduced by
@@ -187,12 +187,12 @@ mean, as a proportion (printed as a percentage).
 interval; every other statistic has a Wald interval on the log scale
 with a delta-method standard error from the normal-theory variances of
 the mean squares (and of the grand mean, for the CV). Before version
-0.3.1 these used \\\chi^2\\ intervals with the error degrees of freedom
+0.4.0 these used \\\chi^2\\ intervals with the error degrees of freedom
 (and Vangel's interval for the CV), which do not apply to these
 statistics. The bootstrap types resample subjects (as
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 does, including its hybrid step for the item mean square); before
-version 0.3.1 `reli_stats()` used a parametric bootstrap.
+version 0.4.0 `reli_stats()` used a parametric bootstrap.
 
 ## References
 

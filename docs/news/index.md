@@ -1,6 +1,6 @@
 # Changelog
 
-## SimplyAgree 0.3.1
+## SimplyAgree 0.4.0
 
 ### Reliability
 
@@ -20,6 +20,18 @@
   prediction (SEP), with intervals and an optional test against an
   acceptable error. `scale = "log"` (sympercents) and `scale = "mean"`
   give coefficients of variation.
+- New
+  [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md):
+  the minimal detectable change (MDC, also SDD/SRD or repeatability
+  coefficient), 1.96 × √2 × SEM by default, with its interval (the SEM
+  interval, scaled) and an optional test against a change that matters.
+  It works from the data or from an existing
+  [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+  SEM, and offers one-sided MDCs (`sided`), scores averaged over several
+  trials (`k_avg`), and percentage increases and decreases on the log
+  scale. The documentation explains that the MDC is an individual
+  threshold (not for group effects or counting “responders”) and why no
+  “smallest worthwhile change” is computed from the reliability data.
 - New
   [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
   and
@@ -168,6 +180,75 @@
   - Lower confidence limits are clipped to the possible range of the
     coefficient (they were only clipped at 1).
   - The row name “Kririppendorff’s Alpha” is now “Krippendorff’s Alpha”.
+
+### Agreement power and sample size
+
+- [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md),
+  [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md),
+  [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+  and
+  [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+  gain `m` (paired measurements per subject) and `icc` (the ICC of the
+  paired *differences*) for clustered data; `n` is then the number of
+  subjects, and the output gains `m`, `icc` and `n.obs`. The exact
+  methods integrate over the exact distribution of the variance estimate
+  under a balanced compound symmetry model (checked against simulation);
+  [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+  uses a Satterthwaite approximation. With `m = 1` (the default) the
+  results are unchanged.
+- The power and sample size vignette now uses these arguments. The
+  design effect it previously recommended, 1 + (m - 1) × ICC applied to
+  the whole sample size, is correct for the bias but overstates the
+  penalty for the SD, so it was conservative; the vignette also now
+  makes clear that the ICC is that of the differences.
+- [`find_n()`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
+  now returns the smallest sample size at which the target power is
+  reached. It previously returned the sample size with the *closest*
+  power, which could fall just below the target (**results can change by
+  one**), and it failed when several sample sizes tied. If the target is
+  not reached, `N` is `NA` with a warning.
+- Fixed the sample size searches:
+  - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+    could not return fewer than 6 pairs, and
+    [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)
+    and
+    [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+    fewer than 5.
+  - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+    silently returned the upper search limit (10000) when power could
+    not be reached. It now stops when the alternative proportion
+    `p1_star` does not exceed `p0_star`, and warns when the limit is
+    reached.
+- [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+  capped `omega` at 10 × `sigma` when solving for it, so with small `n`
+  or high assurance it could return an `omega` with assurance below the
+  target. `omega` now has a closed form.
+- [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+  used absolute tolerances when solving for `delta` or `sigma`, which
+  failed for data on a small scale; they are now relative.
+- The tolerance factor in
+  [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)
+  and
+  [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+  hung with `n = 2` and was inaccurate for very small `n` (e.g., 24.96
+  instead of 30.48 for `n = 3` with 99% confidence and coverage, which
+  gave 98.5% rather than 99% confidence in simulation). The integration
+  grid is now accurate for any `n`, the search has an iteration limit
+  and expands its bracket, and the three functions share one
+  implementation. Results for `n >= 5` are unchanged to about 4
+  significant digits, and the published examples are unchanged.
+- [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)
+  and
+  [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
+  validate `n`, and return a `note`. Their documented return names now
+  match the object.
+- The documentation of
+  [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+  no longer says the power “roughly” matches tolerance limits. It is the
+  power of Shieh’s test; deciding agreement by whether
+  [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+  limits fall within the bounds is less powerful (about 0.66 in
+  simulation at a planned 0.80).
 
 ### Other changes
 

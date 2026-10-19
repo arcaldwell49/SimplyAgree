@@ -27,7 +27,7 @@ excluded, \(\sqrt{MS_E}\).'><meta property="og:image" content="https://aaroncald
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -351,10 +351,11 @@ usually preferable: it treats the error as proportional to each
 measurement rather than to the overall mean.</p>
 <p><strong>Minimal detectable change.</strong> The minimal detectable change (MDC),
 smallest real difference, or repeatability coefficient is a scaled SEM:
-\(1.96 \sqrt{2} SEM\) for 95% (Weir, 2005, eq. 13). Scale the estimate
-and interval, e.g. <code>qnorm(0.975) * sqrt(2) * c(res$estimate, res$conf.int)</code>.
-With two trials, <code><a href="agreement_limit.html">agreement_limit()</a></code> gives the same quantity as the half
-width of the limits of agreement, with the bias reported separately.</p>
+\(1.96 \sqrt{2} SEM\) for 95% (Weir, 2005, eq. 13). <code><a href="mdc_test.html">mdc_test()</a></code>
+computes it, with its interval and a test, from the data or from an SEM
+result of this function. With two trials, <code><a href="agreement_limit.html">agreement_limit()</a></code> gives the
+same quantity as the half width of the limits of agreement, with the bias
+reported separately.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

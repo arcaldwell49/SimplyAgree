@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,10 @@ for details.
 <dd><p>Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)</p></dd>
 
 <dt><code>find_n</code></dt>
-<dd><p>Find sample size at which desired power is achieved</p></dd>
+<dd><p>Find the smallest sample size at which the desired
+power is achieved, for each combination of settings. If the power is not
+reached within the sample sizes evaluated, <code>N</code> is <code>NA</code> (with a warning)
+and the range of sample sizes must be expanded.</p></dd>
 
 
 </dl></div>

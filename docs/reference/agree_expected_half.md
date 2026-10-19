@@ -10,7 +10,9 @@ agree_expected_half(
   delta = NULL,
   pstar = 0.95,
   sigma = 1,
-  n = NULL
+  n = NULL,
+  m = 1,
+  icc = 0
 )
 ```
 
@@ -41,35 +43,56 @@ agree_expected_half(
 
   population standard deviation of the paired differences. If the true
   value is unknown, delta can be specified in standard deviation units
-  by setting sigma = 1.
+  by setting sigma = 1. With clustered data (`m > 1`), this is the
+  *total* SD of the differences (between- plus within-subject variance).
 
 - n:
 
-  sample size (optional). If provided, the function will solve for a
-  different parameter rather than sample size.
+  sample size (optional): the number of pairs, or the number of subjects
+  when `m > 1`. If provided, the function will solve for a different
+  parameter rather than sample size.
+
+- m:
+
+  number of paired measurements per subject (default 1, independent
+  pairs). See the "Clustered data" section.
+
+- icc:
+
+  intraclass correlation of the paired *differences* (between-subject
+  share of the variance of the differences), in \[0, 1). Ignored when
+  `m = 1`. This is not the test-retest ICC of the measurements
+  themselves.
 
 ## Value
 
 An object of class `"power.htest"` containing the following components:
 
-- `n`: The required sample size (number of subject pairs)
+- `n`: The required sample size (number of pairs, or of subjects when
+  `m > 1`)
 
 - `conf.level`: The confidence level (1 - alpha)
 
-- `delta.target`: The target upper bound of expected half-width
+- `target.delta`: The target upper bound of expected half-width
 
-- `delta.actual`: The actual upper bound of expected half-width achieved
-  (may differ slightly from target due to discrete nature of n)
+- `actual.delta`: The expected half-width achieved (may be smaller than
+  the target due to discrete nature of n)
 
 - `pstar`: The central proportion covered (P\*)
 
 - `sigma`: The population standard deviation
 
-- `g.factor`: The Odeh-Owen factor (g”) used to construct the tolerance
+- `g`: The Odeh-Owen factor (g”) used to construct the tolerance
   interval, tabulated in Odeh and Owen (1980)
 
-- `c.factor`: The bias correction factor used in the expected half-width
-  calculation
+- `c`: The bias correction factor, 1 / E(S / sigma), used in the
+  expected half-width calculation
+
+- `zp`: The normal quantile for the central proportion
+
+- `m`, `icc`: The clustering inputs
+
+- `n.obs`: The total number of pairs, `n * m`
 
 - `method`: Description of the method used
 
@@ -172,13 +195,46 @@ target due to the discrete nature of sample size.
 For dropout considerations, inflate the sample size using: N' = N / (1 -
 dropout_rate), always rounding up.
 
+## Clustered data
+
+When each of `n` subjects contributes `m` paired measurements (repeated
+measures, or several pairs per subject), the pairs are not independent
+and treating `n * m` pairs as independent overstates precision. Setting
+`m` and `icc` accounts for this under a balanced one-way random-effects
+(compound symmetry) model for the differences:
+
+- The mean difference has variance sigma^2 \\ DEFF / (n \\ m), with
+  design effect DEFF = 1 + (m - 1) \\ icc, so the effective sample size
+  for the mean is n \\ m / DEFF.
+
+- The total variance is estimated as S^2 = MSB / m + (m - 1) / m \\ MSW,
+  whose distribution is a weighted sum of two independent chi-square
+  variables with n - 1 and n(m - 1) degrees of freedom. This
+  distribution is integrated numerically in place of the single
+  chi-square of the independent case. It is more skewed than a
+  Satterthwaite approximation suggests, which matters when icc is large.
+
+Under these assumptions the calculation is exact (it agrees with
+simulation to Monte Carlo error), and `m = 1` gives exactly the
+published method. The simple design effect 1 + (m - 1) \\ icc applied to
+the whole sample size overstates the penalty, because the SD has a much
+smaller design effect, 1 + (m - 1) \\ icc^2. Unbalanced designs, other
+correlation structures, or several levels of nesting are not covered;
+use simulation for those.
+
+`icc` is the ICC of the *differences*, which can be estimated from pilot
+data with an intercept-only mixed model on the differences (e.g.
+`lme4::lmer(diff ~ 1 + (1 | id))`), and `sigma` is then the square root
+of the sum of the two variance components.
+
 ## Assumptions
 
 - The paired differences are normally distributed
 
 - The variance is constant across the range of measurement
 
-- Pairs are independent
+- Pairs are independent, or (with `m > 1`) follow the balanced compound
+  symmetry model in the "Clustered data" section
 
 ## References
 
@@ -193,6 +249,16 @@ agreement between two methods of clinical measurement. *The Lancet*,
 
 Hahn, G.J. and Meeker, W.Q. (1991). *Statistical Intervals: A Guide for
 Practitioners*. John Wiley & Sons, New York.
+
+Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+measurement with multiple observations per individual. *Journal of
+Biopharmaceutical Statistics*, **17**(4), 571-582.
+[doi:10.1080/10543400701329422](https://doi.org/10.1080/10543400701329422)
+
+Mee, R.W. and Owen, D.B. (1983). Improved factors for one-sided
+tolerance limits for balanced one-way ANOVA random model. *Journal of
+the American Statistical Association*, **78**(384), 901-905.
+[doi:10.1080/01621459.1983.10477038](https://doi.org/10.1080/01621459.1983.10477038)
 
 Odeh, R.E. and Owen, D.B. (1980). *Tables for Normal Tolerance Limits,
 Sampling Plans, and Screening*. Marcel Dekker, Inc., New York.
@@ -221,12 +287,17 @@ agree_expected_half(
 #>               n = 155
 #>      conf.level = 0.95
 #>    target.delta = 44.1225
-#>    actual.delta = 44.1113
+#>    actual.delta = 44.11132
 #>           pstar = 0.95
 #>           sigma = 19.61
 #>               g = 2.253084
 #>               c = 1.001625
 #>              zp = 1.959964
+#>               m = 1
+#>             icc = 0
+#>           n.obs = 155
+#> 
+#> NOTE: n is the number of pairs. Two measurements per unit; one for each method.
 #> 
 # Expected result: n = 155
 
@@ -245,11 +316,44 @@ agree_expected_half(
 #>               n = 26
 #>      conf.level = 0.95
 #>    target.delta = 2.4
-#>    actual.delta = 2.382023
+#>    actual.delta = 2.382019
 #>           pstar = 0.9
 #>           sigma = 1
-#>               g = 2.405957
+#>               g = 2.405953
 #>               c = 1.010047
 #>              zp = 1.644854
+#>               m = 1
+#>             icc = 0
+#>           n.obs = 26
+#> 
+#> NOTE: n is the number of pairs. Two measurements per unit; one for each method.
+#> 
+
+# Example 3: Clustered data, 3 pairs per subject, ICC of the differences 0.2
+# (n is then the number of subjects)
+agree_expected_half(
+  delta = 2.4,
+  pstar = 0.90,
+  m = 3,
+  icc = 0.2
+)
+#> 
+#>      Expected half-width and sample size for limits of agreement 
+#> 
+#>               n = 10
+#>      conf.level = 0.95
+#>    target.delta = 2.4
+#>    actual.delta = 2.391907
+#>           pstar = 0.9
+#>           sigma = 1
+#>               g = 2.414812
+#>               c = 1.009576
+#>              zp = 1.644854
+#>               m = 3
+#>             icc = 0.2
+#>           n.obs = 30
+#> 
+#> NOTE: n is the number of subjects, each with m = 3 paired measurements (n.obs pairs in total).
+#>      Assumes balanced compound symmetry with ICC of the differences = 0.2.
 #> 
 ```

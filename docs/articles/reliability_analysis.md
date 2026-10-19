@@ -22,6 +22,7 @@ test:
 |----|----|
 | [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md) | One ICC |
 | [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md) | The SEM, SEE or SEP, in units, sympercents or % of the mean |
+| [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md) | The minimal detectable change (MDC) |
 | [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md), [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md) | Sample size for an ICC study |
 
 The older
@@ -595,23 +596,208 @@ The minimal detectable change (MDC), smallest detectable or real
 difference (SDD, SRD), “minimal difference” ([Weir 2005](#ref-weir2005))
 and repeatability coefficient are all the SEM scaled by \\z \sqrt{2}\\:
 for 95%, \\1.96 \sqrt{2} \times SEM\\, the change between two
-measurements that measurement error alone would exceed only 5% of the
-time. Scale the estimate and interval of
-[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md):
+measurements of one subject that measurement error alone would exceed
+only 5% of the time.
+[`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
+computes it, with an interval (the SEM interval, scaled):
 
 ``` r
 
-sem <- reli_err_test(col.names = c("t1", "t2"), data = weir)
-qnorm(0.975) * sqrt(2) * c(sem$estimate, sem$conf.int)
-#>      SEM                   
-#> 20.94635 13.84918 42.63152
+mdc_test(col.names = c("t1", "t2"), data = weir)
+#> 
+#>  Minimal detectable change (95%, two-sided) from the standard error of
+#>  measurement (two-way, consistency)
+#> 
+#> data:  t1, t2
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  13.84918 42.63152
+#> sample estimates:
+#>      MDC 
+#> 20.94635
 ```
 
-With two trials this is the half-width of the limits of agreement of
+`sided = "one.sided"` gives the MDC for a change in one stated
+direction, `k_avg` the MDC for scores that are means of several trials,
+and `scale = "log"` the MDC as a percentage (in `percent`, as an
+increase and a decrease). An existing SEM can be reused without
+refitting, as `mdc_test(sem)`. With two trials the MDC is the half-width
+of the limits of agreement of
 [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md),
 which also reports the bias between trials. Weir ([2005](#ref-weir2005))
 notes that, strictly, real change should be judged against an interval
 around the subject’s estimated true score, using the SEP.
+
+**What the MDC is not.** The MDC is a threshold for *one individual’s*
+change. It is not a threshold for an average (group) effect: the
+uncertainty of a mean change shrinks with the number of subjects, so a
+mean effect well below the MDC can be estimated precisely and be clearly
+different from zero. An effect smaller than the MDC is small relative to
+one person’s measurement noise; that does not make it noise. The MDC
+should never be used to count “responders”. An observed change mixes the
+true response with within-person variation, so even if everyone
+responded identically, some would exceed the MDC and some would not
+([Senn 2004](#ref-senn2004)). Real differences in response need a
+control group or replicated crossover designs ([Atkinson and Batterham
+2015](#ref-atkinson2015); [Senn 2016](#ref-senn2016)).
+
+**The MDC and a change that matters.** The MDC describes noise; whether
+a change *matters* needs an external anchor, such as a clinically
+important difference. Give it as `null.value` to test whether the MDC is
+below it, i.e. whether such a change can be told apart from measurement
+error:
+
+``` r
+
+mdc_test(col.names = c("t1", "t2"), data = weir, null.value = 30)
+#> 
+#>  Minimal detectable change (95%, two-sided) from the standard error of
+#>  measurement (two-way, consistency)
+#> 
+#> data:  t1, t2
+#> X-squared = 3.4125, df = 7, p-value = 0.1556
+#> alternative hypothesis: true MDC is less than 30
+#> 95 percent confidence interval:
+#>   0.00000 37.64374
+#> sample estimates:
+#>      MDC 
+#> 20.94635
+```
+
+A “smallest worthwhile change” (SWC) computed from the same reliability
+data is not such an anchor. With 0.2 times the between-subject SD
+([Hopkins 2004](#ref-hopkins2004)), its ratio to the SEM is
+\\0.2/\sqrt{1 - ICC}\\, a restatement of the ICC. Hopkins
+([2004](#ref-hopkins2004)) offers it as a default (e.g. for fitness
+tests in team sports) when no relationship to a real outcome is
+available, and it should be treated as such a fallback.
+
+### Hopkins’s smallest worthwhile change
+
+For solo athletes, Hopkins ([2004](#ref-hopkins2004)) defines the SWC as
+0.3 times the CV of top athletes’ performance from one *competition* to
+the next. Because of that race-to-race variation, evenly matched
+athletes take turns winning; simulations showed that an enhancement of
+0.3 of the CV gives a top athlete about one extra win in 10 events
+([Hopkins et al. 1999](#ref-hopkins1999)). The CV comes from
+competitions, not from the test, so it is an external anchor. The test’s
+own typical error must not be used in its place: 0.3 times it is a fixed
+11% of the MDC for every test (\\0.3 / (1.96\sqrt{2}) \approx 0.11\\),
+so it says nothing about whether a change matters.
+
+The competition CV is a typical error with competitions in place of
+trials, so
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+estimates it from repeated competition results. A few choices matter:
+
+- **Top athletes only.** Less successful athletes vary more from race to
+  race, so including the whole field makes the SWC too large.
+- **The consistency SEM (the default).** Course, weather and tactics
+  shift everyone in a race together, and placings depend on performance
+  relative to the field; the two-way consistency SEM removes those
+  shifts. `type = "agreement"` would count them as athlete variability.
+- **`method = "reml"`**, because athletes rarely compete in every event.
+- **`scale = "log"`**, as Hopkins does, so the CV is in sympercents.
+- **A short span**, such as one season, so that long-term trends in an
+  athlete’s performance are not counted as noise.
+- **The same measure as the test.** A CV for race time is not a CV for
+  power; Hopkins ([2004](#ref-hopkins2004)) suggests multiplying a time
+  CV by about 2 to 3 for mean power.
+
+Simulated results for 15 top athletes over 8 races in a season (times in
+seconds), with a within-athlete CV of 1% and some races missed:
+
+``` r
+
+set.seed(2004)
+races <- expand.grid(athlete = paste0("A", 1:15), race = paste0("R", 1:8))
+ability <- rnorm(15, 0, 0.01)  # differences between athletes
+course <- rnorm(8, 0, 0.02)    # race conditions shift everyone
+races$time <- 240 * exp(ability[races$athlete] + course[races$race] +
+                          rnorm(nrow(races), 0, 0.01))
+races <- races[runif(nrow(races)) > 0.2, ]  # missed races
+
+cv_comp <- reli_err_test(time ~ race | athlete, data = races,
+                         scale = "log", method = "reml")
+#> Warning: 14.2% of subject-by-item cells are missing. Intervals and p-values use
+#> observed-data degrees of freedom and are approximate; they may be liberal as
+#> missingness increases. Consider boot = TRUE.
+cv_comp
+#> 
+#>  Standard error of measurement (two-way, consistency), log scale
+#>  (sympercents) (REML)
+#> 
+#> data:  time ~ race | athlete
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  0.9376954 1.2782908
+#> sample estimates:
+#> SEM (sympercent) 
+#>         1.081671
+swc <- 0.3 * unname(cv_comp$estimate)
+swc
+#> [1] 0.3245013
+```
+
+A test can then be judged against the SWC in two ways; here, a simulated
+laboratory time trial with 12 athletes and 2 trials. Hopkins’s criterion
+is that the noise is smaller than the signal: the test’s typical error
+below the SWC. That is the test of the SEM against `null.value = swc`:
+
+``` r
+
+lab <- data.frame(id = rep(paste0("S", 1:12), 2),
+                  trial = rep(c("t1", "t2"), each = 12))
+lab$time <- 300 * exp(rep(rnorm(12, 0, 0.02), 2) + rnorm(24, 0, 0.008))
+lab_sem <- reli_err_test(time ~ trial | id, data = lab, scale = "log",
+                         null.value = swc)
+lab_sem
+#> 
+#>  Standard error of measurement (two-way, consistency), log scale
+#>  (sympercents)
+#> 
+#> data:  time ~ trial | id
+#> X-squared = 104.66, df = 11, p-value = 1
+#> alternative hypothesis: true SEM (sympercent) is less than 0.3245013
+#> 95 percent confidence interval:
+#>  0.000000 1.552118
+#> sample estimates:
+#> SEM (sympercent) 
+#>         1.000956
+```
+
+The stricter question, whether one athlete’s change the size of the SWC
+can be told apart from measurement error with 95% confidence, is the MDC
+against the same value:
+
+``` r
+
+lab_mdc <- mdc_test(lab_sem, null.value = swc)
+lab_mdc
+#> 
+#>  Minimal detectable change (95%, two-sided) from the standard error of
+#>  measurement (two-way, consistency), log scale (sympercents)
+#> 
+#> data:  time ~ trial | id
+#> X-squared = 804.11, df = 11, p-value = 1
+#> alternative hypothesis: true MDC (sympercent) is less than 0.3245013
+#> 95 percent confidence interval:
+#>  0.000000 4.302172
+#> sample estimates:
+#> MDC (sympercent) 
+#>         2.774458
+```
+
+Here the time trial’s typical error (1.00%) is 3.1 times the SWC
+(0.32%), and its MDC (2.8%) is 9 times it. That is common ([Hopkins
+2004](#ref-hopkins2004)): a change of SWC size in one athlete cannot be
+distinguished from noise with this test. Averaging \\k\\ trials
+(`k_avg`) shrinks the error by \\\sqrt{k}\\, but bringing it down to the
+SWC would take about 10 trials. The SWC is itself an estimate (0.3 times
+the interval for the CV gives 0.28 to 0.38), and using it as
+`null.value` treats it as known.
 
 ## Planning a reliability study
 
@@ -699,7 +885,7 @@ reli_aov(data = dat, wide = TRUE, col.names = judges)
 #> 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.67567   0.9859
 ```
 
-Since version 0.3.1 they use the same engine as
+Since version 0.4.0 they use the same engine as
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
 In particular, their ICC intervals are now two-sided. Previous versions
 used `conf.level` in each tail, so a “95%” interval was really a 90%
@@ -828,6 +1014,11 @@ model-based kappa, and comparisons between groups of raters or subjects.
 
 ## References
 
+Atkinson, Greg, and Alan M. Batterham. 2015. “True and False
+Interindividual Differences in the Physiological Response to an
+Intervention.” *Experimental Physiology* 100 (6): 577–88.
+<https://doi.org/10.1113/EP085070>.
+
 Atkinson, Greg, and Alan M. Nevill. 1998. “Statistical Methods for
 Assessing Measurement Error (Reliability) in Variables Relevant to
 Sports Medicine.” *Sports Medicine* 26 (4): 217–38.
@@ -855,6 +1046,15 @@ s-Values.” *The American Statistician* 73 (sup1): 106–14.
 Hopkins, Will G. 2000. “Measures of Reliability in Sports Medicine and
 Science.” *Sports Medicine* 30 (1): 1–15.
 <https://doi.org/10.2165/00007256-200030010-00001>.
+
+Hopkins, Will G. 2004. “How to Interpret Changes in an Athletic
+Performance Test.” *Sportscience* 8: 1–7.
+<https://www.sportsci.org/jour/04/wghtests.htm>.
+
+Hopkins, Will G., John A. Hawley, and Louise M. Burke. 1999. “Design and
+Analysis of Research on Sport Performance Enhancement.” *Medicine &
+Science in Sports & Exercise* 31 (3): 472–85.
+<https://doi.org/10.1097/00005768-199903000-00018>.
 
 Koo, Terry K., and Mae Y. Li. 2016. “A Guideline of Selecting and
 Reporting Intraclass Correlation Coefficients for Reliability Research.”
@@ -890,6 +1090,14 @@ Compatibility and Surprise.” *BMC Medical Research Methodology* 20: 244.
 
 Satterthwaite, Franklin E. 1946. “An Approximate Distribution of
 Estimates of Variance Components.” *Biometrics Bulletin* 2 (6): 110–14.
+
+Senn, Stephen. 2004. “Individual Response to Treatment: Is It a Valid
+Assumption?” *BMJ* 329 (7472): 966–68.
+<https://doi.org/10.1136/bmj.329.7472.966>.
+
+Senn, Stephen. 2016. “Mastering Variation: Variance Components and
+Personalised Medicine.” *Statistics in Medicine* 35 (7): 966–77.
+<https://doi.org/10.1002/sim.6739>.
 
 Shrout, Patrick E, and Joseph L Fleiss. 1979. “Intraclass Correlations:
 Uses in Assessing Rater Reliability.” *Psychological Bulletin* 86 (2):

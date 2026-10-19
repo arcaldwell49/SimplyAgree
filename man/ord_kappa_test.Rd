@@ -84,7 +84,8 @@ errors and intervals (\code{subgroups}).}
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Estimates the model-based kappa \eqn{\kappa_m} of Nelson and Edwards
-(2015) and Nelson, Mitani and Edwards (2017): a chance-corrected measure of
+(2015) and Nelson, Mitani and Edwards (2017), and please cite these papers if this function is utilized.
+This is a chance-corrected measure of
 exact agreement between raters who classify subjects on an ordinal scale.
 It is computed from an ordinal (cumulative probit) generalized linear mixed
 model with crossed random effects for subjects and raters, so it describes

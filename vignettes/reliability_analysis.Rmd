@@ -441,16 +441,100 @@ i.e. whether such a change can be told apart from measurement error:
 mdc_test(col.names = c("t1", "t2"), data = weir, null.value = 30)
 ```
 
-A "smallest worthwhile change" computed from the same reliability data is
-not such an anchor. With 0.2 times the between-subject SD [@hopkins2004],
-its ratio to the SEM is \(0.2/\sqrt{1 - ICC}\), a restatement of the ICC;
-with 0.3 times the test's own typical error it is a fixed 11% of the MDC.
-@hopkins2004 offers 0.2 SD as a default when nothing else is available.
-Hopkins also reports the 0.3 of the CV for elite athletes. This uses the variability
-of performance between *competitions*, chosen because an enhancement of that
-size raises the best athlete's chance of winning by about 10 percentage
-points [@hopkins1999], so it is an external anchor that can be given as
-`null.value`. See `?mdc_test` for details.
+A "smallest worthwhile change" (SWC) computed from the same reliability
+data is not such an anchor. With 0.2 times the between-subject SD
+[@hopkins2004], its ratio to the SEM is \(0.2/\sqrt{1 - ICC}\), a
+restatement of the ICC. @hopkins2004 offers it as a default (e.g. for
+fitness tests in team sports) when no relationship to a real outcome is
+available, and it should be treated as such a fallback.
+
+## Hopkins's smallest worthwhile change (SWC)
+
+I want give a quick example of Hopkin's SWC here because this quick example and thought experiment was enlightening for me. @hopkins2004 defined the SWC as 0.3 times the CV of top
+athletes' performance from one *competition* to the next. Because of that
+race-to-race variation (let's assume track athletes here), evenly matched athletes take turns winning;
+simulations showed that an enhancement of 0.3 of the CV gives a top athlete
+about one extra win in 10 events [@hopkins1999]. The CV comes from
+competitions, not from the test, so it is an external anchor. The test's own
+typical error must not be used in its place. To be clear here, 0.3 times the CV (from SEM) is a fixed 11% of
+the MDC for every test (\(0.3 / (1.96\sqrt{2}) \approx 0.11\)), so it says
+nothing about whether a change matters for competition.
+
+The competition CV is a typical error with competitions in place of trials,
+so `reli_err_test()` estimates it from repeated competition results. A few
+choices matter:
+
+- **Top athletes only.** Less successful athletes may vary more from race to
+  race, so including the whole field makes the SWC too large. So, I'd be careful about who you include.
+- **The consistency SEM (the default).** Course, weather and tactics shift
+  everyone in a race together, and placings depend on performance relative
+  to the field; the two-way consistency SEM removes those shifts.
+  `type = "agreement"` would count them as athlete variability.
+- **`method = "reml"`**, because athletes rarely compete in every event.
+- **`scale = "log"`**, as Hopkins does, so the CV is in sympercents.
+- **A short span**, such as one season, so that long-term trends in an
+  athlete's performance are not counted as noise.
+- **The same measure as the test.** A CV for race time is not a CV for
+  power; @hopkins2004 suggests multiplying a time CV by about 2 to 3 for
+  mean power (i.e., applying it to the test-retest data).
+
+Simulated results for 15 top athletes over 8 races in a season (times in
+seconds), with a within-athlete CV of 1% and some races missed:
+
+```{r}
+set.seed(2004)
+races <- expand.grid(athlete = paste0("A", 1:15), race = paste0("R", 1:8))
+ability <- rnorm(15, 0, 0.01)  # differences between athletes
+course <- rnorm(8, 0, 0.02)    # race conditions shift everyone
+races$time <- 240 * exp(ability[races$athlete] + course[races$race] +
+                          rnorm(nrow(races), 0, 0.01))
+races <- races[runif(nrow(races)) > 0.2, ]  # missed races
+
+cv_comp <- reli_err_test(time ~ race | athlete, data = races,
+                         scale = "log", method = "reml")
+cv_comp
+swc <- 0.3 * unname(cv_comp$estimate)
+swc
+```
+
+A test can then be judged against the SWC in two ways; here, a simulated
+laboratory time trial with 12 athletes and 2 trials. Hopkins's criterion is
+that the noise is smaller than the signal: the test's typical error below
+the SWC. That is the test of the SEM against `null.value = swc`:
+
+```{r}
+lab <- data.frame(id = rep(paste0("S", 1:12), 2),
+                  trial = rep(c("t1", "t2"), each = 12))
+lab$time <- 300 * exp(rep(rnorm(12, 0, 0.02), 2) + rnorm(24, 0, 0.008))
+lab_sem <- reli_err_test(time ~ trial | id, data = lab, scale = "log",
+                         null.value = swc)
+lab_sem
+```
+
+The stricter question, whether one athlete's change the size of the SWC can
+be told apart from measurement error with 95% confidence, is the MDC against
+the same value:
+
+```{r}
+lab_mdc <- mdc_test(lab_sem, null.value = swc)
+lab_mdc
+```
+
+```{r, include = FALSE}
+te <- unname(lab_sem$estimate)
+swc_ci <- 0.3 * as.numeric(cv_comp$conf.int)
+```
+
+Here the time trial's typical error (`r sprintf("%.2f", te)`%) is
+`r round(te / swc, 1)` times the SWC (`r sprintf("%.2f", swc)`%), and its MDC
+(`r round(unname(lab_mdc$estimate), 1)`%) is
+`r round(unname(lab_mdc$estimate) / swc)` times it. That is common
+[@hopkins2004]: a change of SWC size in one athlete cannot be distinguished
+from noise with this test. Averaging \(k\) trials (`k_avg`) shrinks the
+error by \(\sqrt{k}\), but bringing it down to the SWC would take about
+`r ceiling((te / swc)^2)` trials. The SWC is itself an estimate (0.3 times
+the interval for the CV gives `r sprintf("%.2f", swc_ci[1])` to
+`r sprintf("%.2f", swc_ci[2])`), and using it as `null.value` treats it as known.
 
 # Planning a reliability study
 

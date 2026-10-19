@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-18</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/reliability_analysis.Rmd" class="external-link"><code>vignettes/reliability_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>reliability_analysis.Rmd</code></div>
@@ -127,6 +127,10 @@ interval and, optionally, a test:</p>
 <td>The SEM, SEE or SEP, in units, sympercents or % of the mean</td>
 </tr>
 <tr class="odd">
+<td><code><a href="../reference/mdc_test.html">mdc_test()</a></code></td>
+<td>The minimal detectable change (MDC)</td>
+</tr>
+<tr class="even">
 <td>
 <code><a href="../reference/power_icc.html">power_icc()</a></code>, <code><a href="../reference/precision_icc.html">precision_icc()</a></code>
 </td>
@@ -764,19 +768,196 @@ estimate.</p>
 difference (SDD, SRD), “minimal difference” <span class="citation">(<a href="#ref-weir2005">Weir 2005</a>)</span> and repeatability coefficient
 are all the SEM scaled by <span class="math inline">\(z
 \sqrt{2}\)</span>: for 95%, <span class="math inline">\(1.96 \sqrt{2}
-\times SEM\)</span>, the change between two measurements that
-measurement error alone would exceed only 5% of the time. Scale the
-estimate and interval of <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code>:</p>
+\times SEM\)</span>, the change between two measurements of one subject
+that measurement error alone would exceed only 5% of the time.
+<code><a href="../reference/mdc_test.html">mdc_test()</a></code> computes it, with an interval (the SEM interval,
+scaled):</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sem</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="fl">0.975</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">sem</span><span class="op">$</span><span class="va">estimate</span>, <span class="va">sem</span><span class="op">$</span><span class="va">conf.int</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      SEM                   </span></span>
-<span><span class="co">#&gt; 20.94635 13.84918 42.63152</span></span></code></pre></div>
-<p>With two trials this is the half-width of the limits of agreement of
-<code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, which also reports the bias between
-trials. <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span> notes that, strictly, real change
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  13.84918 42.63152</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 20.94635</span></span></code></pre></div>
+<p><code>sided = "one.sided"</code> gives the MDC for a change in one
+stated direction, <code>k_avg</code> the MDC for scores that are means
+of several trials, and <code>scale = "log"</code> the MDC as a
+percentage (in <code>percent</code>, as an increase and a decrease). An
+existing SEM can be reused without refitting, as
+<code>mdc_test(sem)</code>. With two trials the MDC is the half-width of
+the limits of agreement of <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, which also
+reports the bias between trials. <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span> notes that, strictly, real change
 should be judged against an interval around the subject’s estimated true
 score, using the SEP.</p>
+<p><strong>What the MDC is not.</strong> The MDC is a threshold for
+<em>one individual’s</em> change. It is not a threshold for an average
+(group) effect: the uncertainty of a mean change shrinks with the number
+of subjects, so a mean effect well below the MDC can be estimated
+precisely and be clearly different from zero. An effect smaller than the
+MDC is small relative to one person’s measurement noise; that does not
+make it noise. The MDC should never be used to count “responders”. An
+observed change mixes the true response with within-person variation, so
+even if everyone responded identically, some would exceed the MDC and
+some would not <span class="citation">(<a href="#ref-senn2004">Senn
+2004</a>)</span>. Real differences in response need a control group or
+replicated crossover designs <span class="citation">(<a href="#ref-atkinson2015">Atkinson and Batterham 2015</a>; <a href="#ref-senn2016">Senn 2016</a>)</span>.</p>
+<p><strong>The MDC and a change that matters.</strong> The MDC describes
+noise; whether a change <em>matters</em> needs an external anchor, such
+as a clinically important difference. Give it as <code>null.value</code>
+to test whether the MDC is below it, i.e. whether such a change can be
+told apart from measurement error:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, null.value <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; X-squared = 3.4125, df = 7, p-value = 0.1556</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true MDC is less than 30</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   0.00000 37.64374</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 20.94635</span></span></code></pre></div>
+<p>A “smallest worthwhile change” (SWC) computed from the same
+reliability data is not such an anchor. With 0.2 times the
+between-subject SD <span class="citation">(<a href="#ref-hopkins2004">Hopkins 2004</a>)</span>, its ratio to the SEM
+is <span class="math inline">\(0.2/\sqrt{1 - ICC}\)</span>, a
+restatement of the ICC. <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> offers it as a default
+(e.g. for fitness tests in team sports) when no relationship to a real
+outcome is available, and it should be treated as such a fallback.</p>
+<div class="section level3">
+<h3 id="hopkinss-smallest-worthwhile-change">Hopkins’s smallest worthwhile change<a class="anchor" aria-label="anchor" href="#hopkinss-smallest-worthwhile-change"></a>
+</h3>
+<p>For solo athletes, <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> defines the SWC as 0.3 times
+the CV of top athletes’ performance from one <em>competition</em> to the
+next. Because of that race-to-race variation, evenly matched athletes
+take turns winning; simulations showed that an enhancement of 0.3 of the
+CV gives a top athlete about one extra win in 10 events <span class="citation">(<a href="#ref-hopkins1999">Hopkins et al.
+1999</a>)</span>. The CV comes from competitions, not from the test, so
+it is an external anchor. The test’s own typical error must not be used
+in its place: 0.3 times it is a fixed 11% of the MDC for every test
+(<span class="math inline">\(0.3 / (1.96\sqrt{2}) \approx
+0.11\)</span>), so it says nothing about whether a change matters.</p>
+<p>The competition CV is a typical error with competitions in place of
+trials, so <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> estimates it from repeated
+competition results. A few choices matter:</p>
+<ul>
+<li>
+<strong>Top athletes only.</strong> Less successful athletes vary
+more from race to race, so including the whole field makes the SWC too
+large.</li>
+<li>
+<strong>The consistency SEM (the default).</strong> Course, weather
+and tactics shift everyone in a race together, and placings depend on
+performance relative to the field; the two-way consistency SEM removes
+those shifts. <code>type = "agreement"</code> would count them as
+athlete variability.</li>
+<li>
+<strong><code>method = "reml"</code></strong>, because athletes
+rarely compete in every event.</li>
+<li>
+<strong><code>scale = "log"</code></strong>, as Hopkins does, so the
+CV is in sympercents.</li>
+<li>
+<strong>A short span</strong>, such as one season, so that long-term
+trends in an athlete’s performance are not counted as noise.</li>
+<li>
+<strong>The same measure as the test.</strong> A CV for race time is
+not a CV for power; <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> suggests multiplying a time CV
+by about 2 to 3 for mean power.</li>
+</ul>
+<p>Simulated results for 15 top athletes over 8 races in a season (times
+in seconds), with a within-athlete CV of 1% and some races missed:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2004</span><span class="op">)</span></span>
+<span><span class="va">races</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>athlete <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span>, race <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"R"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ability</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">0</span>, <span class="fl">0.01</span><span class="op">)</span>  <span class="co"># differences between athletes</span></span>
+<span><span class="va">course</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">0</span>, <span class="fl">0.02</span><span class="op">)</span>    <span class="co"># race conditions shift everyone</span></span>
+<span><span class="va">races</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fl">240</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">ability</span><span class="op">[</span><span class="va">races</span><span class="op">$</span><span class="va">athlete</span><span class="op">]</span> <span class="op">+</span> <span class="va">course</span><span class="op">[</span><span class="va">races</span><span class="op">$</span><span class="va">race</span><span class="op">]</span> <span class="op">+</span></span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">races</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">races</span> <span class="op">&lt;-</span> <span class="va">races</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">races</span><span class="op">)</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.2</span>, <span class="op">]</span>  <span class="co"># missed races</span></span>
+<span></span>
+<span><span class="va">cv_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span><span class="va">time</span> <span class="op">~</span> <span class="va">race</span> <span class="op">|</span> <span class="va">athlete</span>, data <span class="op">=</span> <span class="va">races</span>,</span>
+<span>                         scale <span class="op">=</span> <span class="st">"log"</span>, method <span class="op">=</span> <span class="st">"reml"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: 14.2% of subject-by-item cells are missing. Intervals and p-values use</span></span>
+<span><span class="co">#&gt; observed-data degrees of freedom and are approximate; they may be liberal as</span></span>
+<span><span class="co">#&gt; missingness increases. Consider boot = TRUE.</span></span>
+<span><span class="va">cv_comp</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency), log scale</span></span>
+<span><span class="co">#&gt;  (sympercents) (REML)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  time ~ race | athlete</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.9376954 1.2782908</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; SEM (sympercent) </span></span>
+<span><span class="co">#&gt;         1.081671</span></span>
+<span><span class="va">swc</span> <span class="op">&lt;-</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">cv_comp</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span></span>
+<span><span class="va">swc</span></span>
+<span><span class="co">#&gt; [1] 0.3245013</span></span></code></pre></div>
+<p>A test can then be judged against the SWC in two ways; here, a
+simulated laboratory time trial with 12 athletes and 2 trials. Hopkins’s
+criterion is that the noise is smaller than the signal: the test’s
+typical error below the SWC. That is the test of the SEM against
+<code>null.value = swc</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                  trial <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">12</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">lab</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fl">300</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">0</span>, <span class="fl">0.02</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">24</span>, <span class="fl">0</span>, <span class="fl">0.008</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">lab_sem</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span><span class="va">time</span> <span class="op">~</span> <span class="va">trial</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">lab</span>, scale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>                         null.value <span class="op">=</span> <span class="va">swc</span><span class="op">)</span></span>
+<span><span class="va">lab_sem</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency), log scale</span></span>
+<span><span class="co">#&gt;  (sympercents)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  time ~ trial | id</span></span>
+<span><span class="co">#&gt; X-squared = 104.66, df = 11, p-value = 1</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true SEM (sympercent) is less than 0.3245013</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.000000 1.552118</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; SEM (sympercent) </span></span>
+<span><span class="co">#&gt;         1.000956</span></span></code></pre></div>
+<p>The stricter question, whether one athlete’s change the size of the
+SWC can be told apart from measurement error with 95% confidence, is the
+MDC against the same value:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lab_mdc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span><span class="va">lab_sem</span>, null.value <span class="op">=</span> <span class="va">swc</span><span class="op">)</span></span>
+<span><span class="va">lab_mdc</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, consistency), log scale (sympercents)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  time ~ trial | id</span></span>
+<span><span class="co">#&gt; X-squared = 804.11, df = 11, p-value = 1</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true MDC (sympercent) is less than 0.3245013</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.000000 4.302172</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; MDC (sympercent) </span></span>
+<span><span class="co">#&gt;         2.774458</span></span></code></pre></div>
+<p>Here the time trial’s typical error (1.00%) is 3.1 times the SWC
+(0.32%), and its MDC (2.8%) is 9 times it. That is common <span class="citation">(<a href="#ref-hopkins2004">Hopkins 2004</a>)</span>: a
+change of SWC size in one athlete cannot be distinguished from noise
+with this test. Averaging <span class="math inline">\(k\)</span> trials
+(<code>k_avg</code>) shrinks the error by <span class="math inline">\(\sqrt{k}\)</span>, but bringing it down to the SWC
+would take about 10 trials. The SWC is itself an estimate (0.3 times the
+interval for the CV gives 0.28 to 0.38), and using it as
+<code>null.value</code> treats it as known.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="planning-a-reliability-study">Planning a reliability study<a class="anchor" aria-label="anchor" href="#planning-a-reliability-study"></a>
@@ -786,7 +967,7 @@ number of subjects (<code>n</code>), measurements per subject
 (<code>k</code>), or the ICC under the alternative needed for a given
 power. For example, the subjects needed to show, with two trials and 80%
 power, that the ICC is above 0.6 when it is really 0.8:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">2</span>, power <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>          alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -806,7 +987,7 @@ power, that the ICC is above 0.6 when it is really 0.8:</p>
 interval: here, the subjects needed for a 95% interval no wider than 0.2
 around an ICC of 0.8, with three trials, with 80% assurance (the
 probability that the interval is that narrow).</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/precision_icc.html">precision_icc</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">0.2</span>, assurance <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;      Precision (confidence interval width) calculation for the one-way ICC, ICC(1) (exact F distribution) </span></span>
@@ -835,7 +1016,7 @@ how to use these calculations as a guide for agreement ICCs.</p>
 <p><code><a href="../reference/reli_stats.html">reli_stats()</a></code> (linear mixed model) and
 <code><a href="../reference/reli_stats.html">reli_aov()</a></code> (analysis of variance) return all six ICCs, the
 CV, SEM, SEE and SEP at once. They are superseded but still work.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_stats.html">reli_aov</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="va">judges</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficient of Variation (%):  19.1</span></span>
@@ -851,7 +1032,7 @@ CV, SEM, SEE and SEP at once. They are superseded but still work.</p>
 <span><span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.88444   0.9124</span></span>
 <span><span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.07114   0.9272</span></span>
 <span><span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.67567   0.9859</span></span></code></pre></div>
-<p>Since version 0.3.1 they use the same engine as
+<p>Since version 0.4.0 they use the same engine as
 <code><a href="../reference/icc_test.html">icc_test()</a></code>. In particular, their ICC intervals are now
 two-sided. Previous versions used <code>conf.level</code> in each tail,
 so a “95%” interval was really a 90% interval; the old numbers at
@@ -999,7 +1180,7 @@ such as Gwet’s AC1, Fleiss’ kappa or Krippendorff’s alpha
 (<code><a href="../reference/cac_test.html">cac_test()</a></code>), or, for ordinal ratings from many raters, by
 the model-based kappa of <span class="citation">Nelson and Edwards (<a href="#ref-nelson2015">2015</a>)</span> (<code><a href="../reference/ord_kappa_test.html">ord_kappa_test()</a></code>).
 For example, with 4 raters on a 5-point scale:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ratings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
 <span>  Rater2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
@@ -1028,6 +1209,12 @@ subjects.</p>
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-atkinson2015" class="csl-entry">
+Atkinson, Greg, and Alan M. Batterham. 2015. <span>“True and False
+Interindividual Differences in the Physiological Response to an
+Intervention.”</span> <em>Experimental Physiology</em> 100 (6): 577–88.
+<a href="https://doi.org/10.1113/EP085070" class="external-link">https://doi.org/10.1113/EP085070</a>.
+</div>
 <div id="ref-atkinson1998" class="csl-entry">
 Atkinson, Greg, and Alan M. Nevill. 1998. <span>“Statistical Methods for
 Assessing Measurement Error (Reliability) in Variables Relevant to
@@ -1057,6 +1244,16 @@ s-Values.”</span> <em>The American Statistician</em> 73 (sup1): 106–14.
 <div id="ref-hopkins2000" class="csl-entry">
 Hopkins, Will G. 2000. <span>“Measures of Reliability in Sports Medicine
 and Science.”</span> <em>Sports Medicine</em> 30 (1): 1–15. <a href="https://doi.org/10.2165/00007256-200030010-00001" class="external-link">https://doi.org/10.2165/00007256-200030010-00001</a>.
+</div>
+<div id="ref-hopkins2004" class="csl-entry">
+Hopkins, Will G. 2004. <span>“How to Interpret Changes in an Athletic
+Performance Test.”</span> <em>Sportscience</em> 8: 1–7. <a href="https://www.sportsci.org/jour/04/wghtests.htm" class="external-link">https://www.sportsci.org/jour/04/wghtests.htm</a>.
+</div>
+<div id="ref-hopkins1999" class="csl-entry">
+Hopkins, Will G., John A. Hawley, and Louise M. Burke. 1999.
+<span>“Design and Analysis of Research on Sport Performance
+Enhancement.”</span> <em>Medicine &amp; Science in Sports &amp;
+Exercise</em> 31 (3): 472–85. <a href="https://doi.org/10.1097/00005768-199903000-00018" class="external-link">https://doi.org/10.1097/00005768-199903000-00018</a>.
 </div>
 <div id="ref-koo2016" class="csl-entry">
 Koo, Terry K., and Mae Y. Li. 2016. <span>“A Guideline of Selecting and
@@ -1100,6 +1297,15 @@ Methodology</em> 20: 244. <a href="https://doi.org/10.1186/s12874-020-01105-9" c
 Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
 Estimates of Variance Components.”</span> <em>Biometrics Bulletin</em> 2
 (6): 110–14.
+</div>
+<div id="ref-senn2004" class="csl-entry">
+Senn, Stephen. 2004. <span>“Individual Response to Treatment: Is It a
+Valid Assumption?”</span> <em>BMJ</em> 329 (7472): 966–68. <a href="https://doi.org/10.1136/bmj.329.7472.966" class="external-link">https://doi.org/10.1136/bmj.329.7472.966</a>.
+</div>
+<div id="ref-senn2016" class="csl-entry">
+Senn, Stephen. 2016. <span>“Mastering Variation: Variance Components and
+Personalised Medicine.”</span> <em>Statistics in Medicine</em> 35 (7):
+966–77. <a href="https://doi.org/10.1002/sim.6739" class="external-link">https://doi.org/10.1002/sim.6739</a>.
 </div>
 <div id="ref-shrout1979" class="csl-entry">
 Shrout, Patrick E, and Joseph L Fleiss. 1979. <span>“Intraclass

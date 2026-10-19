@@ -324,10 +324,10 @@ measurement rather than to the overall mean.
 
 **Minimal detectable change.** The minimal detectable change (MDC),
 smallest real difference, or repeatability coefficient is a scaled SEM:
-\\1.96 \sqrt{2} SEM\\ for 95% (Weir, 2005, eq. 13). Scale the estimate
-and interval, e.g.
-`qnorm(0.975) * sqrt(2) * c(res$estimate, res$conf.int)`. With two
-trials,
+\\1.96 \sqrt{2} SEM\\ for 95% (Weir, 2005, eq. 13).
+[`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
+computes it, with its interval and a test, from the data or from an SEM
+result of this function. With two trials,
 [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
 gives the same quantity as the half width of the limits of agreement,
 with the bias reported separately.

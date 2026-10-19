@@ -228,6 +228,8 @@ limits of agreement with multiple observations per individual.
   **\[maturing\]** : Intraclass Correlation Coefficient Test
 - [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
   **\[maturing\]** : Measurement Error Test
+- [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
+  **\[experimental\]** : Minimal Detectable Change
 - [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
   **\[maturing\]** : Power and Sample Size for an Intraclass Correlation
   Test

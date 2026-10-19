@@ -93,12 +93,16 @@ that matters, and is returned as an object of class \code{"htest"}.
 }
 \details{
 \strong{Estimate.} A change score is the difference between two measurements,
-each with error SEM, so its error SD is \eqn{\sqrt{2} \, SEM}, and
-\deqn{MDC = z \sqrt{2} \, SEM / \sqrt{k_{avg}},}
+each with error SEM, so its error SD is \eqn{\sqrt{2} \cdot SEM}{sqrt(2) * SEM}, and
+\deqn{MDC = \frac{z \cdot \sqrt{2} \cdot SEM}{\sqrt{k_{avg}}},}{MDC = z * sqrt(2) * SEM / sqrt(k_avg),}
 with \eqn{z} the standard normal quantile for \code{mdc.level} (1.96 for a
-two-sided MDC95; Weir, 2005, eq. 13). The SEM is from \code{\link[=reli_err_test]{reli_err_test()}},
+two-sided MDC95; Weir, 2005, eq. 13) and \eqn{k_{avg}}{k_avg} the number
+of measurements averaged to give the score at each occasion (\code{k_avg};
+1 for single measurements). The mean of \eqn{k_{avg}}{k_avg} measurements
+has error \eqn{SEM / \sqrt{k_{avg}}}{SEM / sqrt(k_avg)}, so averaging
+shrinks the MDC by the same factor. The SEM is from \code{\link[=reli_err_test]{reli_err_test()}},
 with the same \code{model}, \code{type} and \code{scale} choices; the defaults give the
-typical error of Hopkins (2000), \eqn{\sqrt{MS_E}}. With two trials the
+typical error of Hopkins (2000), \eqn{\sqrt{MS_E}}{sqrt(MS_E)}. With two trials the
 MDC equals the half-width of the limits of agreement of
 \code{\link[=agreement_limit]{agreement_limit()}}, which also reports the bias between trials.
 
@@ -112,13 +116,13 @@ equivalent percentage increase and decrease, which differ:
 
 \strong{An individual threshold, not a group one.} The MDC applies to a single
 individual's change between two measurements. It is not a threshold for
-an average (group) effect: the uncertainty in a mean change shrinks with
+an average (group) effect. The uncertainty in a mean change shrinks with
 the number of subjects (its standard error is about
 \eqn{\sqrt{2} \, SEM / \sqrt{n}}), so a mean effect well below the MDC can
 be estimated precisely and be clearly different from zero. Judge a mean
 effect by its own confidence interval. An effect smaller than the MDC is
 small relative to one person's measurement noise; that does not make it
-noise, and it does not show that the effect is absent.
+noise itself, and it does not show that the effect is absent!
 
 Nor should the MDC be used to count "responders". An individual's observed
 change mixes their true response with within-person variation from
@@ -131,34 +135,34 @@ treated group compared with a control group, or from replicated
 crossover designs (Atkinson & Batterham, 2015; Senn, 2016).
 
 \strong{The MDC and the smallest worthwhile change.} The MDC describes
-measurement noise: how large an observed change must be before it can be
-distinguished from error. Whether a change \emph{matters} is a separate
-question that the reliability data cannot answer: it needs an external
+measurement noise. It answers the question: how large an observed change must be before it can be
+distinguished from error? Whether a change \emph{matters} is a separate
+question that the reliability data cannot answer. There needs to be an external
 anchor, such as a clinically important difference or a change that
 alters competitive outcomes. Give that value as \code{null.value} (with the
 default \code{alternative = "less"}) to test whether the MDC is below it.
 
 A "smallest worthwhile change" (SWC) computed from the same reliability
-data cannot serve as that anchor; the two common versions are circular.
-With SWC = 0.2 times the between-subject SD (Hopkins, 2004),
-\eqn{SWC / SEM = 0.2 / \sqrt{1 - ICC}}, a restatement of the ICC. With
-SWC = 0.3 times the test's own typical error,
-\eqn{SWC / MDC = 0.3 / (1.96 \sqrt{2}) \approx 0.11} for every test, so
-the SWC is a fixed fraction of the MDC by construction. Hopkins (2004)
-presents 0.2 times the between-subject SD as a default for when no
-relationship to a real outcome is available, and it should be treated as
-such a fallback.
+data cannot serve as that anchor. With SWC = 0.2 times the
+between-subject SD (Hopkins, 2004),
+\eqn{SWC / SEM = 0.2 / \sqrt{1 - ICC}}{SWC / SEM = 0.2 / sqrt(1 - ICC)},
+a restatement of the ICC. Hopkins (2004) offers it as a default (e.g. for
+fitness tests in team sports) when no relationship to a real outcome is
+available, and it should be treated as such a fallback.
 
-Hopkins's 0.3 times the CV has a different source: the within-athlete
-variability between \emph{competitions}, that is, the typical error of the
-event itself, estimated from repeated competition results. Simulations by
-Hopkins, Hawley and Burke (1999) showed that an enhancement of 0.3 of
-that CV raises the best athlete's chance of winning by about 10
-percentage points. Because that CV comes from data external to the test,
-comparing a test's MDC or SEM with it is informative, although it rests
-on the 10-point convention and on elite fields with similar between- and
-within-athlete variation. It can be given as \code{null.value} where it
-applies.
+Hopkins's (2004) SWC for solo athletes, 0.3 times the CV, is an external
+anchor, but only with the right CV: the within-athlete variability of top
+athletes' performance from one \emph{competition} to the next, not the test's
+own typical error. Simulations (Hopkins, Hawley & Burke, 1999) showed that
+an enhancement of 0.3 of that CV gives a top athlete about one extra win
+in 10 events. That CV can be estimated with \code{\link[=reli_err_test]{reli_err_test()}}
+(\code{scale = "log"}) from repeated competition results, with competitions as
+items, and 0.3 times it given here as \code{null.value}. Applied to the test's
+own CV instead, the rule is circular:
+\eqn{SWC / MDC = 0.3 / (1.96 \sqrt{2}) \approx 0.11}{SWC / MDC = 0.3 / (1.96 * sqrt(2)) = 0.11}
+for every test. The anchor also rests on the one-in-10 convention and on
+elite fields of evenly matched athletes; for athletes further back in the
+field, Hopkins works out the worthwhile enhancement case by case.
 }
 \examples{
 # Weir (2005) data set A: 8 subjects, 2 trials
@@ -171,6 +175,7 @@ res <- mdc_test(col.names = c("t1", "t2"), data = weir, null.value = 30)
 summary(res)
 
 # From an existing SEM, one-sided, as a percentage (log scale)
+# in the result we can access the MDC on the percentage scale (converted from sympercent)
 sem <- reli_err_test(col.names = c("t1", "t2"), data = weir, scale = "log")
 res_log <- mdc_test(sem, sided = "one.sided")
 res_log$percent

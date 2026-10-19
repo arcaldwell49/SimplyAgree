@@ -1,9 +1,10 @@
 # Methods for reli_htest objects
 
 Methods for objects returned by
-[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
 and
-[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md).
+[`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md).
 They print as standard `"htest"` objects;
 [`summary()`](https://rdrr.io/r/base/summary.html) describes the result
 in words, [`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows

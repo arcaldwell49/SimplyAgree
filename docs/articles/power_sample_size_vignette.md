@@ -83,7 +83,9 @@ power_agreement_exact(
   sigma = NULL,       # SD of differences
   p0_star = 0.95,    # Central proportion (tolerance coverage)
   power = NULL,       # Target power
-  alpha = 0.05       # Significance level
+  alpha = 0.05,      # Significance level
+  m = 1,             # Paired measurements per subject
+  icc = 0            # ICC of the differences (if m > 1)
 )
 ```
 
@@ -102,7 +104,6 @@ result <- power_agreement_exact(
   power = 0.80,      # 80% power
   alpha = 0.05
 )
-#> Maximum iterations reached in gamma computation
 print(result)
 #> 
 #>      Power for Exact Method for Assessing Agreement Between Two Methods 
@@ -114,12 +115,15 @@ print(result)
 #>         p0_star = 0.95
 #>         p1_star = 0.9939889
 #>           alpha = 0.05
-#>           power = 0.8018321
-#>  critical_value = 13.57044
+#>           power = 0.8018401
+#>  critical_value = 13.57038
+#>               m = 1
+#>             icc = 0
+#>           n.obs = 34
 #> 
 #> NOTE: H0: Central 95% of differences not within [-delta, delta]
 #>      H1: Central 99.4% of differences within [-delta, delta] 
-#> n is number pairs. Two measurements per unit; one for each method.
+#>      n is the number of pairs. Two measurements per unit; one for each method.
 ```
 
 ## Method 2: Bland-Altman Power Curves
@@ -140,7 +144,9 @@ blandPowerCurve(
   SD,                              # SD of differences
   delta,                           # Tolerance bound(s)
   conf.level = 0.95,              # CI confidence level
-  agree.level = 0.95               # LOA agreement level
+  agree.level = 0.95,              # LOA agreement level
+  m = 1,                           # Paired measurements per subject
+  icc = 0                          # ICC of the differences (if m > 1)
 )
 ```
 
@@ -169,10 +175,10 @@ plot(pc, type = 1)
 
 # Find n for 80% power
 find_n(pc, power = 0.8)
-#> # A tibble: 1 × 5
-#>   delta conf.level agree.level power     N
-#>   <dbl>      <dbl>       <dbl> <dbl> <dbl>
-#> 1     8       0.95        0.95 0.800   145
+#> # A tibble: 1 × 7
+#>   delta conf.level agree.level     m   icc power     N
+#>   <dbl>      <dbl>       <dbl> <dbl> <dbl> <dbl> <dbl>
+#> 1     8       0.95        0.95     1     0 0.800   145
 ```
 
 ## Method 3: Expected Half-Width
@@ -191,7 +197,9 @@ agree_expected_half(
   delta = NULL,         # Target expected half-width
   pstar = 0.95,        # Central proportion
   sigma = 1,           # SD of differences
-  n = NULL             # Sample size
+  n = NULL,            # Sample size
+  m = 1,               # Paired measurements per subject
+  icc = 0              # ICC of the differences (if m > 1)
 )
 ```
 
@@ -221,6 +229,11 @@ print(result)
 #>               g = 2.509039
 #>               c = 1.004914
 #>              zp = 1.959964
+#>               m = 1
+#>             icc = 0
+#>           n.obs = 52
+#> 
+#> NOTE: n is the number of pairs. Two measurements per unit; one for each method.
 ```
 
 ## Method 4: Assurance Probability
@@ -243,7 +256,9 @@ agree_assurance(
   omega = NULL,          # Target half-width bound
   pstar = 0.95,         # Central proportion
   sigma = 1,            # SD of differences
-  n = NULL              # Sample size
+  n = NULL,             # Sample size
+  m = 1,                # Paired measurements per subject
+  icc = 0               # ICC of the differences (if m > 1)
 )
 ```
 
@@ -268,12 +283,17 @@ print(result)
 #>                n = 115
 #>       conf.level = 0.95
 #>        assurance = 0.9
-#> actual.assurance = 0.9024848
+#> actual.assurance = 0.9024825
 #>            omega = 2.5
 #>            pstar = 0.95
 #>            sigma = 1
-#>                g = 2.306167
+#>                g = 2.306169
 #>               zp = 1.959964
+#>                m = 1
+#>              icc = 0
+#>            n.obs = 115
+#> 
+#> NOTE: n is the number of pairs. Two measurements per unit; one for each method.
 ```
 
 ## Decision Guide for the Method
@@ -296,164 +316,208 @@ print(result)
 
 ### The Problem
 
-Many studies have **clustered** data where there are multiple
-measurements per subject or natural groupings (e.g., repeated measures,
-multi-center studies). Note, the advice here only applies to clustering
-but not to situations where replicate measures are taken within a
-measurement occasion (e.g., multiple measures at the same time point
-wherein any variation would only represent measurement error).
+Many studies have **clustered** data, with several paired measurements
+per subject (e.g., repeated measures, several occasions, or several
+sites per subject). The standard formulas assume that pairs are
+independent[^1]. Counting every pair as independent overstates the
+precision, so a study planned that way is too small.
 
-Standard formulas assume independence[^1]. Ignoring clustering can leads
-to studies that lack precision. To my knowledge, there is no well
-developed methods for accounting for clustering in sample size
-calculations for agreement studies, so we use a common approximation
-from survey sampling and multilevel modeling: the **design effect**.
+### Clustering in the Functions
 
-### My Best Approximation: Design Effect
+All four agreement functions take two extra arguments:
 
-The design effect (DEFF) quantifies loss of efficiency due to
-clustering:
+- `m`: the number of paired measurements per subject (default 1,
+  independent pairs)
+- `icc`: the intraclass correlation of the **paired differences**,
+  i.e. the share of the variance of the differences that is between
+  subjects
 
-\\\text{DEFF} = 1 + (m - 1) \times \text{ICC}\\
+With `m > 1`, `n` is the **number of subjects** (the output also gives
+`n.obs = n * m`), and `sigma` (or `SD`) is the **total** SD of the
+differences, between- plus within-subject.
 
-where:
-
-- m = observations per cluster
-- ICC = intraclass correlation coefficient
-- \\n\_{ESS}\\ = effective sample size
-
-**Effect on sample size:** \\n\_{\text{ESS}} = n\_{\text{independent}}
-\times \text{DEFF}\\
-
-### Understanding ICC
-
-ICC = proportion of variance between clusters:
-
-\\\text{ICC} =
-\frac{\sigma^2\_{\text{between}}}{\sigma^2\_{\text{between}} +
-\sigma^2\_{\text{within}}}\\
-
-### Application Workflow
-
-1.  Calculate independent sample size (using power function)
-2.  Determine m (observations per cluster)
-3.  Estimate ICC (from pilot data, literature, or theory)
-4.  Calculate DEFF = 1 + (m-1)\*ICC
-5.  Inflate: n_total = n_indep \* DEFF
-6.  Calculate clusters: K = the smallest integer greater than or equal
-    to (n_total / m) (i.e., round up n_total / m)
+Note that `icc` is *not* the test-retest ICC of the measurements
+themselves. Two methods can each be highly reliable (measurement ICC of
+0.9) while their differences have a small ICC, because the subject’s
+true value cancels in the difference. The ICC of the differences
+reflects how much the *bias* between the methods varies from subject to
+subject.
 
 ### Example: Repeated Measures Design
 
+Three paired measurements per participant, with an ICC of the
+differences of 0.15:
+
 ``` r
 
-# Step 1: Independent sample size
-result <- power_agreement_exact(
+# Independent pairs
+n_indep <- power_agreement_exact(
   delta = 7, mu = 0.5, sigma = 2.5,
   p0_star = 0.95, power = 0.80, alpha = 0.05
+)$n
+n_indep
+#> [1] 34
+
+# 3 pairs per participant
+result <- power_agreement_exact(
+  delta = 7, mu = 0.5, sigma = 2.5,
+  p0_star = 0.95, power = 0.80, alpha = 0.05,
+  m = 3, icc = 0.15
 )
-#> Maximum iterations reached in gamma computation
-n_indep <- result$n
-cat("Independent pairs needed:", n_indep, "\n")
-#> Independent pairs needed: 34
-
-# Step 2: Apply design effect
-m <- 3  # 3 measurements per participant
-ICC <- 0.15  # from pilot or literature
-DEFF <- 1 + (m - 1) * ICC
-cat("Design effect:", round(DEFF, 3), "\n")
-#> Design effect: 1.3
-
-# Step 3: Calculate participants needed
-n_ess <- ceiling(n_indep * DEFF)
-K <- ceiling(n_ess / m)
-cat("Total observations:", n_ess, "\n")
-#> Total observations: 45
-cat("Participants needed:", K, "\n")
-#> Participants needed: 15
+result
+#> 
+#>      Power for Exact Method for Assessing Agreement Between Two Methods 
+#> 
+#>               n = 12
+#>           delta = 7
+#>              mu = 0.5
+#>           sigma = 2.5
+#>         p0_star = 0.95
+#>         p1_star = 0.9939889
+#>           alpha = 0.05
+#>           power = 0.8047327
+#>  critical_value = 12.17416
+#>               m = 3
+#>             icc = 0.15
+#>           n.obs = 36
+#> 
+#> NOTE: H0: Central 95% of differences not within [-delta, delta]
+#>      H1: Central 99.4% of differences within [-delta, delta] 
+#>      n is the number of subjects, each with m = 3 paired measurements (n.obs pairs in total).
+#>      Assumes balanced compound symmetry with ICC of the differences = 0.15.
 ```
 
-**Result**: Instead of 34 independent pairs, need ~15 participants (45
-total observations).
+**Result**: 34 independent pairs, or 12 participants with 3 pairs each
+(36 pairs in total).
 
-### Impact of ICC
+The other functions work the same way:
 
 ``` r
 
-# Compare different ICC values
-n_indep <- 50
-m <- 4
-
-ICC_values <- c(0, 0.05, 0.10, 0.15, 0.20)
-for (ICC in ICC_values) {
-  DEFF <- 1 + (m - 1) * ICC
-  K <- ceiling(ceiling(n_indep * DEFF) / m)
-  cat(sprintf("ICC = %.2f: Need %d participants\n", ICC, K))
-}
-#> ICC = 0.00: Need 13 participants
-#> ICC = 0.05: Need 15 participants
-#> ICC = 0.10: Need 17 participants
-#> ICC = 0.15: Need 19 participants
-#> ICC = 0.20: Need 20 participants
+agree_expected_half(delta = 2.5, pstar = 0.95, m = 3, icc = 0.15)$n
+#> [1] 20
+agree_assurance(omega = 2.5, assurance = 0.90, pstar = 0.95, m = 3, icc = 0.15)$n
+#> [1] 42
 ```
 
-### When Design Effect Works Well
+### What the Functions Assume
 
-**Good situations:**
+The calculations assume a **balanced** design (every subject has `m`
+pairs) and a one-way random-effects (compound symmetry) model for the
+differences. Under that model:
 
-- Balanced designs (equal cluster sizes)
-- Moderate ICC (0.01 - 0.30)
-- Sufficient clusters (K \>= 10)
-- Simple two-level hierarchy
+- The mean difference (the bias) has variance \\\sigma^2 \times
+  \text{DEFF} / (n m)\\, with the familiar design effect \\\text{DEFF} =
+  1 + (m - 1) \times \text{ICC}\\.
+- The estimated total variance, \\S^2 = MS_B / m + (m - 1) / m \times
+  MS_W\\, is a weighted sum of two chi-square variables with \\n - 1\\
+  and \\n(m - 1)\\ degrees of freedom. The functions integrate over this
+  distribution exactly, in place of the single chi-square used for
+  independent pairs.
 
-**Problematic:**
+With `m = 1` the published methods are reproduced exactly. With `m > 1`,
+the expected half-width, assurance and power agree with simulation from
+this model to Monte Carlo error.
+[`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+uses a simpler Satterthwaite approximation, in keeping with the
+approximate method of Lu et al. ([2016](#ref-lu2016)).
 
-- Highly unbalanced clusters
-- Very high ICC (\> 0.4)
-- Small number of clusters (K \< 10)
-- Complex correlation structures
-- Multiple levels of nesting
+### Why Not Just Inflate the Sample Size?
 
-For complex designs, consider simulation-based power analysis and
-consult a statistician.
+A common approximation from survey sampling is to multiply the
+independent sample size by \\\text{DEFF} = 1 + (m - 1) \times
+\text{ICC}\\ and divide by \\m\\ to get the number of subjects. That is
+correct for the *mean*, but the limits of agreement also depend on the
+*SD* of the differences. Its design effect is much smaller, about \\1 +
+(m - 1) \times \text{ICC}^2\\. Inflating the whole sample size by DEFF
+therefore overstates the penalty, more so as `m` grows:
+
+``` r
+
+n_indep <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                                 p0_star = 0.95, power = 0.80)$n
+m <- 4
+for (ICC in c(0, 0.05, 0.10, 0.20, 0.40)) {
+  DEFF <- 1 + (m - 1) * ICC
+  K_simple <- ceiling(ceiling(n_indep * DEFF) / m)
+  K_exact <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                                   p0_star = 0.95, power = 0.80,
+                                   m = m, icc = ICC)$n
+  cat(sprintf("ICC = %.2f: simple DEFF %2d participants, exact %2d\n",
+              ICC, K_simple, K_exact))
+}
+#> ICC = 0.00: simple DEFF  9 participants, exact  9
+#> ICC = 0.05: simple DEFF 10 participants, exact  9
+#> ICC = 0.10: simple DEFF 12 participants, exact  9
+#> ICC = 0.20: simple DEFF 14 participants, exact 10
+#> ICC = 0.40: simple DEFF 19 participants, exact 13
+```
+
+The simple inflation is conservative, so it is still a reasonable rule
+of thumb for designs the functions do not cover.
+
+### Estimating the Inputs from Pilot Data
+
+Fit an intercept-only mixed model to the pilot differences. The two
+variance components give `icc` and `sigma`:
+
+``` r
+
+fit <- lme4::lmer(diff ~ 1 + (1 | id), data = pilot)
+vc <- as.data.frame(lme4::VarCorr(fit))$vcov  # between, within
+icc <- vc[1] / sum(vc)
+sigma <- sqrt(sum(vc))
+```
+
+Pilot estimates of `icc` are imprecise; check how sensitive the sample
+size is to plausible values.
+
+### When to Use Simulation Instead
+
+The calculations do **not** cover:
+
+- Unbalanced designs (different numbers of pairs per subject)
+- Other correlation structures (e.g., autocorrelation over time)
+- Several levels of nesting
+- Analyses other than the planned procedure. For example,
+  [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+  gives the power of Shieh’s exact test; judging agreement by whether
+  the limits from
+  [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+  fall within \\\[-\delta, \delta\]\\ is less powerful (see
+  [`?power_agreement_exact`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)).
+
+For these, use simulation-based power analysis with the analysis you
+intend to run.
 
 ### Complete Example with Clustering
 
 ``` r
 
 # Study parameters
-sigma <- 3.3
+sigma <- 3.3  # total SD of the differences
 delta <- 7
-m <- 4  # measurements per participant
-ICC <- 0.15
+m <- 4        # paired measurements per participant
+ICC <- 0.15   # ICC of the differences
 dropout <- 0.20
 
-# Step 1: Independent sample size
+# Participants needed
 result <- power_agreement_exact(
   delta = delta, mu = 0, sigma = sigma,
-  p0_star = 0.95, power = 0.80, alpha = 0.05
+  p0_star = 0.95, power = 0.80, alpha = 0.05,
+  m = m, icc = ICC
 )
-#> Maximum iterations reached in gamma computation
 
-# Step 2: Account for clustering
-DEFF <- 1 + (m - 1) * ICC
-n_total <- ceiling(result$n * DEFF)
-K_pre <- ceiling(n_total / m)
-
-# Step 3: Account for dropout
-K_final <- ceiling(K_pre / (1 - dropout))
+# Account for dropout
+K_final <- ceiling(result$n / (1 - dropout))
 
 # Summary
-cat("Independent pairs:", result$n, "\n")
-#> Independent pairs: 566
-cat("Design effect:", round(DEFF, 3), "\n")
-#> Design effect: 1.45
-cat("Participants (no dropout):", K_pre, "\n")
-#> Participants (no dropout): 206
+cat("Participants (no dropout):", result$n, "\n")
+#> Participants (no dropout): 158
 cat("Participants to recruit:", K_final, "\n")
-#> Participants to recruit: 258
-cat("Total measurements:", K_final * m, "\n")
-#> Total measurements: 1032
+#> Participants to recruit: 198
+cat("Total paired measurements:", K_final * m, "\n")
+#> Total paired measurements: 792
 ```
 
 ## Planning a Reliability Study (ICC)
@@ -713,11 +777,10 @@ Define research question (hypothesis test vs. estimation)
 
 Choose appropriate power method
 
-If possible, obtain pilot estimates (SD, ICC if clustered)
+If possible, obtain pilot estimates (SD; ICC of the differences if
+clustered)
 
-Calculate independent sample size
-
-Adjust for clustering (if applicable)
+Calculate the sample size (with `m` and `icc` if clustered)
 
 Adjust for dropout
 
@@ -732,7 +795,7 @@ Pre-register before data collection
 When uncertain:
 
 - Use **upper range** of plausible SD estimates
-- Use **upper range** of plausible ICC estimates
+- Use **upper range** of plausible ICC estimates (of the differences)
 - Build in **10-20% buffer** beyond calculated required sample size
 - Conduct **sensitivity analyses** for key parameters (SD, ICC, etc)
 

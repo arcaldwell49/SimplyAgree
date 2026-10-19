@@ -52,7 +52,8 @@
 #'   not change the F-based interval or test. See Details.
 #'
 #' @details
-#' **ICC forms.** McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
+#'
+#' **ICC forms.**. The different ICCs can be confusing. Therefore, I have summarized it here. McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
 #' forms differently:
 #'
 #' | `model` | `type` | `unit` | McGraw & Wong | Shrout & Fleiss |
@@ -109,8 +110,8 @@
 #' is the one-sided `conf.level` lower bound; with `"less"` it is
 #' `[-Inf, U]`.
 #'
-#' **Tests.** By default (`null.value = NULL`) no test is done: the result is
-#' the estimate and a two-sided interval. Testing against an ICC of 0, the
+#' **Tests.** By default (`null.value = NULL`) no test is done. The result is
+#' the estimate and a two-sided interval when printed to the console. Testing against an ICC of 0, the
 #' default in many programs, is rarely informative for reliability. When
 #' `null.value` is given, the tests are the F tests of McGraw and Wong (1996,
 #' Table 8) of \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency

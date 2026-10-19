@@ -111,7 +111,7 @@ interval and a test against a null value, and returns an object of class
 following McGraw and Wong (1996).
 }
 \details{
-\strong{ICC forms.} McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
+\strong{ICC forms.}. The different ICCs can be confusing. Therefore, I have summarized it here. McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
 forms differently:\tabular{lllll}{
    \code{model} \tab \code{type} \tab \code{unit} \tab McGraw & Wong \tab Shrout & Fleiss \cr
    oneway \tab agreement \tab single \tab ICC(1) \tab ICC(1,1) \cr
@@ -168,8 +168,8 @@ With \code{alternative = "greater"} the interval is one-sided, \verb{[L, 1]}, wh
 is the one-sided \code{conf.level} lower bound; with \code{"less"} it is
 \verb{[-Inf, U]}.
 
-\strong{Tests.} By default (\code{null.value = NULL}) no test is done: the result is
-the estimate and a two-sided interval. Testing against an ICC of 0, the
+\strong{Tests.} By default (\code{null.value = NULL}) no test is done. The result is
+the estimate and a two-sided interval when printed to the console. Testing against an ICC of 0, the
 default in many programs, is rarely informative for reliability. When
 \code{null.value} is given, the tests are the F tests of McGraw and Wong (1996,
 Table 8) of \eqn{H_0: \rho = \rho_0}. They are exact for the one-way and consistency

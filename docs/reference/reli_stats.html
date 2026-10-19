@@ -31,7 +31,7 @@ scale = "mean". See Details for how the two sets of functions differ.'><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -216,7 +216,7 @@ on the observed data and warns that its intervals are approximate.</p>
 <p><strong>ICCs.</strong> The six forms of Shrout and Fleiss (1979) are returned, with
 the F-based intervals of McGraw and Wong (1996). The intervals are
 two-sided <code>conf.level</code> intervals, as in those papers (and in the psych,
-irr, SPSS and Stata implementations). Before version 0.3.1 the intervals
+irr, SPSS and Stata implementations). Before version 0.4.0 the intervals
 used <code>conf.level</code> in each tail, so each limit was a one-sided
 <code>conf.level</code> bound and the pair covered only <code>1 - 2 * (1 - conf.level)</code>;
 the old output at <code>conf.level = c</code> is reproduced by
@@ -237,10 +237,10 @@ mean, as a proportion (printed as a percentage).</p>
 \(\chi^2\) interval; every other statistic has a Wald interval on the
 log scale with a delta-method standard error from the normal-theory
 variances of the mean squares (and of the grand mean, for the CV). Before
-version 0.3.1 these used \(\chi^2\) intervals with the error degrees of
+version 0.4.0 these used \(\chi^2\) intervals with the error degrees of
 freedom (and Vangel's interval for the CV), which do not apply to these
 statistics. The bootstrap types resample subjects (as <code><a href="icc_test.html">icc_test()</a></code> does,
-including its hybrid step for the item mean square); before version 0.3.1
+including its hybrid step for the item mean square); before version 0.4.0
 <code>reli_stats()</code> used a parametric bootstrap.</p>
     </div>
     <div class="section level2">
