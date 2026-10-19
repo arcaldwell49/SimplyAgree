@@ -20,8 +20,13 @@ estimateLimitsOfAgreement <- function(mu, SD, agree.level = 0.95){
   return(result)
 }
 
-estimateConfidenceIntervals <- function(LOA, n, conf.level = 0.95){
+estimateConfidenceIntervals <- function(LOA, n, conf.level = 0.95,
+                                        m = 1, icc = 0){
   alpha = 1-conf.level
+  # effective n for the bias and (Satterthwaite) df for the SD; with m = 1
+  # these are n and n - 1 (Lu et al. 2016)
+  n_eff = .n_eff(n, m, icc)
+  df = .s2_df(n, m, icc)
 
   # get from LOA object
   if(!"LOA" %in% class(LOA)) stop("input must be an LOA object produced by estimateLimitsOfAgreement")
@@ -32,14 +37,14 @@ estimateConfidenceIntervals <- function(LOA, n, conf.level = 0.95){
   mu <- LOA$mu
 
   # compute standard error on LOA
-  se = SD * sqrt( (1/n) + (zgamma^2)/(2*(n - 1)) )
+  se = SD * sqrt( (1/n_eff) + (zgamma^2)/(2*df) )
 
   # compute quantiles of t-distribution
-  talpha = qt(1 - alpha/2, df = n - 1, lower.tail = TRUE)
+  talpha = qt(1 - alpha/2, df = df, lower.tail = TRUE)
 
   # compute CI of mean
-  mu_upperCI <- mu + talpha * SD * sqrt(1/n)
-  mu_lowerCI <- mu - talpha * SD * sqrt(1/n)
+  mu_upperCI <- mu + talpha * SD * sqrt(1/n_eff)
+  mu_lowerCI <- mu - talpha * SD * sqrt(1/n_eff)
 
   # CI on lower LOA (Lu eq 1)
   lowerLOA_upperCI = lowerLOA + talpha * se
@@ -51,6 +56,7 @@ estimateConfidenceIntervals <- function(LOA, n, conf.level = 0.95){
 
   result <- list(
     n = n,
+    df = df,
     se = se,
     alpha = alpha,
     talpha = talpha,
@@ -78,6 +84,7 @@ estimateTypeIIerror <- function(CI, delta){
   SD = CI$LOA$SD
   zgamma = CI$LOA$zgamma
   n = CI$CI$n
+  df = CI$CI$df
   se = CI$CI$se
   alpha = CI$CI$alpha
   talpha = CI$CI$talpha
@@ -89,11 +96,11 @@ estimateTypeIIerror <- function(CI, delta){
   tau1 = (delta - mu - zgamma * SD) / se # non-centrality parameter
   tau2 = (delta + mu - zgamma * SD) / se # non-centrality parameter
   beta1 = 1 - pt(talpha,
-                 df = n - 1,
+                 df = df,
                  ncp = tau1,
                  lower.tail = FALSE) # Lu eq 3
   beta2 = 1 - pt(talpha,
-                 df = n - 1,
+                 df = df,
                  ncp = tau2,
                  lower.tail = FALSE) # Lu eq 4
 

@@ -20,23 +20,33 @@
 #'   limits. Must be between 0 and 1. Common values are 0.90 or 0.95.
 #' @param sigma population standard deviation of the paired differences. If the
 #'   true value is unknown, delta can be specified in standard deviation units
-#'   by setting sigma = 1.
-#' @param n sample size (optional). If provided, the function will solve for a
+#'   by setting sigma = 1. With clustered data (`m > 1`), this is the *total*
+#'   SD of the differences (between- plus within-subject variance).
+#' @param n sample size (optional): the number of pairs, or the number of
+#'   subjects when `m > 1`. If provided, the function will solve for a
 #'   different parameter rather than sample size.
+#' @param m number of paired measurements per subject (default 1, independent
+#'   pairs). See the "Clustered data" section.
+#' @param icc intraclass correlation of the paired *differences* (between-subject
+#'   share of the variance of the differences), in \[0, 1). Ignored when `m = 1`.
+#'   This is not the test-retest ICC of the measurements themselves.
 #'
 #' @returns An object of class `"power.htest"` containing the following components:
 #'
-#' - `n`: The required sample size (number of subject pairs)
+#' - `n`: The required sample size (number of pairs, or of subjects when `m > 1`)
 #' - `conf.level`: The confidence level (1 - alpha)
-#' - `delta.target`: The target upper bound of expected half-width
-#' - `delta.actual`: The actual upper bound of expected half-width achieved (may
-#'   differ slightly from target due to discrete nature of n)
+#' - `target.delta`: The target upper bound of expected half-width
+#' - `actual.delta`: The expected half-width achieved (may be smaller than
+#'   the target due to discrete nature of n)
 #' - `pstar`: The central proportion covered (P*)
 #' - `sigma`: The population standard deviation
-#' - `g.factor`: The Odeh-Owen factor (g'') used to construct the tolerance
+#' - `g`: The Odeh-Owen factor (g'') used to construct the tolerance
 #'   interval, tabulated in Odeh and Owen (1980)
-#' - `c.factor`: The bias correction factor used in the expected half-width
-#'   calculation
+#' - `c`: The bias correction factor, 1 / E(S / sigma), used in the expected
+#'   half-width calculation
+#' - `zp`: The normal quantile for the central proportion
+#' - `m`, `icc`: The clustering inputs
+#' - `n.obs`: The total number of pairs, `n * m`
 #' - `method`: Description of the method used
 #' - `note`: Additional notes about the analysis
 #'
@@ -117,11 +127,42 @@
 #' For dropout considerations, inflate the sample size using: N' = N / (1 - dropout_rate),
 #' always rounding up.
 #'
+#' @section Clustered data:
+#'
+#' When each of `n` subjects contributes `m` paired measurements (repeated
+#' measures, or several pairs per subject), the pairs are not independent and
+#' treating `n * m` pairs as independent overstates precision. Setting `m` and
+#' `icc` accounts for this under a balanced one-way random-effects
+#' (compound symmetry) model for the differences:
+#'
+#' - The mean difference has variance sigma^2 \* DEFF / (n \* m), with design
+#'   effect DEFF = 1 + (m - 1) \* icc, so the effective sample size for the mean
+#'   is n \* m / DEFF.
+#' - The total variance is estimated as S^2 = MSB / m + (m - 1) / m \* MSW, whose
+#'   distribution is a weighted sum of two independent chi-square variables with
+#'   n - 1 and n(m - 1) degrees of freedom. This distribution is integrated
+#'   numerically in place of the single chi-square of the independent case.
+#'   It is more skewed than a Satterthwaite approximation suggests, which matters
+#'   when icc is large.
+#'
+#' Under these assumptions the calculation is exact (it agrees with simulation
+#' to Monte Carlo error), and `m = 1` gives exactly the published method. The
+#' simple design effect 1 + (m - 1) \* icc applied to the whole sample size
+#' overstates the penalty, because the SD has a much smaller design effect,
+#' 1 + (m - 1) \* icc^2. Unbalanced designs, other correlation structures, or
+#' several levels of nesting are not covered; use simulation for those.
+#'
+#' `icc` is the ICC of the *differences*, which can be estimated from pilot data
+#' with an intercept-only mixed model on the differences (e.g.
+#' `lme4::lmer(diff ~ 1 + (1 | id))`), and `sigma` is then the square root of
+#' the sum of the two variance components.
+#'
 #' @section Assumptions:
 #'
 #' - The paired differences are normally distributed
 #' - The variance is constant across the range of measurement
-#' - Pairs are independent
+#' - Pairs are independent, or (with `m > 1`) follow the balanced
+#'   compound symmetry model in the "Clustered data" section
 #'
 #' @references
 #' Jan, S.L. and Shieh, G. (2018). The Bland-Altman range of agreement: Exact
@@ -134,6 +175,16 @@
 #'
 #' Hahn, G.J. and Meeker, W.Q. (1991). *Statistical Intervals: A Guide for
 #' Practitioners*. John Wiley & Sons, New York.
+#'
+#' Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+#' measurement with multiple observations per individual. *Journal of
+#' Biopharmaceutical Statistics*, **17**(4), 571-582.
+#' \doi{10.1080/10543400701329422}
+#'
+#' Mee, R.W. and Owen, D.B. (1983). Improved factors for one-sided tolerance
+#' limits for balanced one-way ANOVA random model. *Journal of the American
+#' Statistical Association*, **78**(384), 901-905.
+#' \doi{10.1080/01621459.1983.10477038}
 #'
 #' Odeh, R.E. and Owen, D.B. (1980). *Tables for Normal Tolerance Limits,
 #' Sampling Plans, and Screening*. Marcel Dekker, Inc., New York.
@@ -164,12 +215,23 @@
 #'   sigma = 1
 #' )
 #'
+#' # Example 3: Clustered data, 3 pairs per subject, ICC of the differences 0.2
+#' # (n is then the number of subjects)
+#' agree_expected_half(
+#'   delta = 2.4,
+#'   pstar = 0.90,
+#'   m = 3,
+#'   icc = 0.2
+#' )
+#'
 #' @export
 agree_expected_half <- function(conf.level = 0.95,
-                           delta = NULL,
-                           pstar = 0.95,
-                           sigma = 1,
-                           n = NULL) {
+                                delta = NULL,
+                                pstar = 0.95,
+                                sigma = 1,
+                                n = NULL,
+                                m = 1,
+                                icc = 0) {
 
   # Input validation
   if (!is.null(n) && !is.null(delta)) {
@@ -192,86 +254,36 @@ agree_expected_half <- function(conf.level = 0.95,
     stop("'sigma' must be positive")
   }
 
-  alpha <- 1 - conf.level
+  if (!is.null(delta) && delta <= 0) {
+    stop("'delta' must be positive")
+  }
+
+  if (!is.null(n)) .check_n(n)
+  .check_cluster_args(m, icc)
+
   coverp <- conf.level
 
   # Calculate percentile
   pct <- (pstar + 1) / 2
   zp <- qnorm(pct)
 
-  # Numerical integration setup
-  numint <- 1000
-  coevec <- c(1, rep(c(4, 2), numint / 2 - 1), 4, 1)
-
-  # Function to calculate g factor (tolerance interval multiplier)
-  gfun <- function(n, alpha, zp) {
-    df <- n - 1
-    cql <- 1e-8
-    cqu <- qchisq(1 - cql, df)
-    int <- cqu - cql
-    intl <- int / numint
-    cvec <- cql + intl * (0:numint)
-    wcpdf <- (intl / 3) * coevec * dchisq(cvec, df)
-
-    gl <- 0
-    gu <- 100
-    dd <- 1
-
-    while (abs(dd) > 1e-9 | dd < 0) {
-      g <- (gl + gu) / 2
-      b <- sqrt(n) * (-zp + g * sqrt(cvec / df))
-      cpt <- sum(wcpdf * ((2 * pnorm(b) - 1) * (cvec > df * (zp / g)^2)))
-
-      if (cpt > coverp) {
-        gu <- g
-      } else {
-        gl <- g
-      }
-      dd <- cpt - coverp
-    }
-
-    return(g)
+  # Expected half-width, E(H) = g * sigma * E(S / sigma), at n subjects
+  half_width <- function(n) {
+    grid <- .s2_grid(n, m, icc)
+    g <- .tol_g(.n_eff(n, m, icc), grid, zp, coverp)
+    c <- 1 / .s_mean(n, m, icc, grid)
+    list(g = g, c = c, ehw = (g / c) * sigma)
   }
 
-  # Function to calculate bias correction factor c
-  calc_c <- function(n) {
-    df <- n - 1
-    logc <- log(sqrt(df / 2)) + lgamma(df / 2) - lgamma(n / 2)
-    exp(logc)
-  }
-
-  # Solve for n
   if (is.null(n)) {
-    n <- 4
-    ehe <- Inf
-
-    while (ehe > delta && n < 10000) {
-      n <- n + 1
-      df <- n - 1
-      c <- calc_c(n)
-      g <- gfun(n, alpha, zp)
-      ehe <- (g / c) * sigma
-    }
-
-    if (n >= 10000) {
-      warning("Maximum iterations reached; solution may not have converged")
-    }
-
-    # Calculate final values for output
-    g_final <- gfun(n, alpha, zp)
-    c_final <- calc_c(n)
-    actual_delta <- (g_final / c_final) * sigma
-
+    # Solve for n
+    n <- .search_n(function(n) half_width(n)$ehw <= delta,
+                   lo = 2, hi = 10000)
+    res <- half_width(n)
   } else {
-    # Solve for delta (less common case)
-    df <- n - 1
-    c <- calc_c(n)
-    g <- gfun(n, alpha, zp)
-    delta <- (g / c) * sigma
-
-    g_final <- g
-    c_final <- c
-    actual_delta <- delta
+    # Solve for delta
+    res <- half_width(n)
+    delta <- res$ehw
   }
 
   # Create output object
@@ -280,13 +292,17 @@ agree_expected_half <- function(conf.level = 0.95,
       n = n,
       conf.level = conf.level,
       target.delta = delta,
-      actual.delta = actual_delta,
+      actual.delta = res$ehw,
       pstar = pstar,
       sigma = sigma,
-      g = g_final,
-      c = c_final,
+      g = res$g,
+      c = res$c,
       zp = zp,
-      method = "Expected half-width and sample size for limits of agreement"
+      m = m,
+      icc = icc,
+      n.obs = n * m,
+      method = "Expected half-width and sample size for limits of agreement",
+      note = .agree_n_note(m, icc)
     ),
     class = "power.htest"
   )

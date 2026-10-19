@@ -82,7 +82,9 @@ power_agreement_exact(
   sigma = NULL,       # SD of differences
   p0_star = 0.95,    # Central proportion (tolerance coverage)
   power = NULL,       # Target power
-  alpha = 0.05       # Significance level
+  alpha = 0.05,      # Significance level
+  m = 1,             # Paired measurements per subject
+  icc = 0            # ICC of the differences (if m > 1)
 )
 ```
 
@@ -119,7 +121,9 @@ blandPowerCurve(
   SD,                              # SD of differences
   delta,                           # Tolerance bound(s)
   conf.level = 0.95,              # CI confidence level
-  agree.level = 0.95               # LOA agreement level
+  agree.level = 0.95,              # LOA agreement level
+  m = 1,                           # Paired measurements per subject
+  icc = 0                          # ICC of the differences (if m > 1)
 )
 ```
 
@@ -158,7 +162,9 @@ agree_expected_half(
   delta = NULL,         # Target expected half-width
   pstar = 0.95,        # Central proportion
   sigma = 1,           # SD of differences
-  n = NULL             # Sample size
+  n = NULL,            # Sample size
+  m = 1,               # Paired measurements per subject
+  icc = 0              # ICC of the differences (if m > 1)
 )
 ```
 
@@ -195,7 +201,9 @@ agree_assurance(
   omega = NULL,          # Target half-width bound
   pstar = 0.95,         # Central proportion
   sigma = 1,            # SD of differences
-  n = NULL              # Sample size
+  n = NULL,             # Sample size
+  m = 1,                # Paired measurements per subject
+  icc = 0               # ICC of the differences (if m > 1)
 )
 ```
 
@@ -238,131 +246,127 @@ Reliability (ICC) study?
 
 ## The Problem
 
-Many studies have **clustered** data where there are multiple measurements per subject or natural groupings (e.g., repeated measures, multi-center studies). Note, the advice here only applies to clustering but not to situations where replicate measures are taken within a measurement occasion (e.g., multiple measures at the same time point wherein any variation would only represent measurement error). 
+Many studies have **clustered** data, with several paired measurements per subject (e.g., repeated measures, several occasions, or several sites per subject). The standard formulas assume that pairs are independent^[Implications of which are discussed by @bland2003cluster among many others]. Counting every pair as independent overstates the precision, so a study planned that way is too small.
 
-Standard formulas assume independence^[Implications of which are discussed by @bland2003cluster among many others]. Ignoring clustering can leads to studies that lack precision. To my knowledge, there is no well developed methods for accounting for clustering in sample size calculations for agreement studies, so we use a common approximation from survey sampling and multilevel modeling: the **design effect**. 
+## Clustering in the Functions
 
-## My Best Approximation: Design Effect
+All four agreement functions take two extra arguments:
 
-The design effect (DEFF) quantifies loss of efficiency due to clustering:
+- `m`: the number of paired measurements per subject (default 1, independent pairs)
+- `icc`: the intraclass correlation of the **paired differences**, i.e. the share of the variance of the differences that is between subjects
 
-$$\text{DEFF} = 1 + (m - 1) \times \text{ICC}$$
+With `m > 1`, `n` is the **number of subjects** (the output also gives `n.obs = n * m`), and `sigma` (or `SD`) is the **total** SD of the differences, between- plus within-subject.
 
-where:
-
-- m = observations per cluster
-- ICC = intraclass correlation coefficient
-- $n_{ESS}$ = effective sample size
-
-**Effect on sample size:**
-$$n_{\text{ESS}} = n_{\text{independent}} \times \text{DEFF}$$
-
-## Understanding ICC
-
-ICC = proportion of variance between clusters:
-
-$$\text{ICC} = \frac{\sigma^2_{\text{between}}}{\sigma^2_{\text{between}} + \sigma^2_{\text{within}}}$$
-
-
-## Application Workflow
-
-1. Calculate independent sample size (using power function)
-2. Determine m (observations per cluster)
-3. Estimate ICC (from pilot data, literature, or theory)
-4. Calculate DEFF = 1 + (m-1)*ICC
-5. Inflate: n_total = n_indep * DEFF
-6. Calculate clusters: K = the smallest integer greater than or equal to (n_total / m) (i.e., round up n_total / m)
+Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject.
 
 ## Example: Repeated Measures Design
 
+Three paired measurements per participant, with an ICC of the differences of 0.15:
+
 ```{r cluster_ex1, eval=TRUE}
-# Step 1: Independent sample size
-result <- power_agreement_exact(
+# Independent pairs
+n_indep <- power_agreement_exact(
   delta = 7, mu = 0.5, sigma = 2.5,
   p0_star = 0.95, power = 0.80, alpha = 0.05
+)$n
+n_indep
+
+# 3 pairs per participant
+result <- power_agreement_exact(
+  delta = 7, mu = 0.5, sigma = 2.5,
+  p0_star = 0.95, power = 0.80, alpha = 0.05,
+  m = 3, icc = 0.15
 )
-n_indep <- result$n
-cat("Independent pairs needed:", n_indep, "\n")
-
-# Step 2: Apply design effect
-m <- 3  # 3 measurements per participant
-ICC <- 0.15  # from pilot or literature
-DEFF <- 1 + (m - 1) * ICC
-cat("Design effect:", round(DEFF, 3), "\n")
-
-# Step 3: Calculate participants needed
-n_ess <- ceiling(n_indep * DEFF)
-K <- ceiling(n_ess / m)
-cat("Total observations:", n_ess, "\n")
-cat("Participants needed:", K, "\n")
+result
 ```
 
-**Result**: Instead of 34 independent pairs, need ~15 participants (45 total observations).
+**Result**: `r n_indep` independent pairs, or `r result$n` participants with 3 pairs each (`r result$n.obs` pairs in total).
 
-## Impact of ICC
+The other functions work the same way:
+
+```{r cluster_ex1b, eval=TRUE}
+agree_expected_half(delta = 2.5, pstar = 0.95, m = 3, icc = 0.15)$n
+agree_assurance(omega = 2.5, assurance = 0.90, pstar = 0.95, m = 3, icc = 0.15)$n
+```
+
+## What the Functions Assume
+
+The calculations assume a **balanced** design (every subject has `m` pairs) and a one-way random-effects (compound symmetry) model for the differences. Under that model:
+
+- The mean difference (the bias) has variance $\sigma^2 \times \text{DEFF} / (n m)$, with the familiar design effect $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$.
+- The estimated total variance, $S^2 = MS_B / m + (m - 1) / m \times MS_W$, is a weighted sum of two chi-square variables with $n - 1$ and $n(m - 1)$ degrees of freedom. The functions integrate over this distribution exactly, in place of the single chi-square used for independent pairs.
+
+With `m = 1` the published methods are reproduced exactly. With `m > 1`, the expected half-width, assurance and power agree with simulation from this model to Monte Carlo error. `blandPowerCurve()` uses a simpler Satterthwaite approximation, in keeping with the approximate method of @lu2016.
+
+## Why Not Just Inflate the Sample Size?
+
+A common approximation from survey sampling is to multiply the independent sample size by $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$ and divide by $m$ to get the number of subjects. That is correct for the *mean*, but the limits of agreement also depend on the *SD* of the differences. Its design effect is much smaller, about $1 + (m - 1) \times \text{ICC}^2$. Inflating the whole sample size by DEFF therefore overstates the penalty, more so as `m` grows:
 
 ```{r cluster_ex2, eval=TRUE}
-# Compare different ICC values
-n_indep <- 50
+n_indep <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                                 p0_star = 0.95, power = 0.80)$n
 m <- 4
-
-ICC_values <- c(0, 0.05, 0.10, 0.15, 0.20)
-for (ICC in ICC_values) {
+for (ICC in c(0, 0.05, 0.10, 0.20, 0.40)) {
   DEFF <- 1 + (m - 1) * ICC
-  K <- ceiling(ceiling(n_indep * DEFF) / m)
-  cat(sprintf("ICC = %.2f: Need %d participants\n", ICC, K))
+  K_simple <- ceiling(ceiling(n_indep * DEFF) / m)
+  K_exact <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                                   p0_star = 0.95, power = 0.80,
+                                   m = m, icc = ICC)$n
+  cat(sprintf("ICC = %.2f: simple DEFF %2d participants, exact %2d\n",
+              ICC, K_simple, K_exact))
 }
 ```
 
-## When Design Effect Works Well
+The simple inflation is conservative, so it is still a reasonable rule of thumb for designs the functions do not cover.
 
-**Good situations:**
+## Estimating the Inputs from Pilot Data
 
-- Balanced designs (equal cluster sizes)
-- Moderate ICC (0.01 - 0.30)
-- Sufficient clusters (K >= 10)
-- Simple two-level hierarchy
+Fit an intercept-only mixed model to the pilot differences. The two variance components give `icc` and `sigma`:
 
-**Problematic:**
+```{r cluster_pilot, eval=FALSE}
+fit <- lme4::lmer(diff ~ 1 + (1 | id), data = pilot)
+vc <- as.data.frame(lme4::VarCorr(fit))$vcov  # between, within
+icc <- vc[1] / sum(vc)
+sigma <- sqrt(sum(vc))
+```
 
-- Highly unbalanced clusters
-- Very high ICC (> 0.4)
-- Small number of clusters (K < 10)
-- Complex correlation structures
-- Multiple levels of nesting
+Pilot estimates of `icc` are imprecise; check how sensitive the sample size is to plausible values.
 
-For complex designs, consider simulation-based power analysis and consult a statistician.
+## When to Use Simulation Instead
+
+The calculations do **not** cover:
+
+- Unbalanced designs (different numbers of pairs per subject)
+- Other correlation structures (e.g., autocorrelation over time)
+- Several levels of nesting
+- Analyses other than the planned procedure. For example, `power_agreement_exact()` gives the power of Shieh's exact test; judging agreement by whether the limits from `tolerance_limit()` fall within $[-\delta, \delta]$ is less powerful (see `?power_agreement_exact`).
+
+For these, use simulation-based power analysis with the analysis you intend to run.
 
 ## Complete Example with Clustering
 
 ```{r cluster_complete, eval=TRUE}
 # Study parameters
-sigma <- 3.3
+sigma <- 3.3  # total SD of the differences
 delta <- 7
-m <- 4  # measurements per participant
-ICC <- 0.15
+m <- 4        # paired measurements per participant
+ICC <- 0.15   # ICC of the differences
 dropout <- 0.20
 
-# Step 1: Independent sample size
+# Participants needed
 result <- power_agreement_exact(
   delta = delta, mu = 0, sigma = sigma,
-  p0_star = 0.95, power = 0.80, alpha = 0.05
+  p0_star = 0.95, power = 0.80, alpha = 0.05,
+  m = m, icc = ICC
 )
 
-# Step 2: Account for clustering
-DEFF <- 1 + (m - 1) * ICC
-n_total <- ceiling(result$n * DEFF)
-K_pre <- ceiling(n_total / m)
-
-# Step 3: Account for dropout
-K_final <- ceiling(K_pre / (1 - dropout))
+# Account for dropout
+K_final <- ceiling(result$n / (1 - dropout))
 
 # Summary
-cat("Independent pairs:", result$n, "\n")
-cat("Design effect:", round(DEFF, 3), "\n")
-cat("Participants (no dropout):", K_pre, "\n")
+cat("Participants (no dropout):", result$n, "\n")
 cat("Participants to recruit:", K_final, "\n")
-cat("Total measurements:", K_final * m, "\n")
+cat("Total paired measurements:", K_final * m, "\n")
 ```
 
 # Planning a Reliability Study (ICC)
@@ -466,9 +470,8 @@ power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80,
 
 - [ ] Define research question (hypothesis test vs. estimation)
 - [ ] Choose appropriate power method
-- If possible, obtain pilot estimates (SD, ICC if clustered)
-- [ ] Calculate independent sample size
-- [ ] Adjust for clustering (if applicable)
+- [ ] If possible, obtain pilot estimates (SD; ICC of the differences if clustered)
+- [ ] Calculate the sample size (with `m` and `icc` if clustered)
 - [ ] Adjust for dropout
 - [ ] Conduct sensitivity analyses
 - [ ] Document all assumptions and sources
@@ -479,7 +482,7 @@ power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80,
 When uncertain:
 
 - Use **upper range** of plausible SD estimates
-- Use **upper range** of plausible ICC estimates
+- Use **upper range** of plausible ICC estimates (of the differences)
 - Build in **10-20% buffer** beyond calculated required sample size
 - Conduct **sensitivity analyses** for key parameters (SD, ICC, etc)
 

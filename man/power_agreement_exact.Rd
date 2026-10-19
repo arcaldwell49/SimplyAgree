@@ -12,17 +12,21 @@ power_agreement_exact(
   p0_star = 0.95,
   power = NULL,
   alpha = 0.05,
-  max_iter = 1000
+  max_iter = 1000,
+  m = 1,
+  icc = 0
 )
 }
 \arguments{
-\item{n}{Number of subject pairs (sample size)}
+\item{n}{Number of subject pairs (sample size), or the number of subjects
+when \code{m > 1}}
 
 \item{delta}{Maximum allowable difference bound (half-width of tolerance interval)}
 
 \item{mu}{Mean of paired differences}
 
-\item{sigma}{Standard deviation of paired differences}
+\item{sigma}{Standard deviation of paired differences. With clustered data
+(\code{m > 1}), the \emph{total} SD of the differences.}
 
 \item{p0_star}{The coverage proportion (content) of the tolerance interval. Central proportion under null hypothesis (default = 0.95)}
 
@@ -31,11 +35,18 @@ power_agreement_exact(
 \item{alpha}{Significance level (Type I error rate, default = 0.05, Confidence level = 1-alpha)}
 
 \item{max_iter}{Maximum iterations for gamma computation (default = 1000)}
+
+\item{m}{number of paired measurements per subject (default 1, independent
+pairs). See the "Clustered data" section.}
+
+\item{icc}{intraclass correlation of the paired \emph{differences} (between-subject
+share of the variance of the differences), in [0, 1). Ignored when \code{m = 1}.
+This is not the test-retest ICC of the measurements themselves.}
 }
 \value{
 An object of class "power.htest", a list with components:
-\item{n}{Sample size}
-\item{delta}{c}
+\item{n}{Sample size (pairs, or subjects when \code{m > 1})}
+\item{delta}{Maximum allowable difference bound}
 \item{mu}{Mean of differences}
 \item{sigma}{Standard deviation of differences}
 \item{p0_star}{Central proportion (null hypothesis)}
@@ -43,6 +54,8 @@ An object of class "power.htest", a list with components:
 \item{alpha}{Significance level}
 \item{power}{Power of the test}
 \item{critical_value}{Critical value for test statistic}
+\item{m, icc}{The clustering inputs}
+\item{n.obs}{Total number of pairs, \code{n * m}}
 \item{method}{Description of the method}
 \item{note}{Additional notes}
 }
@@ -52,7 +65,7 @@ An object of class "power.htest", a list with components:
 Computes sample size, power, or other parameters for the exact method of
 assessing agreement between two measurement methods, as described in
 Shieh (2019). This method tests whether the central portion of paired
-differences falls within specified bounds. This \emph{roughly} equates to the power for tolerance limits.
+differences falls within specified bounds.
 }
 \details{
 This function implements the exact agreement test procedure of Shieh (2019)
@@ -67,7 +80,10 @@ where p = (1 + p0_star)/2, and theta_p represents the 100p-th percentile
 of the paired differences.
 
 Specify three of: n, delta, power, and sigma. The fourth will be calculated.
-If mu is not specified, it defaults to 0.
+If mu is not specified, it defaults to 0. A sample size can only be found
+when the proportion of differences within [-delta, delta] under the
+alternative (\code{p1_star}) exceeds \code{p0_star}; otherwise power cannot exceed
+alpha and an error is returned.
 
 Tolerance Interval Interpretation:
 
@@ -77,10 +93,60 @@ bounds [-delta, delta] under the null hypothesis. This is conceptually
 related to tolerance intervals, but formulated as a
 hypothesis test rather than an estimation problem.
 
+The power is that of Shieh's test (reject H0 when xbar -/+ gamma \* SE lies
+within [-delta, delta]; for independent pairs this test is reported by
+\code{\link[=agree_test]{agree_test()}}). It is \strong{not} the probability that tolerance limits from
+\code{\link[=tolerance_limit]{tolerance_limit()}} fall within [-delta, delta]; that decision rule is less
+powerful. In simulations at a planned power of 0.80, it was about 0.66 for
+independent pairs and about 0.57 to 0.61 for clustered data (m = 3,
+icc = 0.1 to 0.6). Allow a larger sample if the analysis will be based on
+tolerance limits.
+
 Note: This differs from Bland-Altman's "95\% limits of agreement," which
 are confidence intervals for the 2.5th and 97.5th percentiles, \emph{not}
 tolerance intervals.
 }
+\section{Clustered test statistic}{
+
+With \code{m > 1}, the test is Shieh's test with the standard error of the mean
+difference taken as S \* sqrt(DEFF / (n \* m)), i.e. with the design effect
+treated as known. No function in this package currently carries out that
+clustered test, so treat the clustered power as a planning approximation.
+}
+
+\section{Clustered data}{
+
+
+When each of \code{n} subjects contributes \code{m} paired measurements (repeated
+measures, or several pairs per subject), the pairs are not independent and
+treating \code{n * m} pairs as independent overstates precision. Setting \code{m} and
+\code{icc} accounts for this under a balanced one-way random-effects
+(compound symmetry) model for the differences:
+\itemize{
+\item The mean difference has variance sigma^2 \* DEFF / (n \* m), with design
+effect DEFF = 1 + (m - 1) \* icc, so the effective sample size for the mean
+is n \* m / DEFF.
+\item The total variance is estimated as S^2 = MSB / m + (m - 1) / m \* MSW, whose
+distribution is a weighted sum of two independent chi-square variables with
+n - 1 and n(m - 1) degrees of freedom. This distribution is integrated
+numerically in place of the single chi-square of the independent case.
+It is more skewed than a Satterthwaite approximation suggests, which matters
+when icc is large.
+}
+
+Under these assumptions the calculation is exact (it agrees with simulation
+to Monte Carlo error), and \code{m = 1} gives exactly the published method. The
+simple design effect 1 + (m - 1) \* icc applied to the whole sample size
+overstates the penalty, because the SD has a much smaller design effect,
+1 + (m - 1) \* icc^2. Unbalanced designs, other correlation structures, or
+several levels of nesting are not covered; use simulation for those.
+
+\code{icc} is the ICC of the \emph{differences}, which can be estimated from pilot data
+with an intercept-only mixed model on the differences (e.g.
+\code{lme4::lmer(diff ~ 1 + (1 | id))}), and \code{sigma} is then the square root of
+the sum of the two variance components.
+}
+
 \examples{
 # Example 1: Find required sample size
 power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
@@ -94,10 +160,19 @@ power_agreement_exact(n = 15, delta = 0.1, mu = 0.011,
 power_agreement_exact(n = 50, mu = 0, sigma = 2.5,
                       p0_star = 0.95, power = 0.90, alpha = 0.05)
 
+# Example 4: Clustered data, 3 pairs per subject, ICC of the differences 0.15
+power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                      p0_star = 0.95, power = 0.80, m = 3, icc = 0.15)
+
 }
 \references{
 Shieh, G. (2019). Assessing Agreement Between Two Methods of Quantitative
 Measurements: Exact Test Procedure and Sample Size Calculation.
 Statistics in Biopharmaceutical Research, 12(3), 352-359.
-https://doi.org/10.1080/19466315.2019.1677495
+\doi{10.1080/19466315.2019.1677495}
+
+Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+measurement with multiple observations per individual. \emph{Journal of
+Biopharmaceutical Statistics}, \strong{17}(4), 571-582.
+\doi{10.1080/10543400701329422}
 }

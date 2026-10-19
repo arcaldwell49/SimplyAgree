@@ -36,6 +36,20 @@
   - Lower confidence limits are clipped to the possible range of the coefficient (they were only clipped at 1).
   - The row name "Kririppendorff's Alpha" is now "Krippendorff's Alpha".
 
+## Agreement power and sample size
+
+- `power_agreement_exact()`, `agree_expected_half()`, `agree_assurance()` and `blandPowerCurve()` gain `m` (paired measurements per subject) and `icc` (the ICC of the paired *differences*) for clustered data; `n` is then the number of subjects, and the output gains `m`, `icc` and `n.obs`. The exact methods integrate over the exact distribution of the variance estimate under a balanced compound symmetry model (checked against simulation); `blandPowerCurve()` uses a Satterthwaite approximation. With `m = 1` (the default) the results are unchanged.
+- The power and sample size vignette now uses these arguments. The design effect it previously recommended, 1 + (m - 1) × ICC applied to the whole sample size, is correct for the bias but overstates the penalty for the SD, so it was conservative; the vignette also now makes clear that the ICC is that of the differences.
+- `find_n()` now returns the smallest sample size at which the target power is reached. It previously returned the sample size with the *closest* power, which could fall just below the target (**results can change by one**), and it failed when several sample sizes tied. If the target is not reached, `N` is `NA` with a warning.
+- Fixed the sample size searches:
+  - `power_agreement_exact()` could not return fewer than 6 pairs, and `agree_expected_half()` and `agree_assurance()` fewer than 5.
+  - `power_agreement_exact()` silently returned the upper search limit (10000) when power could not be reached. It now stops when the alternative proportion `p1_star` does not exceed `p0_star`, and warns when the limit is reached.
+- `agree_assurance()` capped `omega` at 10 × `sigma` when solving for it, so with small `n` or high assurance it could return an `omega` with assurance below the target. `omega` now has a closed form.
+- `power_agreement_exact()` used absolute tolerances when solving for `delta` or `sigma`, which failed for data on a small scale; they are now relative.
+- The tolerance factor in `agree_expected_half()` and `agree_assurance()` hung with `n = 2` and was inaccurate for very small `n` (e.g., 24.96 instead of 30.48 for `n = 3` with 99% confidence and coverage, which gave 98.5% rather than 99% confidence in simulation). The integration grid is now accurate for any `n`, the search has an iteration limit and expands its bracket, and the three functions share one implementation. Results for `n >= 5` are unchanged to about 4 significant digits, and the published examples are unchanged.
+- `agree_expected_half()` and `agree_assurance()` validate `n`, and return a `note`. Their documented return names now match the object.
+- The documentation of `power_agreement_exact()` no longer says the power "roughly" matches tolerance limits. It is the power of Shieh's test; deciding agreement by whether `tolerance_limit()` limits fall within the bounds is less powerful (about 0.66 in simulation at a planned 0.80).
+
 ## Other changes
 
 - Fixed error in the jamovi module (and any other use where the analysis is saved and reloaded) where plots failed with "object 'y' not found" (#76).

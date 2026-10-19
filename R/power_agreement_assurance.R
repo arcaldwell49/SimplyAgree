@@ -23,13 +23,16 @@
 #'   limits. Must be between 0 and 1. Common values are 0.90 or 0.95.
 #' @param sigma population standard deviation of the paired differences. If the
 #'   true value is unknown, omega can be specified in standard deviation units
-#'   by setting sigma = 1.
-#' @param n sample size (optional). If provided, the function will solve for a
-#'   different parameter rather than sample size.
+#'   by setting sigma = 1. With clustered data (`m > 1`), this is the *total*
+#'   SD of the differences (between- plus within-subject variance).
+#' @param n sample size (optional): the number of pairs, or the number of
+#'   subjects when `m > 1`. If provided, the function will solve for omega
+#'   rather than sample size.
+#' @inheritParams agree_expected_half
 #'
 #' @returns An object of class `"power.htest"` containing the following components:
 #'
-#' - `n`: The required sample size (number of subject pairs)
+#' - `n`: The required sample size (number of pairs, or of subjects when `m > 1`)
 #' - `conf.level`: The confidence level (1 - alpha)
 #' - `assurance`: The target assurance probability (1 - gamma)
 #' - `actual.assurance`: The actual assurance probability achieved (may differ
@@ -37,8 +40,11 @@
 #' - `omega`: The upper bound of assurance half-width
 #' - `pstar`: The central proportion covered (P*)
 #' - `sigma`: The population standard deviation
-#' - `g.factor`: The Odeh-Owen factor (g'') used to construct the tolerance
+#' - `g`: The Odeh-Owen factor (g'') used to construct the tolerance
 #'   interval, tabulated in Odeh and Owen (1980)
+#' - `zp`: The normal quantile for the central proportion
+#' - `m`, `icc`: The clustering inputs
+#' - `n.obs`: The total number of pairs, `n * m`
 #' - `method`: Description of the method used
 #' - `note`: Additional notes about the analysis
 #'
@@ -101,16 +107,29 @@
 #' For dropout considerations, inflate the sample size using: N' = N / (1 - dropout_rate),
 #' always rounding up.
 #'
+#' @inheritSection agree_expected_half Clustered data
+#'
 #' @section Assumptions:
 #'
 #' - The paired differences are normally distributed
 #' - The variance is constant across the range of measurement
-#' - Pairs are independent
+#' - Pairs are independent, or (with `m > 1`) follow the balanced
+#'   compound symmetry model in the "Clustered data" section
 #'
 #' @references
 #' Jan, S.L. and Shieh, G. (2018). The Bland-Altman range of agreement: Exact
 #' interval procedure and sample size determination. *Computers in Biology and Medicine*, **100**,
 #' 247-252. \doi{10.1016/j.compbiomed.2018.06.020}
+#'
+#' Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+#' measurement with multiple observations per individual. *Journal of
+#' Biopharmaceutical Statistics*, **17**(4), 571-582.
+#' \doi{10.1080/10543400701329422}
+#'
+#' Mee, R.W. and Owen, D.B. (1983). Improved factors for one-sided tolerance
+#' limits for balanced one-way ANOVA random model. *Journal of the American
+#' Statistical Association*, **78**(384), 901-905.
+#' \doi{10.1080/01621459.1983.10477038}
 #'
 #' Odeh, R.E. and Owen, D.B. (1980). *Tables for Normal Tolerance Limits,
 #' Sampling Plans, and Screening*. Marcel Dekker, Inc., New York.
@@ -131,13 +150,24 @@
 #'   pstar = 0.95,
 #'   sigma = 1
 #' )
+#'
+#' # Clustered data: 4 pairs per subject, ICC of the differences 0.3
+#' agree_assurance(
+#'   assurance = 0.90,
+#'   omega = 2.5,
+#'   pstar = 0.95,
+#'   m = 4,
+#'   icc = 0.3
+#' )
 #' @export
 agree_assurance <- function(conf.level = 0.95,
                             assurance = 0.90,
                             omega = NULL,
                             pstar = 0.95,
                             sigma = 1,
-                            n = NULL) {
+                            n = NULL,
+                            m = 1,
+                            icc = 0) {
 
   # Input validation
   if (!is.null(n) && !is.null(omega)) {
@@ -165,91 +195,48 @@ agree_assurance <- function(conf.level = 0.95,
     stop("'sigma' must be positive")
   }
 
-  alpha <- 1 - conf.level
+  if (!is.null(omega) && omega <= 0) {
+    stop("'omega' must be positive")
+  }
+
+  if (!is.null(n)) .check_n(n)
+  .check_cluster_args(m, icc)
+
   coverp <- conf.level
 
   # Calculate percentile
   pct <- (pstar + 1) / 2
   zp <- qnorm(pct)
 
-  # Numerical integration setup
-  numint <- 1000
-  coevec <- c(1, rep(c(4, 2), numint / 2 - 1), 4, 1)
-
-  # Function to calculate g factor (tolerance interval multiplier)
-  gfun <- function(n, alpha, zp) {
-    df <- n - 1
-    cql <- 1e-8
-    cqu <- qchisq(1 - cql, df)
-    int <- cqu - cql
-    intl <- int / numint
-    cvec <- cql + intl * (0:numint)
-    wcpdf <- (intl / 3) * coevec * dchisq(cvec, df)
-
-    gl <- 0
-    gu <- 100
-    dd <- 1
-
-    while (abs(dd) > 1e-9 | dd < 0) {
-      g <- (gl + gu) / 2
-      b <- sqrt(n) * (-zp + g * sqrt(cvec / df))
-      cpt <- sum(wcpdf * ((2 * pnorm(b) - 1) * (cvec > df * (zp / g)^2)))
-
-      if (cpt > coverp) {
-        gu <- g
-      } else {
-        gl <- g
-      }
-      dd <- cpt - coverp
-    }
-
-    return(g)
+  # Tolerance factor at n subjects
+  g_at <- function(n) {
+    .tol_g(.n_eff(n, m, icc), .s2_grid(n, m, icc), zp, coverp)
   }
 
-  # Solve for n
+  # Assurance Pr(H <= omega) = Pr(S^2 / sigma^2 <= (omega / (g * sigma))^2)
+  assur_at <- function(n, g, omega) {
+    .s2_cdf((omega / (g * sigma))^2, n, m, icc)
+  }
+
   if (is.null(n)) {
-    n <- 4
-    ape <- 0
-
-    while (ape < assurance && n < 20000) {
-      n <- n + 1
-      df <- n - 1
-      g <- gfun(n, alpha, zp)
-      ape <- pchisq((df / g^2) * (omega / sigma)^2, df)
-    }
-
-    if (n >= 20000) {
-      warning("Maximum iterations reached; solution may not have converged")
-    }
-
-    # Calculate final g for output
-    g_final <- gfun(n, alpha, zp)
-    actual_assurance <- ape
-
+    # Solve for n
+    n <- .search_n(function(n) assur_at(n, g_at(n), omega) >= assurance,
+                   lo = 2, hi = 20000)
+    g_final <- g_at(n)
   } else {
-    # Solve for omega (less common case)
-    df <- n - 1
-    g <- gfun(n, alpha, zp)
-
-    # Binary search for omega
-    omega_low <- 0
-    omega_high <- 10 * sigma  # Start with reasonable upper bound
-
-    while (omega_high - omega_low > 1e-6) {
-      omega_mid <- (omega_low + omega_high) / 2
-      ape <- pchisq((df / g^2) * (omega_mid / sigma)^2, df)
-
-      if (ape < assurance) {
-        omega_low <- omega_mid
-      } else {
-        omega_high <- omega_mid
-      }
+    # Solve for omega: omega = g * sigma * sqrt(q), q the assurance quantile
+    # of S^2 / sigma^2
+    g_final <- g_at(n)
+    if (m == 1) {
+      q <- qchisq(assurance, n - 1) / (n - 1)
+    } else {
+      q <- .bisect(function(t) .s2_cdf(t, n, m, icc), assurance,
+                   lo = 0, hi = 2, increasing = TRUE, side = "above")
     }
-
-    omega <- omega_high
-    g_final <- g
-    actual_assurance <- pchisq((df / g^2) * (omega / sigma)^2, df)
+    # nudge up so the reported assurance is not below target by rounding
+    omega <- g_final * sigma * sqrt(q) * (1 + 1e-10)
   }
+  actual_assurance <- assur_at(n, g_final, omega)
 
   # Create output object
   structure(
@@ -263,7 +250,11 @@ agree_assurance <- function(conf.level = 0.95,
       sigma = sigma,
       g = g_final,
       zp = zp,
-      method = "Assurance probability & sample size for Limits of Agreement"
+      m = m,
+      icc = icc,
+      n.obs = n * m,
+      method = "Assurance probability & sample size for Limits of Agreement",
+      note = .agree_n_note(m, icc)
     ),
     class = "power.htest"
   )
