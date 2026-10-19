@@ -1,6 +1,6 @@
 # NEWS
 
-# SimplyAgree 0.3.1
+# SimplyAgree 0.4.0
 
 ## Reliability
 

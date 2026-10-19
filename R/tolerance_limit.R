@@ -431,7 +431,7 @@ tolerance_limit = function(data,
 
 
 # tol_method argument ----
-# "approx" and "perc" were renamed to "analytic" and "boot_cal" in 0.3.1
+# "approx" and "perc" were renamed to "analytic" and "boot_cal" in 0.4.0
 # ("perc" was never a percentile bootstrap after the calibration was added).
 # The old names, including partial matches, still work with a notice.
 tol_method_arg = function(tol_method){
@@ -447,7 +447,7 @@ tol_method_arg = function(tol_method){
   # user_env is the caller of tolerance_limit(); without it lifecycle sees
   # this helper's caller (inside the package) and never warns users
   lifecycle::deprecate_soft(
-    "0.3.1",
+    "0.4.0",
     I(paste0('tolerance_limit(tol_method = "', old, '")')),
     I(paste0('tolerance_limit(tol_method = "', new, '")')),
     user_env = parent.frame(2)

@@ -275,7 +275,7 @@ test_that("parameter n is correctly computed", {
   expect_equal(unname(result_reps$parameter), length(unique(reps$id)))
 })
 
-# ccc_htest class, defaults and intervals (0.3.1) -------------------------------
+# ccc_htest class, defaults and intervals (0.4.0) -------------------------------
 
 test_that("ccc_test returns a ccc_htest with no test by default", {
   testthat::local_edition(3)

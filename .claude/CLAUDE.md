@@ -1,7 +1,7 @@
 # CLAUDE.md - SimplyAgree Package Guide
 
 ## Package Overview
-**SimplyAgree** (v0.3.0) - Flexible and Robust Agreement and Reliability Analyses
+**SimplyAgree** (v0.4.0) - Flexible and Robust Agreement and Reliability Analyses
 
 An R package for method comparison studies implementing Bland-Altman limits of agreement, tolerance intervals, concordance correlation coefficients, and reliability statistics (ICCs). Supports simple paired data, repeated measures, and nested data structures.
 

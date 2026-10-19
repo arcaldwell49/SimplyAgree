@@ -491,7 +491,7 @@ but still work.
 reli_aov(data = dat, wide = TRUE, col.names = judges)
 ```
 
-Since version 0.3.1 they use the same engine as `icc_test()`. In
+Since version 0.4.0 they use the same engine as `icc_test()`. In
 particular, their ICC intervals are now two-sided. Previous versions used
 `conf.level` in each tail, so a "95%" interval was really a 90% interval;
 the old numbers at `conf.level = c` are reproduced with
