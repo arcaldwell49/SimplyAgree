@@ -33,6 +33,7 @@ reference:
   contents:
   - icc_test
   - reli_err_test
+  - mdc_test
   - power_icc
   - precision_icc
   - reli_htest-methods

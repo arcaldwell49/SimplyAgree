@@ -43,6 +43,7 @@ turn relies on @shrout1979 and @mcgraw1996.
 |---|---|
 | `icc_test()` | One ICC |
 | `reli_err_test()` | The SEM, SEE or SEP, in units, sympercents or % of the mean |
+| `mdc_test()` | The minimal detectable change (MDC) |
 | `power_icc()`, `precision_icc()` | Sample size for an ICC study |
 
 The older `reli_stats()` and `reli_aov()`, which return everything at once,
@@ -402,19 +403,54 @@ In both cases `null.value` is on the same scale as the estimate.
 The minimal detectable change (MDC), smallest detectable or real difference
 (SDD, SRD), "minimal difference" [@weir2005] and repeatability coefficient
 are all the SEM scaled by \(z \sqrt{2}\): for 95%,
-\(1.96 \sqrt{2} \times SEM\), the change between two measurements that
-measurement error alone would exceed only 5% of the time. Scale the
-estimate and interval of `reli_err_test()`:
+\(1.96 \sqrt{2} \times SEM\), the change between two measurements of one
+subject that measurement error alone would exceed only 5% of the time.
+`mdc_test()` computes it, with an interval (the SEM interval, scaled):
 
 ```{r}
-sem <- reli_err_test(col.names = c("t1", "t2"), data = weir)
-qnorm(0.975) * sqrt(2) * c(sem$estimate, sem$conf.int)
+mdc_test(col.names = c("t1", "t2"), data = weir)
 ```
 
-With two trials this is the half-width of the limits of agreement of
-`agreement_limit()`, which also reports the bias between trials. @weir2005
-notes that, strictly, real change should be judged against an interval
-around the subject's estimated true score, using the SEP.
+`sided = "one.sided"` gives the MDC for a change in one stated direction,
+`k_avg` the MDC for scores that are means of several trials, and
+`scale = "log"` the MDC as a percentage (in `percent`, as an increase and a
+decrease). An existing SEM can be reused without refitting, as
+`mdc_test(sem)`. With two trials the MDC is the half-width of the limits of
+agreement of `agreement_limit()`, which also reports the bias between
+trials. @weir2005 notes that, strictly, real change should be judged against
+an interval around the subject's estimated true score, using the SEP.
+
+**What the MDC is not.** The MDC is a threshold for *one individual's*
+change. It is not a threshold for an average (group) effect: the
+uncertainty of a mean change shrinks with the number of subjects, so a mean
+effect well below the MDC can be estimated precisely and be clearly
+different from zero. An effect smaller than the MDC is small relative to one
+person's measurement noise; that does not make it noise. The MDC
+should never be used to count "responders". An observed change mixes the true response
+with within-person variation, so even if everyone responded identically,
+some would exceed the MDC and some would not [@senn2004]. Real differences
+in response need a control group or replicated crossover designs
+[@atkinson2015; @senn2016].
+
+**The MDC and a change that matters.** The MDC describes noise; whether a
+change *matters* needs an external anchor, such as a clinically important
+difference. Give it as `null.value` to test whether the MDC is below it,
+i.e. whether such a change can be told apart from measurement error:
+
+```{r}
+mdc_test(col.names = c("t1", "t2"), data = weir, null.value = 30)
+```
+
+A "smallest worthwhile change" computed from the same reliability data is
+not such an anchor. With 0.2 times the between-subject SD [@hopkins2004],
+its ratio to the SEM is \(0.2/\sqrt{1 - ICC}\), a restatement of the ICC;
+with 0.3 times the test's own typical error it is a fixed 11% of the MDC.
+@hopkins2004 offers 0.2 SD as a default when nothing else is available.
+Hopkins also reports the 0.3 of the CV for elite athletes. This uses the variability
+of performance between *competitions*, chosen because an enhancement of that
+size raises the best athlete's chance of winning by about 10 percentage
+points [@hopkins1999], so it is an external anchor that can be given as
+`null.value`. See `?mdc_test` for details.
 
 # Planning a reliability study
 

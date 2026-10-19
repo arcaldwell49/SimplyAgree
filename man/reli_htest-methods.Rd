@@ -54,7 +54,8 @@ the scale the model was fitted). See Details.}
 }
 }
 \description{
-Methods for objects returned by \code{\link[=icc_test]{icc_test()}} and \code{\link[=reli_err_test]{reli_err_test()}}. They
+Methods for objects returned by \code{\link[=icc_test]{icc_test()}}, \code{\link[=reli_err_test]{reli_err_test()}} and
+\code{\link[=mdc_test]{mdc_test()}}. They
 print as standard
 \code{"htest"} objects; \code{summary()} describes the result in words,
 \code{plot()} shows the data, and \code{check()} gives model diagnostics.

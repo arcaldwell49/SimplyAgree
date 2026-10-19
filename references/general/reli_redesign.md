@@ -731,6 +731,9 @@ Notes:
 
 #### MDC, SDD and RC
 
+**Update 2026-10-19:** superseded by `mdc_test()` (see Section 10). The notes
+below are kept for the terminology and the SEP caveat.
+
 **No multiplier, no MDC/RC option.** `@details` and the vignette explain that
 MDC, SDD and RC are scaled SEMs and point users to the options below.
 Terminology to use in the docs (pre-check): Weir (2005) calls it the
@@ -1663,11 +1666,27 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
   compare the observed estimate with that null distribution. A proper test,
   replacing the approximate CI-inversion p-value. Needs a way to impose the
   null on subject-resampled data or a constrained fit; research first.
-- **MDC converter:** a helper that turns a `reli_err_test()` result into an
-  MDC/SDD/RC (e.g. `as_mdc(res, agree.level = 0.95)`), scaling estimate and CI
-  by `qnorm((1 + agree.level)/2) * sqrt(2)`, so users don't write the line in
-  Section 6.2 by hand. Consider `k1`/`k2` (trials averaged per occasion):
-  multiplier `sqrt(1/k1 + 1/k2)` instead of `sqrt(2)`.
+- ~~**MDC converter**~~ — done 2026-10-19 as the standalone `mdc_test()`
+  (`R/mdc_test.R`): from data or an existing SEM result, `mdc.level`,
+  `sided`, `k_avg` (same number of trials averaged at both occasions; unequal
+  `k1`/`k2` not offered), scaled interval, test against an anchored change
+  via the SEM test of `null.value / multiplier`, percent increase/decrease on
+  the log scale. Docs state that the MDC is an individual threshold (not for
+  group effects, not for counting responders; Senn 2004) and why no SWC is
+  computed (0.2 SD is a restatement of the ICC; 0.3 × the test's own TE is a
+  fixed 11% of the MDC; Hopkins's 0.3 × CV is anchored only because it uses
+  the competition CV; Hopkins et al. 1999, Hopkins 2004, read from
+  user-supplied PDFs).
+- **Individual responses (instead of an MDC "responder" classifier).** A
+  helper that flags each subject as improved/unchanged/worse by the MDC was
+  considered and rejected: observed changes mix true response with
+  within-person variation, so the share exceeding the MDC reflects noise as
+  much as real heterogeneity (Senn 2004, 2016). The defensible tool is an
+  estimate of the SD of individual responses,
+  sqrt(SD²_change,treatment − SD²_change,control), with a CI (Atkinson &
+  Batterham 2015; Hopkins 2015, "Individual responses made easy"), and
+  pointers to replicated crossover designs. Research the CI (it can be
+  negative under the square root) before building.
 - **D-study / Spearman-Brown projection:** ICC (and SEM of the mean) for k′
   items from fitted variance components; multi-facet G-theory via lmer.
 - **Average-measure SEM** (SEM/√k).

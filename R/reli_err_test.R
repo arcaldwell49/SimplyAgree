@@ -165,10 +165,11 @@
 #'
 #' **Minimal detectable change.** The minimal detectable change (MDC),
 #' smallest real difference, or repeatability coefficient is a scaled SEM:
-#' \eqn{1.96 \sqrt{2} SEM} for 95% (Weir, 2005, eq. 13). Scale the estimate
-#' and interval, e.g. `qnorm(0.975) * sqrt(2) * c(res$estimate, res$conf.int)`.
-#' With two trials, [agreement_limit()] gives the same quantity as the half
-#' width of the limits of agreement, with the bias reported separately.
+#' \eqn{1.96 \sqrt{2} SEM} for 95% (Weir, 2005, eq. 13). [mdc_test()]
+#' computes it, with its interval and a test, from the data or from an SEM
+#' result of this function. With two trials, [agreement_limit()] gives the
+#' same quantity as the half width of the limits of agreement, with the bias
+#' reported separately.
 #'
 #' @return A list of class `c("reli_htest", "htest")` containing:
 #'   \item{statistic}{The \eqn{\chi^2} (SEM) or z (SEE, SEP) statistic, when
@@ -379,7 +380,8 @@ reli_err_test <- function(x = NULL,
   what <- switch(stat,
                  SEM = "Standard error of measurement",
                  SEE = "Standard error of estimate",
-                 SEP = "Standard error of prediction")
+                 SEP = "Standard error of prediction",
+                 MDC = "Minimal detectable change")
   design <- if (model == "oneway") "one-way" else
     paste0("two-way, ", if (type == "consistency") "consistency" else
       "absolute agreement")

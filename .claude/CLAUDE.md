@@ -50,7 +50,7 @@ Methods are organized in `R/methods.*.R` files:
 | simple_eiv | Yes | Yes | Yes | coef, confint, fitted, predict, residuals, summary, vcov |
 | loa, loa_mermod | Yes | Yes (ggplot2) | Yes | - |
 | tolerance_delta | Yes | Yes (ggplot2) | Yes | - |
-| reli_htest (icc_test, reli_err_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
+| reli_htest (icc_test, reli_err_test, mdc_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
 | ccc_htest (ccc_test) | htest | Yes (identity, `type = "ba"`) | Yes | summary (`style`) |
 | cac_htest (cac_test, ord_kappa_test) | htest | Yes (ggplot2, `type`) | - | summary (`style`) |
 | htest | Inherited from stats | - | - | - |
@@ -82,6 +82,7 @@ R/
 ├── ccc_test.R             # CCC hypothesis test (htest)
 ├── icc_test.R             # ICC test (htest; recommended)
 ├── reli_err_test.R        # SEM/SEE/SEP and CV (htest; recommended)
+├── mdc_test.R             # Minimal detectable change (htest, from the SEM)
 ├── power_icc.R            # power_icc(), precision_icc()
 ├── reli_engine.R          # Internal reliability engine
 ├── reli_stats.R           # reli_stats(), reli_aov() (superseded)
@@ -228,6 +229,7 @@ Not extensively used, but consider for grouping related functions.
 | Categorical agreement (AC1, kappa, alpha) | `cac_test()` (`agree_coef()` superseded) | Categorical ratings |
 | Model-based kappa | `ord_kappa_test()` | Ordinal ratings, many raters |
 | SEM / CV | `reli_err_test()` | Repeated measures |
+| Minimal detectable change | `mdc_test()` | Repeated measures |
 | Deming Regression | `dem_reg()` | Paired |
 | Passing-Bablok | `pb_reg()` | Paired |
 

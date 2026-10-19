@@ -1,6 +1,7 @@
 #' Methods for reli_htest objects
 #'
-#' Methods for objects returned by [icc_test()] and [reli_err_test()]. They
+#' Methods for objects returned by [icc_test()], [reli_err_test()] and
+#' [mdc_test()]. They
 #' print as standard
 #' \code{"htest"} objects; `summary()` describes the result in words,
 #' `plot()` shows the data, and `check()` gives model diagnostics.
@@ -514,7 +515,8 @@ check.reli_htest <- function(x, ...) {
                  " and the SD matched to its denominator"),
     SEP = paste0("the standard error for judging change from a subject's ",
                  "estimated true score, SD * sqrt(1 - ICC^2) with ",
-                 .icc_label(s$form), " and the SD matched to its denominator"))
+                 .icc_label(s$form), " and the SD matched to its denominator"),
+    MDC = .describe_mdc(object))
   description <- .err_description(s$stat, s$model, s$type)
   description <- paste0(tolower(substr(description, 1, 1)),
                         substring(description, 2))
@@ -525,8 +527,36 @@ check.reli_htest <- function(x, ...) {
                                "coefficient of variation)"),
                   mean = paste0("as a percentage of the grand mean (a ",
                                 "coefficient of variation)"))
+  if (s$stat == "MDC") {
+    return(paste0("The estimate is the ", description, ", ", units,
+                  ", from the SEM ", treatment, ": ", what, "."))
+  }
   paste0("The estimate is the ", description, ", ", units, ": ", what, ", ",
          treatment, ".")
+}
+
+# What the MDC is, with its multiplier, the percentage change on the log scale,
+# and the reminder that it is an individual threshold.
+.describe_mdc <- function(object) {
+  m <- object$settings$mdc
+  level <- paste0(format(100 * m$level), "%")
+  direction <- if (m$sided == "two.sided") "in either direction" else
+    "in one stated direction"
+  averaged <- if (m$k_avg > 1) {
+    paste0(" / sqrt(", m$k_avg, "), for scores that are means of ", m$k_avg,
+           " trials")
+  } else ""
+  pct <- if (!is.null(object$percent)) {
+    p <- object$percent
+    paste0(" (as a percentage change, an increase of ",
+           .fmt_num(p$estimate[1]), "% or a decrease of ",
+           .fmt_num(p$estimate[2]), "%)")
+  } else ""
+  paste0("the smallest change ", direction, " between two measurements of ",
+         "one subject that exceeds measurement error with ", level,
+         " confidence, ", .fmt_num(m$z), " * sqrt(2) * SEM", averaged, pct,
+         ". It applies to an individual's change, not to an average (group) ",
+         "effect, which should be judged by its own confidence interval")
 }
 
 .describe_design <- function(fit) {
@@ -584,7 +614,7 @@ check.reli_htest <- function(x, ...) {
   s <- object$settings
   fit <- object$fit
   relative <- identical(s$scale, "mean")
-  sem <- s$stat == "SEM" && !relative
+  sem <- s$stat %in% c("SEM", "MDC") && !relative
   what <- if (tested) {
     if (sem) "The interval and chi-square test" else "The interval and z test"
   } else "The interval"
