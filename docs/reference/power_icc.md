@@ -1,6 +1,6 @@
 # Power and Sample Size for an Intraclass Correlation Test
 
-**\[maturing\]**
+**\[experimental\]**
 
 Computes the power of the F test of an intraclass correlation
 coefficient (ICC) used by

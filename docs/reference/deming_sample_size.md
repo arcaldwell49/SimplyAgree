@@ -1,6 +1,6 @@
 # Determine Required Sample Size for Deming Regression
 
-\#' **\[experimental\]**
+**\[experimental\]**
 
 Automatically determines the minimum sample size needed to achieve
 target statistical power for detecting specified bias in method

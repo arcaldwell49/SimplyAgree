@@ -183,6 +183,17 @@
 
 ### Agreement power and sample size
 
+- New
+  [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md):
+  power and sample size for the Bland-Altman limits of agreement (Lu et
+  al. 2016), returned as a `power.htest`. It solves for any one of `n`,
+  `delta`, `sigma` or `power`, and supports `m` and `icc`. It reproduces
+  both PASS (Chapter 427) examples, including PASS’s point that the
+  exact power formula gives n = 201 where Table 1 of Lu et
+  al. reports 203.
+  [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+  is superseded by it but remains for power curves; it now uses the same
+  internal code (results unchanged).
 - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md),
   [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md),
   [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
@@ -557,6 +568,26 @@
   chi-squared(2) approximation. The previous chi-squared approach was
   anti-conservative for small samples. A `test_method` argument allows
   selecting `"F"` (default) or `"asymptotic"` (old behavior).
+- [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  now takes `ideal_intercept` before `ideal_slope`, as
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  does. **Calls that passed the ideal values by position
+  (`plot_joint(fit, 1, 0)`) must swap them**; named arguments are
+  unaffected.
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  gains `conf.level`, and in both functions it now defaults to the level
+  the model was fitted with
+  ([`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  previously defaulted to 0.95 whatever the model’s level).
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  now stops with an informative error, as
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  does, when the model has no variance-covariance matrix
+  (e.g. [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
+  with `replicates = 0`), instead of drawing a plot without the region.
+  The two functions are now documented together on the
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  page.
 
 ## SimplyAgree 0.3.0
 

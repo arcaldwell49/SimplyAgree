@@ -221,7 +221,7 @@ provide a covariance between the intercept and slope, so a
 variance-covariance matrix (needed by
 [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
 and
-[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md))
+[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md))
 is only returned when one of the following is used:
 
 - **Pairs bootstrap** (`se_method = "bootstrap"`, `replicates > 0`):

@@ -175,13 +175,20 @@ to the regression line.</p>
 <h3 id="weighted-deming-regression">Weighted Deming Regression<a class="anchor" aria-label="anchor" href="#weighted-deming-regression"></a>
 </h3>
 <p>For this example, I will rely upon the “ferritin” data from the
-<code>deming</code> R package. <em>The code in this section was not run
-because the deming package is not installed.</em></p>
+<code>deming</code> R package.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: package 'deming' was built under R version 4.4.3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   id period old.lot new.lot</span></span>
+<span><span class="co">#&gt; 1  1      1       1       1</span></span>
+<span><span class="co">#&gt; 2  2      1       3       3</span></span>
+<span><span class="co">#&gt; 3  3      1      10       9</span></span>
+<span><span class="co">#&gt; 4  4      1      13      11</span></span>
+<span><span class="co">#&gt; 5  5      1      13      12</span></span>
+<span><span class="co">#&gt; 6  6      1      15      13</span></span></code></pre></div>
 <p>Let me demonstrate the problem with using simple Deming regression
 when the weights are helpful. When we look at the two plots below, we
 can see there is severe problem with using the “un-weighted” model.</p>
@@ -192,23 +199,55 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span>  weighted <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Deming Regression with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = FALSE, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             coef      bias      se  df lower.ci upper.ci      t p.value</span></span>
+<span><span class="co">#&gt; Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821</span></span>
+<span><span class="co">#&gt; Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 160 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span>
-<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="700"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem3</span> <span class="op">=</span> <span class="fu"><a href="../reference/dem_reg.html">dem_reg</a></span><span class="op">(</span></span>
 <span>  <span class="va">old.lot</span> <span class="op">~</span> <span class="va">new.lot</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">ferritin</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Weighted Deming Regression with 95% C.I. </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = TRUE, </span></span>
+<span><span class="co">#&gt;     conf.level = 0.95)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;               coef       bias       se  df lower.ci upper.ci       t   p.value</span></span>
+<span><span class="co">#&gt; Intercept -0.02616  0.0065148 0.033219 160 -0.09176  0.03945 -0.7874 4.322e-01</span></span>
+<span><span class="co">#&gt; Slope      1.03052 -0.0001929 0.006262 160  1.01815  1.04288  4.8729 2.626e-06</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 160 degrees of freedom</span></span>
+<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span>
-<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="700"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" width="700"></p>
 <p>The weighted model provides a better fit.</p>
 </div>
 </div>
@@ -249,7 +288,7 @@ method from <span class="citation">Bablok et al. (<a href="#ref-bablok1988">1988
 <strong>“invariant”</strong>: Scale-invariant method from <span class="citation">Passing and Bablok (<a href="#ref-passing1984">1984</a>)</span>
 </li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create example data</span></span>
 <span><span class="va">pb_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  method1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">69.3</span>, <span class="fl">27.1</span>, <span class="fl">61.3</span>, <span class="fl">50.8</span>, <span class="fl">34.4</span>, <span class="fl">92.3</span>, <span class="fl">57.5</span>, <span class="fl">45.5</span>, <span class="fl">33.3</span>, <span class="fl">60.9</span>,</span>
@@ -288,7 +327,7 @@ method from <span class="citation">Bablok et al. (<a href="#ref-bablok1988">1988
 </h3>
 <p>The summary provides details about the regression coefficients and
 diagnostic tests:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Passing-Bablok (scissors) with 95% C.I. </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -304,7 +343,7 @@ diagnostic tests:</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method displays the regression line with
 data:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
 </div>
@@ -314,7 +353,7 @@ data:</p>
 <p>The <code><a href="../reference/simple_agree-methods.html">check()</a></code> method provides diagnostic plots specific to
 Passing-Bablok regression, including the CUSUM linearity test and
 Kendall’s tau correlation:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="700"></p>
 </div>
@@ -323,7 +362,7 @@ Kendall’s tau correlation:</p>
 </h3>
 <p>For more robust inference, especially with the “invariant” or
 “scissors” methods, bootstrap confidence intervals are recommended:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pb2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pb_reg.html">pb_reg</a></span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, </span>
 <span>              data <span class="op">=</span> <span class="va">pb_data</span>, </span>
 <span>              replicates <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
@@ -378,10 +417,10 @@ method comparisons.</p>
 <div class="section level3">
 <h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
 </h3>
-<p>The <code><a href="../reference/simple_eiv-methods.html">plot_joint()</a></code> function allows visualization of the
+<p>The <code><a href="../reference/joint_test.html">plot_joint()</a></code> function allows visualization of the
 confidence region in parameter space:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
 <span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -400,8 +439,8 @@ the directions that matter for detecting bias.</p>
 <p>For Passing-Bablok regression, bootstrap resampling must be used to
 obtain the variance-covariance matrix needed for the joint confidence
 region:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
@@ -410,7 +449,7 @@ region:</p>
 <p>The <code><a href="../reference/joint_test.html">joint_test()</a></code> function provides a formal hypothesis
 test for whether the identity line (slope = 1, intercept = 0) falls
 within the joint confidence region:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>
@@ -427,7 +466,7 @@ within the joint confidence region:</p>
 <p>This returns an <code>htest</code> object with the Mahalanobis
 distance (chi-squared statistic) and p-value. The test can also be
 applied to Passing-Bablok models fitted with bootstrap:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>

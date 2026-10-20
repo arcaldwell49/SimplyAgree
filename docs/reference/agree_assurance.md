@@ -1,6 +1,6 @@
 # Assurance Probability for Limits of Agreement
 
-**\[maturing\]**
+**\[stable\]**
 
 ## Usage
 

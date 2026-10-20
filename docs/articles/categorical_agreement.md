@@ -3,11 +3,12 @@
 ## Background
 
 Many measurements are not numbers on a continuous scale but
-classifications: a diagnosis (present or absent), a grade (1 to 5), or a
-severity rating (none, mild, moderate, severe). When several raters
-classify the same subjects, the question is how often they agree. For
-continuous measurements, see instead the reliability analysis vignette
-(ICCs) and the agreement analysis vignette (limits of agreement).
+classifications. For example, a diagnosis (present or absent), a grade
+(1 to 5), or a severity rating (none, mild, moderate, severe). When
+several raters classify the same subjects, the question is how often
+they agree. For continuous measurements, see instead the reliability
+analysis vignette (ICCs) and the agreement analysis vignette (limits of
+agreement).
 
 `SimplyAgree` has two functions for categorical ratings. Both return a
 standard `htest` object, with
@@ -276,6 +277,10 @@ plot(res, type = "subjects")
 ![](categorical_agreement_files/figure-html/unnamed-chunk-11-2.png)
 
 ## Model-based kappa for many raters
+
+Below is a new experimental function based on the published work of
+Nelson and Edwards ([2015](#ref-nelson2015)) and Nelson et al.
+([2017](#ref-nelson2017)).
 
 ### When to use it
 

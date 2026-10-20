@@ -5,9 +5,9 @@
 ### Limits Calculations
 
 - [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
-  **\[maturing\]** : Tolerance Limits from an Agreement Study
+  **\[stable\]** : Tolerance Limits from an Agreement Study
 - [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
-  **\[maturing\]** : Limits of Agreement
+  **\[stable\]** : Limits of Agreement
 
 ### Methods
 
@@ -23,16 +23,16 @@
 ## Reliability
 
 - [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
-  **\[maturing\]** : Intraclass Correlation Coefficient Test
+  **\[stable\]** : Intraclass Correlation Coefficient Test
 - [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
-  **\[maturing\]** : Measurement Error Test
+  **\[experimental\]** : Measurement Error Test
 - [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
   **\[experimental\]** : Minimal Detectable Change
 - [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
-  **\[maturing\]** : Power and Sample Size for an Intraclass Correlation
-  Test
+  **\[experimental\]** : Power and Sample Size for an Intraclass
+  Correlation Test
 - [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md)
-  **\[maturing\]** : Sample Size for the Precision of an Intraclass
+  **\[experimental\]** : Sample Size for the Precision of an Intraclass
   Correlation
 - [`summary(`*`<reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
   [`print(`*`<summary.reli_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/reli_htest-methods.md)
@@ -50,7 +50,7 @@
 ### Categorical Ratings
 
 - [`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md)
-  **\[experimental\]** : Chance-Corrected Agreement Coefficients for
+  **\[stable\]** : Chance-Corrected Agreement Coefficients for
   Categorical Ratings
 - [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md)
   **\[experimental\]** : Model-Based Kappa for Ordinal Ratings from Many
@@ -69,7 +69,8 @@
 - [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
   **\[experimental\]** : Passing-Bablok Regression for Method Comparison
 - [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
-  : Joint Confidence Region Test for Method Agreement
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  **\[experimental\]** : Joint Confidence Region for Intercept and Slope
 - [`print(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`formula(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`model.frame(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
@@ -77,7 +78,6 @@
   [`confint(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`plot(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`check(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
-  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`vcov(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`coef(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   [`fitted(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
@@ -88,7 +88,7 @@
 ### Other Miscellaneous Functions
 
 - [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
-  : Concordance Correlation Coefficient
+  **\[experimental\]** : Concordance Correlation Coefficient
 - [`summary(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
   [`plot(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
   [`check(`*`<ccc_htest>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_htest-methods.md)
@@ -122,21 +122,23 @@
 
 ## Power
 
-Fucntions for power calculations
+Functions for power calculations
 
+- [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md)
+  **\[stable\]** : Power Calculation for Bland-Altman Limits of
+  Agreement
 - [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
-  **\[maturing\]** : Power Curve for Bland-Altman Limits of Agreement
+  **\[superseded\]** : Power Curve for Bland-Altman Limits of Agreement
 - [`find_n()`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
   [`plot(`*`<powerCurve>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
   : Methods for powerCurve objects
 - [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
-  **\[maturing\]** : Assurance Probability for Limits of Agreement
+  **\[stable\]** : Assurance Probability for Limits of Agreement
 - [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)
-  **\[maturing\]** : Sample Size for Limits of Agreement Using Expected
+  **\[stable\]** : Sample Size for Limits of Agreement Using Expected
   Half-Width
 - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
-  **\[maturing\]** : Power Calculation for Exact Agreement/Tolerance
-  Test
+  **\[stable\]** : Power Calculation for Exact Agreement/Tolerance Test
 - [`deming_power_sim()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_power.md)
   **\[experimental\]** : Simulate Deming Regression Power
 - [`deming_sample_size()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_sample_size.md)

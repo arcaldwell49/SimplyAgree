@@ -1,6 +1,6 @@
 # Intraclass Correlation Coefficient Test
 
-**\[maturing\]**
+**\[stable\]**
 
 Estimates one intraclass correlation coefficient (ICC), with a
 confidence interval and a test against a null value, and returns an
