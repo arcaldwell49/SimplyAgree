@@ -420,6 +420,27 @@ agreement of `agreement_limit()`, which also reports the bias between
 trials. @weir2005 notes that, strictly, real change should be judged against
 an interval around the subject's estimated true score, using the SEP.
 
+**Differences between raters.** The MDC also answers a common inter-rater
+question: how far apart could two raters' (or devices') measurements of the
+same subject be? Each measurement has error SEM, so their difference has
+error SD \(\sqrt{2} \times SEM\), the same reasoning as for two occasions.
+When the raters are interchangeable (any rater's score is used as it is, and
+the raters are thought of as drawn from a pool), use the agreement SEM, so
+that systematic differences between raters count as error:
+
+```{r}
+mdc_test(col.names = judges, data = dat, type = "agreement")
+```
+
+Two of the judges differing by less than this would be consistent with
+measurement error alone. The consistency SEM would leave out the judges'
+systematic differences, which are large here, and give an MDC of only
+about 2.8. For two particular raters,
+`agreement_limit()` reports their bias and the spread around it separately.
+The SEP is not the statistic for this: it concerns a change from a subject's
+estimated true score, and \(1.96 \times SEP\) does not bound the difference
+between two raters.
+
 **What the MDC is not.** The MDC is a threshold for *one individual's*
 change. It is not a threshold for an average (group) effect: the
 uncertainty of a mean change shrinks with the number of subjects, so a mean

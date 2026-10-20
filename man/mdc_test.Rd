@@ -114,6 +114,21 @@ With \code{scale = "log"} the MDC is in sympercents; \code{percent} gives the
 equivalent percentage increase and decrease, which differ:
 \eqn{100(e^{MDC/100} - 1)} and \eqn{100(1 - e^{-MDC/100})}.
 
+\strong{Differences between raters or devices.} The same reasoning applies to
+two measurements of one subject by different items, such as two raters or
+two devices, rather than two occasions: the MDC is the difference between
+them that measurement error alone would exceed only 5\% of the time (for
+95\%). When the raters are interchangeable (any rater's score is used as
+it is, and raters are thought of as drawn from a pool), use
+\code{type = "agreement"}, so that systematic differences between raters count
+as error; the consistency SEM leaves them out and understates how far
+apart two raters can be. For two particular raters, the limits of
+agreement of \code{\link[=agreement_limit]{agreement_limit()}} report their bias and the spread around
+it separately. This is the MDC, not a multiple of the standard error of
+prediction (SEP): the SEP concerns a change from a subject's estimated
+true score (Weir, 2005), and \eqn{1.96 \cdot SEP}{1.96 * SEP} does not
+bound the difference between two raters.
+
 \strong{An individual threshold, not a group one.} The MDC applies to a single
 individual's change between two measurements. It is not a threshold for
 an average (group) effect. The uncertainty in a mean change shrinks with

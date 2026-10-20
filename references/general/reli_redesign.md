@@ -112,6 +112,11 @@ Then the PR from `reli-update` to `master` (description from this doc and
 NEWS). Manual checks only the user can do: the jamovi module in jamovi,
 and a read of the rendered vignette.
 
+**After the PR (proposed, 2026-10-20):** repeat measurements within
+subject × item cells via a G-theory model. Design only, in Section 14;
+the API (14.3) and the truncation rule (14.2) need the user's decision
+before phase G1.
+
 ### Open TODOs
 
 - Influence SE: tuned small-sample correction (B) or an `"auto"` SE (C),
@@ -1689,6 +1694,7 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
   negative under the square root) before building.
 - **D-study / Spearman-Brown projection:** ICC (and SEM of the mean) for k′
   items from fitted variance components; multi-facet G-theory via lmer.
+  The repeats-within-cells case (r:(p × i)) is designed in Section 14.
 - **Average-measure SEM** (SEM/√k).
 - **Power/precision for the agreement ICC:** simulation-based (no exact F
   distribution); `power_icc()`/`precision_icc()` currently cover one-way and
@@ -1732,7 +1738,7 @@ Use testthat edition 3 (`expect_equal(..., tolerance = 1e-5)`, no
 | Agreement ICC power | Not supported; documented; simulation-based is a TODO |
 | `alternative` in `power_icc()` | Test notation (`"two.sided"`, `"greater"`, `"less"`); default `"two.sided"`, shared with `icc_test()`; two-sided `rho1` solve returns the root above `rho0` with a NOTE |
 | Legacy ICC CIs | Change to two-sided (Shrout & Fleiss / McGraw & Wong convention), with NEWS and the `conf.level` mapping that reproduces old numbers |
-| D-study | TODO only |
+| D-study | TODO only; for repeats within cells, designed (not built) in Section 14 (2026-10-20) |
 
 ## 12. Open questions
 
@@ -1861,3 +1867,333 @@ All metadata below checked against CrossRef on 2026-10-15 unless noted.
 - Zou, G. Y. (2012). Sample size formulas for estimating intraclass correlation
   coefficients with precision and assurance. Statistics in Medicine, 31(29),
   3972-3981. doi:10.1002/sim.5466
+
+References for Section 14 (G-theory design; **metadata not yet checked**
+against CrossRef; verify before citing in an Rd):
+
+- Brennan, R. L. (2001). Generalizability Theory. Springer.
+- Burdick, R. K., & Graybill, F. A. (1992). Confidence Intervals on Variance
+  Components. Marcel Dekker.
+- Burdick, R. K., Borror, C. M., & Montgomery, D. C. (2005). Design and
+  Analysis of Gauge R&R Studies. SIAM/ASA. (Parts × operators × replicates
+  is this design; repeatability = σ²_e, reproducibility = σ²_i + σ²_pi.)
+- Cappelleri, J. C., & Ting, N. (2003). A modified large-sample approach to
+  approximate interval estimation for a particular intraclass correlation
+  coefficient. Statistics in Medicine, 22(11), 1861-1877. (Check.)
+- Graybill, F. A., & Wang, C.-M. (1980). Confidence intervals on nonnegative
+  linear combinations of variances. Journal of the American Statistical
+  Association, 75(372), 869-873.
+- Jiang, Z. (2018). Using the linear mixed-effect model framework to
+  estimate generalizability variance components in R: A lme4 package
+  application. Methodology, 14(3), 133-142. (Check.)
+- Satterthwaite, F. E. (1946). An approximate distribution of estimates of
+  variance components. Biometrics Bulletin, 2(6), 110-114.
+- Shavelson, R. J., & Webb, N. M. (1991). Generalizability Theory: A Primer.
+  Sage.
+- Software (14.7; cite the package's `citation()` output at release):
+  VCA (Schuetzenmeister & Dufey), rptR (Stoffel, Nakagawa & Schielzeth,
+  2017, Methods in Ecology and Evolution 8(11), 1639-1644; check),
+  SixSigma (Cano, Moguerza & Prieto Corcoba), gtheoryr (Tyagi), gtheory
+  (Moore; archived), cccrm (Carrasco et al.).
+
+## 14. Replicate measurements: a G-theory extension (design, not built)
+
+Status: design only, written 2026-10-20 at the user's request. No code.
+Motivation: users (e.g. an ultrasound study with 3 operators × 20
+participants × 3 scans per operator) have **replicates inside each
+subject × item cell**. `.reli_prepare()` currently stops ("aggregate
+replicate measurements first", `R/reli_engine.R:114`), and the legacy
+`reli_stats()` silently folded the extra rows into the error with wrong df
+(its model had no id × item term; now an error, see NEWS). Aggregating is valid only when the
+score used in practice is also a mean of r replicates, and it cannot
+separate intra-rater from inter-rater error, which is usually the question.
+
+### 14.1 Model
+
+Balanced design: n subjects (p), k items (i: raters, devices), r
+replicates nested in each p × i cell, design r:(p × i) in G-theory
+notation:
+
+y_pir = μ + p + i + (pi) + e_pir,  all effects random, independent,
+variances σ²_p, σ²_i, σ²_pi, σ²_e.
+
+lme4: `y ~ 1 + (1 | id) + (1 | item) + (1 | id:item)`.
+
+Two-way ANOVA with replication (unrestricted, random-items
+parameterization, as lme4 and McGraw & Wong's Case 2 use):
+
+| Source | df | E[MS] |
+|---|---|---|
+| Subjects (MS_p) | n − 1 | σ²_e + r σ²_pi + k r σ²_p |
+| Items (MS_i) | k − 1 | σ²_e + r σ²_pi + n r σ²_i |
+| Subjects × items (MS_pi) | (n − 1)(k − 1) | σ²_e + r σ²_pi |
+| Within cells (MS_w) | n k (r − 1) | σ²_e |
+
+ANOVA estimates: σ²_e = MS_w; σ²_pi = (MS_pi − MS_w)/r;
+σ²_p = (MS_p − MS_pi)/(k r); σ²_i = (MS_i − MS_pi)/(n r).
+
+**Consistency forms with fixed items.** As in the current functions, the
+consistency estimands simply leave σ²_i out of the denominator; the
+estimators are the same (McGraw & Wong: the fixed/random distinction
+changes interpretation, not computation). Under the *restricted* mixed
+model E[MS_p] would lack the r σ²_pi term; the design follows the
+unrestricted model (lme4, current engine). Document this.
+
+**What r = 1 reduces to.** With r = 1, σ²_pi and σ²_e are confounded and
+MS_pi is the current MS_E, so every estimand below collapses to an
+existing `icc_test()` / `reli_err_test()` form. The new function requires
+r ≥ 2 in at least some cells and otherwise points to those functions.
+
+**Nested vs crossed replicates.** The model assumes replicates are
+exchangeable within a cell (scan 1 vs scan 2 means nothing). If the
+replicate index is a shared occasion (every operator measures everyone on
+day 1 and day 2), the design is p × i × o, fully crossed; treating it as
+nested puts σ²_o and σ²_io into σ²_e (error looks larger, intra-rater ICC
+lower). Out of scope for v1; document the distinction and how to check it
+(fit both in lme4 and compare σ²_o).
+
+### 14.2 Estimands
+
+Measurement error (all can be given on `scale = "raw"`, `"log"`
+(sympercents) or `"mean"`, as in `reli_err_test()`):
+
+| Name | Definition | Question |
+|---|---|---|
+| SEM_rep (repeatability, intra-rater) | √σ²_e | Same rater, same subject, rescanned |
+| SEM_C (inter-rater, consistency) | √(σ²_pi + σ²_e) | Different rater, rater bias handled separately |
+| SEM_A (inter-rater, agreement) | √(σ²_i + σ²_pi + σ²_e) | Different rater, scores used interchangeably |
+
+In mean squares: SEM_C² = (MS_pi + (r − 1) MS_w)/r;
+SEM_A² = (MS_i + (n − 1) MS_pi + n (r − 1) MS_w)/(n r). Both are
+**nonnegative combinations** of mean squares (good for Satterthwaite and
+Graybill-Wang intervals). Gauge R&R names: SEM_rep² = repeatability,
+σ²_i + σ²_pi = reproducibility.
+
+Reliability coefficients, for a planned score that is the mean of k′
+items (raters) and r′ replicates per item (D-study; defaults k′ = r′ = 1):
+
+- Relative (consistency) coefficient
+  Eρ² = σ²_p / (σ²_p + σ²_pi/k′ + σ²_e/(k′r′)).
+- Absolute (agreement) coefficient
+  Φ = σ²_p / (σ²_p + σ²_i/k′ + σ²_pi/k′ + σ²_e/(k′r′)).
+- Intra-rater ICC (same rater, two replicates)
+  ρ_intra = (σ²_p + σ²_pi) / (σ²_p + σ²_pi + σ²_e), pooled over raters
+  (assumes equal σ²_e across raters; `check()` should show per-rater
+  within-cell SDs).
+
+With k′ = r′ = 1, Eρ² and Φ are the single-measurement ICC(C,1) and
+ICC(A,1) with the replicate noise correctly placed. 
+
+**Exact special case (verify algebraically in phase G1).** When r′ = r
+(the planned score averages as many replicates as the study had), σ²_pi +
+σ²_e/r = MS_pi/r, so Eρ² = (F − 1)/(F − 1 + k/k′) with F = MS_p/MS_pi: a
+monotone function of one F ratio, so it has an **exact** F interval and
+test for every k′ (it is ICC(C,·) on the cell means, Spearman-Brown
+projected). For r′ ≠ r (the common practical case, r′ = 1: one scan) three
+mean squares are involved and no exact interval exists. Similarly
+ρ_intra = (MS_p + (k − 1) MS_pi − k MS_w) / (MS_p + (k − 1) MS_pi +
+k (r − 1) MS_w), not exact.
+
+MDCs follow by passing the matching SEM to `mdc_test()`: same rater,
+z√2·SEM_rep (or /√r′ for means of r′ scans); two raters drawn from the
+pool, z√2·SEM_A. (`mdc_test()` currently takes a `reli_err_test()` SEM;
+accept the new SEM results too.)
+
+Negative component estimates: ANOVA estimates are reported unconstrained
+in the component table (REML truncates at 0); for coefficients and SEMs,
+decide in G1 whether to truncate at 0 (current rule: a negative ICC gives
+SEE = 0, SEP = SD). **Open question for the user.**
+
+### 14.3 API (proposed; decide before G1)
+
+Option A (recommended): a new `htest`-style function, one estimand per
+call, consistent with the suite:
+
+```r
+gstudy_test(x = NULL, data = NULL, measure = NULL, item = NULL, id = NULL,
+            stat = c("ICC", "SEM"),
+            form = c("intra", "consistency", "agreement"),
+            k_avg = 1, r_avg = 1,          # D-study: score = mean of k′ items × r′ repeats
+            scale = c("raw", "log", "mean"),   # SEMs only
+            method = c("anova", "reml"),
+            conf.level = 0.95, null.value = NULL,
+            alternative = c("two.sided", "greater", "less"),
+            ci_method = c("auto", ...),       # analytic choice, decided by 14.5
+            boot = FALSE, boot_ci = c("auto", "perc", "bca", "stud", "basic"),
+            replicates = 1999, se_method = c("jackknife", "influence", "normal"))
+```
+
+- Returns `c("reli_htest", "htest")`; `summary()` adds the variance
+  component table (with Satterthwaite/χ² intervals) and the share of each
+  component, which is the most informative output for raters × scans
+  studies. `plot()` gains a variance-component bar; `check()` per-rater
+  within-cell SDs and Mandel-type additivity on cell means.
+- Input: formula `values ~ item | id` or long data, with duplicate
+  `(id, item)` rows **allowed** (they are the repeats). Wide data is not
+  supported (no natural layout). No repeat-index column in v1 (exchangeable
+  repeats); an optional `occasion` column could later enable the crossed
+  p × i × o design.
+- **Naming clash:** `replicates` already means bootstrap replicates in
+  every reliability function, so the measurements are called **repeats**
+  in arguments and docs (`r_avg`, "repeat measurements"). `repeat` itself
+  is reserved in R.
+- `icc_test()` / `reli_err_test()` keep stopping on duplicates; the error
+  message and the vignette point to the new function.
+
+Option B: an argument on `icc_test()`/`reli_err_test()` (e.g.
+`repeats = "nested"`) that switches the engine. Fewer functions, but the
+estimand list (intra, inter-consistency, inter-agreement, D-study) does
+not map onto `model`/`type`/`unit`, and the arguments would interact
+awkwardly. Option C: a fit object (`reli_components()`) plus a D-study
+method returning several coefficients at once; flexible but breaks the
+one-estimate `htest` pattern used everywhere else.
+
+### 14.4 Interval candidates
+
+| Estimand | Candidates (first = expected default) |
+|---|---|
+| SEM_rep | Exact χ²(nk(r − 1)) on MS_w |
+| SEM_C, SEM_A | Graybill-Wang MLS for nonnegative combinations; Satterthwaite χ² (current approach for the agreement SEM) |
+| Eρ² with r′ = r | Exact F on MS_p/MS_pi, transformed |
+| Eρ² with r′ ≠ r, ρ_intra | MLS for ratios of variance components (Burdick & Graybill, balanced designs); Satterthwaite-F (pool the numerator mean squares into one with Satterthwaite df, then an F ratio, the McGraw & Wong Type A device) |
+| Φ (any k′, r′) | Satterthwaite-F generalizing McGraw & Wong's ICC(A,1) interval; MLS (Cappelleri & Ting 2003 style) |
+| All | Logit-Wald with jackknife SE (coefficients), log-Wald (SEMs): fallback for REML |
+| All, `boot = TRUE` | Subject resampling (each drawn subject keeps all cells and repeats, so repeat variability is carried within subject), plus the hybrid χ²(k − 1)/(k − 1) multiplier on MS_i for statistics containing σ²_i; `perc`, `bca`, `stud` (jackknife SE) |
+
+Tests: exact F where the interval is exact; otherwise by inverting the
+chosen interval (documented as approximate), as now.
+
+Unbalanced data (unequal repeats per cell, missing cells): REML only (the
+ANOVA estimators lose their closed forms). Analytic intervals use the
+balanced formulas with observed-data df and a harmonic-mean r̃ and a
+warning (the current REML device), or the bootstrap (`perc` default for
+REML, as now). To be checked in the simulation, not assumed.
+
+### 14.5 Simulation plan and acceptance criteria (set before running)
+
+**Grid.** n ∈ {10, 30}; k ∈ {2, 3, 5}; r ∈ {2, 3}; data normal or
+non-normal (chi-square(3) for p, i and pi effects, t(5) errors, as in
+phase 3). Variance mixes, σ²_p = 1 throughout:
+
+| Mix | σ²_i | σ²_pi | σ²_e | Character |
+|---|---|---|---|---|
+| R (repeat-dominated) | 0.05 | 0.05 | 0.30 | intra-rater error is the main error |
+| I (interaction-dominated) | 0.05 | 0.30 | 0.05 | raters rank subjects differently |
+| B (rater-bias-dominated) | 0.30 | 0.05 | 0.10 | the few-items problem for Φ, SEM_A |
+| L (low reliability) | 0.10 | 0.50 | 0.50 | coefficients near 0.5 |
+
+Estimands: SEM_rep, SEM_C, SEM_A; Eρ² (k′ = 1, r′ = 1), Eρ² (k′ = 1,
+r′ = r, exact check), Φ (k′ = 1, r′ = 1), Φ (k′ = k, r′ = r), ρ_intra.
+
+Replications: analytic methods 2000 sims per cell (MC SE ≈ 0.005);
+bootstrap 300 sims × 499 replicates (MC SE ≈ 0.013), on a reduced grid
+(k ∈ {2, 3}, r = 2) if run time demands. Scripts in `reli_sims/`
+(`gstudy_*.R`), parallel with progress logging, tables recorded in
+Section 9 under the G phases.
+
+**Pre-set criteria.**
+
+1. *Correctness (no simulation).* ANOVA components equal lme4 REML on
+   balanced data with all components positive (tolerance 1e-6); with
+   r′ = r, Eρ² and its interval equal `icc_test()` (consistency, `unit`
+   matched via Spearman-Brown) on the cell means exactly; with r = 1
+   input, the function stops and names the existing function; one
+   published worked example reproduced (a Brennan (2001) r:(p × i)
+   synthetic data set or a gauge R&R example from Burdick et al.; locate
+   in G1); and the cross-package checks in 14.7 pass.
+2. *Exact intervals.* SEM_rep and Eρ² (r′ = r): coverage .94–.96 in every
+   normal-data cell (they are exact; this checks the code).
+3. *Analytic default per non-exact estimand.* Choose MLS over
+   Satterthwaite if its mean coverage over normal cells is ≥ the
+   Satterthwaite mean − 0.005 and its minimum at n = 30 is ≥ .93;
+   otherwise Satterthwaite. The analytic default ships for an estimand
+   only if every normal-data cell at n = 30 has coverage ≥ .92, except
+   mix-B cells with k = 2 (σ²_i on 1 df), which are reported and
+   documented rather than required; if the criterion fails, the docs
+   recommend `boot = TRUE` for that estimand.
+4. *Bootstrap.* For estimands containing σ²_i, hybrid ≥ subject-only −
+   0.02 in every cell (as phase 3). `boot_ci = "auto"` picks, per estimand
+   family, the type with the highest mean coverage over non-normal cells,
+   provided no n = 30 cell falls below .88; `stud` must also beat `perc`
+   by ≥ 0.01 on average to be preferred (it costs a jackknife per
+   replicate).
+5. *Unbalanced / REML (phase G4).* With 20% of repeats MCAR (no cell left
+   empty) and with unequal r per cell, the REML analytic intervals cover
+   ≥ .91 at n = 30 with normal data; otherwise REML defaults to the
+   bootstrap and the analytic interval is not offered.
+6. *Size of tests.* For any analytic test shipped, Type I error at
+   α = .05 within .035–.065 (2000 sims, normal data, n = 30).
+7. *Bias report (not a gate).* Mean bias of each point estimate,
+   recorded, to decide the truncation rule (14.2).
+
+### 14.6 Phases
+
+- **G1:** engine support for repeats (`.reli_prepare()` mode that allows
+  duplicates, `.reli_fit()` four-source ANOVA and lme4 formula), estimands,
+  exact intervals, correctness checks (criterion 1). API decision (14.3)
+  and truncation decision first.
+- **G2:** analytic intervals (MLS and Satterthwaite), coverage study,
+  criteria 2, 3, 6.
+- **G3:** bootstrap (hybrid, `stud` with jackknife SE), criterion 4.
+- **G4:** REML for unbalanced data, criterion 5.
+- **G5:** methods (`summary()` component table, plot, check), `mdc_test()`
+  accepting the new SEMs, vignette section "Repeat measurements" (nested
+  vs crossed repeats, what averaging changes, intra- vs inter-rater error,
+  a D-study example: more raters or more scans), error message pointer,
+  NEWS. Jamovi later, if at all.
+
+Out of scope for v1: the crossed p × i × o design (occasions as a facet),
+more than one item facet, unequal error variance by rater, and power /
+precision functions for G coefficients (simulation-based, later).
+
+### 14.7 Existing R packages: validation and citation
+
+Surveyed 2026-10-20 (CRAN `available.packages()` plus the packages' own
+manuals; none of these packages was installed or run, so function names
+and arguments below are from documentation and must be confirmed in G1). **None of them provides confidence intervals for G coefficients
+or for the inter-rater SEMs of the r:(p × i) design by MLS, Satterthwaite or
+a nonparametric bootstrap**, so the interval work in 14.4–14.5 is not
+duplicated anywhere in R. Several do fit the model, so they serve as
+references for point estimates, and some go further than v1 will, so the
+docs should point users to them (as `agreement_analysis.Rmd` does for
+BivRegBLS).
+
+| Package (version checked) | What it does relevant here | Use for validation | Point users to it for |
+|---|---|---|---|
+| **VCA** 1.5.2 (Schuetzenmeister & Dufey; CRAN) | ANOVA (Searle) and REML variance components for arbitrary crossed/nested random designs; CIs for each component, total variance, SD and CV (`VCAinference(ci.method = "sas"` or `"satterthwaite")`); CLSI EP05 precision | Mean squares, df and components of the four-source ANOVA; the exact χ² CI for σ²_e (SEM_rep); total-variance CI; Satterthwaite df of components; ANOVA estimates with unbalanced data (its ANOVA handles imbalance, ours will use REML) | Laboratory precision designs and deeper nesting (runs within days within sites) |
+| **rptR** 0.9.23 (Stoffel, Nakagawa & Schielzeth; CRAN) | Repeatability (ICC) and variance components from lme4 with several grouping factors (`grname = c("id", "item", "id:item")`), parametric-bootstrap CIs, permutation tests; Gaussian, Poisson, binary, proportion data | REML components (balanced and unbalanced); ratio estimates for ρ_intra and the single-measurement coefficients; its parametric-bootstrap intervals as an informal comparator (a different method, so not expected to agree exactly) | Non-Gaussian outcomes (counts, binary), and adjusted repeatability with fixed effects |
+| **SixSigma** 0.11.1 (`ss.rr()`; CRAN) | Gauge R&R for parts × operators × replicates, crossed or nested: repeatability, reproducibility, %study variation, %tolerance, number of distinct categories; no CIs | Components of the same design under gauge R&R names. **Set `alphaLim = 1`**: by default the interaction is pooled into repeatability when not significant, which changes the estimands | Industrial measurement-system analysis (%tolerance, ndc) |
+| **gtheoryr** 0.2.0 (Tyagi; CRAN, first released 2026-03, so new) | Balanced fully crossed G-studies (p × i, p × i × r, p × i × o, more facets), items-within-person nesting, D-studies with G and Φ, design grids, cost optimisation, error budgets, parametric-bootstrap percentile CIs. **Does not fit repeats nested in p × i cells** (r:(p × i)); negative components stop by default | D-study formulas: with r = 1, our relative and absolute coefficients for k′ items should equal `dstudy_pxi()`; the crossed p × i × o fit as a check on the nested-vs-crossed documentation | Multi-facet crossed designs (raters × occasions), D-study design optimisation and costs |
+| **gtheory** 0.1.2 (Moore) | lme4-based G- and D-studies for balanced or unbalanced, crossed or nested designs (Brennan 2001 examples). **Archived from CRAN 2025-03-24** (maintainer email undeliverable); still installable from the CRAN archive / r-universe | Point estimates and D-study coefficients for r:(p × i) directly, including a Brennan example (one-off check, versions recorded) | Not recommended to users (archived); mention only if it returns to CRAN |
+| **cccrm** 3.0.6 (Carrasco et al.; CRAN; already used for `ccc_test()` checks) | CCC from variance components with replicates (`ccc_vc(..., int = TRUE)`) | For k = 2, the replicate CCC is close to Φ(k′ = 1, r′ = 1) but treats the methods as fixed (a sum of squared method differences, not σ²_i), so it is a near-check to explain, not an equality. Confirm in G1 | Already cited for the CCC |
+| **lme4** (Imports) | The model itself | REML fit in `method = "reml"` | — |
+
+**How to use them (follow the existing convention in
+`tests/testthat/test-ccc_test.R`):** compute reference values once in a
+script under `reli_sims/` (`gstudy_crosscheck.R`), record the package
+versions and calls in comments, and hard-code the numbers in
+`tests/testthat/test-gstudy_test.R`. Do **not** add any of these packages
+to Suggests for the checks (gtheory cannot be, being archived).
+Planned checks, added to criterion 1:
+
+- Balanced simulated data and one published example: mean squares and the
+  four ANOVA components equal VCA's `anovaVCA()` (tolerance 1e-8);
+  REML components equal VCA's `remlVCA()` and rptR (1e-5); the σ²_e χ²
+  interval equals VCA's (1e-6).
+- Repeatability and reproducibility equal `SixSigma::ss.rr(alphaLim = 1)`.
+- With r = 1: relative and absolute D-study coefficients equal
+  `gtheoryr::dstudy_pxi()` for k′ = 1 and k′ = k.
+- One-off: Brennan (2001) r:(p × i) example through archived gtheory,
+  if its data set covers that design.
+- Informal: our analytic and bootstrap intervals beside rptR's and
+  gtheoryr's parametric-bootstrap intervals on the same data; record the
+  comparison, no pass/fail.
+
+**Docs (phase G5):** in the vignette section and the Rd, a short
+"Other software" paragraph naming VCA (deeper nesting, lab precision),
+rptR (non-Gaussian data), gtheoryr (crossed multi-facet designs and
+D-study optimisation) and SixSigma (gauge R&R summaries), and saying
+what `gstudy_test()` adds (intervals and tests for the coefficients and
+the intra-/inter-rater SEMs, and the link to `mdc_test()`). Re-check
+versions and CRAN status at release, since gtheoryr is new and gtheory
+has already been archived once.
