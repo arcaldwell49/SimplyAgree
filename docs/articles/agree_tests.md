@@ -203,7 +203,7 @@ a2 = agree_reps(x = "x",
 The results can then be printed. The printing format is very similar to
 `agree_test`, but notice that 1) the hypothesis test is based on the
 limits of agreement (MOVER method), 2) the Concordance Correlation
-Coefficient is calculated via the U-statistics method, 3) the Shieh TOST
+Coefficient is estimated from variance components, 3) the Shieh TOST
 results are missing because they cannot be estimated for this type of
 design.
 
@@ -262,10 +262,9 @@ a3 = agree_nest(x = "x",
 #> generated.
 ```
 
-The printed results (and plots) are very similar to `agree_reps`.
-However, the CCC result now has a warning because the calculation in
-this scenario may not be entirely appropriate given the nature of the
-data.
+The printed results (and plots) are very similar to `agree_reps`. Here
+the CCC is Lin’s coefficient computed over all of the paired
+measurements.
 
 ``` r
 
@@ -431,12 +430,19 @@ RME**
 
 \\ Upper \space CI = LoA\_{upper} + LME \\
 
-### CCC from U-statistics
+### CCC for replicate and nested data
 
-The CCC calculations are derived from the `cccUst` function of the
-`cccrm` R package. The mathematics for this CCC calculation can be found
-in the work of King et al. ([2007](#ref-king2007)) and Carrasco et al.
-([2009](#ref-carrasco2009)).
+For replicate data (`agree_reps`), the CCC is estimated from the
+variance components of a linear mixed model with a fixed method effect
+and random subject and subject-by-method effects ([Carrasco and Jover
+2003](#ref-carrasco2003)); this is the estimate of `ccc_vc()` in the
+`cccrm` R package. For nested data (`agree_nest`), it is Lin’s CCC ([Lin
+1989](#ref-lin1989)) computed over all complete pairs. In both cases the
+standard error is a delete-one-subject jackknife on Fisher’s z scale, so
+the subject (not the measurement) is the independent unit, and the
+interval uses a t distribution with (number of subjects - 1) degrees of
+freedom. These are the same calculations as
+`ccc_test(data_type = "reps")` and `ccc_test(data_type = "nest")`.
 
 ## Checking Assumptions
 
@@ -707,14 +713,10 @@ Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in
 Method Comparison Studies.” *Statistical Methods in Medical Research* 8
 (2): 135–60. <https://doi.org/10.1177/096228029900800204>.
 
-Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. “The
-Concordance Correlation Coefficient for Repeated Measures Estimated by
-Variance Components.” *Journal of Biopharmaceutical Statistics* 19 (1):
-90–105. <https://doi.org/10.1080/10543400802527890>.
-
-King, Tonya S, Vernon M Chinchilli, and Josep L Carrasco. 2007. “A
-Repeated Measures Concordance Correlation Coefficient.” *Statistics in
-Medicine* 26 (16): 3095–113. <https://doi.org/10.1002/sim.2778>.
+Carrasco, Josep L., and Lluı́s Jover. 2003. “Estimating the Generalized
+Concordance Correlation Coefficient Through Variance Components.”
+*Biometrics* 59 (4): 849–58.
+<https://doi.org/10.1111/j.0006-341x.2003.00099.x>.
 
 Koenker, Roger. 2020. *Quantreg: Quantile Regression*.
 <https://CRAN.R-project.org/package=quantreg>.

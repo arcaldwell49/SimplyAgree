@@ -11,7 +11,9 @@ development.
 agree_nest produces an absolute agreement analysis for data where there
 is multiple observations per subject but the mean does not vary within
 subjects as described by Zou (2013). Output mirrors that of agree_test
-but CCC is calculated via U-statistics.
+but the CCC is estimated from variance components (Carrasco & Jover,
+2003) with a delete-one-subject jackknife standard error; see
+[`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md).
 
 ## Usage
 
@@ -90,8 +92,9 @@ Returns single list with the results of the agreement analysis.
 
 - `h0_test`: Decision from hypothesis test.
 
-- `ccc.xy`: Lin's concordance correlation coefficient and confidence
-  intervals using U-statistics.
+- `ccc.xy`: The concordance correlation coefficient (variance
+  components) and confidence intervals, as in
+  `ccc_test(data_type = "reps")`.
 
 - `call`: The matched call.
 
@@ -105,13 +108,9 @@ Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman
 limits of agreement with multiple observations per individual.
 Statistical methods in medical research, 22(6), 630-642.
 
-King, TS and Chinchilli, VM. (2001). A generalized concordance
-correlation coefficient for continuous and categorical data. Statistics
-in Medicine, 20, 2131:2147.
-
-King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures
-concordance correlation coefficient. Statistics in Medicine, 26,
-3095:3113.
+Carrasco, JL & Jover, L. (2003). Estimating the generalized concordance
+correlation coefficient through variance components. Biometrics, 59(4),
+849-858.
 
 Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM.
 (2013). Estimation of the concordance correlation coefficient for

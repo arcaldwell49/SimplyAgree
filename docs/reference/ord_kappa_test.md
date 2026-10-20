@@ -3,7 +3,8 @@
 **\[experimental\]**
 
 Estimates the model-based kappa \\\kappa_m\\ of Nelson and Edwards
-(2015) and Nelson, Mitani and Edwards (2017): a chance-corrected measure
+(2015) and Nelson, Mitani and Edwards (2017), and please cite these
+papers if this function is utilized. This is a chance-corrected measure
 of exact agreement between raters who classify subjects on an ordinal
 scale. It is computed from an ordinal (cumulative probit) generalized
 linear mixed model with crossed random effects for subjects and raters,

@@ -36,12 +36,13 @@ agreement analysis. This approach:
 
 - Computes confidence intervals for the range of agreement between two
   methods
-- Supports both simple and nested/repeated measures designs
-- Implements exact procedures based on Shieh (2019) and Jan & Shieh
-  (2018)
+- Supports simple, replicate and nested designs
 - Handles design effects for clustered data
-- Provides multiple interval estimation methods (exact, MOVER, Zou’s
-  method)
+- Uses the MOVER method of Zou (2013) by default, or the classic
+  Bland-Altman (1999) intervals (`loa_calc`)
+
+Exact procedures based on Shieh (2019) and Jan & Shieh (2018) are
+available in `agree_test()` and the power functions.
 
 This is the preferred function when you want to describe what proportion
 of differences fall within specified bounds or when making inferences
@@ -57,7 +58,6 @@ that:
 - Implement exact equal-tailed tolerance intervals
 - Support confidence intervals for ranges of percentiles
 - Handle both simple and complex study designs
-- Provide sample size and power calculations
 
 Tolerance intervals are most appropriate when making simultaneous
 inferences about pairs of percentile limits or when you need
@@ -67,10 +67,21 @@ prediction-oriented intervals for future measurements.
 
 Beyond the two core functions, `SimplyAgree` provides:
 
-- **Reliability Analysis**: `reli_stats()` and `reli_aov()` functions
-  for comprehensive reliability assessment
+- **Concordance**: `ccc_test()` for the concordance correlation
+  coefficient with simple, replicate and nested data (with an optional
+  subject bootstrap, `boot = TRUE`, recommended for replicate data with
+  few subjects)
+- **Reliability Analysis**: `icc_test()` (intraclass correlations;
+  replaces the superseded `reli_stats()` and `reli_aov()`),
+  `reli_err_test()` (SEM, SEE, SEP and coefficients of variation) and
+  `mdc_test()` (minimal detectable change)
+- **Categorical Agreement**: `cac_test()` for chance-corrected agreement
+  coefficients (Gwet’s AC1, kappa, Krippendorff’s alpha and more) and
+  `ord_kappa_test()` for model-based kappa with ordinal ratings and many
+  raters
 - **Power Analysis**: `power_exact_agreement()` and related functions
-  for sample size determination in agreement studies
+  for sample size determination in agreement studies, and `power_icc()`
+  / `precision_icc()` for reliability studies
 - **Error-in-Variables**: supports “Deming” and “Passing-Bablok”
   regression methods for method comparison
 - **Visualization**: Built-in plotting capabilities for Bland-Altman
@@ -80,7 +91,14 @@ Beyond the two core functions, `SimplyAgree` provides:
 
 ## Installing SimplyAgree
 
-You can install the most up-to-date version of `SimplyAgree` from
+You can install the released version of `SimplyAgree` from
+[CRAN](https://cran.r-project.org/package=SimplyAgree) with:
+
+``` r
+install.packages("SimplyAgree")
+```
+
+Or the most up-to-date version from
 [GitHub](https://github.com/arcaldwell49/SimplyAgree) with:
 
 ``` r
@@ -92,25 +110,89 @@ devtools::install_github("arcaldwell49/SimplyAgree")
 ``` r
 library(SimplyAgree)
 
-# Load example data
+# Example data: rectal (trec) and esophageal (teso) temperatures,
+# several trials per subject
 data(temps)
 
 # Limits of agreement analysis
-agree_results <- agreement_limit(x = "method1", 
-                                  y = "method2", 
-                                  data = temps,
-                                  agree.level = 0.95)
-
-# Tolerance interval analysis  
-tol_results <- tolerance_limit(x = "method1",
-                                y = "method2", 
-                                data = temps,
-                                prop = 0.95)
-
-# Reliability analysis
-reli_results <- reli_stats(data = temps,
-                           wide = TRUE)
+agreement_limit(x = "trec_pre",
+                y = "teso_pre",
+                id = "id",
+                data = temps,
+                data_type = "nest",
+                agree.level = 0.95)
 ```
+
+    ## MOVER Limits of Agreement (LoA)
+    ## 95% LoA @ 5% Alpha-Level
+    ## Nested Data
+    ## 
+    ##    Bias          Bias CI Lower LoA Upper LoA            LoA CI
+    ##  0.1908 [0.1191, 0.2625]   -0.1507    0.5324 [-0.2307, 0.6124]
+    ## 
+    ## LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
+    ##   not a joint 95% interval for the LoA
+    ## SD of Differences = 0.1743
+
+``` r
+# Tolerance interval analysis
+tolerance_limit(x = "trec_pre",
+                y = "teso_pre",
+                id = "id",
+                data = temps,
+                tol_level = 0.95)
+```
+
+    ## Agreement between Measures (Difference: x-y)
+    ## 95% CI for Bias; 95% Prediction Interval
+    ## Tolerance Limits: at least 95% of differences with 95% confidence
+    ## Model: GLS, compound symmetry within id
+    ## 
+    ##    Bias          Bias CI Prediction Interval  Tolerance Limits
+    ##  0.1908 [0.1191, 0.2625]   [-0.2098, 0.5915] [-0.2532, 0.6349]
+    ## 
+    ## SD of Differences = 0.1743
+    ## Between-Subject SD = 0.0773; Within-Subject SD = 0.1562
+
+``` r
+# Concordance correlation coefficient
+ccc_test(x = "trec_pre",
+         y = "teso_pre",
+         id = "id",
+         data = temps,
+         data_type = "nest")
+```
+
+    ## 
+    ##  Concordance Correlation Coefficient (nested pairs)
+    ## 
+    ## data:  trec_pre and teso_pre
+    ## 
+    ## alternative hypothesis: two.sided
+    ## 95 percent confidence interval:
+    ##  0.3216463 0.7053779
+    ## sample estimates:
+    ##       CCC 
+    ## 0.5410955
+
+``` r
+# Reliability analysis: Shrout & Fleiss (1979), 6 subjects rated by 4 judges
+sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
+                 J3 = c(5, 3, 6, 2, 6, 4), J4 = c(8, 2, 8, 6, 9, 7))
+icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
+```
+
+    ## 
+    ##  Two-way, consistency, single-measure ICC [Shrout & Fleiss ICC(3,1)]
+    ## 
+    ## data:  J1, J2, J3, J4
+    ## 
+    ## alternative hypothesis: two.sided
+    ## 95 percent confidence interval:
+    ##  0.3424648 0.9458583
+    ## sample estimates:
+    ##  ICC(C,1) 
+    ## 0.7148407
 
 # Contributing
 
@@ -145,6 +227,11 @@ Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
 comparison studies. *Statistical Methods in Medical Research*, 8(2),
 135-160. <https://doi.org/10.1177/096228029900800204>
 
+Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+*Biometrics*, 59(4), 849-858.
+<https://doi.org/10.1111/j.0006-341x.2003.00099.x>
+
 Carrasco, JL, et al. (2013). Estimation of the concordance correlation
 coefficient for repeated measures using SAS and R. *Computer Methods and
 Programs in Biomedicine*, 109, 293-304.
@@ -159,18 +246,13 @@ Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and
 tolerance in linear mixed models. *Statistics in Medicine*, 38(30),
 5603-5622. <https://doi.org/10.1002/sim.8386>
 
+Gwet, K. L. (2014). *Handbook of Inter-Rater Reliability* (4th ed.).
+Advanced Analytics, LLC.
+
 Jan, S. L., & Shieh, G. (2018). The Bland-Altman range of agreement:
 Exact interval procedure and sample size determination. *Computers in
 Biology and Medicine*, 100, 247-252.
 <https://doi.org/10.1016/j.compbiomed.2018.06.020>
-
-King, TS and Chinchilli, VM. (2001). A generalized concordance
-correlation coefficient for continuous and categorical data. *Statistics
-in Medicine*, 20, 2131-2147. <https://doi.org/10.1002/sim.845>
-
-King, TS, Chinchilli, VM, and Carrasco, JL. (2007). A repeated measures
-concordance correlation coefficient. *Statistics in Medicine*, 26,
-3095-3113. <https://doi.org/10.1002/sim.2778>
 
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. *Biometrics*, 45(1), 255-268.
@@ -180,6 +262,10 @@ Lu, M. J., et al. (2016). Sample Size for Assessing Agreement between
 Two Methods of Measurement by Bland-Altman Method. *The International
 Journal of Biostatistics*, 12(2).
 <https://doi.org/10.1515/ijb-2015-0039>
+
+McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+intraclass correlation coefficients. *Psychological Methods*, 1(1),
+30-46. <https://doi.org/10.1037/1082-989X.1.1.30>
 
 Parker, R. A., et al. (2016). Application of mixed effects limits of
 agreement in the presence of multiple sources of variability: exemplar
@@ -191,6 +277,10 @@ Shieh, G. (2019). Assessing agreement between two methods of
 quantitative measurements: Exact test procedure and sample size
 calculation. *Statistics in Biopharmaceutical Research*, 12(3), 352-359.
 <https://doi.org/10.1080/19466315.2019.1677495>
+
+Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+assessing rater reliability. *Psychological Bulletin*, 86(2), 420-428.
+<https://doi.org/10.1037/0033-2909.86.2.420>
 
 Weir, J. P. (2005). Quantifying test-retest reliability using the
 intraclass correlation coefficient and the SEM. *The Journal of Strength

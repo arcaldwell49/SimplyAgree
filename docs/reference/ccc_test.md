@@ -14,7 +14,10 @@ ccc_test(
   data_type = c("simple", "reps", "nest"),
   conf.level = 0.95,
   null.value = NULL,
-  alternative = c("two.sided", "greater", "less")
+  alternative = c("two.sided", "greater", "less"),
+  boot = FALSE,
+  boot_ci = c("stud", "perc", "bca"),
+  replicates = 999
 )
 ```
 
@@ -64,6 +67,23 @@ ccc_test(
   alternative gives a one-sided interval, as in
   [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
 
+- boot:
+
+  If `TRUE`, use a nonparametric bootstrap that resamples subjects for
+  the interval and p-value. Default `FALSE`. Available only for
+  `data_type = "reps"`, where it is recommended with few subjects (fewer
+  than about 30) or clearly non-normal data; see Details.
+
+- boot_ci:
+
+  Bootstrap interval type: `"stud"` (studentized, default and
+  recommended), `"perc"` (percentile) or `"bca"`. Used only when
+  `boot = TRUE`.
+
+- replicates:
+
+  Number of bootstrap replicates (default 999).
+
 ## Value
 
 A list with class `c("ccc_htest", "htest")` containing the following
@@ -71,16 +91,21 @@ components:
 
 - statistic:
 
-  The Z-statistic (Fisher-transformed), when a test was requested.
+  The test statistic on the Fisher z scale (`Z` for simple data, `t` for
+  reps/nest), when a test was requested (omitted with `boot = TRUE`).
 
 - parameter:
 
-  The sample size (n for simple data, number of subjects for reps/nest),
-  when a test was requested.
+  When a test was requested: the number of pairs `n` for simple data, or
+  the degrees of freedom `df` (number of subjects - 1) for reps/nest.
+  The number of pairs or subjects is also in `settings$n`.
 
 - stderr:
 
-  The standard errors for CCC and Z-transformed CCC.
+  The standard errors for CCC and Z-transformed CCC (for reps/nest, the
+  jackknife SE of z, and the SE of the CCC from it by the delta method).
+  With `boot = TRUE`, also `boot`: the standard deviation of the
+  bootstrap estimates.
 
 - p.value:
 
@@ -120,9 +145,25 @@ components:
   (precision) and the bias correction factor `C_b` (accuracy), with CCC
   = r x C_b. `NULL` for reps/nest.
 
+- jackknife:
+
+  For reps/nest, the delete-one-subject jackknife estimate of the
+  small-sample bias: a list with `bias` ((g - 1) times the mean
+  leave-one-out estimate minus the estimate), `estimate_bc` (the
+  bias-corrected CCC, estimate - bias, kept within -1 to 1) and
+  `clamped` (`TRUE` when the correction went past 1 or -1). Not printed,
+  and not used by the interval or test; see Details. `NULL` for simple
+  data.
+
 - settings:
 
   The settings used, for the methods.
+
+- boot:
+
+  Bootstrap details (`NULL` unless `boot = TRUE`): the interval type,
+  the number of replicates requested, used and failed, and the bootstrap
+  estimates.
 
 ## Details
 
@@ -132,9 +173,73 @@ two measurements of the same quantity. It combines measures of precision
 how far the observed data deviate from the line of perfect concordance
 (45-degree line through the origin).
 
-For simple paired data, Lin's original method is used. For replicate or
-nested data, U-statistics are employed following King, Chinchilli, and
-Carrasco.
+**Simple data.** Lin's (1989) estimator and asymptotic standard error
+are used, from the complete pairs; these match `DescTools::CCC()` and
+`epiR::epi.ccc()` (with `ci = "z-transform"`).
+
+**Replicate data** (`"reps"`; the true value is constant within a
+subject). The CCC is estimated from variance components (Carrasco &
+Jover, 2003): a linear mixed model with a fixed method effect and random
+subject and subject-by-method effects, fit by REML, gives \$\$CCC =
+\frac{\sigma^2\_{s}}{\sigma^2\_{s} + \sigma^2\_{sm} + \sigma^2\_{m} +
+\sigma^2\_{e}}\$\$ where \\\sigma^2\_{m}\\ is the variance between the
+method means. All measurements are used, so the replicates of the two
+methods need not be paired or equal in number. The estimate equals that
+of `cccrm::ccc_vc(int = TRUE)`.
+
+**Nested data** (`"nest"`; the true value may change within a subject,
+and each row is a matched pair). Lin's estimator is computed over all
+complete pairs, which keep their pairing.
+
+For both, the subject is the independent unit: the standard error of
+Fisher's z is a delete-one-subject jackknife, so it allows for the
+correlation of measurements within a subject. (Treating every pair as
+independent understates the standard error.) The interval and test use a
+t distribution with (number of subjects - 1) degrees of freedom. At
+least 3 subjects are needed.
+
+In simulations (10, 20 or 50 subjects; 2, 3 or 6 measurements per
+subject; CCC 0.5 to 0.95; with and without a method difference and 15%
+missing data), 95% jackknife intervals covered about 93-95% of the time
+with normal data, but only 88-91% (replicate data) and 90-93% (nested
+data) with skewed subject effects and heavy-tailed errors, at every
+number of subjects. Misses fall mostly above the interval: the CCC is
+biased downward with few subjects (by about 0.03-0.04 with 10 subjects).
+
+**Bias.** The jackknife estimate of that bias, and the bias-corrected
+CCC, are kept in the `jackknife` element, and
+[`summary()`](https://rdrr.io/r/base/summary.html) mentions them when
+the bias is more than 0.01 or more than 10% of the interval width. They
+are a guide, not a replacement for the estimate. In the simulations the
+correction removed 80-90% of the average bias with 10 or 20 subjects,
+but the corrected value was closer to the true CCC in only 43-50% of
+data sets, its root mean squared error was slightly larger (up to 28%
+larger with non-normal data and 10 subjects), and with 10 subjects it
+went past 1 (and is then truncated) in about 5% of replicate data sets.
+It is most useful when CCCs from several small studies are averaged,
+where the bias would otherwise accumulate. Centring the interval on the
+corrected value did not improve its coverage, so the interval and test
+use the uncorrected estimate.
+
+**Bootstrap** (replicate data). With `boot = TRUE`, subjects are
+resampled with replacement (a subject drawn twice counts as two
+subjects) and the CCC is re-estimated. The studentized interval
+(`boot_ci = "stud"`) works on Fisher's z scale and divides each
+replicate by its own delete-one-subject jackknife standard error; the
+p-value inverts the interval (as in
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md))
+and is approximate. In the simulations above it raised coverage with 10
+subjects from 0.90 to 0.94 (from 0.88 to 0.94 with non-normal data) and
+with 20 subjects from 0.92 to 0.94, with intervals of about the same
+width, so `boot = TRUE` is a good idea for replicate data with few
+subjects. With non-normal data and 6 replicates per subject some designs
+still covered only 0.88-0.89. The percentile and BCa intervals covered
+poorly (0.80-0.91 on average) and are offered only for comparison. Each
+replicate needs one model fit per subject (from the subjects' summary
+statistics rather than lme4), so the studentized bootstrap takes roughly
+20 seconds with 10 subjects and a minute with 30 subjects at the default
+999 replicates. For nested data no bootstrap interval improved on the
+jackknife.
 
 The confidence interval and the hypothesis test use Fisher's
 Z-transformation of the CCC: \$\$Z = 0.5 \times \log\left(\frac{1 +
@@ -143,10 +248,14 @@ done.
 
 **Relation to the ICC.** For two methods, the CCC is close to the
 absolute-agreement intraclass correlation, ICC(A,1)
-(`icc_test(type = "agreement")`); Lin's estimator uses n rather than n -
-1 in the variances, and the difference vanishes as n grows (Nickerson,
-1997; Carrasco & Jover, 2003). `ccc_test()` is meant for
-method-comparison (agreement) studies;
+(`icc_test(type = "agreement")`). Lin's estimator (simple and nested
+data) uses n rather than n - 1 in the variances and covariance, as Lin
+(1989) defined it and as other software computes it, so it is slightly
+below the ICC in small samples; the difference vanishes as n grows
+(Nickerson, 1997; Carrasco & Jover, 2003). The variance-components
+estimator (replicate data) uses REML variance components and so
+corresponds to the ICC form. `ccc_test()` is meant for method-comparison
+(agreement) studies;
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 for reliability studies (see its "Choosing the form" and "Related
 coefficients" sections).
@@ -165,6 +274,9 @@ gives diagnostics; see
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268.
 
+Lin, L. I. (2000). A note on the concordance correlation coefficient.
+Biometrics, 56(1), 324-325.
+
 Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
 concordance correlation coefficient through variance components.
 Biometrics, 59(4), 849-858.
@@ -173,14 +285,6 @@ Biometrics, 59(4), 849-858.
 Nickerson, C. A. E. (1997). A note on "A concordance correlation
 coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
 [doi:10.2307/2533516](https://doi.org/10.2307/2533516)
-
-King, T. S., & Chinchilli, V. M. (2001). A generalized concordance
-correlation coefficient for continuous and categorical data. Statistics
-in Medicine, 20(14), 2131-2147.
-
-King, T. S., Chinchilli, V. M., & Carrasco, J. L. (2007). A repeated
-measures concordance correlation coefficient. Statistics in Medicine,
-26(16), 3095-3113.
 
 ## See also
 
@@ -244,28 +348,48 @@ ccc_test(x = "x", y = "y", data = reps,
 # Replicate data
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 #> 
-#>  Concordance Correlation Coefficient (U-statistics)
+#>  Concordance Correlation Coefficient (variance components)
 #> 
 #> data:  x and y
 #> 
 #> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
-#>  -0.1595543  0.3588391
+#>  -0.9037355  0.9843770
 #> sample estimates:
 #>       CCC 
-#> 0.1069017 
+#> 0.4341189 
 #> 
+
+# Replicate data with few subjects: studentized subject bootstrap
+# \donttest{
+ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
+         boot = TRUE)
+#> Warning: 350 of 999 bootstrap replicates failed and were dropped; the bootstrap interval may be unreliable.
+#> 
+#>  Concordance Correlation Coefficient (variance components) with
+#>  nonparametric (subject) bootstrap studentized interval
+#> 
+#> data:  x and y
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  -0.6697919  1.0000000
+#> sample estimates:
+#>       CCC 
+#> 0.4341189 
+#> 
+# }
 
 # Nested data
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 #> 
-#>  Concordance Correlation Coefficient (U-statistics)
+#>  Concordance Correlation Coefficient (nested pairs)
 #> 
 #> data:  x and y
 #> 
 #> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
-#>  0.2429167 0.6616278
+#>  -0.9126016  0.9887276
 #> sample estimates:
 #>       CCC 
 #> 0.4790783 

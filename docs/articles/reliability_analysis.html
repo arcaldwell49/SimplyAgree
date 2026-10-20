@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-19</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/reliability_analysis.Rmd" class="external-link"><code>vignettes/reliability_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>reliability_analysis.Rmd</code></div>
@@ -835,26 +835,29 @@ restatement of the ICC. <span class="citation">Hopkins (<a href="#ref-hopkins200
 (e.g. for fitness tests in team sports) when no relationship to a real
 outcome is available, and it should be treated as such a fallback.</p>
 <div class="section level3">
-<h3 id="hopkinss-smallest-worthwhile-change">Hopkins’s smallest worthwhile change<a class="anchor" aria-label="anchor" href="#hopkinss-smallest-worthwhile-change"></a>
+<h3 id="hopkinss-smallest-worthwhile-change-swc">Hopkins’s smallest worthwhile change (SWC)<a class="anchor" aria-label="anchor" href="#hopkinss-smallest-worthwhile-change-swc"></a>
 </h3>
-<p>For solo athletes, <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> defines the SWC as 0.3 times
-the CV of top athletes’ performance from one <em>competition</em> to the
-next. Because of that race-to-race variation, evenly matched athletes
+<p>I want give a quick example of Hopkin’s SWC here because this quick
+example and thought experiment was enlightening for me. <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span>
+defined the SWC as 0.3 times the CV of top athletes’ performance from
+one <em>competition</em> to the next. Because of that race-to-race
+variation (let’s assume track athletes here), evenly matched athletes
 take turns winning; simulations showed that an enhancement of 0.3 of the
 CV gives a top athlete about one extra win in 10 events <span class="citation">(<a href="#ref-hopkins1999">Hopkins et al.
 1999</a>)</span>. The CV comes from competitions, not from the test, so
 it is an external anchor. The test’s own typical error must not be used
-in its place: 0.3 times it is a fixed 11% of the MDC for every test
-(<span class="math inline">\(0.3 / (1.96\sqrt{2}) \approx
-0.11\)</span>), so it says nothing about whether a change matters.</p>
+in its place. To be clear here, 0.3 times the CV (from SEM) is a fixed
+11% of the MDC for every test (<span class="math inline">\(0.3 /
+(1.96\sqrt{2}) \approx 0.11\)</span>), so it says nothing about whether
+a change matters for competition.</p>
 <p>The competition CV is a typical error with competitions in place of
 trials, so <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> estimates it from repeated
 competition results. A few choices matter:</p>
 <ul>
 <li>
-<strong>Top athletes only.</strong> Less successful athletes vary
-more from race to race, so including the whole field makes the SWC too
-large.</li>
+<strong>Top athletes only.</strong> Less successful athletes may
+vary more from race to race, so including the whole field makes the SWC
+too large. So, I’d be careful about who you include.</li>
 <li>
 <strong>The consistency SEM (the default).</strong> Course, weather
 and tactics shift everyone in a race together, and placings depend on
@@ -873,7 +876,8 @@ trends in an athlete’s performance are not counted as noise.</li>
 <li>
 <strong>The same measure as the test.</strong> A CV for race time is
 not a CV for power; <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> suggests multiplying a time CV
-by about 2 to 3 for mean power.</li>
+by about 2 to 3 for mean power (i.e., applying it to the test-retest
+data).</li>
 </ul>
 <p>Simulated results for 15 top athletes over 8 races in a season (times
 in seconds), with a within-athlete CV of 1% and some races missed:</p>

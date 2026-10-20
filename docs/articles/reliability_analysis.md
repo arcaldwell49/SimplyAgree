@@ -673,26 +673,30 @@ data is not such an anchor. With 0.2 times the between-subject SD
 tests in team sports) when no relationship to a real outcome is
 available, and it should be treated as such a fallback.
 
-### Hopkins’s smallest worthwhile change
+### Hopkins’s smallest worthwhile change (SWC)
 
-For solo athletes, Hopkins ([2004](#ref-hopkins2004)) defines the SWC as
-0.3 times the CV of top athletes’ performance from one *competition* to
-the next. Because of that race-to-race variation, evenly matched
-athletes take turns winning; simulations showed that an enhancement of
-0.3 of the CV gives a top athlete about one extra win in 10 events
-([Hopkins et al. 1999](#ref-hopkins1999)). The CV comes from
+I want give a quick example of Hopkin’s SWC here because this quick
+example and thought experiment was enlightening for me. Hopkins
+([2004](#ref-hopkins2004)) defined the SWC as 0.3 times the CV of top
+athletes’ performance from one *competition* to the next. Because of
+that race-to-race variation (let’s assume track athletes here), evenly
+matched athletes take turns winning; simulations showed that an
+enhancement of 0.3 of the CV gives a top athlete about one extra win in
+10 events ([Hopkins et al. 1999](#ref-hopkins1999)). The CV comes from
 competitions, not from the test, so it is an external anchor. The test’s
-own typical error must not be used in its place: 0.3 times it is a fixed
-11% of the MDC for every test (\\0.3 / (1.96\sqrt{2}) \approx 0.11\\),
-so it says nothing about whether a change matters.
+own typical error must not be used in its place. To be clear here, 0.3
+times the CV (from SEM) is a fixed 11% of the MDC for every test (\\0.3
+/ (1.96\sqrt{2}) \approx 0.11\\), so it says nothing about whether a
+change matters for competition.
 
 The competition CV is a typical error with competitions in place of
 trials, so
 [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
 estimates it from repeated competition results. A few choices matter:
 
-- **Top athletes only.** Less successful athletes vary more from race to
-  race, so including the whole field makes the SWC too large.
+- **Top athletes only.** Less successful athletes may vary more from
+  race to race, so including the whole field makes the SWC too large.
+  So, I’d be careful about who you include.
 - **The consistency SEM (the default).** Course, weather and tactics
   shift everyone in a race together, and placings depend on performance
   relative to the field; the two-way consistency SEM removes those
@@ -703,7 +707,8 @@ estimates it from repeated competition results. A few choices matter:
   athlete’s performance are not counted as noise.
 - **The same measure as the test.** A CV for race time is not a CV for
   power; Hopkins ([2004](#ref-hopkins2004)) suggests multiplying a time
-  CV by about 2 to 3 for mean power.
+  CV by about 2 to 3 for mean power (i.e., applying it to the
+  test-retest data).
 
 Simulated results for 15 top athletes over 8 races in a season (times in
 seconds), with a within-athlete CV of 1% and some races missed:
