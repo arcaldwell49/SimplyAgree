@@ -32,7 +32,7 @@ This vignette provides comprehensive guidance on power analysis and sample size 
 `SimplyAgree` implements four approaches to power/sample size calculations for agreement (limits of agreement) studies:
 
 1. **`power_agreement_exact()`** - Exact agreement test [@shieh2019]
-2. **`blandPowerCurve()`** - Bland-Altman power curves [@lu2016]
+2. **`power_agreement_limit()`** - Bland-Altman limits of agreement test [@lu2016] (`blandPowerCurve()` for power curves)
 3. **`agree_expected_half()`** - Expected half-width criterion [@JanShieh2018]
 4. **`agree_assurance()`** - Assurance probability criterion [@JanShieh2018]
 
@@ -54,7 +54,7 @@ The methods divide into two categories:
 **Hypothesis Testing** (binary decision):
 
 - `power_agreement_exact()` - Tests if central proportion, essentially tolerance intevals, are within the maximal allowable difference
-- `blandPowerCurve()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
+- `power_agreement_limit()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
 
 **Estimation** (quantifying precision):
 
@@ -106,15 +106,41 @@ print(result)
 ```
 
 
-# Method 2: Bland-Altman Power Curves
+# Method 2: Bland-Altman Limits of Agreement
 
 ## Overview
 
-Calculates power curves using approximate Bland-Altman confidence intervals using the method of @lu2016 (which is approximate). Useful for exploring power across sample sizes.
+Calculates power for the Bland-Altman approach: agreement is concluded when the confidence intervals of both limits of agreement (the approximate Bland-Altman intervals, as in `agreement_limit(loa_calc = "blandaltman")`) fall within $[-\delta, \delta]$. Power follows the method of @lu2016, using their exact formula (eq. 5) as PASS does. Their Table 1 used an approximation and some of its sample sizes are slightly too large.
 
 ## Usage
 
 ```{r bland_usage, eval=FALSE}
+power_agreement_limit(
+  n = NULL,                        # Sample size (pairs)
+  delta = NULL,                    # Maximal allowable difference
+  mu = 0,                          # Mean difference
+  sigma = NULL,                    # SD of differences
+  power = NULL,                    # Target power
+  conf.level = 0.95,               # CI confidence level
+  agree.level = 0.95,              # LOA agreement level
+  m = 1,                           # Paired measurements per subject
+  icc = 0                          # ICC of the differences (if m > 1)
+)
+```
+
+Specify three of `n`, `delta`, `sigma` and `power`.
+
+## Example: Sample Size
+
+```{r bland_n, eval=TRUE}
+power_agreement_limit(delta = 7, mu = 0.5, sigma = 2.5, power = 0.80)
+```
+
+## Power Curves
+
+`blandPowerCurve()` (superseded) evaluates the same power over a range of sample sizes and settings, for plotting:
+
+```{r bland_curve_usage, eval=FALSE}
 blandPowerCurve(
   samplesizes = seq(10, 100, 1),  # Range of sample sizes
   mu = 0,                          # Mean difference
@@ -126,8 +152,6 @@ blandPowerCurve(
   icc = 0                          # ICC of the differences (if m > 1)
 )
 ```
-
-## Example: Power Curve
 
 ```{r bland_ex1, eval=TRUE}
 # Generate power curve
@@ -296,7 +320,7 @@ The calculations assume a **balanced** design (every subject has `m` pairs) and 
 - The mean difference (the bias) has variance $\sigma^2 \times \text{DEFF} / (n m)$, with the familiar design effect $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$.
 - The estimated total variance, $S^2 = MS_B / m + (m - 1) / m \times MS_W$, is a weighted sum of two chi-square variables with $n - 1$ and $n(m - 1)$ degrees of freedom. The functions integrate over this distribution exactly, in place of the single chi-square used for independent pairs.
 
-With `m = 1` the published methods are reproduced exactly. With `m > 1`, the expected half-width, assurance and power agree with simulation from this model to Monte Carlo error. `blandPowerCurve()` uses a simpler Satterthwaite approximation, in keeping with the approximate method of @lu2016.
+With `m = 1` the published methods are reproduced exactly. With `m > 1`, the expected half-width, assurance and power agree with simulation from this model to Monte Carlo error. `power_agreement_limit()` and `blandPowerCurve()` use a simpler Satterthwaite approximation, in keeping with the approximate method of @lu2016.
 
 ## Why Not Just Inflate the Sample Size?
 

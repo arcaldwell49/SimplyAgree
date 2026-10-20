@@ -77,8 +77,9 @@ reference:
 
 - title: "Power"
   desc: >
-    Fucntions for power calculations
+    Functions for power calculations
   contents:
+  - power_agreement_limit
   - blandPowerCurve
   - powerCurve-methods
   - agree_assurance

@@ -69,11 +69,17 @@
 #'   the bootstrap estimates.}
 #'
 #' @details
-#' The concordance correlation coefficient measures the agreement between two
-#' measurements of the same quantity. It combines measures of precision (Pearson
-#' correlation) and accuracy (bias correction factor) to determine how far the
-#' observed data deviate from the line of perfect concordance (45-degree line
-#' through the origin).
+#' The concordance correlation coefficient (CCC) quantifies agreement between
+#' two measurements of the same quantity. It is the product of a precision
+#' component (Pearson's correlation) and an accuracy component (the bias
+#' correction factor), and together these capture how far the observed data
+#' depart from the line of perfect concordance (the 45-degree line through the
+#' origin). Its purpose is closely related to that of [dem_reg()]. By analogy,
+#' Lin's CCC is to Pearson's r what Deming regression is to ordinary least
+#' squares. Deming regression estimates the
+#' relationship (slope and intercept) and asks whether it deviates from the
+#' line of identity, whereas
+#' the CCC summarizes that deviation in a single index.
 #'
 #' **Simple data.** Lin's (1989) estimator and asymptotic standard error are
 #' used, from the complete pairs; these match `DescTools::CCC()` and
@@ -94,7 +100,7 @@
 #' and each row is a matched pair). Lin's estimator is computed over all
 #' complete pairs, which keep their pairing.
 #'
-#' For both, the subject is the independent unit: the standard error of
+#' For both, the subject is the independent unit. The standard error of
 #' Fisher's z is a delete-one-subject jackknife, so it allows for the
 #' correlation of measurements within a subject. (Treating every pair as
 #' independent understates the standard error.) The interval and test use a
