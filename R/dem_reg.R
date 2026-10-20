@@ -74,13 +74,24 @@
 #'   - `resamples`: List containing resamples from jacknife procedure (if keep_data = TRUE).
 #'
 #' @examples
-#' \dontrun{
-#' # New formula interface (recommended)
-#' model <- dem_reg(y ~ x, data = mydata)
+#' # Peak flow: mini vs Wright meter (Bland & Altman, 1986)
+#' data("ba1986")
+#' fit <- dem_reg(mini1 ~ wright1, data = ba1986)
+#' summary(fit)
+#' plot(fit)
 #'
-#' # Old interface (still works with deprecation warning)
-#' model <- dem_reg(x = "x", y = "y", data = mydata)
-#' }
+#' # Joint test of intercept = 0 and slope = 1
+#' joint_test(fit)
+#'
+#' # Known error ratio, var(x) / var(y)
+#' dem_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+#'
+#' # Replicate measurements: the error ratio is estimated from the replicates
+#' data("reps")
+#' dem_reg(y ~ x, data = reps, id = "id")
+#'
+#' # Weighted Deming regression (error proportional to the level)
+#' dem_reg(mini1 ~ wright1, data = ba1986, weighted = TRUE)
 #'
 #' @references
 #' Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.

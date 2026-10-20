@@ -93,10 +93,11 @@ The variance functions allow flexible modeling of heteroscedastic errors:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Simple example: detect 5\% proportional bias with constant variance
+# (use n_sims = 1000 or more in practice)
 power_result <- deming_power_sim(
-  n_sims = 500,
+  n_sims = 200,
   sample_size = 50,
   x_range = c(10, 100),
   actual_slope = 1.05,
@@ -108,7 +109,7 @@ print(power_result)
 
 # More complex: heteroscedastic errors
 power_result2 <- deming_power_sim(
-  n_sims = 500,
+  n_sims = 200,
   sample_size = 75,
   x_range = c(1, 100),
   actual_slope = 1.03,

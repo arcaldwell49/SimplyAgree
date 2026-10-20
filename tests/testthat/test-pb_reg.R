@@ -998,3 +998,17 @@ test_that("reject_h0 is not triggered by floating-point error on tied data", {
   expect_false(mt$reject_h0[2])
   expect_false(mt$reject_h0[1])
 })
+
+test_that("pb_reg id works when x or y has missing values", {
+  d <- data.frame(id = rep(1:6, each = 3),
+                  x = c(1, 1.2, 0.9, 2, 2.1, 1.9, 3, 3.2, NA, 4, 4.1, 3.8,
+                        5, 5.2, 4.9, 6, 6.1, 5.8),
+                  y = c(1.1, 1, 1.2, 2.2, NA, 2, 3.1, 3, 3.2, 4.1, 3.9, 4,
+                        5.2, 5, 5.1, 6.1, 6, 6.2))
+  fit <- suppressWarnings(pb_reg(y ~ x, data = d, id = "id"))
+  cc <- d[complete.cases(d), ]
+  means <- aggregate(cbind(x, y) ~ id, data = cc, FUN = mean)
+  expect_equal(nrow(fit$model), 6)
+  expect_equal(fit$model$x, means$x)
+  expect_equal(fit$model$y, means$y)
+})

@@ -163,38 +163,32 @@
 #'     "bootstrap", "jackknife", or "dufey").
 #'
 #' @examples
-#' \dontrun{
-#' # Basic Passing-Bablok regression (scissors method, default)
-#' model <- pb_reg(method2 ~ method1, data = mydata)
+#' # Peak flow: mini vs Wright meter (Bland & Altman, 1986)
+#' data("ba1986")
 #'
-#' # With replicate measurements (averaged within subject)
-#' model_rep <- pb_reg(method2 ~ method1, data = mydata, id = "subject_id")
+#' # Analytic confidence intervals (scissors method, default)
+#' fit <- pb_reg(mini1 ~ wright1, data = ba1986)
+#' summary(fit)
+#' plot(fit)
 #'
-#' # With bootstrap confidence intervals
-#' model_boot <- pb_reg(method2 ~ method1, data = mydata, replicates = 1000)
+#' # Symmetric and scale-invariant methods
+#' pb_reg(mini1 ~ wright1, data = ba1986, method = "symmetric")
+#' pb_reg(mini1 ~ wright1, data = ba1986, method = "invariant")
 #'
-#' # Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix
-#' model_jack <- pb_reg(method2 ~ method1, data = mydata,
-#'                      se_method = "jackknife", replicates = 1000)
-#' model_dufey <- pb_reg(method2 ~ method1, data = mydata, se_method = "dufey")
+#' \donttest{
+#' # Bootstrap (or delete-d jackknife) variance-covariance matrix, needed for
+#' # the joint test of intercept and slope; use more replicates in practice
+#' fit_boot <- pb_reg(mini1 ~ wright1, data = ba1986, replicates = 199)
+#' joint_test(fit_boot)
+#' plot_joint(fit_boot)
 #'
-#' # Joint test of intercept and slope (bootstrap or jackknife fits)
-#' joint_test(model_boot)
+#' fit_jack <- pb_reg(mini1 ~ wright1, data = ba1986,
+#'                    se_method = "jackknife", replicates = 199)
 #'
-#' # Symmetric method
-#' model_sym <- pb_reg(method2 ~ method1, data = mydata, method = "symmetric")
-#'
-#' # Scale-invariant method
-#' model_inv <- pb_reg(method2 ~ method1, data = mydata, method = "invariant")
-#'
-#' # With case weights
-#' model_wt <- pb_reg(method2 ~ method1, data = mydata,
-#'                    weights = mydata$case_weights)
-#'
-#' # View results
-#' print(model)
-#' summary(model)
-#' plot(model)
+#' # Case weights
+#' w <- rep(1, nrow(ba1986))
+#' w[1:3] <- 2
+#' pb_reg(mini1 ~ wright1, data = ba1986, weights = w, replicates = 199)
 #' }
 #'
 #' @references
@@ -287,6 +281,11 @@ pb_reg <- function(formula,
       id_vals <- data[[id]]
     } else {
       id_vals <- id
+    }
+    # model.frame() dropped rows with missing x or y; drop them from id too
+    omitted <- attr(mf, "na.action")
+    if (!is.null(omitted) && length(id_vals) == nrow(data)) {
+      id_vals <- id_vals[-omitted]
     }
 
     df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
@@ -879,9 +878,10 @@ pb_reg <- function(formula,
   # Abscissa of minimal intercept variance
   x0 <- (median(Y - (slope - se1 * z0) * x) - median(Y - (slope + se1 * z0) * x)) /
     (2 * se1 * z0)
-  # TODO: joint tests using this vcov are anti-conservative (~7-11% at nominal
-  # 5%) while marginal SEs are accurate; check -xw * se1^2 against the
-  # empirical intercept-slope covariance before promoting from experimental.
+  # Joint tests from this vcov were anti-conservative (8-11% at nominal 5%;
+  # references/general/eiv_sims) while marginal SEs are accurate, so
+  # joint_test() refuses Dufey fits. To revisit: check -xw * se1^2 against the
+  # empirical intercept-slope covariance.
   xw <- x0 - sez / se1 * covtx
   se0 <- sqrt(max(0, sez^2 * (1 - covtx^2) + se1^2 * xw^2))
 

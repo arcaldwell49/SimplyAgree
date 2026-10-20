@@ -65,13 +65,16 @@ the chosen N with \code{\link[=deming_power_sim]{deming_power_sim()}}) when the 
 never below \code{initial_n}.
 }
 \examples{
-\dontrun{
-# Determine N needed for 90\% power to detect 5\% bias
+\donttest{
+# Determine N needed for 90\% power to detect 5\% bias with the joint
+# region (use_joint = TRUE stops there; n_sims = 500 or more in practice)
 sample_size_result <- deming_sample_size(
   target_power = 0.90,
-  initial_n = 30,
+  initial_n = 10,
   max_n = 200,
-  n_sims = 500,
+  n_sims = 200,
+  step_size = 10,
+  use_joint = TRUE,
   x_range = c(20, 200),
   actual_slope = 1.05,
   ideal_slope = 1.0,

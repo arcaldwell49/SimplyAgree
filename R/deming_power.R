@@ -66,10 +66,11 @@
 #' regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Simple example: detect 5% proportional bias with constant variance
+#' # (use n_sims = 1000 or more in practice)
 #' power_result <- deming_power_sim(
-#'   n_sims = 500,
+#'   n_sims = 200,
 #'   sample_size = 50,
 #'   x_range = c(10, 100),
 #'   actual_slope = 1.05,
@@ -81,7 +82,7 @@
 #'
 #' # More complex: heteroscedastic errors
 #' power_result2 <- deming_power_sim(
-#'   n_sims = 500,
+#'   n_sims = 200,
 #'   sample_size = 75,
 #'   x_range = c(1, 100),
 #'   actual_slope = 1.03,
@@ -254,13 +255,16 @@ deming_power_sim <- function(n_sims = 1000,
 #' never below `initial_n`.
 #'
 #' @examples
-#' \dontrun{
-#' # Determine N needed for 90% power to detect 5% bias
+#' \donttest{
+#' # Determine N needed for 90% power to detect 5% bias with the joint
+#' # region (use_joint = TRUE stops there; n_sims = 500 or more in practice)
 #' sample_size_result <- deming_sample_size(
 #'   target_power = 0.90,
-#'   initial_n = 30,
+#'   initial_n = 10,
 #'   max_n = 200,
-#'   n_sims = 500,
+#'   n_sims = 200,
+#'   step_size = 10,
+#'   use_joint = TRUE,
 #'   x_range = c(20, 200),
 #'   actual_slope = 1.05,
 #'   ideal_slope = 1.0,
