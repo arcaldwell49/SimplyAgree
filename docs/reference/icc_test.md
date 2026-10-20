@@ -1,6 +1,6 @@
 # Intraclass Correlation Coefficient Test
 
-**\[maturing\]**
+**\[stable\]**
 
 Estimates one intraclass correlation coefficient (ICC), with a
 confidence interval and a test against a null value, and returns an
@@ -182,8 +182,9 @@ A list of class `c("reli_htest", "htest")` containing:
 
 ## Details
 
-**ICC forms.** McGraw and Wong (1996) and Shrout and Fleiss (1979) name
-the forms differently:
+**ICC forms.**. The different ICCs can be confusing. Therefore, I have
+summarized it here. McGraw and Wong (1996) and Shrout and Fleiss (1979)
+name the forms differently:
 
 |         |             |         |               |                 |
 |---------|-------------|---------|---------------|-----------------|
@@ -243,17 +244,18 @@ With `alternative = "greater"` the interval is one-sided, `[L, 1]`,
 where L is the one-sided `conf.level` lower bound; with `"less"` it is
 `[-Inf, U]`.
 
-**Tests.** By default (`null.value = NULL`) no test is done: the result
-is the estimate and a two-sided interval. Testing against an ICC of 0,
-the default in many programs, is rarely informative for reliability.
-When `null.value` is given, the tests are the F tests of McGraw and Wong
-(1996, Table 8) of \\H_0: \rho = \rho_0\\. They are exact for the
-one-way and consistency forms, and invert exactly to the interval. For
-the agreement forms the test and the interval are separate Satterthwaite
-approximations (degrees of freedom evaluated at \\\rho_0\\ for the test
-and at the estimate for the interval), so with few subjects they can
-disagree near the interval limits; McGraw and Wong note that their power
-cannot be determined exactly.
+**Tests.** By default (`null.value = NULL`) no test is done. The result
+is the estimate and a two-sided interval when printed to the console.
+Testing against an ICC of 0, the default in many programs, is rarely
+informative for reliability. When `null.value` is given, the tests are
+the F tests of McGraw and Wong (1996, Table 8) of \\H_0: \rho =
+\rho_0\\. They are exact for the one-way and consistency forms, and
+invert exactly to the interval. For the agreement forms the test and the
+interval are separate Satterthwaite approximations (degrees of freedom
+evaluated at \\\rho_0\\ for the test and at the estimate for the
+interval), so with few subjects they can disagree near the interval
+limits; McGraw and Wong note that their power cannot be determined
+exactly.
 
 **Missing data.** `method = "reml"` estimates the variance components
 from a linear mixed model and uses degrees of freedom based on the

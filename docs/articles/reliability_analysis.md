@@ -8,11 +8,12 @@ by an intraclass correlation coefficient (ICC), the proportion of the
 observed variance that is due to real differences between subjects.
 *Absolute* reliability asks how much a single measurement varies around
 a subject’s true value; it is summarised by the standard error of
-measurement (SEM), also called the typical error ([Hopkins
-2000](#ref-hopkins2000)), often expressed as a coefficient of variation.
-The calculations here follow Weir ([2005](#ref-weir2005)), who in turn
-relies on Shrout and Fleiss ([1979](#ref-shrout1979)) and McGraw and
-Wong ([1996](#ref-mcgraw1996)).
+measurement (SEM), also called the “typical error” in some fields
+([Hopkins 2000](#ref-hopkins2000)), and often is expressed as a
+coefficient of variation. The calculations here were originally derived
+from Weir ([2005](#ref-weir2005)), who in turn relied on Shrout and
+Fleiss ([1979](#ref-shrout1979)) and McGraw and Wong
+([1996](#ref-mcgraw1996)).
 
 `SimplyAgree` has one function for each question, each returning a
 standard `htest` object with a confidence interval and, optionally, a
@@ -30,7 +31,8 @@ The older
 and
 [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md),
 which return everything at once, are superseded (see [Legacy
-functions](#legacy-functions)).
+functions](#legacy-functions)). This was a deliberate design choice on
+my part as I thought the old function was confusing users.
 
 All functions accept data in three ways: a formula,
 `values ~ item | id`; long data, with `measure`, `item` and `id` column
@@ -103,11 +105,11 @@ Some common designs:
 
 Whether the items are thought of as fixed (these particular raters) or
 random (a sample of possible raters) changes how widely the result
-generalises, not how it is calculated ([McGraw and Wong
+generalizies, not how it is calculated ([McGraw and Wong
 1996](#ref-mcgraw1996)). The average-measure forms describe the mean of
-the k items in this study; other values of k would need a Spearman-Brown
-projection. Whatever the form, report the matching error statistic, and
-test against a meaningful threshold rather than labelling the estimate
+the k items in this study (other values of k would need a Spearman-Brown
+projection). Whatever the form, report the matching error statistic, and
+test against a meaningful threshold rather than labeling the estimate
 “good” or “poor”.
 
 The three arguments map onto the names used by McGraw and Wong
@@ -150,7 +152,8 @@ icc_test(col.names = judges, data = dat, type = "agreement")
 
 ### Related coefficients: Cronbach’s alpha and the CCC
 
-Two other widely used coefficients are ICCs in disguise.
+There are two widely reported coefficients that many might not realize
+are ICCs in disguise.
 
 **Cronbach’s alpha is ICC(C,k).** With complete data, Cronbach’s
 ([1951](#ref-cronbach1951)) alpha for k items equals the average-measure
@@ -158,8 +161,9 @@ consistency ICC, \\(MS_B - MS_E)/MS_B\\ ([McGraw and Wong
 1996](#ref-mcgraw1996)). So alpha is the reliability of the *mean* (or
 sum) of the k items when systematic differences between items do not
 count, not the reliability of a single item; ICC(C,1) is the
-corresponding single-item figure. Here alpha computed from its usual
-formula matches `icc_test(unit = "average")`:
+corresponding single-item figure. This is often reported as a measure of
+“internal consistency”. Here alpha computed from its usual formula
+matches `icc_test(unit = "average")`:
 
 ``` r
 
@@ -172,7 +176,7 @@ c(alpha = alpha,
 #> 0.9093155 0.9093155
 ```
 
-**The CCC is close to ICC(A,1) for two methods.** Lin’s concordance
+**The CCC is analogous to ICC(A,1) for two methods.** Lin’s concordance
 correlation coefficient ([Lin 1989](#ref-Lin1989)) measures how closely
 pairs fall on the line of identity, so systematic differences between
 the methods count as disagreement, as in an absolute-agreement ICC. For
@@ -201,11 +205,14 @@ few dozen subjects the two estimates agree to about two decimal places.
 
 ### Testing against a threshold
 
-By default no test is done: testing whether an ICC differs from 0 is
-rarely informative. No qualitative labels (“good”, “excellent”) are
-given either, because published cutoffs disagree and the ICC depends on
-how much subjects differ from each other ([Weir 2005](#ref-weir2005)).
-To claim that reliability exceeds a value, test against it:
+By default. no test is done. This, like many things in `SimplyAgree`,
+was a design choice on my part as I tend to see ICCs are most often used
+for estimation rather than hypothesis testing, and a test of whether an
+ICC differs from zero is rarely informative. Additionally, the package
+provides no qualitative labels (“good”, “excellent”), because published
+cutoffs disagree and the ICC depends on how much subjects differ from
+each other ([Weir 2005](#ref-weir2005)). To claim that reliability
+exceeds a value, test against it:
 
 ``` r
 
@@ -225,8 +232,10 @@ res
 #> 0.7148407
 ```
 
-With a one-sided alternative the interval is one-sided too: its lower
-limit is the one-sided bound that matches the test.
+With a one-sided alternative, the confidence interval is also one-sided,
+and its lower limit is the bound that corresponds to the test. This
+approach is appropriate when the only question of interest is whether
+the ICC exceeds a specified threshold.
 
 ### Describing the result
 
@@ -304,21 +313,21 @@ icc_test(col.names = judges, data = dat_na, method = "reml")
 
 ### Bootstrap intervals and standard errors
 
-**When to bootstrap.** The F-based intervals assume normal data. In
-simulations (3 trials, 10 or 30 subjects, ICC 0.5 or 0.9), they covered
-0.92 to 0.97 of the time with normal data but only 0.80 to 0.93 with
-skewed or heavy-tailed data. With `boot = TRUE`, the interval comes from
-a nonparametric bootstrap instead, which helps with clearly non-normal
-data and about 30 or more subjects. With 10 subjects every method, the
-bootstrap included, falls short of its nominal coverage, so a bootstrap
-is no cure for a small sample.
+The F-based intervals that subject effects and residual errors are
+normally distributed. In simulations (3 trials, 10 or 30 subjects, ICC
+0.5 or 0.9), they covered 0.92 to 0.97 of the time with normal data but
+only 0.80 to 0.93 with skewed or heavy-tailed data. With `boot = TRUE`,
+the interval comes from a nonparametric bootstrap instead, which helps
+with clearly non-normal data and about 30 or more subjects. With 10
+subjects every method, the bootstrap included, falls short of its
+nominal coverage, so a bootstrap is no cure for a small sample.
 
-**How it works.** Each replicate resamples subjects with replacement,
-keeping all of each subject’s measurements, and refits the model
-(`replicates` times, 1999 by default; with `method = "reml"` this means
-refitting the mixed model each time, which is slow). The interval type
-is set by `boot_ci`; the default, `"auto"`, picks the type that did best
-in the simulations:
+When using the bootstrap methods, each replicate resamples subjects with
+replacement, keeping all of each subject’s measurements, and refits the
+model (`replicates` times, 1999 by default; with `method = "reml"` this
+means refitting the mixed model each time, which is slow). The interval
+type is set by `boot_ci`; the default, `"auto"`, picks the type that did
+best in the simulations:
 
 | Estimate | `method = "anova"` | `method = "reml"` |
 |----|----|----|
@@ -347,19 +356,20 @@ icc_test(col.names = judges, data = dat, boot = TRUE, replicates = 499)
 #> 0.7148407
 ```
 
-**The hybrid step for agreement.** Resampling subjects keeps the same
-items (judges, trials) in every replicate, so on its own it treats the
-items as fixed. An absolute-agreement ICC (and the agreement SEM and
-SEP) treats the items as a sample, and their systematic differences
-count as error, so plain subject resampling misses the uncertainty that
-comes from which items happened to be used. In simulations it covered
-only 0.70 to 0.80 for an agreement ICC of 0.9. Each replicate therefore
-also multiplies the item mean square by an independent
-\\\chi^2\_{k-1}/(k-1)\\ draw, its sampling variation under normal
-theory. This “hybrid” bootstrap restored coverage to about 0.94 to 0.96
-with normal data and 30 subjects. It is applied automatically to the
-two-way agreement forms; when the items really are fixed it is somewhat
-conservative, like the F interval.
+#### The hybrid step for agreement
+
+Resampling subjects keeps the same items (judges, trials) in every
+replicate, so on its own it treats the items as fixed. An
+absolute-agreement ICC (and the agreement SEM and SEP) treats the items
+as a sample, and their systematic differences count as error, so plain
+subject resampling misses the uncertainty that comes from which items
+happened to be used. In simulations it covered only 0.70 to 0.80 for an
+agreement ICC of 0.9. Each replicate therefore also multiplies the item
+mean square by an independent \\\chi^2\_{k-1}/(k-1)\\ draw, its sampling
+variation under normal theory. This “hybrid” bootstrap restored coverage
+to about 0.94 to 0.96 with normal data and 30 subjects. It is applied
+automatically to the two-way agreement forms; when the items really are
+fixed it is somewhat conservative, like the F-interval.
 
 ``` r
 
@@ -380,9 +390,11 @@ icc_test(col.names = judges, data = dat, type = "agreement", boot = TRUE,
 #> 0.2897638
 ```
 
-**Standard errors (`se_method`).** Every result reports standard errors
-in `stderr`, and the studentized bootstrap divides each replicate by its
-own standard error. Three estimates are available:
+#### Standard errors (`se_method`)
+
+Every result reports standard errors in `stderr`, and the studentized
+bootstrap divides each replicate by its own standard error. Three
+estimates are available:
 
 - `"jackknife"` (default): delete one subject at a time. It averaged
   0.89 to 1.08 times the true sampling SD in simulations, including
@@ -463,10 +475,11 @@ check(res)
 
 [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
 estimates the standard error of measurement (SEM), estimate (SEE) or
-prediction (SEP). With the defaults it gives the typical error:
-\\\sqrt{MS_E}\\ from the two-way analysis of variance, which excludes
-systematic differences between trials. As an example, take data set A of
-Weir ([2005](#ref-weir2005)) (8 subjects, 2 trials).
+prediction (SEP). With the defaults it gives the “typical error” in the
+terminology of Hopkins. This is the \\\sqrt{MS_E}\\ from the two-way
+analysis of variance, which excludes systematic differences between
+trials. As an example, take data set A of Weir ([2005](#ref-weir2005))
+(8 subjects, 2 trials).
 
 ``` r
 
@@ -625,28 +638,32 @@ increase and a decrease). An existing SEM can be reused without
 refitting, as `mdc_test(sem)`. With two trials the MDC is the half-width
 of the limits of agreement of
 [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md),
-which also reports the bias between trials. Weir ([2005](#ref-weir2005))
-notes that, strictly, real change should be judged against an interval
-around the subject’s estimated true score, using the SEP.
+which also reports the bias between trials.[^1]
 
-**What the MDC is not.** The MDC is a threshold for *one individual’s*
-change. It is not a threshold for an average (group) effect: the
-uncertainty of a mean change shrinks with the number of subjects, so a
-mean effect well below the MDC can be estimated precisely and be clearly
-different from zero. An effect smaller than the MDC is small relative to
-one person’s measurement noise; that does not make it noise. The MDC
-should never be used to count “responders”. An observed change mixes the
-true response with within-person variation, so even if everyone
-responded identically, some would exceed the MDC and some would not
-([Senn 2004](#ref-senn2004)). Real differences in response need a
-control group or replicated crossover designs ([Atkinson and Batterham
-2015](#ref-atkinson2015); [Senn 2016](#ref-senn2016)).
+I do want to quickly make an aside about what the MDC is not. I write
+this mainly as resolution to my own confusion and what I have seen
+written out in the scientific literature. The MDC is a threshold for
+*one individual’s* change. It is not a threshold for an average (group)
+effect. The uncertainty of a mean change shrinks with the number of
+subjects, so a mean effect well below the MDC can be estimated precisely
+and be clearly different from zero. An effect smaller than the MDC is
+small relative to one person’s measurement noise; that does not make it
+noise (i.e., the effect can be “real”). The MDC should never be used to
+count “responders”. An observed change mixes the true response with
+within-person variation, so even if everyone responded identically, some
+would exceed the MDC and some would not ([Senn 2004](#ref-senn2004)).
+Real differences in response need a control group or replicated
+crossover designs ([Atkinson and Batterham 2015](#ref-atkinson2015);
+[Senn 2016](#ref-senn2016)).
 
-**The MDC and a change that matters.** The MDC describes noise; whether
-a change *matters* needs an external anchor, such as a clinically
-important difference. Give it as `null.value` to test whether the MDC is
-below it, i.e. whether such a change can be told apart from measurement
-error:
+### The MDC and a change that “matters”
+
+Again, I want to briefly highlight another common area of confusion.
+Whether a change *matters* needs an external anchor, such as a
+clinically important difference. The MDC is not such an anchor. But, you
+can give an anchor it as `null.value` to test whether the MDC is below
+it, i.e. whether such a change can be told apart from measurement error
+on an individual level:
 
 ``` r
 
@@ -671,133 +688,8 @@ data is not such an anchor. With 0.2 times the between-subject SD
 \\0.2/\sqrt{1 - ICC}\\, a restatement of the ICC. Hopkins
 ([2004](#ref-hopkins2004)) offers it as a default (e.g. for fitness
 tests in team sports) when no relationship to a real outcome is
-available, and it should be treated as such a fallback.
-
-### Hopkins’s smallest worthwhile change
-
-For solo athletes, Hopkins ([2004](#ref-hopkins2004)) defines the SWC as
-0.3 times the CV of top athletes’ performance from one *competition* to
-the next. Because of that race-to-race variation, evenly matched
-athletes take turns winning; simulations showed that an enhancement of
-0.3 of the CV gives a top athlete about one extra win in 10 events
-([Hopkins et al. 1999](#ref-hopkins1999)). The CV comes from
-competitions, not from the test, so it is an external anchor. The test’s
-own typical error must not be used in its place: 0.3 times it is a fixed
-11% of the MDC for every test (\\0.3 / (1.96\sqrt{2}) \approx 0.11\\),
-so it says nothing about whether a change matters.
-
-The competition CV is a typical error with competitions in place of
-trials, so
-[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
-estimates it from repeated competition results. A few choices matter:
-
-- **Top athletes only.** Less successful athletes vary more from race to
-  race, so including the whole field makes the SWC too large.
-- **The consistency SEM (the default).** Course, weather and tactics
-  shift everyone in a race together, and placings depend on performance
-  relative to the field; the two-way consistency SEM removes those
-  shifts. `type = "agreement"` would count them as athlete variability.
-- **`method = "reml"`**, because athletes rarely compete in every event.
-- **`scale = "log"`**, as Hopkins does, so the CV is in sympercents.
-- **A short span**, such as one season, so that long-term trends in an
-  athlete’s performance are not counted as noise.
-- **The same measure as the test.** A CV for race time is not a CV for
-  power; Hopkins ([2004](#ref-hopkins2004)) suggests multiplying a time
-  CV by about 2 to 3 for mean power.
-
-Simulated results for 15 top athletes over 8 races in a season (times in
-seconds), with a within-athlete CV of 1% and some races missed:
-
-``` r
-
-set.seed(2004)
-races <- expand.grid(athlete = paste0("A", 1:15), race = paste0("R", 1:8))
-ability <- rnorm(15, 0, 0.01)  # differences between athletes
-course <- rnorm(8, 0, 0.02)    # race conditions shift everyone
-races$time <- 240 * exp(ability[races$athlete] + course[races$race] +
-                          rnorm(nrow(races), 0, 0.01))
-races <- races[runif(nrow(races)) > 0.2, ]  # missed races
-
-cv_comp <- reli_err_test(time ~ race | athlete, data = races,
-                         scale = "log", method = "reml")
-#> Warning: 14.2% of subject-by-item cells are missing. Intervals and p-values use
-#> observed-data degrees of freedom and are approximate; they may be liberal as
-#> missingness increases. Consider boot = TRUE.
-cv_comp
-#> 
-#>  Standard error of measurement (two-way, consistency), log scale
-#>  (sympercents) (REML)
-#> 
-#> data:  time ~ race | athlete
-#> 
-#> alternative hypothesis: two.sided
-#> 95 percent confidence interval:
-#>  0.9376954 1.2782908
-#> sample estimates:
-#> SEM (sympercent) 
-#>         1.081671
-swc <- 0.3 * unname(cv_comp$estimate)
-swc
-#> [1] 0.3245013
-```
-
-A test can then be judged against the SWC in two ways; here, a simulated
-laboratory time trial with 12 athletes and 2 trials. Hopkins’s criterion
-is that the noise is smaller than the signal: the test’s typical error
-below the SWC. That is the test of the SEM against `null.value = swc`:
-
-``` r
-
-lab <- data.frame(id = rep(paste0("S", 1:12), 2),
-                  trial = rep(c("t1", "t2"), each = 12))
-lab$time <- 300 * exp(rep(rnorm(12, 0, 0.02), 2) + rnorm(24, 0, 0.008))
-lab_sem <- reli_err_test(time ~ trial | id, data = lab, scale = "log",
-                         null.value = swc)
-lab_sem
-#> 
-#>  Standard error of measurement (two-way, consistency), log scale
-#>  (sympercents)
-#> 
-#> data:  time ~ trial | id
-#> X-squared = 104.66, df = 11, p-value = 1
-#> alternative hypothesis: true SEM (sympercent) is less than 0.3245013
-#> 95 percent confidence interval:
-#>  0.000000 1.552118
-#> sample estimates:
-#> SEM (sympercent) 
-#>         1.000956
-```
-
-The stricter question, whether one athlete’s change the size of the SWC
-can be told apart from measurement error with 95% confidence, is the MDC
-against the same value:
-
-``` r
-
-lab_mdc <- mdc_test(lab_sem, null.value = swc)
-lab_mdc
-#> 
-#>  Minimal detectable change (95%, two-sided) from the standard error of
-#>  measurement (two-way, consistency), log scale (sympercents)
-#> 
-#> data:  time ~ trial | id
-#> X-squared = 804.11, df = 11, p-value = 1
-#> alternative hypothesis: true MDC (sympercent) is less than 0.3245013
-#> 95 percent confidence interval:
-#>  0.000000 4.302172
-#> sample estimates:
-#> MDC (sympercent) 
-#>         2.774458
-```
-
-Here the time trial’s typical error (1.00%) is 3.1 times the SWC
-(0.32%), and its MDC (2.8%) is 9 times it. That is common ([Hopkins
-2004](#ref-hopkins2004)): a change of SWC size in one athlete cannot be
-distinguished from noise with this test. Averaging \\k\\ trials
-(`k_avg`) shrinks the error by \\\sqrt{k}\\, but bringing it down to the
-SWC would take about 10 trials. The SWC is itself an estimate (0.3 times
-the interval for the CV gives 0.28 to 0.38), and using it as
-`null.value` treats it as known.
+available, and it should be treated as such a fallback when *nothing*
+else is available.
 
 ## Planning a reliability study
 
@@ -1051,11 +943,6 @@ Hopkins, Will G. 2004. “How to Interpret Changes in an Athletic
 Performance Test.” *Sportscience* 8: 1–7.
 <https://www.sportsci.org/jour/04/wghtests.htm>.
 
-Hopkins, Will G., John A. Hawley, and Louise M. Burke. 1999. “Design and
-Analysis of Research on Sport Performance Enhancement.” *Medicine &
-Science in Sports & Exercise* 31 (3): 472–85.
-<https://doi.org/10.1097/00005768-199903000-00018>.
-
 Koo, Terry K., and Mae Y. Li. 2016. “A Guideline of Selecting and
 Reporting Intraclass Correlation Coefficients for Reliability Research.”
 *Journal of Chiropractic Medicine* 15 (2): 155–63.
@@ -1116,3 +1003,7 @@ Strength and Conditioning Research* 19 (1): 231.
 Zou, G. Y. 2012. “Sample Size Formulas for Estimating Intraclass
 Correlation Coefficients with Precision and Assurance.” *Statistics in
 Medicine* 31 (29): 3972–81. <https://doi.org/10.1002/sim.5466>.
+
+[^1]: Weir ([2005](#ref-weir2005)) notes that, strictly, real change
+    should be judged against an interval around the subject’s estimated
+    true score, using the SEP.

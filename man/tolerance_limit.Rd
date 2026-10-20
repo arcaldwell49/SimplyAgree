@@ -77,7 +77,7 @@ Returns single \code{tolerance_delta} class object with the results of the agree
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 This is a procedure that should produce results similar to the Bland-Altman limits of agreement.

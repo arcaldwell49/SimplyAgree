@@ -183,6 +183,17 @@
 
 ### Agreement power and sample size
 
+- New
+  [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md):
+  power and sample size for the Bland-Altman limits of agreement (Lu et
+  al. 2016), returned as a `power.htest`. It solves for any one of `n`,
+  `delta`, `sigma` or `power`, and supports `m` and `icc`. It reproduces
+  both PASS (Chapter 427) examples, including PASS’s point that the
+  exact power formula gives n = 201 where Table 1 of Lu et
+  al. reports 203.
+  [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+  is superseded by it but remains for power curves; it now uses the same
+  internal code (results unchanged).
 - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md),
   [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md),
   [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md)
@@ -483,6 +494,54 @@
   (normality and heteroskedasticity of the differences, linearity with a
   RESET test, and bivariate normality for simple data) methods are
   provided.
+- Fixed the concordance correlation coefficient for replicate and nested
+  data
+  ([`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md),
+  and the CCC of
+  [`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md)
+  and
+  [`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md)).
+  **Results change:**
+  - Replicate data (`data_type = "reps"`,
+    [`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md)):
+    with a missing value, the old U-statistic code paired the remaining
+    measurements of the two methods out of order (and recycled values),
+    so the CCC was wrong. The CCC is now estimated from variance
+    components (Carrasco & Jover, 2003), which uses every measurement
+    and needs no pairing of replicates; it matches
+    `cccrm::ccc_vc(int = TRUE)`.
+  - Nested data (`data_type = "nest"`,
+    [`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md)):
+    the estimate (Lin’s CCC over all complete pairs) is unchanged.
+  - For both, the old standard error treated every pair as an
+    independent subject and was too small, so the intervals were too
+    narrow. The standard error is now a delete-one-subject jackknife,
+    and the interval and test use a t distribution with (number of
+    subjects - 1) degrees of freedom (the statistic is reported as `t`
+    with `df`).
+  - The CCC for simple data is unchanged; the documentation now notes
+    that Lin’s estimator uses n (not n - 1) in the variances, as in
+    DescTools and epiR.
+  - New opt-in subject bootstrap for replicate data
+    (`ccc_test(data_type = "reps", boot = TRUE)`), as in
+    [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md):
+    `boot_ci = "stud"` (default; studentized on the Fisher z scale with
+    a jackknife SE in each replicate), `"perc"` or `"bca"`, and
+    `replicates`. In simulations the jackknife-t interval covered 0.90
+    with 10 subjects (0.88 with non-normal data); the studentized
+    bootstrap covered 0.94, so it is recommended for replicate data with
+    few subjects. The percentile and BCa intervals covered poorly and no
+    bootstrap helped for nested data. The bootstrap fits the
+    variance-components model from the subjects’ summary statistics
+    (adds `minqa` to Imports).
+  - For replicate and nested data the result also keeps the jackknife
+    estimate of the small-sample bias and the bias-corrected CCC
+    (`$jackknife`), which
+    [`summary()`](https://rdrr.io/r/base/summary.html) mentions when the
+    bias is sizeable. In simulations it removed most of the average
+    downward bias but was not more accurate for a single study, so the
+    printed estimate, interval and test are unchanged; it is offered as
+    a guide, mainly for pooling small studies.
 - Fixed the Passing-Bablok (`pb_reg`) bootstrap. The previous wild
   bootstrap perturbed the observed values rather than the fitted values,
   so resampled points never crossed the regression line; standard errors
@@ -509,6 +568,26 @@
   chi-squared(2) approximation. The previous chi-squared approach was
   anti-conservative for small samples. A `test_method` argument allows
   selecting `"F"` (default) or `"asymptotic"` (old behavior).
+- [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  now takes `ideal_intercept` before `ideal_slope`, as
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  does. **Calls that passed the ideal values by position
+  (`plot_joint(fit, 1, 0)`) must swap them**; named arguments are
+  unaffected.
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  gains `conf.level`, and in both functions it now defaults to the level
+  the model was fitted with
+  ([`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  previously defaulted to 0.95 whatever the model’s level).
+  [`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  now stops with an informative error, as
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  does, when the model has no variance-covariance matrix
+  (e.g. [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md)
+  with `replicates = 0`), instead of drawing a plot without the region.
+  The two functions are now documented together on the
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  page.
 
 ## SimplyAgree 0.3.0
 

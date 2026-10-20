@@ -63,7 +63,7 @@ following McGraw and Wong (1996).'><meta property="og:image" content="https://aa
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="figures/lifecycle-maturing.svg" alt="[Maturing]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
 <p>Estimates one intraclass correlation coefficient (ICC), with a confidence
 interval and a test against a null value, and returns an object of class
 <code>"htest"</code>. The ICC form is chosen with <code>model</code>, <code>type</code> and <code>unit</code>,
@@ -235,7 +235,7 @@ not change the F-based interval or test. See Details.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>ICC forms.</strong> McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
+    <p><strong>ICC forms.</strong>. The different ICCs can be confusing. Therefore, I have summarized it here. McGraw and Wong (1996) and Shrout and Fleiss (1979) name the
 forms differently:</p><table class="table table"><tr><td><code>model</code></td><td><code>type</code></td><td><code>unit</code></td><td>McGraw &amp; Wong</td><td>Shrout &amp; Fleiss</td></tr><tr><td>oneway</td><td>agreement</td><td>single</td><td>ICC(1)</td><td>ICC(1,1)</td></tr><tr><td>oneway</td><td>agreement</td><td>average</td><td>ICC(k)</td><td>ICC(1,k)</td></tr><tr><td>twoway</td><td>agreement</td><td>single</td><td>ICC(A,1)</td><td>ICC(2,1)</td></tr><tr><td>twoway</td><td>agreement</td><td>average</td><td>ICC(A,k)</td><td>ICC(2,k)</td></tr><tr><td>twoway</td><td>consistency</td><td>single</td><td>ICC(C,1)</td><td>ICC(3,1)</td></tr><tr><td>twoway</td><td>consistency</td><td>average</td><td>ICC(C,k)</td><td>ICC(3,k)</td></tr></table><p>Whether items are treated as random or fixed changes the interpretation
 but not the calculation (McGraw &amp; Wong, 1996). Average-measure forms are
 not defined for McGraw and Wong's two-way mixed model with an interaction.</p>
@@ -275,8 +275,8 @@ approximate (Satterthwaite degrees of freedom) for the agreement forms.
 With <code>alternative = "greater"</code> the interval is one-sided, <code>[L, 1]</code>, where L
 is the one-sided <code>conf.level</code> lower bound; with <code>"less"</code> it is
 <code>[-Inf, U]</code>.</p>
-<p><strong>Tests.</strong> By default (<code>null.value = NULL</code>) no test is done: the result is
-the estimate and a two-sided interval. Testing against an ICC of 0, the
+<p><strong>Tests.</strong> By default (<code>null.value = NULL</code>) no test is done. The result is
+the estimate and a two-sided interval when printed to the console. Testing against an ICC of 0, the
 default in many programs, is rarely informative for reliability. When
 <code>null.value</code> is given, the tests are the F tests of McGraw and Wong (1996,
 Table 8) of \(H_0: \rho = \rho_0\). They are exact for the one-way and consistency

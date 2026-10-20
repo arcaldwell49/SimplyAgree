@@ -1,6 +1,6 @@
 #' @title Tolerance Limits from an Agreement Study
 #'
-#' @description `r lifecycle::badge('maturing')`
+#' @description `r lifecycle::badge('stable')`
 #'
 #' A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 #' This is a procedure that should produce results similar to the Bland-Altman limits of agreement.

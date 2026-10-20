@@ -1,6 +1,6 @@
 # Sample Size for Limits of Agreement Using Expected Half-Width
 
-**\[maturing\]**
+**\[stable\]**
 
 ## Usage
 

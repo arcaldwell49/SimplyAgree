@@ -95,15 +95,22 @@ perpendicular distances from each point to the regression line.
 ### Weighted Deming Regression
 
 For this example, I will rely upon the “ferritin” data from the `deming`
-R package. *The code in this section was not run because the deming
-package is not installed.*
+R package.
 
 ``` r
 
 library(deming)
+#> Warning: package 'deming' was built under R version 4.4.3
 data('ferritin')
 
 head(ferritin)
+#>   id period old.lot new.lot
+#> 1  1      1       1       1
+#> 2  2      1       3       3
+#> 3  3      1      10       9
+#> 4  4      1      13      11
+#> 5  5      1      13      12
+#> 6  6      1      15      13
 ```
 
 Let me demonstrate the problem with using simple Deming regression when
@@ -118,11 +125,32 @@ dem2 = dem_reg(
   weighted = FALSE
 )
 summary(dem2)
+#> Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = FALSE, 
+#>     conf.level = 0.95)
+#> 
+#> Coefficients:
+#>             coef      bias      se  df lower.ci upper.ci      t p.value
+#> Intercept 5.2157 -0.235818 2.18603 160   0.8985    9.533  2.386 0.01821
+#> Slope     0.9637  0.002597 0.02505 160   0.9143    1.013 -1.448 0.14949
+#> 
+#> 160 degrees of freedom
+#> Error variance ratio (lambda): 1.0000
 
 plot(dem2)
+```
+
+![](Deming_files/figure-html/unnamed-chunk-6-1.png)
+
+``` r
+
 
 check(dem2)
 ```
+
+![](Deming_files/figure-html/unnamed-chunk-6-2.png)
 
 Now, let us see what happens when `weighted` is set to TRUE.
 
@@ -134,11 +162,32 @@ dem3 = dem_reg(
   weighted = TRUE
 )
 summary(dem3)
+#> Weighted Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = old.lot ~ new.lot, data = ferritin, weighted = TRUE, 
+#>     conf.level = 0.95)
+#> 
+#> Coefficients:
+#>               coef       bias       se  df lower.ci upper.ci       t   p.value
+#> Intercept -0.02616  0.0065148 0.033219 160 -0.09176  0.03945 -0.7874 4.322e-01
+#> Slope      1.03052 -0.0001929 0.006262 160  1.01815  1.04288  4.8729 2.626e-06
+#> 
+#> 160 degrees of freedom
+#> Error variance ratio (lambda): 1.0000
 
 plot(dem3)
+```
+
+![](Deming_files/figure-html/unnamed-chunk-7-1.png)
+
+``` r
+
 
 check(dem3)
 ```
+
+![](Deming_files/figure-html/unnamed-chunk-7-2.png)
 
 The weighted model provides a better fit.
 
@@ -311,7 +360,7 @@ comparisons.
 ### Visualizing the Joint Confidence Region
 
 The
-[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
+[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
 function allows visualization of the confidence region in parameter
 space:
 

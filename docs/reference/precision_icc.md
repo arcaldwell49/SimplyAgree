@@ -1,6 +1,6 @@
 # Sample Size for the Precision of an Intraclass Correlation
 
-**\[maturing\]**
+**\[experimental\]**
 
 Plans a reliability study so that the confidence interval for an
 intraclass correlation coefficient (ICC) from

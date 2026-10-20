@@ -1,8 +1,12 @@
 #' @title Power Curve for Bland-Altman Limits of Agreement
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('superseded')`
+#'
 #' This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+#' It is superseded by [power_agreement_limit()], which returns a `power.htest`
+#' object and can solve for the sample size, power, `delta` or the SD directly.
+#' This function remains available for drawing power curves.
 #'
 #' @param samplesizes vector of samples sizes at which to estimate power: the
 #'   number of pairs, or the number of subjects when `m > 1`.
@@ -78,37 +82,26 @@ blandPowerCurve <- function(samplesizes = seq(10, 100, 1),
   dat_grid = expand.grid(conf.level,agree.level,delta)
   colnames(dat_grid) = c("conf.level","agree.level","delta")
   for(i in 1:nrow(dat_grid)){
-  LOA <- estimateLimitsOfAgreement(mu = mu,
-                                   SD = SD,
-                                   agree.level = dat_grid$agree.level[i])
-
-  df <- lapply(samplesizes, function(this_n) {
-    LOA %>%
-      estimateConfidenceIntervals(n = this_n,
-                                  conf.level = dat_grid$conf.level[i],
-                                  m = m,
-                                  icc = icc) %>%
-      estimateTypeIIerror(delta = dat_grid$delta[i]) %>%
-      estimatePowerFromBeta() %>%
-      unlist(recursive = FALSE) %>%
-      as.data.frame()
-  })
-  result <- do.call(rbind, df) %>%
-    select(CI.n,LOA.mu,LOA.SD,beta.delta,
-           power.power) %>%
-    rename(mu = LOA.mu,
-           SD = LOA.SD,
-           N = CI.n,
-           delta = beta.delta,
-           power = power.power) %>%
-    mutate(agree.level = dat_grid$agree.level[i],
-           conf.level = dat_grid$conf.level[i],
-           m = m,
-           icc = icc)
+  result <- data.frame(
+    N = samplesizes,
+    mu = mu,
+    SD = SD,
+    delta = dat_grid$delta[i],
+    power = .lu_power(n = samplesizes,
+                      delta = dat_grid$delta[i],
+                      mu = mu,
+                      sigma = SD,
+                      conf.level = dat_grid$conf.level[i],
+                      agree.level = dat_grid$agree.level[i],
+                      m = m,
+                      icc = icc),
+    agree.level = dat_grid$agree.level[i],
+    conf.level = dat_grid$conf.level[i],
+    m = m,
+    icc = icc
+  )
   final_dat = rbind(final_dat,result)
   }
-  final_dat = final_dat %>%
-    mutate(power = ifelse(power < 0, 0,power))
   class(final_dat) <- list("powerCurve","data.frame")
   return(final_dat)
 }

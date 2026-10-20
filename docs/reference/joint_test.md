@@ -1,8 +1,12 @@
-# Joint Confidence Region Test for Method Agreement
+# Joint Confidence Region for Intercept and Slope
 
-Tests whether the estimated intercept and slope jointly fall within a
-confidence region around specified ideal values (typically intercept=0
-and slope=1 for method comparison studies).
+**\[experimental\]**
+
+`joint_test()` tests whether the estimated intercept and slope jointly
+fall within a confidence region around specified ideal values (typically
+intercept = 0 and slope = 1 for method comparison studies).
+`plot_joint()` draws that region, with the ideal point marked as
+enclosed or not.
 
 ## Usage
 
@@ -14,15 +18,29 @@ joint_test(
   object,
   ideal_intercept = 0,
   ideal_slope = 1,
-  conf.level = 0.95,
+  conf.level = NULL,
   test_method = c("F", "asymptotic"),
+  ...
+)
+
+plot_joint(x, ...)
+
+# S3 method for class 'simple_eiv'
+plot_joint(
+  x,
+  ideal_intercept = 0,
+  ideal_slope = 1,
+  conf.level = NULL,
+  test_method = c("F", "asymptotic"),
+  show_intervals = TRUE,
+  n_points = 100,
   ...
 )
 ```
 
 ## Arguments
 
-- object:
+- object, x:
 
   A `simple_eiv` object from
   [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
@@ -43,18 +61,31 @@ joint_test(
 
 - conf.level:
 
-  Confidence level for the test (default: 0.95).
+  Confidence level for the region and test. The default, `NULL`, uses
+  the level the model was fitted with (`object$conf.level`).
 
 - test_method:
 
-  Reference distribution for the test. `"F"` (default) uses the
-  finite-sample F(2, n-2) distribution per Sadler (2010). `"asymptotic"`
-  uses the chi-squared(2) distribution, which is the large-sample
-  approximation. The two converge for large n.
+  Reference distribution for the region and test. `"F"` (default) uses
+  the finite-sample F(2, n-2) distribution per Sadler (2010).
+  `"asymptotic"` uses the chi-squared(2) distribution, which is the
+  large-sample approximation. The two converge for large n.
+
+- show_intervals:
+
+  Logical (`plot_joint()` only). If TRUE (default), also shows the
+  model's marginal confidence intervals as a rectangle. They are shown
+  only when `conf.level` matches the level the model was fitted with.
+
+- n_points:
+
+  Number of points used to draw the region (`plot_joint()` only; default
+  100).
 
 ## Value
 
-An object of class `htest` containing:
+`plot_joint()` returns a ggplot. `joint_test()` returns an object of
+class `htest` containing:
 
 - statistic:
 
@@ -103,11 +134,35 @@ conservative than the asymptotic chi-squared(2) approximation for small
 samples.
 
 For Deming regression, the variance-covariance matrix is computed via
-jackknife. For Passing-Bablok regression, bootstrap resampling must have
-been performed (i.e., `boot_ci = TRUE` in the original call).
+jackknife. For Passing-Bablok regression, the model must have been
+fitted with `replicates > 0` (`se_method = "bootstrap"` or
+`"jackknife"`) or with `se_method = "dufey"`.
 
 ## References
 
 Sadler, W.A. (2010). Joint parameter confidence regions improve the
 power of parametric regression in method-comparison studies.
 *Accreditation and Quality Assurance*, 15, 547-554.
+
+## Examples
+
+``` r
+data("reps")
+fit <- dem_reg(y ~ x, data = reps)
+joint_test(fit)
+#> 
+#>  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)
+#> 
+#> data:  y ~ x
+#> X-squared = 17.172, df1 = 2, df2 = 16, p-value = 0.002929
+#> alternative hypothesis: true intercept and slope are not equal to the null values
+#> null values:
+#> intercept     slope 
+#>         0         1 
+#> sample estimates:
+#> intercept     slope 
+#> 2.6793028 0.4433897 
+#> 
+plot_joint(fit)
+
+```

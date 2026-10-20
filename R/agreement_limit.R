@@ -1,7 +1,7 @@
 #' @title Limits of Agreement
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('stable')`
 #'
 #' A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
 #' Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).

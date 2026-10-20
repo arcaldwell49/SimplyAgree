@@ -32,7 +32,7 @@ This vignette provides comprehensive guidance on power analysis and sample size 
 `SimplyAgree` implements four approaches to power/sample size calculations for agreement (limits of agreement) studies:
 
 1. **`power_agreement_exact()`** - Exact agreement test [@shieh2019]
-2. **`blandPowerCurve()`** - Bland-Altman power curves [@lu2016]
+2. **`power_agreement_limit()`** - Bland-Altman limits of agreement test [@lu2016] (`blandPowerCurve()` for power curves)
 3. **`agree_expected_half()`** - Expected half-width criterion [@JanShieh2018]
 4. **`agree_assurance()`** - Assurance probability criterion [@JanShieh2018]
 
@@ -54,7 +54,7 @@ The methods divide into two categories:
 **Hypothesis Testing** (binary decision):
 
 - `power_agreement_exact()` - Tests if central proportion, essentially tolerance intevals, are within the maximal allowable difference
-- `blandPowerCurve()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
+- `power_agreement_limit()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
 
 **Estimation** (quantifying precision):
 
@@ -106,15 +106,41 @@ print(result)
 ```
 
 
-# Method 2: Bland-Altman Power Curves
+# Method 2: Bland-Altman Limits of Agreement
 
 ## Overview
 
-Calculates power curves using approximate Bland-Altman confidence intervals using the method of @lu2016 (which is approximate). Useful for exploring power across sample sizes.
+Calculates power for the Bland-Altman approach: agreement is concluded when the confidence intervals of both limits of agreement (the approximate Bland-Altman intervals, as in `agreement_limit(loa_calc = "blandaltman")`) fall within $[-\delta, \delta]$. Power follows the method of @lu2016, using their exact formula (eq. 5) as PASS does. Their Table 1 used an approximation and some of its sample sizes are slightly too large.
 
 ## Usage
 
 ```{r bland_usage, eval=FALSE}
+power_agreement_limit(
+  n = NULL,                        # Sample size (pairs)
+  delta = NULL,                    # Maximal allowable difference
+  mu = 0,                          # Mean difference
+  sigma = NULL,                    # SD of differences
+  power = NULL,                    # Target power
+  conf.level = 0.95,               # CI confidence level
+  agree.level = 0.95,              # LOA agreement level
+  m = 1,                           # Paired measurements per subject
+  icc = 0                          # ICC of the differences (if m > 1)
+)
+```
+
+Specify three of `n`, `delta`, `sigma` and `power`.
+
+## Example: Sample Size
+
+```{r bland_n, eval=TRUE}
+power_agreement_limit(delta = 7, mu = 0.5, sigma = 2.5, power = 0.80)
+```
+
+## Power Curves
+
+`blandPowerCurve()` (superseded) evaluates the same power over a range of sample sizes and settings, for plotting:
+
+```{r bland_curve_usage, eval=FALSE}
 blandPowerCurve(
   samplesizes = seq(10, 100, 1),  # Range of sample sizes
   mu = 0,                          # Mean difference
@@ -126,8 +152,6 @@ blandPowerCurve(
   icc = 0                          # ICC of the differences (if m > 1)
 )
 ```
-
-## Example: Power Curve
 
 ```{r bland_ex1, eval=TRUE}
 # Generate power curve
@@ -257,7 +281,20 @@ All four agreement functions take two extra arguments:
 
 With `m > 1`, `n` is the **number of subjects** (the output also gives `n.obs = n * m`), and `sigma` (or `SD`) is the **total** SD of the differences, between- plus within-subject.
 
-Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject.
+Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject. To put it another way, a high ICC would reflect that the bias is consistent within a subject but differs across subjects (i.e., the bias is largely subject-specific). *Caveat emptor* but I personally believe it is reasonble to suspect that in many cases the ICC for nested agreement studies would be low (ICC < 0.10).
+
+*Caveat emptor* but I personally believe it is reasonable to expect the ICC of the
+differences to be low (e.g., < 0.10) in many nested agreement studies. When
+two methods measure the same quantity, the between-subject variation that
+drives a high measurement ICC largely cancels in the difference, leaving
+mostly within-subject error. Meaningful subject-specific bias requires
+something systematic, such as proportional bias (where the difference
+depends on the magnitude of the measured value) or a characteristic of the
+subject that affects one method more than the other (e.g., skin tone for
+optical sensors, or body composition for impedance-based measures). If such
+mechanisms are plausible, a higher ICC should be expected. Varying the ICC for these power analyses is a good sensitivity check.
+
+
 
 ## Example: Repeated Measures Design
 
@@ -296,11 +333,11 @@ The calculations assume a **balanced** design (every subject has `m` pairs) and 
 - The mean difference (the bias) has variance $\sigma^2 \times \text{DEFF} / (n m)$, with the familiar design effect $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$.
 - The estimated total variance, $S^2 = MS_B / m + (m - 1) / m \times MS_W$, is a weighted sum of two chi-square variables with $n - 1$ and $n(m - 1)$ degrees of freedom. The functions integrate over this distribution exactly, in place of the single chi-square used for independent pairs.
 
-With `m = 1` the published methods are reproduced exactly. With `m > 1`, the expected half-width, assurance and power agree with simulation from this model to Monte Carlo error. `blandPowerCurve()` uses a simpler Satterthwaite approximation, in keeping with the approximate method of @lu2016.
+With `m = 1` the published methods are reproduced exactly. With `m > 1`, the expected half-width, assurance and power agree with simulation from this model to Monte Carlo error. `power_agreement_limit()` and `blandPowerCurve()` use a simpler Satterthwaite approximation, in keeping with the approximate method of @lu2016.
 
 ## Why Not Just Inflate the Sample Size?
 
-A common approximation from survey sampling is to multiply the independent sample size by $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$ and divide by $m$ to get the number of subjects. That is correct for the *mean*, but the limits of agreement also depend on the *SD* of the differences. Its design effect is much smaller, about $1 + (m - 1) \times \text{ICC}^2$. Inflating the whole sample size by DEFF therefore overstates the penalty, more so as `m` grows:
+A common approximation from survey sampling is to multiply the independent sample size by $\text{DEFF} = 1 + (m - 1) \times \text{ICC}$ and divide by $m$ to get the number of subjects. That is correct for the *mean*, but the limits of agreement also depend on the *SD* of the differences (I made this error in my earlier writing on this). Its design effect is much smaller, about $1 + (m - 1) \times \text{ICC}^2$. Inflating the whole sample size by DEFF therefore overstates the penalty, more so as `m` grows:
 
 ```{r cluster_ex2, eval=TRUE}
 n_indep <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
@@ -317,7 +354,7 @@ for (ICC in c(0, 0.05, 0.10, 0.20, 0.40)) {
 }
 ```
 
-The simple inflation is conservative, so it is still a reasonable rule of thumb for designs the functions do not cover.
+The simple inflation is conservative. So I think it is still a reasonable rule of thumb for designs the functions do not cover.
 
 ## Estimating the Inputs from Pilot Data
 
@@ -341,7 +378,8 @@ The calculations do **not** cover:
 - Several levels of nesting
 - Analyses other than the planned procedure. For example, `power_agreement_exact()` gives the power of Shieh's exact test; judging agreement by whether the limits from `tolerance_limit()` fall within $[-\delta, \delta]$ is less powerful (see `?power_agreement_exact`).
 
-For these, use simulation-based power analysis with the analysis you intend to run.
+For these, use a simulation-based power analysis with the analysis you intend to run. That said, these functions can still provide a useful approximation, placing the required sample size in
+the right ballpark even when the design departs from their assumptions (e.g., unbalanced designs).
 
 ## Complete Example with Clustering
 
@@ -351,7 +389,7 @@ sigma <- 3.3  # total SD of the differences
 delta <- 7
 m <- 4        # paired measurements per participant
 ICC <- 0.15   # ICC of the differences
-dropout <- 0.20
+dropout <- 0.20 # expecting 20% dropout
 
 # Participants needed
 result <- power_agreement_exact(
@@ -449,13 +487,13 @@ power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80, model = "twoway",
 
 With 15% of measurements missing, 52 subjects are needed instead of 40.
 
-Subjects lost entirely are different: plan for the subjects who complete the study and recruit n / (1 - d) for an expected dropout d.
+Subjects lost entirely are different, and the typical dropout adjustment should be applied.
 
 ## Other designs
 
 The exact calculations cover the one-way and two-way consistency ICCs. They can still guide other designs, as long as the direction of the error is known:
 
-- **Absolute agreement ICC, ICC(A,1), and the CCC.** These have no exact F distribution. When the trials or raters differ little systematically, ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good guide. When they differ, power is lower and intervals are wider, most of all with 2 or 3 items. Treat the consistency result as a **lower bound** on the number of subjects.
+- **Absolute agreement ICC, ICC(A,1), and the CCC.** These have no exact F distribution. When the trials or raters differ little systematically, ICC(A,1) is close to ICC(C,1) and the consistency calculation is a good guide. When they differ, power is lower and intervals are wider, most of all with 2 or 3 items. Treat the consistency result as a **lower bound** on the number of subjects needed to achieve the desired level of statistical power.
 - **Non-normal data.** With skewed or heavy-tailed data the F-based intervals are wider and cover less than planned. Allow a margin, or plan for a bootstrap analysis with a larger sample.
 - **Published tables.** `method = "approximate"` reproduces the closed forms of @walter1998 (power) and @zou2012 (precision), for the one-way ICC only. The exact method is preferred [@mondal2024].
 

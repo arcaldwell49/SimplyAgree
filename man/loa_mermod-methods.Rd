@@ -45,5 +45,5 @@ for details.
 }
 }
 \description{
-Methods defined for objects returned from the loa_lme.
+Methods defined for objects returned from the deprecated loa_lme.
 }

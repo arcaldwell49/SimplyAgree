@@ -61,7 +61,7 @@ An object of class \code{"power.htest"}, printed by
 \code{conf.level}, \code{assurance}, \code{method} and \code{note}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Plans a reliability study so that the confidence interval for an
 intraclass correlation coefficient (ICC) from \code{\link[=icc_test]{icc_test()}} is narrow

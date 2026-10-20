@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-19</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/categorical_agreement.Rmd" class="external-link"><code>vignettes/categorical_agreement.Rmd</code></a></small>
       <div class="d-none name"><code>categorical_agreement.Rmd</code></div>
@@ -96,11 +96,12 @@ Caldwell</h4>
 <h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
 </h2>
 <p>Many measurements are not numbers on a continuous scale but
-classifications: a diagnosis (present or absent), a grade (1 to 5), or a
-severity rating (none, mild, moderate, severe). When several raters
-classify the same subjects, the question is how often they agree. For
-continuous measurements, see instead the reliability analysis vignette
-(ICCs) and the agreement analysis vignette (limits of agreement).</p>
+classifications. For example, a diagnosis (present or absent), a grade
+(1 to 5), or a severity rating (none, mild, moderate, severe). When
+several raters classify the same subjects, the question is how often
+they agree. For continuous measurements, see instead the reliability
+analysis vignette (ICCs) and the agreement analysis vignette (limits of
+agreement).</p>
 <p><code>SimplyAgree</code> has two functions for categorical ratings.
 Both return a standard <code>htest</code> object, with
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p>
@@ -353,6 +354,8 @@ reveals raters who are systematically more lenient or severe, or (with
 <div class="section level2">
 <h2 id="model-based-kappa-for-many-raters">Model-based kappa for many raters<a class="anchor" aria-label="anchor" href="#model-based-kappa-for-many-raters"></a>
 </h2>
+<p>Below is a new experimental function based on the published work of
+<span class="citation">Nelson and Edwards (<a href="#ref-nelson2015">2015</a>)</span> and <span class="citation">Nelson et al. (<a href="#ref-nelson2017">2017</a>)</span>.</p>
 <div class="section level3">
 <h3 id="when-to-use-it">When to use it<a class="anchor" aria-label="anchor" href="#when-to-use-it"></a>
 </h3>

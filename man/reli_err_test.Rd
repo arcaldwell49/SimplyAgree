@@ -115,7 +115,7 @@ standard deviation of the bootstrap estimates.}
 \item{boot}{Bootstrap details (\code{NULL} unless \code{boot = TRUE}).}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Estimates one measurement error statistic, the standard error of
 measurement (SEM), the standard error of estimate (SEE), or the standard

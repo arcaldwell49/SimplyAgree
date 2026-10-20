@@ -60,7 +60,7 @@ An object of class "power.htest", a list with components:
 \item{note}{Additional notes}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Computes sample size, power, or other parameters for the exact method of
 assessing agreement between two measurement methods, as described in

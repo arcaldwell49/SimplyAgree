@@ -1,6 +1,8 @@
 #' Methods for simple_eiv objects
 #'
 #' Methods defined for objects returned from error-in-variables models (e.g., `dem_reg`, `pb_reg`).
+#' The joint confidence region for the intercept and slope is tested with
+#' [joint_test()] and plotted with [plot_joint()].
 #'
 #' @param object,x object of class \code{simple_eiv} from dem_reg or pb_reg function.
 #' @param data Optional data frame. Required for methods like `plot()`, `fitted()`, `residuals()`,
@@ -13,7 +15,6 @@
 #'   \item{\code{summary}}{Prints detailed summary.}
 #'   \item{\code{plot}}{Returns a plot of the regression line and data.}
 #'   \item{\code{check}}{Returns plots of residuals.}
-#'   \item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
 #'   \item{\code{predict}}{Predicts Y values for new X values.}
 #'   \item{\code{fitted}}{Extracts fitted values.}
 #'   \item{\code{residuals}}{Extracts residuals.}
@@ -173,7 +174,7 @@ summary.simple_eiv <- function(object, ...) {
               object$df.residual))
 
   # Error ratio output
-  if (!is.null(object$error.ratio)) {
+  if (!is.null(object$error.ratio) && !is_passing_bablok) {
     cat(sprintf("Error variance ratio (lambda): %.4f\n", object$error.ratio))
   }
 
@@ -647,116 +648,6 @@ check.simple_eiv <- function(x, data = NULL, ...) {
 }
 
 #' @rdname simple_eiv-methods
-#' @export
-
-plot_joint <- function(x, ...) {
-  UseMethod("plot_joint")
-}
-
-#' @rdname simple_eiv-methods
-#' @method plot_joint simple_eiv
-#' @param ideal_slope The hypothesized slope value to test against (default = 1)
-#' @param ideal_intercept The hypothesized intercept value to test against (default = 0)
-#' @param show_intervals Logical. If TRUE, shows individual confidence intervals as well.
-#' @param n_points Number of points to use for drawing the joint confidence region (default = 100).
-#' @param test_method Reference distribution for the ellipse and test. \code{"F"} (default)
-#'   uses the finite-sample F(2, n-2) distribution. \code{"asymptotic"} uses chi-squared(2).
-#' @export
-plot_joint.simple_eiv <- function(x,
-                                  ideal_slope = 1,
-                                  ideal_intercept = 0,
-                                  show_intervals = TRUE,
-                                  n_points = 100,
-                                  test_method = c("F", "asymptotic"),
-                                  ...) {
-  object <- x
-  test_method <- match.arg(test_method)
-  df_res <- if (test_method == "F") object$df.residual else NULL
-
-  # Get estimates
-  est_slope <- object$coefficients[2]
-  est_intercept <- object$coefficients[1]
-  conf.level <- object$conf.level
-  # Get confidence intervals
-  ci_slope <- c(object$model_table$lower.ci[2], object$model_table$upper.ci[2])
-  ci_intercept <- c(object$model_table$lower.ci[1], object$model_table$upper.ci[1])
-
-  # Test if ideal point enclosed
-  ideal_test <- .test_joint_enclosure(
-    intercept = est_intercept,
-    slope = est_slope,
-    vcov = object$vcov,
-    ideal_intercept = ideal_intercept,
-    ideal_slope = ideal_slope,
-    conf.level = object$conf.level,
-    df_residual = df_res
-  )
-
-  joint_region <- .compute_joint_region(
-    intercept = est_intercept,
-    slope = est_slope,
-    vcov = vcov(object),
-    conf.level = conf.level,
-    n_points = n_points,
-    df_residual = df_res
-  )
-
-  # Create base plot
-  p <- ggplot() +
-    # Joint confidence region (ellipse)
-    geom_path(data = joint_region,
-              aes(x = slope, y = intercept),
-              color = "red",
-              linewidth = 1.2) +
-    # Estimated point
-    geom_point(aes(x = est_slope, y = est_intercept),
-               size = 3,
-               color = "black") +
-    # Ideal point
-    geom_point(aes(x = ideal_slope, y = ideal_intercept),
-               size = 4,
-               shape = 4,
-               stroke = 1.5,
-               color = ifelse(ideal_test$is_enclosed, "darkgreen", "darkred")) +
-    labs(
-      title = "Joint Confidence Region",
-      subtitle = sprintf("%.0f%% confidence level | Identity %s by region",
-                         object$conf.level * 100,
-                         ifelse(ideal_test$is_enclosed, "ENCLOSED", "NOT enclosed")),
-      x = "Slope",
-      y = "Intercept",
-      caption = sprintf("%s statistic = %.3f | critical value = %.3f | p = %.4f",
-                        ideal_test$distribution,
-                        ideal_test$mahalanobis_distance,
-                        ideal_test$critical_value,
-                        ideal_test$p_value)
-    ) +
-    theme_bw() +
-    theme(plot.caption = element_text(hjust = 0))
-
-  # Add confidence interval rectangle if requested
-  if (show_intervals) {
-    rect_df <- data.frame(
-      xmin = ci_slope[1],
-      xmax = ci_slope[2],
-      ymin = ci_intercept[1],
-      ymax = ci_intercept[2]
-    )
-
-    p <- p +
-      geom_rect(data = rect_df,
-                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                fill = "blue",
-                alpha = 0.1,
-                color = "blue",
-                linetype = "dashed")
-  }
-
-  return(p)
-}
-
-
-#' @rdname simple_eiv-methods
 #' @method vcov simple_eiv
 #' @export
 
@@ -1053,26 +944,44 @@ predict.simple_eiv <- function(object,
 
 
 
-#' Joint Confidence Region Test for Method Agreement
+#' Joint Confidence Region for Intercept and Slope
 #'
-#' Tests whether the estimated intercept and slope jointly fall within a
-#' confidence region around specified ideal values (typically intercept=0
-#' and slope=1 for method comparison studies).
+#' @description
+#' `r lifecycle::badge('experimental')`
 #'
-#' @param object A `simple_eiv` object from `dem_reg()` or `pb_reg()`.
+#' `joint_test()` tests whether the estimated intercept and slope jointly fall
+#' within a confidence region around specified ideal values (typically
+#' intercept = 0 and slope = 1 for method comparison studies). `plot_joint()`
+#' draws that region, with the ideal point marked as enclosed or not.
+#'
+#' @param object,x A `simple_eiv` object from `dem_reg()` or `pb_reg()`.
 #' @param ideal_intercept The hypothesized intercept value (default: 0).
 #' @param ideal_slope The hypothesized slope value (default: 1).
-#' @param conf.level Confidence level for the test (default: 0.95).
-#' @param test_method Reference distribution for the test. \code{"F"} (default)
-#'   uses the finite-sample F(2, n-2) distribution per Sadler (2010).
-#'   \code{"asymptotic"} uses the chi-squared(2) distribution, which is the
-#'   large-sample approximation. The two converge for large n.
+#' @param conf.level Confidence level for the region and test. The default,
+#'   `NULL`, uses the level the model was fitted with (`object$conf.level`).
+#' @param test_method Reference distribution for the Wald test and ellipse
+#'   (`method = "wald"` only). \code{"F"} (default) uses F(2, n-2);
+#'   \code{"asymptotic"} uses chi-squared(2), the large-sample approximation.
+#'   The Sadler test always uses F(2, n-2).
+#' @param method Which joint region and test. `NULL` (default) uses
+#'   \code{"sadler"} for Deming fits and \code{"wald"} for Passing-Bablok fits.
+#'   \code{"sadler"} is the sum-of-squares region of Sadler (2010), available
+#'   for `dem_reg()` fits only. \code{"wald"} is the ellipse from the
+#'   variance-covariance matrix (the only option for `pb_reg()`). See Details.
+#' @param show_intervals Logical (`plot_joint()` only). If TRUE (default),
+#'   also shows the model's marginal confidence intervals as a rectangle. They
+#'   are shown only when `conf.level` matches the level the model was fitted
+#'   with.
+#' @param n_points Number of points used to draw the region (`plot_joint()`
+#'   only; default 100).
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return An object of class `htest` containing:
+#' @return `plot_joint()` returns a ggplot. `joint_test()` returns an object
+#'   of class `htest` containing:
 #' \describe{
-#'   \item{statistic}{The Mahalanobis distance.}
-#'   \item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
+#'   \item{statistic}{For `method = "sadler"`, the F statistic; for
+#'     `method = "wald"`, the Mahalanobis distance.}
+#'   \item{parameter}{Degrees of freedom. For the F-based tests, \code{df1} and
 #'     \code{df2}; for the asymptotic test, \code{df} (always 2).}
 #'   \item{p.value}{The p-value for the test.}
 #'   \item{conf.int}{The confidence level used.}
@@ -1084,20 +993,67 @@ predict.simple_eiv <- function(object,
 #' }
 #'
 #' @details
-#' The test computes the Mahalanobis distance between the estimated coefficients
-#' and the hypothesized values using the variance-covariance matrix of the
-#' estimates. By default, the finite-sample F(2, n-2) reference distribution
-#' is used (Sadler, 2010), which is more conservative than the asymptotic
-#' chi-squared(2) approximation for small samples.
+#' ## Sadler region (Deming, default)
 #'
-#' For Deming regression, the variance-covariance matrix is computed via
-#' jackknife. For Passing-Bablok regression, bootstrap resampling must have
-#' been performed (i.e., `boot_ci = TRUE` in the original call).
+#' For a Deming fit with error ratio \eqn{\lambda} and weights \eqn{w_i}, let
+#' \deqn{S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2},}
+#' the weighted sum of squares that Deming regression minimises (Sadler, 2010,
+#' Eq. 11; Draper & Smith). With \eqn{\hat S} its minimum, the test of
+#' \eqn{(a_0, b_0)} is
+#' \deqn{F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat S / (n - 2)}}
+#' on F(2, n - 2), and the confidence region is the set of \eqn{(a, b)} where
+#' \eqn{F} does not exceed the critical value. No variance-covariance matrix
+#' is involved; only the error ratio (not the size of the errors) matters. The
+#' region is not an ellipse: for each slope its intercept limits have a closed
+#' form, and its slope limits are the roots of a quadratic, so `plot_joint()`
+#' draws it exactly. If the data are too imprecise for the slope to be bounded,
+#' the test is still reported but the region is not drawn.
+#'
+#' In simulations with normal errors (n = 10 to 100, narrow and wide ranges,
+#' error ratios 1 and 4, constant and proportional errors, and replicate data
+#' with the error ratio estimated), the Sadler test rejected a true null
+#' hypothesis 4.3-5.9% of the time at a nominal 5%. It was at least as
+#' powerful as the Wald test at the same size.
+#'
+#' The model frame must be stored (`dem_reg(model = TRUE)`, the default).
+#' `dem_reg(weighted = TRUE)` uses fixed weights computed from the data, while
+#' Sadler reweighted iteratively; the region uses the fitted model's weights.
+#'
+#' ## Wald ellipse
+#'
+#' `method = "wald"` computes the Mahalanobis distance between the estimated
+#' coefficients and the hypothesized values, using the variance-covariance
+#' matrix of the estimates, against 2 F(2, n - 2) (or chi-squared(2) with
+#' `test_method = "asymptotic"`).
+#'
+#' For Deming regression the matrix is the delete-one jackknife. This test is
+#' **liberal in small samples**: in the same simulations it rejected a true
+#' null 7.8-9.7% of the time at n = 10, about 7.4% at n = 20 and 6.1% at
+#' n = 50 (up to 14% with `test_method = "asymptotic"`), because the jackknife
+#' variance is itself unstable. Prefer the Sadler test for Deming fits.
+#'
+#' For Passing-Bablok regression the model must have been fitted with
+#' `replicates > 0` and `se_method = "bootstrap"` or `"jackknife"`. Both held
+#' 4.3-5.4% in simulations (n = 20 to 100). The Dufey (2020) matrix
+#' (`se_method = "dufey"`) is not used for joint tests: it rejected a true
+#' null 8-11% of the time.
 #'
 #' @references
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
 #' parametric regression in method-comparison studies. *Accreditation and Quality
 #' Assurance*, 15, 547-554.
+#'
+#' Draper, N.R., & Smith, H. (1966). *Applied Regression Analysis*. Wiley,
+#' New York.
+#'
+#' @examples
+#' data("reps")
+#' fit <- dem_reg(y ~ x, data = reps)
+#' joint_test(fit)
+#' plot_joint(fit)
+#'
+#' # The Wald ellipse from the jackknife variance-covariance matrix
+#' joint_test(fit, method = "wald")
 #'
 #' @export
 joint_test <- function(object, ...) {
@@ -1105,83 +1061,214 @@ joint_test <- function(object, ...) {
   UseMethod("joint_test")
 }
 
-#' @rdname joint_test
-#' @export
-joint_test.simple_eiv <- function(object,
-                                  ideal_intercept = 0,
-                                  ideal_slope = 1,
-                                  conf.level = 0.95,
-                                  test_method = c("F", "asymptotic"),
-                                  ...) {
+# Joint-test method: Sadler for Deming fits, Wald for Passing-Bablok fits
+.joint_method <- function(object, method, test_method_given, test_method) {
+  is_pb <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
+  if (is.null(method)) {
+    method <- if (is_pb) "wald" else "sadler"
+  } else {
+    method <- match.arg(method, c("sadler", "wald"))
+  }
+  if (is_pb && method == "sadler") {
+    stop("method = 'sadler' is only available for Deming regression (dem_reg()). ",
+         "Passing-Bablok fits use method = 'wald'.")
+  }
+  if (method == "sadler" && test_method_given && test_method == "asymptotic") {
+    stop("test_method applies only to method = 'wald'; ",
+         "the Sadler test always uses the F(2, n - 2) distribution.")
+  }
+  method
+}
 
-  # Validate conf.level
-
+# Shared checks and inputs for joint_test() and plot_joint()
+.joint_inputs <- function(object, conf.level, method, test_method) {
+  if (is.null(conf.level)) {
+    conf.level <- object$conf.level
+  }
   if (!is.numeric(conf.level) || length(conf.level) != 1 ||
       conf.level <= 0 || conf.level >= 1) {
     stop("'conf.level' must be a single number between 0 and 1")
   }
 
-  test_method <- match.arg(test_method)
+  coefs <- coef(object)
 
-  # Only pass df_residual when using the finite-sample F reference
-  df_res <- if (test_method == "F") object$df.residual else NULL
+  if (method == "sadler") {
+    return(list(
+      intercept = coefs[1],
+      slope = coefs[2],
+      conf.level = conf.level,
+      sadler = .sadler_setup(object)
+    ))
+  }
+
+  if (!is.null(object$error.ratio) && object$error.ratio != 1 &&
+      !is.null(object$method) && grepl("Passing-Bablok", object$method)) {
+    stop("This Passing-Bablok fit used error.ratio != 1, which biases the ",
+         "estimates; pb_reg() no longer supports it. Use dem_reg() instead.")
+  }
+
+  if (identical(object$se_method, "dufey")) {
+    stop("The Dufey (2020) variance-covariance matrix is not used for joint tests: ",
+         "in simulations the test rejected a true null hypothesis 8-11% of the ",
+         "time at a nominal 5%. Refit pb_reg() with se_method = 'bootstrap' or ",
+         "'jackknife' and replicates > 0.")
+  }
 
   # Extract variance-covariance matrix
   vcov_mat <- vcov(object)
 
   if (is.null(vcov_mat)) {
     stop("Variance-covariance matrix not available. ",
-         "For Passing-Bablok regression, refit with 'boot_ci = TRUE'.")
+         "For Passing-Bablok regression, refit with 'replicates' > 0 ",
+         "or se_method = 'dufey'.")
   }
-
-  # Check for invalid vcov matrix
 
   if (any(!is.finite(vcov_mat))) {
     stop("Cannot perform joint test: variance-covariance matrix contains non-finite values")
   }
 
-  # Extract coefficients
-  coefs <- coef(object)
-  intercept <- coefs[1]
-  slope <- coefs[2]
-
-  # Compute test using internal function
-  test_result <- .test_joint_enclosure(
-    intercept = intercept,
-    slope = slope,
+  list(
+    intercept = coefs[1],
+    slope = coefs[2],
     vcov = vcov_mat,
+    conf.level = conf.level,
+    # Only pass df_residual when using the finite-sample F reference
+    df_res = if (test_method == "F") object$df.residual else NULL
+  )
+}
+
+# Sadler (2010) sum-of-squares joint region for Deming regression.
+# S(a, b) = sum W_i(b) (y_i - a - b x_i)^2 with Deming weights
+# W_i(b) = w_i / (1 + lambda b^2), i.e. 1 / (var_y,i + b^2 var_x,i) up to a
+# constant that cancels. The Deming estimate minimises S. In weighted moments
+# about the weighted means (u = Sxx, q = Syy, p = Sxy, W = sum w),
+# S(a, b) = [W (a - ybar + b xbar)^2 + q - 2 b p + b^2 u] / (1 + lambda b^2).
+.sadler_setup <- function(object) {
+  df <- .get_simple_eiv_data(object)
+  x <- df$x
+  y <- df$y
+  w <- object$weights
+  if (is.null(w)) w <- rep(1, length(x))
+  W <- sum(w)
+  xm <- sum(w * x) / W
+  ym <- sum(w * y) / W
+  list(W = W, xm = xm, ym = ym,
+       u = sum(w * (x - xm)^2), q = sum(w * (y - ym)^2),
+       p = sum(w * (x - xm) * (y - ym)),
+       lambda = object$error.ratio, df = length(x) - 2)
+}
+
+.sadler_S <- function(s, a, b) {
+  (s$W * (a - s$ym + b * s$xm)^2 + s$q - 2 * b * s$p + b^2 * s$u) /
+    (1 + s$lambda * b^2)
+}
+
+# F = ((S(a0, b0) - S_hat) / 2) / (S_hat / (n - 2)) ~ F(2, n - 2)
+.sadler_test <- function(s, intercept, slope, ideal_intercept, ideal_slope,
+                         conf.level) {
+  s_hat <- unname(.sadler_S(s, intercept, slope))
+  s0 <- unname(.sadler_S(s, ideal_intercept, ideal_slope))
+  f_stat <- (max(s0 - s_hat, 0) / 2) / (s_hat / s$df)
+  f_crit <- qf(conf.level, 2, s$df)
+  list(statistic = f_stat,
+       critical_value = f_crit,
+       p_value = pf(f_stat, 2, s$df, lower.tail = FALSE),
+       is_enclosed = f_stat <= f_crit,
+       s_hat = s_hat)
+}
+
+# Region boundary S(a, b) = K, K = S_hat (1 + 2 F / (n - 2)). For fixed b,
+# a = ybar - b xbar +/- sqrt(g(b) / W) with
+# g(b) = K (1 + lambda b^2) - (q - 2 b p + b^2 u), a quadratic in b whose
+# roots are the slope limits. Returns NULL if the region is unbounded.
+.sadler_region <- function(s, s_hat, conf.level, n_points = 100) {
+  K <- s_hat * (1 + 2 * qf(conf.level, 2, s$df) / s$df)
+  A <- K * s$lambda - s$u
+  B <- 2 * s$p
+  C <- K - s$q
+  disc <- B^2 - 4 * A * C
+  if (!is.finite(A) || A >= 0 || disc <= 0) {
+    warning("The joint confidence region is unbounded in the slope ",
+            "(the data are too imprecise); it is not drawn.")
+    return(NULL)
+  }
+  b_lim <- sort((-B + c(-1, 1) * sqrt(disc)) / (2 * A))
+  n_half <- max(3, ceiling(n_points / 2))
+  b <- b_lim[1] + diff(b_lim) * (1 - cos(seq(0, pi, length.out = n_half))) / 2
+  half <- sqrt(pmax(A * b^2 + B * b + C, 0) / s$W)
+  centre <- s$ym - b * s$xm
+  data.frame(intercept = c(centre + half, rev(centre - half), centre[1] + half[1]),
+             slope = c(b, rev(b), b[1]))
+}
+
+# One joint test, either method; common fields for joint_test()/plot_joint()
+.joint_run <- function(inp, method, ideal_intercept, ideal_slope) {
+  if (method == "sadler") {
+    r <- .sadler_test(inp$sadler, inp$intercept, inp$slope,
+                      ideal_intercept, ideal_slope, inp$conf.level)
+    return(c(r, list(stat_name = "F", distribution = "F",
+                     df = c(df1 = 2L, df2 = as.integer(inp$sadler$df)))))
+  }
+  r <- .test_joint_enclosure(
+    intercept = inp$intercept,
+    slope = inp$slope,
+    vcov = inp$vcov,
     ideal_intercept = ideal_intercept,
     ideal_slope = ideal_slope,
-    conf.level = conf.level,
-    df_residual = df_res
+    conf.level = inp$conf.level,
+    df_residual = inp$df_res
   )
-
-  # Handle failure from internal function
-
-  if (is.null(test_result)) {
+  if (is.null(r)) {
     stop("Joint test computation failed. Check variance-covariance matrix.")
   }
+  list(statistic = r$mahalanobis_distance,
+       critical_value = r$critical_value,
+       p_value = r$p_value,
+       is_enclosed = r$is_enclosed,
+       stat_name = "X-squared",
+       distribution = r$distribution,
+       df = if (is.null(r$df_residual)) c(df = 2L) else
+         c(df1 = 2L, df2 = as.integer(r$df_residual)))
+}
+
+#' @rdname joint_test
+#' @export
+joint_test.simple_eiv <- function(object,
+                                  ideal_intercept = 0,
+                                  ideal_slope = 1,
+                                  conf.level = NULL,
+                                  test_method = c("F", "asymptotic"),
+                                  method = NULL,
+                                  ...) {
+
+  test_method_given <- !missing(test_method)
+  test_method <- match.arg(test_method)
+  method <- .joint_method(object, method, test_method_given, test_method)
+  inp <- .joint_inputs(object, conf.level, method, test_method)
+  intercept <- inp$intercept
+  slope <- inp$slope
+
+  test_result <- .joint_run(inp, method, ideal_intercept, ideal_slope)
 
   # Build htest object
   dname <- deparse(formula(object$terms))
 
   # Format null hypothesis string for method description
-  dist_label <- if (test_method == "F") "F-based" else "asymptotic chi-squared"
+  dist_label <- if (method == "sadler") {
+    "Sadler sum-of-squares, F-based"
+  } else if (test_method == "F") {
+    "Wald, F-based"
+  } else {
+    "Wald, asymptotic chi-squared"
+  }
   method_string <- sprintf(
     "Joint Confidence Region Test [%s] (H0: intercept = %g, slope = %g)",
     dist_label, ideal_intercept, ideal_slope
   )
 
-  statistic <- test_result$mahalanobis_distance
-  names(statistic) <- "X-squared"
-
-  if (test_method == "F") {
-    parameter <- c(2L, as.integer(test_result$df_residual))
-    names(parameter) <- c("df1", "df2")
-  } else {
-    parameter <- 2L
-    names(parameter) <- "df"
-  }
+  statistic <- test_result$statistic
+  names(statistic) <- test_result$stat_name
+  parameter <- test_result$df
 
   estimate <- c(intercept, slope)
   names(estimate) <- c("intercept", "slope")
@@ -1203,6 +1290,116 @@ joint_test.simple_eiv <- function(object,
     ),
     class = "htest"
   )
+}
+
+#' @rdname joint_test
+#' @export
+plot_joint <- function(x, ...) {
+  UseMethod("plot_joint")
+}
+
+#' @rdname joint_test
+#' @method plot_joint simple_eiv
+#' @export
+plot_joint.simple_eiv <- function(x,
+                                  ideal_intercept = 0,
+                                  ideal_slope = 1,
+                                  conf.level = NULL,
+                                  test_method = c("F", "asymptotic"),
+                                  show_intervals = TRUE,
+                                  n_points = 100,
+                                  method = NULL,
+                                  ...) {
+  object <- x
+  test_method_given <- !missing(test_method)
+  test_method <- match.arg(test_method)
+  method <- .joint_method(object, method, test_method_given, test_method)
+  inp <- .joint_inputs(object, conf.level, method, test_method)
+  est_slope <- inp$slope
+  est_intercept <- inp$intercept
+  conf.level <- inp$conf.level
+
+  # Test if ideal point enclosed
+  ideal_test <- .joint_run(inp, method, ideal_intercept, ideal_slope)
+
+  joint_region <- if (method == "sadler") {
+    .sadler_region(inp$sadler, ideal_test$s_hat, conf.level, n_points)
+  } else {
+    .compute_joint_region(
+      intercept = est_intercept,
+      slope = est_slope,
+      vcov = inp$vcov,
+      conf.level = conf.level,
+      n_points = n_points,
+      df_residual = inp$df_res
+    )
+  }
+
+  # Create base plot
+  p <- ggplot()
+  if (!is.null(joint_region)) {
+    # Joint confidence region (Sadler region or Wald ellipse)
+    p <- p +
+      geom_path(data = joint_region,
+                aes(x = slope, y = intercept),
+                color = "red",
+                linewidth = 1.2)
+  }
+  p <- p +
+    # Estimated point
+    geom_point(aes(x = est_slope, y = est_intercept),
+               size = 3,
+               color = "black") +
+    # Ideal point
+    geom_point(aes(x = ideal_slope, y = ideal_intercept),
+               size = 4,
+               shape = 4,
+               stroke = 1.5,
+               color = ifelse(ideal_test$is_enclosed, "darkgreen", "darkred")) +
+    labs(
+      title = "Joint Confidence Region",
+      subtitle = sprintf("%.0f%% confidence level | Identity %s by region",
+                         conf.level * 100,
+                         ifelse(ideal_test$is_enclosed, "ENCLOSED", "NOT enclosed")),
+      x = "Slope",
+      y = "Intercept",
+      caption = sprintf("%s: %s statistic = %.3f | critical value = %.3f | p = %.4f",
+                        if (method == "sadler") "Sadler sum-of-squares region"
+                        else "Wald ellipse",
+                        ideal_test$distribution,
+                        ideal_test$statistic,
+                        ideal_test$critical_value,
+                        ideal_test$p_value)
+    ) +
+    theme_bw() +
+    theme(plot.caption = element_text(hjust = 0))
+
+  # The marginal intervals are stored at the model's level only
+  if (show_intervals && !isTRUE(all.equal(conf.level, object$conf.level))) {
+    message("Marginal intervals not shown: they are at the model's level (",
+            object$conf.level * 100, "%), not ", conf.level * 100, "%.")
+    show_intervals <- FALSE
+  }
+
+  # Add confidence interval rectangle if requested
+  if (show_intervals) {
+    rect_df <- data.frame(
+      xmin = object$model_table$lower.ci[2],
+      xmax = object$model_table$upper.ci[2],
+      ymin = object$model_table$lower.ci[1],
+      ymax = object$model_table$upper.ci[1]
+    )
+
+    p <- p +
+      geom_rect(data = rect_df,
+                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                fill = "blue",
+                alpha = 0.1,
+                color = "blue",
+                linetype = "dashed")
+  }
+
+  return(p)
 }
 # internal -----
 #

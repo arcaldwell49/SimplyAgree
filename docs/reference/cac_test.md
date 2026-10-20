@@ -1,6 +1,6 @@
 # Chance-Corrected Agreement Coefficients for Categorical Ratings
 
-**\[experimental\]**
+**\[stable\]**
 
 Estimates and tests one agreement coefficient for categorical (nominal
 or ordinal) ratings of the same subjects by two or more raters: percent

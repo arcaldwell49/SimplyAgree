@@ -16,6 +16,7 @@ Imports:
     ggplot2,
     emmeans,
     lme4,
+    minqa,
     boot,
     stats,
     dplyr,

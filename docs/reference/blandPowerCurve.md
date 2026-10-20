@@ -1,7 +1,14 @@
 # Power Curve for Bland-Altman Limits of Agreement
 
-**\[maturing\]** This function calculates the power for the Bland-Altman
-method under varying parameter settings and for a range of sample sizes.
+**\[superseded\]**
+
+This function calculates the power for the Bland-Altman method under
+varying parameter settings and for a range of sample sizes. It is
+superseded by
+[`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md),
+which returns a `power.htest` object and can solve for the sample size,
+power, `delta` or the SD directly. This function remains available for
+drawing power curves.
 
 ## Usage
 

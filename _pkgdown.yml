@@ -70,15 +70,11 @@ reference:
   - agree_np
   - simple_agree-methods
 
-- subtitle: "Mixed"
-  contents:
-  - loa_lme
-  - loa_mermod-methods
-
 - title: "Power"
   desc: >
-    Fucntions for power calculations
+    Functions for power calculations
   contents:
+  - power_agreement_limit
   - blandPowerCurve
   - powerCurve-methods
   - agree_assurance
@@ -101,10 +97,12 @@ reference:
   - jmvdeming
   - jmvreli
 
-- title: "Defunct Functions"
+- title: "Deprecated Functions"
   desc: >
     Old functions that are no longer maintained; use with caution
   contents:
+  - loa_lme
+  - loa_mermod-methods
   - loa_mixed
   - loa_mixed_bs-methods
 

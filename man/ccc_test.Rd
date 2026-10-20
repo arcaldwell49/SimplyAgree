@@ -12,7 +12,10 @@ ccc_test(
   data_type = c("simple", "reps", "nest"),
   conf.level = 0.95,
   null.value = NULL,
-  alternative = c("two.sided", "greater", "less")
+  alternative = c("two.sided", "greater", "less"),
+  boot = FALSE,
+  boot_ci = c("stud", "perc", "bca"),
+  replicates = 999
 )
 }
 \arguments{
@@ -43,18 +46,30 @@ gives the estimate and interval without a test.}
 only when \code{null.value} is given (without a test the interval is
 two-sided); a one-sided alternative gives a one-sided interval, as in
 \code{\link[=icc_test]{icc_test()}}.}
+
+\item{boot}{If \code{TRUE}, use a nonparametric bootstrap that resamples
+subjects for the interval and p-value. Default \code{FALSE}. Available only
+for \code{data_type = "reps"}, where it is recommended with few subjects
+(fewer than about 30) or clearly non-normal data; see Details.}
+
+\item{boot_ci}{Bootstrap interval type: \code{"stud"} (studentized, default
+and recommended), \code{"perc"} (percentile) or \code{"bca"}. Used only when
+\code{boot = TRUE}.}
+
+\item{replicates}{Number of bootstrap replicates (default 999).}
 }
 \value{
 A list with class \code{c("ccc_htest", "htest")} containing the
 following components:
 \item{statistic}{The test statistic on the Fisher z scale (\code{Z} for
-simple data, \code{t} for reps/nest), when a test was requested.}
+simple data, \code{t} for reps/nest), when a test was requested (omitted with \code{boot = TRUE}).}
 \item{parameter}{When a test was requested: the number of pairs \code{n} for
 simple data, or the degrees of freedom \code{df} (number of subjects - 1) for
 reps/nest. The number of pairs or subjects is also in \code{settings$n}.}
 \item{stderr}{The standard errors for CCC and Z-transformed CCC (for
 reps/nest, the jackknife SE of z, and the SE of the CCC from it by the
-delta method).}
+delta method). With \code{boot = TRUE}, also \code{boot}: the standard deviation
+of the bootstrap estimates.}
 \item{p.value}{The p-value for the test, when a test was requested.}
 \item{conf.int}{A confidence interval for the CCC.}
 \item{estimate}{The estimated CCC.}
@@ -67,18 +82,36 @@ methods.}
 \item{components}{For simple data, Lin's decomposition: the Pearson
 correlation \code{r} (precision) and the bias correction factor \code{C_b}
 (accuracy), with CCC = r x C_b. \code{NULL} for reps/nest.}
+\item{jackknife}{For reps/nest, the delete-one-subject jackknife
+estimate of the small-sample bias: a list with \code{bias}
+((g - 1) times the mean leave-one-out estimate minus the estimate),
+\code{estimate_bc} (the bias-corrected CCC, estimate - bias, kept within
+-1 to 1) and \code{clamped} (\code{TRUE} when the correction went past 1 or -1).
+Not printed, and not used by the interval or test; see Details.
+\code{NULL} for simple data.}
 \item{settings}{The settings used, for the methods.}
+\item{boot}{Bootstrap details (\code{NULL} unless \code{boot = TRUE}): the
+interval type, the number of replicates requested, used and failed, and
+the bootstrap estimates.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
 hypothesis test, returning an object of class \code{"htest"}.
 }
 \details{
-The concordance correlation coefficient measures the agreement between two
-measurements of the same quantity. It combines measures of precision (Pearson
-correlation) and accuracy (bias correction factor) to determine how far the
-observed data deviate from the line of perfect concordance (45-degree line
-through the origin).
+The concordance correlation coefficient (CCC) quantifies agreement between
+two measurements of the same quantity. It is the product of a precision
+component (Pearson's correlation) and an accuracy component (the bias
+correction factor), and together these capture how far the observed data
+depart from the line of perfect concordance (the 45-degree line through the
+origin). Its purpose is closely related to that of \code{\link[=dem_reg]{dem_reg()}}. By analogy,
+Lin's CCC is to Pearson's r what Deming regression is to ordinary least
+squares. Deming regression estimates the
+relationship (slope and intercept) and asks whether it deviates from the
+line of identity, whereas
+the CCC summarizes that deviation in a single index.
 
 \strong{Simple data.} Lin's (1989) estimator and asymptotic standard error are
 used, from the complete pairs; these match \code{DescTools::CCC()} and
@@ -99,15 +132,52 @@ paired or equal in number. The estimate equals that of
 and each row is a matched pair). Lin's estimator is computed over all
 complete pairs, which keep their pairing.
 
-For both, the subject is the independent unit: the standard error of
+For both, the subject is the independent unit. The standard error of
 Fisher's z is a delete-one-subject jackknife, so it allows for the
 correlation of measurements within a subject. (Treating every pair as
 independent understates the standard error.) The interval and test use a
-t distribution with (number of subjects - 1) degrees of freedom. In
-simulations (10\% missing, 3-4 measurements per subject) 95\% intervals
-covered 94-95\% of the time with 20 or more subjects, but only 91-93\% with
-10 subjects, where the CCC is also biased downward; treat intervals from
-few subjects as approximate. At least 3 subjects are needed.
+t distribution with (number of subjects - 1) degrees of freedom. At least
+3 subjects are needed.
+
+In simulations (10, 20 or 50 subjects; 2, 3 or 6 measurements per
+subject; CCC 0.5 to 0.95; with and without a method difference and 15\%
+missing data), 95\% jackknife intervals covered about 93-95\% of the time
+with normal data, but only 88-91\% (replicate data) and 90-93\% (nested
+data) with skewed subject effects and heavy-tailed errors, at every
+number of subjects. Misses fall mostly above the interval: the CCC is
+biased downward with few subjects (by about 0.03-0.04 with 10 subjects).
+
+\strong{Bias.} The jackknife estimate of that bias, and the bias-corrected
+CCC, are kept in the \code{jackknife} element, and \code{summary()} mentions them
+when the bias is more than 0.01 or more than 10\% of the interval width.
+They are a guide, not a replacement for the estimate. In the simulations
+the correction removed 80-90\% of the average bias with 10 or 20 subjects,
+but the corrected value was closer to the true CCC in only 43-50\% of
+data sets, its root mean squared error was slightly larger (up to 28\%
+larger with non-normal data and 10 subjects), and with 10 subjects it
+went past 1 (and is then truncated) in about 5\% of replicate data sets.
+It is most useful when CCCs from several small studies are averaged,
+where the bias would otherwise accumulate. Centring the interval on the
+corrected value did not improve its coverage, so the interval and test
+use the uncorrected estimate.
+
+\strong{Bootstrap} (replicate data). With \code{boot = TRUE}, subjects are
+resampled with replacement (a subject drawn twice counts as two
+subjects) and the CCC is re-estimated. The studentized interval
+(\code{boot_ci = "stud"}) works on Fisher's z scale and divides each replicate
+by its own delete-one-subject jackknife standard error; the p-value
+inverts the interval (as in \code{\link[=icc_test]{icc_test()}}) and is approximate. In the
+simulations above it raised coverage with 10 subjects from 0.90 to 0.94
+(from 0.88 to 0.94 with non-normal data) and with 20 subjects from 0.92
+to 0.94, with intervals of about the same width, so \code{boot = TRUE} is a
+good idea for replicate data with few subjects. With non-normal data and
+6 replicates per subject some designs still covered only 0.88-0.89. The
+percentile and BCa intervals covered poorly (0.80-0.91 on average) and
+are offered only for comparison. Each replicate needs one model fit per
+subject (from the subjects' summary statistics rather than lme4), so the
+studentized bootstrap takes roughly 20 seconds with 10 subjects and a
+minute with 30 subjects at the default 999 replicates. For nested data
+no bootstrap interval improved on the jackknife.
 
 The confidence interval and the hypothesis test use Fisher's
 Z-transformation of the CCC:
@@ -148,6 +218,12 @@ ccc_test(x = "x", y = "y", data = reps,
 
 # Replicate data
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+
+# Replicate data with few subjects: studentized subject bootstrap
+\donttest{
+ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
+         boot = TRUE)
+}
 
 # Nested data
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")

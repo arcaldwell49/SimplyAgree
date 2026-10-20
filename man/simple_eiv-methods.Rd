@@ -9,8 +9,6 @@
 \alias{confint.simple_eiv}
 \alias{plot.simple_eiv}
 \alias{check.simple_eiv}
-\alias{plot_joint}
-\alias{plot_joint.simple_eiv}
 \alias{vcov.simple_eiv}
 \alias{coef.simple_eiv}
 \alias{fitted.simple_eiv}
@@ -40,18 +38,6 @@
 )
 
 \method{check}{simple_eiv}(x, data = NULL, ...)
-
-plot_joint(x, ...)
-
-\method{plot_joint}{simple_eiv}(
-  x,
-  ideal_slope = 1,
-  ideal_intercept = 0,
-  show_intervals = TRUE,
-  n_points = 100,
-  test_method = c("F", "asymptotic"),
-  ...
-)
 
 \method{vcov}{simple_eiv}(object, ...)
 
@@ -94,16 +80,7 @@ either a vector of numbers or a vector of names. If missing, all parameters are 
 
 \item{interval}{Type of interval calculation. Can be "none" (default), or "confidence"}
 
-\item{n_points}{Number of points to use for drawing the joint confidence region (default = 100).}
-
-\item{ideal_slope}{The hypothesized slope value to test against (default = 1)}
-
-\item{ideal_intercept}{The hypothesized intercept value to test against (default = 0)}
-
-\item{show_intervals}{Logical. If TRUE, shows individual confidence intervals as well.}
-
-\item{test_method}{Reference distribution for the ellipse and test. \code{"F"} (default)
-uses the finite-sample F(2, n-2) distribution. \code{"asymptotic"} uses chi-squared(2).}
+\item{n_points}{Number of points to use for drawing smooth interval bands (default = 100).}
 
 \item{type}{Type of residuals to return. Options are "optimized" (default), "x", "y", or "raw_y".}
 
@@ -120,7 +97,6 @@ available and this argument is ignored with a warning.}
 \item{\code{summary}}{Prints detailed summary.}
 \item{\code{plot}}{Returns a plot of the regression line and data.}
 \item{\code{check}}{Returns plots of residuals.}
-\item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
 \item{\code{predict}}{Predicts Y values for new X values.}
 \item{\code{fitted}}{Extracts fitted values.}
 \item{\code{residuals}}{Extracts residuals.}
@@ -130,4 +106,6 @@ available and this argument is ignored with a warning.}
 }
 \description{
 Methods defined for objects returned from error-in-variables models (e.g., \code{dem_reg}, \code{pb_reg}).
+The joint confidence region for the intercept and slope is tested with
+\code{\link[=joint_test]{joint_test()}} and plotted with \code{\link[=plot_joint]{plot_joint()}}.
 }

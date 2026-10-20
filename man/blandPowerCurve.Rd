@@ -39,8 +39,12 @@ Ignored when \code{m = 1}.}
 A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+It is superseded by \code{\link[=power_agreement_limit]{power_agreement_limit()}}, which returns a \code{power.htest}
+object and can solve for the sample size, power, \code{delta} or the SD directly.
+This function remains available for drawing power curves.
 }
 \details{
 Power follows the approximate method of Lu et al. (2016). With clustered

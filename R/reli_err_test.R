@@ -1,7 +1,7 @@
 #' Measurement Error Test
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' Estimates one measurement error statistic, the standard error of
 #' measurement (SEM), the standard error of estimate (SEE), or the standard

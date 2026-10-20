@@ -13,8 +13,11 @@ calculations for agreement (limits of agreement) studies:
 
 1.  **[`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)** -
     Exact agreement test ([Shieh 2019](#ref-shieh2019))
-2.  **[`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)** -
-    Bland-Altman power curves ([Lu et al. 2016](#ref-lu2016))
+2.  **[`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md)** -
+    Bland-Altman limits of agreement test ([Lu et al.
+    2016](#ref-lu2016))
+    ([`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+    for power curves)
 3.  **[`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md)** -
     Expected half-width criterion ([Jan and Shieh
     2018](#ref-JanShieh2018))
@@ -48,7 +51,7 @@ The methods divide into two categories:
 - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md) -
   Tests if central proportion, essentially tolerance intevals, are
   within the maximal allowable difference
-- [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md) -
+- [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md) -
   Tests if confidence intervals of limits of agreement fall within the
   maximal allowable difference
 
@@ -126,15 +129,66 @@ print(result)
 #>      n is the number of pairs. Two measurements per unit; one for each method.
 ```
 
-## Method 2: Bland-Altman Power Curves
+## Method 2: Bland-Altman Limits of Agreement
 
 ### Overview
 
-Calculates power curves using approximate Bland-Altman confidence
-intervals using the method of Lu et al. ([2016](#ref-lu2016)) (which is
-approximate). Useful for exploring power across sample sizes.
+Calculates power for the Bland-Altman approach: agreement is concluded
+when the confidence intervals of both limits of agreement (the
+approximate Bland-Altman intervals, as in
+`agreement_limit(loa_calc = "blandaltman")`) fall within \\\[-\delta,
+\delta\]\\. Power follows the method of Lu et al. ([2016](#ref-lu2016)),
+using their exact formula (eq. 5) as PASS does. Their Table 1 used an
+approximation and some of its sample sizes are slightly too large.
 
 ### Usage
+
+``` r
+
+power_agreement_limit(
+  n = NULL,                        # Sample size (pairs)
+  delta = NULL,                    # Maximal allowable difference
+  mu = 0,                          # Mean difference
+  sigma = NULL,                    # SD of differences
+  power = NULL,                    # Target power
+  conf.level = 0.95,               # CI confidence level
+  agree.level = 0.95,              # LOA agreement level
+  m = 1,                           # Paired measurements per subject
+  icc = 0                          # ICC of the differences (if m > 1)
+)
+```
+
+Specify three of `n`, `delta`, `sigma` and `power`.
+
+### Example: Sample Size
+
+``` r
+
+power_agreement_limit(delta = 7, mu = 0.5, sigma = 2.5, power = 0.80)
+#> 
+#>      Power for Bland-Altman Limits of Agreement (Lu et al. 2016) 
+#> 
+#>               n = 60
+#>           delta = 7
+#>              mu = 0.5
+#>           sigma = 2.5
+#>      conf.level = 0.95
+#>     agree.level = 0.95
+#>           power = 0.8059154
+#>               m = 1
+#>             icc = 0
+#>           n.obs = 60
+#> 
+#> NOTE: H0: CIs of the 95% limits of agreement not within [-delta, delta]
+#>      H1: CIs of the limits of agreement within [-delta, delta]
+#>      n is the number of pairs. Two measurements per unit; one for each method.
+```
+
+### Power Curves
+
+[`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
+(superseded) evaluates the same power over a range of sample sizes and
+settings, for plotting:
 
 ``` r
 
@@ -149,8 +203,6 @@ blandPowerCurve(
   icc = 0                          # ICC of the differences (if m > 1)
 )
 ```
-
-### Example: Power Curve
 
 ``` r
 
@@ -418,8 +470,10 @@ differences. Under that model:
 With `m = 1` the published methods are reproduced exactly. With `m > 1`,
 the expected half-width, assurance and power agree with simulation from
 this model to Monte Carlo error.
+[`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md)
+and
 [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md)
-uses a simpler Satterthwaite approximation, in keeping with the
+use a simpler Satterthwaite approximation, in keeping with the
 approximate method of Lu et al. ([2016](#ref-lu2016)).
 
 ### Why Not Just Inflate the Sample Size?

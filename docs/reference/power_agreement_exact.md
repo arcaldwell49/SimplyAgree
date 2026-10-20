@@ -1,6 +1,6 @@
 # Power Calculation for Exact Agreement/Tolerance Test
 
-**\[maturing\]**
+**\[stable\]**
 
 Computes sample size, power, or other parameters for the exact method of
 assessing agreement between two measurement methods, as described in

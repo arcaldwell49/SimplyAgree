@@ -25,77 +25,70 @@ testthat::test_that("errors", {
 
 })
 
-testthat::test_that("basic runs", {
-  powerCurve <- blandPowerCurve(samplesizes = seq(10, 100, 1),
-                                mu = 0.5,
-                                SD = 2.5,
-                                delta = 7,
-                                conf.level = .95,
-                                agree.level = .95)
-  p = plot(powerCurve)
+testthat::test_that("matches PASS 427 Example 1", {
+  # PASS Chapter 427, Example 1: delta = 7, mu = 0.5, SD = 2.5, 2.6, 2.7
+  pass <- data.frame(SD = c(2.5, 2.6, 2.7),
+                     N80 = c(60, 82, 118), pow80 = c(0.8059, 0.8019, 0.8024),
+                     N90 = c(78, 108, 156), pow90 = c(0.9014, 0.9003, 0.9002))
+  for (i in seq_len(nrow(pass))) {
+    powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
+                                  mu = 0.5,
+                                  SD = pass$SD[i],
+                                  delta = 7,
+                                  conf.level = .95,
+                                  agree.level = .95)
+    Ntest1 = find_n(powerCurve, power = .8)
+    Ntest2 = find_n(powerCurve, power = .9)
+    testthat::expect_equal(Ntest1$N, pass$N80[i])
+    testthat::expect_equal(round(Ntest1$power, 4), pass$pow80[i])
+    testthat::expect_equal(Ntest2$N, pass$N90[i])
+    testthat::expect_equal(round(Ntest2$power, 4), pass$pow90[i])
+  }
+  testthat::expect_s3_class(plot(powerCurve), "ggplot")
+})
 
-  Ntest1 = find_n(powerCurve, power = .8)
-  Ntest2 = find_n(powerCurve, power = .9)
-  testthat::expect_equivalent(Ntest1$N,
-                              60,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest1$power,
-                              .806,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$N,
-                              78,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$power,
-                              .901,
-                              tolerance = 0.001)
+testthat::test_that("matches PASS 427 Example 2 (Lu et al. 2016 Table 1)", {
+  # Lu et al. report n = 203; PASS shows n = 201 already reaches 0.8
+  pc <- blandPowerCurve(samplesizes = 200:203, mu = 0.2, SD = 1, delta = 2.5)
+  testthat::expect_equal(round(pc$power, 4),
+                         c(0.7983, 0.8003, 0.8023, 0.8042))
+  testthat::expect_equal(find_n(pc, power = 0.8)$N, 201)
+})
 
-  powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
-                                mu = 0.5,
-                                SD = 2.6,
-                                delta = 7,
-                                conf.level = .95,
-                                agree.level = .95)
-  p = plot(powerCurve)
+testthat::test_that("power matches Lu et al. (2016) eq. 5 in closed form", {
+  n <- c(15, 40, 120)
+  mu <- -0.3; SD <- 1.2; delta <- 3.5
+  conf.level <- 0.90; agree.level <- 0.80
+  z <- qnorm(1 - (1 - agree.level) / 2)
+  se <- SD * sqrt(1 / n + z^2 / (2 * (n - 1)))
+  tcrit <- qt(1 - (1 - conf.level) / 2, n - 1)
+  pow <- 1 - pt(tcrit, n - 1, (delta - mu - z * SD) / se) -
+    pt(tcrit, n - 1, (delta + mu - z * SD) / se)
+  pc <- blandPowerCurve(samplesizes = n, mu = mu, SD = SD, delta = delta,
+                        conf.level = conf.level, agree.level = agree.level)
+  testthat::expect_equal(pc$power, pow, tolerance = 1e-10)
+  testthat::expect_equal(names(pc),
+                         c("N", "mu", "SD", "delta", "power", "agree.level",
+                           "conf.level", "m", "icc"))
 
-  Ntest1 = find_n(powerCurve, power = .8)
-  Ntest2 = find_n(powerCurve, power = .9)
-  testthat::expect_equivalent(Ntest1$N,
-                              82,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest1$power,
-                              .801,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$N,
-                              108,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$power,
-                              .900,
-                              tolerance = 0.001)
+  # power is truncated at 0 when the true limits exceed delta
+  pc0 <- blandPowerCurve(samplesizes = 5:10, mu = 0, SD = 3, delta = 2)
+  testthat::expect_true(all(pc0$power == 0))
+})
 
-  powerCurve <- blandPowerCurve(samplesizes = seq(10, 200, 1),
-                                mu = 0.5,
-                                SD = 2.7,
-                                delta = 7,
-                                conf.level = .95,
-                                agree.level = .95)
-  p = plot(powerCurve)
+testthat::test_that("input validation", {
+  testthat::expect_error(blandPowerCurve(SD = 0, delta = 7), "'SD' must be positive")
+  testthat::expect_error(blandPowerCurve(SD = 1, delta = 7, conf.level = 1),
+                         "'conf.level'")
+  testthat::expect_error(blandPowerCurve(SD = 1, delta = 7, agree.level = 0),
+                         "'agree.level'")
+  testthat::expect_error(blandPowerCurve(samplesizes = c(1, 10), SD = 1,
+                                         delta = 7), "'samplesizes'")
+  testthat::expect_error(blandPowerCurve(samplesizes = 10.5, SD = 1,
+                                         delta = 7), "'samplesizes'")
+})
 
-  Ntest1 = find_n(powerCurve, power = .8)
-  Ntest2 = find_n(powerCurve, power = .9)
-  testthat::expect_equivalent(Ntest1$N,
-                              118,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest1$power,
-                              .802,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$N,
-                              156,
-                              tolerance = 0.001)
-  testthat::expect_equivalent(Ntest2$power,
-                              .900,
-                              tolerance = 0.001)
-
-  # issue on github
+testthat::test_that("small-scale data (GitHub issue)", {
   powerCurve <- blandPowerCurve(
     samplesizes = seq(2, 200, 1),
     mu = 0.001167,

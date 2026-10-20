@@ -1,7 +1,7 @@
 #' Intraclass Correlation Coefficient Test
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('stable')`
 #'
 #' Estimates one intraclass correlation coefficient (ICC), with a confidence
 #' interval and a test against a null value, and returns an object of class

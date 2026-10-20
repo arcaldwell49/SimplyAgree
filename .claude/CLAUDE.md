@@ -89,7 +89,7 @@ R/
 ├── tolerance_limit.R      # Tolerance intervals
 ├── dem_reg.R              # Deming regression
 ├── pb_reg.R               # Passing-Bablok regression
-├── loa_lme.R              # Mixed-effects LoA
+├── loa_lme.R              # Mixed-effects LoA (deprecated)
 ├── power_*.R              # Power/sample size functions
 ├── methods.*.R            # S3 methods by class
 ├── *_functions.R          # Internal helpers
@@ -241,4 +241,4 @@ Not extensively used, but consider for grouping related functions.
 ### Function Lifecycle
 - `agreement_limit()` - **Recommended** for new code
 - `agree_test()` - **Superseded** (works but not actively developed)
-- `loa_lme()` - Current; replaces deprecated `loa_mixed()`
+- `loa_lme()` - **Deprecated** (0.4.0); use `tolerance_limit(model = "lme")`. Replaced deprecated `loa_mixed()`

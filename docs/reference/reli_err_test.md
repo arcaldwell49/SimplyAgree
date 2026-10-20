@@ -1,6 +1,6 @@
 # Measurement Error Test
 
-**\[maturing\]**
+**\[experimental\]**
 
 Estimates one measurement error statistic, the standard error of
 measurement (SEM), the standard error of estimate (SEE), or the standard

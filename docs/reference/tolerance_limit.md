@@ -1,6 +1,6 @@
 # Tolerance Limits from an Agreement Study
 
-**\[maturing\]**
+**\[stable\]**
 
 A function for calculating tolerance limits for the difference between
 two measurements (difference = x-y). This is a procedure that should

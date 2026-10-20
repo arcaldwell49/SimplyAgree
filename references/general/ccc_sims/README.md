@@ -1,8 +1,6 @@
 # ccc_test() intervals for replicate and nested data: simulation plan
 
-Status (2026-10-19): **plan fixed, scripts written and checked, main runs not
-started.** The work is moving to another machine; the next step there is
-"How to run" below. Decisions follow the reliability redesign
+Status (2026-10-20): **runs complete; results below, decision pending.** Decisions follow the reliability redesign
 (`../reli_redesign.md`): criteria are set before running, and the user
 decides from the evidence.
 
@@ -133,4 +131,84 @@ because the stud stage also returns jk/perc/bca for them.
 
 ## Results
 
-Not yet run.
+Run 2026-10-19/20 on a 16-core Windows machine (14 workers): nest main 1
+min, nest stud 2.4 min, reps main 1.9 h, reps stud 6.9 h. Fidelity checks
+re-run first (fast REML vs lme4 max 5e-5; jk vs `ccc_test()` max 1.6e-4
+reps, exact nest). Per-cell results in `summary.csv`; raw RDS in
+`references/working/ccc_out/` (not tracked). Below, "cov pass" = share of
+cells with coverage in 92.5-97.5% and failures < 1%; "full pass" also needs
+both tails in 1.25-3.75%. Note stud has 500 sims per cell (MC SE ~1 point),
+so cells near 92.5% flip on noise.
+
+Mean coverage (cov pass / full pass) by g:
+
+| type | g | jk | perc | bca | stud |
+|---|---|---|---|---|---|
+| nest | 10 | .917 (44% / 1%) | .834 (0 / 0) | .849 (0 / 0) | .923 (44% / 18%) |
+| nest | 20 | .925 (63% / 3%) | .879 (0 / 0) | .885 (1% / 0) | .928 (68% / 17%) |
+| nest | 50 | .935 (74% / 31%) | .913 (38% / 1%) | .912 (36% / 24%) | .935 (75% / 47%) |
+| reps | 10 | .904 (31% / 3%) | .801 (0 / 0) | .824 (0 / 0) | .941 (85% / 44%) |
+| reps | 20 | .918 (50% / 15%) | .860 (0 / 0) | .874 (0 / 0) | .935 (67% / 32%) |
+| reps | 50 | .930 (56% / 35%) | .902 (19% / 1%) | .907 (25% / 11%) | .940 (92% / 50%)* |
+
+\* reps stud at g = 50 covers only the 12 k = 3, missing-data cells.
+
+Coverage by distribution (normal / non-normal):
+
+| type | g | jk | stud |
+|---|---|---|---|
+| nest | 10 | .931 / .903 | .933 / .913 |
+| nest | 20 | .937 / .913 | .934 / .923 |
+| nest | 50 | .946 / .925 | .943 / .928 |
+| reps | 10 | .928 / .881 | .945 / .937 |
+| reps | 20 | .941 / .895 | .943 / .926 |
+| reps | 50 | .946 / .914 | .948 / .931 |
+
+Findings:
+
+- **Percentile and BCa fail almost everywhere** and are worse than jk in
+  every slice (reps g = 10 percentile .80, 19% of misses above). The
+  subject bootstrap distribution of the CCC sits low (it adds the estimator's
+  downward bias a second time) and is too narrow; BCa misses on both sides.
+  Ruled out.
+- **jk**: fine with normal data at g >= 20 (.94); g = 10 normal is borderline
+  (.93 nest, .93 reps). With non-normal data it fails at every g (reps .88-.91,
+  nest .90-.93). Misses are lopsided: 4-10% above vs ~1.4% below, so it
+  almost never meets the tail criterion. The estimate is biased low (mean
+  bias -.040 reps / -.033 nest at g = 10; -.008 / -.006 at g = 50).
+- **stud**: for **reps** it fixes most of what jk gets wrong: +5.7 points at
+  g = 10 non-normal, +3.1 at g = 20, and cov pass in 85% of g = 10 cells vs
+  31% for jk. Tails are more balanced. Median width is within 2% of jk (it
+  moves the interval rather than widening it). For **nest** the gain is
+  small (+1 point non-normal, about 0 normal) and non-normal coverage stays
+  below 92.5% at g <= 20.
+- The cells where jk passes and stud fails (24 of 288 shared cells) have
+  stud coverage .910-.924, within ~1.5 MC SE of the bound.
+- Worst stud cells are all non-normal, mostly k = 6 (.87-.89, misses above):
+  more replicates do not help when subject effects are skewed and g is small.
+- Failures: none for jk/perc/stud; BCa up to 2.5% in one reps cell (z0
+  infinite).
+- The method-difference factor makes no material difference for any
+  interval (reps jk .918 vs .917; stud .939 vs .938), so the s2_method = 0
+  truncation is not a problem for coverage.
+
+Against the decision rule: stud passes where jk fails mainly for reps (g =
+10 and 20, especially non-normal) and does not clearly fail where jk passes.
+For nest no interval is a clear improvement.
+
+Cost if added to the package: stud needs an inner jackknife per resample
+(g fits x Bs resamples). With lme4 at ~20 ms per fit that is ~100 s at
+g = 10 and ~200 s at g = 20 with Bs = 499. The package has no compiled code;
+the pure-R REML in `fast_vc.R` (`.vc_dev`, no Rcpp) would avoid lme4 for the
+reps CCC.
+
+Decision (user, 2026-10-20): add an opt-in subject bootstrap to
+`ccc_test()` for `data_type = "reps"` only, following `icc_test()`
+(`boot = FALSE`, `boot_ci = "stud"` default with `"perc"`/`"bca"` for
+comparison, `replicates = 999`), documented as a good idea for replicate
+data with few subjects. Nested data keeps the jackknife-t with the
+limitation documented. Implemented in `R/ccc_boot.R`: a pure-R port of
+`fast_vc.R` (`.ccc_vc_fit()`, BOBYQA via minqa, rhoend 1e-7, inner
+jackknife warm-started at the replicate's theta; ~3.5-5.5 ms per fit, so
+~20 ms per studentized replicate at g = 10). Next: a bias-correction study
+for the small-g downward bias (see `../ccc_bias/` once started).

@@ -1,6 +1,6 @@
 #' Assurance Probability for Limits of Agreement
 #'
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('stable')`
 #'
 #' Calculate the sample size necessary for a confidence interval of the Bland-Altman
 #' range of agreement when the underlying data distribution is normal. This function

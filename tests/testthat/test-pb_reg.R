@@ -260,10 +260,14 @@ test_that("pb_reg default error.ratio is 1", {
   expect_equal(result$error.ratio, 1)
 })
 
-test_that("pb_reg warns about non-unit error.ratio", {
-  expect_warning(
+test_that("pb_reg errors on non-unit error.ratio", {
+  expect_error(
     pb_reg(Method2 ~ Method1, data = ncss_pb1, error.ratio = 2),
-    regexp = "error.ratio"
+    regexp = "supports only error.ratio = 1"
+  )
+  expect_error(
+    pb_reg(Method2 ~ Method1, data = ncss_pb1, error.ratio = c(1, 1)),
+    regexp = "supports only error.ratio = 1"
   )
 })
 
@@ -287,7 +291,11 @@ test_that("pb_reg works with replicate data", {
                    replicates = 99)
 
   expect_s3_class(result, "simple_eiv")
-  expect_true(is.numeric(result$error.ratio))
+  # Replicates are averaged; the error ratio is not estimated or used
+  expect_equal(result$error.ratio, 1)
+  expect_equal(nrow(result$model), 15)
+  means <- aggregate(cbind(x, y) ~ id, data = rep_data, FUN = mean)
+  expect_equal(sort(result$model$x), sort(means$x))
 })
 
 
@@ -575,9 +583,6 @@ test_that("pb_reg handles id as vector directly",
             expect_s3_class(result, "simple_eiv")
 
             expect_warning(pb_reg(y ~ x, data = rep_data, id = id_vector),
-                           "error.ratio != 1 or with case weights",
-                           fixed = TRUE)
-            expect_warning(pb_reg(y ~ x, data = rep_data, id = id_vector),
                            "'invariant' and 'scissors' methods",
                            fixed = TRUE)
           })
@@ -644,10 +649,11 @@ test_that("pb_reg errors when no valid slopes can be computed", {
 })
 
 # Weighted median in method 2 (invariant) - Line 533 -----------
-test_that("pb_reg uses weighted median in invariant method with error.ratio", {
+test_that("pb_reg uses weighted median in invariant method with case weights", {
+  wts <- rep(1, nrow(test_data)); wts[1:5] <- 2
   result <- pb_reg(method2 ~ method1, data = test_data,
                    method = "invariant",
-                   error.ratio = 2,
+                   weights = wts,
                    replicates = 100)
 
   expect_s3_class(result, "simple_eiv")
@@ -680,8 +686,8 @@ test_that("pb_reg computes weighted intercept with case weights", {
   expect_false(is.null(result$weights))
 })
 
-# dx near zero in pair weights - Lines 454-455 -----------
-test_that("pb_reg handles near-zero dx in pair weights",
+# dx near zero -----------
+test_that("pb_reg handles near-zero dx",
           {
             # Data with some very close x values
             close_data <- data.frame(
@@ -689,7 +695,8 @@ test_that("pb_reg handles near-zero dx in pair weights",
               y = c(1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9)
             )
 
-            result <- pb_reg(y ~ x, data = close_data, error.ratio = 2, replicates = 50)
+            result <- suppressWarnings(pb_reg(y ~ x, data = close_data,
+                                              replicates = 50))
             expect_s3_class(result, "simple_eiv")
           })
 
@@ -767,7 +774,6 @@ test_that("pb_reg handles case with no pair_weights and no case_weights", {
     x, y,
     method = 3,
     conf.level = 0.95,
-    pair_weights = NULL,
     case_weights = NULL
   )
 
@@ -874,8 +880,6 @@ test_that("pb_reg Dufey ignores replicates and needs no bootstrap warning", {
 test_that("pb_reg Dufey is restricted to unweighted scissors fits", {
   expect_error(pb_reg(Method2 ~ Method1, data = ncss_pb1, se_method = "dufey",
                       method = "symmetric"), "scissors")
-  expect_error(pb_reg(Method2 ~ Method1, data = ncss_pb1, se_method = "dufey",
-                      error.ratio = 2), "error.ratio")
   wts <- rep(1, nrow(ncss_pb1)); wts[1] <- 2
   expect_error(pb_reg(Method2 ~ Method1, data = ncss_pb1, se_method = "dufey",
                       weights = wts), "weights")
@@ -887,12 +891,12 @@ test_that("pb_reg analytic fit returns no vcov", {
   expect_null(result$vcov)
 })
 
-test_that("pb_reg resampling works with error.ratio and case weights", {
+test_that("pb_reg resampling works with case weights", {
   set.seed(77)
   wts <- rep(1, nrow(ncss_pb1)); wts[1:5] <- 2
   for (sm in c("bootstrap", "jackknife")) {
     result <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 25,
-                     error.ratio = 1.5, weights = wts, se_method = sm)
+                     weights = wts, se_method = sm)
     expect_true(all(is.finite(result$vcov)))
     expect_true(all(is.finite(result$model_table$lower.ci)))
   }
@@ -903,14 +907,33 @@ test_that("joint_test works for every pb_reg se_method", {
   fits <- list(
     pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 99),
     pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 99,
-           se_method = "jackknife"),
-    pb_reg(Method2 ~ Method1, data = ncss_pb1, se_method = "dufey")
+           se_method = "jackknife")
   )
   for (f in fits) {
     jt <- joint_test(f)
     expect_s3_class(jt, "htest")
+    expect_match(jt$method, "Wald")
     expect_true(jt$p.value > 0 && jt$p.value <= 1)
   }
+})
+
+test_that("joint_test and plot_joint refuse Dufey fits", {
+  fit <- pb_reg(Method2 ~ Method1, data = ncss_pb1, se_method = "dufey")
+  expect_error(joint_test(fit), "Dufey")
+  expect_error(plot_joint(fit), "Dufey")
+})
+
+test_that("joint_test refuses PB fits with error.ratio != 1 from older versions", {
+  set.seed(9)
+  fit <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 49)
+  fit$error.ratio <- 2
+  expect_error(joint_test(fit), "error.ratio != 1")
+})
+
+test_that("joint_test offers only the Wald test for PB fits", {
+  set.seed(9)
+  fit <- pb_reg(Method2 ~ Method1, data = ncss_pb1, replicates = 49)
+  expect_error(joint_test(fit, method = "sadler"), "only available for Deming")
 })
 
 
@@ -974,4 +997,18 @@ test_that("reject_h0 is not triggered by floating-point error on tied data", {
   expect_equal(mt$upper.ci[2], 1)
   expect_false(mt$reject_h0[2])
   expect_false(mt$reject_h0[1])
+})
+
+test_that("pb_reg id works when x or y has missing values", {
+  d <- data.frame(id = rep(1:6, each = 3),
+                  x = c(1, 1.2, 0.9, 2, 2.1, 1.9, 3, 3.2, NA, 4, 4.1, 3.8,
+                        5, 5.2, 4.9, 6, 6.1, 5.8),
+                  y = c(1.1, 1, 1.2, 2.2, NA, 2, 3.1, 3, 3.2, 4.1, 3.9, 4,
+                        5.2, 5, 5.1, 6.1, 6, 6.2))
+  fit <- suppressWarnings(pb_reg(y ~ x, data = d, id = "id"))
+  cc <- d[complete.cases(d), ]
+  means <- aggregate(cbind(x, y) ~ id, data = cc, FUN = mean)
+  expect_equal(nrow(fit$model), 6)
+  expect_equal(fit$model$x, means$x)
+  expect_equal(fit$model$y, means$y)
 })

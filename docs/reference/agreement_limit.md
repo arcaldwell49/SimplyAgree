@@ -1,6 +1,6 @@
 # Limits of Agreement
 
-**\[maturing\]**
+**\[stable\]**
 
 A function for calculating for Bland-Altman limits of agreement based on
 the difference between two measurements (difference = x-y). Please note

@@ -1,6 +1,8 @@
 #' Concordance Correlation Coefficient
 #'
 #' @description
+#' `r lifecycle::badge('experimental')`
+#'
 #' Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
 #' hypothesis test, returning an object of class \code{"htest"}.
 #'
@@ -24,17 +26,26 @@
 #'   only when `null.value` is given (without a test the interval is
 #'   two-sided); a one-sided alternative gives a one-sided interval, as in
 #'   [icc_test()].
+#' @param boot If `TRUE`, use a nonparametric bootstrap that resamples
+#'   subjects for the interval and p-value. Default `FALSE`. Available only
+#'   for `data_type = "reps"`, where it is recommended with few subjects
+#'   (fewer than about 30) or clearly non-normal data; see Details.
+#' @param boot_ci Bootstrap interval type: `"stud"` (studentized, default
+#'   and recommended), `"perc"` (percentile) or `"bca"`. Used only when
+#'   `boot = TRUE`.
+#' @param replicates Number of bootstrap replicates (default 999).
 #'
 #' @return A list with class \code{c("ccc_htest", "htest")} containing the
 #'   following components:
 #'   \item{statistic}{The test statistic on the Fisher z scale (`Z` for
-#'   simple data, `t` for reps/nest), when a test was requested.}
+#'   simple data, `t` for reps/nest), when a test was requested (omitted with `boot = TRUE`).}
 #'   \item{parameter}{When a test was requested: the number of pairs `n` for
 #'   simple data, or the degrees of freedom `df` (number of subjects - 1) for
 #'   reps/nest. The number of pairs or subjects is also in `settings$n`.}
 #'   \item{stderr}{The standard errors for CCC and Z-transformed CCC (for
 #'   reps/nest, the jackknife SE of z, and the SE of the CCC from it by the
-#'   delta method).}
+#'   delta method). With `boot = TRUE`, also `boot`: the standard deviation
+#'   of the bootstrap estimates.}
 #'   \item{p.value}{The p-value for the test, when a test was requested.}
 #'   \item{conf.int}{A confidence interval for the CCC.}
 #'   \item{estimate}{The estimated CCC.}
@@ -47,14 +58,30 @@
 #'   \item{components}{For simple data, Lin's decomposition: the Pearson
 #'   correlation `r` (precision) and the bias correction factor `C_b`
 #'   (accuracy), with CCC = r x C_b. `NULL` for reps/nest.}
+#'   \item{jackknife}{For reps/nest, the delete-one-subject jackknife
+#'   estimate of the small-sample bias: a list with `bias`
+#'   ((g - 1) times the mean leave-one-out estimate minus the estimate),
+#'   `estimate_bc` (the bias-corrected CCC, estimate - bias, kept within
+#'   -1 to 1) and `clamped` (`TRUE` when the correction went past 1 or -1).
+#'   Not printed, and not used by the interval or test; see Details.
+#'   `NULL` for simple data.}
 #'   \item{settings}{The settings used, for the methods.}
+#'   \item{boot}{Bootstrap details (`NULL` unless `boot = TRUE`): the
+#'   interval type, the number of replicates requested, used and failed, and
+#'   the bootstrap estimates.}
 #'
 #' @details
-#' The concordance correlation coefficient measures the agreement between two
-#' measurements of the same quantity. It combines measures of precision (Pearson
-#' correlation) and accuracy (bias correction factor) to determine how far the
-#' observed data deviate from the line of perfect concordance (45-degree line
-#' through the origin).
+#' The concordance correlation coefficient (CCC) quantifies agreement between
+#' two measurements of the same quantity. It is the product of a precision
+#' component (Pearson's correlation) and an accuracy component (the bias
+#' correction factor), and together these capture how far the observed data
+#' depart from the line of perfect concordance (the 45-degree line through the
+#' origin). Its purpose is closely related to that of [dem_reg()]. By analogy,
+#' Lin's CCC is to Pearson's r what Deming regression is to ordinary least
+#' squares. Deming regression estimates the
+#' relationship (slope and intercept) and asks whether it deviates from the
+#' line of identity, whereas
+#' the CCC summarizes that deviation in a single index.
 #'
 #' **Simple data.** Lin's (1989) estimator and asymptotic standard error are
 #' used, from the complete pairs; these match `DescTools::CCC()` and
@@ -75,15 +102,52 @@
 #' and each row is a matched pair). Lin's estimator is computed over all
 #' complete pairs, which keep their pairing.
 #'
-#' For both, the subject is the independent unit: the standard error of
+#' For both, the subject is the independent unit. The standard error of
 #' Fisher's z is a delete-one-subject jackknife, so it allows for the
 #' correlation of measurements within a subject. (Treating every pair as
 #' independent understates the standard error.) The interval and test use a
-#' t distribution with (number of subjects - 1) degrees of freedom. In
-#' simulations (10% missing, 3-4 measurements per subject) 95% intervals
-#' covered 94-95% of the time with 20 or more subjects, but only 91-93% with
-#' 10 subjects, where the CCC is also biased downward; treat intervals from
-#' few subjects as approximate. At least 3 subjects are needed.
+#' t distribution with (number of subjects - 1) degrees of freedom. At least
+#' 3 subjects are needed.
+#'
+#' In simulations (10, 20 or 50 subjects; 2, 3 or 6 measurements per
+#' subject; CCC 0.5 to 0.95; with and without a method difference and 15%
+#' missing data), 95% jackknife intervals covered about 93-95% of the time
+#' with normal data, but only 88-91% (replicate data) and 90-93% (nested
+#' data) with skewed subject effects and heavy-tailed errors, at every
+#' number of subjects. Misses fall mostly above the interval: the CCC is
+#' biased downward with few subjects (by about 0.03-0.04 with 10 subjects).
+#'
+#' **Bias.** The jackknife estimate of that bias, and the bias-corrected
+#' CCC, are kept in the `jackknife` element, and `summary()` mentions them
+#' when the bias is more than 0.01 or more than 10% of the interval width.
+#' They are a guide, not a replacement for the estimate. In the simulations
+#' the correction removed 80-90% of the average bias with 10 or 20 subjects,
+#' but the corrected value was closer to the true CCC in only 43-50% of
+#' data sets, its root mean squared error was slightly larger (up to 28%
+#' larger with non-normal data and 10 subjects), and with 10 subjects it
+#' went past 1 (and is then truncated) in about 5% of replicate data sets.
+#' It is most useful when CCCs from several small studies are averaged,
+#' where the bias would otherwise accumulate. Centring the interval on the
+#' corrected value did not improve its coverage, so the interval and test
+#' use the uncorrected estimate.
+#'
+#' **Bootstrap** (replicate data). With `boot = TRUE`, subjects are
+#' resampled with replacement (a subject drawn twice counts as two
+#' subjects) and the CCC is re-estimated. The studentized interval
+#' (`boot_ci = "stud"`) works on Fisher's z scale and divides each replicate
+#' by its own delete-one-subject jackknife standard error; the p-value
+#' inverts the interval (as in [icc_test()]) and is approximate. In the
+#' simulations above it raised coverage with 10 subjects from 0.90 to 0.94
+#' (from 0.88 to 0.94 with non-normal data) and with 20 subjects from 0.92
+#' to 0.94, with intervals of about the same width, so `boot = TRUE` is a
+#' good idea for replicate data with few subjects. With non-normal data and
+#' 6 replicates per subject some designs still covered only 0.88-0.89. The
+#' percentile and BCa intervals covered poorly (0.80-0.91 on average) and
+#' are offered only for comparison. Each replicate needs one model fit per
+#' subject (from the subjects' summary statistics rather than lme4), so the
+#' studentized bootstrap takes roughly 20 seconds with 10 subjects and a
+#' minute with 30 subjects at the default 999 replicates. For nested data
+#' no bootstrap interval improved on the jackknife.
 #'
 #' The confidence interval and the hypothesis test use Fisher's
 #' Z-transformation of the CCC:
@@ -140,6 +204,12 @@
 #' # Replicate data
 #' ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 #'
+#' # Replicate data with few subjects: studentized subject bootstrap
+#' \donttest{
+#' ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
+#'          boot = TRUE)
+#' }
+#'
 #' # Nested data
 #' ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 #'
@@ -163,11 +233,16 @@ ccc_test <- function(x,
                      data_type = c("simple", "reps", "nest"),
                      conf.level = 0.95,
                      null.value = NULL,
-                     alternative = c("two.sided", "greater", "less")) {
+                     alternative = c("two.sided", "greater", "less"),
+                     boot = FALSE,
+                     boot_ci = c("stud", "perc", "bca"),
+                     replicates = 999) {
 
   # Match arguments
   data_type <- match.arg(data_type)
   alternative <- match.arg(alternative)
+  boot_ci <- match.arg(boot_ci)
+  .check_boot_args(boot, replicates)
 
   # Validate conf.level
 
@@ -195,6 +270,10 @@ ccc_test <- function(x,
   id_vec <- prepared$id
   data_name <- prepared$data_name
   effective_data_type <- prepared$data_type
+  if (boot && effective_data_type != "reps") {
+    stop("boot = TRUE is available only for data_type = \"reps\".",
+         call. = FALSE)
+  }
   labels <- strsplit(data_name, " and ", fixed = TRUE)[[1]]
   x_label <- labels[1]
   y_label <- if (length(labels) > 1) labels[2] else "y"
@@ -233,6 +312,7 @@ ccc_test <- function(x,
     # CCC = precision (Pearson r) x accuracy (bias correction factor C_b)
     c_b <- unname(ccc_result$bias)
     components <- c(r = unname(ccc_est) / c_b, C_b = c_b)
+    jackknife <- NULL
 
   } else {
     df_wide <- data.frame(id = id_vec, x = x_vec, y = y_vec)
@@ -252,6 +332,7 @@ ccc_test <- function(x,
       "Concordance Correlation Coefficient (nested pairs)"
     }
     components <- NULL
+    jackknife <- clustered$jackknife
   }
 
   ccc_est <- unname(ccc_est)
@@ -274,6 +355,30 @@ ccc_test <- function(x,
                                          df = jack_df)
   }
 
+  # Subject bootstrap: replaces the interval and p-value; no test statistic
+  stderr <- c("SE CCC" = unname(sep), "SE Z" = se_z)
+  boot_info <- NULL
+  if (boot) {
+    bo <- .ccc_boot_reps(df_wide, R = replicates, boot_ci = boot_ci)
+    .check_boot_failures(bo)
+    ci <- .boot_interval(bo, boot_ci, conf.level, alternative,
+                         back = tanh, bounds = c(-1, 1))
+    test_result <- list(
+      z_stat = NULL,
+      p_value = if (is.null(null.value)) NULL else
+        .boot_pvalue(bo, boot_ci, null.value, alternative, fwd = atanh))
+    boot_info <- list(boot_ci = boot_ci,
+                      replicates = replicates,
+                      n_used = nrow(bo$t),
+                      n_failed = bo$n_failed,
+                      boot_se = stats::sd(bo$t[, "est"]),
+                      estimates = bo$t[, "est"])
+    stderr <- c(stderr, boot = boot_info$boot_se)
+    method <- paste0(method, " with nonparametric (subject) bootstrap ",
+                     .boot_ci_name(boot_ci), " interval")
+  }
+  tested <- !is.null(null.value) && !boot
+
   # Data kept for summary(), plot() and check()
   stored <- if (effective_data_type == "simple") {
     keep <- complete.cases(x_vec, y_vec)
@@ -284,21 +389,21 @@ ccc_test <- function(x,
 
   structure(
     list(
-      statistic = if (is.null(null.value)) {
+      statistic = if (!tested) {
         NULL
       } else if (is.null(jack_df)) {
         c(Z = test_result$z_stat)
       } else {
         c(t = test_result$z_stat)
       },
-      parameter = if (is.null(null.value)) {
+      parameter = if (!tested) {
         NULL
       } else if (is.null(jack_df)) {
         c(n = n_param)
       } else {
         c(df = jack_df)
       },
-      stderr = c("SE CCC" = unname(sep), "SE Z" = se_z),
+      stderr = stderr,
       p.value = test_result$p_value,
       conf.int = ci,
       estimate = c(CCC = ccc_est),
@@ -308,11 +413,15 @@ ccc_test <- function(x,
       data.name = data_name,
       data = stored,
       components = components,
+      jackknife = jackknife,
       settings = list(data_type = effective_data_type,
                       conf.level = conf.level,
                       n = n_param,
                       x_name = x_label,
-                      y_name = y_label)
+                      y_name = y_label,
+                      boot = boot,
+                      boot_ci = if (boot) boot_ci else NULL),
+      boot = boot_info
     ),
     class = c("ccc_htest", "htest")
   )
@@ -358,14 +467,29 @@ ccc_test <- function(x,
          if (data_type == "reps") "replicate" else "nested", " data")
   }
   est <- est_fun(df)
-  z_loo <- vapply(ids, function(i) atanh(est_fun(df[df$id != i, ,
-                                                     drop = FALSE])),
-                  numeric(1))
+  loo <- vapply(ids, function(i) est_fun(df[df$id != i, , drop = FALSE]),
+                numeric(1))
+  z_loo <- atanh(loo)
   se_z <- sqrt((g - 1) / g * sum((z_loo - mean(z_loo))^2))
   list(estimate = est,
        se = se_z * (1 - est^2),
        se_z = se_z,
-       n = g)
+       n = g,
+       jackknife = .ccc_jack_bias(est, loo))
+}
+
+# Internal helper: jackknife bias of the CCC from the leave-one-subject-out
+# estimates, bias = (g - 1) (mean(loo) - est), and the bias-corrected
+# estimate est - bias, kept in [-1, 1] (clamped = TRUE when it was outside).
+# Simulations (references/general/ccc_bias) found it removes most of the
+# average small-sample bias but is not closer to the truth in a single study.
+.ccc_jack_bias <- function(est, loo) {
+  g <- length(loo)
+  bias <- (g - 1) * (mean(loo) - est)
+  bc <- est - bias
+  list(bias = unname(bias),
+       estimate_bc = unname(min(max(bc, -1), 1)),
+       clamped = abs(bc) > 1)
 }
 
 # Internal helper: Lin's CCC (variances and covariance with denominator n)

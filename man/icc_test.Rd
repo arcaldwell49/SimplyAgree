@@ -103,7 +103,7 @@ A list of class \code{c("reli_htest", "htest")} containing:
 \item{boot}{Bootstrap details (\code{NULL} unless \code{boot = TRUE}).}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Estimates one intraclass correlation coefficient (ICC), with a confidence
 interval and a test against a null value, and returns an object of class

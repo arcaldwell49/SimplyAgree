@@ -9,11 +9,11 @@
 Development on agree_nest() is complete, and for new code we recommend
 switching to agreement_limit(), which is easier to use, has more features,
 and still under active development.
-agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics."><meta property="og:description" content="
+agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but the CCC is Lin's estimator over all complete pairs with a delete-one-subject jackknife standard error; see ccc_test()."><meta property="og:description" content="
 Development on agree_nest() is complete, and for new code we recommend
 switching to agreement_limit(), which is easier to use, has more features,
 and still under active development.
-agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+agree_nest produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but the CCC is Lin's estimator over all complete pairs with a delete-one-subject jackknife standard error; see ccc_test()."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -67,7 +67,7 @@ agree_nest produces an absolute agreement analysis for data where there is multi
 <p>Development on <code>agree_nest()</code> is complete, and for new code we recommend
 switching to <code><a href="agreement_limit.html">agreement_limit()</a></code>, which is easier to use, has more features,
 and still under active development.</p>
-<p><code>agree_nest</code> produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.</p>
+<p><code>agree_nest</code> produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but the CCC is Lin's estimator over all complete pairs with a delete-one-subject jackknife standard error; see <code><a href="ccc_test.html">ccc_test()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -134,7 +134,7 @@ and still under active development.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns single simple_agree class object with the results of the agreement analysis.</p><ul><li><p><code>loa</code>: A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.</p></li>
 <li><p><code>h0_test</code>: Decision from hypothesis test.</p></li>
-<li><p><code>ccc.xy</code>: Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.</p></li>
+<li><p><code>ccc.xy</code>: Lin's concordance correlation coefficient over all complete pairs and confidence intervals, as in <code>ccc_test(data_type = "nest")</code>.</p></li>
 <li><p><code>call</code>: the matched call.</p></li>
 <li><p><code>var_comp</code>: Table of Variance Components.</p></li>
 <li><p><code>class</code>: The type of simple_agree analysis.</p></li>
@@ -142,9 +142,7 @@ and still under active development.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.</p>
-<p>King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. Statistics in Medicine, 20, 2131:2147.</p>
-<p>King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.</p>
-<p>Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.</p>
+<p>Lin, L. I. (1989). A concordance correlation coefficient to evaluate reproducibility. Biometrics, 45(1), 255-268.</p>
     </div>
 
     <div class="section level2">
