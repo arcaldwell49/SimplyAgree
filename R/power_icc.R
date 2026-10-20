@@ -1,7 +1,7 @@
 #' Power and Sample Size for an Intraclass Correlation Test
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' Computes the power of the F test of an intraclass correlation
 #' coefficient (ICC) used by [icc_test()], or solves for the number of
@@ -265,7 +265,7 @@ power_icc <- function(n = NULL,
 #' Sample Size for the Precision of an Intraclass Correlation
 #'
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' Plans a reliability study so that the confidence interval for an
 #' intraclass correlation coefficient (ICC) from [icc_test()] is narrow

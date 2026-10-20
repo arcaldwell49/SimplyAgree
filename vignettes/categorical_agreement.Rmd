@@ -29,7 +29,7 @@ has_ordinal <- requireNamespace("ordinal", quietly = TRUE)
 
 # Background
 
-Many measurements are not numbers on a continuous scale but classifications:
+Many measurements are not numbers on a continuous scale but classifications. For example,
 a diagnosis (present or absent), a grade (1 to 5), or a severity rating
 (none, mild, moderate, severe). When several raters classify the same
 subjects, the question is how often they agree. For continuous measurements,
@@ -215,6 +215,9 @@ plot(res, type = "subjects")
 ```
 
 # Model-based kappa for many raters
+
+Below is a new experimental function based on the published work of @nelson2015 and
+@nelson2017.
 
 ## When to use it
 

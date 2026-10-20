@@ -64,7 +64,7 @@ An object of class \code{"power.htest"}, printed by
 \code{sig.level}, \code{power}, \code{alternative}, \code{method} and \code{note}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Computes the power of the F test of an intraclass correlation
 coefficient (ICC) used by \code{\link[=icc_test]{icc_test()}}, or solves for the number of

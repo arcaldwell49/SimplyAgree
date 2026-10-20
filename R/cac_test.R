@@ -1,6 +1,6 @@
 #' @title Chance-Corrected Agreement Coefficients for Categorical Ratings
 #' @description
-#' `r lifecycle::badge('experimental')`
+#' `r lifecycle::badge('stable')`
 #'
 #' Estimates and tests one agreement coefficient for categorical (nominal or
 #' ordinal) ratings of the same subjects by two or more raters: percent
@@ -36,7 +36,8 @@
 #'   two-sided.
 #'
 #' @details
-#' **Coefficients.** All four coefficients share the observed agreement
+#'
+#' All four coefficients share the observed agreement
 #' \eqn{p_a}, the proportion of agreeing pairs of ratings within subjects
 #' (weighted when `weights` is used), averaged over the subjects with two or
 #' more ratings. The chance-corrected coefficients are
@@ -47,14 +48,14 @@
 #' rater classifies at random and is stable in that situation (Gwet, 2008).
 #' Krippendorff's alpha also corrects for the number of pairs.
 #'
-#' **Inference.** Standard errors come from Gwet's (2008, 2014) linearisation
+#' Standard errors come from Gwet's (2008, 2014) linearisation
 #' over subjects, which treats the subjects as a random sample and the raters
 #' as fixed. The interval and test use the t distribution with n - 1 degrees
 #' of freedom (n subjects; for Krippendorff's alpha, those with 2 or more
 #' ratings), and limits are clipped to the possible range of the coefficient.
 #' These match the irrCAC package (with an infinite population).
 #'
-#' **Data.** Ratings may be numeric, character or factor. Subjects with no
+#' Ratings may be numeric, character or factor. Subjects with no
 #' ratings are dropped; subjects with one rating add to the category
 #' proportions but not to the observed agreement. Each subject can have at
 #' most one rating per rater.

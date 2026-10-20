@@ -433,12 +433,15 @@ test_that("joint_test.simple_eiv works for PB regression", {
   expect_type(jt, "list")
 })
 
-test_that("joint_test.simple_eiv accepts level parameter", {
-  jt_95 <- joint_test(dem_model, level = 0.95)
-  jt_90 <- joint_test(dem_model, level = 0.90)
+test_that("joint_test.simple_eiv accepts conf.level", {
+  jt_95 <- joint_test(dem_model, conf.level = 0.95)
+  jt_90 <- joint_test(dem_model, conf.level = 0.90)
 
-  expect_type(jt_95, "list")
-  expect_type(jt_90, "list")
+  expect_s3_class(jt_90, "htest")
+  # The p-value does not depend on the confidence level
+  expect_equal(jt_95$p.value, jt_90$p.value)
+  # The default is the level the model was fitted with
+  expect_equal(joint_test(dem_model)$p.value, jt_95$p.value)
 })
 
 test_that("joint_test.simple_eiv detects deviation from identity", {
@@ -753,6 +756,30 @@ test_that("plot_joint works with different ideal values", {
 test_that("plot_joint works without interval display", {
   p <- plot_joint(dem_fit, show_intervals = FALSE)
   expect_s3_class(p, "gg")
+})
+
+test_that("plot_joint takes ideal values in the same order as joint_test", {
+  p_pos <- plot_joint(dem_fit, 1, 0.9)
+  p_named <- plot_joint(dem_fit, ideal_intercept = 1, ideal_slope = 0.9)
+  expect_equal(p_pos$labels$caption, p_named$labels$caption)
+})
+
+test_that("plot_joint uses the model's level by default and accepts conf.level", {
+  expect_match(plot_joint(dem_fit)$labels$subtitle, "^95% confidence")
+
+  expect_message(p_90 <- plot_joint(dem_fit, conf.level = 0.90),
+                 "Marginal intervals not shown")
+  expect_match(p_90$labels$subtitle, "^90% confidence")
+  expect_length(p_90$layers, 3)
+  expect_no_message(plot_joint(dem_fit, conf.level = 0.90,
+                               show_intervals = FALSE))
+  expect_error(plot_joint(dem_fit, conf.level = 1), "between 0 and 1")
+})
+
+test_that("plot_joint errors when vcov not available", {
+  pb_no_vcov <- pb_reg(y ~ x, data = test_data)
+  expect_error(suppressWarnings(plot_joint(pb_no_vcov)),
+               "replicates")
 })
 
 

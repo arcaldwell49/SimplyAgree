@@ -1,6 +1,8 @@
 #' Methods for simple_eiv objects
 #'
 #' Methods defined for objects returned from error-in-variables models (e.g., `dem_reg`, `pb_reg`).
+#' The joint confidence region for the intercept and slope is tested with
+#' [joint_test()] and plotted with [plot_joint()].
 #'
 #' @param object,x object of class \code{simple_eiv} from dem_reg or pb_reg function.
 #' @param data Optional data frame. Required for methods like `plot()`, `fitted()`, `residuals()`,
@@ -13,7 +15,6 @@
 #'   \item{\code{summary}}{Prints detailed summary.}
 #'   \item{\code{plot}}{Returns a plot of the regression line and data.}
 #'   \item{\code{check}}{Returns plots of residuals.}
-#'   \item{\code{plot_joint}}{Returns plot of joint confidence region (Deming only).}
 #'   \item{\code{predict}}{Predicts Y values for new X values.}
 #'   \item{\code{fitted}}{Extracts fitted values.}
 #'   \item{\code{residuals}}{Extracts residuals.}
@@ -647,116 +648,6 @@ check.simple_eiv <- function(x, data = NULL, ...) {
 }
 
 #' @rdname simple_eiv-methods
-#' @export
-
-plot_joint <- function(x, ...) {
-  UseMethod("plot_joint")
-}
-
-#' @rdname simple_eiv-methods
-#' @method plot_joint simple_eiv
-#' @param ideal_slope The hypothesized slope value to test against (default = 1)
-#' @param ideal_intercept The hypothesized intercept value to test against (default = 0)
-#' @param show_intervals Logical. If TRUE, shows individual confidence intervals as well.
-#' @param n_points Number of points to use for drawing the joint confidence region (default = 100).
-#' @param test_method Reference distribution for the ellipse and test. \code{"F"} (default)
-#'   uses the finite-sample F(2, n-2) distribution. \code{"asymptotic"} uses chi-squared(2).
-#' @export
-plot_joint.simple_eiv <- function(x,
-                                  ideal_slope = 1,
-                                  ideal_intercept = 0,
-                                  show_intervals = TRUE,
-                                  n_points = 100,
-                                  test_method = c("F", "asymptotic"),
-                                  ...) {
-  object <- x
-  test_method <- match.arg(test_method)
-  df_res <- if (test_method == "F") object$df.residual else NULL
-
-  # Get estimates
-  est_slope <- object$coefficients[2]
-  est_intercept <- object$coefficients[1]
-  conf.level <- object$conf.level
-  # Get confidence intervals
-  ci_slope <- c(object$model_table$lower.ci[2], object$model_table$upper.ci[2])
-  ci_intercept <- c(object$model_table$lower.ci[1], object$model_table$upper.ci[1])
-
-  # Test if ideal point enclosed
-  ideal_test <- .test_joint_enclosure(
-    intercept = est_intercept,
-    slope = est_slope,
-    vcov = object$vcov,
-    ideal_intercept = ideal_intercept,
-    ideal_slope = ideal_slope,
-    conf.level = object$conf.level,
-    df_residual = df_res
-  )
-
-  joint_region <- .compute_joint_region(
-    intercept = est_intercept,
-    slope = est_slope,
-    vcov = vcov(object),
-    conf.level = conf.level,
-    n_points = n_points,
-    df_residual = df_res
-  )
-
-  # Create base plot
-  p <- ggplot() +
-    # Joint confidence region (ellipse)
-    geom_path(data = joint_region,
-              aes(x = slope, y = intercept),
-              color = "red",
-              linewidth = 1.2) +
-    # Estimated point
-    geom_point(aes(x = est_slope, y = est_intercept),
-               size = 3,
-               color = "black") +
-    # Ideal point
-    geom_point(aes(x = ideal_slope, y = ideal_intercept),
-               size = 4,
-               shape = 4,
-               stroke = 1.5,
-               color = ifelse(ideal_test$is_enclosed, "darkgreen", "darkred")) +
-    labs(
-      title = "Joint Confidence Region",
-      subtitle = sprintf("%.0f%% confidence level | Identity %s by region",
-                         object$conf.level * 100,
-                         ifelse(ideal_test$is_enclosed, "ENCLOSED", "NOT enclosed")),
-      x = "Slope",
-      y = "Intercept",
-      caption = sprintf("%s statistic = %.3f | critical value = %.3f | p = %.4f",
-                        ideal_test$distribution,
-                        ideal_test$mahalanobis_distance,
-                        ideal_test$critical_value,
-                        ideal_test$p_value)
-    ) +
-    theme_bw() +
-    theme(plot.caption = element_text(hjust = 0))
-
-  # Add confidence interval rectangle if requested
-  if (show_intervals) {
-    rect_df <- data.frame(
-      xmin = ci_slope[1],
-      xmax = ci_slope[2],
-      ymin = ci_intercept[1],
-      ymax = ci_intercept[2]
-    )
-
-    p <- p +
-      geom_rect(data = rect_df,
-                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-                fill = "blue",
-                alpha = 0.1,
-                color = "blue",
-                linetype = "dashed")
-  }
-
-  return(p)
-}
-
-
-#' @rdname simple_eiv-methods
 #' @method vcov simple_eiv
 #' @export
 
@@ -1053,23 +944,35 @@ predict.simple_eiv <- function(object,
 
 
 
-#' Joint Confidence Region Test for Method Agreement
+#' Joint Confidence Region for Intercept and Slope
 #'
-#' Tests whether the estimated intercept and slope jointly fall within a
-#' confidence region around specified ideal values (typically intercept=0
-#' and slope=1 for method comparison studies).
+#' @description
+#' `r lifecycle::badge('experimental')`
 #'
-#' @param object A `simple_eiv` object from `dem_reg()` or `pb_reg()`.
+#' `joint_test()` tests whether the estimated intercept and slope jointly fall
+#' within a confidence region around specified ideal values (typically
+#' intercept = 0 and slope = 1 for method comparison studies). `plot_joint()`
+#' draws that region, with the ideal point marked as enclosed or not.
+#'
+#' @param object,x A `simple_eiv` object from `dem_reg()` or `pb_reg()`.
 #' @param ideal_intercept The hypothesized intercept value (default: 0).
 #' @param ideal_slope The hypothesized slope value (default: 1).
-#' @param conf.level Confidence level for the test (default: 0.95).
-#' @param test_method Reference distribution for the test. \code{"F"} (default)
-#'   uses the finite-sample F(2, n-2) distribution per Sadler (2010).
-#'   \code{"asymptotic"} uses the chi-squared(2) distribution, which is the
-#'   large-sample approximation. The two converge for large n.
+#' @param conf.level Confidence level for the region and test. The default,
+#'   `NULL`, uses the level the model was fitted with (`object$conf.level`).
+#' @param test_method Reference distribution for the region and test.
+#'   \code{"F"} (default) uses the finite-sample F(2, n-2) distribution per
+#'   Sadler (2010). \code{"asymptotic"} uses the chi-squared(2) distribution,
+#'   which is the large-sample approximation. The two converge for large n.
+#' @param show_intervals Logical (`plot_joint()` only). If TRUE (default),
+#'   also shows the model's marginal confidence intervals as a rectangle. They
+#'   are shown only when `conf.level` matches the level the model was fitted
+#'   with.
+#' @param n_points Number of points used to draw the region (`plot_joint()`
+#'   only; default 100).
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return An object of class `htest` containing:
+#' @return `plot_joint()` returns a ggplot. `joint_test()` returns an object
+#'   of class `htest` containing:
 #' \describe{
 #'   \item{statistic}{The Mahalanobis distance.}
 #'   \item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
@@ -1091,13 +994,20 @@ predict.simple_eiv <- function(object,
 #' chi-squared(2) approximation for small samples.
 #'
 #' For Deming regression, the variance-covariance matrix is computed via
-#' jackknife. For Passing-Bablok regression, bootstrap resampling must have
-#' been performed (i.e., `boot_ci = TRUE` in the original call).
+#' jackknife. For Passing-Bablok regression, the model must have been fitted
+#' with `replicates > 0` (`se_method = "bootstrap"` or `"jackknife"`) or with
+#' `se_method = "dufey"`.
 #'
 #' @references
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
 #' parametric regression in method-comparison studies. *Accreditation and Quality
 #' Assurance*, 15, 547-554.
+#'
+#' @examples
+#' data("reps")
+#' fit <- dem_reg(y ~ x, data = reps)
+#' joint_test(fit)
+#' plot_joint(fit)
 #'
 #' @export
 joint_test <- function(object, ...) {
@@ -1105,55 +1015,64 @@ joint_test <- function(object, ...) {
   UseMethod("joint_test")
 }
 
-#' @rdname joint_test
-#' @export
-joint_test.simple_eiv <- function(object,
-                                  ideal_intercept = 0,
-                                  ideal_slope = 1,
-                                  conf.level = 0.95,
-                                  test_method = c("F", "asymptotic"),
-                                  ...) {
-
-  # Validate conf.level
-
+# Shared checks and inputs for joint_test() and plot_joint()
+.joint_inputs <- function(object, conf.level, test_method) {
+  if (is.null(conf.level)) {
+    conf.level <- object$conf.level
+  }
   if (!is.numeric(conf.level) || length(conf.level) != 1 ||
       conf.level <= 0 || conf.level >= 1) {
     stop("'conf.level' must be a single number between 0 and 1")
   }
-
-  test_method <- match.arg(test_method)
-
-  # Only pass df_residual when using the finite-sample F reference
-  df_res <- if (test_method == "F") object$df.residual else NULL
 
   # Extract variance-covariance matrix
   vcov_mat <- vcov(object)
 
   if (is.null(vcov_mat)) {
     stop("Variance-covariance matrix not available. ",
-         "For Passing-Bablok regression, refit with 'boot_ci = TRUE'.")
+         "For Passing-Bablok regression, refit with 'replicates' > 0 ",
+         "or se_method = 'dufey'.")
   }
-
-  # Check for invalid vcov matrix
 
   if (any(!is.finite(vcov_mat))) {
     stop("Cannot perform joint test: variance-covariance matrix contains non-finite values")
   }
 
-  # Extract coefficients
   coefs <- coef(object)
-  intercept <- coefs[1]
-  slope <- coefs[2]
+
+  list(
+    intercept = coefs[1],
+    slope = coefs[2],
+    vcov = vcov_mat,
+    conf.level = conf.level,
+    # Only pass df_residual when using the finite-sample F reference
+    df_res = if (test_method == "F") object$df.residual else NULL
+  )
+}
+
+#' @rdname joint_test
+#' @export
+joint_test.simple_eiv <- function(object,
+                                  ideal_intercept = 0,
+                                  ideal_slope = 1,
+                                  conf.level = NULL,
+                                  test_method = c("F", "asymptotic"),
+                                  ...) {
+
+  test_method <- match.arg(test_method)
+  inp <- .joint_inputs(object, conf.level, test_method)
+  intercept <- inp$intercept
+  slope <- inp$slope
 
   # Compute test using internal function
   test_result <- .test_joint_enclosure(
     intercept = intercept,
     slope = slope,
-    vcov = vcov_mat,
+    vcov = inp$vcov,
     ideal_intercept = ideal_intercept,
     ideal_slope = ideal_slope,
-    conf.level = conf.level,
-    df_residual = df_res
+    conf.level = inp$conf.level,
+    df_residual = inp$df_res
   )
 
   # Handle failure from internal function
@@ -1203,6 +1122,111 @@ joint_test.simple_eiv <- function(object,
     ),
     class = "htest"
   )
+}
+
+#' @rdname joint_test
+#' @export
+plot_joint <- function(x, ...) {
+  UseMethod("plot_joint")
+}
+
+#' @rdname joint_test
+#' @method plot_joint simple_eiv
+#' @export
+plot_joint.simple_eiv <- function(x,
+                                  ideal_intercept = 0,
+                                  ideal_slope = 1,
+                                  conf.level = NULL,
+                                  test_method = c("F", "asymptotic"),
+                                  show_intervals = TRUE,
+                                  n_points = 100,
+                                  ...) {
+  object <- x
+  test_method <- match.arg(test_method)
+  inp <- .joint_inputs(object, conf.level, test_method)
+  est_slope <- inp$slope
+  est_intercept <- inp$intercept
+  conf.level <- inp$conf.level
+
+  # Test if ideal point enclosed
+  ideal_test <- .test_joint_enclosure(
+    intercept = est_intercept,
+    slope = est_slope,
+    vcov = inp$vcov,
+    ideal_intercept = ideal_intercept,
+    ideal_slope = ideal_slope,
+    conf.level = conf.level,
+    df_residual = inp$df_res
+  )
+
+  joint_region <- .compute_joint_region(
+    intercept = est_intercept,
+    slope = est_slope,
+    vcov = inp$vcov,
+    conf.level = conf.level,
+    n_points = n_points,
+    df_residual = inp$df_res
+  )
+
+  # Create base plot
+  p <- ggplot() +
+    # Joint confidence region (ellipse)
+    geom_path(data = joint_region,
+              aes(x = slope, y = intercept),
+              color = "red",
+              linewidth = 1.2) +
+    # Estimated point
+    geom_point(aes(x = est_slope, y = est_intercept),
+               size = 3,
+               color = "black") +
+    # Ideal point
+    geom_point(aes(x = ideal_slope, y = ideal_intercept),
+               size = 4,
+               shape = 4,
+               stroke = 1.5,
+               color = ifelse(ideal_test$is_enclosed, "darkgreen", "darkred")) +
+    labs(
+      title = "Joint Confidence Region",
+      subtitle = sprintf("%.0f%% confidence level | Identity %s by region",
+                         conf.level * 100,
+                         ifelse(ideal_test$is_enclosed, "ENCLOSED", "NOT enclosed")),
+      x = "Slope",
+      y = "Intercept",
+      caption = sprintf("%s statistic = %.3f | critical value = %.3f | p = %.4f",
+                        ideal_test$distribution,
+                        ideal_test$mahalanobis_distance,
+                        ideal_test$critical_value,
+                        ideal_test$p_value)
+    ) +
+    theme_bw() +
+    theme(plot.caption = element_text(hjust = 0))
+
+  # The marginal intervals are stored at the model's level only
+  if (show_intervals && !isTRUE(all.equal(conf.level, object$conf.level))) {
+    message("Marginal intervals not shown: they are at the model's level (",
+            object$conf.level * 100, "%), not ", conf.level * 100, "%.")
+    show_intervals <- FALSE
+  }
+
+  # Add confidence interval rectangle if requested
+  if (show_intervals) {
+    rect_df <- data.frame(
+      xmin = object$model_table$lower.ci[2],
+      xmax = object$model_table$upper.ci[2],
+      ymin = object$model_table$lower.ci[1],
+      ymax = object$model_table$upper.ci[1]
+    )
+
+    p <- p +
+      geom_rect(data = rect_df,
+                aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                fill = "blue",
+                alpha = 0.1,
+                color = "blue",
+                linetype = "dashed")
+  }
+
+  return(p)
 }
 # internal -----
 #

@@ -3,7 +3,9 @@
 \name{joint_test}
 \alias{joint_test}
 \alias{joint_test.simple_eiv}
-\title{Joint Confidence Region Test for Method Agreement}
+\alias{plot_joint}
+\alias{plot_joint.simple_eiv}
+\title{Joint Confidence Region for Intercept and Slope}
 \usage{
 joint_test(object, ...)
 
@@ -11,13 +13,26 @@ joint_test(object, ...)
   object,
   ideal_intercept = 0,
   ideal_slope = 1,
-  conf.level = 0.95,
+  conf.level = NULL,
   test_method = c("F", "asymptotic"),
+  ...
+)
+
+plot_joint(x, ...)
+
+\method{plot_joint}{simple_eiv}(
+  x,
+  ideal_intercept = 0,
+  ideal_slope = 1,
+  conf.level = NULL,
+  test_method = c("F", "asymptotic"),
+  show_intervals = TRUE,
+  n_points = 100,
   ...
 )
 }
 \arguments{
-\item{object}{A \code{simple_eiv} object from \code{dem_reg()} or \code{pb_reg()}.}
+\item{object, x}{A \code{simple_eiv} object from \code{dem_reg()} or \code{pb_reg()}.}
 
 \item{...}{Additional arguments (currently unused).}
 
@@ -25,15 +40,25 @@ joint_test(object, ...)
 
 \item{ideal_slope}{The hypothesized slope value (default: 1).}
 
-\item{conf.level}{Confidence level for the test (default: 0.95).}
+\item{conf.level}{Confidence level for the region and test. The default,
+\code{NULL}, uses the level the model was fitted with (\code{object$conf.level}).}
 
-\item{test_method}{Reference distribution for the test. \code{"F"} (default)
-uses the finite-sample F(2, n-2) distribution per Sadler (2010).
-\code{"asymptotic"} uses the chi-squared(2) distribution, which is the
-large-sample approximation. The two converge for large n.}
+\item{test_method}{Reference distribution for the region and test.
+\code{"F"} (default) uses the finite-sample F(2, n-2) distribution per
+Sadler (2010). \code{"asymptotic"} uses the chi-squared(2) distribution,
+which is the large-sample approximation. The two converge for large n.}
+
+\item{show_intervals}{Logical (\code{plot_joint()} only). If TRUE (default),
+also shows the model's marginal confidence intervals as a rectangle. They
+are shown only when \code{conf.level} matches the level the model was fitted
+with.}
+
+\item{n_points}{Number of points used to draw the region (\code{plot_joint()}
+only; default 100).}
 }
 \value{
-An object of class \code{htest} containing:
+\code{plot_joint()} returns a ggplot. \code{joint_test()} returns an object
+of class \code{htest} containing:
 \describe{
 \item{statistic}{The Mahalanobis distance.}
 \item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
@@ -48,9 +73,12 @@ An object of class \code{htest} containing:
 }
 }
 \description{
-Tests whether the estimated intercept and slope jointly fall within a
-confidence region around specified ideal values (typically intercept=0
-and slope=1 for method comparison studies).
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+\code{joint_test()} tests whether the estimated intercept and slope jointly fall
+within a confidence region around specified ideal values (typically
+intercept = 0 and slope = 1 for method comparison studies). \code{plot_joint()}
+draws that region, with the ideal point marked as enclosed or not.
 }
 \details{
 The test computes the Mahalanobis distance between the estimated coefficients
@@ -60,8 +88,16 @@ is used (Sadler, 2010), which is more conservative than the asymptotic
 chi-squared(2) approximation for small samples.
 
 For Deming regression, the variance-covariance matrix is computed via
-jackknife. For Passing-Bablok regression, bootstrap resampling must have
-been performed (i.e., \code{boot_ci = TRUE} in the original call).
+jackknife. For Passing-Bablok regression, the model must have been fitted
+with \code{replicates > 0} (\code{se_method = "bootstrap"} or \code{"jackknife"}) or with
+\code{se_method = "dufey"}.
+}
+\examples{
+data("reps")
+fit <- dem_reg(y ~ x, data = reps)
+joint_test(fit)
+plot_joint(fit)
+
 }
 \references{
 Sadler, W.A. (2010). Joint parameter confidence regions improve the power of

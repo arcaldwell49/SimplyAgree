@@ -2,7 +2,7 @@
 #'
 #' @description
 #'
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('stable')`
 #'
 #' Computes sample size, power, or other parameters for the exact method of
 #' assessing agreement between two measurement methods, as described in

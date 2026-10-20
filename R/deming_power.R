@@ -201,7 +201,7 @@ deming_power_sim <- function(n_sims = 1000,
 #'
 #' @description
 #'
-#' #' `r lifecycle::badge('experimental')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' Automatically determines the minimum sample size needed to achieve target statistical
 #' power for detecting specified bias in method comparison studies using Deming regression.

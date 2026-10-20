@@ -74,7 +74,7 @@ categories, the weight matrix, and the numbers of subjects and raters.}
 \item{settings}{The settings used, for the methods.}
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Estimates and tests one agreement coefficient for categorical (nominal or
 ordinal) ratings of the same subjects by two or more raters: percent

@@ -1,6 +1,8 @@
 #' Concordance Correlation Coefficient
 #'
 #' @description
+#' `r lifecycle::badge('experimental')`
+#'
 #' Computes Lin's Concordance Correlation Coefficient (CCC) and performs a
 #' hypothesis test, returning an object of class \code{"htest"}.
 #'
