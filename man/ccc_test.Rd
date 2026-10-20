@@ -47,11 +47,14 @@ two-sided); a one-sided alternative gives a one-sided interval, as in
 \value{
 A list with class \code{c("ccc_htest", "htest")} containing the
 following components:
-\item{statistic}{The Z-statistic (Fisher-transformed), when a test was
-requested.}
-\item{parameter}{The sample size (n for simple data, number of subjects
-for reps/nest), when a test was requested.}
-\item{stderr}{The standard errors for CCC and Z-transformed CCC.}
+\item{statistic}{The test statistic on the Fisher z scale (\code{Z} for
+simple data, \code{t} for reps/nest), when a test was requested.}
+\item{parameter}{When a test was requested: the number of pairs \code{n} for
+simple data, or the degrees of freedom \code{df} (number of subjects - 1) for
+reps/nest. The number of pairs or subjects is also in \code{settings$n}.}
+\item{stderr}{The standard errors for CCC and Z-transformed CCC (for
+reps/nest, the jackknife SE of z, and the SE of the CCC from it by the
+delta method).}
 \item{p.value}{The p-value for the test, when a test was requested.}
 \item{conf.int}{A confidence interval for the CCC.}
 \item{estimate}{The estimated CCC.}
@@ -77,8 +80,34 @@ correlation) and accuracy (bias correction factor) to determine how far the
 observed data deviate from the line of perfect concordance (45-degree line
 through the origin).
 
-For simple paired data, Lin's original method is used. For replicate or nested
-data, U-statistics are employed following King, Chinchilli, and Carrasco.
+\strong{Simple data.} Lin's (1989) estimator and asymptotic standard error are
+used, from the complete pairs; these match \code{DescTools::CCC()} and
+\code{epiR::epi.ccc()} (with \code{ci = "z-transform"}).
+
+\strong{Replicate data} (\code{"reps"}; the true value is constant within a
+subject). The CCC is estimated from variance components (Carrasco &
+Jover, 2003): a linear mixed model with a fixed method effect and random
+subject and subject-by-method effects, fit by REML, gives
+\deqn{CCC = \frac{\sigma^2_{s}}{\sigma^2_{s} + \sigma^2_{sm} +
+\sigma^2_{m} + \sigma^2_{e}}}
+where \eqn{\sigma^2_{m}} is the variance between the method means. All
+measurements are used, so the replicates of the two methods need not be
+paired or equal in number. The estimate equals that of
+\code{cccrm::ccc_vc(int = TRUE)}.
+
+\strong{Nested data} (\code{"nest"}; the true value may change within a subject,
+and each row is a matched pair). Lin's estimator is computed over all
+complete pairs, which keep their pairing.
+
+For both, the subject is the independent unit: the standard error of
+Fisher's z is a delete-one-subject jackknife, so it allows for the
+correlation of measurements within a subject. (Treating every pair as
+independent understates the standard error.) The interval and test use a
+t distribution with (number of subjects - 1) degrees of freedom. In
+simulations (10\% missing, 3-4 measurements per subject) 95\% intervals
+covered 94-95\% of the time with 20 or more subjects, but only 91-93\% with
+10 subjects, where the CCC is also biased downward; treat intervals from
+few subjects as approximate. At least 3 subjects are needed.
 
 The confidence interval and the hypothesis test use Fisher's
 Z-transformation of the CCC:
@@ -87,9 +116,12 @@ By default (\code{null.value = NULL}) no test is done.
 
 \strong{Relation to the ICC.} For two methods, the CCC is close to the
 absolute-agreement intraclass correlation, ICC(A,1)
-(\code{icc_test(type = "agreement")}); Lin's estimator uses n rather than
-n - 1 in the variances, and the difference vanishes as n grows
-(Nickerson, 1997; Carrasco & Jover, 2003). \code{ccc_test()} is meant for
+(\code{icc_test(type = "agreement")}). Lin's estimator (simple and nested data)
+uses n rather than n - 1 in the variances and covariance, as Lin (1989)
+defined it and as other software computes it, so it is slightly below the
+ICC in small samples; the difference vanishes as n grows (Nickerson, 1997;
+Carrasco & Jover, 2003). The variance-components estimator (replicate
+data) uses REML variance components and so corresponds to the ICC form. \code{ccc_test()} is meant for
 method-comparison (agreement) studies; \code{\link[=icc_test]{icc_test()}} for reliability
 studies (see its "Choosing the form" and "Related coefficients"
 sections).
@@ -131,6 +163,9 @@ check(res)
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268.
 
+Lin, L. I. (2000). A note on the concordance correlation coefficient.
+Biometrics, 56(1), 324-325.
+
 Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
 concordance correlation coefficient through variance components.
 Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
@@ -138,13 +173,6 @@ Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
 Nickerson, C. A. E. (1997). A note on "A concordance correlation
 coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
 \doi{10.2307/2533516}
-
-King, T. S., & Chinchilli, V. M. (2001). A generalized concordance correlation
-coefficient for continuous and categorical data. Statistics in Medicine,
-20(14), 2131-2147.
-
-King, T. S., Chinchilli, V. M., & Carrasco, J. L. (2007). A repeated measures
-concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.
 }
 \seealso{
 \link{ccc_htest-methods}, \code{\link[=icc_test]{icc_test()}}, \code{\link[=agreement_limit]{agreement_limit()}}

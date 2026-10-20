@@ -38,7 +38,7 @@
 #' two measurements are bivariate normal, and points far above the line
 #' suggest they are not. For replicate or nested data the linearity test
 #' uses all pairs, which are correlated within subjects, so its p-value is
-#' approximate; the U-statistic standard error makes few distributional
+#' approximate; the jackknife standard error makes few distributional
 #' assumptions, so these panels mainly help interpret the CCC.
 #'
 #' @return
@@ -54,6 +54,10 @@
 #' @references
 #' Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 #' reproducibility. Biometrics, 45(1), 255-268. \doi{10.2307/2532051}
+#'
+#' Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+#' concordance correlation coefficient through variance components.
+#' Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
 #'
 #' Ramsey, J. B. (1969). Tests for specification errors in classical linear
 #' least-squares regression analysis. Journal of the Royal Statistical
@@ -164,11 +168,15 @@ check.ccc_htest <- function(x, ...) {
            ") and accuracy (bias correction factor C_b = ",
            .fmt_num(comp[["C_b"]]), "), CCC = r x C_b.")
   } else {
+    how <- if (s$data_type == "reps") {
+      paste0("replicate measurements, estimated from variance components ",
+             "(Carrasco & Jover, 2003)")
+    } else {
+      "nested measurements, Lin's estimator over all complete pairs"
+    }
     paste0("The estimate is the concordance correlation coefficient between ",
-           pair, " for ", if (s$data_type == "reps") "replicate" else "nested",
-           " measurements, estimated by U-statistics (King, Chinchilli & ",
-           "Carrasco, 2007): how closely the measurements fall on the line ",
-           "of identity.")
+           pair, " for ", how, ": how closely the measurements fall on the ",
+           "line of identity.")
   }
 }
 
@@ -193,7 +201,10 @@ check.ccc_htest <- function(x, ...) {
            "standard error, which assumes the two measurements are ",
            "bivariate normal")
   } else {
-    "Fisher's z transformation with the U-statistic standard error"
+    paste0("Fisher's z transformation with a delete-one-subject jackknife ",
+           "standard error, which treats subjects, not measurements, as ",
+           "independent, and a t distribution with ", s$n - 1,
+           " degrees of freedom")
   }
   paste0(what, " ", how, ".")
 }

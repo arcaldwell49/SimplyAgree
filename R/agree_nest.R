@@ -8,7 +8,7 @@
 #' switching to `agreement_limit()`, which is easier to use, has more features,
 #' and still under active development.
 #'
-#' `agree_nest` produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but CCC is calculated via U-statistics.
+#' `agree_nest` produces an absolute agreement analysis for data where there is multiple observations per subject but the mean varies within subjects as described by Zou (2013). Output mirrors that of agree_test but the CCC is Lin's estimator over all complete pairs with a delete-one-subject jackknife standard error; see [ccc_test()].
 #' @param x Name of column with first measurement
 #' @param y Name of other column with the other measurement to compare to the first.
 #' @param id Column with subject identifier
@@ -23,7 +23,7 @@
 #'
 #'   - `loa`: A data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.
 #'   - `h0_test`: Decision from hypothesis test.
-#'   - `ccc.xy`: Lin's concordance correlation coefficient and confidence intervals using U-statistics. Warning: if underlying value varies this estimate will be inaccurate.
+#'   - `ccc.xy`: Lin's concordance correlation coefficient over all complete pairs and confidence intervals, as in `ccc_test(data_type = "nest")`.
 #'   - `call`: the matched call.
 #'   - `var_comp`: Table of Variance Components.
 #'   - `class`: The type of simple_agree analysis.
@@ -34,11 +34,7 @@
 #' @references
 #' Zou, G. Y. (2013). Confidence interval estimation for the Bland–Altman limits of agreement with multiple observations per individual. Statistical methods in medical research, 22(6), 630-642.
 #'
-#' King, TS and Chinchilli, VM. (2001). A generalized concordance correlation coefficient for continuous and categorical data. Statistics in Medicine, 20, 2131:2147.
-#'
-#' King, TS; Chinchilli, VM; Carrasco, JL. (2007). A repeated measures concordance correlation coefficient. Statistics in Medicine, 26, 3095:3113.
-#'
-#' Carrasco, JL; Phillips, BR; Puig-Martinez, J; King, TS; Chinchilli, VM. (2013). Estimation of the concordance correlation coefficient for repeated measures using SAS and R. Computer Methods and Programs in Biomedicine, 109, 293-304.
+#' Lin, L. I. (1989). A concordance correlation coefficient to evaluate reproducibility. Biometrics, 45(1), 255-268.
 #' @importFrom stats pnorm qnorm lm dchisq qchisq sd var
 #' @importFrom tidyselect all_of
 #' @importFrom tidyr drop_na pivot_longer
@@ -82,21 +78,15 @@ agree_nest <- function(x,
     select(id,x,y) %>%
     drop_na()
 
-  df_long = df %>%
-    pivot_longer(!id,
-                 names_to = "method",
-                 values_to = "measure")
-
   if(ccc){
-  ccc_nest = cccUst(dataset = df_long,
-                    ry = "measure",
-                    rmet = "method",
-                    cl = conf.level)
+  ccc_nest = .ccc_clustered(as.data.frame(df), "nest")
+  ccc_ci = .ccc_ci(ccc_nest$estimate, ccc_nest$se_z, conf.level, "two.sided",
+                   df = ccc_nest$n - 1)
 
-  ccc.xy = data.frame(est.ccc = ccc_nest[1],
-                      lower.ci = ccc_nest[2],
-                      upper.ci = ccc_nest[3],
-                      SE = ccc_nest[4])
+  ccc.xy = data.frame(est.ccc = ccc_nest$estimate,
+                      lower.ci = ccc_ci[1],
+                      upper.ci = ccc_ci[2],
+                      SE = ccc_nest$se)
   } else{
     ccc.xy = data.frame(est.ccc = NA,
                         lower.ci = NA,

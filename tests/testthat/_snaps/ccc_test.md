@@ -19,12 +19,14 @@
     Code
       summary(ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps"))
     Output
-      The estimated CCC was 0.107 (95% compatibility interval [-0.160,
-      0.359]). Values in this interval are the most compatible with the data,
+      The estimated CCC was 0.434 (95% compatibility interval [-0.904,
+      0.984]). Values in this interval are the most compatible with the data,
       given the model and its assumptions. The estimate is the concordance
       correlation coefficient between x and y for replicate measurements,
-      estimated by U-statistics (King, Chinchilli & Carrasco, 2007): how
+      estimated from variance components (Carrasco & Jover, 2003): how
       closely the measurements fall on the line of identity. The data had 4
       subjects (20 measurements of x and 18 of y). The interval uses Fisher's
-      z transformation with the U-statistic standard error.
+      z transformation with a delete-one-subject jackknife standard error,
+      which treats subjects, not measurements, as independent, and a t
+      distribution with 3 degrees of freedom.
 

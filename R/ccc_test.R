@@ -27,11 +27,14 @@
 #'
 #' @return A list with class \code{c("ccc_htest", "htest")} containing the
 #'   following components:
-#'   \item{statistic}{The Z-statistic (Fisher-transformed), when a test was
-#'   requested.}
-#'   \item{parameter}{The sample size (n for simple data, number of subjects
-#'   for reps/nest), when a test was requested.}
-#'   \item{stderr}{The standard errors for CCC and Z-transformed CCC.}
+#'   \item{statistic}{The test statistic on the Fisher z scale (`Z` for
+#'   simple data, `t` for reps/nest), when a test was requested.}
+#'   \item{parameter}{When a test was requested: the number of pairs `n` for
+#'   simple data, or the degrees of freedom `df` (number of subjects - 1) for
+#'   reps/nest. The number of pairs or subjects is also in `settings$n`.}
+#'   \item{stderr}{The standard errors for CCC and Z-transformed CCC (for
+#'   reps/nest, the jackknife SE of z, and the SE of the CCC from it by the
+#'   delta method).}
 #'   \item{p.value}{The p-value for the test, when a test was requested.}
 #'   \item{conf.int}{A confidence interval for the CCC.}
 #'   \item{estimate}{The estimated CCC.}
@@ -53,8 +56,34 @@
 #' observed data deviate from the line of perfect concordance (45-degree line
 #' through the origin).
 #'
-#' For simple paired data, Lin's original method is used. For replicate or nested
-#' data, U-statistics are employed following King, Chinchilli, and Carrasco.
+#' **Simple data.** Lin's (1989) estimator and asymptotic standard error are
+#' used, from the complete pairs; these match `DescTools::CCC()` and
+#' `epiR::epi.ccc()` (with `ci = "z-transform"`).
+#'
+#' **Replicate data** (`"reps"`; the true value is constant within a
+#' subject). The CCC is estimated from variance components (Carrasco &
+#' Jover, 2003): a linear mixed model with a fixed method effect and random
+#' subject and subject-by-method effects, fit by REML, gives
+#' \deqn{CCC = \frac{\sigma^2_{s}}{\sigma^2_{s} + \sigma^2_{sm} +
+#' \sigma^2_{m} + \sigma^2_{e}}}
+#' where \eqn{\sigma^2_{m}} is the variance between the method means. All
+#' measurements are used, so the replicates of the two methods need not be
+#' paired or equal in number. The estimate equals that of
+#' `cccrm::ccc_vc(int = TRUE)`.
+#'
+#' **Nested data** (`"nest"`; the true value may change within a subject,
+#' and each row is a matched pair). Lin's estimator is computed over all
+#' complete pairs, which keep their pairing.
+#'
+#' For both, the subject is the independent unit: the standard error of
+#' Fisher's z is a delete-one-subject jackknife, so it allows for the
+#' correlation of measurements within a subject. (Treating every pair as
+#' independent understates the standard error.) The interval and test use a
+#' t distribution with (number of subjects - 1) degrees of freedom. In
+#' simulations (10% missing, 3-4 measurements per subject) 95% intervals
+#' covered 94-95% of the time with 20 or more subjects, but only 91-93% with
+#' 10 subjects, where the CCC is also biased downward; treat intervals from
+#' few subjects as approximate. At least 3 subjects are needed.
 #'
 #' The confidence interval and the hypothesis test use Fisher's
 #' Z-transformation of the CCC:
@@ -63,9 +92,12 @@
 #'
 #' **Relation to the ICC.** For two methods, the CCC is close to the
 #' absolute-agreement intraclass correlation, ICC(A,1)
-#' (`icc_test(type = "agreement")`); Lin's estimator uses n rather than
-#' n - 1 in the variances, and the difference vanishes as n grows
-#' (Nickerson, 1997; Carrasco & Jover, 2003). `ccc_test()` is meant for
+#' (`icc_test(type = "agreement")`). Lin's estimator (simple and nested data)
+#' uses n rather than n - 1 in the variances and covariance, as Lin (1989)
+#' defined it and as other software computes it, so it is slightly below the
+#' ICC in small samples; the difference vanishes as n grows (Nickerson, 1997;
+#' Carrasco & Jover, 2003). The variance-components estimator (replicate
+#' data) uses REML variance components and so corresponds to the ICC form. `ccc_test()` is meant for
 #' method-comparison (agreement) studies; [icc_test()] for reliability
 #' studies (see its "Choosing the form" and "Related coefficients"
 #' sections).
@@ -79,6 +111,9 @@
 #' Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 #' reproducibility. Biometrics, 45(1), 255-268.
 #'
+#' Lin, L. I. (2000). A note on the concordance correlation coefficient.
+#' Biometrics, 56(1), 324-325.
+#'
 #' Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
 #' concordance correlation coefficient through variance components.
 #' Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
@@ -86,13 +121,6 @@
 #' Nickerson, C. A. E. (1997). A note on "A concordance correlation
 #' coefficient to evaluate reproducibility". Biometrics, 53(4), 1503-1507.
 #' \doi{10.2307/2533516}
-#'
-#' King, T. S., & Chinchilli, V. M. (2001). A generalized concordance correlation
-#' coefficient for continuous and categorical data. Statistics in Medicine,
-#' 20(14), 2131-2147.
-#'
-#' King, T. S., Chinchilli, V. M., & Carrasco, J. L. (2007). A repeated measures
-#' concordance correlation coefficient. Statistics in Medicine, 26(16), 3095-3113.
 #'
 #' @examples
 #' # Simple paired data using vectors
@@ -182,43 +210,24 @@ ccc_test <- function(x,
 
     ccc_est <- ccc_result$rho.c$est.ccc
 
-    # Standard errors: prefer values computed by ccc.xy, fall back to
-    # local computation only if necessary to avoid duplication.
-    sep <- NULL
-    se_z <- NULL
+    # Lin's (1989, 2000) asymptotic SE, from the complete pairs (as ccc.xy
+    # computes the CCC); the same formula as DescTools::CCC and epiR::epi.ccc
+    pairs <- complete.cases(x_vec, y_vec)
+    xc <- x_vec[pairs]
+    yc <- y_vec[pairs]
+    k <- length(xc)
+    sx2 <- var(xc) * (k - 1) / k
+    sy2 <- var(yc) * (k - 1) / k
+    r <- cor(xc, yc)
+    u <- (mean(yc) - mean(xc)) / ((sx2 * sy2)^0.25)
 
-    # From ccc.xy: sep is SE of CCC, set is SE of Z-transformed CCC
-    if (!is.null(ccc_result$rho.c$sep)) {
-      sep <- ccc_result$rho.c$sep
-    }
-    if (!is.null(ccc_result$rho.c$set)) {
-      se_z <- ccc_result$rho.c$set
-    }
+    # SE of CCC on original scale
+    sep <- sqrt(((1 - r^2) * ccc_est^2 * (1 - ccc_est^2) / r^2 +
+                   (2 * ccc_est^3 * (1 - ccc_est) * u^2 / r) -
+                   0.5 * ccc_est^4 * u^4 / r^2) / (k - 2))
 
-    if (is.null(sep) || is.null(se_z)) {
-      # Recompute SEs only if they are not available from ccc.xy, from the
-      # complete pairs (as ccc.xy computes the CCC)
-      pairs <- complete.cases(x_vec, y_vec)
-      xc <- x_vec[pairs]
-      yc <- y_vec[pairs]
-      k <- length(xc)
-      sx2 <- var(xc) * (k - 1) / k
-      sy2 <- var(yc) * (k - 1) / k
-      r <- cor(xc, yc)
-      xb <- mean(xc)
-      yb <- mean(yc)
-      u <- (yb - xb) / ((sx2 * sy2)^0.25)
-
-      # SE of CCC on original scale
-      sep <- sqrt(((1 - r^2) * ccc_est^2 * (1 - ccc_est^2) / r^2 +
-                     (2 * ccc_est^3 * (1 - ccc_est) * u^2 / r) -
-                     0.5 * ccc_est^4 * u^4 / r^2) / (k - 2))
-      names(sep) <- "SE CCC"
-
-      # SE of Z-transformed CCC
-      se_z <- sep / (1 - ccc_est^2)
-      names(se_z) <- "SE Z"
-    }
+    # SE of Z-transformed CCC
+    se_z <- sep / (1 - ccc_est^2)
     n_param <- sum(complete.cases(data.frame(x_vec, y_vec)))
     method <- "Lin's Concordance Correlation Coefficient"
     # CCC = precision (Pearson r) x accuracy (bias correction factor C_b)
@@ -226,39 +235,22 @@ ccc_test <- function(x,
     components <- c(r = unname(ccc_est) / c_b, C_b = c_b)
 
   } else {
-    # Use cccUst for reps/nest data
-    # Prepare long-format data for cccUst
-    # Note: For 'nest' data, drop_na() is applied BEFORE pivot_longer
-    #       For 'reps' data, drop_na() is applied AFTER pivot_longer
     df_wide <- data.frame(id = id_vec, x = x_vec, y = y_vec)
-
+    clustered <- .ccc_clustered(df_wide, effective_data_type)
+    ccc_est <- clustered$estimate
+    sep <- clustered$se
+    se_z <- clustered$se_z
+    n_param <- clustered$n
+    # the nested CCC uses the complete pairs only
     if (effective_data_type == "nest") {
-      # For nested data: drop rows with any NA first, then pivot
       df_wide <- tidyr::drop_na(df_wide)
-      df_long <- tidyr::pivot_longer(df_wide, !id,
-                                      names_to = "method",
-                                      values_to = "measure")
-    } else {
-      # For replicate data: pivot first, then drop NA
-      df_long <- tidyr::pivot_longer(df_wide, !id,
-                                      names_to = "method",
-                                      values_to = "measure") %>%
-        tidyr::drop_na()
     }
 
-    ccc_ust_result <- cccUst(dataset = df_long,
-                              ry = "measure",
-                              rmet = "method",
-                              cl = conf.level)
-
-    sep <- ccc_ust_result["SE CCC"]  # SE of CCC
-    se_z <- ccc_ust_result["SE Z"]  # SE of Z-transformed CCC
-    ccc_est <- ccc_ust_result["CCC"]  # CCC
-
-    # Number of subjects
-    n_param <- length(unique(id_vec))
-
-    method <- "Concordance Correlation Coefficient (U-statistics)"
+    method <- if (effective_data_type == "reps") {
+      "Concordance Correlation Coefficient (variance components)"
+    } else {
+      "Concordance Correlation Coefficient (nested pairs)"
+    }
     components <- NULL
   }
 
@@ -267,7 +259,9 @@ ccc_test <- function(x,
 
   # Confidence interval on the Fisher z scale (one-sided with a one-sided
   # alternative, as in icc_test())
-  ci <- .ccc_ci(ccc_est, se_z, conf.level, alternative)
+  # (reps/nest: t with g - 1 df for the jackknife SE over g subjects)
+  jack_df <- if (effective_data_type == "simple") NULL else n_param - 1
+  ci <- .ccc_ci(ccc_est, se_z, conf.level, alternative, df = jack_df)
 
   # Hypothesis test only when a null value is given
   if (is.null(null.value)) {
@@ -276,7 +270,8 @@ ccc_test <- function(x,
     test_result <- .ccc_hypothesis_test(ccc_est = ccc_est,
                                          se_z = se_z,
                                          null.value = null.value,
-                                         alternative = alternative)
+                                         alternative = alternative,
+                                         df = jack_df)
   }
 
   # Data kept for summary(), plot() and check()
@@ -289,8 +284,20 @@ ccc_test <- function(x,
 
   structure(
     list(
-      statistic = if (is.null(null.value)) NULL else c(Z = test_result$z_stat),
-      parameter = if (is.null(null.value)) NULL else c(n = n_param),
+      statistic = if (is.null(null.value)) {
+        NULL
+      } else if (is.null(jack_df)) {
+        c(Z = test_result$z_stat)
+      } else {
+        c(t = test_result$z_stat)
+      },
+      parameter = if (is.null(null.value)) {
+        NULL
+      } else if (is.null(jack_df)) {
+        c(n = n_param)
+      } else {
+        c(df = jack_df)
+      },
       stderr = c("SE CCC" = unname(sep), "SE Z" = se_z),
       p.value = test_result$p_value,
       conf.int = ci,
@@ -311,16 +318,87 @@ ccc_test <- function(x,
   )
 }
 
-# Internal helper: confidence interval for the CCC on the Fisher z scale
-.ccc_ci <- function(ccc_est, se_z, conf.level, alternative) {
+# Internal helper: confidence interval for the CCC on the Fisher z scale,
+# with normal quantiles, or t quantiles with df degrees of freedom
+.ccc_ci <- function(ccc_est, se_z, conf.level, alternative, df = NULL) {
   alpha <- 1 - conf.level
+  q <- function(p) if (is.null(df)) qnorm(p) else stats::qt(p, df)
   z <- atanh(ccc_est)
   ci <- switch(alternative,
-               two.sided = tanh(z + c(-1, 1) * qnorm(1 - alpha / 2) * se_z),
-               greater = c(tanh(z - qnorm(1 - alpha) * se_z), 1),
-               less = c(-1, tanh(z + qnorm(1 - alpha) * se_z)))
+               two.sided = tanh(z + c(-1, 1) * q(1 - alpha / 2) * se_z),
+               greater = c(tanh(z - q(1 - alpha) * se_z), 1),
+               less = c(-1, tanh(z + q(1 - alpha) * se_z)))
   attr(ci, "conf.level") <- conf.level
   ci
+}
+
+# Internal helper: CCC for replicate or nested data, with a delete-one-subject
+# jackknife SE of the Fisher z (the subject is the independent unit).
+#   reps: variance-components CCC (Carrasco & Jover, 2003) from all
+#         measurements, so replicates need not be paired; it equals the
+#         point estimate of cccrm::ccc_vc(int = TRUE).
+#   nest: Lin's CCC over the complete (x, y) pairs, which keep their pairing.
+# df has columns id, x and y. Returns the estimate, its SE, the SE of z and
+# the number of subjects.
+.ccc_clustered <- function(df, data_type = c("reps", "nest")) {
+  data_type <- match.arg(data_type)
+  if (data_type == "nest") {
+    df <- df[complete.cases(df), , drop = FALSE]
+    est_fun <- function(d) .ccc_lin(d$x, d$y)
+  } else {
+    df <- tidyr::drop_na(tidyr::pivot_longer(df, !id, names_to = "method",
+                                             values_to = "measure"))
+    df <- as.data.frame(df)
+    est_fun <- .ccc_vc
+  }
+  ids <- unique(df$id)
+  g <- length(ids)
+  if (g < 3) {
+    stop("At least 3 subjects with data are needed for the CCC of ",
+         if (data_type == "reps") "replicate" else "nested", " data")
+  }
+  est <- est_fun(df)
+  z_loo <- vapply(ids, function(i) atanh(est_fun(df[df$id != i, ,
+                                                     drop = FALSE])),
+                  numeric(1))
+  se_z <- sqrt((g - 1) / g * sum((z_loo - mean(z_loo))^2))
+  list(estimate = est,
+       se = se_z * (1 - est^2),
+       se_z = se_z,
+       n = g)
+}
+
+# Internal helper: Lin's CCC (variances and covariance with denominator n)
+.ccc_lin <- function(x, y) {
+  n <- length(x)
+  sxy <- stats::cov(x, y) * (n - 1) / n
+  sx2 <- var(x) * (n - 1) / n
+  sy2 <- var(y) * (n - 1) / n
+  2 * sxy / (sx2 + sy2 + (mean(x) - mean(y))^2)
+}
+
+# Internal helper: variance-components CCC for replicate data (Carrasco &
+# Jover, 2003): y = mu + method + subject + subject:method + error, fit by
+# REML; CCC = s2_subject / (s2_subject + s2_subject:method + s2_method +
+# s2_error). The subject:method term is used only when some subject has
+# replicates of a method. s2_method is the unbiased (b^2 - var(b)) / 2 for
+# the method difference b, truncated at 0. d has columns id, method, measure.
+.ccc_vc <- function(d) {
+  inter <- any(table(d$id, d$method) > 1)
+  form <- if (inter) {
+    measure ~ method + (1 | id) + (1 | id:method)
+  } else {
+    measure ~ method + (1 | id)
+  }
+  fit <- suppressMessages(suppressWarnings(
+    lme4::lmer(form, data = d, REML = TRUE)
+  ))
+  vc <- as.data.frame(lme4::VarCorr(fit))
+  s2_id <- vc$vcov[vc$grp == "id"]
+  s2_int <- if (inter) vc$vcov[vc$grp == "id:method"] else 0
+  b <- lme4::fixef(fit)[[2]]
+  s2_met <- max((b^2 - as.matrix(stats::vcov(fit))[2, 2]) / 2, 0)
+  s2_id / (s2_id + s2_int + s2_met + stats::sigma(fit)^2)
 }
 
 
@@ -435,8 +513,13 @@ ccc_test <- function(x,
 }
 
 
-# Internal helper: Perform hypothesis test on Fisher-transformed CCC
-.ccc_hypothesis_test <- function(ccc_est, se_z, null.value, alternative) {
+# Internal helper: Perform hypothesis test on Fisher-transformed CCC, with a
+# normal reference distribution, or t with df degrees of freedom
+.ccc_hypothesis_test <- function(ccc_est, se_z, null.value, alternative,
+                                 df = NULL) {
+  cdf <- function(q, ...) {
+    if (is.null(df)) pnorm(q, ...) else stats::pt(q, df, ...)
+  }
 
   # Fisher Z-transformation
   # Handle edge cases where CCC is exactly 1 or -1
@@ -458,9 +541,9 @@ ccc_test <- function(x,
   # P-value based on alternative
 
   p_value <- switch(alternative,
-                    "two.sided" = 2 * pnorm(-abs(z_stat)),
-                    "less" = pnorm(z_stat),
-                    "greater" = pnorm(z_stat, lower.tail = FALSE))
+                    "two.sided" = 2 * cdf(-abs(z_stat)),
+                    "less" = cdf(z_stat),
+                    "greater" = cdf(z_stat, lower.tail = FALSE))
 
   list(
     z_stat = z_stat,

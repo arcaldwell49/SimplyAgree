@@ -66,7 +66,7 @@ distribution with 2 degrees of freedom: Lin's standard error assumes the
 two measurements are bivariate normal, and points far above the line
 suggest they are not. For replicate or nested data the linearity test
 uses all pairs, which are correlated within subjects, so its p-value is
-approximate; the U-statistic standard error makes few distributional
+approximate; the jackknife standard error makes few distributional
 assumptions, so these panels mainly help interpret the CCC.
 }
 \examples{
@@ -81,6 +81,10 @@ check(res)
 \references{
 Lin, L. I. (1989). A concordance correlation coefficient to evaluate
 reproducibility. Biometrics, 45(1), 255-268. \doi{10.2307/2532051}
+
+Carrasco, J. L., & Jover, L. (2003). Estimating the generalized
+concordance correlation coefficient through variance components.
+Biometrics, 59(4), 849-858. \doi{10.1111/j.0006-341x.2003.00099.x}
 
 Ramsey, J. B. (1969). Tests for specification errors in classical linear
 least-squares regression analysis. Journal of the Royal Statistical

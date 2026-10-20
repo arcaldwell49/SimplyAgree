@@ -55,7 +55,7 @@ test_that("ccc_test works with reps data type", {
   result <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 
   expect_s3_class(result, "htest")
-  expect_true(grepl("U-statistics", result$method))
+  expect_true(grepl("variance components|nested pairs", result$method))
   expect_true(result$estimate > -1 && result$estimate < 1)
 })
 
@@ -82,7 +82,7 @@ test_that("ccc_test works with nest data type", {
   result <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
 
   expect_s3_class(result, "htest")
-  expect_true(grepl("U-statistics", result$method))
+  expect_true(grepl("variance components|nested pairs", result$method))
 })
 
 test_that("ccc_test CCC matches agree_nest output for nest data", {
@@ -218,7 +218,7 @@ test_that("method description is correct for different data types", {
   result_reps <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 
   expect_equal(result_simple$method, "Lin's Concordance Correlation Coefficient")
-  expect_equal(result_reps$method, "Concordance Correlation Coefficient (U-statistics)")
+  expect_equal(result_reps$method, "Concordance Correlation Coefficient (variance components)")
 })
 
 test_that("warning issued when data_type specified with vector input", {
@@ -271,8 +271,12 @@ test_that("parameter n is correctly computed", {
   expected_n_simple <- sum(complete.cases(reps_simple[, c("x", "y")]))
   expect_equal(unname(result_simple$parameter), expected_n_simple)
 
-  # For reps data, n should equal number of unique subjects
-  expect_equal(unname(result_reps$parameter), length(unique(reps$id)))
+
+  # for reps data, the t test has (number of subjects - 1) df
+  expect_equal(unname(result_reps$parameter), length(unique(reps$id)) - 1)
+  expect_named(result_reps$parameter, "df")
+  expect_named(result_reps$statistic, "t")
+  expect_equal(result_reps$settings$n, length(unique(reps$id)))
 })
 
 # ccc_htest class, defaults and intervals (0.4.0) -------------------------------
@@ -300,12 +304,145 @@ test_that("two-sided intervals are unchanged (Fisher z)", {
                               prop_bias = FALSE)$rho.c
   res <- ccc_test(x = "x", y = "y", data = reps)
   expect_equal(as.numeric(res$conf.int), c(old$lower.ci, old$upper.ci))
-  long <- tidyr::drop_na(tidyr::pivot_longer(
-    data.frame(id = reps$id, x = reps$x, y = reps$y), !id,
-    names_to = "method", values_to = "measure"))
-  u <- SimplyAgree:::cccUst(long, ry = "measure", rmet = "method", cl = 0.95)
   r <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
-  expect_equal(as.numeric(r$conf.int), unname(u[2:3]))
+  z <- atanh(unname(r$estimate))
+  expect_equal(as.numeric(r$conf.int),
+               tanh(z + c(-1, 1) * qt(0.975, 3) * r$stderr[["SE Z"]]))
+})
+
+# External reference values -------------------------------------------------------
+# Replicate data: ba1986 (Bland & Altman, 1986), Wright vs mini Wright peak
+# flow meters, 17 subjects with 2 replicates per meter.
+ba_reps <- rbind(
+  data.frame(id = ba1986$id, x = ba1986$wright1, y = ba1986$mini1),
+  data.frame(id = ba1986$id, x = ba1986$wright2, y = ba1986$mini2)
+)
+
+test_that("simple CCC and SE match Lin (1989) and DescTools/epiR", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "wright1", y = "mini1", data = ba1986)
+  # Lin's estimator, variances and covariance with denominator n
+  x <- ba1986$wright1
+  y <- ba1986$mini1
+  n <- length(x)
+  sxy <- sum((x - mean(x)) * (y - mean(y))) / n
+  lin <- 2 * sxy / (sum((x - mean(x))^2) / n + sum((y - mean(y))^2) / n +
+                      (mean(x) - mean(y))^2)
+  expect_equal(unname(res$estimate), lin, tolerance = 1e-10)
+  # estimate and interval from DescTools 0.99.60 CCC(ci = "z-transform") and
+  # epiR 3.0.0 epi.ccc(ci = "z-transform"), which agree to 11 digits; neither
+  # reports the SE, but their z interval fixes it (Lin's SE, kept as a
+  # regression check)
+  expect_equal(unname(res$estimate), 0.94274243143, tolerance = 1e-8)
+  expect_equal(as.numeric(res$conf.int), c(0.85049187317, 0.97872627917),
+               tolerance = 1e-8)
+  expect_equal(res$stderr[["SE CCC"]], 0.02861673746, tolerance = 1e-8)
+})
+
+test_that("replicate CCC matches cccrm::ccc_vc() (variance components)", {
+  testthat::local_edition(3)
+  # cccrm 3.0.6: ccc_vc(long, "measure", "id", rmet = "method", int = TRUE)
+  res <- ccc_test(x = "x", y = "y", id = "id", data = ba_reps,
+                  data_type = "reps")
+  expect_equal(unname(res$estimate), 0.9464972725, tolerance = 1e-6)
+  expect_equal(unname(res$settings$n), 17)
+  # unequal, unpaired replicates (reps has missing y values)
+  r2 <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  expect_equal(unname(r2$estimate), 0.4341188916, tolerance = 1e-6)
+  # the jackknife SE is in line with cccrm's delta-method SE of z (0.220)
+  expect_gt(res$stderr[["SE Z"]], 0.220 / 1.5)
+  expect_lt(res$stderr[["SE Z"]], 0.220 * 1.5)
+})
+
+test_that("replicate CCC does not depend on how replicates are paired", {
+  testthat::local_edition(3)
+  res <- ccc_test(x = "x", y = "y", id = "id", data = ba_reps,
+                  data_type = "reps")
+  # reverse the order of the y replicates within each subject
+  swapped <- ba_reps
+  swapped$y <- c(ba1986$mini2, ba1986$mini1)
+  res2 <- ccc_test(x = "x", y = "y", id = "id", data = swapped,
+                   data_type = "reps")
+  expect_equal(res2$estimate, res$estimate, tolerance = 1e-6)
+  expect_equal(res2$stderr, res$stderr, tolerance = 1e-5)
+  # a missing value drops one measurement, not the pairing of the rest
+  miss <- ba_reps
+  miss$y[1] <- NA
+  long <- tidyr::drop_na(tidyr::pivot_longer(miss, !id, names_to = "method",
+                                             values_to = "measure"))
+  expect_equal(unname(ccc_test(x = "x", y = "y", id = "id", data = miss,
+                               data_type = "reps")$estimate),
+               SimplyAgree:::.ccc_vc(as.data.frame(long)))
+})
+
+test_that("nested CCC matches cccrm::cccUst() on the complete pairs", {
+  testthat::local_edition(3)
+  # recpre_long: 10 subjects, AM vs PM in 3 conditions each (nested)
+  res <- ccc_test(x = "AM", y = "PM", id = "id", data = recpre_long,
+                  data_type = "nest")
+  # cccrm 3.0.6: cccUst(long, "measure", "method") on the 30 pairs
+  expect_equal(unname(res$estimate), 0.16139281245, tolerance = 1e-8)
+  # ... which is Lin's CCC over all pairs
+  simple <- ccc_test(x = "AM", y = "PM", data = recpre_long)
+  expect_equal(res$estimate, simple$estimate)
+  expect_equal(unname(res$settings$n), 10)
+  # pairs stay paired when values are missing
+  r2 <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "nest")
+  expect_equal(r2$estimate,
+               ccc_test(x = "x", y = "y", data = stats::na.omit(reps))$estimate)
+})
+
+test_that("reps/nest SEs are delete-one-subject jackknife SEs of z", {
+  testthat::local_edition(3)
+  d <- as.data.frame(recpre_long)
+  res <- ccc_test(x = "AM", y = "PM", id = "id", data = d, data_type = "nest")
+  lin <- function(x, y) {
+    2 * cov(x, y) / (var(x) + var(y) + (mean(x) - mean(y))^2 *
+                       length(x) / (length(x) - 1))
+  }
+  ids <- unique(d$id)
+  z <- vapply(ids, function(i) {
+    k <- d$id != i
+    atanh(lin(d$AM[k], d$PM[k]))
+  }, numeric(1))
+  g <- length(ids)
+  se_z <- sqrt((g - 1) / g * sum((z - mean(z))^2))
+  expect_equal(res$stderr[["SE Z"]], se_z, tolerance = 1e-10)
+  expect_equal(res$stderr[["SE CCC"]],
+               se_z * (1 - unname(res$estimate)^2), tolerance = 1e-10)
+  # pairs within a subject are correlated: treating each pair as its own
+  # subject gives a smaller SE here
+  d$pair <- seq_len(nrow(d))
+  naive <- ccc_test(x = "AM", y = "PM", id = "pair", data = d,
+                    data_type = "nest")
+  expect_lt(naive$stderr[["SE Z"]], res$stderr[["SE Z"]])
+})
+
+test_that("agree_reps() and agree_nest() report the same CCC as ccc_test()", {
+  testthat::local_edition(3)
+  r <- ccc_test(x = "x", y = "y", id = "id", data = ba_reps,
+                data_type = "reps")
+  a <- suppressWarnings(agree_reps(x = "x", y = "y", id = "id",
+                                   data = ba_reps))
+  expect_equal(unlist(a$ccc.xy[1, ]),
+               c(est.ccc = unname(r$estimate), lower.ci = r$conf.int[[1]],
+                 upper.ci = r$conf.int[[2]], SE = r$stderr[["SE CCC"]]))
+  n <- ccc_test(x = "AM", y = "PM", id = "id", data = recpre_long,
+                data_type = "nest")
+  b <- suppressWarnings(agree_nest(x = "AM", y = "PM", id = "id",
+                                   data = recpre_long))
+  expect_equal(unlist(b$ccc.xy[1, ]),
+               c(est.ccc = unname(n$estimate), lower.ci = n$conf.int[[1]],
+                 upper.ci = n$conf.int[[2]], SE = n$stderr[["SE CCC"]]))
+})
+
+test_that("reps/nest need at least 3 subjects", {
+  testthat::local_edition(3)
+  d <- reps[reps$id %in% 1:2, ]
+  expect_error(ccc_test(x = "x", y = "y", id = "id", data = d,
+                        data_type = "reps"), "At least 3 subjects")
+  expect_error(ccc_test(x = "x", y = "y", id = "id", data = d,
+                        data_type = "nest"), "At least 3 subjects")
 })
 
 test_that("the SE uses the complete pairs, matching the CCC and interval", {
@@ -377,7 +514,7 @@ test_that("summary describes the CCC in both styles", {
   r <- summary(ccc_test(x = "x", y = "y", id = "id", data = reps,
                         data_type = "nest"))
   expect_match(r$text, "nested measurements")
-  expect_match(r$text, "U-statistic standard error")
+  expect_match(r$text, "jackknife standard error")
 
   expect_snapshot(summary(res))
   expect_snapshot(summary(ccc_test(x = "x", y = "y", id = "id", data = reps,
