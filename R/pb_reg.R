@@ -10,8 +10,8 @@
 #'
 #' @param formula A formula of the form `y ~ x` specifying the model.
 #' @param data Data frame with all data.
-#' @param id Column with subject identifier (optional). If provided, measurement error
-#'   ratio is calculated from replicate measurements.
+#' @param id Column with subject identifier (optional). If provided, replicate
+#'   measurements are averaged within each subject before fitting.
 #' @param method Method for Passing-Bablok estimation. Options are:
 #'   \itemize{
 #'     \item "scissors": Scissors estimator (1988) - most robust, scale invariant (default)
@@ -21,8 +21,9 @@
 #' @param conf.level The confidence level required. Default is 95%.
 #' @param weights An optional vector of case weights to be used in the fitting process.
 #'   Should be NULL or a numeric vector.
-#' @param error.ratio Ratio of measurement error variances (var(x)/var(y)). Default is 1.
-#'   This argument is ignored if subject identifiers are provided via `id`.
+#' @param error.ratio Must be 1 (the default). Values other than 1 are no longer
+#'   supported and give an error; see "Measurement Error" in Details. Use
+#'   [dem_reg()] when the error variances of x and y differ.
 #' @param replicates Number of resamples for confidence intervals and the
 #'   variance-covariance matrix. For `se_method = "bootstrap"` this is the number of
 #'   bootstrap resamples; for `se_method = "jackknife"` it is the number of random
@@ -38,8 +39,8 @@
 #'       random subsets (Shao & Wu, 1989). Used when `replicates > 0`.
 #'     \item "dufey": `r lifecycle::badge('experimental')` Analytic sandwich
 #'       estimator of Dufey (2020). Does not require resampling (`replicates` is
-#'       ignored). Only available for the "scissors" method without case weights
-#'       and with `error.ratio = 1`. See Details before using it for joint tests.
+#'       ignored). Only available for the "scissors" method without case weights.
+#'       Not used by [joint_test()] or [plot_joint()] (see Details).
 #'   }
 #' @param model Logical. If TRUE (default), the model frame is stored in the returned object.
 #'   This is needed for methods like `plot()`, `fitted()`, `residuals()`, and `predict()` to work
@@ -74,23 +75,24 @@
 #' **"invariant"**: Scale-invariant method (1984). First finds the median angle
 #' of slopes below the horizontal, then uses this as the reference line.
 #'
-#' ## Measurement Error Handling
+#' ## Measurement Error
 #'
-#' If the data are measured in replicates, then the measurement error ratio can be
-#' directly derived from the data. This can be accomplished by indicating the subject
-#' identifier with the `id` argument. When replicates are not available in the data,
-#' then the ratio of error variances (var(x)/var(y)) can be provided with the
-#' `error.ratio` argument (default = 1, indicating equal measurement errors).
+#' Passing-Bablok regression implicitly assumes that the ratio of the error
+#' variances of y and x equals the squared slope (equal error variances when
+#' the slope is 1). Earlier versions accepted `error.ratio != 1` (or estimated
+#' it from replicates via `id`) and weighted the pairwise slopes by it. In
+#' simulations this biased the slope (by -0.07 to -0.43 with an error ratio of
+#' 4), the bias did not shrink with sample size, and joint tests then rejected a
+#' true identity line 81-100% of the time with n >= 50. `error.ratio != 1` is
+#' therefore an error. When the error variances differ, use [dem_reg()] with
+#' the appropriate `error.ratio` (or `id`).
 #'
-#' The error ratio affects how pairwise slopes are weighted in the robust median
-#' calculation. When error.ratio = 1, all pairs receive equal weight. When
-#' error.ratio != 1, pairs are weighted to account for heterogeneous measurement
-#' precision.
+#' With `id`, replicate measurements are averaged within each subject and the
+#' subject means are analysed.
 #'
 #' ## Weighting
 #'
-#' Case weights can be provided via the `weights` argument. These are distinct from
-#' measurement error weighting (controlled by `error.ratio`). Case weights allow
+#' Case weights can be provided via the `weights` argument. Case weights allow
 #' you to down-weight or up-weight specific observations in the analysis.
 #'
 #' ## Standard Errors and Variance-Covariance Matrix
@@ -115,14 +117,15 @@
 #'   the U-statistic variance of Kendall's tau and a sandwich estimator for the
 #'   intercept. The slope interval is formed from order statistics of the pairwise
 #'   slopes and the intercept interval is Wald-type. **This option is
-#'   experimental.** In simulations its marginal standard errors were accurate
-#'   for n >= 20, but joint tests of intercept and slope ([joint_test()]) rejected
-#'   a true null hypothesis about 7-11% of the time at a nominal 5%, suggesting the
-#'   intercept-slope covariance is not yet reliable. Prefer the pairs bootstrap
-#'   or delete-d jackknife for joint tests.
+#'   experimental.** In simulations its marginal intervals had close to nominal
+#'   coverage for n >= 20, but a joint test of intercept and slope built from
+#'   its variance-covariance matrix rejected a true null hypothesis 8-11% of the
+#'   time at a nominal 5%. [joint_test()] and [plot_joint()] therefore refuse
+#'   Dufey fits; use the pairs bootstrap or delete-d jackknife, which held
+#'   4.3-5.4% in the same simulations.
 #'
 #' Resampling is particularly useful for:
-#' - Weighted regression (case weights or error.ratio != 1)
+#' - Weighted regression (case weights)
 #' - Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)
 #' - Joint tests of intercept and slope
 #'
@@ -147,7 +150,7 @@
 #'   - `x_vals`: Original x values used in fitting.
 #'   - `y_vals`: Original y values used in fitting.
 #'   - `weights`: Case weights (if provided).
-#'   - `error.ratio`: Error ratio used in fitting.
+#'   - `error.ratio`: Always 1 (kept for compatibility).
 #'   - `conf.level`: Confidence level used.
 #'   - `method`: Character string describing the method.
 #'   - `method_num`: Numeric method identifier (1, 2, or 3).
@@ -164,21 +167,19 @@
 #' # Basic Passing-Bablok regression (scissors method, default)
 #' model <- pb_reg(method2 ~ method1, data = mydata)
 #'
-#' # With known error ratio
-#' model_er <- pb_reg(method2 ~ method1, data = mydata, error.ratio = 2)
-#'
-#' # With replicate measurements
+#' # With replicate measurements (averaged within subject)
 #' model_rep <- pb_reg(method2 ~ method1, data = mydata, id = "subject_id")
 #'
 #' # With bootstrap confidence intervals
-#' model_boot <- pb_reg(method2 ~ method1, data = mydata,
-#'                      error.ratio = 1.5, replicates = 1000)
+#' model_boot <- pb_reg(method2 ~ method1, data = mydata, replicates = 1000)
 #'
 #' # Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix
 #' model_jack <- pb_reg(method2 ~ method1, data = mydata,
 #'                      se_method = "jackknife", replicates = 1000)
 #' model_dufey <- pb_reg(method2 ~ method1, data = mydata, se_method = "dufey")
-#' joint_test(model_dufey)
+#'
+#' # Joint test of intercept and slope (bootstrap or jackknife fits)
+#' joint_test(model_boot)
 #'
 #' # Symmetric method
 #' model_sym <- pb_reg(method2 ~ method1, data = mydata, method = "symmetric")
@@ -259,8 +260,12 @@ pb_reg <- function(formula,
   if (!is.numeric(replicates) || replicates < 0) {
     stop("replicates must be a non-negative integer")
   }
-  if (!is.numeric(error.ratio) || error.ratio <= 0) {
-    stop("error.ratio must be a positive number")
+  if (!is.numeric(error.ratio) || length(error.ratio) != 1 || is.na(error.ratio) ||
+      error.ratio != 1) {
+    stop("pb_reg() supports only error.ratio = 1. Weighting the pairwise slopes ",
+         "by an error ratio biased the slope in simulations (e.g. by -0.07 to ",
+         "-0.43 with error.ratio = 4), and the bias did not shrink with sample ",
+         "size. Use dem_reg() when the error variances of x and y differ.")
   }
 
   # Extract model frame
@@ -287,34 +292,14 @@ pb_reg <- function(formula,
     df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
     df <- df[complete.cases(df), ]
 
-    # Calculate error ratio from replicates (matching dem_reg approach)
-    df2 <- df %>%
+    # Average the replicates within subject. The error ratio is not used:
+    # Passing-Bablok has no valid way to weight by it (see Details).
+    df3 <- df %>%
       group_by(id) %>%
-      mutate(mean_y = mean(y, na.rm = TRUE),
-             mean_x = mean(x, na.rm = TRUE),
-             n_x = sum(!is.na(x)),
-             n_y = sum(!is.na(y))) %>%
-      ungroup() %>%
-      mutate(diff_y = y - mean_y,
-             diff_y2 = diff_y^2,
-             diff_x = x - mean_x,
-             diff_x2 = diff_x^2)
-
-    df3 <- df2 %>%
-      group_by(id) %>%
-      summarize(n_x = mean(n_x),
-                x = mean(x, na.rm = TRUE),
-                sum_num_x = sum(diff_x2, na.rm = TRUE),
-                n_y = mean(n_y),
+      summarize(x = mean(x, na.rm = TRUE),
                 y = mean(y, na.rm = TRUE),
-                sum_num_y = sum(diff_y2, na.rm = TRUE),
                 .groups = 'drop') %>%
       drop_na()
-
-    var_x <- sum(df3$sum_num_x) / sum(df3$n_x - 1)
-    var_y <- sum(df3$sum_num_y) / sum(df3$n_y - 1)
-
-    error.ratio <- var_x / var_y
 
     # Use averaged values
     x_vals <- df3$x
@@ -364,27 +349,20 @@ pb_reg <- function(formula,
   }
 
   # Check if bootstrap is needed
-  has_weights <- !all(wts == wts[1]) || error.ratio != 1
+  has_weights <- !all(wts == wts[1])
   if (se_method == "dufey") {
     if (method != "scissors") {
       stop("se_method = 'dufey' is only available for method = 'scissors'.")
     }
     if (has_weights) {
-      stop("se_method = 'dufey' is not available with case weights or error.ratio != 1.")
+      stop("se_method = 'dufey' is not available with case weights.")
     }
   }
   if (has_weights && replicates == 0) {
-    warning("Bootstrap confidence intervals are recommended when error.ratio != 1 or with case weights. Consider setting replicates > 0.")
+    warning("Bootstrap confidence intervals are recommended with case weights. Consider setting replicates > 0.")
   }
   if (method_num > 1 && replicates == 0 && se_method != "dufey") {
     warning("Bootstrap confidence intervals are recommended for 'invariant' and 'scissors' methods. Consider setting replicates > 0.")
-  }
-
-  # Compute weights from error ratio if needed
-  pair_weights <- NULL
-  if (error.ratio != 1) {
-    # Compute pairwise weights based on error ratio
-    pair_weights <- .compute_pair_weights_from_ratio(x_vals, y_vals, error.ratio, wts, n)
   }
 
   # Test for high positive correlation using Kendall's tau
@@ -401,7 +379,7 @@ pb_reg <- function(formula,
 
   # Compute Passing-Bablok estimates
   pb_result <- .passing_bablok_fit(x_vals, y_vals, method_num, conf.level,
-                                   pair_weights, case_weights = wts)
+                                   case_weights = wts)
 
   # Extract coefficients
   b0 <- pb_result$intercept
@@ -426,7 +404,7 @@ pb_reg <- function(formula,
     se_result <- .dufey_pb(x_vals, y_vals, b0, b1, conf.level)
     se_used <- "dufey"
   } else if (replicates > 0) {
-    boot_result <- .resample_pb(x_vals, y_vals, wts, error.ratio,
+    boot_result <- .resample_pb(x_vals, y_vals, wts,
                                 method_num, conf.level, replicates, b0, b1,
                                 type = se_method)
     se_result <- boot_result
@@ -517,49 +495,12 @@ pb_reg <- function(formula,
 }
 
 
-#' Compute pairwise weights from error ratio
-#' @keywords internal
-#' @noRd
-.compute_pair_weights_from_ratio <- function(x, y, error.ratio, case_wts, n) {
-
-  # For Passing-Bablok with error ratio, we weight each pair by
-  # the inverse of the expected variance of the slope estimate
-  # slope_ij = (y_j - y_i) / (x_j - x_i)
-  # var(slope_ij) ~ var_y/dx^2 + dy^2 * var_x/dx^4
-  # With error.ratio = var_x/var_y, this becomes:
-  # var(slope_ij) ~ var_y * (1/dx^2 + error.ratio * dy^2/dx^4)
-
-  weights <- numeric()
-
-  for (i in 1:(n-1)) {
-    for (j in (i+1):n) {
-      dx <- x[j] - x[i]
-      dy <- y[j] - y[i]
-
-      # Skip if dx is too small
-      if (abs(dx) < sqrt(.Machine$double.eps)) {
-        weights <- c(weights, 1)
-        next
-      }
-
-      # Approximate weight (inverse variance of slope)
-      # Simplified: weight by geometric mean adjusted for error ratio
-      wt <- sqrt(case_wts[i] * case_wts[j]) / (1 + error.ratio * (dy/dx)^2)
-
-      weights <- c(weights, wt)
-    }
-  }
-
-  return(weights)
-}
-
-
 #' Compute Passing-Bablok regression coefficients
 #' @keywords internal
 #' @noRd
 
 .passing_bablok_fit <- function(x, y, method = 1, conf.level = 0.95,
-                                pair_weights = NULL, case_weights = NULL) {
+                                case_weights = NULL) {
 
   n <- length(x)
   eps <- sqrt(.Machine$double.eps)
@@ -577,9 +518,7 @@ pb_reg <- function(formula,
   yy <- pdiff(y)
 
   # Compute weights
-  if (!is.null(pair_weights)) {
-    ww <- pair_weights
-  } else if (!is.null(case_weights)) {
+  if (!is.null(case_weights)) {
     ww <- pdiff(case_weights, `*`)
   } else {
     ww <- rep(1, length(xx))
@@ -778,7 +717,7 @@ pb_reg <- function(formula,
 #'   random subsets (Shao & Wu, 1989), Wald-type t(n-2) CIs.
 #' @keywords internal
 #' @noRd
-.resample_pb <- function(x, y, wts, error.ratio, method, conf.level, replicates,
+.resample_pb <- function(x, y, wts, method, conf.level, replicates,
                          b0, b1, type = c("bootstrap", "jackknife")) {
 
   type <- match.arg(type)
@@ -797,15 +736,9 @@ pb_reg <- function(formula,
     y_b <- y[idx]
     w_b <- wts[idx]
 
-    pair_weights_b <- NULL
-    if (error.ratio != 1) {
-      pair_weights_b <- .compute_pair_weights_from_ratio(x_b, y_b, error.ratio,
-                                                         w_b, length(x_b))
-    }
-
     fit_b <- tryCatch(
       .passing_bablok_fit(x_b, y_b, method, conf.level = 0,
-                          pair_weights_b, case_weights = w_b),
+                          case_weights = w_b),
       error = function(e) NULL
     )
     if (!is.null(fit_b)) {

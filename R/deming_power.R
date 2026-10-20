@@ -32,6 +32,9 @@
 #' @param x_var_params List with X variance parameters (same structure as y_var_params).
 #' @param weighted Logical. Use weighted Deming regression? Default is FALSE.
 #' @param conf.level Confidence level for tests. Default is 0.95.
+#' @param joint_method The joint test, passed to [joint_test()] as `method`:
+#'   \code{"sadler"} (default, Sadler's sum-of-squares F test) or \code{"wald"}
+#'   (jackknife Wald ellipse, liberal in small samples).
 #'
 #' @return A list of class "deming_power" containing:
 #'   \item{power_ci_slope}{Power based on slope confidence interval}
@@ -46,6 +49,12 @@
 #' tests whether confidence intervals and joint confidence regions detect deviations
 #' from hypothesized values. The joint confidence region typically provides higher
 #' statistical power, especially when the X-range is narrow (high slope-intercept correlation).
+#'
+#' Each simulated data set is fitted with [dem_reg()] and tested with
+#' [joint_test()] and the marginal confidence intervals, exactly as an analysis
+#' would be, so the estimated power is the power of those tests. The error
+#' ratio passed to `dem_reg()` is the ratio of the two variance functions at the
+#' mean of the simulated x values. Fits that fail count as non-detections.
 #'
 #' The variance functions allow flexible modeling of heteroscedastic errors:
 #' - constant: sigma^2 = beta1
@@ -96,7 +105,10 @@ deming_power_sim <- function(n_sims = 1000,
                              y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
                              x_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
                              weighted = FALSE,
-                             conf.level = 0.95) {
+                             conf.level = 0.95,
+                             joint_method = c("sadler", "wald")) {
+
+  joint_method <- match.arg(joint_method)
 
   # Input validation
   if (sample_size < 3) stop("sample_size must be at least 3")
@@ -148,15 +160,13 @@ deming_power_sim <- function(n_sims = 1000,
       slope_detected[i] <- !(ideal_slope >= slope_ci[1] && ideal_slope <= slope_ci[2])
       intercept_detected[i] <- !(ideal_intercept >= int_ci[1] && ideal_intercept <= int_ci[2])
 
-      # Test with joint region
-      joint_detected[i] <- !.test_joint_enclosure(
-        intercept = fit$coefficients[1],
-        slope =  fit$coefficients[2],
-        vcov = vcov(fit),
-        ideal_intercept = ideal_intercept,
-        ideal_slope = ideal_slope,
-        conf.level = conf.level
-      )$is_enclosed
+      # Test with joint region, exactly as joint_test() does
+      jt <- joint_test(fit,
+                       ideal_intercept = ideal_intercept,
+                       ideal_slope = ideal_slope,
+                       conf.level = conf.level,
+                       method = joint_method)
+      joint_detected[i] <- jt$p.value < 1 - conf.level
 
     }, error = function(e) {
       # If fit fails, count as non-detection
@@ -188,7 +198,8 @@ deming_power_sim <- function(n_sims = 1000,
       ideal_slope = ideal_slope,
       ideal_intercept = ideal_intercept,
       weighted = weighted,
-      conf.level = conf.level
+      conf.level = conf.level,
+      joint_method = joint_method
     )
   )
 
@@ -210,7 +221,11 @@ deming_power_sim <- function(n_sims = 1000,
 #' @param initial_n Starting sample size for search. Default is 20.
 #' @param max_n Maximum sample size to try. Default is 500.
 #' @param n_sims Number of simulations per sample size tested. Default is 500.
-#' @param use_joint Logical. If TRUE, optimizes for joint region power; if FALSE, for CI power.
+#' @param use_joint Which target ends the search. `NULL` (default) searches until
+#'   both the joint-region and the confidence-interval targets are reached, so
+#'   both sample sizes (and the reduction) are reported. `TRUE` stops at the
+#'   joint-region target and `FALSE` at the confidence-interval target; the
+#'   other sample size is then reported only if it was reached first.
 #' @param step_size Step size for sample size increments. Default is 5.
 #' @param ... Additional arguments passed to deming_power_sim()
 #'
@@ -227,8 +242,16 @@ deming_power_sim <- function(n_sims = 1000,
 #' needed to achieve the target power. It tests both confidence interval and
 #' joint confidence region approaches, allowing comparison of required sample sizes.
 #'
-#' Using joint confidence regions typically requires 20-50% fewer samples than
+#' Using joint confidence regions typically requires far fewer samples than
 #' confidence intervals when the measurement range is narrow (max:min ratio < 10:1).
+#'
+#' Each power is a simulation estimate (Monte Carlo SE about 1.3 percentage
+#' points at 90% power with `n_sims = 500`), and the search takes the first N
+#' whose estimate reaches the target, which tends to pick N slightly too small.
+#' In simulations the true power at the returned N was close to the target on
+#' average but below 85% in up to 20% of runs. Use a larger `n_sims` (or check
+#' the chosen N with [deming_power_sim()]) when the sample size matters. N is
+#' never below `initial_n`.
 #'
 #' @examples
 #' \dontrun{
@@ -255,7 +278,7 @@ deming_sample_size <- function(target_power = 0.90,
                                 initial_n = 20,
                                 max_n = 500,
                                 n_sims = 500,
-                                use_joint = TRUE,
+                                use_joint = NULL,
                                 step_size = 5,
                                 ...) {
 
@@ -265,6 +288,11 @@ deming_sample_size <- function(target_power = 0.90,
   }
   if (initial_n < 3) stop("initial_n must be at least 3")
   if (max_n <= initial_n) stop("max_n must be greater than initial_n")
+  if (!is.null(use_joint) && !(is.logical(use_joint) && length(use_joint) == 1 &&
+                               !is.na(use_joint))) {
+    stop("use_joint must be NULL, TRUE or FALSE")
+  }
+  search <- if (is.null(use_joint)) "both" else if (use_joint) "joint" else "ci"
 
   # Grid of sample sizes to test
   sample_sizes <- seq(initial_n, max_n, by = step_size)
@@ -304,8 +332,12 @@ deming_sample_size <- function(target_power = 0.90,
       n_required_joint <- n
     }
 
-    # Stop if both targets achieved
-    if (!is.na(n_required_ci) && !is.na(n_required_joint)) {
+    # Stop once the target(s) searched for are achieved
+    done <- switch(search,
+                   both = !is.na(n_required_ci) && !is.na(n_required_joint),
+                   joint = !is.na(n_required_joint),
+                   ci = !is.na(n_required_ci))
+    if (done) {
       cat(sprintf("\nTarget power achieved!\n"))
       break
     }
@@ -323,6 +355,12 @@ deming_sample_size <- function(target_power = 0.90,
   } else {
     reduction_n <- NA
     reduction_pct <- NA
+  }
+  reached <- switch(search,
+                    both = !is.na(n_required_ci) && !is.na(n_required_joint),
+                    joint = !is.na(n_required_joint),
+                    ci = !is.na(n_required_ci))
+  if (!reached) {
     warning("Target power not achieved within max_n. Consider increasing max_n.")
   }
 
@@ -333,6 +371,8 @@ deming_sample_size <- function(target_power = 0.90,
     power_curve = power_curve,
     reduction_n = reduction_n,
     reduction_pct = reduction_pct,
+    search = search,
+    max_n_tested = max(power_curve$n),
     settings = list(...)
   )
 
@@ -438,7 +478,8 @@ print.deming_power <- function(x, ...) {
   cat(sprintf("  Slope CI:          %.1f%%\n", x$power_ci_slope * 100))
   cat(sprintf("  Intercept CI:      %.1f%%\n", x$power_ci_intercept * 100))
   cat(sprintf("  Either CI:         %.1f%%\n", x$power_either_ci * 100))
-  cat(sprintf("  Joint Region:      %.1f%%\n", x$power_joint * 100))
+  cat(sprintf("  Joint Region:      %.1f%% (%s)\n", x$power_joint * 100,
+              if (identical(x$settings$joint_method, "wald")) "Wald" else "Sadler"))
   cat(sprintf("\nJoint Region Advantage: +%.1f percentage points\n",
               x$advantage * 100))
 
@@ -451,17 +492,27 @@ print.deming_sample_size <- function(x, ...) {
   cat("\n=== Deming Regression Sample Size Determination ===\n\n")
   cat(sprintf("Target Power: %.0f%%\n\n", x$target_power * 100))
 
+  # Searches that stopped at one target leave the other unknown
+  not_reached <- function(which) {
+    if (!is.null(x$search) && !x$search %in% c("both", which)) {
+      sprintf("Not reached by N = %d (search stopped at the %s target)",
+              x$max_n_tested, if (which == "ci") "joint" else "CI")
+    } else {
+      "Target not achieved"
+    }
+  }
+
   cat("Required Sample Sizes:\n")
   if (!is.na(x$n_required_ci)) {
     cat(sprintf("  Confidence Intervals:  N = %d\n", x$n_required_ci))
   } else {
-    cat("  Confidence Intervals:  Target not achieved\n")
+    cat("  Confidence Intervals: ", not_reached("ci"), "\n")
   }
 
   if (!is.na(x$n_required_joint)) {
     cat(sprintf("  Joint Region:          N = %d\n", x$n_required_joint))
   } else {
-    cat("  Joint Region:          Target not achieved\n")
+    cat("  Joint Region:         ", not_reached("joint"), "\n")
   }
 
   if (!is.na(x$reduction_n)) {

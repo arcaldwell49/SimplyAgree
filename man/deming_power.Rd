@@ -17,7 +17,8 @@ deming_power_sim(
   y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
   x_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
   weighted = FALSE,
-  conf.level = 0.95
+  conf.level = 0.95,
+  joint_method = c("sadler", "wald")
 )
 }
 \arguments{
@@ -46,6 +47,10 @@ For power function: sigma^2 = (beta1 + beta2*U)^J}
 \item{weighted}{Logical. Use weighted Deming regression? Default is FALSE.}
 
 \item{conf.level}{Confidence level for tests. Default is 0.95.}
+
+\item{joint_method}{The joint test, passed to \code{\link[=joint_test]{joint_test()}} as \code{method}:
+\code{"sadler"} (default, Sadler's sum-of-squares F test) or \code{"wald"}
+(jackknife Wald ellipse, liberal in small samples).}
 }
 \value{
 A list of class "deming_power" containing:
@@ -73,6 +78,12 @@ This function generates simulated datasets with specified error characteristics 
 tests whether confidence intervals and joint confidence regions detect deviations
 from hypothesized values. The joint confidence region typically provides higher
 statistical power, especially when the X-range is narrow (high slope-intercept correlation).
+
+Each simulated data set is fitted with \code{\link[=dem_reg]{dem_reg()}} and tested with
+\code{\link[=joint_test]{joint_test()}} and the marginal confidence intervals, exactly as an analysis
+would be, so the estimated power is the power of those tests. The error
+ratio passed to \code{dem_reg()} is the ratio of the two variance functions at the
+mean of the simulated x values. Fits that fail count as non-detections.
 
 The variance functions allow flexible modeling of heteroscedastic errors:
 \itemize{

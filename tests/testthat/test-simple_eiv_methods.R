@@ -777,7 +777,7 @@ test_that("plot_joint uses the model's level by default and accepts conf.level",
 })
 
 test_that("plot_joint errors when vcov not available", {
-  pb_no_vcov <- pb_reg(y ~ x, data = test_data)
+  pb_no_vcov <- suppressWarnings(pb_reg(y ~ x, data = test_data))
   expect_error(suppressWarnings(plot_joint(pb_no_vcov)),
                "replicates")
 })
@@ -840,8 +840,10 @@ test_that("joint_test errors when vcov not available", {
   mock_fit$vcov <- NULL
 
   expect_error(
-    expect_warning(joint_test(mock_fit))
+    expect_warning(joint_test(mock_fit, method = "wald"))
   )
+  # The Sadler test does not use the vcov
+  expect_s3_class(joint_test(mock_fit), "htest")
 })
 
 
@@ -851,9 +853,105 @@ test_that("joint_test errors with non-finite vcov", {
   mock_fit$vcov[1, 1] <- Inf
 
   expect_error(
-    joint_test(mock_fit),
+    joint_test(mock_fit, method = "wald"),
     "non-finite values"
   )
+})
+
+
+# Sadler (2010) sum-of-squares joint test --------------
+# Direct computation: S(a, b) = sum w (y - a - b x)^2 / (1 + lambda b^2)
+sadler_ref <- function(fit, a0 = 0, b0 = 1) {
+  d <- fit$model
+  w <- fit$weights
+  lam <- fit$error.ratio
+  S <- function(a, b) sum(w * (d$y - a - b * d$x)^2) / (1 + lam * b^2)
+  s_hat <- S(coef(fit)[[1]], coef(fit)[[2]])
+  df <- nrow(d) - 2
+  f <- ((S(a0, b0) - s_hat) / 2) / (s_hat / df)
+  c(F = f, p = pf(f, 2, df, lower.tail = FALSE))
+}
+
+test_that("joint_test defaults to the Sadler test for Deming fits", {
+  jt <- joint_test(dem_model)
+  expect_match(jt$method, "Sadler")
+  expect_named(jt$statistic, "F")
+  expect_equal(unname(jt$parameter), c(2L, nrow(dem_model$model) - 2L))
+  ref <- sadler_ref(dem_model)
+  expect_equal(unname(jt$statistic), unname(ref["F"]), tolerance = 1e-10)
+  expect_equal(jt$p.value, unname(ref["p"]), tolerance = 1e-10)
+})
+
+test_that("Sadler test matches the direct computation for weighted fits and other nulls", {
+  wfit <- dem_reg(y ~ x, data = test_data, weighted = TRUE, error.ratio = 2)
+  jt <- joint_test(wfit, ideal_intercept = 1, ideal_slope = 0.95)
+  ref <- sadler_ref(wfit, 1, 0.95)
+  expect_equal(jt$p.value, unname(ref["p"]), tolerance = 1e-10)
+})
+
+test_that("the Deming estimate minimises the Sadler sum of squares", {
+  wfit <- dem_reg(y ~ x, data = test_data, weighted = TRUE, error.ratio = 2)
+  s <- SimplyAgree:::.sadler_setup(wfit)
+  S <- function(p) SimplyAgree:::.sadler_S(s, p[1], p[2])
+  o <- optim(coef(wfit) + c(0.5, 0.05), S, control = list(reltol = 1e-14))
+  expect_lte(S(coef(wfit)), o$value * (1 + 1e-8))
+})
+
+test_that("joint_test method = 'wald' reproduces the Mahalanobis test", {
+  jt <- joint_test(dem_model, method = "wald")
+  expect_match(jt$method, "Wald, F-based")
+  d <- c(0, 1) - coef(dem_model)
+  m <- as.numeric(t(d) %*% solve(vcov(dem_model)) %*% d)
+  expect_equal(unname(jt$statistic), m, tolerance = 1e-10)
+  expect_equal(jt$p.value, pf(m / 2, 2, dem_model$df.residual, lower.tail = FALSE),
+               tolerance = 1e-10)
+  ja <- joint_test(dem_model, method = "wald", test_method = "asymptotic")
+  expect_equal(ja$p.value, pchisq(m, 2, lower.tail = FALSE), tolerance = 1e-10)
+})
+
+test_that("test_method = 'asymptotic' is refused for the Sadler test", {
+  expect_error(joint_test(dem_model, test_method = "asymptotic"),
+               "only to method = 'wald'")
+  expect_error(plot_joint(dem_model, test_method = "asymptotic"),
+               "only to method = 'wald'")
+})
+
+test_that("plot_joint draws the exact Sadler region", {
+  p <- plot_joint(dem_fit)
+  expect_s3_class(p, "ggplot")
+  expect_match(p$labels$caption, "Sadler")
+  reg <- p$layers[[1]]$data
+  s <- SimplyAgree:::.sadler_setup(dem_fit)
+  s_hat <- SimplyAgree:::.sadler_S(s, coef(dem_fit)[[1]], coef(dem_fit)[[2]])
+  f <- (SimplyAgree:::.sadler_S(s, reg$intercept, reg$slope) - s_hat) / 2 /
+    (s_hat / s$df)
+  expect_equal(f, rep(qf(0.95, 2, s$df), nrow(reg)), tolerance = 1e-6)
+  # The Wald option still draws the ellipse
+  expect_match(plot_joint(dem_fit, method = "wald")$labels$caption, "Wald")
+})
+
+test_that("plot_joint warns and omits an unbounded Sadler region", {
+  set.seed(3)
+  noisy <- data.frame(x = c(1, 2, 3, 4), y = c(2, -3, 4, 0.5))
+  fit <- suppressWarnings(dem_reg(y ~ x, data = noisy))
+  expect_warning(p <- plot_joint(fit, show_intervals = FALSE), "unbounded")
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(joint_test(fit), "htest")
+})
+
+test_that("Sadler test holds its size where the Wald test is liberal (n = 10)", {
+  skip_on_cran()
+  set.seed(2010)
+  rej <- replicate(2000, {
+    xt <- runif(10, 50, 100)
+    d <- data.frame(x = xt + rnorm(10, 0, 2), y = xt + rnorm(10, 0, 1))
+    fit <- dem_reg(y ~ x, data = d, error.ratio = 4)
+    c(sadler = joint_test(fit)$p.value < 0.05,
+      wald = joint_test(fit, method = "wald")$p.value < 0.05)
+  })
+  # 2000 sims: MC SE about 0.5 points at 5%
+  expect_lt(abs(mean(rej["sadler", ]) - 0.05), 0.015)
+  expect_gt(mean(rej["wald", ]), 0.065)
 })
 
 

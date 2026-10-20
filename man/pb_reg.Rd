@@ -24,8 +24,8 @@ pb_reg(
 
 \item{data}{Data frame with all data.}
 
-\item{id}{Column with subject identifier (optional). If provided, measurement error
-ratio is calculated from replicate measurements.}
+\item{id}{Column with subject identifier (optional). If provided, replicate
+measurements are averaged within each subject before fitting.}
 
 \item{method}{Method for Passing-Bablok estimation. Options are:
 \itemize{
@@ -39,8 +39,9 @@ ratio is calculated from replicate measurements.}
 \item{weights}{An optional vector of case weights to be used in the fitting process.
 Should be NULL or a numeric vector.}
 
-\item{error.ratio}{Ratio of measurement error variances (var(x)/var(y)). Default is 1.
-This argument is ignored if subject identifiers are provided via \code{id}.}
+\item{error.ratio}{Must be 1 (the default). Values other than 1 are no longer
+supported and give an error; see "Measurement Error" in Details. Use
+\code{\link[=dem_reg]{dem_reg()}} when the error variances of x and y differ.}
 
 \item{replicates}{Number of resamples for confidence intervals and the
 variance-covariance matrix. For \code{se_method = "bootstrap"} this is the number of
@@ -58,8 +59,8 @@ confidence intervals (default). Used when \code{replicates > 0}.
 random subsets (Shao & Wu, 1989). Used when \code{replicates > 0}.
 \item "dufey": \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}} Analytic sandwich
 estimator of Dufey (2020). Does not require resampling (\code{replicates} is
-ignored). Only available for the "scissors" method without case weights
-and with \code{error.ratio = 1}. See Details before using it for joint tests.
+ignored). Only available for the "scissors" method without case weights.
+Not used by \code{\link[=joint_test]{joint_test()}} or \code{\link[=plot_joint]{plot_joint()}} (see Details).
 }}
 
 \item{model}{Logical. If TRUE (default), the model frame is stored in the returned object.
@@ -88,7 +89,7 @@ or \code{se_method = "dufey"} is used; otherwise NULL).
 \item \code{x_vals}: Original x values used in fitting.
 \item \code{y_vals}: Original y values used in fitting.
 \item \code{weights}: Case weights (if provided).
-\item \code{error.ratio}: Error ratio used in fitting.
+\item \code{error.ratio}: Always 1 (kept for compatibility).
 \item \code{conf.level}: Confidence level used.
 \item \code{method}: Character string describing the method.
 \item \code{method_num}: Numeric method identifier (1, 2, or 3).
@@ -133,24 +134,25 @@ Uses the line y = -x as the reference for partitioning points.
 of slopes below the horizontal, then uses this as the reference line.
 }
 
-\subsection{Measurement Error Handling}{
+\subsection{Measurement Error}{
 
-If the data are measured in replicates, then the measurement error ratio can be
-directly derived from the data. This can be accomplished by indicating the subject
-identifier with the \code{id} argument. When replicates are not available in the data,
-then the ratio of error variances (var(x)/var(y)) can be provided with the
-\code{error.ratio} argument (default = 1, indicating equal measurement errors).
+Passing-Bablok regression implicitly assumes that the ratio of the error
+variances of y and x equals the squared slope (equal error variances when
+the slope is 1). Earlier versions accepted \code{error.ratio != 1} (or estimated
+it from replicates via \code{id}) and weighted the pairwise slopes by it. In
+simulations this biased the slope (by -0.07 to -0.43 with an error ratio of
+4), the bias did not shrink with sample size, and joint tests then rejected a
+true identity line 81-100\% of the time with n >= 50. \code{error.ratio != 1} is
+therefore an error. When the error variances differ, use \code{\link[=dem_reg]{dem_reg()}} with
+the appropriate \code{error.ratio} (or \code{id}).
 
-The error ratio affects how pairwise slopes are weighted in the robust median
-calculation. When error.ratio = 1, all pairs receive equal weight. When
-error.ratio != 1, pairs are weighted to account for heterogeneous measurement
-precision.
+With \code{id}, replicate measurements are averaged within each subject and the
+subject means are analysed.
 }
 
 \subsection{Weighting}{
 
-Case weights can be provided via the \code{weights} argument. These are distinct from
-measurement error weighting (controlled by \code{error.ratio}). Case weights allow
+Case weights can be provided via the \code{weights} argument. Case weights allow
 you to down-weight or up-weight specific observations in the analysis.
 }
 
@@ -176,16 +178,17 @@ estimator for the equivariant ("scissors") Passing-Bablok estimator, based on
 the U-statistic variance of Kendall's tau and a sandwich estimator for the
 intercept. The slope interval is formed from order statistics of the pairwise
 slopes and the intercept interval is Wald-type. \strong{This option is
-experimental.} In simulations its marginal standard errors were accurate
-for n >= 20, but joint tests of intercept and slope (\code{\link[=joint_test]{joint_test()}}) rejected
-a true null hypothesis about 7-11\% of the time at a nominal 5\%, suggesting the
-intercept-slope covariance is not yet reliable. Prefer the pairs bootstrap
-or delete-d jackknife for joint tests.
+experimental.} In simulations its marginal intervals had close to nominal
+coverage for n >= 20, but a joint test of intercept and slope built from
+its variance-covariance matrix rejected a true null hypothesis 8-11\% of the
+time at a nominal 5\%. \code{\link[=joint_test]{joint_test()}} and \code{\link[=plot_joint]{plot_joint()}} therefore refuse
+Dufey fits; use the pairs bootstrap or delete-d jackknife, which held
+4.3-5.4\% in the same simulations.
 }
 
 Resampling is particularly useful for:
 \itemize{
-\item Weighted regression (case weights or error.ratio != 1)
+\item Weighted regression (case weights)
 \item Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)
 \item Joint tests of intercept and slope
 }
@@ -203,21 +206,19 @@ The method automatically:
 # Basic Passing-Bablok regression (scissors method, default)
 model <- pb_reg(method2 ~ method1, data = mydata)
 
-# With known error ratio
-model_er <- pb_reg(method2 ~ method1, data = mydata, error.ratio = 2)
-
-# With replicate measurements
+# With replicate measurements (averaged within subject)
 model_rep <- pb_reg(method2 ~ method1, data = mydata, id = "subject_id")
 
 # With bootstrap confidence intervals
-model_boot <- pb_reg(method2 ~ method1, data = mydata,
-                     error.ratio = 1.5, replicates = 1000)
+model_boot <- pb_reg(method2 ~ method1, data = mydata, replicates = 1000)
 
 # Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix
 model_jack <- pb_reg(method2 ~ method1, data = mydata,
                      se_method = "jackknife", replicates = 1000)
 model_dufey <- pb_reg(method2 ~ method1, data = mydata, se_method = "dufey")
-joint_test(model_dufey)
+
+# Joint test of intercept and slope (bootstrap or jackknife fits)
+joint_test(model_boot)
 
 # Symmetric method
 model_sym <- pb_reg(method2 ~ method1, data = mydata, method = "symmetric")
