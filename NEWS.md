@@ -60,6 +60,7 @@
   - `limits` gains an `SD` column with the residual SD used for each row.
   - If the variance depends on `avg` (e.g., `weights = nlme::varPower(form = ~avg)`), the limits are reported at the minimum, median, and maximum of `avg`, even when `prop_bias = FALSE`.
 - The `model` returned by `tolerance_limit()` is now self-contained: its call stores the data, correlation structure, and variance function, and calls `nlme::gls`. `update()`, `nlme::getData()`, and `emmeans()` now work on it outside of the function (previously they failed with errors like "object 'var1' not found").
+- `loa_lme()` is deprecated in favour of `tolerance_limit()`, which fits the same random-intercept model with `model = "lme"` (and per-condition residual variances when `condition` is supplied, as `het_var = TRUE` did) and gives analytic limits without a bootstrap. `loa_mixed()` now also points to `tolerance_limit()`.
 - Renamed the `tol_method` options of `tolerance_limit()`: `"approx"` is now `"analytic"` (the default) and `"perc"` is now `"boot_cal"`. The old names still work but are deprecated.
 - Fixed the parametric bootstrap used by `tolerance_limit(tol_method = "boot_cal")` (previously `"perc"`). **Results for the bootstrap will change.**
   - Replicates are now simulated from the point estimates of the fitted model. Previously the coefficients were also drawn from their sampling distribution before adding residual noise, which roughly doubled the sampling variance of the bootstrapped bias and made the tolerance limits too wide.

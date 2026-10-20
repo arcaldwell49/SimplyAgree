@@ -4,7 +4,7 @@
 #' `r lifecycle::badge('deprecated')`
 #'
 #'`loa_mixed()` is outdated, and for new code we recommend
-#' switching to `loa_lme()` or `tolerance_limit`, which are easier to use, have more features,
+#' switching to `tolerance_limit()`, which are easier to use, have more features,
 #' and are still under active development.
 #'
 #' This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
@@ -51,7 +51,7 @@ loa_mixed = function(diff,
                      agree.level = .95,
                      replicates = 1999,
                      type = "bca"){
-  lifecycle::deprecate_warn("0.2.0", "loa_mixed()", "loa_lme()")
+  lifecycle::deprecate_warn("0.2.0", "loa_mixed()", "tolerance_limit()")
   if (conf.level >= 1 || conf.level <= 0) {
     stop("conf.level must be a value between 0 and 1")
   }

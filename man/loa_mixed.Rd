@@ -53,7 +53,7 @@ Returns single list with the results of the agreement analysis.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
 \code{loa_mixed()} is outdated, and for new code we recommend
-switching to \code{loa_lme()} or \code{tolerance_limit}, which are easier to use, have more features,
+switching to \code{tolerance_limit()}, which are easier to use, have more features,
 and are still under active development.
 
 This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
