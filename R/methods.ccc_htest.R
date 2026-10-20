@@ -86,10 +86,11 @@ summary.ccc_htest <- function(object,
   s_value <- if (!is.null(object$p.value)) -log2(object$p.value) else NULL
   result_text <- .htest_result_text(object, style, s_value,
                                     alpha = 1 - s$conf.level)
-  text <- paste(result_text,
+  text <- trimws(paste(result_text,
                 .describe_ccc_estimand(object),
                 .describe_ccc_design(object),
-                .describe_ccc_inference(object))
+                .describe_ccc_inference(object),
+                .describe_ccc_bias(object)))
   structure(list(text = text,
                  style = style,
                  estimate = object$estimate,
@@ -195,6 +196,19 @@ check.ccc_htest <- function(x, ...) {
 .describe_ccc_inference <- function(object) {
   s <- object$settings
   tested <- !is.null(object$p.value)
+  if (isTRUE(s$boot)) {
+    b <- object$boot
+    return(paste0(
+      "The interval is a nonparametric bootstrap ", .boot_ci_name(b$boot_ci),
+      " interval from ", b$n_used, " of ", b$replicates,
+      " replicates (subjects resampled)",
+      if (b$boot_ci == "stud") {
+        paste0(", studentized on Fisher's z scale with a delete-one-subject ",
+               "jackknife standard error in each replicate")
+      } else "",
+      if (tested) "; the p-value inverts this interval and is approximate."
+      else "."))
+  }
   what <- if (tested) "The interval and z test use" else "The interval uses"
   how <- if (s$data_type == "simple") {
     paste0("Fisher's z transformation with Lin's (1989) delta-method ",
@@ -207,6 +221,30 @@ check.ccc_htest <- function(x, ...) {
            " degrees of freedom")
   }
   paste0(what, " ", how, ".")
+}
+
+# Jackknife bias (reps/nest), described when it is sizeable: above 0.01 or
+# above 10% of the interval width. Empty string otherwise.
+.describe_ccc_bias <- function(object) {
+  jk <- object$jackknife
+  if (is.null(jk) || !is.finite(jk$bias)) {
+    return("")
+  }
+  width <- diff(object$conf.int)
+  if (abs(jk$bias) <= 0.01 && abs(jk$bias) <= 0.1 * width) {
+    return("")
+  }
+  dir <- if (jk$bias < 0) "low" else "high"
+  paste0(
+    "With few subjects the CCC tends to be biased low; the jackknife ",
+    "suggests this estimate is about ", .fmt_num(abs(jk$bias)), " too ", dir,
+    " (bias-corrected ", .fmt_num(jk$estimate_bc),
+    if (jk$clamped) ", truncated to the possible range" else "",
+    "). The correction removes the average bias but is not more accurate ",
+    "for a single study, so it is reported only as a guide (it is useful ",
+    "when estimates are pooled across studies)",
+    if (object$settings$data_type == "reps" && !isTRUE(object$settings$boot))
+      "; for replicate data with few subjects, consider boot = TRUE." else ".")
 }
 
 # Identity plot: y against x with the line of identity (perfect concordance)

@@ -28,5 +28,10 @@
       subjects (20 measurements of x and 18 of y). The interval uses Fisher's
       z transformation with a delete-one-subject jackknife standard error,
       which treats subjects, not measurements, as independent, and a t
-      distribution with 3 degrees of freedom.
+      distribution with 3 degrees of freedom. With few subjects the CCC tends
+      to be biased low; the jackknife suggests this estimate is about 0.173
+      too low (bias-corrected 0.607). The correction removes the average bias
+      but is not more accurate for a single study, so it is reported only as
+      a guide (it is useful when estimates are pooled across studies); for
+      replicate data with few subjects, consider boot = TRUE.
 

@@ -570,3 +570,186 @@ test_that("check shows linearity instead of proportional bias", {
   loa <- check(agreement_limit(x = "x", y = "y", data = reps))
   expect_equal(loa$labels$title, "Proportional Bias")
 })
+
+# Subject bootstrap (data_type = "reps") ---------------------------------------
+
+# replicate data with 12 subjects (the reps data set has only 4)
+boot_reps_data <- function() {
+  set.seed(2026)
+  g <- 12
+  k <- 3
+  id <- rep(seq_len(g), each = k)
+  a <- rnorm(g)[id]
+  x <- a + rnorm(g, 0, 0.4)[id] + rnorm(g * k, 0, 0.6)
+  y <- 0.3 + a + rnorm(g, 0, 0.4)[id] + rnorm(g * k, 0, 0.6)
+  y[c(4, 17)] <- NA
+  data.frame(id = id, x = x, y = y)
+}
+
+test_that("the summary-statistic REML fit matches .ccc_vc()", {
+  data("reps")
+  long <- function(d) {
+    as.data.frame(tidyr::drop_na(tidyr::pivot_longer(
+      d[c("id", "x", "y")], !id, names_to = "method", values_to = "measure")))
+  }
+  fast <- function(d) {
+    as.numeric(SimplyAgree:::.ccc_vc_fit(SimplyAgree:::.ccc_vc_stats(d)))
+  }
+  expect_equal(fast(reps), SimplyAgree:::.ccc_vc(long(reps)), tolerance = 1e-4)
+  # missing values
+  r2 <- reps
+  r2$y[c(2, 9)] <- NA
+  expect_equal(fast(r2), SimplyAgree:::.ccc_vc(long(r2)), tolerance = 1e-4)
+  # one measurement per method: no subject:method term
+  r1 <- reps[!duplicated(reps$id), ]
+  expect_equal(fast(r1), SimplyAgree:::.ccc_vc(long(r1)), tolerance = 1e-4)
+  # the jackknife SE on the original data matches ccc_test()
+  set.seed(1)
+  bo <- SimplyAgree:::.ccc_boot_reps(reps, R = 3)
+  ct <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  expect_equal(bo$t0[["se_z"]], ct$stderr[["SE Z"]], tolerance = 1e-3)
+})
+
+test_that("ccc_test(boot = TRUE) returns a bootstrap interval", {
+  reps <- boot_reps_data()
+  ct <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  set.seed(42)
+  res <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                  data_type = "reps", boot = TRUE, replicates = 25)
+  expect_s3_class(res, "ccc_htest")
+  expect_equal(res$estimate, ct$estimate)
+  expect_null(res$statistic)
+  expect_null(res$p.value)
+  expect_true(res$conf.int[1] < res$estimate && res$estimate < res$conf.int[2])
+  expect_true(all(res$conf.int >= -1 & res$conf.int <= 1))
+  expect_match(res$method, "bootstrap studentized interval")
+  expect_equal(res$boot$replicates, 25)
+  expect_equal(res$boot$n_used + res$boot$n_failed, 25)
+  expect_true("boot" %in% names(res$stderr))
+  expect_true(res$settings$boot)
+  expect_match(summary(res)$text, "bootstrap studentized interval")
+  # same seed, same interval
+  set.seed(42)
+  res2 <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                   data_type = "reps", boot = TRUE, replicates = 25)
+  expect_equal(res$conf.int, res2$conf.int)
+})
+
+test_that("ccc_test(boot = TRUE) gives p-values and one-sided intervals", {
+  reps <- boot_reps_data()
+  set.seed(3)
+  res <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                  data_type = "reps", boot = TRUE, replicates = 29,
+                  null.value = 0.2, alternative = "greater")
+  expect_true(res$p.value >= 0 && res$p.value <= 1)
+  expect_null(res$statistic)
+  expect_null(res$parameter)
+  expect_equal(res$conf.int[2], 1)
+  expect_match(summary(res)$text, "approximate")
+  for (ci in c("perc", "bca")) {
+    set.seed(4)
+    r <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                  data_type = "reps", boot = TRUE, boot_ci = ci,
+                  replicates = 29)
+    expect_length(r$conf.int, 2)
+    expect_true(r$conf.int[1] < r$conf.int[2])
+  }
+})
+
+test_that("ccc_test(boot = TRUE) checks its arguments", {
+  data("reps")
+  expect_error(ccc_test(x = "x", y = "y", data = reps, boot = TRUE),
+               "only for data_type = \"reps\"")
+  expect_error(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                        data_type = "nest", boot = TRUE),
+               "only for data_type = \"reps\"")
+  expect_error(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                        data_type = "reps", boot = "yes"),
+               "'boot' must be TRUE or FALSE")
+  expect_error(ccc_test(x = "x", y = "y", id = "id", data = reps,
+                        data_type = "reps", boot = TRUE, replicates = 1),
+               "'replicates'")
+})
+
+test_that("bootstrap weights reproduce resampled data with fresh ids", {
+  skip_on_cran()
+  reps <- boot_reps_data()
+  st <- SimplyAgree:::.ccc_vc_stats(reps)
+  ids <- unique(reps$id)
+  set.seed(11)
+  w <- tabulate(sample.int(length(ids), length(ids), replace = TRUE),
+                length(ids))
+  drawn <- rep(seq_along(ids), w)
+  bdat <- do.call(rbind, lapply(seq_along(drawn), function(j) {
+    s <- reps[reps$id == ids[drawn[j]], c("id", "x", "y")]
+    s$id <- j
+    s
+  }))
+  ref <- SimplyAgree:::.ccc_clustered(bdat, "reps")
+  est <- SimplyAgree:::.ccc_vc_fit(st, w)
+  expect_equal(as.numeric(est), ref$estimate, tolerance = 1e-4)
+  # weighted inner jackknife = jackknife over the resampled subjects
+  zl <- vapply(which(w > 0), function(i) {
+    wl <- w
+    wl[i] <- wl[i] - 1
+    atanh(as.numeric(SimplyAgree:::.ccc_vc_fit(st, wl)))
+  }, numeric(1))
+  wt <- w[w > 0]
+  m <- sum(wt * zl) / sum(wt)
+  se <- sqrt((sum(wt) - 1) / sum(wt) * sum(wt * (zl - m)^2))
+  expect_equal(se, ref$se_z, tolerance = 1e-3)
+})
+
+# Jackknife bias (reps/nest) ---------------------------------------------------
+
+test_that("the jackknife bias matches the leave-one-subject-out estimates", {
+  data("reps")
+  for (type in c("reps", "nest")) {
+    res <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                    data_type = type)
+    ids <- unique(reps$id)
+    loo <- vapply(ids, function(i) {
+      unname(ccc_test(x = "x", y = "y", id = "id",
+                      data = reps[reps$id != i, ], data_type = type)$estimate)
+    }, numeric(1))
+    g <- length(ids)
+    est <- unname(res$estimate)
+    expect_equal(res$jackknife$bias, (g - 1) * (mean(loo) - est),
+                 tolerance = 1e-8)
+    expect_equal(res$jackknife$estimate_bc,
+                 min(max(est - res$jackknife$bias, -1), 1), tolerance = 1e-8)
+    expect_false(res$jackknife$clamped)
+  }
+  expect_null(ccc_test(x = "x", y = "y", data = reps)$jackknife)
+})
+
+test_that("the bias-corrected estimate is kept within -1 and 1", {
+  jb <- SimplyAgree:::.ccc_jack_bias(0.95, c(0.90, 0.91, 0.92))
+  expect_equal(jb$bias, 2 * (0.91 - 0.95))
+  expect_equal(jb$estimate_bc, 1)
+  expect_true(jb$clamped)
+  jb <- SimplyAgree:::.ccc_jack_bias(0.5, c(0.5, 0.5, 0.5))
+  expect_equal(jb$bias, 0)
+  expect_equal(jb$estimate_bc, 0.5)
+  expect_false(jb$clamped)
+})
+
+test_that("summary() mentions a sizeable jackknife bias", {
+  data("reps")
+  res <- ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
+  res$jackknife <- list(bias = -0.04, estimate_bc = 0.75, clamped = FALSE)
+  txt <- summary(res)$text
+  expect_match(txt, "about 0.040* too low")
+  expect_match(txt, "bias-corrected 0.75")
+  expect_match(txt, "consider boot = TRUE")
+  res$jackknife <- list(bias = 0.03, estimate_bc = 1, clamped = TRUE)
+  expect_match(summary(res)$text, "too high .*truncated")
+  res$jackknife$bias <- 0.001
+  expect_no_match(summary(res)$text, "jackknife suggests")
+  res_nest <- ccc_test(x = "x", y = "y", id = "id", data = reps,
+                       data_type = "nest")
+  res_nest$jackknife <- list(bias = -0.04, estimate_bc = 0.75, clamped = FALSE)
+  expect_no_match(summary(res_nest)$text, "boot = TRUE")
+  expect_no_match(summary(ccc_test(x = "x", y = "y", data = reps))$text,
+                  "jackknife suggests")
+})
