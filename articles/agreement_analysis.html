@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -83,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-05</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -370,7 +371,7 @@ correlation.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
 <span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479] 0.1878    [-0.292, 0.5993] [-0.3674, 0.6748]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1341, 0.3219] 0.1520   [-0.2161, 0.6721] [-0.1938, 0.6498]</span></span></code></pre></div>
+<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -1024,7 +1025,7 @@ controlling for time of day (<code>tod</code>).</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition    Bias            Bias CI     SD Prediction Interval</span></span>
 <span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595] 0.1878    [-0.5993, 0.292]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3219, -0.1341] 0.1520   [-0.6721, 0.2161]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342] 0.1520     [-0.672, 0.216]</span></span>
 <span><span class="co">#&gt;   Tolerance Limits</span></span>
 <span><span class="co">#&gt;  [-0.6748, 0.3674]</span></span>
 <span><span class="co">#&gt;  [-0.6498, 0.1938]</span></span></code></pre></div>
@@ -1544,7 +1545,7 @@ argument.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI CV (%) Prediction Interval Tolerance Limits</span></span>
 <span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068] 0.5137    [0.9921, 1.0165]   [0.99, 1.0186]</span></span>
-<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0185] [0.9947, 1.0178]</span></span></code></pre></div>
+<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0184] [0.9947, 1.0178]</span></span></code></pre></div>
 <p>If you prefer to interpret the differences as a percentage
 difference, you can do this by setting the <code>log_tf_display</code>
 argument to “sympercent”. This stands for the “symmetric percentage
@@ -1569,8 +1570,8 @@ difference between the two paired measures.</p>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7958, 1.6334] [-1.0041, 1.8417]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8746] 0.4131   [-0.5914, 1.8283] [-0.5288, 1.7656]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7957, 1.6333] [-1.0041, 1.8417]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3623, 0.8746] 0.4131    [-0.5911, 1.828] [-0.5288, 1.7656]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>

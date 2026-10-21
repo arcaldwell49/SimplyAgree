@@ -5,9 +5,9 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Determine Required Sample Size for Deming Regression — deming_sample_size"><meta name="description" content="#'
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Determine Required Sample Size for Deming Regression — deming_sample_size"><meta name="description" content="
 Automatically determines the minimum sample size needed to achieve target statistical
-power for detecting specified bias in method comparison studies using Deming regression."><meta property="og:description" content="#'
+power for detecting specified bias in method comparison studies using Deming regression."><meta property="og:description" content="
 Automatically determines the minimum sample size needed to achieve target statistical
 power for detecting specified bias in method comparison studies using Deming regression."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -17,7 +17,7 @@ power for detecting specified bias in method comparison studies using Deming reg
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +30,7 @@ power for detecting specified bias in method comparison studies using Deming reg
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -58,7 +59,7 @@ power for detecting specified bias in method comparison studies using Deming reg
     </div>
 
     <div class="ref-description section level2">
-    <p>#' <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
 <p>Automatically determines the minimum sample size needed to achieve target statistical
 power for detecting specified bias in method comparison studies using Deming regression.</p>
     </div>
@@ -70,7 +71,7 @@ power for detecting specified bias in method comparison studies using Deming reg
 <span>  initial_n <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  max_n <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  n_sims <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  use_joint <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use_joint <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  step_size <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -97,7 +98,11 @@ power for detecting specified bias in method comparison studies using Deming reg
 
 
 <dt id="arg-use-joint">use_joint<a class="anchor" aria-label="anchor" href="#arg-use-joint"></a></dt>
-<dd><p>Logical. If TRUE, optimizes for joint region power; if FALSE, for CI power.</p></dd>
+<dd><p>Which target ends the search. <code>NULL</code> (default) searches until
+both the joint-region and the confidence-interval targets are reached, so
+both sample sizes (and the reduction) are reported. <code>TRUE</code> stops at the
+joint-region target and <code>FALSE</code> at the confidence-interval target; the
+other sample size is then reported only if it was reached first.</p></dd>
 
 
 <dt id="arg-step-size">step_size<a class="anchor" aria-label="anchor" href="#arg-step-size"></a></dt>
@@ -135,29 +140,55 @@ power for detecting specified bias in method comparison studies using Deming reg
     <p>This function performs a grid search over sample sizes to find the minimum N
 needed to achieve the target power. It tests both confidence interval and
 joint confidence region approaches, allowing comparison of required sample sizes.</p>
-<p>Using joint confidence regions typically requires 20-50% fewer samples than
+<p>Using joint confidence regions typically requires far fewer samples than
 confidence intervals when the measurement range is narrow (max:min ratio &lt; 10:1).</p>
+<p>Each power is a simulation estimate (Monte Carlo SE about 1.3 percentage
+points at 90% power with <code>n_sims = 500</code>), and the search takes the first N
+whose estimate reaches the target, which tends to pick N slightly too small.
+In simulations the true power at the returned N was close to the target on
+average but below 85% in up to 20% of runs. Use a larger <code>n_sims</code> (or check
+the chosen N with <code><a href="deming_power.html">deming_power_sim()</a></code>) when the sample size matters. N is
+never below <code>initial_n</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Determine N needed for 90% power to detect 5% bias</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Determine N needed for 90% power to detect 5% bias with the joint</span></span></span>
+<span class="r-in"><span><span class="co"># region (use_joint = TRUE stops there; n_sims = 500 or more in practice)</span></span></span>
 <span class="r-in"><span><span class="va">sample_size_result</span> <span class="op">&lt;-</span> <span class="fu">deming_sample_size</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  target_power <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
-<span class="r-in"><span>  initial_n <span class="op">=</span> <span class="fl">30</span>,</span></span>
+<span class="r-in"><span>  initial_n <span class="op">=</span> <span class="fl">10</span>,</span></span>
 <span class="r-in"><span>  max_n <span class="op">=</span> <span class="fl">200</span>,</span></span>
-<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">200</span>,</span></span>
+<span class="r-in"><span>  step_size <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>  use_joint <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">200</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,</span></span>
 <span class="r-in"><span>  ideal_slope <span class="op">=</span> <span class="fl">1.0</span>,</span></span>
 <span class="r-in"><span>  y_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">1</span>, beta2 <span class="op">=</span> <span class="fl">0.05</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  x_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.8</span>, beta2 <span class="op">=</span> <span class="fl">0.04</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Searching for N to achieve 90% power...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Testing N = 10... CI: 13.0%, Joint: 33.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Testing N = 20... CI: 18.5%, Joint: 63.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Testing N = 30... CI: 27.5%, Joint: 80.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Testing N = 40... CI: 38.5%, Joint: 90.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Target power achieved!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sample_size_result</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> === Deming Regression Sample Size Determination ===</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Target Power: 90%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Required Sample Sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Confidence Intervals:  Not reached by N = 40 (search stopped at the joint target) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Joint Region:          N = 40</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sample_size_result</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-plt img"><img src="deming_sample_size-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

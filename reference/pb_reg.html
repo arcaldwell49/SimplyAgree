@@ -19,7 +19,7 @@ method comparison studies."><meta property="og:image" content="https://aaroncald
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,7 @@ method comparison studies."><meta property="og:image" content="https://aaroncald
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -97,8 +98,8 @@ method comparison studies.</p>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
-<dd><p>Column with subject identifier (optional). If provided, measurement error
-ratio is calculated from replicate measurements.</p></dd>
+<dd><p>Column with subject identifier (optional). If provided, replicate
+measurements are averaged within each subject before fitting.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -118,8 +119,9 @@ Should be NULL or a numeric vector.</p></dd>
 
 
 <dt id="arg-error-ratio">error.ratio<a class="anchor" aria-label="anchor" href="#arg-error-ratio"></a></dt>
-<dd><p>Ratio of measurement error variances (var(x)/var(y)). Default is 1.
-This argument is ignored if subject identifiers are provided via <code>id</code>.</p></dd>
+<dd><p>Must be 1 (the default). Values other than 1 are no longer
+supported and give an error; see "Measurement Error" in Details. Use
+<code><a href="dem_reg.html">dem_reg()</a></code> when the error variances of x and y differ.</p></dd>
 
 
 <dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
@@ -139,8 +141,8 @@ confidence intervals (default). Used when <code>replicates &gt; 0</code>.</p></l
 random subsets (Shao &amp; Wu, 1989). Used when <code>replicates &gt; 0</code>.</p></li>
 <li><p>"dufey": <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a> Analytic sandwich
 estimator of Dufey (2020). Does not require resampling (<code>replicates</code> is
-ignored). Only available for the "scissors" method without case weights
-and with <code>error.ratio = 1</code>. See Details before using it for joint tests.</p></li>
+ignored). Only available for the "scissors" method without case weights.
+Not used by <code><a href="joint_test.html">joint_test()</a></code> or <code><a href="joint_test.html">plot_joint()</a></code> (see Details).</p></li>
 </ul></dd>
 
 
@@ -175,7 +177,7 @@ or <code>se_method = "dufey"</code> is used; otherwise NULL).</p></li>
 <li><p><code>x_vals</code>: Original x values used in fitting.</p></li>
 <li><p><code>y_vals</code>: Original y values used in fitting.</p></li>
 <li><p><code>weights</code>: Case weights (if provided).</p></li>
-<li><p><code>error.ratio</code>: Error ratio used in fitting.</p></li>
+<li><p><code>error.ratio</code>: Always 1 (kept for compatibility).</p></li>
 <li><p><code>conf.level</code>: Confidence level used.</p></li>
 <li><p><code>method</code>: Character string describing the method.</p></li>
 <li><p><code>method_num</code>: Numeric method identifier (1, 2, or 3).</p></li>
@@ -210,26 +212,27 @@ of slopes below the horizontal, then uses this as the reference line.</p>
 </div>
 
 <div class="section">
-<h3 id="measurement-error-handling">Measurement Error Handling<a class="anchor" aria-label="anchor" href="#measurement-error-handling"></a></h3>
+<h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a></h3>
 
 
-<p>If the data are measured in replicates, then the measurement error ratio can be
-directly derived from the data. This can be accomplished by indicating the subject
-identifier with the <code>id</code> argument. When replicates are not available in the data,
-then the ratio of error variances (var(x)/var(y)) can be provided with the
-<code>error.ratio</code> argument (default = 1, indicating equal measurement errors).</p>
-<p>The error ratio affects how pairwise slopes are weighted in the robust median
-calculation. When error.ratio = 1, all pairs receive equal weight. When
-error.ratio != 1, pairs are weighted to account for heterogeneous measurement
-precision.</p>
+<p>Passing-Bablok regression implicitly assumes that the ratio of the error
+variances of y and x equals the squared slope (equal error variances when
+the slope is 1). Earlier versions accepted <code>error.ratio != 1</code> (or estimated
+it from replicates via <code>id</code>) and weighted the pairwise slopes by it. In
+simulations this biased the slope (by -0.07 to -0.43 with an error ratio of
+4), the bias did not shrink with sample size, and joint tests then rejected a
+true identity line 81-100% of the time with n &gt;= 50. <code>error.ratio != 1</code> is
+therefore an error. When the error variances differ, use <code><a href="dem_reg.html">dem_reg()</a></code> with
+the appropriate <code>error.ratio</code> (or <code>id</code>).</p>
+<p>With <code>id</code>, replicate measurements are averaged within each subject and the
+subject means are analysed.</p>
 </div>
 
 <div class="section">
 <h3 id="weighting">Weighting<a class="anchor" aria-label="anchor" href="#weighting"></a></h3>
 
 
-<p>Case weights can be provided via the <code>weights</code> argument. These are distinct from
-measurement error weighting (controlled by <code>error.ratio</code>). Case weights allow
+<p>Case weights can be provided via the <code>weights</code> argument. Case weights allow
 you to down-weight or up-weight specific observations in the analysis.</p>
 </div>
 
@@ -239,7 +242,7 @@ you to down-weight or up-weight specific observations in the analysis.</p>
 
 <p>The analytical (Passing &amp; Bablok, 1983) confidence intervals do not provide a
 covariance between the intercept and slope, so a variance-covariance matrix
-(needed by <code><a href="joint_test.html">joint_test()</a></code> and <code><a href="simple_eiv-methods.html">plot_joint()</a></code>) is only returned when one of the
+(needed by <code><a href="joint_test.html">joint_test()</a></code> and <code><a href="joint_test.html">plot_joint()</a></code>) is only returned when one of the
 following is used:</p><ul><li><p><strong>Pairs bootstrap</strong> (<code>se_method = "bootstrap"</code>, <code>replicates &gt; 0</code>): whole
 (x, y) observations are resampled with replacement and the model is refit.
 The variance-covariance matrix is the covariance of the bootstrap estimates
@@ -255,12 +258,13 @@ estimator for the equivariant ("scissors") Passing-Bablok estimator, based on
 the U-statistic variance of Kendall's tau and a sandwich estimator for the
 intercept. The slope interval is formed from order statistics of the pairwise
 slopes and the intercept interval is Wald-type. <strong>This option is
-experimental.</strong> In simulations its marginal standard errors were accurate
-for n &gt;= 20, but joint tests of intercept and slope (<code><a href="joint_test.html">joint_test()</a></code>) rejected
-a true null hypothesis about 7-11% of the time at a nominal 5%, suggesting the
-intercept-slope covariance is not yet reliable. Prefer the pairs bootstrap
-or delete-d jackknife for joint tests.</p></li>
-</ul><p>Resampling is particularly useful for:</p><ul><li><p>Weighted regression (case weights or error.ratio != 1)</p></li>
+experimental.</strong> In simulations its marginal intervals had close to nominal
+coverage for n &gt;= 20, but a joint test of intercept and slope built from
+its variance-covariance matrix rejected a true null hypothesis 8-11% of the
+time at a nominal 5%. <code><a href="joint_test.html">joint_test()</a></code> and <code><a href="joint_test.html">plot_joint()</a></code> therefore refuse
+Dufey fits; use the pairs bootstrap or delete-d jackknife, which held
+4.3-5.4% in the same simulations.</p></li>
+</ul><p>Resampling is particularly useful for:</p><ul><li><p>Weighted regression (case weights)</p></li>
 <li><p>Methods 'invariant' and 'scissors' (where analytical CI validity is uncertain)</p></li>
 <li><p>Joint tests of intercept and slope</p></li>
 </ul><p>The method automatically:</p><ul><li><p>Tests for high positive correlation using Kendall's tau</p></li>
@@ -292,41 +296,115 @@ doi: 10.1214/aos/1176347263</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Basic Passing-Bablok regression (scissors method, default)</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Peak flow: mini vs Wright meter (Bland &amp; Altman, 1986)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ba1986"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># With known error ratio</span></span></span>
-<span class="r-in"><span><span class="va">model_er</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, error.ratio <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Analytic confidence intervals (scissors method, default)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Bootstrap confidence intervals are recommended for 'invariant' and 'scissors' methods. Consider setting replicates &gt; 0.</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Passing-Bablok (scissors) with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pb_reg(formula = mini1 ~ wright1, data = ba1986)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        term    coef      se  lower.ci upper.ci df null_value reject_h0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Intercept -22.502 59.8115 -153.2372   81.219 15          0     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   wright1   1.058  0.1289    0.8412    1.347 15          1     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 degrees of freedom</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="pb_reg-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># With replicate measurements</span></span></span>
-<span class="r-in"><span><span class="va">model_rep</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, id <span class="op">=</span> <span class="st">"subject_id"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Symmetric and scale-invariant methods</span></span></span>
+<span class="r-in"><span><span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, method <span class="op">=</span> <span class="st">"symmetric"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Passing-Bablok (symmetric) with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pb_reg(formula = mini1 ~ wright1, data = ba1986, method = "symmetric")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     wright1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     -24.306       1.065 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Kendall's Tau (H0: tau &lt;= 0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   tau:       0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CUSUM Linearity Test:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Test stat: 0.6667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.6601</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, method <span class="op">=</span> <span class="st">"invariant"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Bootstrap confidence intervals are recommended for 'invariant' and 'scissors' methods. Consider setting replicates &gt; 0.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Passing-Bablok (scale-invariant) with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pb_reg(formula = mini1 ~ wright1, data = ba1986, method = "invariant")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     wright1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     -13.748       1.034 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Kendall's Tau (H0: tau &lt;= 0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   tau:       0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CUSUM Linearity Test:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Test stat: 1.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.2827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># With bootstrap confidence intervals</span></span></span>
-<span class="r-in"><span><span class="va">model_boot</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
-<span class="r-in"><span>                     error.ratio <span class="op">=</span> <span class="fl">1.5</span>, replicates <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Bootstrap (or delete-d jackknife) variance-covariance matrix, needed for</span></span></span>
+<span class="r-in"><span><span class="co"># the joint test of intercept and slope; use more replicates in practice</span></span></span>
+<span class="r-in"><span><span class="va">fit_boot</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, replicates <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">fit_boot</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Joint Confidence Region Test [Wald, F-based] (H0: intercept = 0, slope</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	= 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data:  mini1 ~ wright1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> X-squared = 0.37141, df1 = 2, df2 = 15, p-value = 0.8324</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true intercept and slope are not equal to the null values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> null values:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> intercept     slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         0         1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  intercept      slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -22.502332   1.058061 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">fit_boot</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="pb_reg-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Delete-d jackknife or analytic (Dufey 2020) variance-covariance matrix</span></span></span>
-<span class="r-in"><span><span class="va">model_jack</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
-<span class="r-in"><span>                     se_method <span class="op">=</span> <span class="st">"jackknife"</span>, replicates <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">model_dufey</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, se_method <span class="op">=</span> <span class="st">"dufey"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">model_dufey</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit_jack</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>,</span></span>
+<span class="r-in"><span>                   se_method <span class="op">=</span> <span class="st">"jackknife"</span>, replicates <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Symmetric method</span></span></span>
-<span class="r-in"><span><span class="va">model_sym</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, method <span class="op">=</span> <span class="st">"symmetric"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Scale-invariant method</span></span></span>
-<span class="r-in"><span><span class="va">model_inv</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>, method <span class="op">=</span> <span class="st">"invariant"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># With case weights</span></span></span>
-<span class="r-in"><span><span class="va">model_wt</span> <span class="op">&lt;-</span> <span class="fu">pb_reg</span><span class="op">(</span><span class="va">method2</span> <span class="op">~</span> <span class="va">method1</span>, data <span class="op">=</span> <span class="va">mydata</span>,</span></span>
-<span class="r-in"><span>                   weights <span class="op">=</span> <span class="va">mydata</span><span class="op">$</span><span class="va">case_weights</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># View results</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># Case weights</span></span></span>
+<span class="r-in"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ba1986</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">w</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="fu">pb_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, weights <span class="op">=</span> <span class="va">w</span>, replicates <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Passing-Bablok (scissors) with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pb_reg(formula = mini1 ~ wright1, data = ba1986, weights = w, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     replicates = 199)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     wright1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      -7.562       1.037 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Kendall's Tau (H0: tau &lt;= 0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   tau:       0.7647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.0000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CUSUM Linearity Test:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Test stat: 0.8572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   p-value:   0.3517</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

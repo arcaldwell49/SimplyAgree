@@ -6,8 +6,14 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Power Curve for Bland-Altman Limits of Agreement — blandPowerCurve"><meta name="description" content="
-This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes."><meta property="og:description" content="
-This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+It is superseded by power_agreement_limit(), which returns a power.htest
+object and can solve for the sample size, power, delta or the SD directly.
+This function remains available for drawing power curves."><meta property="og:description" content="
+This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+It is superseded by power_agreement_limit(), which returns a power.htest
+object and can solve for the sample size, power, delta or the SD directly.
+This function remains available for drawing power curves."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -15,7 +21,7 @@ This function calculates the power for the Bland-Altman method under varying par
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +34,7 @@ This function calculates the power for the Bland-Altman method under varying par
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -56,8 +63,11 @@ This function calculates the power for the Bland-Altman method under varying par
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="figures/lifecycle-maturing.svg" alt="[Maturing]"></a>
-This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.</p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#superseded" class="external-link"><img src="figures/lifecycle-superseded.svg" alt="[Superseded]"></a></p>
+<p>This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+It is superseded by <code><a href="power_agreement_limit.html">power_agreement_limit()</a></code>, which returns a <code>power.htest</code>
+object and can solve for the sample size, power, <code>delta</code> or the SD directly.
+This function remains available for drawing power curves.</p>
     </div>
 
     <div class="section level2">
@@ -68,7 +78,9 @@ This function calculates the power for the Bland-Altman method under varying par
 <span>  <span class="va">SD</span>,</span>
 <span>  <span class="va">delta</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span>  agree.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  m <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  icc <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -77,7 +89,8 @@ This function calculates the power for the Bland-Altman method under varying par
 
 
 <dl><dt id="arg-samplesizes">samplesizes<a class="anchor" aria-label="anchor" href="#arg-samplesizes"></a></dt>
-<dd><p>vector of samples sizes at which to estimate power.</p></dd>
+<dd><p>vector of samples sizes at which to estimate power: the
+number of pairs, or the number of subjects when <code>m &gt; 1</code>.</p></dd>
 
 
 <dt id="arg-mu">mu<a class="anchor" aria-label="anchor" href="#arg-mu"></a></dt>
@@ -85,7 +98,7 @@ This function calculates the power for the Bland-Altman method under varying par
 
 
 <dt id="arg-sd">SD<a class="anchor" aria-label="anchor" href="#arg-sd"></a></dt>
-<dd><p>standard deviation of differences</p></dd>
+<dd><p>standard deviation of differences (the <em>total</em> SD when <code>m &gt; 1</code>)</p></dd>
 
 
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
@@ -99,10 +112,29 @@ This function calculates the power for the Bland-Altman method under varying par
 <dt id="arg-agree-level">agree.level<a class="anchor" aria-label="anchor" href="#arg-agree-level"></a></dt>
 <dd><p>the agreement level(s) required. Default is 95%. The proportion of data that should lie between the thresholds, for 95% limits of agreement this should be 0.95. More than one confidence level can be provided.</p></dd>
 
+
+<dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
+<dd><p>number of paired measurements per subject (default 1, independent
+pairs).</p></dd>
+
+
+<dt id="arg-icc">icc<a class="anchor" aria-label="anchor" href="#arg-icc"></a></dt>
+<dd><p>intraclass correlation of the paired <em>differences</em>, in [0, 1).
+Ignored when <code>m = 1</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Power follows the approximate method of Lu et al. (2016). With clustered
+data (<code>m &gt; 1</code>), the standard error of the limits uses the effective sample
+size n \* m / (1 + (m - 1) \* icc) for the mean difference and a
+Satterthwaite df for the SD, under a balanced compound symmetry model (see
+<code><a href="agree_expected_half.html">agree_expected_half()</a></code> for the model). Like the original method, this is
+an approximation; <code>m = 1</code> gives the original results.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -124,10 +156,10 @@ This function calculates the power for the Bland-Altman method under varying par
 <span class="r-plt img"><img src="blandPowerCurve-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># Find at what N power of .8 is achieved</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="powerCurve-methods.html">find_n</a></span><span class="op">(</span><span class="va">powerCurve</span>, power <span class="op">=</span> <span class="fl">.8</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   delta conf.level agree.level power     N</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     8       0.95        0.95 0.800   145</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   delta conf.level agree.level     m   icc power     N</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     8       0.95        0.95     1     0 0.800   145</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span><span class="co"># If the desired power is not found then</span></span></span>
 <span class="r-in"><span><span class="co">## Sample size range must be expanded</span></span></span>

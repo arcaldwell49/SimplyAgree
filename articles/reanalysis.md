@@ -126,9 +126,9 @@ tolerance limits.
 
 ### Rectal Temperature
 
-So we will calculate the tolerance using the `loa_lme` function. We will
-need to identify the columns with the right information using the
-`diff`, `avg`, `condition`, and `id` arguments. We then select the right
+So we will calculate the tolerance using the `tolerance_limit` function.
+We will need to identify the columns with the right information using
+the `x`, `y`, `condition`, and `id` arguments. We then select the right
 data set using the `data` argument. Lastly, we specify the specifics of
 the conditions for how the limits are calculated. For this specific
 analysis I decided to calculate 95% prediction intervals with 95%
@@ -157,9 +157,9 @@ print(rec.post_tol)
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
 #>  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits
-#>    23C/5.5 0.255 [0.0803, 0.4297] 0.2561   [-0.3245, 0.8345] [-0.6109, 1.1209]
-#>    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2689, 0.7769] [-0.5366, 1.0446]
-#>    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3496, 0.7116] [-0.3188, 0.6808]
+#>    23C/5.5 0.255 [0.0804, 0.4296] 0.2561   [-0.3242, 0.8342] [-0.6109, 1.1209]
+#>    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2688, 0.7768] [-0.5366, 1.0446]
+#>    33C/7.5 0.181 [0.0209, 0.3411] 0.1478   [-0.3501, 0.7121] [-0.3188, 0.6808]
 ```
 
 Furthermore, we can visualize the results with a Bland-Altman style plot
@@ -203,7 +203,7 @@ rec.delta_tol
 #> 
 #>  Condition   Bias           Bias CI     SD Prediction Interval
 #>    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]
-#>    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113   [-0.2421, 0.2721]
+#>    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113     [-0.242, 0.272]
 #>    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]
 #>   Tolerance Limits
 #>  [-0.3062, 0.2682]
@@ -260,9 +260,9 @@ eso.post_tol
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
 #>  Condition   Bias            Bias CI     SD Prediction Interval
-#>    23C/5.5 -0.180 [-0.2564, -0.1036] 0.1025   [-0.4332, 0.0732]
-#>    33C/5.5 -0.212   [-0.329, -0.095] 0.1732   [-0.6001, 0.1761]
-#>    33C/7.5 -0.146    [-0.23, -0.062] 0.1062   [-0.4247, 0.1327]
+#>    23C/5.5 -0.180 [-0.2561, -0.1039] 0.1025   [-0.4324, 0.0724]
+#>    33C/5.5 -0.212 [-0.3289, -0.0951] 0.1732   [-0.5999, 0.1759]
+#>    33C/7.5 -0.146 [-0.2297, -0.0623] 0.1062   [-0.4236, 0.1316]
 #>   Tolerance Limits
 #>  [-0.5265, 0.1665]
 #>  [-0.7976, 0.3736]

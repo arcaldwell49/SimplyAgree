@@ -5,11 +5,21 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Limits of Agreement with Linear Mixed Effects — loa_lme"><meta name="description" content="
-This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
-The package author recommends using tolerance_limit as an alternative to this function."><meta property="og:description" content="
-This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
-The package author recommends using tolerance_limit as an alternative to this function."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Limits of Agreement with Linear Mixed Effects — loa_lme"><meta name="description" content='
+loa_lme() is deprecated, and for new code we recommend switching to
+tolerance_limit(), which fits the same random-intercept model with
+model = "lme", gives analytic prediction and tolerance limits (no bootstrap),
+and is still under active development. It takes the two measurements (x
+and y) rather than their difference and average. Supplying condition
+gives each condition its own residual variance, as het_var = TRUE does here.
+This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.'><meta property="og:description" content='
+loa_lme() is deprecated, and for new code we recommend switching to
+tolerance_limit(), which fits the same random-intercept model with
+model = "lme", gives analytic prediction and tolerance limits (no bootstrap),
+and is still under active development. It takes the two measurements (x
+and y) rather than their difference and average. Supplying condition
+gives each condition its own residual variance, as het_var = TRUE does here.
+This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -17,7 +27,7 @@ The package author recommends using tolerance_limit as an alternative to this fu
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +40,7 @@ The package author recommends using tolerance_limit as an alternative to this fu
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -58,9 +69,14 @@ The package author recommends using tolerance_limit as an alternative to this fu
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
-<p>This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
-The package author recommends using <code>tolerance_limit</code> as an alternative to this function.</p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a></p>
+<p><code>loa_lme()</code> is deprecated, and for new code we recommend switching to
+<code><a href="tolerance_limit.html">tolerance_limit()</a></code>, which fits the same random-intercept model with
+<code>model = "lme"</code>, gives analytic prediction and tolerance limits (no bootstrap),
+and is still under active development. It takes the two measurements (<code>x</code>
+and <code>y</code>) rather than their difference and average. Supplying <code>condition</code>
+gives each condition its own residual variance, as <code>het_var = TRUE</code> does here.</p>
+<p>This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.</p>
     </div>
 
     <div class="section level2">
@@ -141,7 +157,32 @@ The package author recommends using <code>tolerance_limit</code> as an alternati
 PLOS One, 11(12), e0168321.
 <a href="https://doi.org/10.1371/journal.pone.0168321" class="external-link">doi:10.1371/journal.pone.0168321</a></p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="tolerance_limit.html">tolerance_limit()</a></code></p></div>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"recpre_long"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Instead of loa_lme(), use:</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">recpre_long</span>, x <span class="op">=</span> <span class="st">"PM"</span>, y <span class="op">=</span> <span class="st">"AM"</span>, id <span class="op">=</span> <span class="st">"id"</span>,</span></span>
+<span class="r-in"><span>                condition <span class="op">=</span> <span class="st">"trial_condition"</span>, model <span class="op">=</span> <span class="st">"lme"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Agreement between Measures (Difference: x-y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 95% CI for Bias; 95% Prediction Interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Tolerance Limits: at least 95% of differences with 95% confidence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Model: random intercept for each id (lme); residual SD by condition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    23C/5.5 0.274 [0.0967, 0.4513] 0.2479   [-0.3141, 0.8621] [-0.5643, 1.1123]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    33C/5.5 0.239 [0.0948, 0.3832] 0.2016   [-0.2392, 0.7172] [-0.4426, 0.9206]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    33C/7.5 0.240 [0.0764, 0.4036] 0.2288   [-0.3028, 0.7828] [-0.5337, 1.0137]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

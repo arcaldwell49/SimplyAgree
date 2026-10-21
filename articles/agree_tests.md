@@ -7,7 +7,8 @@ expands upon the capabilities of currently available R packages (such as
 involve multiple observations (`agree_test` and `agree_reps` functions)
 2) provide robust tests of agreement even in simple studies
 (`shieh_test` output from the `agree_test` function) and 3) a robust set
-of reliability statistics (`reli_stats` function).
+of reliability statistics (`icc_test` and `reli_err_test` functions; see
+the “Reliability Analysis” vignette).
 
 In this vignette I will briefly demonstrate the implementation of the
 functions that include tests of agreement. *Please note*, I would
@@ -202,7 +203,7 @@ a2 = agree_reps(x = "x",
 The results can then be printed. The printing format is very similar to
 `agree_test`, but notice that 1) the hypothesis test is based on the
 limits of agreement (MOVER method), 2) the Concordance Correlation
-Coefficient is calculated via the U-statistics method, 3) the Shieh TOST
+Coefficient is estimated from variance components, 3) the Shieh TOST
 results are missing because they cannot be estimated for this type of
 design.
 
@@ -261,10 +262,9 @@ a3 = agree_nest(x = "x",
 #> generated.
 ```
 
-The printed results (and plots) are very similar to `agree_reps`.
-However, the CCC result now has a warning because the calculation in
-this scenario may not be entirely appropriate given the nature of the
-data.
+The printed results (and plots) are very similar to `agree_reps`. Here
+the CCC is Lin’s coefficient computed over all of the paired
+measurements.
 
 ``` r
 
@@ -430,12 +430,19 @@ RME**
 
 \\ Upper \space CI = LoA\_{upper} + LME \\
 
-### CCC from U-statistics
+### CCC for replicate and nested data
 
-The CCC calculations are derived from the `cccUst` function of the
-`cccrm` R package. The mathematics for this CCC calculation can be found
-in the work of King et al. ([2007](#ref-king2007)) and Carrasco et al.
-([2009](#ref-carrasco2009)).
+For replicate data (`agree_reps`), the CCC is estimated from the
+variance components of a linear mixed model with a fixed method effect
+and random subject and subject-by-method effects ([Carrasco and Jover
+2003](#ref-carrasco2003)); this is the estimate of `ccc_vc()` in the
+`cccrm` R package. For nested data (`agree_nest`), it is Lin’s CCC ([Lin
+1989](#ref-lin1989)) computed over all complete pairs. In both cases the
+standard error is a delete-one-subject jackknife on Fisher’s z scale, so
+the subject (not the measurement) is the independent unit, and the
+interval uses a t distribution with (number of subjects - 1) degrees of
+freedom. These are the same calculations as
+`ccc_test(data_type = "reps")` and `ccc_test(data_type = "nest")`.
 
 ## Checking Assumptions
 
@@ -667,32 +674,27 @@ In some cases, the agreement calculations involve comparing two methods
 within individuals within varying conditions. For example, the
 “recpre_long” data set within this package contains two measurements of
 rectal temperature in 3 different conditions (where there is a fixed
-effect of condition). For this particular case we can use bootstrapping
-to estimate the limits of agreement.
+effect of condition). For this particular case we can use a linear mixed
+model of the differences.
 
-The `loa_lme` function can then calculate the limits of agreement. Like
-the previous functions, the data set must be set with the `data`
-argument. The `diff` is the column which contains the difference between
-the two measurements. The `condition` is the column that indicates the
-different conditions that the measurements were taken within. The `id`
-is the column containing the subject/participant identifier. The final
-two arguments `replicates` and `type` set the requirements for the
-bootstrapping procedure. **Warning**: This is a computationally heavy
-procedure and it may take a few seconds to a few minutes to complete
-depending the number of replicates or if `het_var` is set to TRUE.
+The `tolerance_limit` function can calculate these limits (the `loa_lme`
+function, which bootstrapped them, is deprecated). Like the previous
+functions, the data set must be set with the `data` argument, and `x`
+and `y` are the columns with the two measurements. The `id` is the
+column containing the subject/participant identifier, and
+`model = "lme"` fits a random intercept for each subject. The
+`condition` is the column that indicates the different conditions that
+the measurements were taken within; supplying it gives each condition
+its own residual variance.
 
 ``` r
 
-
-recpre_long$avg = (recpre_long$PM + recpre_long$PM)/2
-a4 = loa_lme(data = recpre_long,
-               diff = "diff",
-               avg = "avg",
-               #condition = "trial_condition",
-               id = "id",
-               #plot.xaxis = "AM",
-               replicates = 199,
-               type = "perc")
+a4 = tolerance_limit(data = recpre_long,
+                     x = "PM",
+                     y = "AM",
+                     id = "id",
+                     condition = "trial_condition",
+                     model = "lme")
 ```
 
 ## References
@@ -706,14 +708,10 @@ Bland, J Martin, and Douglas G Altman. 1999. “Measuring Agreement in
 Method Comparison Studies.” *Statistical Methods in Medical Research* 8
 (2): 135–60. <https://doi.org/10.1177/096228029900800204>.
 
-Carrasco, Josep L., Tonya S. King, and Vernon M. Chinchilli. 2009. “The
-Concordance Correlation Coefficient for Repeated Measures Estimated by
-Variance Components.” *Journal of Biopharmaceutical Statistics* 19 (1):
-90–105. <https://doi.org/10.1080/10543400802527890>.
-
-King, Tonya S, Vernon M Chinchilli, and Josep L Carrasco. 2007. “A
-Repeated Measures Concordance Correlation Coefficient.” *Statistics in
-Medicine* 26 (16): 3095–113. <https://doi.org/10.1002/sim.2778>.
+Carrasco, Josep L., and Lluı́s Jover. 2003. “Estimating the Generalized
+Concordance Correlation Coefficient Through Variance Components.”
+*Biometrics* 59 (4): 849–58.
+<https://doi.org/10.1111/j.0006-341x.2003.00099.x>.
 
 Koenker, Roger. 2020. *Quantreg: Quantile Regression*.
 <https://CRAN.R-project.org/package=quantreg>.

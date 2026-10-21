@@ -1,6 +1,6 @@
 # Methods for loa_mermod objects
 
-Methods defined for objects returned from the loa_lme.
+Methods defined for objects returned from the deprecated loa_lme.
 
 ## Usage
 

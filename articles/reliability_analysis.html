@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -83,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-05</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/reliability_analysis.Rmd" class="external-link"><code>vignettes/reliability_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>reliability_analysis.Rmd</code></div>
@@ -94,106 +95,1234 @@ Caldwell</h4>
 <div class="section level2">
 <h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
 </h2>
-<p>Another feature of this R package is the ability to estimate the
-reliability of a measurement. This R package allows for the calculation
-of Intraclass Correlation Coefficients (ICC), various standard errors
-(SEM, SEE, and SEP), and coefficient of variation. All of the underlying
-calculations (sans the coefficient of variation) are based on the paper
-by <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;The paper by Weir also appears to heavily rely on the
-work of &lt;span class="citation"&gt;Shrout and Fleiss (&lt;a href="#ref-shrout1979"&gt;1979&lt;/a&gt;)&lt;/span&gt; and &lt;span class="citation"&gt;McGraw and Wong (&lt;a href="#ref-mcgraw1996"&gt;1996&lt;/a&gt;)&lt;/span&gt;&lt;/p&gt;'><sup>1</sup></a>. This is a fairly popular paper within my
-own field (kinesiology), and hence was the inspiration for creating this
-function that provides all the calculative approaches included within
-that manuscript.</p>
-</div>
-<div class="section level2">
-<h2 id="code-demonstration">Code Demonstration<a class="anchor" aria-label="anchor" href="#code-demonstration"></a>
-</h2>
-<p>For this package, the test-retest reliability statistics can be
-calculated with the <code>reli_stats</code> function. This function
-allow for data to be input in a long (multiple rows of data for each
-subject) or in wide (one row for each subject but a column for each
-item/measure).</p>
-<p>For the long data form, the column containing the subject identifier
-(<code>id</code>), item number (<code>item</code>), and measurements
-(<code>measure</code>) are provided. In this function I refer to items
-similar to if we were measuring internal consistency for a questionnaire
-(which is just a special case of test-retest reliability). So,
-<code>item</code> could also be refer to time points, which is what is
-typically seen in human performance settings where test-retest
-reliability may be evaluated over the course of repeated visits to the
-same laboratory. If <code>wide</code> is set to <code>TRUE</code> then
-the columns containing the measurements are provided (e.g.,
-<code>c("value1","value2","value3")</code>).</p>
-<p>To demonstrate the function, I will create a data set in the wide
-format.</p>
+<p>Reliability studies ask two related questions. <em>Relative</em>
+reliability asks whether a measurement ranks subjects consistently; it
+is summarised by an intraclass correlation coefficient (ICC), the
+proportion of the observed variance that is due to real differences
+between subjects. <em>Absolute</em> reliability asks how much a single
+measurement varies around a subject’s true value; it is summarised by
+the standard error of measurement (SEM), also called the “typical error”
+in some fields <span class="citation">(<a href="#ref-hopkins2000">Hopkins 2000</a>)</span>, and often is expressed
+as a coefficient of variation. The calculations here were originally
+derived from <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span>, who in turn relied on <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979">1979</a>)</span> and <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996">1996</a>)</span>.</p>
+<p><code>SimplyAgree</code> has one function for each question, each
+returning a standard <code>htest</code> object with a confidence
+interval and, optionally, a test:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Estimates</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/icc_test.html">icc_test()</a></code></td>
+<td>One ICC</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/reli_err_test.html">reli_err_test()</a></code></td>
+<td>The SEM, SEE or SEP, in units, sympercents or % of the mean</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/mdc_test.html">mdc_test()</a></code></td>
+<td>The minimal detectable change (MDC)</td>
+</tr>
+<tr class="even">
+<td>
+<code><a href="../reference/power_icc.html">power_icc()</a></code>, <code><a href="../reference/precision_icc.html">precision_icc()</a></code>
+</td>
+<td>Sample size for an ICC study</td>
+</tr>
+</tbody>
+</table>
+<p>The older <code><a href="../reference/reli_stats.html">reli_stats()</a></code> and <code><a href="../reference/reli_stats.html">reli_aov()</a></code>,
+which return everything at once, are superseded (see <a href="#legacy-functions">Legacy functions</a>). This was a deliberate
+design choice on my part as I thought the old function was confusing
+users.</p>
+<p>All functions accept data in three ways: a formula,
+<code>values ~ item | id</code>; long data, with <code>measure</code>,
+<code>item</code> and <code>id</code> column names; or wide data, one
+row per subject, with the item columns in <code>col.names</code>. An
+<em>item</em> is whatever is repeated: a trial, an occasion, a rater, or
+a judge.</p>
+<p>As an example, take the data of <span class="citation">Shrout and
+Fleiss (<a href="#ref-shrout1979">1979</a>)</span> (6 subjects rated by
+4 judges).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span>  <span class="co"># Example from Shrout and Fleiss (1979), pg. 423</span></span>
-<span>  <span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>judge1 <span class="op">=</span> </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>,<span class="fl">6</span>,<span class="fl">8</span>,<span class="fl">7</span>,<span class="fl">10</span>,<span class="fl">6</span><span class="op">)</span>,</span>
-<span>                   judge2 <span class="op">=</span> </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">1</span>,<span class="fl">4</span>,<span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">2</span><span class="op">)</span>,</span>
-<span>                   judge3 <span class="op">=</span> </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">3</span>,<span class="fl">6</span>,<span class="fl">2</span>,<span class="fl">6</span>,<span class="fl">4</span><span class="op">)</span>,</span>
-<span>                   judge4 <span class="op">=</span> </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>,<span class="fl">2</span>,<span class="fl">8</span>,<span class="fl">6</span>,<span class="fl">9</span>,<span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Now, that we have a data set (<code>dat</code>), I can use it in the
-<code>reli_stats</code> function.</p>
+<code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>judge1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">7</span>, <span class="fl">10</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>                  judge2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                  judge3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">2</span>, <span class="fl">6</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>                  judge4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">2</span>, <span class="fl">8</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">judges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge2"</span>, <span class="st">"judge3"</span>, <span class="st">"judge4"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="the-intraclass-correlation-coefficient">The intraclass correlation coefficient<a class="anchor" aria-label="anchor" href="#the-intraclass-correlation-coefficient"></a>
+</h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test1</span> <span class="op">=</span> <span class="fu"><a href="../reference/reli_stats.html">reli_stats</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge2"</span>, <span class="st">"judge3"</span>, <span class="st">"judge4"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>This function also has generic print and plot functions. The output
-from print provides the coefficient of variation, standard errors, and a
-table of various intraclass correlation coefficients. Notice the
-conclusions about the reliability of the measurement here would vary
-greatly based on the statistic being reported. What statistic you should
-report is beyond the current vignette, but is heavily detailed in <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span>.
-However, within the table there are columns for <code>model</code> and
-<code>measures</code> which describe the model that is being used and
-the what these different ICCs are intended to measure, respectively.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Two-way, consistency, single-measure ICC [Shrout &amp; Fleiss ICC(3,1)]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.3424648 0.9458583</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(C,1) </span></span>
+<span><span class="co">#&gt; 0.7148407</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="choosing-the-icc">Choosing the ICC<a class="anchor" aria-label="anchor" href="#choosing-the-icc"></a>
+</h3>
+<p>The form is set by three arguments, each answering one question about
+the study and how its results will be used. Answer them in order.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Is every subject measured by the same items</strong> (the
+same trials, raters, or devices)? Yes: <code>model = "twoway"</code>.
+No, each subject is measured by different items (for example, raters
+drawn from a pool): <code>model = "oneway"</code>, which only has an
+absolute-agreement form.</li>
+<li>
+<strong>Should systematic differences between items count as
+error?</strong> Yes, <code>type = "agreement"</code>, when measurements
+from different items will be used interchangeably or on their absolute
+values: any rater’s score is taken as it is, scores are compared with a
+fixed cut-off, or sessions are pooled. No,
+<code>type = "consistency"</code>, when only the subjects’ relative
+standing matters, or when systematic differences (a learning or fatigue
+effect, a rater who scores high) are checked and reported
+separately.</li>
+<li>
+<strong>Will a single measurement or the mean of k be used in
+practice?</strong> One measurement: <code>unit = "single"</code>. The
+mean of the same k items as in the study:
+<code>unit = "average"</code>.</li>
+</ol>
+<p>Some common designs:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Study</th>
+<th>ICC</th>
+<th>Arguments</th>
+<th>Matching error statistic</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Test-retest, trial effects checked separately <span class="citation">(<a href="#ref-hopkins2000">Hopkins 2000</a>; <a href="#ref-weir2005">Weir 2005</a>)</span>
+</td>
+<td>ICC(C,1)</td>
+<td>defaults</td>
+<td>
+<code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> (<span class="math inline">\(\sqrt{MS_E}\)</span>)</td>
+</tr>
+<tr class="even">
+<td>Test-retest, absolute values used (e.g. compared with a
+threshold)</td>
+<td>ICC(A,1)</td>
+<td><code>type = "agreement"</code></td>
+<td><code>reli_err_test(type = "agreement")</code></td>
+</tr>
+<tr class="odd">
+<td>Inter-rater, the same raters rate every subject, scores used
+interchangeably</td>
+<td>ICC(A,1)</td>
+<td><code>type = "agreement"</code></td>
+<td><code>reli_err_test(type = "agreement")</code></td>
+</tr>
+<tr class="even">
+<td>Inter-rater, the same raters, only rank order matters</td>
+<td>ICC(C,1)</td>
+<td>defaults</td>
+<td><code><a href="../reference/reli_err_test.html">reli_err_test()</a></code></td>
+</tr>
+<tr class="odd">
+<td>Each subject rated by different raters</td>
+<td>ICC(1)</td>
+<td><code>model = "oneway"</code></td>
+<td><code>reli_err_test(model = "oneway")</code></td>
+</tr>
+<tr class="even">
+<td>The score used in practice is the mean of the k ratings or
+trials</td>
+<td>ICC(C,k), ICC(A,k), ICC(k)</td>
+<td><code>unit = "average"</code></td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Two methods measuring the same quantity (method comparison)</td>
+<td>—</td>
+<td>
+<code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, <code><a href="../reference/ccc_test.html">ccc_test()</a></code>
+</td>
+<td>limits of agreement</td>
+</tr>
+</tbody>
+</table>
+<p>Whether the items are thought of as fixed (these particular raters)
+or random (a sample of possible raters) changes how widely the result
+generalizies, not how it is calculated <span class="citation">(<a href="#ref-mcgraw1996">McGraw and Wong 1996</a>)</span>. The
+average-measure forms describe the mean of the k items in this study
+(other values of k would need a Spearman-Brown projection). Whatever the
+form, report the matching error statistic, and test against a meaningful
+threshold rather than labeling the estimate “good” or “poor”.</p>
+<p>The three arguments map onto the names used by <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996">1996</a>)</span> and <span class="citation">Shrout and Fleiss (<a href="#ref-shrout1979">1979</a>)</span>:</p>
+<table class="table">
+<thead><tr class="header">
+<th><code>model</code></th>
+<th><code>type</code></th>
+<th><code>unit</code></th>
+<th>McGraw &amp; Wong</th>
+<th>Shrout &amp; Fleiss</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>oneway</td>
+<td>agreement</td>
+<td>single</td>
+<td>ICC(1)</td>
+<td>ICC(1,1)</td>
+</tr>
+<tr class="even">
+<td>oneway</td>
+<td>agreement</td>
+<td>average</td>
+<td>ICC(k)</td>
+<td>ICC(1,k)</td>
+</tr>
+<tr class="odd">
+<td>twoway</td>
+<td>agreement</td>
+<td>single</td>
+<td>ICC(A,1)</td>
+<td>ICC(2,1)</td>
+</tr>
+<tr class="even">
+<td>twoway</td>
+<td>agreement</td>
+<td>average</td>
+<td>ICC(A,k)</td>
+<td>ICC(2,k)</td>
+</tr>
+<tr class="odd">
+<td>twoway</td>
+<td>consistency</td>
+<td>single</td>
+<td>ICC(C,1)</td>
+<td>ICC(3,1)</td>
+</tr>
+<tr class="even">
+<td>twoway</td>
+<td>consistency</td>
+<td>average</td>
+<td>ICC(C,k)</td>
+<td>ICC(3,k)</td>
+</tr>
+</tbody>
+</table>
+<p>The default, ICC(C,1), follows <span class="citation">Hopkins (<a href="#ref-hopkins2000">2000</a>)</span> and <span class="citation">Weir
+(<a href="#ref-weir2005">2005</a>)</span>: check for systematic change
+between trials separately (for example with <code><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test()</a></code> for
+two trials), then report the consistency ICC, which is tied to the SEM.
+Others, such as <span class="citation">Koo and Li (<a href="#ref-koo2016">2016</a>)</span>, recommend absolute agreement for
+test-retest studies. I leave the decision up to you (and whatever the
+purpose of your study is), but <em>strongly</em> recommend justifying
+your choice.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficient of Variation (%):  19.1</span></span>
-<span><span class="co">#&gt; Standard Error of Measurement (SEM):  1.01</span></span>
-<span><span class="co">#&gt; Standard Error of the Estimate (SEE):  1.22</span></span>
-<span><span class="co">#&gt; Standard Error of Prediction (SEP):  1.9</span></span>
+<span><span class="co">#&gt;  Two-way, absolute agreement, single-measure ICC [Shrout &amp; Fleiss</span></span>
+<span><span class="co">#&gt;  ICC(2,1)]</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Intraclass Correlation Coefficients with  95 % C.I.</span></span>
-<span><span class="co">#&gt;            Model         Measures  Type    ICC Lower CI Upper CI</span></span>
-<span><span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.09672   0.6434</span></span>
-<span><span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.04290   0.6911</span></span>
-<span><span class="co">#&gt; 3  two-way fixed      Consistency  ICC3 0.7148  0.41184   0.9258</span></span>
-<span><span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.54504   0.8783</span></span>
-<span><span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.15204   0.8995</span></span>
-<span><span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.73690   0.9804</span></span></code></pre></div>
-<p>Also included in the results is a plot of the measurements across the
-items (e.g., time points).</p>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.01878651 0.76108437</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(A,1) </span></span>
+<span><span class="co">#&gt; 0.2897638</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="related-coefficients-cronbachs-alpha-and-the-ccc">Related coefficients: Cronbach’s alpha and the CCC<a class="anchor" aria-label="anchor" href="#related-coefficients-cronbachs-alpha-and-the-ccc"></a>
+</h3>
+<p>There are two widely reported coefficients that many might not
+realize are ICCs in disguise.</p>
+<p><strong>Cronbach’s alpha is ICC(C,k).</strong> With complete data,
+Cronbach’s <span class="citation">(<a href="#ref-cronbach1951">1951</a>)</span> alpha for k items equals the
+average-measure consistency ICC, <span class="math inline">\((MS_B -
+MS_E)/MS_B\)</span> <span class="citation">(<a href="#ref-mcgraw1996">McGraw and Wong 1996</a>)</span>. So alpha is the
+reliability of the <em>mean</em> (or sum) of the k items when systematic
+differences between items do not count, not the reliability of a single
+item; ICC(C,1) is the corresponding single-item figure. This is often
+reported as a measure of “internal consistency”. Here alpha computed
+from its usual formula matches
+<code>icc_test(unit = "average")</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reliability_analysis_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="576"></p>
+<code class="sourceCode R"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">judges</span><span class="op">)</span></span>
+<span><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="va">k</span> <span class="op">/</span> <span class="op">(</span><span class="va">k</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">2</span>, <span class="va">var</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="va">alpha</span>,</span>
+<span>  icc_C_k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>,</span>
+<span>                            unit <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     alpha   icc_C_k </span></span>
+<span><span class="co">#&gt; 0.9093155 0.9093155</span></span></code></pre></div>
+<p><strong>The CCC is analogous to ICC(A,1) for two methods.</strong>
+Lin’s concordance correlation coefficient <span class="citation">(<a href="#ref-Lin1989">Lin 1989</a>)</span> measures how closely pairs fall
+on the line of identity, so systematic differences between the methods
+count as disagreement, as in an absolute-agreement ICC. For two methods
+it is essentially ICC(A,1): the estimators differ only in using n rather
+than n - 1 in the variances, and the difference vanishes as n grows
+<span class="citation">(<a href="#ref-nickerson1997">Nickerson 1997</a>;
+<a href="#ref-carrasco2003">Carrasco and Jover 2003</a>)</span>. The two
+answer different questions in practice: <code><a href="../reference/ccc_test.html">ccc_test()</a></code> is meant
+for comparing two methods (alongside limits of agreement),
+<code><a href="../reference/icc_test.html">icc_test()</a></code> for the reliability of a measurement across
+trials or raters.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">two</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge4"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>CCC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="../reference/ccc_test.html">ccc_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"judge1"</span>, y <span class="op">=</span> <span class="st">"judge4"</span>, data <span class="op">=</span> <span class="va">two</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
+<span>  ICC_A_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge4"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">two</span>,</span>
+<span>                            type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;       CCC   ICC_A_1 </span></span>
+<span><span class="co">#&gt; 0.6052632 0.6478873</span></span></code></pre></div>
+<p>With only 6 subjects the n versus n - 1 difference is visible; with a
+few dozen subjects the two estimates agree to about two decimal
+places.</p>
+</div>
+<div class="section level3">
+<h3 id="testing-against-a-threshold">Testing against a threshold<a class="anchor" aria-label="anchor" href="#testing-against-a-threshold"></a>
+</h3>
+<p>By default, no test is done. This, like many things in
+<code>SimplyAgree</code>, was a design choice on my part as I tend to
+see ICCs are most often used for estimation rather than hypothesis
+testing, and a test of whether an ICC differs from zero is rarely
+informative in my opinion. Additionally, the package provides no
+qualitative labels (“good”, “excellent”), because published cutoffs
+disagree and the ICC depends on how much subjects differ from each other
+<span class="citation">(<a href="#ref-weir2005">Weir 2005</a>)</span>.
+To claim that reliability exceeds a value, test against it:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>,</span>
+<span>                null.value <span class="op">=</span> <span class="fl">0.5</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Two-way, consistency, single-measure ICC [Shrout &amp; Fleiss ICC(3,1)]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; F = 2.2054, df1 = 5, df2 = 15, p-value = 0.108</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true ICC is greater than 0.5</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.4118341 1.0000000</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(C,1) </span></span>
+<span><span class="co">#&gt; 0.7148407</span></span></code></pre></div>
+<p>With a one-sided alternative, the confidence interval is also
+one-sided, and its lower limit is the bound that corresponds to the
+test. This approach is appropriate when the only question of interest is
+whether the ICC exceeds a specified threshold.</p>
+</div>
+<div class="section level3">
+<h3 id="describing-the-result">Describing the result<a class="anchor" aria-label="anchor" href="#describing-the-result"></a>
+</h3>
+<p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> describes the result in words, in one of two
+styles. With a test, the default is the usual decision about the null
+hypothesis:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The test is not statistically significant (F(5, 15) = 2.21, p = 0.108;</span></span>
+<span><span class="co">#&gt; ICC(C,1) = 0.715, 95% lower bound 0.412) at the 0.05 alpha level. The</span></span>
+<span><span class="co">#&gt; null hypothesis cannot be rejected: at the desired error rate, it</span></span>
+<span><span class="co">#&gt; cannot be stated that the true ICC is greater than 0.5. The estimate is</span></span>
+<span><span class="co">#&gt; the two-way, consistency, single-measure ICC (McGraw &amp; Wong ICC(C,1);</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss ICC(3,1)): the reliability of a single measurement,</span></span>
+<span><span class="co">#&gt; excluding systematic differences between items. The data had 6 subjects</span></span>
+<span><span class="co">#&gt; and 4 items (24 measurements, none missing); variance components were</span></span>
+<span><span class="co">#&gt; estimated by analysis of variance. The interval and F test are exact</span></span>
+<span><span class="co">#&gt; (McGraw &amp; Wong, 1996).</span></span></code></pre></div>
+<p>The estimation style, following <span class="citation">Greenland (<a href="#ref-greenland2019">2019</a>)</span> and <span class="citation">Rafi and Greenland (<a href="#ref-rafi2020">2020</a>)</span>, describes the interval as a range
+of values compatible with the data and converts the p-value to an
+S-value, <span class="math inline">\(s = -\log_2 p\)</span>: the bits of
+information against the tested hypothesis, as surprising as <span class="math inline">\(s\)</span> heads in a row from a fair coin.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, style <span class="op">=</span> <span class="st">"estimation"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The estimated ICC(C,1) was 0.715 (95% lower compatibility bound 0.412).</span></span>
+<span><span class="co">#&gt; Values above this bound are the most compatible with the data, given</span></span>
+<span><span class="co">#&gt; the model and its assumptions. Against the hypothesis that the true</span></span>
+<span><span class="co">#&gt; ICC(C,1) is at most 0.5, p = 0.108, an S-value of 3.21 bits of</span></span>
+<span><span class="co">#&gt; information (S = -log2 p): about as surprising as getting 3 heads in a</span></span>
+<span><span class="co">#&gt; row from 3 tosses of a fair coin. The estimate is the two-way,</span></span>
+<span><span class="co">#&gt; consistency, single-measure ICC (McGraw &amp; Wong ICC(C,1); Shrout &amp;</span></span>
+<span><span class="co">#&gt; Fleiss ICC(3,1)): the reliability of a single measurement, excluding</span></span>
+<span><span class="co">#&gt; systematic differences between items. The data had 6 subjects and 4</span></span>
+<span><span class="co">#&gt; items (24 measurements, none missing); variance components were</span></span>
+<span><span class="co">#&gt; estimated by analysis of variance. The interval and F test are exact</span></span>
+<span><span class="co">#&gt; (McGraw &amp; Wong, 1996).</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="missing-data">Missing data<a class="anchor" aria-label="anchor" href="#missing-data"></a>
+</h3>
+<p><code>method = "anova"</code> (the default) needs every subject
+measured on every item. With missing measurements,
+<code>method = "reml"</code> fits a linear mixed model; its intervals
+use degrees of freedom based on the observed data and are approximate,
+so a warning is given.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dat_na</span> <span class="op">&lt;-</span> <span class="va">dat</span></span>
+<span><span class="va">dat_na</span><span class="op">$</span><span class="va">judge2</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
+<span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat_na</span>, method <span class="op">=</span> <span class="st">"reml"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: 4.2% of subject-by-item cells are missing. Intervals and p-values use</span></span>
+<span><span class="co">#&gt; observed-data degrees of freedom and are approximate; they may be liberal as</span></span>
+<span><span class="co">#&gt; missingness increases. Consider boot = TRUE.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Two-way, consistency, single-measure ICC [Shrout &amp; Fleiss ICC(3,1)]</span></span>
+<span><span class="co">#&gt;  (REML)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.3861657 0.9541005</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(C,1) </span></span>
+<span><span class="co">#&gt; 0.7499675</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="bootstrap-intervals-and-standard-errors">Bootstrap intervals and standard errors<a class="anchor" aria-label="anchor" href="#bootstrap-intervals-and-standard-errors"></a>
+</h3>
+<p>The F-based intervals that subject effects and residual errors are
+normally distributed. In simulations (3 trials, 10 or 30 subjects, ICC
+0.5 or 0.9), they covered 0.92 to 0.97 of the time with normal data but
+only 0.80 to 0.93 with skewed or heavy-tailed data. With
+<code>boot = TRUE</code>, the interval comes from a nonparametric
+bootstrap instead, which helps with clearly non-normal data and about 30
+or more subjects. With 10 subjects every method, the bootstrap included,
+falls short of its nominal coverage, so a bootstrap is no cure for a
+small sample.</p>
+<p>When using the bootstrap methods, each replicate resamples subjects
+with replacement, keeping all of each subject’s measurements, and refits
+the model (<code>replicates</code> times, 1999 by default; with
+<code>method = "reml"</code> this means refitting the mixed model each
+time, which is slow). The interval type is set by <code>boot_ci</code>;
+the default, <code>"auto"</code>, picks the type that did best in the
+simulations:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Estimate</th>
+<th><code>method = "anova"</code></th>
+<th><code>method = "reml"</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>ICC (<code><a href="../reference/icc_test.html">icc_test()</a></code>)</td>
+<td>studentized</td>
+<td>percentile</td>
+</tr>
+<tr class="even">
+<td>SEM, SEE, SEP, consistency or one-way
+(<code><a href="../reference/reli_err_test.html">reli_err_test()</a></code>)</td>
+<td>studentized</td>
+<td>percentile</td>
+</tr>
+<tr class="odd">
+<td>SEM, SEP, two-way agreement (<code><a href="../reference/reli_err_test.html">reli_err_test()</a></code>)</td>
+<td>BCa</td>
+<td>percentile</td>
+</tr>
+</tbody>
+</table>
+<p>Any p-value comes from inverting the bootstrap interval, so it is
+approximate and always agrees with the interval.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, boot <span class="op">=</span> <span class="cn">TRUE</span>, replicates <span class="op">=</span> <span class="fl">499</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Two-way, consistency, single-measure ICC [Shrout &amp; Fleiss ICC(3,1)]</span></span>
+<span><span class="co">#&gt;  with nonparametric (subject) bootstrap studentized interval</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.3814147 0.9313985</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(C,1) </span></span>
+<span><span class="co">#&gt; 0.7148407</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="the-hybrid-step-for-agreement">The hybrid step for agreement<a class="anchor" aria-label="anchor" href="#the-hybrid-step-for-agreement"></a>
+</h4>
+<p>Resampling subjects keeps the same items (judges, trials) in every
+replicate, so on its own it treats the items as fixed. An
+absolute-agreement ICC (and the agreement SEM and SEP) treats the items
+as a sample, and their systematic differences count as error, so plain
+subject resampling misses the uncertainty that comes from which items
+happened to be used. In simulations it covered only 0.70 to 0.80 for an
+agreement ICC of 0.9. Each replicate therefore also multiplies the item
+mean square by an independent <span class="math inline">\(\chi^2_{k-1}/(k-1)\)</span> draw, its sampling
+variation under normal theory. This “hybrid” bootstrap restored coverage
+to about 0.94 to 0.96 with normal data and 30 subjects. It is applied
+automatically to the two-way agreement forms; when the items really are
+fixed it is somewhat conservative, like the F-interval.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, boot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>         replicates <span class="op">=</span> <span class="fl">499</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Two-way, absolute agreement, single-measure ICC [Shrout &amp; Fleiss</span></span>
+<span><span class="co">#&gt;  ICC(2,1)] with nonparametric (subject) bootstrap studentized interval</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  -0.0459796  0.8763492</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;  ICC(A,1) </span></span>
+<span><span class="co">#&gt; 0.2897638</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="standard-errors-se_method">Standard errors (<code>se_method</code>)<a class="anchor" aria-label="anchor" href="#standard-errors-se_method"></a>
+</h4>
+<p>Every result reports standard errors in <code>stderr</code>, and the
+studentized bootstrap divides each replicate by its own standard error.
+Three estimates are available:</p>
+<ul>
+<li>
+<code>"jackknife"</code> (default): delete one subject at a time. It
+averaged 0.89 to 1.08 times the true sampling SD in simulations,
+including skewed data and missing measurements. It is cheap with
+complete data and needs n refits with <code>method = "reml"</code>.</li>
+<li>
+<code>"influence"</code>: a sandwich estimate from each subject’s
+influence. It is cheap everywhere but too small with few subjects (0.69
+to 1.00 times the true SD), and it is the only option for the
+studentized bootstrap with <code>method = "reml"</code>.</li>
+<li>
+<code>"normal"</code>: normal theory. It is accurate with normal
+data (0.87 to 1.04) but too small with skewed or heavy-tailed data (0.60
+to 0.80). It depends only on the degrees of freedom, so it cannot be
+used to studentize.</li>
+</ul>
+<p><code>se_method</code> changes <code>stderr</code> and the
+studentized bootstrap, never the F-based (or chi-square) interval and
+test.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res_j</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="va">res_n</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, se_method <span class="op">=</span> <span class="st">"normal"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>jackknife <span class="op">=</span> <span class="va">res_j</span><span class="op">$</span><span class="va">stderr</span>, normal <span class="op">=</span> <span class="va">res_n</span><span class="op">$</span><span class="va">stderr</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 ICC         z</span></span>
+<span><span class="co">#&gt; jackknife 0.1290509 0.2878384</span></span>
+<span><span class="co">#&gt; normal    0.1783508 0.3977982</span></span></code></pre></div>
+<p>More detail, including the full simulation results, is in
+<code><a href="../reference/icc_test.html">?icc_test</a></code> and <code><a href="../reference/reli_err_test.html">?reli_err_test</a></code>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="plots-and-diagnostics">Plots and diagnostics<a class="anchor" aria-label="anchor" href="#plots-and-diagnostics"></a>
+</h3>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> shows each subject’s measurements across the
+items (grey), with the item means and their 95% confidence intervals
+(blue), so systematic differences between items stand out against the
+spread of subjects.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reliability_analysis_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="480"></p>
+<p>Other views are chosen with <code>type</code>:
+<code>"subjects"</code> orders the subjects by their mean and shows each
+subject’s measurements, which compares the spread between subjects with
+the scatter within subjects (what the ICC summarises);
+<code>"items"</code> shows each measurement’s deviation from its
+subject’s mean by item (systematic item differences, which count as
+error for an agreement ICC but not for a consistency ICC); and
+<code>"pairs"</code> plots each pair of items against each other with
+the line of identity.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"subjects"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reliability_analysis_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="480"></p>
+<p><code><a href="../reference/simple_agree-methods.html">check()</a></code> gives model diagnostics: the normality and
+homogeneity of the residuals, and the within-subject SD against the
+subject mean. An SD that rises with the mean means the error grows with
+the size of the measurement, and a coefficient of variation
+(<code>reli_err_test(scale = "log")</code>, below) describes it better
+than an error in units.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reliability_analysis_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="864"></p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="convergence-issues">Convergence Issues<a class="anchor" aria-label="anchor" href="#convergence-issues"></a>
+<h2 id="measurement-error">Measurement error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h2>
-<p>In some cases there are convergence issues for the linear mixed
-models. For this reason, I have added a function, <code>reli_aov</code>,
-which uses a sums of squares approach (i.e., analysis of variance)
-rather than a linear mixed model. As you can see below the results will
-often match that of <code>reli_stats</code>. The only time this function
-is necessary to use is when there are convergence issues. Rows with
-missing data are dropped when using <code>reli_aov</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test2</span> <span class="op">=</span> <span class="fu"><a href="../reference/reli_stats.html">reli_aov</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">dat</span>,</span>
-<span>  wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge2"</span>, <span class="st">"judge3"</span>, <span class="st">"judge4"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<p><code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> estimates the standard error of
+measurement (SEM), estimate (SEE) or prediction (SEP). With the defaults
+it gives the “typical error” in the terminology of Hopkins. This is the
+<span class="math inline">\(\sqrt{MS_E}\)</span> from the two-way
+analysis of variance, which excludes systematic differences between
+trials. As an example, take data set A of <span class="citation">Weir
+(<a href="#ref-weir2005">2005</a>)</span> (8 subjects, 2 trials).</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">weir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">146</span>, <span class="fl">148</span>, <span class="fl">170</span>, <span class="fl">90</span>, <span class="fl">157</span>, <span class="fl">156</span>, <span class="fl">176</span>, <span class="fl">205</span><span class="op">)</span>,</span>
+<span>                   t2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">140</span>, <span class="fl">152</span>, <span class="fl">152</span>, <span class="fl">99</span>, <span class="fl">145</span>, <span class="fl">153</span>, <span class="fl">167</span>, <span class="fl">218</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   4.996445 15.380402</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      SEM </span></span>
+<span><span class="co">#&gt; 7.556927</span></span></code></pre></div>
+<p>To show that the error is smaller than an acceptable value, give it
+as <code>null.value</code> (the default alternative is
+<code>"less"</code>):</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, null.value <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; X-squared = 2.776, df = 7, p-value = 0.09508</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true SEM is less than 12</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   0.00000 13.58094</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      SEM </span></span>
+<span><span class="co">#&gt; 7.556927</span></span></code></pre></div>
+<p>The SEE is the standard error of a subject’s estimated true score,
+and the SEP is used to judge whether a change from the estimated true
+score is real <span class="citation">(<a href="#ref-weir2005">Weir
+2005</a>)</span>. Both depend on the ICC and on how much subjects
+differ, so the SEM is the better general description of measurement
+error.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, stat <span class="op">=</span> <span class="st">"SEP"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of prediction (two-way, consistency) from ICC(C,1)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   6.331135 17.562180</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;     SEP </span></span>
+<span><span class="co">#&gt; 10.5446</span></span></code></pre></div>
+<p>The SEE and SEP use the SD matched to the ICC’s denominator (for the
+consistency ICC, <span class="math inline">\(SD^2 = \sigma^2_{subjects}
++ \sigma^2_{error}\)</span>), so that <span class="math inline">\(SD\sqrt{1 - ICC}\)</span> equals the SEM exactly.
+<span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span>
+uses the SD of all the measurements instead, so his SEE and SEP (7.1 and
+10.2 here) are slightly smaller than these (7.35 and 10.54).</p>
+</div>
+<div class="section level2">
+<h2 id="coefficient-of-variation">Coefficient of variation<a class="anchor" aria-label="anchor" href="#coefficient-of-variation"></a>
+</h2>
+<p>When the error grows with the size of the measurements, it is better
+expressed relative to them <span class="citation">(<a href="#ref-atkinson1998">Atkinson and Nevill 1998</a>; <a href="#ref-hopkins2000">Hopkins 2000</a>)</span>.
+<code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> gives the coefficient of variation in two
+ways.</p>
+<p><code>scale = "log"</code> analyses the log-transformed measurements
+and reports 100 times the statistic, in sympercents <span class="citation">(<a href="#ref-cole2000">Cole 2000</a>)</span>. The SEM
+keeps its exact interval.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, scale <span class="op">=</span> <span class="st">"log"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency), log scale</span></span>
+<span><span class="co">#&gt;  (sympercents)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   3.327576 10.243176</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; SEM (sympercent) </span></span>
+<span><span class="co">#&gt;         5.032829</span></span></code></pre></div>
+<p>A sympercent <span class="math inline">\(s\)</span> converts to the
+conventional CV% as <span class="math inline">\(100\sqrt{\exp((s/100)^2)
+- 1}\)</span>; below about 15% the two are nearly identical (10
+sympercents is a CV of 10.03%). The conversion is monotone, so it can be
+applied to the interval limits too.</p>
+<p><code>scale = "mean"</code> divides the statistic by the grand mean
+(the “pooled” CV); its interval allows for the uncertainty in the
+mean.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_err_test.html">reli_err_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, scale <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Standard error of measurement (two-way, consistency), as a percentage</span></span>
+<span><span class="co">#&gt;  of the grand mean</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  2.731810 8.743404</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; SEM (% of mean) </span></span>
+<span><span class="co">#&gt;        4.887261</span></span></code></pre></div>
+<p>In both cases <code>null.value</code> is on the same scale as the
+estimate.</p>
+</div>
+<div class="section level2">
+<h2 id="mdc-sdd-and-the-repeatability-coefficient">MDC, SDD and the repeatability coefficient<a class="anchor" aria-label="anchor" href="#mdc-sdd-and-the-repeatability-coefficient"></a>
+</h2>
+<p>The minimal detectable change (MDC), smallest detectable or real
+difference (SDD, SRD), “minimal difference” <span class="citation">(<a href="#ref-weir2005">Weir 2005</a>)</span> and repeatability coefficient
+are all the SEM scaled by <span class="math inline">\(z
+\sqrt{2}\)</span>: for 95%, <span class="math inline">\(1.96 \sqrt{2}
+\times SEM\)</span>, the change between two measurements of one subject
+that measurement error alone would exceed only 5% of the time.
+<code><a href="../reference/mdc_test.html">mdc_test()</a></code> computes it, with an interval (the SEM interval,
+scaled):</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  13.84918 42.63152</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 20.94635</span></span></code></pre></div>
+<p><code>sided = "one.sided"</code> gives the MDC for a change in one
+stated direction, <code>k_avg</code> the MDC for scores that are means
+of several trials, and <code>scale = "log"</code> the MDC as a
+percentage (in <code>percent</code>, as an increase and a decrease). An
+existing SEM can be reused without refitting, as
+<code>mdc_test(sem)</code>. With two trials the MDC is the half-width of
+the limits of agreement of <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, which also
+reports the bias between trials.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;&lt;span class="citation"&gt;Weir (&lt;a href="#ref-weir2005"&gt;2005&lt;/a&gt;)&lt;/span&gt; notes that, strictly, real change
+should be judged against an interval around the subject’s estimated true
+score, using the SEP.&lt;/p&gt;'><sup>1</sup></a></p>
+<p><strong>Differences between raters.</strong> The MDC also answers a
+common inter-rater question: how far apart could two raters’ (or
+devices’) measurements of the same subject be? Each measurement has
+error SEM, so their difference has error SD <span class="math inline">\(\sqrt{2} \times SEM\)</span>, the same reasoning
+as for two occasions. When the raters are interchangeable (any rater’s
+score is used as it is, and the raters are thought of as drawn from a
+pool), use the agreement SEM, so that systematic differences between
+raters count as error:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, absolute agreement)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  judge1, judge2, judge3, judge4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   4.155454 19.951684</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 6.937214</span></span></code></pre></div>
+<p>Two of the judges differing by less than this would be consistent
+with measurement error alone. The consistency SEM would leave out the
+judges’ systematic differences, which are large here, and give an MDC of
+only about 2.8. For two particular raters,
+<code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> reports their bias and the spread around
+it separately. The SEP is not the statistic for this: it concerns a
+change from a subject’s estimated true score, and <span class="math inline">\(1.96 \times SEP\)</span> does not bound the
+difference between two raters.</p>
+<p>I do want to quickly make an aside about what the MDC is not. I write
+this mainly as resolution to my own confusion and what I have seen
+written out in the scientific literature. The MDC is a threshold for
+<em>one individual’s</em> change. It is not a threshold for an average
+(group) effect. The uncertainty of a mean change shrinks with the number
+of subjects, so a mean effect well below the MDC can be estimated
+precisely and be clearly different from zero. An effect smaller than the
+MDC is small relative to one person’s measurement noise; that does not
+make it noise (i.e., the effect can be “real”). The MDC should never be
+used to count “responders”. An observed change mixes the true response
+with within-person variation, so even if everyone responded identically,
+some would exceed the MDC and some would not <span class="citation">(<a href="#ref-senn2004">Senn 2004</a>)</span>. Real differences in response
+need a control group or replicated crossover designs <span class="citation">(<a href="#ref-atkinson2015">Atkinson and Batterham
+2015</a>; <a href="#ref-senn2016">Senn 2016</a>)</span>.</p>
+<div class="section level3">
+<h3 id="the-mdc-and-a-change-that-matters">The MDC and a change that “matters”<a class="anchor" aria-label="anchor" href="#the-mdc-and-a-change-that-matters"></a>
+</h3>
+<p>Again, I want to briefly highlight another common area of confusion.
+Whether a change <em>matters</em> needs an external anchor, such as a
+clinically important difference. The MDC is not such an anchor. But, you
+can give an anchor it as <code>null.value</code> to test whether the MDC
+is below it, i.e. whether such a change can be told apart from
+measurement error on an individual level:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t1"</span>, <span class="st">"t2"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">weir</span>, null.value <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the standard error of</span></span>
+<span><span class="co">#&gt;  measurement (two-way, consistency)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  t1, t2</span></span>
+<span><span class="co">#&gt; X-squared = 3.4125, df = 7, p-value = 0.1556</span></span>
+<span><span class="co">#&gt; alternative hypothesis: true MDC is less than 30</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   0.00000 37.64374</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 20.94635</span></span></code></pre></div>
+<p>A “smallest worthwhile change” (SWC) computed from the same
+reliability data is not such an anchor. With 0.2 times the
+between-subject SD <span class="citation">(<a href="#ref-hopkins2004">Hopkins 2004</a>)</span>, its ratio to the SEM
+is <span class="math inline">\(0.2/\sqrt{1 - ICC}\)</span>, a
+restatement of the ICC. <span class="citation">Hopkins (<a href="#ref-hopkins2004">2004</a>)</span> offers it as a default
+(e.g. for fitness tests in team sports) when no relationship to a real
+outcome is available, and it should be treated as such a fallback when
+<em>nothing</em> else is available.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="repeat-measurements-and-occasions">Repeat measurements and occasions<a class="anchor" aria-label="anchor" href="#repeat-measurements-and-occasions"></a>
+</h2>
+<p>Sometimes each rater (or device) measures each subject more than
+once: say 3 sonographers each scan 20 participants twice.
+<code><a href="../reference/icc_test.html">icc_test()</a></code> and <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> stop with such
+data, because one measurement per subject and rater cannot separate two
+different error. Essentially, the scatter of one rater’s repeat scans
+(intra-rater error, or repeatability) and the disagreement between
+raters (inter-rater error). <code><a href="../reference/reli_facet_test.html">reli_facet_test()</a></code> fits the
+generalizability-theory model for these designs <span class="citation">(<a href="#ref-brennan2001">Brennan 2001</a>)</span>.
+One warning though: <em>It is experimental, and its name and how it
+functions may change in the future.</em></p>
+<div class="section level3">
+<h3 id="exchangeable-repeats">Exchangeable repeats<a class="anchor" aria-label="anchor" href="#exchangeable-repeats"></a>
+</h3>
+<p>When the scans within each subject-by-operator cell are
+interchangeable (scan 1 and scan 2 mean nothing in themselves), the
+model is <span class="math display">\[y_{pir} = \mu + p + i + (pi) +
+e_{pir},\]</span> with variance components for subjects (<span class="math inline">\(\sigma^2_p\)</span>), items (<span class="math inline">\(\sigma^2_i\)</span>, systematic differences
+between raters), the subject-by-item interaction (<span class="math inline">\(\sigma^2_{pi}\)</span>, raters ranking subjects
+differently) and repeats (<span class="math inline">\(\sigma^2_e\)</span>).</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">scans</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>scan <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, operator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">subj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">50</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">bias</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>A <span class="op">=</span> <span class="fl">0</span>, B <span class="op">=</span> <span class="fl">1.5</span>, C <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">inter</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">60</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">20</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">scans</span><span class="op">$</span><span class="va">thickness</span> <span class="op">&lt;-</span> <span class="va">subj</span><span class="op">[</span><span class="va">scans</span><span class="op">$</span><span class="va">id</span><span class="op">]</span> <span class="op">+</span> <span class="va">bias</span><span class="op">[</span><span class="va">scans</span><span class="op">$</span><span class="va">operator</span><span class="op">]</span> <span class="op">+</span></span>
+<span>  <span class="va">inter</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">scans</span><span class="op">$</span><span class="va">id</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">scans</span><span class="op">$</span><span class="va">operator</span><span class="op">)</span><span class="op">)</span><span class="op">]</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">scans</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">1.5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">test2</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">scans</span><span class="op">)</span></span>
+<span><span class="va">res</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Intra-rater ICC (same item, another repeat), for a single measurement</span></span>
+<span><span class="co">#&gt;  with MLS interval</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  thickness ~ operator | id</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.8548688 0.9627844</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; ICC(intra) </span></span>
+<span><span class="co">#&gt;  0.9203712</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The estimated ICC(intra) was 0.920 (95% compatibility interval [0.855,</span></span>
+<span><span class="co">#&gt; 0.963]). Values in this interval are the most compatible with the data,</span></span>
+<span><span class="co">#&gt; given the model and its assumptions. The estimate is the intra-rater</span></span>
+<span><span class="co">#&gt; ICC (same item, another repeat), for a single measurement, with error</span></span>
+<span><span class="co">#&gt; from: repeats (within cells). The data had 20 subjects, 3 items (120</span></span>
+<span><span class="co">#&gt; measurements, 2 measurements per subject-by-item cell); variance</span></span>
+<span><span class="co">#&gt; components were estimated by analysis of variance (unconstrained). The</span></span>
+<span><span class="co">#&gt; interval is a modified large-sample (MLS) interval for a ratio of</span></span>
+<span><span class="co">#&gt; linear combinations of mean squares (Graybill &amp; Wang, 1980; Ting et</span></span>
+<span><span class="co">#&gt; al., 1990).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Variance components:</span></span>
+<span><span class="co">#&gt;  Component              Variance 95% CI        SD   Percent</span></span>
+<span><span class="co">#&gt;  subjects               25.2     [14.1, 54.9]  5.02 80.7   </span></span>
+<span><span class="co">#&gt;  items                  1.71     [0.340, 73.6] 1.31 5.5    </span></span>
+<span><span class="co">#&gt;  subjects x items       1.97     [0.785, 4.07] 1.40 6.3    </span></span>
+<span><span class="co">#&gt;  repeats (within cells) 2.35     [1.69, 3.48]  1.53 7.5</span></span></code></pre></div>
+<p>The summary ends with the variance components, each with an interval
+and its share of the variance of a single measurement;
+<code>plot(res, type = "components")</code> draws them. The default,
+<code>facet = "intra"</code>, is the intra-rater ICC which is the
+correlation between two scans of the same subject by the same operator,
+whose error is the repeat variance <em>only</em>.
+<code>facet = "inter"</code> adds the error between operators, with
+<code>type</code> as in <code><a href="../reference/icc_test.html">icc_test()</a></code>:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>
+<code>facet</code>, <code>type</code>
+</th>
+<th>Error variance of one measurement</th>
+<th>Question</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>"intra"</code></td>
+<td><span class="math inline">\(\sigma^2_e\)</span></td>
+<td>Same operator, rescanned</td>
+</tr>
+<tr class="even">
+<td>
+<code>"inter"</code>, <code>"consistency"</code>
+</td>
+<td><span class="math inline">\(\sigma^2_{pi} + \sigma^2_e\)</span></td>
+<td>Another operator, with operator bias handled separately</td>
+</tr>
+<tr class="odd">
+<td>
+<code>"inter"</code>, <code>"agreement"</code>
+</td>
+<td><span class="math inline">\(\sigma^2_i + \sigma^2_{pi} +
+\sigma^2_e\)</span></td>
+<td>Another operator, scores used interchangeably</td>
+</tr>
+</tbody>
+</table>
+<p><code>stat = "SEM"</code> gives the square root of the error
+variance, and <code><a href="../reference/mdc_test.html">mdc_test()</a></code> turns it into the smallest
+difference beyond measurement error, here between two operators drawn
+from the pool:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sem_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">scans</span>,</span>
+<span>                         stat <span class="op">=</span> <span class="st">"SEM"</span>, facet <span class="op">=</span> <span class="st">"inter"</span>, type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span></span>
+<span><span class="va">sem_a</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Inter-rater SEM (absolute agreement, another item), for a single</span></span>
+<span><span class="co">#&gt;  measurement with MLS interval</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  thickness ~ operator | id</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  2.077813 8.828622</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; SEM(inter,A) </span></span>
+<span><span class="co">#&gt;     2.456438</span></span>
+<span><span class="fu"><a href="../reference/mdc_test.html">mdc_test</a></span><span class="op">(</span><span class="va">sem_a</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Minimal detectable change (95%, two-sided) from the inter-rater SEM</span></span>
+<span><span class="co">#&gt;  (absolute agreement, another item), for a single measurement with MLS</span></span>
+<span><span class="co">#&gt;  interval</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  thickness ~ operator | id</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;   5.759299 24.471243</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt;      MDC </span></span>
+<span><span class="co">#&gt; 6.808773</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="what-averaging-changes-d-study">What averaging changes (D-study)<a class="anchor" aria-label="anchor" href="#what-averaging-changes-d-study"></a>
+</h3>
+<p>The arguments <code>k_avg</code> and <code>r_avg</code> describe the
+score that will be used in practice, and the result is the reliability
+of <em>that</em> score, not an average of ICCs. <code>r_avg = 2</code>
+is a score that averages 2 scans by one operator; <code>k_avg = 2</code>
+is a score that averages one scan from each of 2 operators. These are
+the generalizability (<span class="math inline">\(E\rho^2\)</span>) and
+dependability (<span class="math inline">\(\Phi\)</span>) coefficients
+of G theory.</p>
+<p>The two kinds of averaging remove different errors. Averaging repeats
+by the same operator shrinks only the repeat noise: the agreement error
+becomes <span class="math inline">\(\sigma^2_i + \sigma^2_{pi} +
+\sigma^2_e / 2\)</span>, and the operator’s bias and their particular
+reading of each subject stay in. Averaging over operators shrinks all of
+it: <span class="math inline">\((\sigma^2_i + \sigma^2_{pi} +
+\sigma^2_e) / 2\)</span>. So, with two scans per subject to spend:</p>
+<blockquote>
+<p>Would two scans by one operator be better than one scan by each of
+two operators?</p>
+</blockquote>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">one_op</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">scans</span>,</span>
+<span>                          facet <span class="op">=</span> <span class="st">"inter"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, r_avg <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">two_ops</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">scans</span>,</span>
+<span>                           facet <span class="op">=</span> <span class="st">"inter"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, k_avg <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>two_scans_one_operator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">one_op</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
+<span>  one_scan_two_operators <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">two_ops</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; two_scans_one_operator one_scan_two_operators </span></span>
+<span><span class="co">#&gt;              0.8383870              0.8930915</span></span></code></pre></div>
+<p>Two operators win here (0.89 against 0.84) because the
+operator-related components (operator bias and the subject-by-operator
+interaction) are together larger than the repeat variance; see the
+component table above. Rescanning wins only when repeat noise is most of
+the error.</p>
+<p>Averaging the repeats before calling <code><a href="../reference/icc_test.html">icc_test()</a></code> gives
+the coefficient for a score that averages as many scans as the study had
+(<code>r_avg = 2</code> here), not for a single scan. That can be the
+right analysis, but only if the repeat measurements are also averaged in
+practice.</p>
+</div>
+<div class="section level3">
+<h3 id="shared-occasions">Shared occasions<a class="anchor" aria-label="anchor" href="#shared-occasions"></a>
+</h3>
+<p>To make things more complicated, we could ask whether “measurement 2”
+is the same event for every rater. If every operator measured everyone
+on day 1 and again on day 2, the days are shared
+<strong>occasions</strong>, and the model is crossed: <span class="math display">\[y_{pio} = \mu + p + i + o + (pi) + (po) + (io) +
+e_{pio},\]</span> adding a day effect common to everyone (<span class="math inline">\(\sigma^2_o\)</span>), subjects changing between
+days (<span class="math inline">\(\sigma^2_{po}\)</span>), and raters
+drifting differently between days (<span class="math inline">\(\sigma^2_{io}\)</span>).</p>
+<p>Give the occasion column as <code>occasion</code>:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">days</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"day1"</span>, <span class="st">"day2"</span><span class="op">)</span>, operator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>,</span>
+<span>                    id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">subj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">50</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>day1 <span class="op">=</span> <span class="fl">0</span>, day2 <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span>                  <span class="co"># everyone higher on day 2</span></span>
+<span><span class="va">drift</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">0</span>, <span class="fl">0.5</span><span class="op">)</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>           <span class="co"># rater-specific drift</span></span>
+<span><span class="va">change</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">20</span>, <span class="fl">2</span><span class="op">)</span>          <span class="co"># subjects change between days</span></span>
+<span><span class="va">oi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">days</span><span class="op">$</span><span class="va">operator</span><span class="op">)</span>; <span class="va">di</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">days</span><span class="op">$</span><span class="va">day</span><span class="op">)</span></span>
+<span><span class="va">days</span><span class="op">$</span><span class="va">thickness</span> <span class="op">&lt;-</span> <span class="va">subj</span><span class="op">[</span><span class="va">days</span><span class="op">$</span><span class="va">id</span><span class="op">]</span> <span class="op">+</span> <span class="va">bias</span><span class="op">[</span><span class="va">days</span><span class="op">$</span><span class="va">operator</span><span class="op">]</span> <span class="op">+</span> <span class="va">shift</span><span class="op">[</span><span class="va">days</span><span class="op">$</span><span class="va">day</span><span class="op">]</span> <span class="op">+</span></span>
+<span>  <span class="va">drift</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">oi</span>, <span class="va">di</span><span class="op">)</span><span class="op">]</span> <span class="op">+</span> <span class="va">change</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">days</span><span class="op">$</span><span class="va">id</span>, <span class="va">di</span><span class="op">)</span><span class="op">]</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">days</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">test_retest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">days</span>,</span>
+<span>                               occasion <span class="op">=</span> <span class="st">"day"</span>, stat <span class="op">=</span> <span class="st">"SEM"</span>,</span>
+<span>                               type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">test_retest</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The estimated SEM(intra,A) was 1.73 (95% compatibility interval [1.45,</span></span>
+<span><span class="co">#&gt; 21.4]). Values in this interval are the most compatible with the data,</span></span>
+<span><span class="co">#&gt; given the model and its assumptions. The estimate is the intra-rater</span></span>
+<span><span class="co">#&gt; SEM (absolute agreement, same item, another occasion), for a single</span></span>
+<span><span class="co">#&gt; measurement, with error from: occasions, subjects x occasions, items x</span></span>
+<span><span class="co">#&gt; occasions, subjects x items x occasions (residual). Treating the</span></span>
+<span><span class="co">#&gt; occasions as exchangeable repeats would give SEM(intra) = 1.73, the</span></span>
+<span><span class="co">#&gt; same estimate, but its interval would treat the occasion effects shared</span></span>
+<span><span class="co">#&gt; by all subjects as independent noise. The data had 20 subjects, 3</span></span>
+<span><span class="co">#&gt; items, 2 occasions (120 measurements, 1 measurement per</span></span>
+<span><span class="co">#&gt; subject-by-item-by-occasion cell); variance components were estimated</span></span>
+<span><span class="co">#&gt; by analysis of variance (unconstrained). The interval is a modified</span></span>
+<span><span class="co">#&gt; large-sample (MLS) interval for linear combinations of mean squares</span></span>
+<span><span class="co">#&gt; (Graybill &amp; Wang, 1980; Ting et al., 1990).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Variance components:</span></span>
+<span><span class="co">#&gt;  Component                               Variance 95% CI         SD    Percent</span></span>
+<span><span class="co">#&gt;  subjects                                16.2     [8.90, 35.8]   4.03  78.5   </span></span>
+<span><span class="co">#&gt;  items                                   1.29     [0, 55.4]      1.13  6.2    </span></span>
+<span><span class="co">#&gt;  occasions                               0.284    [0, 454.]      0.533 1.4    </span></span>
+<span><span class="co">#&gt;  subjects x items                        0.159    [0, 0.543]     0.399 0.8    </span></span>
+<span><span class="co">#&gt;  subjects x occasions                    1.75     [0.887, 4.03]  1.32  8.5    </span></span>
+<span><span class="co">#&gt;  items x occasions                       0.185    [0.0184, 8.81] 0.430 0.9    </span></span>
+<span><span class="co">#&gt;  subjects x items x occasions (residual) 0.783    [0.523, 1.30]  0.885 3.8</span></span></code></pre></div>
+<p>Each <code>facet</code> now has consistency and agreement forms:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th><code>facet</code></th>
+<th>Same</th>
+<th>Varies</th>
+<th>Agreement adds to the error</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>"intra"</code></td>
+<td>operator</td>
+<td>day</td>
+<td>the day shift and rater drift (<span class="math inline">\(\sigma^2_o + \sigma^2_{io}\)</span>)</td>
+</tr>
+<tr class="even">
+<td><code>"inter"</code></td>
+<td>day</td>
+<td>operator</td>
+<td>operator bias and rater drift (<span class="math inline">\(\sigma^2_i + \sigma^2_{io}\)</span>)</td>
+</tr>
+<tr class="odd">
+<td><code>"overall"</code></td>
+<td>nothing</td>
+<td>operator and day</td>
+<td>all of these</td>
+</tr>
+</tbody>
+</table>
+<p>Both intra-rater SEMs describe one operator measuring the same
+subject on another day; they differ in what counts as error.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test_retest_c</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reli_facet_test.html">reli_facet_test</a></span><span class="op">(</span><span class="va">thickness</span> <span class="op">~</span> <span class="va">operator</span> <span class="op">|</span> <span class="va">id</span>, data <span class="op">=</span> <span class="va">days</span>,</span>
+<span>                                 occasion <span class="op">=</span> <span class="st">"day"</span>, stat <span class="op">=</span> <span class="st">"SEM"</span>,</span>
+<span>                                 type <span class="op">=</span> <span class="st">"consistency"</span><span class="op">)</span></span>
+<span><span class="va">sem_row</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>SEM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>, lower <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">conf.int</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>    upper <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">conf.int</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>agreement <span class="op">=</span> <span class="fu">sem_row</span><span class="op">(</span><span class="va">test_retest</span><span class="op">)</span>,</span>
+<span>      consistency <span class="op">=</span> <span class="fu">sem_row</span><span class="op">(</span><span class="va">test_retest_c</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                  SEM    lower     upper</span></span>
+<span><span class="co">#&gt; agreement   1.733401 1.449317 21.372134</span></span>
+<span><span class="co">#&gt; consistency 1.592482 1.291992  2.201003</span></span></code></pre></div>
+<ul>
+<li>
+<strong>Agreement</strong> (1.73 here): the error of a single
+reading taken on some other day and used as it is. It includes the day
+shift that affects everyone (<span class="math inline">\(\sigma^2_o\)</span>), this operator’s own drift on
+that day (<span class="math inline">\(\sigma^2_{io}\)</span>), the
+subject’s own day-to-day change (<span class="math inline">\(\sigma^2_{po}\)</span>) and the residual. Use it
+when a new measurement is compared directly with an earlier one by the
+same operator and nothing is done about day effects, the usual clinical
+test-retest situation; <code><a href="../reference/mdc_test.html">mdc_test()</a></code> on it gives the smallest
+change between two days that exceeds measurement error.</li>
+<li>
+<strong>Consistency</strong> (1.59 here): the two systematic parts,
+<span class="math inline">\(\sigma^2_o\)</span> and <span class="math inline">\(\sigma^2_{io}\)</span>, are set aside, leaving
+<span class="math inline">\(\sigma^2_{po}\)</span> and the residual: the
+error that remains even if the day’s shift for that operator were known
+and removed. Use it when day effects are corrected (recalibration, a
+reference sample each session), when they cancel in the comparison
+(subjects measured by the same operator in the same session), or when
+the shift is reported separately, as the mean change between trials
+<span class="citation">(<a href="#ref-hopkins2000">Hopkins 2000</a>; <a href="#ref-weir2005">Weir 2005</a>)</span>.</li>
+</ul>
+<p>The subjects’ own day-to-day change (<span class="math inline">\(\sigma^2_{po}\)</span>) is error in both: it
+belongs to the subjects, not the protocol, so the consistency SEM is not
+“pure instrument noise”. With one measurement per day, biological
+variation and measurement noise cannot be separated; repeats within a
+day (two measurements per operator per day) would separate them.</p>
+<p>The gap between the two SEMs is what an uncorrected shift costs. Here
+the day shift and drift are a small part of the error, so the estimates
+are close, but the agreement interval is very wide: the day effect is
+estimated from only two days (<code>m - 1 = 1</code> degree of freedom),
+and with two days its uncertainty stays large however many subjects are
+measured. More days, not more subjects, would narrow it.</p>
+<p>With occasions there are two ways of getting it wrong. Treating the
+days as exchangeable repeats (leaving out <code>occasion</code>) gives
+the <em>same</em> intra-rater agreement estimate, but its interval
+treats the day shift, which every subject shares, as independent noise,
+so it is too narrow; and it cannot separate the shift from the noise at
+all (<code>test_retest$nested</code> gives that estimate). And for the
+consistency SEM it overstates the error, because the day shift is
+counted as noise.</p>
+<div class="section level4">
+<h4 id="intervals">Intervals<a class="anchor" aria-label="anchor" href="#intervals"></a>
+</h4>
+<p>The intra-rater SEM with repeats, and the inter-rater consistency SEM
+and coefficient when <code>r_avg</code> equals the number of repeats,
+have exact intervals. The others combine several mean squares and use,
+by default, modified large-sample (MLS) intervals <span class="citation">(<a href="#ref-graybill1980">Graybill and Wang
+1980</a>; <a href="#ref-ting1990">Ting et al. 1990</a>; <a href="#ref-burdick1992">Burdick and Graybill 1992</a>)</span>. In
+simulations with normal data, with repeats or with occasions, the MLS
+intervals covered at least 0.93 for every statistic, including agreement
+statistics with two operators or two days and a large operator bias or
+day effect, whereas the Satterthwaite alternative
+(<code>ci_method = "satterthwaite"</code>) fell to about 0.7. For
+agreement statistics the two tails are uneven. When the bound driven by
+the operator or day variance (few degrees of freedom) is wide, and the
+other is about nominal, so the usual one-sided tests (a coefficient
+above a threshold, an SEM below an acceptable error) are conservative.
+Leaving out <code>occasion</code> when the measurements were made on
+shared days gave intra-rater SEM intervals that covered the true value
+as little as a quarter of the time. With skewed or heavy-tailed data the
+analytic intervals under-cover (0.78 to 0.90 with repeats), and
+<code>boot = TRUE</code> is better. Subjects are resampled with all
+their measurements, and for the agreement statistics a “hybrid” step
+adds the variation from drawing the operators and days. Agreement
+statistics from two or three operators (or days) remain uncertain
+however many subjects are measured. <code><a href="../reference/reli_facet_test.html">?reli_facet_test</a></code> gives
+the details.</p>
+</div>
+<div class="section level4">
+<h4 id="other-relevant-r-packages-of-note">Other relevant R packages of note<a class="anchor" aria-label="anchor" href="#other-relevant-r-packages-of-note"></a>
+</h4>
+<p>Other packages fit related models: <a href="https://cran.r-project.org/web/packages/VCA/index.html" class="external-link">VCA</a>
+(deeper nesting, laboratory precision designs), <a href="https://cran.r-project.org/web/packages/rptR/index.html" class="external-link">rptR</a>
+(repeatability of non-Gaussian data), gtheoryr (crossed G-studies with
+several facets, D-study optimisation), <a href="https://cran.r-project.org/web/packages/SixSigma/index.html" class="external-link">SixSigma</a>
+(<code>ss.rr()</code>, gauge R&amp;R) and <a href="https://cran.r-project.org/web/packages/MethComp/index.html" class="external-link">MethComp</a>
+(method comparison with linked replicates and method-specific
+variances).</p>
+<p>In <code>SimplyAgree</code>, <code><a href="../reference/reli_facet_test.html">reli_facet_test()</a></code> adds
+intervals and tests for the coefficients and the intra- and inter-rater
+SEMs, and the link to <code><a href="../reference/mdc_test.html">mdc_test()</a></code>.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="planning-a-reliability-study">Planning a reliability study<a class="anchor" aria-label="anchor" href="#planning-a-reliability-study"></a>
+</h2>
+<p><code><a href="../reference/power_icc.html">power_icc()</a></code> gives the power of the ICC test, or the
+number of subjects (<code>n</code>), measurements per subject
+(<code>k</code>), or the ICC under the alternative needed for a given
+power. For example, the subjects needed to show, with two trials and 80%
+power, that the ICC is above 0.6 when it is really 0.8:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/power_icc.html">power_icc</a></span><span class="op">(</span>rho0 <span class="op">=</span> <span class="fl">0.6</span>, rho1 <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">2</span>, power <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span>          alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Power calculation for the one-way ICC, ICC(1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 38.90078</span></span>
+<span><span class="co">#&gt;               k = 2</span></span>
+<span><span class="co">#&gt;            rho0 = 0.6</span></span>
+<span><span class="co">#&gt;            rho1 = 0.8</span></span>
+<span><span class="co">#&gt;       sig.level = 0.05</span></span>
+<span><span class="co">#&gt;           power = 0.8</span></span>
+<span><span class="co">#&gt;     alternative = greater</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject</span></span></code></pre></div>
+<p><code><a href="../reference/precision_icc.html">precision_icc()</a></code> instead plans for a narrow confidence
+interval: here, the subjects needed for a 95% interval no wider than 0.2
+around an ICC of 0.8, with three trials, with 80% assurance (the
+probability that the interval is that narrow).</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/precision_icc.html">precision_icc</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.8</span>, k <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">0.2</span>, assurance <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;      Precision (confidence interval width) calculation for the one-way ICC, ICC(1) (exact F distribution) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               n = 48.34247</span></span>
+<span><span class="co">#&gt;               k = 3</span></span>
+<span><span class="co">#&gt;             rho = 0.8</span></span>
+<span><span class="co">#&gt;           width = 0.2</span></span>
+<span><span class="co">#&gt;      conf.level = 0.95</span></span>
+<span><span class="co">#&gt;       assurance = 0.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; NOTE: n is the number of subjects; round up to a whole number.</span></span>
+<span><span class="co">#&gt;       n = number of subjects, k = measurements per subject; width = upper minus lower limit</span></span></code></pre></div>
+<p>Both are exact for the one-way and consistency ICCs;
+<code>method = "approximate"</code> reproduces the published formulas of
+<span class="citation">Walter et al. (<a href="#ref-walter1998">1998</a>)</span> and <span class="citation">Zou
+(<a href="#ref-zou2012">2012</a>)</span> (see also <span class="citation">Mondal et al. (<a href="#ref-mondal2024">2024</a>)</span>). The agreement ICC has no exact
+distribution and is not supported. See
+<code><a href="../articles/power_sample_size_vignette.html">vignette("power_sample_size_vignette", package = "SimplyAgree")</a></code>
+for more examples, including average measures, missing measurements, and
+how to use these calculations as a guide for agreement ICCs.</p>
+</div>
+<div class="section level2">
+<h2 id="legacy-functions">Legacy functions<a class="anchor" aria-label="anchor" href="#legacy-functions"></a>
+</h2>
+<p><code><a href="../reference/reli_stats.html">reli_stats()</a></code> (linear mixed model) and
+<code><a href="../reference/reli_stats.html">reli_aov()</a></code> (analysis of variance) return all six ICCs, the
+CV, SEM, SEE and SEP at once. They are superseded but still work.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reli_stats.html">reli_aov</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, wide <span class="op">=</span> <span class="cn">TRUE</span>, col.names <span class="op">=</span> <span class="va">judges</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficient of Variation (%):  19.1</span></span>
 <span><span class="co">#&gt; Standard Error of Measurement (SEM):  1.01</span></span>
@@ -202,451 +1331,325 @@ missing data are dropped when using <code>reli_aov</code>.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intraclass Correlation Coefficients with  95 % C.I.</span></span>
 <span><span class="co">#&gt;            Model         Measures  Type    ICC Lower CI Upper CI</span></span>
-<span><span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.09672   0.6434</span></span>
-<span><span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.04290   0.6911</span></span>
-<span><span class="co">#&gt; 3  two-way fixed      Consistency  ICC3 0.7148  0.41183   0.9258</span></span>
-<span><span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.54504   0.8783</span></span>
-<span><span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.15204   0.8995</span></span>
-<span><span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.73690   0.9804</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 one-way random        Agreement  ICC1 0.1657 -0.13293   0.7226</span></span>
+<span><span class="co">#&gt; 2 two-way random        Agreement  ICC2 0.2898  0.01879   0.7611</span></span>
+<span><span class="co">#&gt; 3  two-way fixed      Consistency  ICC3 0.7148  0.34246   0.9459</span></span>
+<span><span class="co">#&gt; 4 one-way random   Avg. Agreement ICC1k 0.4428 -0.88444   0.9124</span></span>
+<span><span class="co">#&gt; 5 two-way random   Avg. Agreement ICC2k 0.6201  0.07114   0.9272</span></span>
+<span><span class="co">#&gt; 6  two-way fixed Avg. Consistency ICC3k 0.9093  0.67567   0.9859</span></span></code></pre></div>
+<p>Since version 0.4.0 they use the same engine as
+<code><a href="../reference/icc_test.html">icc_test()</a></code>. In particular, their ICC intervals are now
+two-sided. Previous versions used <code>conf.level</code> in each tail,
+so a “95%” interval was really a 90% interval; the old numbers at
+<code>conf.level = c</code> are reproduced with
+<code>conf.level = 1 - 2 * (1 - c)</code>. Their SEE and SEP keep the SD
+of all the measurements, as in <span class="citation">Weir (<a href="#ref-weir2005">2005</a>)</span>. See <code><a href="../reference/reli_stats.html">?reli_stats</a></code> for
+the other changes.</p>
 </div>
 <div class="section level2">
-<h2 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
+<h2 id="calculative-approach-for-iccs">Calculative approach for ICCs<a class="anchor" aria-label="anchor" href="#calculative-approach-for-iccs"></a>
 </h2>
+<p>I tend to try and document the calculative approaches where
+possible.</p>
+<p>Below is the step-by-step process for the ICC calculations and their
+intervals.</p>
 <div class="section level3">
-<h3 id="model">Model<a class="anchor" aria-label="anchor" href="#model"></a>
+<h3 id="model-and-mean-squares">Model and mean squares<a class="anchor" aria-label="anchor" href="#model-and-mean-squares"></a>
 </h3>
-<p>The linear mixed model used for the calculations is specified as the
-following:</p>
+<p>For n subjects each measured on k items, the two-way model is <span class="math inline">\(y_{ij} = \mu + s_i + t_j + e_{ij}\)</span>, with
+subject effects <span class="math inline">\(s_i\)</span> (variance <span class="math inline">\(\sigma^2_s\)</span>), item effects <span class="math inline">\(t_j\)</span> (<span class="math inline">\(\sigma^2_t\)</span>) and error <span class="math inline">\(e_{ij}\)</span> (<span class="math inline">\(\sigma^2_e\)</span>). The analysis of variance
+gives the mean squares for subjects (<span class="math inline">\(MS_B\)</span>, <span class="math inline">\(n -
+1\)</span> df), items (<span class="math inline">\(MS_J\)</span>, <span class="math inline">\(k - 1\)</span> df) and error (<span class="math inline">\(MS_E\)</span>, <span class="math inline">\((n-1)(k-1)\)</span> df), and the within-subject
+mean square <span class="math inline">\(MS_W = (MS_J + (n-1)
+MS_E)/n\)</span> (<span class="math inline">\(n(k-1)\)</span> df). Their
+expectations are</p>
 <p><span class="math display">\[
-  Y_{i} \sim\ N \left(\alpha_{j[i],k[i]}, \sigma^2 \right)
+E(MS_B) = k\sigma^2_s + \sigma^2_e, \quad
+E(MS_J) = n\sigma^2_t + \sigma^2_e, \quad
+E(MS_E) = \sigma^2_e.
 \]</span></p>
-<p><span class="math display">\[
-    \alpha_{j}  \sim\ N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}}
-\right)
-    \text{, for id j = 1,} \dots \text{,J}
-\]</span></p>
-<p><span class="math display">\[
-    \alpha_{k}  \sim\ N \left(\mu_{\alpha_{k}}, \sigma^2_{\alpha_{k}}
-\right)
-    \text{, for items k = 1,} \dots \text{,K}
-\]</span></p>
-</div>
-<div class="section level3">
-<h3 id="components-of-variance">Components of Variance<a class="anchor" aria-label="anchor" href="#components-of-variance"></a>
-</h3>
-<p><strong>Mean Squared Error (MSE)</strong></p>
-<p><span class="math display">\[
-MSE = \sigma^2
-\]</span></p>
-<p><strong>Variance Between Subjects</strong></p>
-<p><span class="math display">\[
-MSB = n_k \cdot \sigma^2_{\alpha j} + \sigma^2
-\]</span></p>
-<p><strong>Variance Between Items/Judges</strong></p>
-<p><span class="math display">\[
-MSJ = n_{j} \cdot \sigma^2_{\alpha_{k}} + \sigma^2
-\]</span></p>
-<p><strong>Variance Within Subjects/Participants</strong></p>
-<p><span class="math display">\[
-MSW = \sigma^2 + \sigma^2_{\alpha_{k}}
-\]</span></p>
+<p>With <code>method = "reml"</code>, the variance components come from
+a linear mixed model and the mean squares are reconstructed from
+them.</p>
 </div>
 <div class="section level3">
-<h3 id="intraclass-correlation-coefficients">Intraclass Correlation Coefficients<a class="anchor" aria-label="anchor" href="#intraclass-correlation-coefficients"></a>
+<h3 id="intraclass-correlation-coefficients">Intraclass correlation coefficients<a class="anchor" aria-label="anchor" href="#intraclass-correlation-coefficients"></a>
 </h3>
 <p><span class="math display">\[
-ICC_{(1,1)} = \frac{MSB - MSW}{MSB + (n_j-1) \cdot MSW}
-\]</span> <span class="math display">\[
-ICC_{(2,1)} = \frac{MSB - MSE}{MSB+(n_j -1) \cdot MSE + n_j \cdot (MSJ -
-MSE) \cdot n^{-1}}
-\]</span> <span class="math display">\[
-ICC(_{3,1)} = \frac{MSB - MSE}{MSB + (n_j -1) \cdot MSE}
-\]</span> <span class="math display">\[
-ICC_{(1,k)} = \frac{MSB - MSW}{MSB}
-\]</span> <span class="math display">\[
-ICC_{(2,k)} = \frac{MSB - MSW}{MSB + (MSJ - MSE) \cdot n_j^{-1}}
-\]</span> <span class="math display">\[
-ICC_{(3,k)} = \frac{MSB - MSE}{MSB}
+ICC(1) = \frac{MS_B - MS_W}{MS_B + (k-1) MS_W}
 \]</span></p>
+<p><span class="math display">\[
+ICC(A,1) = \frac{MS_B - MS_E}{MS_B + (k-1) MS_E + k (MS_J - MS_E)/n}
+\]</span></p>
+<p><span class="math display">\[
+ICC(C,1) = \frac{MS_B - MS_E}{MS_B + (k-1) MS_E}
+\]</span></p>
+<p>The average-measure forms are the Spearman-Brown projection of the
+single-measure form to k items, <span class="math inline">\(k\rho / (1 +
+(k-1)\rho)\)</span>; for example <span class="math inline">\(ICC(C,k) =
+(MS_B - MS_E)/MS_B\)</span> and <span class="math inline">\(ICC(A,k) =
+(MS_B - MS_E)/(MS_B + (MS_J - MS_E)/n)\)</span>.</p>
 </div>
 <div class="section level3">
-<h3 id="icc-confidence-intervals">ICC Confidence Intervals<a class="anchor" aria-label="anchor" href="#icc-confidence-intervals"></a>
+<h3 id="confidence-intervals-and-tests">Confidence intervals and tests<a class="anchor" aria-label="anchor" href="#confidence-intervals-and-tests"></a>
 </h3>
-<div class="section level4">
-<h4 id="icc11">ICC(1,1)<a class="anchor" aria-label="anchor" href="#icc11"></a>
-</h4>
+<p>A two-sided <span class="math inline">\(1 - \alpha\)</span> interval
+uses <span class="math inline">\(\alpha/2\)</span> in each tail <span class="citation">(<a href="#ref-shrout1979">Shrout and Fleiss 1979</a>;
+<a href="#ref-mcgraw1996">McGraw and Wong 1996</a>)</span>. For ICC(1)
+and ICC(C,1), with <span class="math inline">\(F = MS_B/MS_W\)</span> or
+<span class="math inline">\(MS_B/MS_E\)</span> and its degrees of
+freedom <span class="math inline">\((\nu_1, \nu_2)\)</span>,</p>
 <p><span class="math display">\[
-F =  \frac{MSB}{MSW}
+F_L = \frac{F}{F_{1-\alpha/2;\, \nu_1, \nu_2}}, \quad
+F_U = F \cdot F_{1-\alpha/2;\, \nu_2, \nu_1}, \quad
+\text{limits} = \frac{F_{L,U} - 1}{F_{L,U} + k - 1}.
 \]</span></p>
+<p>These intervals are exact. For ICC(A,1) the denominator degrees of
+freedom are approximated <span class="citation">(<a href="#ref-satterthwaite1946">Satterthwaite 1946</a>; <a href="#ref-mcgraw1996">McGraw and Wong 1996</a>)</span>,</p>
 <p><span class="math display">\[
-df_{n} = n_j - 1
+v = \frac{(a MS_J + b MS_E)^2}{\frac{(a MS_J)^2}{k-1} +
+\frac{(b MS_E)^2}{(n-1)(k-1)}}, \quad
+a = \frac{k \hat\rho}{n(1-\hat\rho)}, \quad
+b = 1 + \frac{k\hat\rho (n-1)}{n(1-\hat\rho)},
 \]</span></p>
+<p>and with <span class="math inline">\(F^*_{L} = F_{1-\alpha/2;\, n-1,
+v}\)</span> and <span class="math inline">\(F^*_{U} = F_{1-\alpha/2;\,
+v, n-1}\)</span>,</p>
 <p><span class="math display">\[
-df_{d} = n_j \cdot (n_k - 1)
+L = \frac{n(MS_B - F^*_L MS_E)}{F^*_L (k MS_J + (kn - k - n) MS_E) + n
+MS_B},
+\quad
+U = \frac{n(F^*_U MS_B - MS_E)}{k MS_J + (kn - k - n) MS_E + n F^*_U
+MS_B}.
 \]</span></p>
-<p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-\]</span></p>
-<p><span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
-\]</span></p>
-<p><span class="math display">\[
-Lower \space CI = \frac{(F_L - 1)}{(F_L + (n_j - 1))}
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI = \frac{(F_U - 1)}{(F_U + n_j - 1)}
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="icc21">ICC(2,1)<a class="anchor" aria-label="anchor" href="#icc21"></a>
-</h4>
-<p><span class="math display">\[
-F =  \frac{MSJ}{MSE}
-\]</span></p>
-<p><span class="math display">\[
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,1)} \cdot F +
-n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,1)}) -
-n_k \cdot ICC_{(2,1)})]^2
-\]</span></p>
-<p><span class="math display">\[
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,1)}^2 \cdot F^2 + (n_j \cdot
-(1 +
-                                                         (n_k - 1) \cdot
-ICC_{(2,1)}) - n_k \cdot ICC_{(2,1)})^2
-\]</span> <span class="math display">\[
-  v = \frac{vn}{vd}
-\]</span></p>
-<p><span class="math display">\[
-  F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
-\]</span></p>
-<p><span class="math display">\[
-  F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
-\]</span></p>
-<p><span class="math display">\[
-  Lower \space CI = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot
-(n_k \cdot MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot
-MSB)}
-\]</span></p>
-<p><span class="math display">\[
-  Upper \space CI = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot
-MSJ + (n_k \cdot n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="icc31">ICC(3,1)<a class="anchor" aria-label="anchor" href="#icc31"></a>
-</h4>
-<p><span class="math display">\[
-F =  \frac{MSJ}{MSE}
-\]</span> <span class="math display">\[
-df_{n} = n_j - 1
-\]</span> <span class="math display">\[
-df_{d} = (n_j-1) \cdot (n_k - 1)
-\]</span></p>
-<p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-\]</span> <span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{n}, \space df_{d})}
-\]</span> <span class="math display">\[
-F3L &lt;- F31/qf(1 - alpha, df21n, df21d)
-\]</span> <span class="math display">\[
-F3U &lt;- F31 * qf(1 - alpha, df21d, df21n)
-\]</span> <span class="math display">\[
-Lower \space CI = (F3L - 1)/(F3L + n_k - 1)
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI = (F3U - 1)/(F3U + n_k - 1)
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="icc1k">ICC(1,k)<a class="anchor" aria-label="anchor" href="#icc1k"></a>
-</h4>
-<p><span class="math display">\[
-F =  \frac{MSB - MSW}{MSB}
-\]</span> <span class="math display">\[
-df_{n} = n_j - 1
-\]</span></p>
-<p><span class="math display">\[
-df_{d} = n_j \cdot (n_k - 1)
-\]</span></p>
-<p><span class="math display">\[
-F_{L} = \frac{F}{F_{(1 - \alpha, \space df_{n}, \space df_{d})}}
-\]</span> <span class="math display">\[
-F_{U} = F \cdot F_{(1 - \alpha, \space df_{d}, \space df_{n})}
-\]</span></p>
-<p><span class="math display">\[
-Lower \space CI = 1-\frac{1}{F_L}
-\]</span> <span class="math display">\[
-Upper \space CI = 1-\frac{1}{F_U}
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="icc2k">ICC(2,k)<a class="anchor" aria-label="anchor" href="#icc2k"></a>
-</h4>
-<p><span class="math display">\[
-F =  \frac{MSB - MSW}{MSB}
-\]</span></p>
-<p><span class="math display">\[
-vn = (n_k - 1) \cdot (n_j - 1) \cdot [(nj \cdot ICC_{(2,k)} \cdot F +
-n_j \cdot
-                                     (1 + (n_k - 1) \cdot ICC_{(2,k)}) -
-n_k \cdot ICC_{(2,k)})]^2
-\]</span></p>
-<p><span class="math display">\[
-  vd = (n_j - 1) \cdot n_k^2 \cdot ICC_{(2,k)}^2 \cdot F^2 + (n_j \cdot
-(1 +
-                                                         (n_k - 1) \cdot
-ICC_{(2,k)}) - n_k \cdot ICC_{(2,k)})^2
-\]</span></p>
-<p><span class="math display">\[
-v = \frac{vn}{vd}
-\]</span></p>
-<p><span class="math display">\[
-F_{L} = F_{(1 - \alpha, \space n_j-1, \space v)}
-\]</span> <span class="math display">\[
-F_{U} = F_{(1 - \alpha, \space v, \space n_j - 1)}
-\]</span></p>
-<p><span class="math display">\[
-L3 = \frac{n_j \cdot (MSB - F_U \cdot MSE)}{(F_U \cdot (n_k \cdot MSJ +
-(n_k \cdot n_j - n_k - n_j) \cdot MSE) + n_j \cdot MSB)}
-\]</span></p>
-<p><span class="math display">\[
-U3 = \frac{n_j \cdot (MSB \cdot F_L - MSE)}{(n_k \cdot MSJ + (n_k \cdot
-n_j - n_k - n_j) \cdot MSE + n_j \cdot F_L \cdot MSB)}
-\]</span></p>
-<p><span class="math display">\[
-Lower \space CI = \frac{L3 \cdot n_k}{(1 + L3 \cdot (n_k - 1))}
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI = \frac{U3 \cdot n_k}{(1 + U3 \cdot (n_k - 1))}
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="icc3k">ICC(3,k)<a class="anchor" aria-label="anchor" href="#icc3k"></a>
-</h4>
-<p><span class="math display">\[
-F = \frac{MSB}{MSE}
-\]</span></p>
-<p><span class="math display">\[
-df_n = n_j - 1
-\]</span></p>
-<p><span class="math display">\[
-df_d = (n_j - 1) \cdot (n_k - 1)
-\]</span></p>
-<p><span class="math display">\[
-F_L = \frac{F}{F_{(1 - \alpha, \space df_n, \space df_d})}
-\]</span></p>
-<p><span class="math display">\[
-F_U = F \cdot F_{(1 - \alpha, \space df_d, \space df_n)}
-\]</span></p>
-<p><span class="math display">\[
-Lower \space CI = 1-\frac{1}{F_L}
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI = 1-\frac{1}{F_U}
-\]</span></p>
-</div>
+<p>The tests of <span class="math inline">\(H_0: \rho = \rho_0\)</span>
+are the F tests of <span class="citation">McGraw and Wong (<a href="#ref-mcgraw1996">1996</a>)</span>: for ICC(C,1), <span class="math inline">\(F = (MS_B/MS_E)(1-\rho_0)/(1 +
+(k-1)\rho_0)\)</span> on <span class="math inline">\((n-1,
+(n-1)(k-1))\)</span> degrees of freedom, and similarly for the other
+forms.</p>
 </div>
 <div class="section level3">
-<h3 id="standard-error-calculations">Standard Error Calculations<a class="anchor" aria-label="anchor" href="#standard-error-calculations"></a>
+<h3 id="standard-errors-of-measurement">Standard errors of measurement<a class="anchor" aria-label="anchor" href="#standard-errors-of-measurement"></a>
 </h3>
-<p>The standard error of the measurement (SEM), standard error of the
-estimate (SEE), and standard error of prediction (SEP) are all estimated
-with the following calculations.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;This section was previously incorrect. The variance
-calculation used to utilize &lt;span class="math inline"&gt;\(n_j\)&lt;/span&gt;
-instead of N.&lt;/p&gt;'><sup>2</sup></a></p>
-<p>The default SEM calculation is the following:</p>
-<p><span class="math display">\[
-SEM = \sqrt{MSE}
-\]</span> Alternatively, the SEM can be calculated as the following and
-the ICC is determined through the <code>se_type</code> argument:</p>
-<p><span class="math display">\[
-SEM = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC}
-\]</span> The other measures default to using the following equations.
-The default is to use <span class="math inline">\(ICC_{3,1}\)</span>,
-but can be modified with the <code>se_type</code> argument.</p>
-<p><span class="math display">\[
-SEE = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{ICC \cdot (1-ICC)}
-\]</span></p>
-<p><span class="math display">\[
-SEP = \sqrt{\frac{SS_{total}}{(N-1)}} \cdot \sqrt{1-ICC^2}
-\]</span></p>
-</div>
-<div class="section level3">
-<h3 id="coefficient-of-variation">Coefficient of Variation<a class="anchor" aria-label="anchor" href="#coefficient-of-variation"></a>
-</h3>
-<p>The CV is calculated 3 potential ways within <code>reli_stats</code>.
-I highly recommend reporting the default version of CV.</p>
-<ol style="list-style-type: decimal">
-<li>From the MSE (default)</li>
-</ol>
-<p><span class="math display">\[
-CV = \frac{ \sqrt{MSE} }{ \bar y}
-\]</span></p>
-<ol start="2" style="list-style-type: decimal">
-<li>From the SEM<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Also called “%SEM” in some texts. Equivalent to MSE if
-the &lt;code&gt;se_type&lt;/code&gt; is set to “MSE”&lt;/p&gt;"><sup>3</sup></a>
-</li>
-</ol>
-<p><span class="math display">\[
-CV = \frac{SEM}{ \bar y}
-\]</span></p>
-<ol start="3" style="list-style-type: decimal">
-<li>From the model residuals (most liberal)</li>
-</ol>
-<p><span class="math display">\[
-CV = \frac{\sqrt{\frac{\Sigma^{N}_{i=1}(y_i - \hat y_i)^2}{N_{obs}}}}{
-\bar y}
-\]</span></p>
-</div>
-<div class="section level3">
-<h3 id="other-confidence-intervals">Other Confidence Intervals<a class="anchor" aria-label="anchor" href="#other-confidence-intervals"></a>
-</h3>
-<p>If the <code>other_ci</code> argument is set to TRUE then confidence
-intervals will be calculated for the CV, SEM, SEP, and SEE.</p>
-<div class="section level4">
-<h4 id="chi-square">Chi-square<a class="anchor" aria-label="anchor" href="#chi-square"></a>
-</h4>
-<p>The default method is <code>type = 'chisq</code>. This method
-utilizes the chi-square distribution to <em>approximate</em> confidence
-intervals for these measurements. The accuracy of these estimates is
-likely variable, and is probably poor for small samples.</p>
-<p>For the CV, the calculation is as follows:</p>
-<p><span class="math display">\[
-Lower \space CI =
-\frac{CV}{\sqrt{(\frac{\chi^2_{1-\alpha/2}}{df_{error}+1}-1) \cdot CV^2
-\cdot \frac{\chi^2_{1-\alpha/2}}{df_{error}}}}
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI =
-\frac{CV}{\sqrt{(\frac{\chi^2_{\alpha/2}}{df_{error}+1}-1) \cdot CV^2
-\cdot \frac{\chi^2_{\alpha/2}}{df_{error}}}}
-\]</span> For the variance based measures (s) the calculation is as
-follows:</p>
-<p><span class="math display">\[
-Lower \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{1-\alpha/2}}}
-\]</span></p>
-<p><span class="math display">\[
-Upper \space CI = s \cdot \sqrt{\frac{df_{error}}{\chi^2_{\alpha/2}}}
-\]</span></p>
-</div>
-<div class="section level4">
-<h4 id="bootstrap">Bootstrap<a class="anchor" aria-label="anchor" href="#bootstrap"></a>
-</h4>
-<p>If type is not set to <code>chisq</code> then bootstrapping is
-performed.</p>
-<ol style="list-style-type: decimal">
-<li>
-<code>reli_aov</code> utilizes a non-parametric ordinary
-bootstrap.</li>
-<li>
-<code>reli_stats</code> utilizes a parametric bootstrap.</li>
-</ol>
-<p>The number of resamples can be set with the replicates argument
-(default is 1999; increase for greater accuracy or lower for greater
-speed). The reported confidence intervals are estimated using the
-percentile method <code>type = 'perc'</code>, the normal
-<code>type = 'norm'</code>, or basic methods
-<code>type = 'basic'</code>.</p>
-<p>To ensure reproducibility, please use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> when
-these confidence intervals are calculated.</p>
-</div>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Statistic</th>
+<th>Estimate</th>
+<th>Interval</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>SEM, two-way consistency</td>
+<td><span class="math inline">\(\sqrt{MS_E}\)</span></td>
+<td>exact <span class="math inline">\(\chi^2\)</span>
+</td>
+</tr>
+<tr class="even">
+<td>SEM, two-way agreement</td>
+<td><span class="math inline">\(\sqrt{(MS_J +
+(n-1)MS_E)/n}\)</span></td>
+<td>Satterthwaite <span class="math inline">\(\chi^2\)</span>
+</td>
+</tr>
+<tr class="odd">
+<td>SEM, one-way</td>
+<td><span class="math inline">\(\sqrt{MS_W}\)</span></td>
+<td>exact <span class="math inline">\(\chi^2\)</span>
+</td>
+</tr>
+<tr class="even">
+<td>SEE</td>
+<td><span class="math inline">\(SD\sqrt{ICC(1-ICC)}\)</span></td>
+<td>delta method, log scale</td>
+</tr>
+<tr class="odd">
+<td>SEP</td>
+<td><span class="math inline">\(SD\sqrt{1-ICC^2}\)</span></td>
+<td>delta method, log scale</td>
+</tr>
+</tbody>
+</table>
+<p>For example, the exact interval for the consistency SEM is <span class="math inline">\(\sqrt{\nu MS_E /
+\chi^2_{1-\alpha/2;\,\nu}}\)</span> to <span class="math inline">\(\sqrt{\nu MS_E / \chi^2_{\alpha/2;\,\nu}}\)</span>
+with <span class="math inline">\(\nu = (n-1)(k-1)\)</span>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="inter-rater-reliability">Inter-Rater Reliability<a class="anchor" aria-label="anchor" href="#inter-rater-reliability"></a>
 </h2>
-<p>In some cases, the reliability of a categorical or ordinal scale may
-be worth investigating. For example, physicians may want to develop a
-diagnosis tool and ensure that the diagnosis is reliable (i.e.,
-categorical designation) or severity of the disease (i.e., a Likert-type
-scale). Coefficients can be calculated to assess the degree of
-inter-rater reliability. In its simplest form, the percent agreement
-between all the raters can be calculated. All other coefficients of
-agreement are essentially trying to “correct” for random guessing of the
-rater. The function to make these calculations in the
-<code>SimplyAgree</code> is <code>agree_coef</code>, and it produces 4
-estimates: percent agreement, Gwet’s AC, Fleiss’ Kappa, and
-Krippendorff’s Alpha. However, other packages provide much a much
-greater breadth of calculative approaches <span class="citation">(<a href="#ref-irrCAC">Gwet 2019</a>)</span>.</p>
-<p>In the <code>agree_coef</code> function, the user can specify
-<code>weighted = TRUE</code>. If this argument is set to true than the
-ratings have quadratic weights applied to them. Essentially, this
-penalizes values farther away from each other more than those close to
-each other. For example, a pair of values equal to 3 and 4 would be
-penalized less than a pair of values to 1 and 4. For more details, on
-these “agreement coefficients” I refer all users to Gwet’s textbook on
-inter-rater agreement <span class="citation">(<a href="#ref-gwet">Gwet
-2014</a>)</span>.</p>
-<p>As a demonstration, we can create a matrix of ratings.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">ratermat1</span> <span class="op">=</span> <span class="op">(</span><span class="st">"Rater1 Rater2 Rater3 Rater4</span></span>
-<span><span class="st">1       1      1     NA      1</span></span>
-<span><span class="st">2       2      2      3      2</span></span>
-<span><span class="st">3       3      3      3      3</span></span>
-<span><span class="st">4       3      3      3      3</span></span>
-<span><span class="st">5       2      2      2      2</span></span>
-<span><span class="st">6       1      2      3      4</span></span>
-<span><span class="st">7       4      4      4      4</span></span>
-<span><span class="st">8       1      1      2      1</span></span>
-<span><span class="st">9       2      2      2      2</span></span>
-<span><span class="st">10     NA      5      5      5</span></span>
-<span><span class="st">11     NA     NA      1      1</span></span>
-<span><span class="st">12     NA     NA      3     NA"</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">ratermat2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/textconnections.html" class="external-link">textConnection</a></span><span class="op">(</span><span class="va">ratermat1</span><span class="op">)</span>,</span>
-<span>                       header<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>                       row.names<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We can then perform the analysis without the weights.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/agree_coef.html">agree_coef</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ratermat2</span>,</span>
-<span>                     wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                     weighted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                     col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater1"</span>, <span class="st">"Rater2"</span>, <span class="st">"Rater3"</span>, <span class="st">"Rater4"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                              est        se  lower.ci upper.ci</span></span>
-<span><span class="co">#&gt; Percent Agreement      0.8181818 0.1256090 0.5417184        1</span></span>
-<span><span class="co">#&gt; Gwet's AC1             0.7754441 0.1429500 0.4608133        1</span></span>
-<span><span class="co">#&gt; Fleiss' Kappa          0.7611693 0.1530192 0.4243763        1</span></span>
-<span><span class="co">#&gt; Kririppendorff's Alpha 0.7434211 0.1454787 0.4192743        1</span></span></code></pre></div>
-<p>Or, perform it with weighting.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/agree_coef.html">agree_coef</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ratermat2</span>,</span>
-<span>                    wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                    weighted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                    col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater1"</span>, <span class="st">"Rater2"</span>, <span class="st">"Rater3"</span>, <span class="st">"Rater4"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                              est         se  lower.ci upper.ci</span></span>
-<span><span class="co">#&gt; Percent Agreement      0.9753788 0.09061628 0.7759337        1</span></span>
-<span><span class="co">#&gt; Gwet's AC2             0.9140007 0.10396224 0.6851814        1</span></span>
-<span><span class="co">#&gt; Fleiss' Kappa          0.8649351 0.14603361 0.5435173        1</span></span>
-<span><span class="co">#&gt; Kririppendorff's Alpha 0.8491071 0.12905120 0.5615632        1</span></span></code></pre></div>
+<p>The ICC is for continuous measurements. For categorical or ordinal
+ratings (a diagnosis, a grade, a severity scale), agreement between
+raters is summarised instead by chance-corrected agreement coefficients
+such as Gwet’s AC1, Fleiss’ kappa or Krippendorff’s alpha
+(<code><a href="../reference/cac_test.html">cac_test()</a></code>), or, for ordinal ratings from many raters, by
+the model-based kappa of <span class="citation">Nelson and Edwards (<a href="#ref-nelson2015">2015</a>)</span> (<code><a href="../reference/ord_kappa_test.html">ord_kappa_test()</a></code>).
+For example, with 4 raters on a 5-point scale:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ratings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Rater1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  Rater2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  Rater3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  Rater4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">1</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/cac_test.html">cac_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rater1"</span>, <span class="st">"Rater2"</span>, <span class="st">"Rater3"</span>, <span class="st">"Rater4"</span><span class="op">)</span>,</span>
+<span>         data <span class="op">=</span> <span class="va">ratings</span>, weights <span class="op">=</span> <span class="st">"quadratic"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  Weighted (quadratic) Gwet's AC2 for 4 raters</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; data:  Rater1, Rater2, Rater3, Rater4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
+<span><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span><span class="co">#&gt;  0.6851814 1.0000000</span></span>
+<span><span class="co">#&gt; sample estimates:</span></span>
+<span><span class="co">#&gt; Gwet's AC2 </span></span>
+<span><span class="co">#&gt;  0.9140007</span></span></code></pre></div>
+<p>See
+<code><a href="../articles/categorical_agreement.html">vignette("categorical_agreement", package = "SimplyAgree")</a></code>
+for how to choose a coefficient, weights for ordinal scales, the
+model-based kappa, and comparisons between groups of raters or
+subjects.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-gwet" class="csl-entry">
-Gwet, Kilem L. 2014. <em>Handbook of Inter-Rater Reliability</em>.
-Advanced Analytics, LLC. <a href="https://www.agreestat.com/book4/" class="external-link">https://www.agreestat.com/book4/</a>.
+<div id="ref-atkinson2015" class="csl-entry">
+Atkinson, Greg, and Alan M. Batterham. 2015. <span>“True and False
+Interindividual Differences in the Physiological Response to an
+Intervention.”</span> <em>Experimental Physiology</em> 100 (6): 577–88.
+<a href="https://doi.org/10.1113/EP085070" class="external-link">https://doi.org/10.1113/EP085070</a>.
 </div>
-<div id="ref-irrCAC" class="csl-entry">
-Gwet, Kilem L. 2019. <em>irrCAC: Computing Chance-Corrected Agreement
-Coefficients (CAC)</em>. <a href="https://CRAN.R-project.org/package=irrCAC" class="external-link">https://CRAN.R-project.org/package=irrCAC</a>.
+<div id="ref-atkinson1998" class="csl-entry">
+Atkinson, Greg, and Alan M. Nevill. 1998. <span>“Statistical Methods for
+Assessing Measurement Error (Reliability) in Variables Relevant to
+Sports Medicine.”</span> <em>Sports Medicine</em> 26 (4): 217–38. <a href="https://doi.org/10.2165/00007256-199826040-00002" class="external-link">https://doi.org/10.2165/00007256-199826040-00002</a>.
+</div>
+<div id="ref-brennan2001" class="csl-entry">
+Brennan, Robert L. 2001. <em>Generalizability Theory</em>. Springer. <a href="https://doi.org/10.1007/978-1-4757-3456-0" class="external-link">https://doi.org/10.1007/978-1-4757-3456-0</a>.
+</div>
+<div id="ref-burdick1992" class="csl-entry">
+Burdick, Richard K., and Franklin A. Graybill. 1992. <em>Confidence
+Intervals on Variance Components</em>. Marcel Dekker.
+</div>
+<div id="ref-carrasco2003" class="csl-entry">
+Carrasco, Josep L., and Lluı́s Jover. 2003. <span>“Estimating the
+Generalized Concordance Correlation Coefficient Through Variance
+Components.”</span> <em>Biometrics</em> 59 (4): 849–58. <a href="https://doi.org/10.1111/j.0006-341x.2003.00099.x" class="external-link">https://doi.org/10.1111/j.0006-341x.2003.00099.x</a>.
+</div>
+<div id="ref-cole2000" class="csl-entry">
+Cole, T. J. 2000. <span>“Sympercents: Symmetric Percentage Differences
+on the 100 Log<span class="math inline">\(_e\)</span> Scale Simplify the
+Presentation of Log Transformed Data.”</span> <em>Statistics in
+Medicine</em> 19 (22): 3109–25. <a href="https://doi.org/10.1002/1097-0258(20001130)19:22%3C3109::AID-SIM558%3E3.0.CO;2-F" class="external-link">https://doi.org/10.1002/1097-0258(20001130)19:22&lt;3109::AID-SIM558&gt;3.0.CO;2-F</a>.
+</div>
+<div id="ref-cronbach1951" class="csl-entry">
+Cronbach, Lee J. 1951. <span>“Coefficient Alpha and the Internal
+Structure of Tests.”</span> <em>Psychometrika</em> 16 (3): 297–334. <a href="https://doi.org/10.1007/BF02310555" class="external-link">https://doi.org/10.1007/BF02310555</a>.
+</div>
+<div id="ref-graybill1980" class="csl-entry">
+Graybill, Franklin A., and Chih-Ming Wang. 1980. <span>“Confidence
+Intervals on Nonnegative Linear Combinations of Variances.”</span>
+<em>Journal of the American Statistical Association</em> 75 (372):
+869–73. <a href="https://doi.org/10.1080/01621459.1980.10477565" class="external-link">https://doi.org/10.1080/01621459.1980.10477565</a>.
+</div>
+<div id="ref-greenland2019" class="csl-entry">
+Greenland, Sander. 2019. <span>“Valid p-Values Behave Exactly as They
+Should: Some Misleading Criticisms of p-Values and Their Resolution with
+s-Values.”</span> <em>The American Statistician</em> 73 (sup1): 106–14.
+<a href="https://doi.org/10.1080/00031305.2018.1529625" class="external-link">https://doi.org/10.1080/00031305.2018.1529625</a>.
+</div>
+<div id="ref-hopkins2000" class="csl-entry">
+Hopkins, Will G. 2000. <span>“Measures of Reliability in Sports Medicine
+and Science.”</span> <em>Sports Medicine</em> 30 (1): 1–15. <a href="https://doi.org/10.2165/00007256-200030010-00001" class="external-link">https://doi.org/10.2165/00007256-200030010-00001</a>.
+</div>
+<div id="ref-hopkins2004" class="csl-entry">
+Hopkins, Will G. 2004. <span>“How to Interpret Changes in an Athletic
+Performance Test.”</span> <em>Sportscience</em> 8: 1–7. <a href="https://www.sportsci.org/jour/04/wghtests.htm" class="external-link">https://www.sportsci.org/jour/04/wghtests.htm</a>.
+</div>
+<div id="ref-koo2016" class="csl-entry">
+Koo, Terry K., and Mae Y. Li. 2016. <span>“A Guideline of Selecting and
+Reporting Intraclass Correlation Coefficients for Reliability
+Research.”</span> <em>Journal of Chiropractic Medicine</em> 15 (2):
+155–63. <a href="https://doi.org/10.1016/j.jcm.2016.02.012" class="external-link">https://doi.org/10.1016/j.jcm.2016.02.012</a>.
+</div>
+<div id="ref-Lin1989" class="csl-entry">
+Lin, Lawrence I-Kuei. 1989. <span>“A Concordance Correlation Coefficient
+to Evaluate Reproducibility.”</span> <em>Biometrics</em> 45 (1): 255. <a href="https://doi.org/10.2307/2532051" class="external-link">https://doi.org/10.2307/2532051</a>.
 </div>
 <div id="ref-mcgraw1996" class="csl-entry">
 McGraw, Kenneth O, and Seok P Wong. 1996. <span>“Forming Inferences
 about Some Intraclass Correlation Coefficients.”</span>
 <em>Psychological Methods</em> 1 (1): 30. <a href="https://doi.org/10.1037/1082-989X.1.1.30" class="external-link">https://doi.org/10.1037/1082-989X.1.1.30</a>.
 </div>
+<div id="ref-mondal2024" class="csl-entry">
+Mondal, Dipro, Sophie Vanbelle, Alberto Cassese, and Math J. J. M.
+Candel. 2024. <span>“Review of Sample Size Determination Methods for the
+Intraclass Correlation Coefficient in the One-Way Analysis of Variance
+Model.”</span> <em>Statistical Methods in Medical Research</em> 33 (3):
+532–53. <a href="https://doi.org/10.1177/09622802231224657" class="external-link">https://doi.org/10.1177/09622802231224657</a>.
+</div>
+<div id="ref-nelson2015" class="csl-entry">
+Nelson, Kerrie P., and Don Edwards. 2015. <span>“Measures of Agreement
+Between Many Raters for Ordinal Classifications.”</span> <em>Statistics
+in Medicine</em> 34 (23): 3116–32. <a href="https://doi.org/10.1002/sim.6546" class="external-link">https://doi.org/10.1002/sim.6546</a>.
+</div>
+<div id="ref-nickerson1997" class="csl-entry">
+Nickerson, Carol A. E. 1997. <span>“A Note on "a Concordance Correlation
+Coefficient to Evaluate Reproducibility".”</span> <em>Biometrics</em> 53
+(4): 1503–7. <a href="https://doi.org/10.2307/2533516" class="external-link">https://doi.org/10.2307/2533516</a>.
+</div>
+<div id="ref-rafi2020" class="csl-entry">
+Rafi, Zad, and Sander Greenland. 2020. <span>“Semantic and Cognitive
+Tools to Aid Statistical Science: Replace Confidence and Significance by
+Compatibility and Surprise.”</span> <em>BMC Medical Research
+Methodology</em> 20: 244. <a href="https://doi.org/10.1186/s12874-020-01105-9" class="external-link">https://doi.org/10.1186/s12874-020-01105-9</a>.
+</div>
+<div id="ref-satterthwaite1946" class="csl-entry">
+Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
+Estimates of Variance Components.”</span> <em>Biometrics Bulletin</em> 2
+(6): 110–14.
+</div>
+<div id="ref-senn2004" class="csl-entry">
+Senn, Stephen. 2004. <span>“Individual Response to Treatment: Is It a
+Valid Assumption?”</span> <em>BMJ</em> 329 (7472): 966–68. <a href="https://doi.org/10.1136/bmj.329.7472.966" class="external-link">https://doi.org/10.1136/bmj.329.7472.966</a>.
+</div>
+<div id="ref-senn2016" class="csl-entry">
+Senn, Stephen. 2016. <span>“Mastering Variation: Variance Components and
+Personalised Medicine.”</span> <em>Statistics in Medicine</em> 35 (7):
+966–77. <a href="https://doi.org/10.1002/sim.6739" class="external-link">https://doi.org/10.1002/sim.6739</a>.
+</div>
 <div id="ref-shrout1979" class="csl-entry">
 Shrout, Patrick E, and Joseph L Fleiss. 1979. <span>“Intraclass
 Correlations: Uses in Assessing Rater Reliability.”</span>
 <em>Psychological Bulletin</em> 86 (2): 420. <a href="https://doi.org/10.1037/0033-2909.86.2.420" class="external-link">https://doi.org/10.1037/0033-2909.86.2.420</a>.
+</div>
+<div id="ref-ting1990" class="csl-entry">
+Ting, Naitee, Richard K. Burdick, Franklin A. Graybill, S. Jeyaratnam,
+and T.-F. Cathy Lu. 1990. <span>“Confidence Intervals on Linear
+Combinations of Variance Components That Are Unrestricted in
+Sign.”</span> <em>Journal of Statistical Computation and Simulation</em>
+35 (3-4): 135–43. <a href="https://doi.org/10.1080/00949659008811240" class="external-link">https://doi.org/10.1080/00949659008811240</a>.
+</div>
+<div id="ref-walter1998" class="csl-entry">
+Walter, S. D., M. Eliasziw, and A. Donner. 1998. <span>“Sample Size and
+Optimal Designs for Reliability Studies.”</span> <em>Statistics in
+Medicine</em> 17 (1): 101–10. <a href="https://doi.org/10.1002/(SICI)1097-0258(19980115)17:1%3C101::AID-SIM727%3E3.0.CO;2-E" class="external-link">https://doi.org/10.1002/(SICI)1097-0258(19980115)17:1&lt;101::AID-SIM727&gt;3.0.CO;2-E</a>.
 </div>
 <div id="ref-weir2005" class="csl-entry">
 Weir, Joseph P. 2005. <span>“Quantifying Test-Retest Reliability Using
 the Intraclass Correlation Coefficient and the <span>SEM</span>.”</span>
 <em>The Journal of Strength and Conditioning Research</em> 19 (1): 231.
 <a href="https://pubmed.ncbi.nlm.nih.gov/15705040/" class="external-link">https://pubmed.ncbi.nlm.nih.gov/15705040/</a>.
+</div>
+<div id="ref-zou2012" class="csl-entry">
+Zou, G. Y. 2012. <span>“Sample Size Formulas for Estimating Intraclass
+Correlation Coefficients with Precision and Assurance.”</span>
+<em>Statistics in Medicine</em> 31 (29): 3972–81. <a href="https://doi.org/10.1002/sim.5466" class="external-link">https://doi.org/10.1002/sim.5466</a>.
 </div>
 </div>
 </div>

@@ -185,11 +185,80 @@ Accreditation and Quality Assurance, 15, 547-554.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# New formula interface (recommended)
-model <- dem_reg(y ~ x, data = mydata)
+# Peak flow: mini vs Wright meter (Bland & Altman, 1986)
+data("ba1986")
+fit <- dem_reg(mini1 ~ wright1, data = ba1986)
+summary(fit)
+#> Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = mini1 ~ wright1, data = ba1986, weighted = FALSE, 
+#>     conf.level = 0.95)
+#> 
+#> Coefficients:
+#>              coef      bias     se df  lower.ci upper.ci       t p.value
+#> Intercept 15.2316 -18.78805 69.480 15 -132.8606  163.324  0.2192  0.8294
+#> Slope      0.9709   0.03764  0.139 15    0.6746    1.267 -0.2095  0.8369
+#> 
+#> 15 degrees of freedom
+#> Error variance ratio (lambda): 1.0000
+plot(fit)
 
-# Old interface (still works with deprecation warning)
-model <- dem_reg(x = "x", y = "y", data = mydata)
-} # }
+
+# Joint test of intercept = 0 and slope = 1
+joint_test(fit)
+#> 
+#>  Joint Confidence Region Test [Sadler sum-of-squares, F-based] (H0:
+#>  intercept = 0, slope = 1)
+#> 
+#> data:  mini1 ~ wright1
+#> F = 0.078441, df1 = 2, df2 = 15, p-value = 0.9249
+#> alternative hypothesis: true intercept and slope are not equal to the null values
+#> null values:
+#> intercept     slope 
+#>         0         1 
+#> sample estimates:
+#>  intercept      slope 
+#> 15.2315555  0.9708808 
+#> 
+
+# Known error ratio, var(x) / var(y)
+dem_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+#> Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = mini1 ~ wright1, data = ba1986, error.ratio = 2, 
+#>     weighted = FALSE, conf.level = 0.95)
+#> 
+#> Coefficients:
+#> (Intercept)     wright1 
+#>      6.3264      0.9907 
+#> 
+
+# Replicate measurements: the error ratio is estimated from the replicates
+data("reps")
+dem_reg(y ~ x, data = reps, id = "id")
+#> Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = y ~ x + id, data = reps, id = "id", weighted = FALSE, 
+#>     conf.level = 0.95)
+#> 
+#> Coefficients:
+#> (Intercept)           x 
+#>      2.8298      0.3929 
+#> 
+
+# Weighted Deming regression (error proportional to the level)
+dem_reg(mini1 ~ wright1, data = ba1986, weighted = TRUE)
+#> Weighted Deming Regression with 95% C.I. 
+#> 
+#> Call:
+#> dem_reg(formula = mini1 ~ wright1, data = ba1986, weighted = TRUE, 
+#>     conf.level = 0.95)
+#> 
+#> Coefficients:
+#> (Intercept)     wright1 
+#>     66.1190      0.8528 
+#> 
 ```

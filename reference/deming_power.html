@@ -23,7 +23,7 @@ simulated data with known properties."><meta property="og:image" content="https:
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ simulated data with known properties."><meta property="og:image" content="https:
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -86,7 +87,8 @@ simulated data with known properties.</p>
 <span>  y_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">1</span>, beta2 <span class="op">=</span> <span class="fl">0</span>, J <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">"constant"</span><span class="op">)</span>,</span>
 <span>  x_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">1</span>, beta2 <span class="op">=</span> <span class="fl">0</span>, J <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">"constant"</span><span class="op">)</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  joint_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sadler"</span>, <span class="st">"wald"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -143,6 +145,12 @@ For power function: sigma^2 = (beta1 + beta2*U)^J</p></dd>
 <dt id="arg-conf-level">conf.level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
 <dd><p>Confidence level for tests. Default is 0.95.</p></dd>
 
+
+<dt id="arg-joint-method">joint_method<a class="anchor" aria-label="anchor" href="#arg-joint-method"></a></dt>
+<dd><p>The joint test, passed to <code><a href="joint_test.html">joint_test()</a></code> as <code>method</code>:
+<code>"sadler"</code> (default, Sadler's sum-of-squares F test) or <code>"wald"</code>
+(jackknife Wald ellipse, liberal in small samples).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -173,6 +181,11 @@ For power function: sigma^2 = (beta1 + beta2*U)^J</p></dd>
 tests whether confidence intervals and joint confidence regions detect deviations
 from hypothesized values. The joint confidence region typically provides higher
 statistical power, especially when the X-range is narrow (high slope-intercept correlation).</p>
+<p>Each simulated data set is fitted with <code><a href="dem_reg.html">dem_reg()</a></code> and tested with
+<code><a href="joint_test.html">joint_test()</a></code> and the marginal confidence intervals, exactly as an analysis
+would be, so the estimated power is the power of those tests. The error
+ratio passed to <code><a href="dem_reg.html">dem_reg()</a></code> is the ratio of the two variance functions at the
+mean of the simulated x values. Fits that fail count as non-detections.</p>
 <p>The variance functions allow flexible modeling of heteroscedastic errors:</p><ul><li><p>constant: sigma^2 = beta1</p></li>
 <li><p>proportional: sigma^2 = beta1 * U^2 (constant CV%)</p></li>
 <li><p>power: sigma^2 = (beta1 + beta2*U)^J</p></li>
@@ -185,10 +198,11 @@ regression in method-comparison studies. Accreditation and Quality Assurance, 15
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Simple example: detect 5% proportional bias with constant variance</span></span></span>
+<span class="r-in"><span><span class="co"># (use n_sims = 1000 or more in practice)</span></span></span>
 <span class="r-in"><span><span class="va">power_result</span> <span class="op">&lt;-</span> <span class="fu">deming_power_sim</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">200</span>,</span></span>
 <span class="r-in"><span>  sample_size <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  actual_slope <span class="op">=</span> <span class="fl">1.05</span>,</span></span>
@@ -197,10 +211,26 @@ regression in method-comparison studies. Accreditation and Quality Assurance, 15
 <span class="r-in"><span>  x_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">20</span>, beta2 <span class="op">=</span> <span class="fl">0</span>, J <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">"constant"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">power_result</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> === Deming Regression Power Analysis ===</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sample Size: N = 50</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Simulations: 200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence Level: 95%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Testing: slope = 1.050, intercept = 0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Against: slope = 1.000, intercept = 0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Statistical Power:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Slope CI:          26.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Intercept CI:      4.0%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Either CI:         29.5%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Joint Region:      83.5% (Sadler)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Joint Region Advantage: +54.0 percentage points</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># More complex: heteroscedastic errors</span></span></span>
 <span class="r-in"><span><span class="va">power_result2</span> <span class="op">&lt;-</span> <span class="fu">deming_power_sim</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">500</span>,</span></span>
+<span class="r-in"><span>  n_sims <span class="op">=</span> <span class="fl">200</span>,</span></span>
 <span class="r-in"><span>  sample_size <span class="op">=</span> <span class="fl">75</span>,</span></span>
 <span class="r-in"><span>  x_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  actual_slope <span class="op">=</span> <span class="fl">1.03</span>,</span></span>
@@ -208,7 +238,7 @@ regression in method-comparison studies. Accreditation and Quality Assurance, 15
 <span class="r-in"><span>  x_var_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.4</span>, beta2 <span class="op">=</span> <span class="fl">0.04</span>, J <span class="op">=</span> <span class="fl">2</span>, type <span class="op">=</span> <span class="st">"power"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  weighted <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
