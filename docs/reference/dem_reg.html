@@ -190,13 +190,82 @@ as the within-subject variance of x divided by the within-subject variance of y.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># New formula interface (recommended)</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">dem_reg</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">mydata</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Peak flow: mini vs Wright meter (Bland &amp; Altman, 1986)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"ba1986"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">dem_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deming Regression with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dem_reg(formula = mini1 ~ wright1, data = ba1986, weighted = FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     conf.level = 0.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              coef      bias     se df  lower.ci upper.ci       t p.value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept 15.2316 -18.78805 69.480 15 -132.8606  163.324  0.2192  0.8294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Slope      0.9709   0.03764  0.139 15    0.6746    1.267 -0.2095  0.8369</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 degrees of freedom</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error variance ratio (lambda): 1.0000</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="dem_reg-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Old interface (still works with deprecation warning)</span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">dem_reg</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, data <span class="op">=</span> <span class="va">mydata</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># Joint test of intercept = 0 and slope = 1</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Joint Confidence Region Test [Sadler sum-of-squares, F-based] (H0:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	intercept = 0, slope = 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data:  mini1 ~ wright1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> F = 0.078441, df1 = 2, df2 = 15, p-value = 0.9249</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true intercept and slope are not equal to the null values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> null values:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> intercept     slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         0         1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  intercept      slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15.2315555  0.9708808 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Known error ratio, var(x) / var(y)</span></span></span>
+<span class="r-in"><span><span class="fu">dem_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, error.ratio <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deming Regression with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dem_reg(formula = mini1 ~ wright1, data = ba1986, error.ratio = 2, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     weighted = FALSE, conf.level = 0.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     wright1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      6.3264      0.9907 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Replicate measurements: the error ratio is estimated from the replicates</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"reps"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">dem_reg</span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deming Regression with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dem_reg(formula = y ~ x + id, data = reps, id = "id", weighted = FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     conf.level = 0.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)           x </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      2.8298      0.3929 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Weighted Deming regression (error proportional to the level)</span></span></span>
+<span class="r-in"><span><span class="fu">dem_reg</span><span class="op">(</span><span class="va">mini1</span> <span class="op">~</span> <span class="va">wright1</span>, data <span class="op">=</span> <span class="va">ba1986</span>, weighted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Weighted Deming Regression with 95% C.I. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dem_reg(formula = mini1 ~ wright1, data = ba1986, weighted = TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     conf.level = 0.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     wright1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     66.1190      0.8528 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

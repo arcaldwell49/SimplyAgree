@@ -5,11 +5,13 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for reli_htest objects — reli_htest-methods"><meta name="description" content='Methods for objects returned by icc_test(), reli_err_test() and
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for reli_htest objects — reli_htest-methods"><meta name="description" content='Methods for objects returned by icc_test(), reli_err_test(),
+reli_facet_test() and
 mdc_test(). They
 print as standard
 "htest" objects; summary() describes the result in words,
-plot() shows the data, and check() gives model diagnostics.'><meta property="og:description" content='Methods for objects returned by icc_test(), reli_err_test() and
+plot() shows the data, and check() gives model diagnostics.'><meta property="og:description" content='Methods for objects returned by icc_test(), reli_err_test(),
+reli_facet_test() and
 mdc_test(). They
 print as standard
 "htest" objects; summary() describes the result in words,
@@ -63,7 +65,8 @@ plot() shows the data, and check() gives model diagnostics.'><meta property="og:
     </div>
 
     <div class="ref-description section level2">
-    <p>Methods for objects returned by <code><a href="icc_test.html">icc_test()</a></code>, <code><a href="reli_err_test.html">reli_err_test()</a></code> and
+    <p>Methods for objects returned by <code><a href="icc_test.html">icc_test()</a></code>, <code><a href="reli_err_test.html">reli_err_test()</a></code>,
+<code><a href="reli_facet_test.html">reli_facet_test()</a></code> and
 <code><a href="mdc_test.html">mdc_test()</a></code>. They
 print as standard
 <code>"htest"</code> objects; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> describes the result in words,
@@ -79,7 +82,7 @@ print as standard
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'reli_htest'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"profile"</span>, <span class="st">"subjects"</span>, <span class="st">"items"</span>, <span class="st">"pairs"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"profile"</span>, <span class="st">"subjects"</span>, <span class="st">"items"</span>, <span class="st">"pairs"</span>, <span class="st">"components"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'reli_htest'</span></span>
 <span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -114,8 +117,10 @@ compares the spread between subjects with the scatter within subjects
 (what the ICC summarises); <code>"items"</code>, the deviation of each measurement
 from its subject's mean, by item, which shows systematic differences
 between items (error for an agreement ICC, but not for a consistency
-ICC); or <code>"pairs"</code>, each pair of items plotted against each other with
-the line of identity.</p></dd>
+ICC); <code>"pairs"</code>, each pair of items plotted against each other with
+the line of identity; or, for <code><a href="reli_facet_test.html">reli_facet_test()</a></code> results, <code>"components"</code>,
+the share of each variance component. For <code><a href="reli_facet_test.html">reli_facet_test()</a></code> results the
+profile, items and pairs plots use the subject-by-item cell means.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -178,6 +183,13 @@ power with few subjects. A rising within-subject SD against the subject
 mean means the error grows with the size of the measurement, so a
 relative error (<code><a href="reli_err_test.html">reli_err_test()</a></code> with <code>scale = "log"</code>) describes it
 better.</p>
+<p>For <code><a href="reli_facet_test.html">reli_facet_test()</a></code> results, <code><a href="simple_agree-methods.html">check()</a></code> shows the residuals of the full
+model (deviations from the cell means), the additivity panel on the
+subject-by-item cell means, the within-cell SD by item with Bartlett's
+test of equal repeat error across items (the intra-rater coefficient
+pools it over items), the within-cell SD against the cell mean, and, with
+occasions, each item's mean by occasion (shifts and rater-specific drift).
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> adds the table of variance components.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

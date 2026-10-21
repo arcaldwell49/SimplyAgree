@@ -104,9 +104,9 @@ that matters, and is returned as an object of class <code>"htest"</code>.</p>
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A formula of the form <code>values ~ item | id</code>, or the result of
-<code><a href="reli_err_test.html">reli_err_test()</a></code> with <code>stat = "SEM"</code>, whose SEM is then used without
-refitting. Leave <code>NULL</code> to use <code>measure</code>, <code>item</code> and <code>id</code> (long data) or
-<code>col.names</code> (wide data).</p></dd>
+<code><a href="reli_err_test.html">reli_err_test()</a></code> or <code><a href="reli_facet_test.html">reli_facet_test()</a></code> with <code>stat = "SEM"</code>, whose SEM is
+then used without refitting. Leave <code>NULL</code> to use <code>measure</code>, <code>item</code> and
+<code>id</code> (long data) or <code>col.names</code> (wide data).</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
@@ -224,6 +224,27 @@ it (a \(\chi^2\) test for the SEM, or the bootstrap with <code>boot = TRUE</code
 With <code>scale = "log"</code> the MDC is in sympercents; <code>percent</code> gives the
 equivalent percentage increase and decrease, which differ:
 \(100(e^{MDC/100} - 1)\) and \(100(1 - e^{-MDC/100})\).</p>
+<p><strong>Differences between raters or devices.</strong> The same reasoning applies to
+two measurements of one subject by different items, such as two raters or
+two devices, rather than two occasions: the MDC is the difference between
+them that measurement error alone would exceed only 5% of the time (for
+95%). When the raters are interchangeable (any rater's score is used as
+it is, and raters are thought of as drawn from a pool), use
+<code>type = "agreement"</code>, so that systematic differences between raters count
+as error; the consistency SEM leaves them out and understates how far
+apart two raters can be. For two particular raters, the limits of
+agreement of <code><a href="agreement_limit.html">agreement_limit()</a></code> report their bias and the spread around
+it separately. This is the MDC, not a multiple of the standard error of
+prediction (SEP): the SEP concerns a change from a subject's estimated
+true score (Weir, 2005), and \(1.96 \cdot SEP\) does not
+bound the difference between two raters.</p>
+<p><strong>Repeat measurements.</strong> When each rater measured each subject more than
+once, pass an SEM from <code><a href="reli_facet_test.html">reli_facet_test()</a></code>: with <code>facet = "intra"</code> the
+MDC is for two measurements by the same rater (on two occasions, with
+<code>occasion</code>), with <code>facet = "inter"</code> and <code>type = "agreement"</code> for two
+measurements by different raters drawn from the pool. Averaging is then
+set in <code><a href="reli_facet_test.html">reli_facet_test()</a></code> (<code>k_avg</code>, <code>m_avg</code>, <code>r_avg</code>), and <code>k_avg</code> here
+must be 1.</p>
 <p><strong>An individual threshold, not a group one.</strong> The MDC applies to a single
 individual's change between two measurements. It is not a threshold for
 an average (group) effect. The uncertainty in a mean change shrinks with

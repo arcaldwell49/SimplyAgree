@@ -81,6 +81,7 @@ draws that region, with the ideal point marked as enclosed or not.</p>
 <span>  ideal_slope <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  test_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"asymptotic"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -95,6 +96,7 @@ draws that region, with the ideal point marked as enclosed or not.</p>
 <span>  test_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"asymptotic"</span><span class="op">)</span>,</span>
 <span>  show_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_points <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -125,10 +127,18 @@ draws that region, with the ideal point marked as enclosed or not.</p>
 
 
 <dt id="arg-test-method">test_method<a class="anchor" aria-label="anchor" href="#arg-test-method"></a></dt>
-<dd><p>Reference distribution for the region and test.
-<code>"F"</code> (default) uses the finite-sample F(2, n-2) distribution per
-Sadler (2010). <code>"asymptotic"</code> uses the chi-squared(2) distribution,
-which is the large-sample approximation. The two converge for large n.</p></dd>
+<dd><p>Reference distribution for the Wald test and ellipse
+(<code>method = "wald"</code> only). <code>"F"</code> (default) uses F(2, n-2);
+<code>"asymptotic"</code> uses chi-squared(2), the large-sample approximation.
+The Sadler test always uses F(2, n-2).</p></dd>
+
+
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>Which joint region and test. <code>NULL</code> (default) uses
+<code>"sadler"</code> for Deming fits and <code>"wald"</code> for Passing-Bablok fits.
+<code>"sadler"</code> is the sum-of-squares region of Sadler (2010), available
+for <code><a href="dem_reg.html">dem_reg()</a></code> fits only. <code>"wald"</code> is the ellipse from the
+variance-covariance matrix (the only option for <code><a href="pb_reg.html">pb_reg()</a></code>). See Details.</p></dd>
 
 
 <dt id="arg-show-intervals">show_intervals<a class="anchor" aria-label="anchor" href="#arg-show-intervals"></a></dt>
@@ -147,10 +157,11 @@ only; default 100).</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>plot_joint()</code> returns a ggplot. <code>joint_test()</code> returns an object
 of class <code>htest</code> containing:</p><dl><dt>statistic</dt>
-<dd><p>The Mahalanobis distance.</p></dd>
+<dd><p>For <code>method = "sadler"</code>, the F statistic; for
+<code>method = "wald"</code>, the Mahalanobis distance.</p></dd>
 
 <dt>parameter</dt>
-<dd><p>Degrees of freedom. For the F-based test, <code>df1</code> and
+<dd><p>Degrees of freedom. For the F-based tests, <code>df1</code> and
 <code>df2</code>; for the asymptotic test, <code>df</code> (always 2).</p></dd>
 
 <dt>p.value</dt>
@@ -178,21 +189,62 @@ of class <code>htest</code> containing:</p><dl><dt>statistic</dt>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The test computes the Mahalanobis distance between the estimated coefficients
-and the hypothesized values using the variance-covariance matrix of the
-estimates. By default, the finite-sample F(2, n-2) reference distribution
-is used (Sadler, 2010), which is more conservative than the asymptotic
-chi-squared(2) approximation for small samples.</p>
-<p>For Deming regression, the variance-covariance matrix is computed via
-jackknife. For Passing-Bablok regression, the model must have been fitted
-with <code>replicates &gt; 0</code> (<code>se_method = "bootstrap"</code> or <code>"jackknife"</code>) or with
-<code>se_method = "dufey"</code>.</p>
+
+<div class="section">
+<h3 id="sadler-region-deming-default-">Sadler region (Deming, default)<a class="anchor" aria-label="anchor" href="#sadler-region-deming-default-"></a></h3>
+
+
+<p>For a Deming fit with error ratio \(\lambda\) and weights \(w_i\), let
+$$S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2},$$
+the weighted sum of squares that Deming regression minimises (Sadler, 2010,
+Eq. 11; Draper &amp; Smith). With \(\hat S\) its minimum, the test of
+\((a_0, b_0)\) is
+$$F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat S / (n - 2)}$$
+on F(2, n - 2), and the confidence region is the set of \((a, b)\) where
+\(F\) does not exceed the critical value. No variance-covariance matrix
+is involved; only the error ratio (not the size of the errors) matters. The
+region is not an ellipse: for each slope its intercept limits have a closed
+form, and its slope limits are the roots of a quadratic, so <code>plot_joint()</code>
+draws it exactly. If the data are too imprecise for the slope to be bounded,
+the test is still reported but the region is not drawn.</p>
+<p>In simulations with normal errors (n = 10 to 100, narrow and wide ranges,
+error ratios 1 and 4, constant and proportional errors, and replicate data
+with the error ratio estimated), the Sadler test rejected a true null
+hypothesis 4.3-5.9% of the time at a nominal 5%. It was at least as
+powerful as the Wald test at the same size.</p>
+<p>The model frame must be stored (<code>dem_reg(model = TRUE)</code>, the default).
+<code>dem_reg(weighted = TRUE)</code> uses fixed weights computed from the data, while
+Sadler reweighted iteratively; the region uses the fitted model's weights.</p>
+</div>
+
+<div class="section">
+<h3 id="wald-ellipse">Wald ellipse<a class="anchor" aria-label="anchor" href="#wald-ellipse"></a></h3>
+
+
+<p><code>method = "wald"</code> computes the Mahalanobis distance between the estimated
+coefficients and the hypothesized values, using the variance-covariance
+matrix of the estimates, against 2 F(2, n - 2) (or chi-squared(2) with
+<code>test_method = "asymptotic"</code>).</p>
+<p>For Deming regression the matrix is the delete-one jackknife. This test is
+<strong>liberal in small samples</strong>: in the same simulations it rejected a true
+null 7.8-9.7% of the time at n = 10, about 7.4% at n = 20 and 6.1% at
+n = 50 (up to 14% with <code>test_method = "asymptotic"</code>), because the jackknife
+variance is itself unstable. Prefer the Sadler test for Deming fits.</p>
+<p>For Passing-Bablok regression the model must have been fitted with
+<code>replicates &gt; 0</code> and <code>se_method = "bootstrap"</code> or <code>"jackknife"</code>. Both held
+4.3-5.4% in simulations (n = 20 to 100). The Dufey (2020) matrix
+(<code>se_method = "dufey"</code>) is not used for joint tests: it rejected a true
+null 8-11% of the time.</p>
+</div>
+
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
 parametric regression in method-comparison studies. <em>Accreditation and Quality
 Assurance</em>, 15, 547-554.</p>
+<p>Draper, N.R., &amp; Smith, H. (1966). <em>Applied Regression Analysis</em>. Wiley,
+New York.</p>
     </div>
 
     <div class="section level2">
@@ -201,7 +253,27 @@ Assurance</em>, 15, 547-554.</p>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="dem_reg.html">dem_reg</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">joint_test</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Joint Confidence Region Test [Sadler sum-of-squares, F-based] (H0:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	intercept = 0, slope = 1)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data:  y ~ x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> F = 6.3387, df1 = 2, df2 = 16, p-value = 0.009389</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> alternative hypothesis: true intercept and slope are not equal to the null values</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> null values:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> intercept     slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         0         1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sample estimates:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> intercept     slope </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.6793028 0.4433897 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu">plot_joint</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="joint_test-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The Wald ellipse from the jackknife variance-covariance matrix</span></span></span>
+<span class="r-in"><span><span class="fu">joint_test</span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"wald"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	Joint Confidence Region Test [Wald, F-based] (H0: intercept = 0, slope</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	= 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> data:  y ~ x</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> X-squared = 17.172, df1 = 2, df2 = 16, p-value = 0.002929</span>
@@ -213,8 +285,6 @@ Assurance</em>, 15, 547-554.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> intercept     slope </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2.6793028 0.4433897 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">plot_joint</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="joint_test-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

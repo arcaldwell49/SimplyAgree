@@ -41,7 +41,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
+<li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-20</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -339,8 +339,7 @@ diagnostic tests:</p>
 <span><span class="co">#&gt; 1 Intercept 0.09622 0.390603  -0.7206   0.8105 28          0     FALSE</span></span>
 <span><span class="co">#&gt; 2   method1 0.99440 0.005918   0.9840   1.0072 28          1     FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; 28 degrees of freedom</span></span>
-<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span></code></pre></div>
+<span><span class="co">#&gt; 28 degrees of freedom</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method displays the regression line with
 data:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -378,7 +377,6 @@ Kendall’s tau correlation:</p>
 <span><span class="co">#&gt; 2   method1 0.99440 0.006917   0.9836   1.0075 28          1     FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 28 degrees of freedom</span></span>
-<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Pairs bootstrap CIs based on 999 resamples</span></span></code></pre></div>
@@ -387,21 +385,21 @@ Kendall’s tau correlation:</p>
 <div class="section level2">
 <h2 id="joint-confidence-regions">Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#joint-confidence-regions"></a>
 </h2>
-<p>A theoretically valid, but still experimental, enhancement to the
-<code>dem_reg</code> and <code>pb_reg</code> functions is the addition
-of <strong>joint confidence regions</strong> for the slope and intercept
-parameters. Traditional confidence intervals treat each parameter
-separately, but in regression analysis, these parameters are
-correlated.</p>
-<p>Joint confidence regions account for this correlation by creating an
-elliptical region in the (intercept, slope) parameter space. This
-approach, promoted by <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
+<p>An experimental enhancement to the <code>dem_reg</code> and
+<code>pb_reg</code> functions is the addition of <strong>joint
+confidence regions</strong> for the slope and intercept parameters.
+Traditional confidence intervals treat each parameter separately, but in
+regression analysis, these parameters are correlated.</p>
+<p>Joint confidence regions account for this correlation with a region
+in the (intercept, slope) parameter space. This approach, promoted by
+<span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
 advantages:</p>
 <ul>
 <li>
-<strong>Higher Statistical Power</strong>: The ellipse typically
-requires 20-50% fewer samples than traditional confidence intervals to
-detect the same bias</li>
+<strong>Higher Statistical Power</strong>: when the measurement
+range is narrow, the joint region can need several-fold (sometimes far)
+fewer samples than the two confidence intervals to detect the same
+bias</li>
 <li>
 <strong>Accounts for Parameter Correlation</strong>: When the
 measurement range is narrow, slope and intercept are highly negatively
@@ -414,6 +412,25 @@ separate intervals</li>
 <p>The power advantage is most pronounced when the ratio of maximum to
 minimum X values is small (&lt; 10:1), which is common in clinical
 method comparisons.</p>
+<p>Two regions are available through the <code>method</code>
+argument:</p>
+<ul>
+<li>
+<strong><code>"sadler"</code></strong> (default for Deming
+regression): the sum-of-squares region of <span class="citation">Sadler
+(<a href="#ref-sadler2010">2010</a>)</span>. It uses the Deming sum of
+squares directly, not a variance-covariance matrix, and is not exactly
+an ellipse. In simulations it rejected a true identity line 4.3-5.9% of
+the time at a nominal 5%, from n = 10 upward.</li>
+<li>
+<strong><code>"wald"</code></strong> (the only option for
+Passing-Bablok regression): an ellipse from the variance-covariance
+matrix of the estimates. For Deming regression that matrix is a
+delete-one jackknife, and the test is liberal in small samples (about
+8.5% at n = 10 and 7.4% at n = 20 at a nominal 5%). For Passing-Bablok
+regression, use bootstrap or delete-d jackknife resampling (both held
+about 5% in simulations).</li>
+</ul>
 <div class="section level3">
 <h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
 </h3>
@@ -427,18 +444,19 @@ confidence region in parameter space:</p>
 <p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"></p>
 <p>This plot shows:</p>
 <ul>
-<li>The <strong>red ellipse</strong>: Joint confidence region</li>
+<li>The <strong>red curve</strong>: Joint confidence region (Sadler’s
+region by default; <code>method = "wald"</code> draws the ellipse)</li>
 <li>The <strong>blue rectangle</strong>: Traditional confidence
 intervals</li>
 <li>The <strong>black dot</strong>: Estimated (intercept, slope)</li>
 <li>The <strong>green/red X</strong>: Ideal point (whether enclosed or
 not)</li>
 </ul>
-<p>Notice how the ellipse is smaller than the rectangle, especially in
+<p>Notice how the region is narrower than the rectangle, especially in
 the directions that matter for detecting bias.</p>
-<p>For Passing-Bablok regression, bootstrap resampling must be used to
-obtain the variance-covariance matrix needed for the joint confidence
-region:</p>
+<p>For Passing-Bablok regression, bootstrap (or delete-d jackknife)
+resampling must be used to obtain the variance-covariance matrix needed
+for the joint confidence region:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
@@ -452,10 +470,11 @@ within the joint confidence region:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [Sadler sum-of-squares, F-based] (H0:</span></span>
+<span><span class="co">#&gt;  intercept = 0, slope = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  y ~ x</span></span>
-<span><span class="co">#&gt; X-squared = 0.21666, df1 = 2, df2 = 8, p-value = 0.8986</span></span>
+<span><span class="co">#&gt; F = 0.059522, df1 = 2, df2 = 8, p-value = 0.9426</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
 <span><span class="co">#&gt; null values:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
@@ -463,13 +482,16 @@ within the joint confidence region:</p>
 <span><span class="co">#&gt; sample estimates:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
 <span><span class="co">#&gt; 0.1284751 0.9744516</span></span></code></pre></div>
-<p>This returns an <code>htest</code> object with the Mahalanobis
-distance (chi-squared statistic) and p-value. The test can also be
-applied to Passing-Bablok models fitted with bootstrap:</p>
+<p>This returns an <code>htest</code> object with Sadler’s F statistic
+and p-value. The Wald version (Mahalanobis distance) is available with
+<code>joint_test(dem1, method = "wald")</code>. The test can also be
+applied to Passing-Bablok models fitted with bootstrap, where it is
+always the Wald test:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test [F-based] (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [Wald, F-based] (H0: intercept = 0, slope</span></span>
+<span><span class="co">#&gt;  = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  method2 ~ method1</span></span>
 <span><span class="co">#&gt; X-squared = 7.7659, df1 = 2, df2 = 28, p-value = 0.03248</span></span>
@@ -508,20 +530,45 @@ H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 \]</span></p>
 <p>Second, that the slope is equal to one:</p>
 <p><span class="math display">\[
-H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
+H_0: \beta_1 = 1 \space vs. \space H_1: \beta_1 \ne 1
 \]</span></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="joint-confidence-region-calculative-approach">Joint Confidence Region Calculative Approach<a class="anchor" aria-label="anchor" href="#joint-confidence-region-calculative-approach"></a>
 </h2>
-<p>The joint <span class="math inline">\((1-\alpha) \times
-100\%\)</span> confidence region for <span class="math inline">\((\beta_0, \beta_1)\)</span> is defined as:</p>
+<div class="section level3">
+<h3 id="sadlers-region-deming-regression-default">Sadler’s region (Deming regression, default)<a class="anchor" aria-label="anchor" href="#sadlers-region-deming-regression-default"></a>
+</h3>
+<p>Deming regression with error ratio <span class="math inline">\(\lambda\)</span> and weights <span class="math inline">\(w_i\)</span> minimises</p>
 <p><span class="math display">\[
-(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq
-\chi^2_{2,\alpha}
+S(a, b) = \sum_{i=1}^n \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2}
 \]</span></p>
-<p>Where:</p>
+<p>Following <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span> (after Draper and Smith), with
+<span class="math inline">\(\hat S\)</span> the minimum, the joint <span class="math inline">\((1-\alpha) \times 100\%\)</span> confidence region
+for <span class="math inline">\((\beta_0, \beta_1)\)</span> is the set
+of <span class="math inline">\((a, b)\)</span> with</p>
+<p><span class="math display">\[
+F = \frac{(S(a, b) - \hat S)/2}{\hat S / (n - 2)} \leq F_{2, n-2,
+1-\alpha}
+\]</span></p>
+<p>and the joint test of a hypothesized <span class="math inline">\((a_0, b_0)\)</span> (e.g., <span class="math inline">\((0, 1)\)</span> for identity) compares <span class="math inline">\(F\)</span> at that point with the <span class="math inline">\(F(2, n - 2)\)</span> distribution. No
+variance-covariance matrix is needed, and only the error ratio (not the
+size of the errors) matters. For a fixed slope the condition is
+quadratic in the intercept, so the region is drawn exactly.</p>
+</div>
+<div class="section level3">
+<h3 id="wald-ellipse">Wald ellipse<a class="anchor" aria-label="anchor" href="#wald-ellipse"></a>
+</h3>
+<p>This was my original solution for this joint testing problem. I
+would, for Deming regression, stick with Sadler’s region.</p>
+<p>With <code>method = "wald"</code> the region is</p>
+<p><span class="math display">\[
+(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq 2 F_{2,
+n-2, 1-\alpha}
+\]</span></p>
+<p>(or <span class="math inline">\(\chi^2_{2, 1-\alpha}\)</span> with
+<code>test_method = "asymptotic"</code>), where:</p>
 <ul>
 <li>
 <span class="math inline">\(\hat{\beta}\)</span> = estimated
@@ -533,14 +580,13 @@ parameters <span class="math inline">\((\hat{\beta}_0,
 parameters (e.g., <span class="math inline">\((0, 1)\)</span> for
 identity)</li>
 <li>
-<span class="math inline">\(V\)</span> = variance-covariance
-matrix</li>
-<li>
-<span class="math inline">\(\chi^2_{2,\alpha}\)</span> = chi-square
-critical value with 2 degrees of freedom</li>
+<span class="math inline">\(V\)</span> = variance-covariance matrix
+(jackknife for Deming; bootstrap or delete-d jackknife for
+Passing-Bablok)</li>
 </ul>
 <p>This forms an ellipse in parameter space that accounts for the
 correlation between slope and intercept.</p>
+</div>
 <div class="section level3">
 <h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h3>

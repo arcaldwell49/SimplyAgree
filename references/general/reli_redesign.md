@@ -116,12 +116,19 @@ and a read of the rendered vignette.
 **G-theory extension (2026-10-20): built.** `reli_facet_test()` (first
 built as `gstudy_test()`; the name is experimental and may change) for
 repeat measurements within subject × item cells (Section 14, results 14.8)
-and for shared occasions, `occasion` (Section 15, results 15.9). Open:
-the MLS agreement coefficients with occasions are conservative (C6 not
-met on that side; try the G*/H* terms). Manual checks left: a read of the
+and for shared occasions, `occasion` (Section 15, results 15.9). The
+MLS agreement statistics have uneven tails (15.10; the G*/H* terms do not
+help); a generalized confidence interval is the candidate if this is to
+be fixed. Manual checks left: a read of the
 rendered vignette section "Repeat measurements and occasions".
 
 ### Open TODOs
+
+- `reli_facet_test()`: generalized confidence interval as a third
+  `ci_method`, deferred (2026-10-21, with the user): likely little gain
+  over MLS for 1-2 df components, costs Monte Carlo output and another
+  simulation round. Pilot on the `reli_sims/ting1989_check.R` cells first.
+  Rationale in the TODO above `.mls_bounds()` and Section 15.10.
 
 - Influence SE: tuned small-sample correction (B) or an `"auto"` SE (C),
   only if the jackknife default proves a problem.
@@ -2599,11 +2606,8 @@ data, MLS (Satterthwaite):
 - **C6 not met, on the conservative side:** the MLS agreement
   *coefficients* (intra A, inter A, Φ) cover up to .97–.99 at n = 30, so
   their tests have size as low as .01–.035 (less power), not .035–.065.
-  Nothing is liberal. Likely contributors: the omitted Ting G*/H* terms
-  for several same-signed mean squares, and the ratio inversion. Kept (MLS
-  conservative beats Satterthwaite liberal); documented. **Open:** try the
-  G*/H* terms, or a different ratio interval, for the agreement
-  coefficients.
+  Kept (MLS conservative beats Satterthwaite liberal). The suspected
+  cause (the omitted G*/H* terms) was ruled out; see 15.10.
 - Non-normal: MLS .85–.94 mean (agreement statistics .91–.94, consistency
   .85–.89); Satterthwaite lower.
 - **C7 (ignoring occasions):** the repeat model's intra SEM interval
@@ -2652,3 +2656,141 @@ n = 30):
 - With occasions, the analytic MLS intervals are as good as or better than
   the bootstrap for the agreement statistics even with non-normal data;
   the bootstrap helps for the consistency statistics (+.04 to +.07).
+
+### 15.10 The conservative agreement coefficients: G*/H* ruled out (2026-10-21)
+
+**Question:** do Ting et al.'s G*_qt / H*_ru terms (pairs of same-signed
+mean squares, omitted from `.mls_bounds()`) explain the .97–.99 coverage of
+the MLS agreement coefficients with occasions?
+
+**Formula used** (as recalled from Burdick & Graybill 1992, Section 3.2;
+confirmed against the paper afterwards, see the update below;
+not confirmed against the paper, which was not available; the secondary
+sources found, e.g. the stla blog's `ciTing()`, omit these terms too):
+G*_qt = [G(n_q + n_t)² (n_q + n_t)²/(n_q n_t) − G_q² n_q/n_t − G_t² n_t/n_q]
+/ (P − 1), added as G*_qt c_q c_t S_q² S_t² to the lower-bound variance
+for pairs of positive terms, and likewise H*_ru (with G of the negative
+terms) / (Q − P − 1) to the upper-bound variance for pairs of negative
+terms.
+
+**Result: no.** To first order the terms cancel (with G(ν) ≈ z√(2/ν), both
+parts are 2z²(1/n_q + 1/n_t)). Computed on simulated crossed data (n = 30,
+k = m = 3, mixes X, D, N), they moved the coefficient limits by 0.0000–
+0.0004 (lower) and +0.0005 to +0.002 (upper), i.e. slightly *wider*
+intervals, more conservative. The code was tried behind an internal option
+and removed.
+
+**Actual cause: uneven tails, not the sum.** From the existing coverage
+files (normal, n = 30, MLS), the misses are almost all on one side:
+
+| Statistic | Below lower limit | Above upper limit |
+|---|---|---|
+| Agreement coefficients, occasions (intra A, inter A, Φ) | .000–.010 | .020–.042 |
+| Agreement SEMs, occasions (intra A, overall A) | .027–.059 | .000–.006 |
+| Φ, repeats, mixes I, L, R (σ²_i small) | .007 | .026–.028 |
+| SEM_A, repeats, mixes I, L, R | .040–.044 | .005–.006 |
+| Same statistics when σ²_i dominates (repeats, mix B) | .023–.025 | .023–.026 |
+
+The agreement statistics contain a component on k − 1 or m − 1 df.
+H(ν) = ν/χ²_a(ν) − 1 is very large for ν = 1 or 2 (about 1000 for ν = 1,
+a = .025), so the bound that this component drives (the SEM's upper limit,
+the coefficient's lower limit) allows for a large σ²_i or σ²_o even when
+the true one is small: very conservative. The other bound uses
+G(ν) ≤ 1 and is near nominal, or liberal when the low-df component is
+small (SEM lower tail up to .059). When the low-df component dominates
+(mix B), both tails are near nominal.
+
+**Consequences.** The common one-sided tests are conservative: coefficient
+greater than a threshold, SEM less than an acceptable error. The opposite
+directions can be liberal (SEM greater than a threshold: up to about .06
+instead of .025). Documented in `?reli_facet_test` ("Uneven tails for
+agreement statistics") and the vignette.
+
+**If this is to be fixed:** the candidate is a generalized confidence
+interval (GCI; Weerahandi; Hamada & Weerahandi 2000 for gauge R&R), which
+uses the joint fiducial distribution of the mean squares rather than
+separate one-sided bounds and is reported to balance the tails better.
+Drawbacks: Monte Carlo (needs a fixed number of draws and a seed, or
+quasi-random draws, for reproducible output), and coverage with 1-df
+components still needs checking. Would be a third `ci_method`, chosen by
+the same criteria (C3, C6), with the C6 check split by tail.
+
+**Update (2026-10-21): checked against Ting et al. (1990).** The paper
+(supplied by the user; copy in `references/working/`, gitignored) confirms:
+
+- `.mls_bounds()` is the paper's intervals (3.1) and (3.2): L_q = G,
+  L_r = H for the lower bound (H_q = H, H_r = G for the upper), and the
+  cross terms L_qr = [(F1 − 1)² − L_q²F1² − L_r²]/F1 with F1 = F(α1, n_q, n_r)
+  and H_qr = [(1 − F2)² − H_q²F2² − H_r²]/F2 with F2 = F(1 − α2, n_q, n_r).
+  The paper's F(δ, ν1, ν2) is the value with area δ to the *right*, so
+  F(α1) = `qf(1 - a)` and F(1 − α2) = `qf(a)`, as coded. The "errors"
+  flagged in the stla blog's `ciTing()` are this notation, not the paper.
+- The G*/H* form recalled above is the paper's L*_qt in (3.3), with
+  denominator (P − 1); (3.4) is the analogue for the negative terms. The
+  paper recommends (3.3)/(3.4) and notes that other cross-product
+  modifications did not help; with P = Q, (3.3) is the Ting et al. (1989)
+  lower bound on a sum (not Graybill-Wang's), so it would also change the
+  all-positive case slightly. Our code omits them; as measured above, they
+  change our limits by at most about 0.002, outward.
+- The tail behaviour is the method's, not our implementation's. Table 3
+  (simulated 95% one-sided coverage, Q = 6, worst case over the weights):
+  with all n_i ≥ 5 the one-sided ranges are about .93–.97 and .94–.99, but
+  with a 1- or 2-df mean square in the combination they reach .993–.999
+  on one side (e.g. n = (2, 4, 8, 32, 1, 16): upper interval .933–.993,
+  lower interval .937–.997), and the two-sided 90% intervals .886–.977. The
+  authors note one-sided intervals "can be liberal" (down to .928) and that
+  results in a specific design are usually much tighter than their
+  worst case (Table 5).
+- DOI confirmed: 10.1080/00949659008811240.
+
+So the uneven tails of our agreement statistics (1–2 df for items or
+occasions) are expected from Ting et al.'s own results. A fix would need a
+different method (the GCI candidate above), not a correction to ours.
+
+**Update 2 (2026-10-21): Ting, Burdick, Graybill & Gui (1989).** (Statistics
+& Probability Letters 8, 129–135; copy in `references/working/`.) This is
+where the cross-product terms were introduced and evaluated, for one-sided
+intervals on *sums* (all coefficients positive):
+
+- The terms come from Lu, Graybill & Burdick's (1987) Q = 2 bound, which
+  is exact when the two terms pool into one χ² (contributions proportional
+  to df); (2.5a)/(2.5b) extend it to Q > 2 with the divisor Q − 1, added
+  because "better approximations are obtained by dampening out the
+  cross-product terms as Q increases".
+- Their Tables 1–4 (n_q ≥ 5 throughout): GW's *upper* bound (lower interval
+  [0, U]) is conservative (up to .985–.999), and MLS (2.5b) tightens it
+  (e.g. n = (5, 5): GW .950–.985, MLS .939–.966; Table 5: expected squared
+  excess of the GW bound up to 1.6 times MLS's). Both lower bounds (GW and
+  MLS) can be liberal (to .910 and .928); they recommend Welch (1956) for
+  lower bounds. **For two-sided intervals they found the cross terms
+  "slightly inferior" and recommend Graybill-Wang.**
+- So the value claimed is a tighter one-sided upper bound on a sum, i.e.
+  power for tests such as "total (error) variance below c", our SEM with
+  `alternative = "less"`; not better two-sided intervals.
+
+**Our check** (`reli_sims/ting1989_check.R`; nested design, agreement SEM²
+= σ²_i + σ²_pi + σ²_e, all positive in mean squares; n = 30, r = 2, 4000
+sims; misses per tail of 95% two-sided, nominal .025 each):
+
+| k (df of MS_I) | Mix | GW below / above | Ting 1989 below / above |
+|---|---|---|---|
+| 3 (2) | I | .037 / .003 | .030 / .015 |
+| 3 (2) | R | .053 / .004 | .040 / .033 |
+| 3 (2) | B | .025 / .021 | .024 / .024 |
+| 2 (1) | I | .044 / .002 | .035 / **.158** |
+| 2 (1) | R | .052 / .003 | .039 / **.168** |
+| 2 (1) | B | .026 / .024 | .025 / .068 |
+
+The 1989 terms do what they claim with 2 df (both tails closer to .025),
+but with a 1-df mean square (two items, or two occasions) the H cross term
+is large and negative (H(1) ≈ 1000), collapses the upper bound, and the
+upper tail becomes badly liberal (.16–.17). The paper never simulated
+n_q < 5. Not adopted: two raters or two days are common designs here, and
+a liberal "SEM below c" test is the error that matters. The Ting (1990)
+(3.3)/(3.4) terms pair the same-signed terms only in the *other* bound
+(positive pairs in the lower bound, negative pairs in the upper), which is
+why they barely moved our intervals.
+
+If the conservative tail is to be addressed, options: the 1989 terms only
+when every mean square in the pair has ≥ 2 (or ≥ 3) df, which needs its
+own simulation across the grids; or the GCI.

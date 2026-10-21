@@ -422,9 +422,29 @@
 #' Modified large-sample (MLS) one-sided bounds for sum(coef * E[MS])
 #'
 #' Graybill & Wang (1980) when every coefficient is positive; Ting, Burdick,
-#' Graybill, Jeyaratnam & Lu (1990) when some are negative (Burdick &
-#' Graybill, 1992, Section 3.2), without the small G*/H* correction terms for
-#' several same-signed mean squares. Each bound has tail probability `a`.
+#' Graybill, Jeyaratnam & Lu (1990), intervals (3.1) and (3.2), when some
+#' are negative (checked against the paper, 2026-10-21; their F(d, ., .) is
+#' the value with area d to the right, so F(a1) here is qf(1 - a)). Their
+#' refinements (3.3) and (3.4) add cross-products for pairs of same-signed
+#' mean squares; these are omitted: they widened our intervals by at most
+#' about 0.002 (reli_redesign.md, Section 15.10). Each bound has tail
+#' probability `a`.
+#'
+#' TODO (possible, not planned): a generalized confidence interval (GCI;
+#' Weerahandi, 1993; Hamada & Weerahandi, 2000) as a third `ci_method`.
+#' Motivation: for agreement statistics with 2-3 items or occasions the MLS
+#' tails are uneven (the bound driven by the 1-2 df component is very
+#' conservative, the other up to about 6% instead of 2.5%). Not done
+#' because (1) the unevenness mostly reflects how little 1-2 df say about
+#' that variance, so a GCI faces the same limit (its pivotal R = s^2 /
+#' chi^2_1 is just as right-skewed) and published comparisons find GCI and
+#' MLS similar; (2) the conservative side is the side of the usual tests
+#' (coefficient above a threshold, SEM below an acceptable error); (3) it
+#' adds Monte Carlo output (seed-dependent), test inversion and another
+#' round of simulations. Ting et al.'s (1989) cross terms were also tried
+#' and rejected: liberal (to 0.17) with a 1-df mean square. Before building
+#' it, pilot a GCI on the cells of reli_sims/ting1989_check.R and proceed
+#' only if both tails clearly move toward nominal.
 #' @noRd
 .mls_bounds <- function(coef, ms, dfs, a) {
   keep <- coef != 0

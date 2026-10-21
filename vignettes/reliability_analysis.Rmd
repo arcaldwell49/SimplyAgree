@@ -494,11 +494,11 @@ available, and it should be treated as such a fallback when *nothing* else is av
 Sometimes each rater (or device) measures each subject more than once: say
 3 sonographers each scan 20 participants twice. `icc_test()` and
 `reli_err_test()` stop with such data, because one measurement per subject
-and rater cannot separate two different errors: the scatter of one rater's
+and rater cannot separate two different error. Essentially, the scatter of one rater's
 repeat scans (intra-rater error, or repeatability) and the disagreement
 between raters (inter-rater error). `reli_facet_test()` fits the
-generalizability-theory model for these designs [@brennan2001]. *It is
-experimental, and its name may change.*
+generalizability-theory model for these designs [@brennan2001]. 
+One warning though: *It is experimental, and its name and how it functions may change in the future.*
 
 ## Exchangeable repeats
 
@@ -526,10 +526,10 @@ summary(res)
 ```
 
 The summary ends with the variance components, each with an interval and
-its share of the variance of a single measurement; `plot(res, type =
-"components")` draws them. The default, `facet = "intra"`, is the
-intra-rater ICC: the correlation between two scans of the same subject by
-the same operator, whose error is the repeat variance only.
+its share of the variance of a single measurement; `plot(res, type = "components")`
+draws them. The default, `facet = "intra"`, is the
+intra-rater ICC which is the correlation between two scans of the same subject by
+the same operator, whose error is the repeat variance *only*.
 `facet = "inter"` adds the error between operators, with `type` as in
 `icc_test()`:
 
@@ -550,33 +550,57 @@ sem_a
 mdc_test(sem_a)
 ```
 
-**What averaging changes (D-study).** `k_avg` and `r_avg` give the
-reliability of a planned score that averages several operators and several
-scans; these are the generalizability (\(E\rho^2\)) and dependability
-(\(\Phi\)) coefficients of G theory. Would two scans by one operator be
-better than one scan by each of two operators?
+## What averaging changes (D-study) 
+
+The arguments `k_avg` and `r_avg` describe the score that will be used in
+practice, and the result is the reliability of *that* score, not an
+average of ICCs. `r_avg = 2` is a score that averages 2 scans by one
+operator; `k_avg = 2` is a score that averages one scan from each of 2
+operators. These are the generalizability (\(E\rho^2\)) and dependability
+(\(\Phi\)) coefficients of G theory.
+
+The two kinds of averaging remove different errors. Averaging repeats by
+the same operator shrinks only the repeat noise: the agreement error
+becomes \(\sigma^2_i + \sigma^2_{pi} + \sigma^2_e / 2\), and the operator's
+bias and their particular reading of each subject stay in. Averaging over
+operators shrinks all of it:
+\((\sigma^2_i + \sigma^2_{pi} + \sigma^2_e) / 2\). So, with two scans per
+subject to spend:
+
+> Would two scans by one operator be better than one scan by each of two operators?
 
 ```{r}
-reli_facet_test(thickness ~ operator | id, data = scans, facet = "inter",
-                type = "agreement", r_avg = 2)$estimate
-reli_facet_test(thickness ~ operator | id, data = scans, facet = "inter",
-                type = "agreement", k_avg = 2)$estimate
+one_op <- reli_facet_test(thickness ~ operator | id, data = scans,
+                          facet = "inter", type = "agreement", r_avg = 2)
+two_ops <- reli_facet_test(thickness ~ operator | id, data = scans,
+                           facet = "inter", type = "agreement", k_avg = 2)
+c(two_scans_one_operator = unname(one_op$estimate),
+  one_scan_two_operators = unname(two_ops$estimate))
 ```
 
-Averaging the repeats before calling `icc_test()` gives the coefficient for
-a score that averages as many scans as the study had (`r_avg = 2` here),
-not for a single scan; that is only right when the scores used in practice
-are also means.
+Two operators win here (`r round(unname(two_ops$estimate), 2)` against
+`r round(unname(one_op$estimate), 2)`) because the operator-related
+components (operator bias and the subject-by-operator interaction) are
+together larger than the repeat variance; see the component table above.
+Rescanning wins only when repeat noise is most of the error.
+
+Averaging the repeats before calling `icc_test()` gives the coefficient
+for a score that averages as many scans as the study had (`r_avg = 2`
+here), not for a single scan. That can be the right analysis, but only if
+the repeat measurements are also averaged in practice.
 
 ## Shared occasions
 
-Ask whether "measurement 2" is the same event for every rater. If every
+To make things more complicated, we could ask whether "measurement 2" is 
+the same event for every rater. If every
 operator measured everyone on day 1 and again on day 2, the days are shared
 **occasions**, and the model is crossed:
 \[y_{pio} = \mu + p + i + o + (pi) + (po) + (io) + e_{pio},\]
 adding a day effect common to everyone (\(\sigma^2_o\)), subjects changing
 between days (\(\sigma^2_{po}\)), and raters drifting differently between
-days (\(\sigma^2_{io}\)). Give the occasion column as `occasion`:
+days (\(\sigma^2_{io}\)). 
+
+Give the occasion column as `occasion`:
 
 ```{r}
 set.seed(4)
@@ -616,31 +640,40 @@ too narrow; and it cannot separate the shift from the noise at all
 only `m - 1` degrees of freedom, so with two days its uncertainty is large
 however many subjects are measured, and the agreement intervals show it.
 
-**Intervals.** The intra-rater SEM with repeats, and the inter-rater
+### Intervals
+
+The intra-rater SEM with repeats, and the inter-rater
 consistency SEM and coefficient when `r_avg` equals the number of repeats,
 have exact intervals. The others combine several mean squares and use, by
 default, modified large-sample (MLS) intervals [@graybill1980; @ting1990;
 @burdick1992]. In simulations with normal data, with repeats or with
 occasions, the MLS intervals covered at least 0.93 for every statistic,
 including agreement statistics with two operators or two days and a large
-operator bias or day effect, where the Satterthwaite alternative
-(`ci_method = "satterthwaite"`) fell to about 0.7. For the agreement
-coefficients with occasions MLS is conservative (up to 0.97 to 0.99), so
-their tests reject less often than nominal. Leaving out `occasion` when
+operator bias or day effect, whereas the Satterthwaite alternative
+(`ci_method = "satterthwaite"`) fell to about 0.7. For agreement
+statistics the two tails are uneven. When the bound driven by the operator or
+day variance (few degrees of freedom) is wide, and the other is about
+nominal, so the usual one-sided tests (a coefficient above a threshold, an
+SEM below an acceptable error) are conservative. Leaving out `occasion` when
 the measurements were made on shared days gave intra-rater SEM intervals
-that covered the true value as little as a quarter of the time. With skewed or heavy-tailed data the analytic
+that covered the true value as little as a quarter of the time. 
+With skewed or heavy-tailed data the analytic
 intervals under-cover (0.78 to 0.90 with repeats), and `boot = TRUE` is
-better: subjects are resampled with all their measurements, and for the
+better. Subjects are resampled with all their measurements, and for the
 agreement statistics a "hybrid" step adds the variation from drawing the
 operators and days. Agreement statistics from two or three operators (or
 days) remain uncertain however many subjects are measured.
 `?reli_facet_test` gives the details.
 
-Other packages fit related models: VCA (deeper nesting, laboratory
-precision designs), rptR (repeatability of non-Gaussian data), gtheoryr
-(crossed G-studies with several facets, D-study optimisation), SixSigma
-(`ss.rr()`, gauge R&R) and MethComp (method comparison with linked
-replicates and method-specific variances). `reli_facet_test()` adds
+### Other relevant R packages of note
+
+Other packages fit related models: [VCA](https://cran.r-project.org/web/packages/VCA/index.html) (deeper nesting, laboratory
+precision designs), [rptR](https://cran.r-project.org/web/packages/rptR/index.html) (repeatability of non-Gaussian data), gtheoryr
+(crossed G-studies with several facets, D-study optimisation), [SixSigma](https://cran.r-project.org/web/packages/SixSigma/index.html)
+(`ss.rr()`, gauge R&R) and [MethComp](https://cran.r-project.org/web/packages/MethComp/index.html) (method comparison with linked
+replicates and method-specific variances). 
+
+In `SimplyAgree`,  `reli_facet_test()` adds
 intervals and tests for the coefficients and the intra- and inter-rater
 SEMs, and the link to `mdc_test()`.
 

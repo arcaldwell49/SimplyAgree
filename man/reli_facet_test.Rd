@@ -262,9 +262,22 @@ four mixes including a large day effect and large rater bias, 2000 data
 sets per setting): the MLS intervals covered at least 0.934 with 30
 subjects and 0.928 with 10, for every facet, type and statistic; the
 Satterthwaite intervals fell to 0.69 to 0.79 for the agreement
-statistics. The MLS intervals for the agreement \emph{coefficients} are
-conservative (up to 0.97 to 0.99 with 30 subjects), so their tests reject
-less often than the nominal level. With REML and 20\% of cells missing,
+statistics.
+
+\strong{Uneven tails for agreement statistics.} The agreement statistics
+include a component estimated from very few degrees of freedom (items,
+or occasions: k - 1 or m - 1). The MLS bound that this component drives
+is wide, and the other bound is close to nominal. With 30 subjects and
+95\% two-sided intervals, the agreement coefficients fell below their
+lower limit 0 to 1\% of the time and above their upper limit about 3\%
+(nominal 2.5\% each; two-sided coverage up to 0.97 to 0.99 with
+occasions), and the agreement SEMs fell above their upper limit 0 to
+0.6\% of the time and below their lower limit 3 to 6\%. So the usual
+one-sided tests are conservative: a coefficient greater than a
+threshold (\code{alternative = "greater"}) and an SEM less than an acceptable
+error (\code{alternative = "less"}). The opposite one-sided tests can be
+somewhat liberal (up to about 6\% instead of 2.5\% for an agreement SEM
+greater than a threshold). With REML and 20\% of cells missing,
 MLS covered 0.922 to 0.979. Treating the occasions as exchangeable
 repeats (leaving out \code{occasion}) gave intra-rater SEM intervals that
 covered the true agreement SEM only 0.24 to 0.92 of the time (0.04 to
