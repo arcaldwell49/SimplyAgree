@@ -1,5 +1,6 @@
 ---
 title: "Agreement for Categorical and Ordinal Ratings"
+description: "Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test()."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output:
