@@ -1,5 +1,6 @@
 ---
 title: "Re-analysis of an Agreement Study"
+description: "Worked example re-analysing a published agreement study of rectal vs. esophageal temperature with concordance correlation, limits of agreement, and tolerance limits."
 output: rmarkdown::html_vignette
 bibliography: refs.bib
 vignette: >

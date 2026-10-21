@@ -1,5 +1,6 @@
 ---
 title: "Reliability Analysis"
+description: "Test-retest and inter-rater reliability in R: intraclass correlation (ICC) with icc_test(), SEM and coefficient of variation, minimal detectable change, and study planning."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output:

@@ -1,8 +1,6 @@
 
 # SimplyAgree <a href="https://aaroncaldwell.us/SimplyAgree/"><img src="man/figures/logo.png" align="right" height="118" alt="SimplyAgree website" /></a>
 
-*Artwork courtesy of Chelsea Parlett Pelleriti*
-
 <!-- badges: start -->
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.04148/status.svg)](https://doi.org/10.21105/joss.04148)
@@ -12,9 +10,45 @@ coverage](https://codecov.io/gh/arcaldwell49/SimplyAgree/branch/master/graph/bad
 [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/SimplyAgree/)
 <!-- badges: end -->
 
-Please see the package’s
-[website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes,
-and other details about the package.
+`SimplyAgree` is an R package and [jamovi](https://www.jamovi.org/)
+module for method comparison, agreement, and reliability studies. It
+estimates Bland-Altman limits of agreement, tolerance limits,
+concordance correlation coefficients (CCC), intraclass correlation
+coefficients (ICC), measurement error and minimal detectable change,
+chance-corrected agreement for categorical ratings (kappa, Gwet’s AC1,
+Krippendorff’s alpha), and Deming/Passing-Bablok regression, and plans
+sample sizes for agreement and reliability studies. Simple paired data,
+replicate measurements, and nested (repeated measures) designs are
+supported. Full documentation and vignettes are on the [package
+website](https://aaroncaldwell.us/SimplyAgree/).
+
+## Which function should I use?
+
+| Goal | Function | Data |
+|----|----|----|
+| Bland-Altman limits of agreement | `agreement_limit()` | simple, replicate, or nested |
+| Tolerance limits (prediction-oriented agreement) | `tolerance_limit()` | simple, repeated, or nested; optional conditions |
+| Concordance correlation coefficient (CCC) | `ccc_test()` | simple, replicate, or nested |
+| Non-parametric limits of agreement | `agree_np()` | simple or replicate |
+| Reliability: intraclass correlation (ICC) | `icc_test()` | repeated measures (long or wide) |
+| Measurement error: SEM, SEE, SEP, coefficient of variation | `reli_err_test()` | repeated measures |
+| Minimal detectable change (MDC) | `mdc_test()` | repeated measures |
+| Reliability across facets (repeats and occasions) | `reli_facet_test()` | multi-facet designs |
+| Categorical agreement: Gwet’s AC1, kappa, Krippendorff’s alpha | `cac_test()` | categorical or ordinal ratings |
+| Model-based kappa for many raters | `ord_kappa_test()` | ordinal ratings |
+| Deming / Passing-Bablok regression | `dem_reg()`, `pb_reg()` | paired, optionally with replicates |
+| Power and sample size for agreement | `power_agreement_limit()`, `power_agreement_exact()`, `blandPowerCurve()`, `agree_expected_half()`, `agree_assurance()` | study planning |
+| Power and sample size for reliability | `power_icc()`, `precision_icc()` | study planning |
+| Power and sample size for Deming regression | `deming_sample_size()` | study planning |
+
+Some older functions still work but are superseded: use
+`agreement_limit()` instead of `agree_test()`, `agree_reps()`, and
+`agree_nest()`; `icc_test()` and `reli_err_test()` instead of
+`reli_stats()` and `reli_aov()`; and `cac_test()` instead of
+`agree_coef()`. `loa_lme()` is deprecated in favor of
+`tolerance_limit(model = "lme")`, and `loa_mixed()` is defunct. The
+`jmv*()` functions exist for the jamovi module and are not intended for
+use in R.
 
 # Background
 
@@ -79,7 +113,7 @@ Beyond the two core functions, `SimplyAgree` provides:
   coefficients (Gwet’s AC1, kappa, Krippendorff’s alpha and more) and
   `ord_kappa_test()` for model-based kappa with ordinal ratings and many
   raters
-- **Power Analysis**: `power_exact_agreement()` and related functions
+- **Power Analysis**: `power_agreement_exact()` and related functions
   for sample size determination in agreement studies, and `power_icc()`
   / `precision_icc()` for reliability studies
 - **Error-in-Variables**: supports “Deming” and “Passing-Bablok”
@@ -194,6 +228,9 @@ icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
     ##  ICC(C,1) 
     ## 0.7148407
 
+Most results have `plot()` methods (Bland-Altman and line-of-identity
+plots) and `check()` methods for assumption diagnostics.
+
 # Contributing
 
 We are happy to receive bug reports, suggestions, questions, and (most
@@ -214,6 +251,10 @@ Please note that the SimplyAgree project is released with a [Contributor
 Code of
 Conduct](https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html). By
 contributing to this project, you agree to abide by its terms.
+
+## Acknowledgements
+
+Logo artwork courtesy of Chelsea Parlett Pelleriti.
 
 # References
 
