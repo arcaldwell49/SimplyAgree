@@ -128,25 +128,26 @@ repeat model (occasions ignored) would give.}
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
-\strong{The name of this function is experimental and may change} (it was
-briefly \code{gstudy_test()} during development); its arguments may change
-too.
+\strong{This function is experimental and may change}; its arguments and name may change
+too even if its functionality is retained.
 
 Estimates one reliability coefficient or one standard error of
 measurement (SEM) when each subject is measured more than once by each
-item (rater, device): for example 3 operators each scanning 20
+item (rater, device). For example, 3 operators each scanning 20
 participants twice. The extra measurements separate error \emph{within} a
 rater from disagreement \emph{between} raters, which \code{\link[=icc_test]{icc_test()}} and
 \code{\link[=reli_err_test]{reli_err_test()}} cannot do with one measurement per subject and item.
 The measurements can be exchangeable repeats within each subject-by-item
 cell (the default), or shared occasions (\code{occasion}: every rater measured
 every subject on day 1 and again on day 2). The model is the
-generalizability-theory (G-study) model for that design. Returns an
+generalizability-theory (G-study) model for that design.
+It's G-study capabilities are narrow, which is purposeful at this time.
+Returns an
 object of class \code{"htest"} with a confidence interval and an optional
 test.
 }
 \details{
-\strong{Nested or crossed.} Ask whether "measurement 2" is the same event for
+When considered nested versus crossed, ask whether "measurement 2" is the same event for
 every item. If each operator simply scanned each participant twice, in no
 shared order, the measurements are exchangeable repeats nested in the
 subject-by-item cell: leave \code{occasion = NULL}. If every operator measured
@@ -157,7 +158,8 @@ into a systematic shift (fixable) and noise. With \code{occasion}, the result
 (in \code{nested}) and \code{summary()} also give what the repeat model would have
 estimated.
 
-\strong{Model.} All effects are random. Without \code{occasion}, with n subjects, k
+For the model, all effects are random.
+Without \code{occasion}, with n subjects, k
 items and r repeats per cell,
 \deqn{y_{pir} = \mu + p + i + (pi) + e_{pir};}
 with \code{occasion} (m occasions),
@@ -174,7 +176,7 @@ unrestricted (random facets) one used by lme4 and by McGraw and Wong
 (1996); for the consistency forms the items may be regarded as fixed,
 which changes the interpretation but not the computation.
 
-\strong{Estimands.} Following Brennan (2001), the facet that stays the same is
+Following Brennan (2001), the facet that stays the same is
 part of the subject's score, and the facets that vary are error. For a
 planned score that is the mean of \eqn{k'} items (\code{k_avg}), \eqn{m'}
 occasions (\code{m_avg}) and \eqn{r'} repeats (\code{r_avg}), the error variance
@@ -200,7 +202,7 @@ the generalizability (\eqn{E\rho^2}) and dependability (\eqn{\Phi})
 coefficients of G theory. In gauge R&R terms (repeats), \eqn{\sigma^2_e}
 is repeatability and \eqn{\sigma^2_i + \sigma^2_{pi}} reproducibility.
 
-\strong{What averaging does.} Without \code{occasion} and with \eqn{r' = r} (the
+It is important to know what averaging does for this function. Without \code{occasion} and with \eqn{r' = r} (the
 score averages as many repeats as the study had), the inter-rater
 consistency coefficient is the consistency ICC of the cell means,
 \eqn{(F - 1)/(F - 1 + k/k')} with \eqn{F = MS_P/MS_{PI}}, identical to
@@ -209,9 +211,9 @@ measurement unless r = 1. Averaging the repeats before calling
 \code{\link[=icc_test]{icc_test()}} is therefore only right when the scores used in practice
 are also means of r repeats.
 
-\strong{Intervals and tests.} An estimand that is a multiple of one mean
+An estimand that is a multiple of one mean
 square (an SEM) or a function of the ratio of two (a coefficient) has an
-exact interval and test: without \code{occasion}, the intra SEM (\eqn{\chi^2}
+exact interval and test. Without \code{occasion}, the intra SEM (\eqn{\chi^2}
 on \eqn{MS_W}) and the inter-rater consistency SEM and coefficient with
 \eqn{r' = r}. The others are approximate:
 \itemize{
@@ -232,7 +234,7 @@ ICC(A,1)), and the interval inverts it.
 SEMs with \code{scale = "mean"} use a Wald interval on the log scale with a
 delta-method SE that includes the uncertainty of the grand mean.
 
-\strong{Bootstrap.} \code{boot = TRUE} resamples subjects, each with all its
+When wanting bootstrapped results, \code{boot = TRUE} resamples subjects, each with all its
 measurements, as in \code{\link[=icc_test]{icc_test()}}. Resampling subjects keeps the same
 items and occasions, so for statistics that count systematic differences
 between them as error, the mean squares of the effects without subjects
@@ -240,12 +242,12 @@ between them as error, the mean squares of the effects without subjects
 \eqn{\chi^2_{df}/df} draws (the hybrid step). The p-value inverts the
 interval and is approximate.
 
-\strong{Unbalanced data.} \code{method = "reml"} fits the model with lme4 and keeps
+When there is unbalanced data, \code{method = "reml"} fits the model with lme4 and keeps
 the analytic inference, with degrees of freedom from the observed data
 and the harmonic mean number of repeats in place of r, and gives a
 warning.
 
-\strong{Simulations.} Repeats (no \code{occasion}): with 10 or 30 subjects, 2, 3
+In simulations, repeats (no \code{occasion}): with 10 or 30 subjects, 2, 3
 or 5 items, 2 or 3 repeats, four mixes of variance components and normal
 data (2000 data sets per setting), the exact intervals covered 0.940 to
 0.951 and the MLS intervals at least 0.939 for every estimand (0.95 to
@@ -264,7 +266,7 @@ subjects and 0.928 with 10, for every facet, type and statistic; the
 Satterthwaite intervals fell to 0.69 to 0.79 for the agreement
 statistics.
 
-\strong{Uneven tails for agreement statistics.} The agreement statistics
+\strong{Warning:} there are uneven tails for agreement statistics. The agreement statistics
 include a component estimated from very few degrees of freedom (items,
 or occasions: k - 1 or m - 1). The MLS bound that this component drives
 is wide, and the other bound is close to nominal. With 30 subjects and
@@ -300,7 +302,8 @@ to 0.93 with skewed data), but for the agreement statistics the MLS
 interval was as good or better even with skewed data, and every interval
 under-covered when a day effect on 2 days dominated the error.
 
-\strong{Other software.} VCA (variance components for deeper nesting and
+\strong{Other software:} Given the narrow range of application, I want highlight a few R packages.
+VCA (variance components for deeper nesting and
 laboratory precision designs), rptR (repeatability for non-Gaussian
 data), gtheoryr (crossed multi-facet G-studies and D-study design
 optimisation), SixSigma (\code{ss.rr()}, gauge R&R summaries) and MethComp

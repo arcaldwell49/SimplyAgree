@@ -227,7 +227,8 @@
 #' interval was as good or better even with skewed data, and every interval
 #' under-covered when a day effect on 2 days dominated the error.
 #'
-#' **Other software:** VCA (variance components for deeper nesting and
+#' **Other software:** Given the narrow range of application, I want highlight a few R packages.
+#' VCA (variance components for deeper nesting and
 #' laboratory precision designs), rptR (repeatability for non-Gaussian
 #' data), gtheoryr (crossed multi-facet G-studies and D-study design
 #' optimisation), SixSigma (`ss.rr()`, gauge R&R summaries) and MethComp
