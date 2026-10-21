@@ -25,7 +25,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: covr, any::rcmdcheck, Matrix
+          extra-packages: covr, any::rcmdcheck, any::Matrix
           needs: check
 
       - name: Test coverage
