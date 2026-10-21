@@ -22,6 +22,10 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Re-analysis of an Agreement Study">
+<meta name="description" content="Worked example re-analysing a published agreement study of rectal vs. esophageal temperature with concordance correlation, limits of agreement, and tolerance limits.">
+<meta property="og:description" content="Worked example re-analysing a published agreement study of rectal vs. esophageal temperature with concordance correlation, limits of agreement, and tolerance limits.">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -239,9 +243,9 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296] 0.2561   [-0.3242, 0.8342] [-0.6109, 1.1209]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2688, 0.7768] [-0.5366, 1.0446]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181 [0.0209, 0.3411] 0.1478   [-0.3501, 0.7121] [-0.3188, 0.6808]</span></span></code></pre></div>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0803, 0.4297] 0.2561   [-0.3245, 0.8345] [-0.6109, 1.1209]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2689, 0.7769] [-0.5366, 1.0446]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3496, 0.7116] [-0.3188, 0.6808]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -278,7 +282,7 @@ researchers.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias           Bias CI     SD Prediction Interval</span></span>
 <span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113     [-0.242, 0.272]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113   [-0.2421, 0.2721]</span></span>
 <span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]</span></span>
 <span><span class="co">#&gt;   Tolerance Limits</span></span>
 <span><span class="co">#&gt;  [-0.3062, 0.2682]</span></span>
@@ -327,9 +331,9 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias            Bias CI     SD Prediction Interval</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2561, -0.1039] 0.1025   [-0.4324, 0.0724]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951] 0.1732   [-0.5999, 0.1759]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2297, -0.0623] 0.1062   [-0.4236, 0.1316]</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.180 [-0.2564, -0.1036] 0.1025   [-0.4332, 0.0732]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212   [-0.329, -0.095] 0.1732   [-0.6001, 0.1761]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146    [-0.23, -0.062] 0.1062   [-0.4247, 0.1327]</span></span>
 <span><span class="co">#&gt;   Tolerance Limits</span></span>
 <span><span class="co">#&gt;  [-0.5265, 0.1665]</span></span>
 <span><span class="co">#&gt;  [-0.7976, 0.3736]</span></span>

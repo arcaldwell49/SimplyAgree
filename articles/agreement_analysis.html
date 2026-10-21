@@ -22,6 +22,10 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Agreement &amp; Tolerance Limits">
+<meta name="description" content="Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data.">
+<meta property="og:description" content="Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data.">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -371,7 +375,7 @@ correlation.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
 <span><span class="co">#&gt;         AM 0.1537 [0.0595, 0.2479] 0.1878    [-0.292, 0.5993] [-0.3674, 0.6748]</span></span>
-<span><span class="co">#&gt;         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]</span></span></code></pre></div>
+<span><span class="co">#&gt;         PM 0.2280 [0.1341, 0.3219] 0.1520   [-0.2161, 0.6721] [-0.1938, 0.6498]</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="calculative-approach">Calculative Approach<a class="anchor" aria-label="anchor" href="#calculative-approach"></a>
 </h3>
@@ -1025,7 +1029,7 @@ controlling for time of day (<code>tod</code>).</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition    Bias            Bias CI     SD Prediction Interval</span></span>
 <span><span class="co">#&gt;         AM -0.1537 [-0.2479, -0.0595] 0.1878    [-0.5993, 0.292]</span></span>
-<span><span class="co">#&gt;         PM -0.2280 [-0.3218, -0.1342] 0.1520     [-0.672, 0.216]</span></span>
+<span><span class="co">#&gt;         PM -0.2280 [-0.3219, -0.1341] 0.1520   [-0.6721, 0.2161]</span></span>
 <span><span class="co">#&gt;   Tolerance Limits</span></span>
 <span><span class="co">#&gt;  [-0.6748, 0.3674]</span></span>
 <span><span class="co">#&gt;  [-0.6498, 0.1938]</span></span></code></pre></div>
@@ -1545,7 +1549,7 @@ argument.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition  Bias          Bias CI CV (%) Prediction Interval Tolerance Limits</span></span>
 <span><span class="co">#&gt;         AM 1.004 [1.0016, 1.0068] 0.5137    [0.9921, 1.0165]   [0.99, 1.0186]</span></span>
-<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0184] [0.9947, 1.0178]</span></span></code></pre></div>
+<span><span class="co">#&gt;         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0185] [0.9947, 1.0178]</span></span></code></pre></div>
 <p>If you prefer to interpret the differences as a percentage
 difference, you can do this by setting the <code>log_tf_display</code>
 argument to “sympercent”. This stands for the “symmetric percentage
@@ -1570,8 +1574,8 @@ difference between the two paired measures.</p>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7957, 1.6333] [-1.0041, 1.8417]</span></span>
-<span><span class="co">#&gt;         PM 0.6184 [0.3623, 0.8746] 0.4131    [-0.5911, 1.828] [-0.5288, 1.7656]</span></span></code></pre></div>
+<span><span class="co">#&gt;         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7958, 1.6334] [-1.0041, 1.8417]</span></span>
+<span><span class="co">#&gt;         PM 0.6184 [0.3622, 0.8746] 0.4131   [-0.5914, 1.8283] [-0.5288, 1.7656]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-big-data">Visualizing “Big” Data<a class="anchor" aria-label="anchor" href="#visualizing-big-data"></a>

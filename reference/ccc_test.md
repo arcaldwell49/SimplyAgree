@@ -381,7 +381,7 @@ ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
 #> 
 #> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
-#>  -0.6697915  1.0000000
+#>  -0.6697937  1.0000000
 #> sample estimates:
 #>       CCC 
 #> 0.4341189 

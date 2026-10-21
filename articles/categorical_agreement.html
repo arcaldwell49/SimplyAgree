@@ -22,6 +22,10 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Agreement for Categorical and Ordinal Ratings">
+<meta name="description" content="Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test().">
+<meta property="og:description" content="Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test().">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -405,26 +409,26 @@ scale.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; alternative hypothesis: two.sided</span></span>
 <span><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span><span class="co">#&gt;  0.2073109 0.3290736</span></span>
+<span><span class="co">#&gt;  0.2073107 0.3290734</span></span>
 <span><span class="co">#&gt; sample estimates:</span></span>
 <span><span class="co">#&gt;   kappa_m </span></span>
-<span><span class="co">#&gt; 0.2650769</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.2650767</span></span></code></pre></div>
 <p>The interval is formed on the logit of <span class="math inline">\(\rho\)</span>, so it stays between 0 and 1. A test
 against a threshold works as before, with <code>null.value</code>. The
 fitted model and its variance components are in <code>fit</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_km</span><span class="op">$</span><span class="va">fit</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma2_subject"</span>, <span class="st">"sigma2_rater"</span>, <span class="st">"rho"</span>, <span class="st">"p0"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $sigma2_subject</span></span>
-<span><span class="co">#&gt; [1] 2.953058</span></span>
+<span><span class="co">#&gt; [1] 2.953056</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $sigma2_rater</span></span>
-<span><span class="co">#&gt; [1] 0.171656</span></span>
+<span><span class="co">#&gt; [1] 0.1716571</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $rho</span></span>
-<span><span class="co">#&gt; [1] 0.7159425</span></span>
+<span><span class="co">#&gt; [1] 0.7159422</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $p0</span></span>
-<span><span class="co">#&gt; [1] 0.4208259</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.4208257</span></span></code></pre></div>
 <p><code>p0</code> is the observed agreement at the fitted thresholds,
 before the correction for chance.</p>
 <p>For comparison, Fleiss’ kappa for the same data:</p>
@@ -469,7 +473,7 @@ the groups. Here the last five raters are made more variable.</p>
 <span><span class="co">#&gt; LRT = 4.3937, p-value = 0.03607</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true difference in kappa_m is not equal to 0</span></span>
 <span><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span><span class="co">#&gt;  -0.190612420 -0.003347544</span></span>
+<span><span class="co">#&gt;  -0.190612428 -0.003347573</span></span>
 <span><span class="co">#&gt; sample estimates:</span></span>
 <span><span class="co">#&gt; kappa_m (experienced)      kappa_m (novice) </span></span>
 <span><span class="co">#&gt;             0.2823913             0.1854113</span></span></code></pre></div>
@@ -483,7 +487,7 @@ group:</p>
 <span><span class="co">#&gt;                subgroup   kappa_m         se     lower     upper</span></span>
 <span><span class="co">#&gt; 1           experienced 0.2823913 0.03379464 0.2210622 0.3530237</span></span>
 <span><span class="co">#&gt; 2                novice 0.1854113 0.05032463 0.1059146 0.3042702</span></span>
-<span><span class="co">#&gt; 3 experienced vs novice 0.2201791 0.04262552 0.1478965 0.3147400</span></span>
+<span><span class="co">#&gt; 3 experienced vs novice 0.2201790 0.04262553 0.1478965 0.3147400</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res_g</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The likelihood ratio test is statistically significant (LRT = 4.39, p =</span></span>
 <span><span class="co">#&gt; 0.036) at the 0.05 alpha level: it can be stated that agreement differs</span></span>

@@ -245,7 +245,7 @@ tolerance_limit(
 #> 
 #>  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits
 #>         AM 0.1537 [0.0595, 0.2479] 0.1878    [-0.292, 0.5993] [-0.3674, 0.6748]
-#>         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]
+#>         PM 0.2280 [0.1341, 0.3219] 0.1520   [-0.2161, 0.6721] [-0.1938, 0.6498]
 ```
 
 ### Calculative Approach
@@ -667,7 +667,7 @@ test1
 #> 
 #>  Condition    Bias            Bias CI     SD Prediction Interval
 #>         AM -0.1537 [-0.2479, -0.0595] 0.1878    [-0.5993, 0.292]
-#>         PM -0.2280 [-0.3218, -0.1342] 0.1520     [-0.672, 0.216]
+#>         PM -0.2280 [-0.3219, -0.1341] 0.1520   [-0.6721, 0.2161]
 #>   Tolerance Limits
 #>  [-0.6748, 0.3674]
 #>  [-0.6498, 0.1938]
@@ -1164,7 +1164,7 @@ tolerance_limit(
 #> 
 #>  Condition  Bias          Bias CI CV (%) Prediction Interval Tolerance Limits
 #>         AM 1.004 [1.0016, 1.0068] 0.5137    [0.9921, 1.0165]   [0.99, 1.0186]
-#>         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0184] [0.9947, 1.0178]
+#>         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0185] [0.9947, 1.0178]
 ```
 
 If you prefer to interpret the differences as a percentage difference,
@@ -1192,8 +1192,8 @@ tolerance_limit(
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
 #>  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits
-#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7957, 1.6333] [-1.0041, 1.8417]
-#>         PM 0.6184 [0.3623, 0.8746] 0.4131    [-0.5911, 1.828] [-0.5288, 1.7656]
+#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7958, 1.6334] [-1.0041, 1.8417]
+#>         PM 0.6184 [0.3622, 0.8746] 0.4131   [-0.5914, 1.8283] [-0.5288, 1.7656]
 ```
 
 ## Visualizing “Big” Data
