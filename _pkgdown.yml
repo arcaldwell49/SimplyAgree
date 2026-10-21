@@ -34,6 +34,7 @@ reference:
   - icc_test
   - reli_err_test
   - mdc_test
+  - reli_facet_test
   - power_icc
   - precision_icc
   - reli_htest-methods

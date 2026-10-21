@@ -26,10 +26,16 @@
                           item = NULL,
                           id = NULL,
                           col.names = NULL,
-                          allow_categorical = FALSE) {
+                          allow_categorical = FALSE,
+                          repeats = FALSE,
+                          occasion = NULL) {
   use_formula <- !is.null(x)
   use_long <- !is.null(measure) || !is.null(item) || !is.null(id)
   use_wide <- !is.null(col.names)
+  if (repeats && use_wide) {
+    stop("Repeat measurements need long data: use a formula ",
+         "(values ~ item | id) or 'measure', 'item' and 'id'.", call. = FALSE)
+  }
   n_interfaces <- sum(use_formula, use_long, use_wide)
 
   if (n_interfaces == 0) {
@@ -94,6 +100,20 @@
     stop("Missing values found in the item and/or id columns.", call. = FALSE)
   }
 
+  if (repeats) {
+    if (!is.null(occasion)) {
+      if (!is.character(occasion) || length(occasion) != 1) {
+        stop("'occasion' must be a single column name.", call. = FALSE)
+      }
+      .reli_check_columns(occasion, data)
+      if (anyNA(data[[occasion]])) {
+        stop("Missing values found in the occasion column.", call. = FALSE)
+      }
+      df$occ <- data[[occasion]]
+      data.name <- paste0(data.name, ", occasions: ", occasion)
+    }
+    return(.facet_prep_from_long(df, data.name = data.name))
+  }
   .reli_prep_from_long(df, data.name = data.name)
 }
 
@@ -110,8 +130,9 @@
   rownames(df) <- NULL
 
   if (anyDuplicated(df[c("id", "items")])) {
-    stop("Each subject must have at most one measurement per item; ",
-         "aggregate replicate measurements first.", call. = FALSE)
+    stop("Each subject must have at most one measurement per item. For ",
+         "repeat measurements within subject-by-item cells, use ",
+         "reli_facet_test().", call. = FALSE)
   }
 
   n <- nlevels(df$id)
@@ -989,9 +1010,9 @@
 #'
 #' Keeps all of each drawn subject's observations and gives duplicated
 #' subjects new ids. Returns `NULL` when fewer than 2 distinct subjects are
-#' drawn.
+#' drawn. `rebuild` turns the resampled long data into a prep object.
 #' @noRd
-.reli_resample <- function(prep) {
+.reli_resample <- function(prep, rebuild = .reli_prep_from_long) {
   df <- prep$df
   rows <- split(seq_len(nrow(df)), df$id)
   draw <- sample(names(rows), length(rows), replace = TRUE)
@@ -1001,7 +1022,7 @@
   idx <- unlist(rows[draw], use.names = FALSE)
   new_df <- df[idx, , drop = FALSE]
   new_df$id <- rep(seq_along(draw), lengths(rows[draw]))
-  .reli_prep_from_long(new_df, data.name = prep$data.name)
+  rebuild(new_df, data.name = prep$data.name)
 }
 
 #' Hybrid bootstrap step for random items
@@ -1032,13 +1053,15 @@
 #' original data and the jackknife, so a statistic can add variation that
 #' subject resampling does not capture (the hybrid bootstrap for agreement
 #' ICCs). Replicates that error, warn, or draw fewer than 2 distinct subjects
-#' are dropped and counted.
+#' are dropped and counted. `rebuild` builds the prep object for resamples
+#' and jackknife deletions (`.facet_prep_from_long()` for repeat data).
 #'
 #' @return A list with `t0` (statistics on the original data), `t` (matrix of
 #'   usable replicates), `R`, `n_failed`, and `jack` (matrix of
 #'   leave-one-subject-out statistics, or `NULL`).
 #' @noRd
-.reli_boot <- function(prep, stat_fun, R = 1999, jackknife = FALSE) {
+.reli_boot <- function(prep, stat_fun, R = 1999, jackknife = FALSE,
+                       rebuild = .reli_prep_from_long) {
   safe_stat <- function(p, resample) {
     if (is.null(p)) {
       return(c(est = NA_real_, z = NA_real_, se_z = NA_real_))
@@ -1052,7 +1075,7 @@
   # a resample with missing data can lose items; .reli_resample() then errors
   # and the replicate is counted as failed
   t_all <- t(vapply(seq_len(R), function(i) {
-    p <- tryCatch(.reli_resample(prep), error = function(e) NULL)
+    p <- tryCatch(.reli_resample(prep, rebuild), error = function(e) NULL)
     safe_stat(p, TRUE)
   }, numeric(3)))
   colnames(t_all) <- c("est", "z", "se_z")
@@ -1063,7 +1086,7 @@
     ids <- levels(prep$df$id)
     jack <- t(vapply(ids, function(i) {
       kept <- prep$df[prep$df$id != i, , drop = FALSE]
-      p <- tryCatch(.reli_prep_from_long(kept, prep$data.name),
+      p <- tryCatch(rebuild(kept, prep$data.name),
                     error = function(e) NULL)
       safe_stat(p, FALSE)
     }, numeric(3)))

@@ -1,4 +1,5 @@
-utils::globalVariables(c("boot_bias",
+utils::globalVariables(c("boot_bias", "occ",
+                         "component", "label", "percent",
                          "Freq", "rater", "group",
                          "boot_within_sd",
                          "boot_between_sd",

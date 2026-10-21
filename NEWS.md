@@ -16,6 +16,7 @@ Several fixes change results from earlier versions:
 ## Reliability
 
 - New `icc_test()` (one ICC as an `htest`, two-sided F intervals, REML for missing data, optional subject bootstrap), `reli_err_test()` (SEM, SEE, SEP and CVs), and `mdc_test()` (minimal detectable change).
+- New `reli_facet_test()` (experimental; **its name may change**) for subjects measured more than once by each rater or device: exchangeable repeats within subject-by-rater cells, or shared occasions (`occasion`, e.g. every rater on day 1 and day 2). Intra-rater, inter-rater and overall coefficients and SEMs from the generalizability-theory model, in consistency or agreement forms, with D-study projections, exact or MLS/Satterthwaite intervals, REML for unbalanced data, and the subject bootstrap. `icc_test()` and `reli_err_test()` point to it when the data have repeats, and `mdc_test()` accepts its SEMs.
 - New `power_icc()` and `precision_icc()` for ICC power and interval-width sample sizes, including missing data.
 - New `summary()`, `plot()` and `check()` methods for these results, with a new section in the power vignette.
 - `reli_stats()` and `reli_aov()` are superseded and now use the same engine. Beyond the two-sided intervals: observed-data degrees of freedom with missing data, subject bootstrap, delta-method intervals for SEE/SEP/CV, ANOVA variance components, and stricter data checks.

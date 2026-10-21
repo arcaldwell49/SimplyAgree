@@ -489,6 +489,161 @@ restatement of the ICC. @hopkins2004 offers it as a default (e.g. for
 fitness tests in team sports) when no relationship to a real outcome is
 available, and it should be treated as such a fallback when *nothing* else is available.
 
+# Repeat measurements and occasions
+
+Sometimes each rater (or device) measures each subject more than once: say
+3 sonographers each scan 20 participants twice. `icc_test()` and
+`reli_err_test()` stop with such data, because one measurement per subject
+and rater cannot separate two different errors: the scatter of one rater's
+repeat scans (intra-rater error, or repeatability) and the disagreement
+between raters (inter-rater error). `reli_facet_test()` fits the
+generalizability-theory model for these designs [@brennan2001]. *It is
+experimental, and its name may change.*
+
+## Exchangeable repeats
+
+When the scans within each subject-by-operator cell are interchangeable
+(scan 1 and scan 2 mean nothing in themselves), the model is
+\[y_{pir} = \mu + p + i + (pi) + e_{pir},\]
+with variance components for subjects (\(\sigma^2_p\)), items
+(\(\sigma^2_i\), systematic differences between raters), the
+subject-by-item interaction (\(\sigma^2_{pi}\), raters ranking subjects
+differently) and repeats (\(\sigma^2_e\)).
+
+```{r}
+set.seed(2)
+scans <- expand.grid(scan = 1:2, operator = c("A", "B", "C"), id = 1:20)
+subj <- rnorm(20, 50, 5)
+bias <- c(A = 0, B = 1.5, C = -1)
+inter <- matrix(rnorm(60, 0, 1), 20, 3)
+scans$thickness <- subj[scans$id] + bias[scans$operator] +
+  inter[cbind(scans$id, as.integer(scans$operator))] +
+  rnorm(nrow(scans), 0, 1.5)
+
+res <- reli_facet_test(thickness ~ operator | id, data = scans)
+res
+summary(res)
+```
+
+The summary ends with the variance components, each with an interval and
+its share of the variance of a single measurement; `plot(res, type =
+"components")` draws them. The default, `facet = "intra"`, is the
+intra-rater ICC: the correlation between two scans of the same subject by
+the same operator, whose error is the repeat variance only.
+`facet = "inter"` adds the error between operators, with `type` as in
+`icc_test()`:
+
+| `facet`, `type` | Error variance of one measurement | Question |
+|---|---|---|
+| `"intra"` | \(\sigma^2_e\) | Same operator, rescanned |
+| `"inter"`, `"consistency"` | \(\sigma^2_{pi} + \sigma^2_e\) | Another operator, with operator bias handled separately |
+| `"inter"`, `"agreement"` | \(\sigma^2_i + \sigma^2_{pi} + \sigma^2_e\) | Another operator, scores used interchangeably |
+
+`stat = "SEM"` gives the square root of the error variance, and `mdc_test()`
+turns it into the smallest difference beyond measurement error, here
+between two operators drawn from the pool:
+
+```{r}
+sem_a <- reli_facet_test(thickness ~ operator | id, data = scans,
+                         stat = "SEM", facet = "inter", type = "agreement")
+sem_a
+mdc_test(sem_a)
+```
+
+**What averaging changes (D-study).** `k_avg` and `r_avg` give the
+reliability of a planned score that averages several operators and several
+scans; these are the generalizability (\(E\rho^2\)) and dependability
+(\(\Phi\)) coefficients of G theory. Would two scans by one operator be
+better than one scan by each of two operators?
+
+```{r}
+reli_facet_test(thickness ~ operator | id, data = scans, facet = "inter",
+                type = "agreement", r_avg = 2)$estimate
+reli_facet_test(thickness ~ operator | id, data = scans, facet = "inter",
+                type = "agreement", k_avg = 2)$estimate
+```
+
+Averaging the repeats before calling `icc_test()` gives the coefficient for
+a score that averages as many scans as the study had (`r_avg = 2` here),
+not for a single scan; that is only right when the scores used in practice
+are also means.
+
+## Shared occasions
+
+Ask whether "measurement 2" is the same event for every rater. If every
+operator measured everyone on day 1 and again on day 2, the days are shared
+**occasions**, and the model is crossed:
+\[y_{pio} = \mu + p + i + o + (pi) + (po) + (io) + e_{pio},\]
+adding a day effect common to everyone (\(\sigma^2_o\)), subjects changing
+between days (\(\sigma^2_{po}\)), and raters drifting differently between
+days (\(\sigma^2_{io}\)). Give the occasion column as `occasion`:
+
+```{r}
+set.seed(4)
+days <- expand.grid(day = c("day1", "day2"), operator = c("A", "B", "C"),
+                    id = 1:20)
+subj <- rnorm(20, 50, 5)
+shift <- c(day1 = 0, day2 = 1.5)                  # everyone higher on day 2
+drift <- matrix(rnorm(6, 0, 0.5), 3, 2)           # rater-specific drift
+change <- matrix(rnorm(40, 0, 1), 20, 2)          # subjects change between days
+oi <- as.integer(days$operator); di <- as.integer(days$day)
+days$thickness <- subj[days$id] + bias[days$operator] + shift[days$day] +
+  drift[cbind(oi, di)] + change[cbind(days$id, di)] +
+  rnorm(nrow(days), 0, 1)
+
+test_retest <- reli_facet_test(thickness ~ operator | id, data = days,
+                               occasion = "day", stat = "SEM",
+                               type = "agreement")
+summary(test_retest)
+```
+
+Each `facet` now has consistency and agreement forms:
+
+| `facet` | Same | Varies | Agreement adds to the error |
+|---|---|---|---|
+| `"intra"` | operator | day | the day shift and rater drift (\(\sigma^2_o + \sigma^2_{io}\)) |
+| `"inter"` | day | operator | operator bias and rater drift (\(\sigma^2_i + \sigma^2_{io}\)) |
+| `"overall"` | nothing | operator and day | all of these |
+
+The intra-rater agreement SEM above is the test-retest error of one
+operator, day-to-day shift included; the consistency SEM sets the shift and
+the rater drift aside. With occasions there are two ways of getting it
+wrong. Treating the days as exchangeable repeats (leaving out `occasion`)
+gives the *same* intra-rater agreement estimate, but its interval treats
+the day shift, which every subject shares, as independent noise, so it is
+too narrow; and it cannot separate the shift from the noise at all
+(`test_retest$nested` gives that estimate). The day effect itself rests on
+only `m - 1` degrees of freedom, so with two days its uncertainty is large
+however many subjects are measured, and the agreement intervals show it.
+
+**Intervals.** The intra-rater SEM with repeats, and the inter-rater
+consistency SEM and coefficient when `r_avg` equals the number of repeats,
+have exact intervals. The others combine several mean squares and use, by
+default, modified large-sample (MLS) intervals [@graybill1980; @ting1990;
+@burdick1992]. In simulations with normal data, with repeats or with
+occasions, the MLS intervals covered at least 0.93 for every statistic,
+including agreement statistics with two operators or two days and a large
+operator bias or day effect, where the Satterthwaite alternative
+(`ci_method = "satterthwaite"`) fell to about 0.7. For the agreement
+coefficients with occasions MLS is conservative (up to 0.97 to 0.99), so
+their tests reject less often than nominal. Leaving out `occasion` when
+the measurements were made on shared days gave intra-rater SEM intervals
+that covered the true value as little as a quarter of the time. With skewed or heavy-tailed data the analytic
+intervals under-cover (0.78 to 0.90 with repeats), and `boot = TRUE` is
+better: subjects are resampled with all their measurements, and for the
+agreement statistics a "hybrid" step adds the variation from drawing the
+operators and days. Agreement statistics from two or three operators (or
+days) remain uncertain however many subjects are measured.
+`?reli_facet_test` gives the details.
+
+Other packages fit related models: VCA (deeper nesting, laboratory
+precision designs), rptR (repeatability of non-Gaussian data), gtheoryr
+(crossed G-studies with several facets, D-study optimisation), SixSigma
+(`ss.rr()`, gauge R&R) and MethComp (method comparison with linked
+replicates and method-specific variances). `reli_facet_test()` adds
+intervals and tests for the coefficients and the intra- and inter-rater
+SEMs, and the link to `mdc_test()`.
+
 # Planning a reliability study
 
 `power_icc()` gives the power of the ICC test, or the number of subjects

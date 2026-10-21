@@ -13,9 +13,9 @@
 #'
 #' @inheritParams reli_err_test
 #' @param x A formula of the form `values ~ item | id`, or the result of
-#'   [reli_err_test()] with `stat = "SEM"`, whose SEM is then used without
-#'   refitting. Leave `NULL` to use `measure`, `item` and `id` (long data) or
-#'   `col.names` (wide data).
+#'   [reli_err_test()] or [reli_facet_test()] with `stat = "SEM"`, whose SEM is
+#'   then used without refitting. Leave `NULL` to use `measure`, `item` and
+#'   `id` (long data) or `col.names` (wide data).
 #' @param mdc.level The confidence that a change of at least the MDC is not
 #'   measurement error (default 0.95, the "MDC95"). This is not the
 #'   confidence level of the interval, which is `conf.level`.
@@ -72,6 +72,14 @@
 #' prediction (SEP): the SEP concerns a change from a subject's estimated
 #' true score (Weir, 2005), and \eqn{1.96 \cdot SEP}{1.96 * SEP} does not
 #' bound the difference between two raters.
+#'
+#' **Repeat measurements.** When each rater measured each subject more than
+#' once, pass an SEM from [reli_facet_test()]: with `facet = "intra"` the
+#' MDC is for two measurements by the same rater (on two occasions, with
+#' `occasion`), with `facet = "inter"` and `type = "agreement"` for two
+#' measurements by different raters drawn from the pool. Averaging is then
+#' set in [reli_facet_test()] (`k_avg`, `m_avg`, `r_avg`), and `k_avg` here
+#' must be 1.
 #'
 #' **An individual threshold, not a group one.** The MDC applies to a single
 #' individual's change between two measurements. It is not a threshold for
@@ -225,6 +233,10 @@ mdc_test <- function(x = NULL,
   null_sem <- if (is.null(null.value)) NULL else null.value / multiplier
 
   if (inherits(x, "reli_htest")) {
+    if (identical(x$settings$statistic, "facet") && k_avg != 1) {
+      stop("For a reli_facet_test() SEM, set the averaging there (k_avg, ",
+           "m_avg, r_avg); 'k_avg' here must be 1.", call. = FALSE)
+    }
     sem <- .mdc_from_sem(x, conf.level, null_sem, alternative, ...)
   } else {
     sem <- reli_err_test(x = x, data = data, measure = measure, item = item,
@@ -303,9 +315,10 @@ mdc_test <- function(x = NULL,
 #' @noRd
 .mdc_from_sem <- function(x, conf.level, null_sem, alternative, ...) {
   s <- x$settings
-  if (!identical(s$statistic, "error") || !identical(s$stat, "SEM")) {
-    stop("'x' must be a formula or the result of reli_err_test() with ",
-         "stat = \"SEM\".", call. = FALSE)
+  if (!(identical(s$statistic, "error") || identical(s$statistic, "facet")) ||
+      !identical(s$stat, "SEM")) {
+    stop("'x' must be a formula or the result of reli_err_test() or ",
+         "reli_facet_test() with stat = \"SEM\".", call. = FALSE)
   }
   if (length(list(...)) > 0) {
     stop("Arguments in '...' are used only when fitting from data; they ",
@@ -319,12 +332,22 @@ mdc_test <- function(x = NULL,
     }
     return(x)
   }
-  ci <- .err_ci(x$fit, "SEM", s$model, s$type, conf.level, alternative,
-                s$scale)
-  test <- if (is.null(null_sem)) {
-    list(statistic = NULL, parameter = NULL, p.value = NULL)
+  if (identical(s$statistic, "facet")) {
+    spec <- s[c("stat", "facet", "type", "k_avg", "m_avg", "r_avg", "scale")]
+    ci <- .facet_ci(x$fit, spec, conf.level, alternative, s$ci_method)
+    test <- if (is.null(null_sem)) {
+      list(statistic = NULL, parameter = NULL, p.value = NULL)
+    } else {
+      .facet_test(x$fit, spec, null_sem, alternative, s$ci_method)
+    }
   } else {
-    .err_test(x$fit, "SEM", s$model, s$type, null_sem, alternative, s$scale)
+    ci <- .err_ci(x$fit, "SEM", s$model, s$type, conf.level, alternative,
+                  s$scale)
+    test <- if (is.null(null_sem)) {
+      list(statistic = NULL, parameter = NULL, p.value = NULL)
+    } else {
+      .err_test(x$fit, "SEM", s$model, s$type, null_sem, alternative, s$scale)
+    }
   }
   x$conf.int <- ci
   x$statistic <- test$statistic

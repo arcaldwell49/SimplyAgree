@@ -22,9 +22,9 @@ mdc_test(
 }
 \arguments{
 \item{x}{A formula of the form \code{values ~ item | id}, or the result of
-\code{\link[=reli_err_test]{reli_err_test()}} with \code{stat = "SEM"}, whose SEM is then used without
-refitting. Leave \code{NULL} to use \code{measure}, \code{item} and \code{id} (long data) or
-\code{col.names} (wide data).}
+\code{\link[=reli_err_test]{reli_err_test()}} or \code{\link[=reli_facet_test]{reli_facet_test()}} with \code{stat = "SEM"}, whose SEM is
+then used without refitting. Leave \code{NULL} to use \code{measure}, \code{item} and
+\code{id} (long data) or \code{col.names} (wide data).}
 
 \item{data}{A data frame containing the variables.}
 
@@ -128,6 +128,14 @@ it separately. This is the MDC, not a multiple of the standard error of
 prediction (SEP): the SEP concerns a change from a subject's estimated
 true score (Weir, 2005), and \eqn{1.96 \cdot SEP}{1.96 * SEP} does not
 bound the difference between two raters.
+
+\strong{Repeat measurements.} When each rater measured each subject more than
+once, pass an SEM from \code{\link[=reli_facet_test]{reli_facet_test()}}: with \code{facet = "intra"} the
+MDC is for two measurements by the same rater (on two occasions, with
+\code{occasion}), with \code{facet = "inter"} and \code{type = "agreement"} for two
+measurements by different raters drawn from the pool. Averaging is then
+set in \code{\link[=reli_facet_test]{reli_facet_test()}} (\code{k_avg}, \code{m_avg}, \code{r_avg}), and \code{k_avg} here
+must be 1.
 
 \strong{An individual threshold, not a group one.} The MDC applies to a single
 individual's change between two measurements. It is not a threshold for

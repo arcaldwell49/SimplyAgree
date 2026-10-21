@@ -1,6 +1,7 @@
 #' Methods for reli_htest objects
 #'
-#' Methods for objects returned by [icc_test()], [reli_err_test()] and
+#' Methods for objects returned by [icc_test()], [reli_err_test()],
+#' [reli_facet_test()] and
 #' [mdc_test()]. They
 #' print as standard
 #' \code{"htest"} objects; `summary()` describes the result in words,
@@ -20,8 +21,10 @@
 #'   (what the ICC summarises); `"items"`, the deviation of each measurement
 #'   from its subject's mean, by item, which shows systematic differences
 #'   between items (error for an agreement ICC, but not for a consistency
-#'   ICC); or `"pairs"`, each pair of items plotted against each other with
-#'   the line of identity.
+#'   ICC); `"pairs"`, each pair of items plotted against each other with
+#'   the line of identity; or, for [reli_facet_test()] results, `"components"`,
+#'   the share of each variance component. For [reli_facet_test()] results the
+#'   profile, items and pairs plots use the subject-by-item cell means.
 #' @param ... Not used.
 #'
 #' @details
@@ -65,6 +68,14 @@
 #' mean means the error grows with the size of the measurement, so a
 #' relative error ([reli_err_test()] with `scale = "log"`) describes it
 #' better.
+#'
+#' For [reli_facet_test()] results, `check()` shows the residuals of the full
+#' model (deviations from the cell means), the additivity panel on the
+#' subject-by-item cell means, the within-cell SD by item with Bartlett's
+#' test of equal repeat error across items (the intra-rater coefficient
+#' pools it over items), the within-cell SD against the cell mean, and, with
+#' occasions, each item's mean by occasion (shifts and rater-specific drift).
+#' `summary()` adds the table of variance components.
 #'
 #' @references
 #' Mandel, J. (1961). Non-additivity in two-way analysis of variance.
@@ -144,6 +155,7 @@ summary.reli_htest <- function(object,
                  conf.int = object$conf.int,
                  p.value = object$p.value,
                  s.value = s_value,
+                 components = object$components,
                  settings = s),
             class = "summary.reli_htest")
 }
@@ -153,6 +165,20 @@ summary.reli_htest <- function(object,
 #' @export
 print.summary.reli_htest <- function(x, ...) {
   cat(strwrap(x$text), sep = "\n")
+  if (is.data.frame(x$components)) {
+    comp <- x$components
+    level <- format(100 * attr(comp, "conf.level"))
+    tab <- data.frame(Component = comp$component,
+                      Variance = .fmt_num(comp$variance),
+                      CI = paste0("[", .fmt_num(comp$lower), ", ",
+                                  .fmt_num(comp$upper), "]"),
+                      SD = .fmt_num(comp$sd),
+                      Percent = formatC(comp$percent, digits = 1,
+                                        format = "f"))
+    names(tab)[3] <- paste0(level, "% CI")
+    cat("\nVariance components:\n")
+    print(tab, row.names = FALSE, right = FALSE)
+  }
   invisible(x)
 }
 
@@ -161,10 +187,24 @@ print.summary.reli_htest <- function(x, ...) {
 #' @import ggplot2
 #' @export
 plot.reli_htest <- function(x,
-                            type = c("profile", "subjects", "items", "pairs"),
+                            type = c("profile", "subjects", "items", "pairs",
+                                     "components"),
                             ...) {
   type <- match.arg(type)
   df <- x$data
+  repeats <- identical(x$settings$statistic, "facet")
+  if (type == "components") {
+    if (!repeats) {
+      stop("type = \"components\" is available for reli_facet_test() results.",
+           call. = FALSE)
+    }
+    return(.plot_components(x$components))
+  }
+  # with repeat measurements, the profile, item and pair plots use the cell
+  # means and the subjects plot every measurement
+  if (repeats && type != "subjects") {
+    df <- .cell_mean_data(df)
+  }
   switch(type,
          profile = .plot_profile(df),
          subjects = .plot_subjects(df),
@@ -176,6 +216,9 @@ plot.reli_htest <- function(x,
 #' @method check reli_htest
 #' @export
 check.reli_htest <- function(x, ...) {
+  if (identical(x$settings$statistic, "facet")) {
+    return(.check_facet(x))
+  }
   checks <- check_reli(list(lmer = x$fit$fit))
   # on the scale the model was fitted (log values for scale = "log")
   values <- x$data$values
@@ -230,6 +273,114 @@ check.reli_htest <- function(x, ...) {
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     )
+}
+
+# Diagnostics for repeat measurements: residuals of the full model (deviations
+# from the cell means for ANOVA), additivity of the cell means, the
+# within-cell SD by item (the intra-rater coefficient pools sigma2_e over
+# items), and the within-cell SD against the cell mean.
+.check_facet <- function(x) {
+  checks <- check_reli(list(lmer = x$fit$fit))
+  values <- x$data$values
+  log_scale <- identical(x$settings$scale, "log")
+  if (log_scale) {
+    values <- log(values)
+  }
+  d <- data.frame(values = values, id = x$data$id, items = x$data$items)
+  cell <- interaction(d$id, d$items, drop = TRUE)
+  p_add <- .plot_additivity(.cell_mean_data(d))
+  p_items <- .plot_within_by_item(d, cell)
+  p_err <- .plot_error_vs_mean(cell, values, log_scale = log_scale,
+                               unit = "cell")
+  p_occ <- if (!is.null(x$data$occ)) {
+    .plot_occasions(data.frame(values = values, items = x$data$items,
+                               occ = x$data$occ))
+  } else NULL
+  out <- checks
+  for (p in Filter(Negate(is.null), list(p_add, p_items, p_err, p_occ))) {
+    out <- out + p
+  }
+  out + patchwork::plot_layout(ncol = 2)
+}
+
+# Mean by occasion for each item: a common shift is the occasion effect
+# (sigma2_o), lines that are not parallel the item-by-occasion interaction
+# (sigma2_io, rater-specific drift).
+.plot_occasions <- function(d) {
+  m <- stats::aggregate(values ~ items + occ, data = d, FUN = mean)
+  ggplot(m, aes(x = occ, y = values, colour = items, group = items)) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 2) +
+    scale_colour_viridis_d(end = 0.85) +
+    labs(title = "Occasions",
+         subtitle = "Parallel lines: no rater-specific drift",
+         x = "Occasion", y = "Mean", colour = "Item",
+         caption = "Mean of each item on each occasion") +
+    theme(
+      panel.background = element_rect(fill = "transparent"),
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+}
+
+# Long data with one row per observed subject-by-item cell (the cell mean).
+.cell_mean_data <- function(df) {
+  m <- stats::aggregate(values ~ items + id, data = df, FUN = mean)
+  m$items <- factor(m$items, levels = levels(df$items))
+  m$id <- factor(m$id, levels = levels(df$id))
+  m[order(m$items, m$id), c("values", "items", "id")]
+}
+
+# Within-cell SDs by item, with Bartlett's test of equal within-cell
+# variances across items (each item's variance pooled over its cells).
+.plot_within_by_item <- function(d, cell) {
+  cells <- split(d$values, cell)
+  n_c <- lengths(cells)
+  keep <- n_c >= 2
+  sds <- vapply(cells[keep], stats::sd, numeric(1))
+  item_of <- d$items[match(names(cells)[keep], as.character(cell))]
+  sd_df <- data.frame(items = item_of, sd = sds)
+  ss <- tapply((n_c[keep] - 1) * sds^2, item_of, sum)
+  nu <- tapply(n_c[keep] - 1, item_of, sum)
+  ss <- ss[nu > 0]
+  nu <- nu[nu > 0]
+  caption <- "Within-cell SD by item"
+  if (length(nu) >= 2) {
+    s2 <- ss / nu
+    s2p <- sum(ss) / sum(nu)
+    K <- (sum(nu) * log(s2p) - sum(nu * log(s2))) /
+      (1 + (sum(1 / nu) - 1 / sum(nu)) / (3 * (length(nu) - 1)))
+    p <- stats::pchisq(K, length(nu) - 1, lower.tail = FALSE)
+    caption <- paste0(caption, " \nBartlett's test (equal repeat error ",
+                      "across items): ", .fmt_test_p(p))
+  }
+  ggplot(sd_df, aes(x = items, y = sd)) +
+    geom_boxplot(width = 0.5, outlier.shape = NA, fill = "grey92") +
+    geom_jitter(width = 0.08, height = 0, colour = "#0077B5", size = 1.3) +
+    labs(title = "Repeat error by item",
+         subtitle = "Boxes should be similar",
+         x = "Item", y = "Within-cell SD", caption = caption) +
+    theme(
+      panel.background = element_rect(fill = "transparent"),
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+}
+
+# Variance components as horizontal bars (share of the variance of a single
+# measurement), with the estimate and interval in the label.
+.plot_components <- function(comp) {
+  comp$component <- factor(comp$component, levels = rev(comp$component))
+  comp$label <- paste0(formatC(comp$percent, digits = 1, format = "f"), "%")
+  ggplot(comp, aes(x = percent, y = component)) +
+    geom_col(fill = "#2166ac", width = 0.6) +
+    geom_text(aes(label = label), hjust = -0.15, size = 3.5) +
+    scale_x_continuous(limits = c(0, 110), breaks = seq(0, 100, 25)) +
+    labs(x = "Share of the variance of a single measurement (%)", y = NULL,
+         caption = "Negative estimates are shown as 0.") +
+    .reli_plot_theme()
 }
 
 # Plot helpers ------------------------------------------------------------------
@@ -348,7 +499,7 @@ check.reli_htest <- function(x, ...) {
 # Within-subject SD against the subject mean (subjects with 2 or more
 # measurements). A rising trend means the error grows with the size of the
 # measurement, so a relative error (scale = "log") describes it better.
-.plot_error_vs_mean <- function(id, values, log_scale = FALSE) {
+.plot_error_vs_mean <- function(id, values, log_scale = FALSE, unit = "subject") {
   n_i <- tapply(values, id, length)
   keep <- names(n_i)[n_i >= 2]
   if (length(keep) < 3) {
@@ -363,8 +514,9 @@ check.reli_htest <- function(x, ...) {
                 linewidth = 0.8, colour = "#3aaf85") +
     labs(title = "Error vs Mean",
          subtitle = "Reference line should be flat",
-         x = if (log_scale) "Subject mean (log scale)" else "Subject mean",
-         y = "Within-subject SD",
+         x = paste0(toupper(substr(unit, 1, 1)), substring(unit, 2), " mean",
+                    if (log_scale) " (log scale)" else ""),
+         y = paste0("Within-", unit, " SD"),
          caption = paste0("Error vs mean", " \n",
                           "Kendall's tau = ", signif(tau$estimate, 3),
                           ", p = ", signif(tau$p.value, 4),
@@ -476,6 +628,9 @@ check.reli_htest <- function(x, ...) {
   if (identical(s$statistic, "error")) {
     return(.describe_error_estimand(object))
   }
+  if (identical(s$statistic, "facet")) {
+    return(.describe_facet_estimand(object))
+  }
   form <- s$form
   k <- object$fit$k
   what <- if (.icc_is_average(form)) {
@@ -559,7 +714,75 @@ check.reli_htest <- function(x, ...) {
          "effect, which should be judged by its own confidence interval")
 }
 
+.describe_facet_estimand <- function(object) {
+  s <- object$settings
+  spec <- s[c("stat", "facet", "type", "k_avg", "m_avg", "r_avg", "scale")]
+  if (s$stat == "MDC") {
+    spec$stat <- "SEM"
+  }
+  fit <- object$fit
+  weights <- .facet_weights(fit, spec)
+  err <- if (spec$stat == "SEM") weights$var else weights$den - weights$num
+  error_effects <- fit$effects[err != 0]
+  error <- paste(vapply(error_effects, .facet_effect_label, "",
+                        design = fit$design, replicated = fit$replicated),
+                 collapse = ", ")
+  description <- .facet_description(spec, fit$design)
+  description <- paste0(tolower(substr(description, 1, 1)),
+                        substring(description, 2))
+  units <- switch(s$scale,
+                  raw = "",
+                  log = " in sympercents (a coefficient of variation)",
+                  mean = " as a percentage of the grand mean")
+  nested <- if (!is.null(object$nested)) {
+    ne <- unname(object$nested$estimate)
+    same <- isTRUE(all.equal(ne, unname(object$estimate)))
+    paste0(" Treating the occasions as exchangeable repeats would give ",
+           names(object$nested$estimate), " = ", .fmt_num(ne),
+           if (same) {
+             paste0(", the same estimate, but its interval would treat the ",
+                    "occasion effects shared by all subjects as independent ",
+                    "noise.")
+           } else {
+             ", with day-to-day shifts counted as repeat error."
+           })
+  } else ""
+  if (s$stat == "MDC") {
+    return(paste0("The estimate is the minimal detectable change from the ",
+                  description, units, ", with error from: ", error, "; ",
+                  .describe_mdc(object), "."))
+  }
+  paste0("The estimate is the ", description, units, ", with error from: ",
+         error, ".", nested)
+}
+
+.describe_facet_design <- function(fit) {
+  cell <- if (fit$design == "crossed") {
+    "subject-by-item-by-occasion cell"
+  } else "subject-by-item cell"
+  repeats <- if (fit$balanced) {
+    paste0(fit$r, " measurement", if (fit$r > 1) "s" else "", " per ", cell)
+  } else {
+    sprintf("%d of %d cells observed, with a harmonic mean of %s measurements per %s",
+            fit$n_cells, as.integer(prod(fit$levels)), .fmt_num(fit$r), cell)
+  }
+  occ <- if (fit$design == "crossed") {
+    paste0(", ", fit$levels[["o"]], " occasions")
+  } else ""
+  estimator <- if (fit$method == "anova") {
+    "analysis of variance (unconstrained)"
+  } else {
+    "REML (linear mixed model)"
+  }
+  paste0("The data had ", fit$n, " subjects, ", fit$k, " items", occ, " (",
+         fit$N, " measurements, ", repeats, "); variance components were ",
+         "estimated by ", estimator, ".")
+}
+
 .describe_design <- function(fit) {
+  if (inherits(fit, "facet_fit")) {
+    return(.describe_facet_design(fit))
+  }
   cells <- fit$n * fit$k
   missing_text <- if (fit$n_missing == 0) {
     "none missing"
@@ -593,6 +816,9 @@ check.reli_htest <- function(x, ...) {
   tested <- !is.null(object$p.value)
   if (identical(s$statistic, "error")) {
     return(.describe_error_inference(object, tested))
+  }
+  if (identical(s$statistic, "facet")) {
+    return(.describe_facet_inference(object, tested))
   }
   what <- if (tested) "The interval and F test" else "The F-based interval"
   if (!fit$balanced) {
@@ -637,6 +863,36 @@ check.reli_htest <- function(x, ...) {
                     "it is", " approximate and may be liberal")
   }
   paste0(what, how, ".")
+}
+
+.describe_facet_inference <- function(object, tested) {
+  s <- object$settings
+  coefficient <- s$stat == "ICC"
+  how <- switch(
+    s$ci_method,
+    exact = if (coefficient) {
+      "is exact under normality (an F ratio of two mean squares)"
+    } else {
+      "is exact under normality (chi-square distribution of one mean square)"
+    },
+    mls = paste0("is a modified large-sample (MLS) interval for ",
+                 if (coefficient) "a ratio of " else "",
+                 "linear combinations of mean squares (Graybill & Wang, ",
+                 "1980; Ting et al., 1990)",
+                 if (tested) "; the p-value inverts it" else ""),
+    satterthwaite = paste0("uses ",
+                           if (coefficient) "an F" else "a chi-square",
+                           " distribution with Satterthwaite degrees of ",
+                           "freedom"),
+    delta = paste0("uses the delta method on the log scale with ",
+                   "normal-theory variances of the mean squares and the ",
+                   "grand mean"))
+  text <- paste0("The interval ", how, ".")
+  if (!object$fit$balanced) {
+    text <- paste0(text, " With unbalanced data it uses observed-data ",
+                   "degrees of freedom and is approximate.")
+  }
+  text
 }
 
 .fmt_num <- function(x) {

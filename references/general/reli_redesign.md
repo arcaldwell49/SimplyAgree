@@ -20,6 +20,7 @@ are current.
 | Engine (data prep, ANOVA/REML fits, ICC/SEM/SD helpers, CIs and tests, SEs, bootstrap) | `R/reli_engine.R` (internal, `@noRd`) |
 | `icc_test()` | `R/icc_test.R`, `man/icc_test.Rd` |
 | `reli_err_test()` (SEM/SEE/SEP; raw, log, mean scales) | `R/reli_err_test.R`, `man/reli_err_test.Rd` |
+| `gstudy_test()` (repeats within cells, G theory) | `R/gstudy_test.R`, `R/gstudy_engine.R`, `tests/testthat/test-gstudy_test.R`, sims `reli_sims/gstudy_*.R` (Section 14) |
 | `power_icc()`, `precision_icc()` | `R/power_icc.R`, `man/power_icc.Rd`, `man/precision_icc.Rd`, `tests/testthat/test-power_icc.R` |
 | `summary()`, `plot()`, `check()` for `reli_htest` | `R/methods.reli_htest.R`, `man/reli_htest-methods.Rd` |
 | Tests | `tests/testthat/test-reli_engine.R`, `test-icc_test.R`, `test-reli_err_test.R`, snapshots in `tests/testthat/_snaps/` (all passing on 2026-10-16) |
@@ -112,10 +113,13 @@ Then the PR from `reli-update` to `master` (description from this doc and
 NEWS). Manual checks only the user can do: the jamovi module in jamovi,
 and a read of the rendered vignette.
 
-**After the PR (proposed, 2026-10-20):** repeat measurements within
-subject × item cells via a G-theory model. Design only, in Section 14;
-the API (14.3) and the truncation rule (14.2) need the user's decision
-before phase G1.
+**G-theory extension (2026-10-20): built.** `reli_facet_test()` (first
+built as `gstudy_test()`; the name is experimental and may change) for
+repeat measurements within subject × item cells (Section 14, results 14.8)
+and for shared occasions, `occasion` (Section 15, results 15.9). Open:
+the MLS agreement coefficients with occasions are conservative (C6 not
+met on that side; try the G*/H* terms). Manual checks left: a read of the
+rendered vignette section "Repeat measurements and occasions".
 
 ### Open TODOs
 
@@ -1896,9 +1900,9 @@ against CrossRef; verify before citing in an Rd):
   SixSigma (Cano, Moguerza & Prieto Corcoba), gtheoryr (Tyagi), gtheory
   (Moore; archived), cccrm (Carrasco et al.).
 
-## 14. Replicate measurements: a G-theory extension (design, not built)
+## 14. Replicate measurements: a G-theory extension (`gstudy_test()`, built 2026-10-20)
 
-Status: design only, written 2026-10-20 at the user's request. No code.
+Status: designed and built 2026-10-20; see 14.8 for what was built and the simulation results.
 Motivation: users (e.g. an ultrasound study with 3 operators × 20
 participants × 3 scans per operator) have **replicates inside each
 subject × item cell**. `.reli_prepare()` currently stops ("aggregate
@@ -2197,3 +2201,454 @@ what `gstudy_test()` adds (intervals and tests for the coefficients and
 the intra-/inter-rater SEMs, and the link to `mdc_test()`). Re-check
 versions and CRAN status at release, since gtheoryr is new and gtheory
 has already been archived once.
+
+### 14.8 As built (2026-10-20): decisions and results
+
+**Decisions (user, 2026-10-20):** Option A, `gstudy_test()`; estimates
+**unconstrained** (coefficients from the mean squares, as `icc_test()`;
+negative components kept in the component table, shown as 0% share; an
+SEM whose error variance is negative, possible only with r′ > r, is
+reported as 0 with a warning); all phases G1–G5 in one pass.
+
+**Code.** `R/gstudy_engine.R` (prep with repeats, four-source ANOVA and
+lme4 fit, estimands as mean-square weights, MLS (Graybill-Wang / Ting et
+al. 1990, without the G*/H* terms) and Satterthwaite-F test inversion,
+jackknife and delta SEs, hybrid bootstrap step, component table);
+`R/gstudy_test.R`; methods in `R/methods.reli_htest.R` (`summary()` prints
+the component table, `plot(type = "components")`, `check()` with Bartlett's
+test of equal repeat error across items); `mdc_test()` accepts gstudy SEMs
+(averaging set in `gstudy_test()`); the duplicate-cell error of
+`.reli_prep_from_long()` points to `gstudy_test()`. `.reli_boot()` and
+`.reli_resample()` gained a `rebuild` argument. Tests:
+`tests/testthat/test-gstudy_test.R`.
+
+Deviations from 14.3: `se_method` is `"jackknife"` or `"normal"` (no
+influence SE for this design); `scale` applies to SEMs only; the logit-Wald
+REML fallback was not needed (criterion 5 passed with the analytic MLS).
+Labels: `ICC(intra)`, `Erho2`, `Phi`, `SEM(intra)`, `SEM(C)`, `SEM(A)`.
+REML uses r̃ = harmonic mean of repeats per observed cell, kc = cells per
+subject, nc = cells per item, df_W = N − C, df_PI = C − n − k + 1.
+
+**Criterion 1 (correctness), all pass** (`reli_sims/gstudy_crosscheck.R`,
+values hard-coded in the tests; VCA 1.5.2, rptR 0.9.23, SixSigma 0.11.1,
+gtheoryr 0.1.0 (CRAN binary; not 0.2.0 as surveyed), in a scratch library):
+mean squares, df and components equal `VCA::anovaVCA` (1e-7); σ²_e χ²
+interval equals `VCAinference` two-sided (1e-6); REML equals rptR/lme4
+(1e-6, unbalanced) and `VCA::remlVCA` (3e-6 relative, its own optimiser);
+repeatability/reproducibility equal `SixSigma::ss.rr(alphaLim = 1)`;
+Eρ² and Φ with r′ = r equal `gtheoryr::dstudy_pxi()` on the cell means for
+k′ = 1 and k′ = k; Eρ² (r′ = r) estimate, interval and F test equal
+`icc_test()` on the cell means (1e-8), and the consistency SEM (r′ = r)
+equals `reli_err_test()`. The Ting bound is exactly 0 at the F boundary
+for two mean squares (checks the formula). rptR does not accept `id:items`
+beside `id`; an explicit cell factor gives the same model. No Brennan
+(2001) r:(p × i) data set was available, and gtheory (archived) was not
+run. Informal: rptR's parametric-bootstrap interval for (σ²_p + σ²_pi)/total
+on the check data was close to ours.
+
+**Phase G2: analytic coverage** (`reli_sims/gstudy_coverage.R`; 96 cells,
+2000 sims each, MC SE ≈ 0.005; 95% two-sided). Normal data:
+
+| Estimand | Method | Mean | Min | Min, n = 30 |
+|---|---|---|---|---|
+| SEM_rep | exact | .951 | .940 | .941 |
+| Eρ² (k′=1, r′=r) | exact | .951 | .942 | .944 |
+| SEM_C | MLS / Satt. | .950 / .947 | .940 / .930 | .940 / .936 |
+| SEM_A | MLS / Satt. | .951 / .913 | .939 / .667 | .939 / .667 |
+| Eρ² (1,1) | MLS / Satt. | .951 / .949 | .942 / .939 | .942 / .939 |
+| Φ (1,1) | MLS / Satt. | .962 / .928 | .947 / .722 | .948 / .722 |
+| Φ (k,r) | MLS / Satt. | .962 / .928 | .944 / .728 | .949 / .728 |
+| ρ_intra | MLS / Satt. | .951 / .944 | .939 / .928 | .939 / .935 |
+
+- Criterion 2 passes (exact .940–.951). Criterion 3: MLS meets both
+  conditions for every estimand, including the mix-B, k = 2 cells (no
+  exemption needed) → **`ci_method = "auto"` = MLS for all**. Satterthwaite
+  fails badly for the agreement statistics when rater bias dominates (mix
+  B: .67–.74 at k = 2, .78–.82 at k = 3, misses on one side); it is kept as
+  an option. MLS is slightly conservative for Φ (mean .962).
+- Criterion 6 (size): tests invert the intervals, so two-sided size at .05
+  is 1 − coverage: .038–.061 for MLS and exact at n = 30.
+- Non-normal data (χ²₃ effects, t₅ errors): all analytic intervals
+  under-cover, mean .83–.90, min .78–.86 (MLS) and down to .59
+  (Satterthwaite SEM_A); the docs point to `boot = TRUE`.
+- Criterion 7 (bias, not a gate): unconstrained estimates have small
+  negative relative bias, −0.6% to −4.9% at n = 10 and −0.3% to −1.8% at
+  n = 30 (SEM_A up to −9% in single cells); no case for truncation.
+
+**Phase G4: REML, unbalanced** (`reli_sims/gstudy_reml.R`; n = 30, normal,
+1000 sims per cell; 20% of repeats MCAR with no empty cell, k ∈ {2, 3},
+r ∈ {2, 3}; or 1–3 repeats per cell, k ∈ {2, 3}). MLS and exact: min .937,
+mean .949–.969 → **criterion 5 passes; REML keeps the analytic MLS
+interval** (with the warning). Satterthwaite: SEM_A and Φ down to .71–.84
+in mix B, as with balanced data.
+
+**Phase G3: bootstrap** (`reli_sims/gstudy_boot.R`; n ∈ {10, 30},
+k ∈ {2, 3}, r = 2, 4 mixes, normal and non-normal; 300 sims × 499
+replicates, MC SE ≈ 0.013). Mean coverage (min at n = 30), non-normal:
+
+| Estimand | perc | BCa | stud | basic |
+|---|---|---|---|---|
+| SEM_rep | .848 (.857) | .866 (.873) | **.922 (.917)** | .857 (.850) |
+| SEM_C | .813 (.803) | .845 (.860) | **.928 (.927)** | .849 (.843) |
+| SEM_A | .838 (.597) | **.889 (.740)** | .872 (.690) | .796 (.473) |
+| Eρ² (1,1) | .847 (.840) | .842 (.820) | **.917 (.873)** | .776 (.797) |
+| Φ (1,1) | .869 (.827) | .850 (.767) | **.914 (.847)** | .711 (.530) |
+| ρ_intra | .846 (.850) | .851 (.843) | **.925 (.910)** | .809 (.807) |
+
+- Criterion 4: hybrid ≥ subject-only in every cell (minimum difference
+  +0.007 perc, +0.007 BCa; mean +0.14 / +0.15). Subject-only fell to
+  .15–.22 for SEM_A in mix B. Hybrid kept.
+- `boot_ci = "auto"`: highest mean non-normal coverage → `stud` for all but
+  SEM_A, `bca` for SEM_A (stud beats perc by ≥ .05 everywhere, well over the
+  .01 required). The .88 floor at n = 30 holds for SEM_rep, SEM_C and
+  ρ_intra only; Eρ² stud .873 (one cell), and the agreement statistics fail
+  it with every type (mix B, k ≤ 3, worst .69–.85): no bootstrap rescues
+  σ²_i on 1–2 df. Documented, as for the agreement SEM of
+  `reli_err_test()`. REML keeps `perc` (stud needs n refits per replicate).
+- Normal data: stud .926–.946 mean; analytic (exact/MLS) intervals better,
+  so the analytic interval stays the default and `boot = TRUE` is
+  recommended for non-normal data.
+- Comparison with analytic MLS under non-normal data: bootstrap stud gains
+  +.06 to +.09 for the intra and consistency statistics and +.03 for Φ;
+  for SEM_A, MLS (.899) and BCa (.889) are similar.
+
+## 15. Crossed occasions: repeats that are shared across raters (built 2026-10-20)
+
+Status: designed and built 2026-10-20; decisions and results in 15.9.
+Decisions needed before phase C1 are marked **Decide**.
+
+### 15.1 Motivation and naming
+
+`gstudy_test()` (Section 14) assumes the repeats are exchangeable within a
+subject × item cell (design r:(p × i)). Often they are not: every rater
+measures every subject on day 1 and again on day 2, so "repeat 2" is a
+shared **occasion**. MethComp's `BA.est(linked = TRUE)` models this with an
+item × replicate term; we do not. Fitting the nested model to crossed data
+puts the occasion effects (σ²_o, σ²_io, σ²_po) into the repeat error: the
+intra-rater SEM looks larger, and it cannot say whether the error is a
+day-to-day shift (systematic, fixable) or noise.
+
+**Decide: the function name.** "gstudy" is broader than what the function
+does (one item facet plus repeats; G theory covers arbitrary designs, and
+gtheoryr and gtheory use the word). The function is unreleased, so a rename
+costs nothing now. Candidates (recommendation first):
+
+| Name | For | Against |
+|---|---|---|
+| `rater_reli_test()` | Says what users have (raters or devices measuring subjects repeatedly) and fits the `reli_*` family | `icc_test()` also does inter-rater reliability |
+| `intra_inter_test()` | Names the key output (intra- vs inter-rater error) | Unusual form; less obviously a reliability function |
+| `reli_reps_test()` | Matches the package's "reps" vocabulary (`agree_reps()`, `data_type = "reps"`) | "reps" sits awkwardly beside `replicates` (bootstrap); does not say raters |
+| `rr_test()` | Gauge R&R (repeatability and reproducibility), the industrial name for exactly this | Opaque outside metrology |
+
+### 15.2 Model
+
+p × i × o, all random: n subjects, k items, m occasions, r ≥ 1
+measurements per p × i × o cell (r = 1 is the usual case):
+
+y_pior = μ + p + i + o + (pi) + (po) + (io) + (pio) + e_pior.
+
+With r = 1, σ²_pio and σ²_e are confounded (reported together as the
+residual). Balanced ANOVA expected mean squares follow the all-random rule
+E[MS_S] = σ²_e + Σ_{T ⊇ S} c_T σ²_T, with c_T = r × (product of the levels
+of the factors not in T); for example
+E[MS_p] = σ²_e + r σ²_pio + kr σ²_po + mr σ²_pi + kmr σ²_p.
+Components are E⁻¹ · MS (unconstrained, as in Section 14). σ²_p, σ²_i and
+σ²_o are signed combinations of four mean squares (quasi-F situations), so
+the Ting et al. MLS for sign-unrestricted combinations, already in the
+engine, is the natural interval; no new theory is needed.
+
+lme4 (REML, unbalanced):
+`y ~ 1 + (1|id) + (1|item) + (1|occ) + (1|id:item) + (1|id:occ) + (1|item:occ)`,
+plus `(1|id:item:occ)` when r ≥ 2.
+
+### 15.3 Engine refactor (prerequisite)
+
+Generalise `R/gstudy_engine.R` from the hard-coded four-source table to a
+**design object**: the facets, their levels, r, and the object of
+measurement (p). From it:
+
+- the EMS coefficient matrix by the rule above, so components =
+  solve(EMS) %*% MS for any balanced, fully crossed random design with
+  optional replication. The nested r:(p × i) design is the special case
+  {p, i} with replication, so every Section 14 result must be reproduced
+  exactly (regression tests against the current hard-coded version);
+- balanced ANOVA mean squares from marginal means (closed form, no `aov()`);
+- estimand weights by Brennan's (2001) general rules, given which facets
+  are generalised over (random, with D-study sizes n′) and which are fixed
+  (part of the universe score):
+  - universe score τ: effects containing p and only fixed facets, each
+    divided by the D-study sizes of its fixed facets;
+  - relative error δ: effects containing p and at least one random facet,
+    divided by the product of the D-study sizes of its facets other than p;
+  - absolute error Δ: δ plus the effects without p that contain a random
+    facet, divided likewise;
+  - coefficient τ / (τ + δ) (consistency) or τ / (τ + Δ) (agreement); SEM
+    √δ or √Δ.
+
+Everything downstream (MLS and Satterthwaite inversion, jackknife, hybrid
+bootstrap, component table) already works on MS weights and carries over.
+
+### 15.4 Estimands
+
+D-study sizes k′ (raters, `k_avg`) and m′ (occasions, new `m_avg`).
+
+| Question | Fixed | Random | Consistency error | Agreement error adds |
+|---|---|---|---|---|
+| Intra-rater (same rater, another occasion) | i (k′ = 1) | o | (σ²_po + σ²_res)/m′ | (σ²_o + σ²_io)/m′ |
+| Inter-rater (another rater, same occasion) | o (m′ = 1) | i | (σ²_pi + σ²_res)/k′ | (σ²_i + σ²_io)/k′ |
+| Overall (any rater, any occasion) | none | i, o | σ²_pi/k′ + σ²_po/m′ + σ²_res/(k′m′) | σ²_i/k′ + σ²_o/m′ + σ²_io/(k′m′) |
+
+σ²_res = σ²_pio + σ²_e. Universe scores: σ²_p + σ²_pi (intra), σ²_p + σ²_po
+(inter, occasion fixed), σ²_p (overall). The overall row is Brennan's
+p × i × o Eρ² and Φ. With r ≥ 2, a pure repeatability SEM (σ²_e: same rater,
+same occasion) is also available, as in Section 14.
+
+Notes:
+
+- In the nested design "intra" had one form (exchangeable repeats have no
+  systematic effect). With occasions, consistency vs agreement matters for
+  intra too: agreement counts a day-2 shift (σ²_o) and rater-specific drift
+  (σ²_io) as error; consistency sets them aside, to be reported separately,
+  as Hopkins and Weir do for trials.
+- The inter-rater row at a *fixed* occasion is what most inter-rater
+  studies report; the overall row is what a clinic using any rater on any
+  day experiences.
+
+**Decide: the API.** The current `form = c("intra", "consistency",
+"agreement")` mixes two things: *which measurement varies* and *whether
+systematic effects count as error*. Recommended (before release):
+
+```r
+<name>(x, data, measure, item, id, occasion = NULL,
+       stat = c("ICC", "SEM"),
+       facet = c("intra", "inter", "overall"),   # which measurement varies
+       type = c("consistency", "agreement"),     # as in icc_test()
+       k_avg = 1, r_avg = 1, m_avg = 1, ...)     # the rest unchanged
+```
+
+- `occasion = NULL`: nested design, as now. `facet = "overall"` is then
+  the same as `"inter"`, and `type` makes no difference for `"intra"`. The
+  current `form = "intra"`, `"consistency"`, `"agreement"` become
+  `facet = "intra"`, `facet = "inter", type = "consistency"` and
+  `facet = "inter", type = "agreement"`.
+- `occasion = "day"`: crossed design; every facet/type combination is
+  defined.
+- Alternative: keep `form` and add `occasion_effects = c("error",
+  "exclude")`. Fewer changes, but two arguments that both mean "what counts
+  as error".
+
+### 15.5 Nested or crossed: helping users choose
+
+- Docs and vignette: the decision rule ("is repeat 2 the same event for
+  every rater? Then it is an occasion").
+- With `occasion` given, `summary()` reports the occasion components' share
+  (σ²_o + σ²_io + σ²_po), and the result keeps what the nested model would
+  have given (the intra SEM with occasions folded into repeat error), so
+  the cost of ignoring the design is visible.
+- `check()`: occasion means by rater (the io interaction) and each
+  subject's change between occasions against their mean.
+- No formal "nested vs crossed" test: with r = 1 per occasion the nested
+  model just pools σ²_o, σ²_io and σ²_po into the error; the intervals of
+  those components (excluding 0 or not) answer the practical question.
+
+### 15.6 Intervals and bootstrap
+
+- Exact cases are rare (every coefficient involves a quasi-F); the engine
+  detects them generically (weights on at most 2 MS for a ratio, 1 MS for an
+  SEM). MLS (test inversion for coefficients) is the expected default and
+  Satterthwaite the alternative, decided by simulation as before.
+- Hybrid bootstrap generalised: resampling subjects captures the variation
+  of every MS involving p; each MS without p (MS_i, MS_o, MS_io) is
+  multiplied by an independent χ²_df/df draw in each replicate. This
+  reduces to the current rule (MS_I only) for the nested design. **Check by
+  simulation** whether MS_io's draw should replace or scale its resampled
+  value (it is a function of item × occasion means, which subject
+  resampling also moves).
+- Jackknife SE: leave-one-subject-out mean squares by downdating, as now.
+- REML with unbalanced data: reconstructing mean squares with observed-data
+  df is less obvious with three crossed facets. Plan: try the analogue
+  (harmonic means of cell counts per margin; observed-data df by
+  subtraction) and gate it by criterion C5. If it fails, REML gives point
+  estimates and `boot = TRUE` only (no analytic interval).
+
+### 15.7 Simulation plan and acceptance criteria (set before running)
+
+Grid: n ∈ {10, 30}; k ∈ {2, 3}; m ∈ {2, 3}; r = 1 (and r = 2 on a reduced
+grid); normal and non-normal (χ²₃ effects, t₅ errors). σ²_p = 1. Mixes:
+
+| Mix | σ²_i | σ²_o | σ²_pi | σ²_po | σ²_io | σ²_res | Character |
+|---|---|---|---|---|---|---|---|
+| N (noise) | .05 | .05 | .05 | .05 | .02 | .30 | residual dominates |
+| D (day shift) | .05 | .30 | .05 | .05 | .05 | .10 | occasion main effect: the few-levels problem for intra agreement |
+| R (rater bias) | .30 | .05 | .05 | .05 | .02 | .10 | as Section 14 mix B |
+| X (interactions) | .05 | .05 | .25 | .25 | .10 | .10 | raters and days rank subjects differently |
+
+Estimands: intra C/A, inter C/A, overall Eρ²/Φ (k′ = m′ = 1, and k′ = k,
+m′ = m), and their SEMs; plus the nested model's intra SEM fitted to the
+same crossed data (the bias of ignoring occasions; a report, not a gate).
+
+Criteria (as Section 14.5):
+
+- **C1 correctness (no simulation):** the refactored engine reproduces
+  every Section 14 result exactly; crossed components equal
+  `VCA::anovaVCA(y ~ id*item*occ)` (1e-7) and lme4 REML (1e-5); overall
+  Eρ² and Φ equal gtheoryr's p × i × o G- and D-study (gtheoryr 0.2.0 is now
+  on CRAN; confirm the function names) and, if obtainable, a Brennan (2001)
+  p × i × o example; MethComp `BA.est(linked = TRUE)` components compared
+  informally (methods are fixed there, so not expected to be equal).
+- **C2 exact intervals** (if any): .94–.96 in every normal cell.
+- **C3 analytic default:** MLS over Satterthwaite if its mean normal
+  coverage ≥ Satterthwaite's − .005 and its minimum at n = 30 ≥ .93. Ships
+  if every normal n = 30 cell ≥ .92, except agreement forms whose
+  systematic facet has 2 levels and dominates (mixes D and R with m = 2 or
+  k = 2), which are reported and documented.
+- **C4 bootstrap:** generalised hybrid ≥ subject-only − .02 in every cell;
+  `boot_ci = "auto"` by highest mean non-normal coverage, with the .88 floor
+  at n = 30; `stud` preferred only if ≥ perc + .01.
+- **C5 REML, unbalanced:** 20% of cells MCAR, n = 30, normal: analytic
+  ≥ .91, else bootstrap only for REML.
+- **C6 size:** analytic tests .035–.065 at n = 30, normal.
+- **C7 bias report:** including the nested-model intra SEM on crossed data.
+
+Replications: analytic 2000 per cell; bootstrap 300 × 499 on k, m ∈ {2, 3},
+r = 1. Scripts `reli_sims/occasion_*.R`.
+
+### 15.8 Phases
+
+- **C0:** decisions on the name (15.1) and API (15.4); rename
+  `gstudy_test()` with its files, labels, docs and tests in one commit
+  before C1 (no change in behaviour).
+- **C1:** engine refactor to a design object (15.3), regression tests
+  against Section 14; crossed fit, estimands, correctness checks (C1).
+- **C2:** analytic coverage (C2, C3, C6).
+- **C3:** generalised hybrid bootstrap (C4).
+- **C4:** REML with unbalanced data (C5).
+- **C5:** methods (occasion components in `summary()`, `check()` panels),
+  `mdc_test()` (the intra agreement SEM gives the test-retest MDC for one
+  rater), vignette (a worked day-1/day-2 example), NEWS.
+
+Out of scope: rater-specific (heteroscedastic) error variances, MethComp's
+other strength (possible later via `nlme::varIdent`, with bootstrap-only
+inference); more facets; power and precision functions.
+
+### 15.9 As built (2026-10-20): decisions and results
+
+**Decisions (user, 2026-10-20):** name `reli_facet_test()`, with the
+documentation saying the name is experimental and may change; implement the
+crossed design now. The `facet` / `type` API of 15.4 was adopted (the
+function was unreleased, so `form` was dropped rather than deprecated):
+`form = "intra"`, `"consistency"`, `"agreement"` became `facet = "intra"`,
+`facet = "inter", type = "consistency"`, `facet = "inter", type =
+"agreement"`. Labels: `ICC(intra)` / `SEM(intra)` (nested intra),
+`ICC(facet,C|A)` / `SEM(facet,C|A)`, `Erho2` / `Phi` (overall coefficients).
+Restrictions: `k_avg = 1` for intra; `m_avg = 1` for inter and without
+`occasion`; `r_avg = 1` for crossed data with one measurement per cell;
+`facet = "overall"` without `occasion` is `"inter"`.
+
+**Code.** `R/reli_facet_engine.R` replaces `R/gstudy_engine.R`: the design
+(nested or crossed, with or without repeats) is data; effects are named by
+their facets; EMS from the all-random rule (observed cells per level
+combination for REML); ANOVA mean squares by Möbius inclusion-exclusion of
+marginal means; estimand weights by Brennan's rules (15.3); observed-data
+df by subtraction; jackknife by recomputing the ANOVA without each subject;
+generalised hybrid step and jackknife hold for every mean square without
+subjects in the estimand (`.facet_nonsubject()`). `R/reli_facet_test.R`
+replaces `R/gstudy_test.R`. `.reli_prepare()` gained `occasion`. With
+`occasion` and `facet = "intra"`, the result carries `nested`, the repeat
+model's estimate, and `summary()` reports it. `check()` adds the occasion
+means by item. `boot_ci = "auto"` uses BCa for any SEM that counts
+effects without subjects (generalising "agreement SEM").
+
+**C1 correctness, all pass.** The refactored engine reproduced all 244
+recorded `gstudy_test()` results (every form, statistic, D-study size, CI
+method and scale; REML unbalanced; bootstrap with the same seed) to 6e-11.
+Crossed: mean squares, df and components equal `VCA::anovaVCA` (1e-7) with
+one measurement per cell and with repeats (three-way interaction and error
+separated); REML equals `VCA::remlVCA` (balanced and 15 empty cells,
+1e-5); overall relative and absolute error variances, Eρ² and Φ equal
+`gtheoryr::dstudy_pxio()` (gtheoryr 0.2.0, CRAN source) for (k′, m′) =
+(1, 1), (3, 3), (2, 1). Script `reli_sims/occasion_crosscheck.R`; values
+hard-coded in `tests/testthat/test-reli_facet_test.R`. MethComp was not
+compared (fixed methods; informal only, not done).
+
+A finding: with occasions, the intra-rater *agreement* SEM has exactly the
+same point estimate as the repeat model's intra SEM (the within-cell sum of
+squares splits into the occasion terms), but a far wider interval; the
+consistency SEM is smaller. See C7.
+
+**C2/C3/C6: analytic coverage** (`reli_sims/occasion_coverage.R`; n ∈
+{10, 30}, k ∈ {2, 3}, m ∈ {2, 3}, r = 1, mixes N, D, R, X, normal and
+non-normal, 2000 sims per cell). No estimand in this grid is exact. Normal
+data, MLS (Satterthwaite):
+
+| Estimand | Mean | Min | Min, n = 30 | Max, n = 30 |
+|---|---|---|---|---|
+| ICC intra C | .954 (.947) | .942 (.928) | .942 | |
+| ICC intra A | .968 (.927) | .955 (.789) | .956 | .974 |
+| ICC inter C | .954 (.947) | .943 (.933) | .943 | |
+| ICC inter A | .968 (.922) | .954 (.754) | .954 | .972 |
+| Eρ² (1,1) / (k,m) | .955 / .957 | .942 / .943 | .942 / .943 | |
+| Φ (1,1) / (k,m) | .969 / .971 (.926 / .922) | .961 / .936 (.842 / .809) | .961 / .936 | .979 / .988 |
+| SEM intra C / A | .951 / .953 (.951 / .906) | .934 / .938 (.939 / .745) | .934 / .941 | |
+| SEM inter C / A | .950 / .951 (.950 / .899) | .939 / .930 (.936 / .692) | .939 / .935 | |
+| SEM overall C / A | .950 / .952 (.954 / .899) | .938 / .928 (.945 / .784) | .944 / .936 | |
+
+- C3 passes for every estimand without exemptions → `ci_method = "auto"`
+  stays MLS. Satterthwaite fails again for every agreement statistic
+  (mixes D and R).
+- **C6 not met, on the conservative side:** the MLS agreement
+  *coefficients* (intra A, inter A, Φ) cover up to .97–.99 at n = 30, so
+  their tests have size as low as .01–.035 (less power), not .035–.065.
+  Nothing is liberal. Likely contributors: the omitted Ting G*/H* terms
+  for several same-signed mean squares, and the ratio inversion. Kept (MLS
+  conservative beats Satterthwaite liberal); documented. **Open:** try the
+  G*/H* terms, or a different ratio interval, for the agreement
+  coefficients.
+- Non-normal: MLS .85–.94 mean (agreement statistics .91–.94, consistency
+  .85–.89); Satterthwaite lower.
+- **C7 (ignoring occasions):** the repeat model's intra SEM interval
+  covered the true intra-agreement SEM .675 on average (min .24) and the
+  intra-consistency SEM .50 (min .04), the latter with +30% bias; its intra
+  ICC covered .84 / .76. Treating shared occasions as repeats is not a
+  harmless simplification.
+- Bias (unconstrained): −5% to +1% for coefficients and SEMs at n = 10,
+  within ±2.4% on average at n = 30.
+
+**C5: REML, unbalanced** (`reli_sims/occasion_reml.R`; n = 30, normal,
+20% of cells MCAR, 1000 sims, 16 cells). MLS: mean .951–.969, min .922
+(SEM overall A, mix X) → **passes; REML keeps the analytic MLS interval.**
+Satterthwaite down to .75–.79 for agreement statistics in mixes D and R.
+
+**C3 bootstrap (C4 criterion):**
+(`reli_sims/occasion_boot.R`; n ∈ {10, 30}, k ∈ {2, 3}, m = 2, r = 1,
+4 mixes, normal and non-normal, 300 sims × 499 replicates; mean squares in
+closed form, estimand coefficients from `.facet_ms_coef()`, jackknife SE
+checked equal to `.facet_se_z()`). Mean coverage, non-normal (min at
+n = 30):
+
+| Estimand | perc | BCa | stud | MLS (analytic, for comparison) |
+|---|---|---|---|---|
+| ICC intra C | .871 (.860) | .860 (.830) | **.917 (.903)** | .848 |
+| ICC intra A | .904 (.847) | .874 (.800) | **.917 (.860)** | .914 |
+| ICC inter A | .895 (.820) | .869 (.767) | **.919 (.837)** | .916 |
+| Φ (1,1) | .898 (.880) | .876 (.847) | **.920 (.900)** | .921 |
+| SEM intra C | .796 (.823) | .834 (.863) | **.926 (.907)** | .882 |
+| SEM intra A | .841 (.663) | **.911 (.797)** | .864 (.743) | .923 |
+| SEM overall A | .833 (.683) | **.913 (.823)** | .862 (.763) | .929 |
+
+(The MLS column is from the analytic grid, whose cells differ: m ∈ {2, 3}.)
+
+- C4: the generalised hybrid (MS_i, MS_o and MS_io scaled) beats subject
+  resampling in every cell: minimum +0.013 (BCa), +0.037 (perc); mean +0.20
+  to +0.22; subject-only fell to .14 for the intra agreement SEM. Scaling
+  MS_io (rather than replacing it) is adequate; the open check of 15.6 is
+  closed.
+- `boot_ci = "auto"` unchanged: `stud`, except `bca` for SEMs that count
+  effects without subjects (agreement SEMs), which the generalised rule
+  already selects.
+- The .88 floor fails for agreement statistics when the 2-day occasion
+  effect dominates (mix D: .62–.87) and with rater bias (mix R), for every
+  type: σ²_o on 1 df. Documented, as for few items.
+- With occasions, the analytic MLS intervals are as good as or better than
+  the bootstrap for the agreement statistics even with non-normal data;
+  the bootstrap helps for the consistency statistics (+.04 to +.07).

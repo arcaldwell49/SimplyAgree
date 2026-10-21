@@ -12,7 +12,7 @@
 
 \method{print}{summary.reli_htest}(x, ...)
 
-\method{plot}{reli_htest}(x, type = c("profile", "subjects", "items", "pairs"), ...)
+\method{plot}{reli_htest}(x, type = c("profile", "subjects", "items", "pairs", "components"), ...)
 
 \method{check}{reli_htest}(x, ...)
 }
@@ -35,8 +35,10 @@ compares the spread between subjects with the scatter within subjects
 (what the ICC summarises); \code{"items"}, the deviation of each measurement
 from its subject's mean, by item, which shows systematic differences
 between items (error for an agreement ICC, but not for a consistency
-ICC); or \code{"pairs"}, each pair of items plotted against each other with
-the line of identity.}
+ICC); \code{"pairs"}, each pair of items plotted against each other with
+the line of identity; or, for \code{\link[=reli_facet_test]{reli_facet_test()}} results, \code{"components"},
+the share of each variance component. For \code{\link[=reli_facet_test]{reli_facet_test()}} results the
+profile, items and pairs plots use the subject-by-item cell means.}
 }
 \value{
 \describe{
@@ -54,7 +56,8 @@ the scale the model was fitted). See Details.}
 }
 }
 \description{
-Methods for objects returned by \code{\link[=icc_test]{icc_test()}}, \code{\link[=reli_err_test]{reli_err_test()}} and
+Methods for objects returned by \code{\link[=icc_test]{icc_test()}}, \code{\link[=reli_err_test]{reli_err_test()}},
+\code{\link[=reli_facet_test]{reli_facet_test()}} and
 \code{\link[=mdc_test]{mdc_test()}}. They
 print as standard
 \code{"htest"} objects; \code{summary()} describes the result in words,
@@ -102,6 +105,14 @@ power with few subjects. A rising within-subject SD against the subject
 mean means the error grows with the size of the measurement, so a
 relative error (\code{\link[=reli_err_test]{reli_err_test()}} with \code{scale = "log"}) describes it
 better.
+
+For \code{\link[=reli_facet_test]{reli_facet_test()}} results, \code{check()} shows the residuals of the full
+model (deviations from the cell means), the additivity panel on the
+subject-by-item cell means, the within-cell SD by item with Bartlett's
+test of equal repeat error across items (the intra-rater coefficient
+pools it over items), the within-cell SD against the cell mean, and, with
+occasions, each item's mean by occasion (shifts and rater-specific drift).
+\code{summary()} adds the table of variance components.
 }
 \examples{
 sf <- data.frame(J1 = c(9, 6, 8, 7, 10, 6), J2 = c(2, 1, 4, 1, 5, 2),
