@@ -36,6 +36,8 @@ mdc_test(
 
   A formula of the form `values ~ item | id`, or the result of
   [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+  or
+  [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
   with `stat = "SEM"`, whose SEM is then used without refitting. Leave
   `NULL` to use `measure`, `item` and `id` (long data) or `col.names`
   (wide data).
@@ -169,6 +171,32 @@ it (a \\\chi^2\\ test for the SEM, or the bootstrap with `boot = TRUE`).
 With `scale = "log"` the MDC is in sympercents; `percent` gives the
 equivalent percentage increase and decrease, which differ:
 \\100(e^{MDC/100} - 1)\\ and \\100(1 - e^{-MDC/100})\\.
+
+**Differences between raters or devices.** The same reasoning applies to
+two measurements of one subject by different items, such as two raters
+or two devices, rather than two occasions: the MDC is the difference
+between them that measurement error alone would exceed only 5% of the
+time (for 95%). When the raters are interchangeable (any rater's score
+is used as it is, and raters are thought of as drawn from a pool), use
+`type = "agreement"`, so that systematic differences between raters
+count as error; the consistency SEM leaves them out and understates how
+far apart two raters can be. For two particular raters, the limits of
+agreement of
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+report their bias and the spread around it separately. This is the MDC,
+not a multiple of the standard error of prediction (SEP): the SEP
+concerns a change from a subject's estimated true score (Weir, 2005),
+and \\1.96 \cdot SEP\\ does not bound the difference between two raters.
+
+**Repeat measurements.** When each rater measured each subject more than
+once, pass an SEM from
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md):
+with `facet = "intra"` the MDC is for two measurements by the same rater
+(on two occasions, with `occasion`), with `facet = "inter"` and
+`type = "agreement"` for two measurements by different raters drawn from
+the pool. Averaging is then set in
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+(`k_avg`, `m_avg`, `r_avg`), and `k_avg` here must be 1.
 
 **An individual threshold, not a group one.** The MDC applies to a
 single individual's change between two measurements. It is not a

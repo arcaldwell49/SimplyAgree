@@ -122,7 +122,7 @@
 
 #' Expected-mean-square matrix (rows: mean squares, columns: components)
 #'
-#' All-random rule: E[MS_S] = sum over effects T containing S of c_T
+#' All-random rule: E(MS_S) = sum over effects T containing S of c_T
 #' sigma2_T, with c_T = r times the number of cells per level combination of
 #' T (the product of the levels of the factors not in T with balanced data;
 #' observed cells / observed combinations otherwise), and c_e = 1.
@@ -419,7 +419,7 @@
 
 # Intervals for linear combinations of mean squares --------------------------
 
-#' Modified large-sample (MLS) one-sided bounds for sum(coef * E[MS])
+#' Modified large-sample (MLS) one-sided bounds for sum(coef * E(MS))
 #'
 #' Graybill & Wang (1980) when every coefficient is positive; Ting, Burdick,
 #' Graybill, Jeyaratnam & Lu (1990), intervals (3.1) and (3.2), when some
@@ -474,7 +474,7 @@
   c(est - sqrt(max(v_lower, 0)), est + sqrt(max(v_upper, 0)))
 }
 
-#' Satterthwaite F statistic for H0: sum(d * E[MS]) = 0
+#' Satterthwaite F statistic for H0: sum(d * E(MS)) = 0
 #'
 #' The positive and negative parts of the combination are each treated as a
 #' scaled chi-square with Satterthwaite df, so their ratio is approximately
@@ -514,7 +514,7 @@
 }
 
 #' One-sided limits for a coefficient by inverting a test of
-#' H0: rho = rho0, i.e. sum((a - rho0 t) * E[MS]) = 0
+#' H0: rho = rho0, i.e. sum((a - rho0 t) * E(MS)) = 0
 #'
 #' `ci_method = "satterthwaite"`: Satterthwaite F test (exact when only two
 #' mean squares are involved). `"mls"`: the MLS interval for the
@@ -650,7 +650,7 @@
        p.value = combine(p[["greater"]], p[["less"]]))
 }
 
-#' One-sided p-values for H0: sum(coef * E[MS]) = target from the MLS bounds
+#' One-sided p-values for H0: sum(coef * E(MS)) = target from the MLS bounds
 #'
 #' "greater": the tail probability a at which the lower bound equals
 #' `target`; "less": at which the upper bound does. The MLS bounds are
@@ -685,7 +685,7 @@
 
 #' Normal-theory variance of the grand mean
 #'
-#' E[MS_p] / (n c_p) collects every effect with subjects and the repeats;
+#' E(MS_p) / (n c_p) collects every effect with subjects and the repeats;
 #' each effect without subjects that is generalised over (random items or
 #' occasions counted as error) adds sigma2_T / (its observed level
 #' combinations), with negative estimates set to 0.

@@ -674,32 +674,27 @@ In some cases, the agreement calculations involve comparing two methods
 within individuals within varying conditions. For example, the
 “recpre_long” data set within this package contains two measurements of
 rectal temperature in 3 different conditions (where there is a fixed
-effect of condition). For this particular case we can use bootstrapping
-to estimate the limits of agreement.
+effect of condition). For this particular case we can use a linear mixed
+model of the differences.
 
-The `loa_lme` function can then calculate the limits of agreement. Like
-the previous functions, the data set must be set with the `data`
-argument. The `diff` is the column which contains the difference between
-the two measurements. The `condition` is the column that indicates the
-different conditions that the measurements were taken within. The `id`
-is the column containing the subject/participant identifier. The final
-two arguments `replicates` and `type` set the requirements for the
-bootstrapping procedure. **Warning**: This is a computationally heavy
-procedure and it may take a few seconds to a few minutes to complete
-depending the number of replicates or if `het_var` is set to TRUE.
+The `tolerance_limit` function can calculate these limits (the `loa_lme`
+function, which bootstrapped them, is deprecated). Like the previous
+functions, the data set must be set with the `data` argument, and `x`
+and `y` are the columns with the two measurements. The `id` is the
+column containing the subject/participant identifier, and
+`model = "lme"` fits a random intercept for each subject. The
+`condition` is the column that indicates the different conditions that
+the measurements were taken within; supplying it gives each condition
+its own residual variance.
 
 ``` r
 
-
-recpre_long$avg = (recpre_long$PM + recpre_long$PM)/2
-a4 = loa_lme(data = recpre_long,
-               diff = "diff",
-               avg = "avg",
-               #condition = "trial_condition",
-               id = "id",
-               #plot.xaxis = "AM",
-               replicates = 199,
-               type = "perc")
+a4 = tolerance_limit(data = recpre_long,
+                     x = "PM",
+                     y = "AM",
+                     id = "id",
+                     condition = "trial_condition",
+                     model = "lme")
 ```
 
 ## References

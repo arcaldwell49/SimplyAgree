@@ -2,7 +2,8 @@
 
 Methods for objects returned by
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
-[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md),
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
 and
 [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md).
 They print as standard `"htest"` objects;
@@ -22,7 +23,7 @@ summary(object, style = c("auto", "hypothesis", "estimation"), ...)
 print(x, ...)
 
 # S3 method for class 'reli_htest'
-plot(x, type = c("profile", "subjects", "items", "pairs"), ...)
+plot(x, type = c("profile", "subjects", "items", "pairs", "components"), ...)
 
 # S3 method for class 'reli_htest'
 check(x, ...)
@@ -56,8 +57,13 @@ check(x, ...)
   subjects with the scatter within subjects (what the ICC summarises);
   `"items"`, the deviation of each measurement from its subject's mean,
   by item, which shows systematic differences between items (error for
-  an agreement ICC, but not for a consistency ICC); or `"pairs"`, each
-  pair of items plotted against each other with the line of identity.
+  an agreement ICC, but not for a consistency ICC); `"pairs"`, each pair
+  of items plotted against each other with the line of identity; or, for
+  [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+  results, `"components"`, the share of each variance component. For
+  [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+  results the profile, items and pairs plots use the subject-by-item
+  cell means.
 
 ## Value
 
@@ -129,6 +135,19 @@ within-subject SD against the subject mean means the error grows with
 the size of the measurement, so a relative error
 ([`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
 with `scale = "log"`) describes it better.
+
+For
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+results,
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+shows the residuals of the full model (deviations from the cell means),
+the additivity panel on the subject-by-item cell means, the within-cell
+SD by item with Bartlett's test of equal repeat error across items (the
+intra-rater coefficient pools it over items), the within-cell SD against
+the cell mean, and, with occasions, each item's mean by occasion (shifts
+and rater-specific drift).
+[`summary()`](https://rdrr.io/r/base/summary.html) adds the table of
+variance components.
 
 ## References
 

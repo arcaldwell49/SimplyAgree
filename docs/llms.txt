@@ -343,6 +343,9 @@ limits of agreement with multiple observations per individual.
   **\[experimental\]** : Measurement Error Test
 - [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
   **\[experimental\]** : Minimal Detectable Change
+- [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+  **\[experimental\]** : Reliability Across Facets: Repeats and
+  Occasions
 - [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
   **\[experimental\]** : Power and Sample Size for an Intraclass
   Correlation Test
@@ -426,15 +429,6 @@ limits of agreement with multiple observations per individual.
   [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
   : Methods for simple_agree objects
 
-### Mixed
-
-- [`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
-  **\[stable\]** : Limits of Agreement with Linear Mixed Effects
-- [`print(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
-  [`plot(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
-  [`check(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
-  : Methods for loa_mermod objects
-
 ## Power
 
 Functions for power calculations
@@ -482,10 +476,16 @@ Functions intended for jamovi; suggested that you do not use in R
 - [`jmvreli()`](https://aaroncaldwell.us/SimplyAgree/reference/jmvreli.md)
   : Reliability Analysis
 
-## Defunct Functions
+## Deprecated Functions
 
 Old functions that are no longer maintained; use with caution
 
+- [`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
+  **\[deprecated\]** : Limits of Agreement with Linear Mixed Effects
+- [`print(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  [`plot(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  [`check(`*`<loa_mermod>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.md)
+  : Methods for loa_mermod objects
 - [`loa_mixed()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed.md)
   **\[deprecated\]** : Mixed Effects Limits of Agreement
 - [`print(`*`<loa_mixed_bs>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed_bs-methods.md)

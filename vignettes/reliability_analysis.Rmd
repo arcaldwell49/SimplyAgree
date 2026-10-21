@@ -129,7 +129,8 @@ The default, ICC(C,1), follows @hopkins2000 and @weir2005: check for
 systematic change between trials separately (for example with
 `t.test()` for two trials), then report the consistency ICC, which is tied
 to the SEM. Others, such as @koo2016, recommend absolute agreement for
-test-retest studies:
+test-retest studies. I leave the decision up to you (and whatever the purpose of your study is), but *strongly* recommend
+justifying your choice.
 
 ```{r}
 icc_test(col.names = judges, data = dat, type = "agreement")
@@ -179,10 +180,10 @@ dozen subjects the two estimates agree to about two decimal places.
 
 ## Testing against a threshold
 
-By default. no test is done. This, like many things in `SimplyAgree`, was a design
+By default, no test is done. This, like many things in `SimplyAgree`, was a design
 choice on my part as I tend to see ICCs are most often used
 for estimation rather than hypothesis testing, and a test of whether an ICC
-differs from zero is rarely informative.
+differs from zero is rarely informative in my opinion.
 Additionally, the package provides no qualitative labels ("good", "excellent"),
 because published cutoffs disagree and the ICC depends on how much subjects
 differ from each other [@weir2005]. To claim that reliability exceeds a
@@ -629,16 +630,60 @@ Each `facet` now has consistency and agreement forms:
 | `"inter"` | day | operator | operator bias and rater drift (\(\sigma^2_i + \sigma^2_{io}\)) |
 | `"overall"` | nothing | operator and day | all of these |
 
-The intra-rater agreement SEM above is the test-retest error of one
-operator, day-to-day shift included; the consistency SEM sets the shift and
-the rater drift aside. With occasions there are two ways of getting it
+Both intra-rater SEMs describe one operator measuring the same subject on
+another day; they differ in what counts as error.
+
+```{r}
+test_retest_c <- reli_facet_test(thickness ~ operator | id, data = days,
+                                 occasion = "day", stat = "SEM",
+                                 type = "consistency")
+sem_row <- function(res) {
+  c(SEM = unname(res$estimate), lower = res$conf.int[1],
+    upper = res$conf.int[2])
+}
+rbind(agreement = sem_row(test_retest),
+      consistency = sem_row(test_retest_c))
+```
+
+- **Agreement** (`r round(unname(test_retest$estimate), 2)` here): the
+  error of a single reading taken on some other day and used as it is.
+  It includes the day shift that affects everyone (\(\sigma^2_o\)), this
+  operator's own drift on that day (\(\sigma^2_{io}\)), the subject's own
+  day-to-day change (\(\sigma^2_{po}\)) and the residual. Use it when a new
+  measurement is compared directly with an earlier one by the same
+  operator and nothing is done about day effects, the usual clinical
+  test-retest situation; `mdc_test()` on it gives the smallest change
+  between two days that exceeds measurement error.
+- **Consistency** (`r round(unname(test_retest_c$estimate), 2)` here):
+  the two systematic parts, \(\sigma^2_o\) and \(\sigma^2_{io}\), are set
+  aside, leaving \(\sigma^2_{po}\) and the residual: the error that
+  remains even if the day's shift for that operator were known and
+  removed. Use it when day effects are corrected (recalibration, a
+  reference sample each session), when they cancel in the comparison
+  (subjects measured by the same operator in the same session), or when
+  the shift is reported separately, as the mean change between trials
+  [@hopkins2000; @weir2005].
+
+The subjects' own day-to-day change (\(\sigma^2_{po}\)) is error in both:
+it belongs to the subjects, not the protocol, so the consistency SEM is
+not "pure instrument noise". With one measurement per day, biological
+variation and measurement noise cannot be separated; repeats within a day
+(two measurements per operator per day) would separate them.
+
+The gap between the two SEMs is what an uncorrected shift costs. Here the
+day shift and drift are a small part of the error, so the estimates are
+close, but the agreement interval is very wide: the day effect is
+estimated from only two days (`m - 1 = 1` degree of freedom), and with two
+days its uncertainty stays large however many subjects are measured. More
+days, not more subjects, would narrow it.
+
+With occasions there are two ways of getting it
 wrong. Treating the days as exchangeable repeats (leaving out `occasion`)
 gives the *same* intra-rater agreement estimate, but its interval treats
 the day shift, which every subject shares, as independent noise, so it is
 too narrow; and it cannot separate the shift from the noise at all
-(`test_retest$nested` gives that estimate). The day effect itself rests on
-only `m - 1` degrees of freedom, so with two days its uncertainty is large
-however many subjects are measured, and the agreement intervals show it.
+(`test_retest$nested` gives that estimate). And for the consistency SEM it
+overstates the error, because the day shift is counted as noise.
 
 ### Intervals
 
@@ -723,7 +768,11 @@ the old numbers at `conf.level = c` are reproduced with
 `conf.level = 1 - 2 * (1 - c)`. Their SEE and SEP keep the SD of all the
 measurements, as in @weir2005. See `?reli_stats` for the other changes.
 
-# Calculative approach
+# Calculative approach for ICCs
+
+I tend to try and document the calculative approaches where possible.
+
+Below is the step-by-step process for the ICC calculations and their intervals.
 
 ## Model and mean squares
 

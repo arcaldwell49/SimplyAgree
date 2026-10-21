@@ -1,11 +1,17 @@
 # Limits of Agreement with Linear Mixed Effects
 
-**\[stable\]**
+**\[deprecated\]**
+
+`loa_lme()` is deprecated, and for new code we recommend switching to
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md),
+which fits the same random-intercept model with `model = "lme"`, gives
+analytic prediction and tolerance limits (no bootstrap), and is still
+under active development. It takes the two measurements (`x` and `y`)
+rather than their difference and average. Supplying `condition` gives
+each condition its own residual variance, as `het_var = TRUE` does here.
 
 This function allows for the calculation of (parametric) bootstrapped
 limits of agreement when there are multiple observations per subject.
-The package author recommends using `tolerance_limit` as an alternative
-to this function.
 
 ## Usage
 
@@ -104,3 +110,29 @@ in the presence of multiple sources of variability: exemplar from the
 comparison of several devices to measure respiratory rate in COPD
 patients". PLOS One, 11(12), e0168321.
 [doi:10.1371/journal.pone.0168321](https://doi.org/10.1371/journal.pone.0168321)
+
+## See also
+
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+
+## Examples
+
+``` r
+# \donttest{
+data("recpre_long")
+# Instead of loa_lme(), use:
+tolerance_limit(data = recpre_long, x = "PM", y = "AM", id = "id",
+                condition = "trial_condition", model = "lme")
+#> Agreement between Measures (Difference: x-y)
+#> 95% CI for Bias; 95% Prediction Interval
+#> Tolerance Limits: at least 95% of differences with 95% confidence
+#> Model: random intercept for each id (lme); residual SD by condition
+#> 
+#>  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits
+#>    23C/5.5 0.274 [0.0967, 0.4513] 0.2479   [-0.3141, 0.8621] [-0.5643, 1.1123]
+#>    33C/5.5 0.239 [0.0948, 0.3832] 0.2016   [-0.2392, 0.7172] [-0.4426, 0.9206]
+#>    33C/7.5 0.240 [0.0764, 0.4036] 0.2288   [-0.3028, 0.7828] [-0.5337, 1.0137]
+#> 
+#> 
+# }
+```

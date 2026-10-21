@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-20</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/power_sample_size_vignette.Rmd" class="external-link"><code>vignettes/power_sample_size_vignette.Rmd</code></a></small>
       <div class="d-none name"><code>power_sample_size_vignette.Rmd</code></div>
@@ -499,7 +499,24 @@ measurements themselves. Two methods can each be highly reliable
 (measurement ICC of 0.9) while their differences have a small ICC,
 because the subject’s true value cancels in the difference. The ICC of
 the differences reflects how much the <em>bias</em> between the methods
-varies from subject to subject.</p>
+varies from subject to subject. To put it another way, a high ICC would
+reflect that the bias is consistent within a subject but differs across
+subjects (i.e., the bias is largely subject-specific). <em>Caveat
+emptor</em> but I personally believe it is reasonble to suspect that in
+many cases the ICC for nested agreement studies would be low (ICC &lt;
+0.10).</p>
+<p><em>Caveat emptor</em> but I personally believe it is reasonable to
+expect the ICC of the differences to be low (e.g., &lt; 0.10) in many
+nested agreement studies. When two methods measure the same quantity,
+the between-subject variation that drives a high measurement ICC largely
+cancels in the difference, leaving mostly within-subject error.
+Meaningful subject-specific bias requires something systematic, such as
+proportional bias (where the difference depends on the magnitude of the
+measured value) or a characteristic of the subject that affects one
+method more than the other (e.g., skin tone for optical sensors, or body
+composition for impedance-based measures). If such mechanisms are
+plausible, a higher ICC should be expected. Varying the ICC for these
+power analyses is a good sensitivity check.</p>
 </div>
 <div class="section level3">
 <h3 id="example-repeated-measures-design">Example: Repeated Measures Design<a class="anchor" aria-label="anchor" href="#example-repeated-measures-design"></a>
@@ -582,10 +599,10 @@ approximate method of <span class="citation">Lu et al. (<a href="#ref-lu2016">20
 independent sample size by <span class="math inline">\(\text{DEFF} = 1 +
 (m - 1) \times \text{ICC}\)</span> and divide by <span class="math inline">\(m\)</span> to get the number of subjects. That is
 correct for the <em>mean</em>, but the limits of agreement also depend
-on the <em>SD</em> of the differences. Its design effect is much
-smaller, about <span class="math inline">\(1 + (m - 1) \times
-\text{ICC}^2\)</span>. Inflating the whole sample size by DEFF therefore
-overstates the penalty, more so as <code>m</code> grows:</p>
+on the <em>SD</em> of the differences (I made this error in my earlier
+writing on this). Its design effect is much smaller, about <span class="math inline">\(1 + (m - 1) \times \text{ICC}^2\)</span>.
+Inflating the whole sample size by DEFF therefore overstates the
+penalty, more so as <code>m</code> grows:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_indep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_agreement_exact.html">power_agreement_exact</a></span><span class="op">(</span>delta <span class="op">=</span> <span class="fl">7</span>, mu <span class="op">=</span> <span class="fl">0.5</span>, sigma <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>                                 p0_star <span class="op">=</span> <span class="fl">0.95</span>, power <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span><span class="op">$</span><span class="va">n</span></span>
@@ -604,8 +621,8 @@ overstates the penalty, more so as <code>m</code> grows:</p>
 <span><span class="co">#&gt; ICC = 0.10: simple DEFF 12 participants, exact  9</span></span>
 <span><span class="co">#&gt; ICC = 0.20: simple DEFF 14 participants, exact 10</span></span>
 <span><span class="co">#&gt; ICC = 0.40: simple DEFF 19 participants, exact 13</span></span></code></pre></div>
-<p>The simple inflation is conservative, so it is still a reasonable
-rule of thumb for designs the functions do not cover.</p>
+<p>The simple inflation is conservative. So I think it is still a
+reasonable rule of thumb for designs the functions do not cover.</p>
 </div>
 <div class="section level3">
 <h3 id="estimating-the-inputs-from-pilot-data">Estimating the Inputs from Pilot Data<a class="anchor" aria-label="anchor" href="#estimating-the-inputs-from-pilot-data"></a>
@@ -634,8 +651,11 @@ test; judging agreement by whether the limits from
 <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> fall within <span class="math inline">\([-\delta, \delta]\)</span> is less powerful (see
 <code><a href="../reference/power_agreement_exact.html">?power_agreement_exact</a></code>).</li>
 </ul>
-<p>For these, use simulation-based power analysis with the analysis you
-intend to run.</p>
+<p>For these, use a simulation-based power analysis with the analysis
+you intend to run. That said, these functions can still provide a useful
+approximation, placing the required sample size in the right ballpark
+even when the design departs from their assumptions (e.g., unbalanced
+designs).</p>
 </div>
 <div class="section level3">
 <h3 id="complete-example-with-clustering">Complete Example with Clustering<a class="anchor" aria-label="anchor" href="#complete-example-with-clustering"></a>
@@ -646,7 +666,7 @@ intend to run.</p>
 <span><span class="va">delta</span> <span class="op">&lt;-</span> <span class="fl">7</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">4</span>        <span class="co"># paired measurements per participant</span></span>
 <span><span class="va">ICC</span> <span class="op">&lt;-</span> <span class="fl">0.15</span>   <span class="co"># ICC of the differences</span></span>
-<span><span class="va">dropout</span> <span class="op">&lt;-</span> <span class="fl">0.20</span></span>
+<span><span class="va">dropout</span> <span class="op">&lt;-</span> <span class="fl">0.20</span> <span class="co"># expecting 20% dropout</span></span>
 <span></span>
 <span><span class="co"># Participants needed</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/power_agreement_exact.html">power_agreement_exact</a></span><span class="op">(</span></span>
@@ -850,9 +870,8 @@ within 0.035 of the simulated power.</p>
 <span><span class="co">#&gt;       n = number of subjects, k = measurements per subject</span></span></code></pre></div>
 <p>With 15% of measurements missing, 52 subjects are needed instead of
 40.</p>
-<p>Subjects lost entirely are different: plan for the subjects who
-complete the study and recruit n / (1 - d) for an expected dropout
-d.</p>
+<p>Subjects lost entirely are different, and the typical dropout
+adjustment should be applied.</p>
 </div>
 <div class="section level3">
 <h3 id="other-designs">Other designs<a class="anchor" aria-label="anchor" href="#other-designs"></a>
@@ -868,7 +887,7 @@ little systematically, ICC(A,1) is close to ICC(C,1) and the consistency
 calculation is a good guide. When they differ, power is lower and
 intervals are wider, most of all with 2 or 3 items. Treat the
 consistency result as a <strong>lower bound</strong> on the number of
-subjects.</li>
+subjects needed to achieve the desired level of statistical power.</li>
 <li>
 <strong>Non-normal data.</strong> With skewed or heavy-tailed data
 the F-based intervals are wider and cover less than planned. Allow a

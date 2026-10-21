@@ -498,8 +498,8 @@ Fleiss, Joseph L. 1971. “Measuring Nominal Scale Agreement Among Many
 Raters.” *Psychological Bulletin* 76 (5): 378–82.
 <https://doi.org/10.1037/h0031619>.
 
-Gwet, Kilem L. 2014. *Handbook of Inter-Rater Reliability*. Advanced
-Analytics, LLC. <https://www.agreestat.com/book4/>.
+Gwet, Kilem L. 2014. *Handbook of Inter-Rater Reliability*. 4th ed.
+Advanced Analytics, LLC.
 
 Gwet, Kilem L. 2019. *irrCAC: Computing Chance-Corrected Agreement
 Coefficients (CAC)*. <https://CRAN.R-project.org/package=irrCAC>.

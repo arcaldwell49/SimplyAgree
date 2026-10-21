@@ -126,9 +126,9 @@ tolerance limits.
 
 ### Rectal Temperature
 
-So we will calculate the tolerance using the `loa_lme` function. We will
-need to identify the columns with the right information using the
-`diff`, `avg`, `condition`, and `id` arguments. We then select the right
+So we will calculate the tolerance using the `tolerance_limit` function.
+We will need to identify the columns with the right information using
+the `x`, `y`, `condition`, and `id` arguments. We then select the right
 data set using the `data` argument. Lastly, we specify the specifics of
 the conditions for how the limits are calculated. For this specific
 analysis I decided to calculate 95% prediction intervals with 95%

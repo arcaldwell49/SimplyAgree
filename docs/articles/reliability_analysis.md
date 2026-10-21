@@ -640,6 +640,42 @@ of the limits of agreement of
 [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md),
 which also reports the bias between trials.[^1]
 
+**Differences between raters.** The MDC also answers a common
+inter-rater question: how far apart could two raters’ (or devices’)
+measurements of the same subject be? Each measurement has error SEM, so
+their difference has error SD \\\sqrt{2} \times SEM\\, the same
+reasoning as for two occasions. When the raters are interchangeable (any
+rater’s score is used as it is, and the raters are thought of as drawn
+from a pool), use the agreement SEM, so that systematic differences
+between raters count as error:
+
+``` r
+
+mdc_test(col.names = judges, data = dat, type = "agreement")
+#> 
+#>  Minimal detectable change (95%, two-sided) from the standard error of
+#>  measurement (two-way, absolute agreement)
+#> 
+#> data:  judge1, judge2, judge3, judge4
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>   4.155454 19.951684
+#> sample estimates:
+#>      MDC 
+#> 6.937214
+```
+
+Two of the judges differing by less than this would be consistent with
+measurement error alone. The consistency SEM would leave out the judges’
+systematic differences, which are large here, and give an MDC of only
+about 2.8. For two particular raters,
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+reports their bias and the spread around it separately. The SEP is not
+the statistic for this: it concerns a change from a subject’s estimated
+true score, and \\1.96 \times SEP\\ does not bound the difference
+between two raters.
+
 I do want to quickly make an aside about what the MDC is not. I write
 this mainly as resolution to my own confusion and what I have seen
 written out in the scientific literature. The MDC is a threshold for
@@ -690,6 +726,347 @@ data is not such an anchor. With 0.2 times the between-subject SD
 tests in team sports) when no relationship to a real outcome is
 available, and it should be treated as such a fallback when *nothing*
 else is available.
+
+## Repeat measurements and occasions
+
+Sometimes each rater (or device) measures each subject more than once:
+say 3 sonographers each scan 20 participants twice.
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+and
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+stop with such data, because one measurement per subject and rater
+cannot separate two different error. Essentially, the scatter of one
+rater’s repeat scans (intra-rater error, or repeatability) and the
+disagreement between raters (inter-rater error).
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+fits the generalizability-theory model for these designs ([Brennan
+2001](#ref-brennan2001)). One warning though: *It is experimental, and
+its name and how it functions may change in the future.*
+
+### Exchangeable repeats
+
+When the scans within each subject-by-operator cell are interchangeable
+(scan 1 and scan 2 mean nothing in themselves), the model is \\y\_{pir}
+= \mu + p + i + (pi) + e\_{pir},\\ with variance components for subjects
+(\\\sigma^2_p\\), items (\\\sigma^2_i\\, systematic differences between
+raters), the subject-by-item interaction (\\\sigma^2\_{pi}\\, raters
+ranking subjects differently) and repeats (\\\sigma^2_e\\).
+
+``` r
+
+set.seed(2)
+scans <- expand.grid(scan = 1:2, operator = c("A", "B", "C"), id = 1:20)
+subj <- rnorm(20, 50, 5)
+bias <- c(A = 0, B = 1.5, C = -1)
+inter <- matrix(rnorm(60, 0, 1), 20, 3)
+scans$thickness <- subj[scans$id] + bias[scans$operator] +
+  inter[cbind(scans$id, as.integer(scans$operator))] +
+  rnorm(nrow(scans), 0, 1.5)
+
+res <- reli_facet_test(thickness ~ operator | id, data = scans)
+res
+#> 
+#>  Intra-rater ICC (same item, another repeat), for a single measurement
+#>  with MLS interval
+#> 
+#> data:  thickness ~ operator | id
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  0.8548688 0.9627844
+#> sample estimates:
+#> ICC(intra) 
+#>  0.9203712
+summary(res)
+#> The estimated ICC(intra) was 0.920 (95% compatibility interval [0.855,
+#> 0.963]). Values in this interval are the most compatible with the data,
+#> given the model and its assumptions. The estimate is the intra-rater
+#> ICC (same item, another repeat), for a single measurement, with error
+#> from: repeats (within cells). The data had 20 subjects, 3 items (120
+#> measurements, 2 measurements per subject-by-item cell); variance
+#> components were estimated by analysis of variance (unconstrained). The
+#> interval is a modified large-sample (MLS) interval for a ratio of
+#> linear combinations of mean squares (Graybill & Wang, 1980; Ting et
+#> al., 1990).
+#> 
+#> Variance components:
+#>  Component              Variance 95% CI        SD   Percent
+#>  subjects               25.2     [14.1, 54.9]  5.02 80.7   
+#>  items                  1.71     [0.340, 73.6] 1.31 5.5    
+#>  subjects x items       1.97     [0.785, 4.07] 1.40 6.3    
+#>  repeats (within cells) 2.35     [1.69, 3.48]  1.53 7.5
+```
+
+The summary ends with the variance components, each with an interval and
+its share of the variance of a single measurement;
+`plot(res, type = "components")` draws them. The default,
+`facet = "intra"`, is the intra-rater ICC which is the correlation
+between two scans of the same subject by the same operator, whose error
+is the repeat variance *only*. `facet = "inter"` adds the error between
+operators, with `type` as in
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md):
+
+| `facet`, `type` | Error variance of one measurement | Question |
+|----|----|----|
+| `"intra"` | \\\sigma^2_e\\ | Same operator, rescanned |
+| `"inter"`, `"consistency"` | \\\sigma^2\_{pi} + \sigma^2_e\\ | Another operator, with operator bias handled separately |
+| `"inter"`, `"agreement"` | \\\sigma^2_i + \sigma^2\_{pi} + \sigma^2_e\\ | Another operator, scores used interchangeably |
+
+`stat = "SEM"` gives the square root of the error variance, and
+[`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
+turns it into the smallest difference beyond measurement error, here
+between two operators drawn from the pool:
+
+``` r
+
+sem_a <- reli_facet_test(thickness ~ operator | id, data = scans,
+                         stat = "SEM", facet = "inter", type = "agreement")
+sem_a
+#> 
+#>  Inter-rater SEM (absolute agreement, another item), for a single
+#>  measurement with MLS interval
+#> 
+#> data:  thickness ~ operator | id
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>  2.077813 8.828622
+#> sample estimates:
+#> SEM(inter,A) 
+#>     2.456438
+mdc_test(sem_a)
+#> 
+#>  Minimal detectable change (95%, two-sided) from the inter-rater SEM
+#>  (absolute agreement, another item), for a single measurement with MLS
+#>  interval
+#> 
+#> data:  thickness ~ operator | id
+#> 
+#> alternative hypothesis: two.sided
+#> 95 percent confidence interval:
+#>   5.759299 24.471243
+#> sample estimates:
+#>      MDC 
+#> 6.808773
+```
+
+### What averaging changes (D-study)
+
+The arguments `k_avg` and `r_avg` describe the score that will be used
+in practice, and the result is the reliability of *that* score, not an
+average of ICCs. `r_avg = 2` is a score that averages 2 scans by one
+operator; `k_avg = 2` is a score that averages one scan from each of 2
+operators. These are the generalizability (\\E\rho^2\\) and
+dependability (\\\Phi\\) coefficients of G theory.
+
+The two kinds of averaging remove different errors. Averaging repeats by
+the same operator shrinks only the repeat noise: the agreement error
+becomes \\\sigma^2_i + \sigma^2\_{pi} + \sigma^2_e / 2\\, and the
+operator’s bias and their particular reading of each subject stay in.
+Averaging over operators shrinks all of it: \\(\sigma^2_i +
+\sigma^2\_{pi} + \sigma^2_e) / 2\\. So, with two scans per subject to
+spend:
+
+> Would two scans by one operator be better than one scan by each of two
+> operators?
+
+``` r
+
+one_op <- reli_facet_test(thickness ~ operator | id, data = scans,
+                          facet = "inter", type = "agreement", r_avg = 2)
+two_ops <- reli_facet_test(thickness ~ operator | id, data = scans,
+                           facet = "inter", type = "agreement", k_avg = 2)
+c(two_scans_one_operator = unname(one_op$estimate),
+  one_scan_two_operators = unname(two_ops$estimate))
+#> two_scans_one_operator one_scan_two_operators 
+#>              0.8383870              0.8930915
+```
+
+Two operators win here (0.89 against 0.84) because the operator-related
+components (operator bias and the subject-by-operator interaction) are
+together larger than the repeat variance; see the component table above.
+Rescanning wins only when repeat noise is most of the error.
+
+Averaging the repeats before calling
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+gives the coefficient for a score that averages as many scans as the
+study had (`r_avg = 2` here), not for a single scan. That can be the
+right analysis, but only if the repeat measurements are also averaged in
+practice.
+
+### Shared occasions
+
+To make things more complicated, we could ask whether “measurement 2” is
+the same event for every rater. If every operator measured everyone on
+day 1 and again on day 2, the days are shared **occasions**, and the
+model is crossed: \\y\_{pio} = \mu + p + i + o + (pi) + (po) + (io) +
+e\_{pio},\\ adding a day effect common to everyone (\\\sigma^2_o\\),
+subjects changing between days (\\\sigma^2\_{po}\\), and raters drifting
+differently between days (\\\sigma^2\_{io}\\).
+
+Give the occasion column as `occasion`:
+
+``` r
+
+set.seed(4)
+days <- expand.grid(day = c("day1", "day2"), operator = c("A", "B", "C"),
+                    id = 1:20)
+subj <- rnorm(20, 50, 5)
+shift <- c(day1 = 0, day2 = 1.5)                  # everyone higher on day 2
+drift <- matrix(rnorm(6, 0, 0.5), 3, 2)           # rater-specific drift
+change <- matrix(rnorm(40, 0, 1), 20, 2)          # subjects change between days
+oi <- as.integer(days$operator); di <- as.integer(days$day)
+days$thickness <- subj[days$id] + bias[days$operator] + shift[days$day] +
+  drift[cbind(oi, di)] + change[cbind(days$id, di)] +
+  rnorm(nrow(days), 0, 1)
+
+test_retest <- reli_facet_test(thickness ~ operator | id, data = days,
+                               occasion = "day", stat = "SEM",
+                               type = "agreement")
+summary(test_retest)
+#> The estimated SEM(intra,A) was 1.73 (95% compatibility interval [1.45,
+#> 21.4]). Values in this interval are the most compatible with the data,
+#> given the model and its assumptions. The estimate is the intra-rater
+#> SEM (absolute agreement, same item, another occasion), for a single
+#> measurement, with error from: occasions, subjects x occasions, items x
+#> occasions, subjects x items x occasions (residual). Treating the
+#> occasions as exchangeable repeats would give SEM(intra) = 1.73, the
+#> same estimate, but its interval would treat the occasion effects shared
+#> by all subjects as independent noise. The data had 20 subjects, 3
+#> items, 2 occasions (120 measurements, 1 measurement per
+#> subject-by-item-by-occasion cell); variance components were estimated
+#> by analysis of variance (unconstrained). The interval is a modified
+#> large-sample (MLS) interval for linear combinations of mean squares
+#> (Graybill & Wang, 1980; Ting et al., 1990).
+#> 
+#> Variance components:
+#>  Component                               Variance 95% CI         SD    Percent
+#>  subjects                                16.2     [8.90, 35.8]   4.03  78.5   
+#>  items                                   1.29     [0, 55.4]      1.13  6.2    
+#>  occasions                               0.284    [0, 454.]      0.533 1.4    
+#>  subjects x items                        0.159    [0, 0.543]     0.399 0.8    
+#>  subjects x occasions                    1.75     [0.887, 4.03]  1.32  8.5    
+#>  items x occasions                       0.185    [0.0184, 8.81] 0.430 0.9    
+#>  subjects x items x occasions (residual) 0.783    [0.523, 1.30]  0.885 3.8
+```
+
+Each `facet` now has consistency and agreement forms:
+
+| `facet` | Same | Varies | Agreement adds to the error |
+|----|----|----|----|
+| `"intra"` | operator | day | the day shift and rater drift (\\\sigma^2_o + \sigma^2\_{io}\\) |
+| `"inter"` | day | operator | operator bias and rater drift (\\\sigma^2_i + \sigma^2\_{io}\\) |
+| `"overall"` | nothing | operator and day | all of these |
+
+Both intra-rater SEMs describe one operator measuring the same subject
+on another day; they differ in what counts as error.
+
+``` r
+
+test_retest_c <- reli_facet_test(thickness ~ operator | id, data = days,
+                                 occasion = "day", stat = "SEM",
+                                 type = "consistency")
+sem_row <- function(res) {
+  c(SEM = unname(res$estimate), lower = res$conf.int[1],
+    upper = res$conf.int[2])
+}
+rbind(agreement = sem_row(test_retest),
+      consistency = sem_row(test_retest_c))
+#>                  SEM    lower     upper
+#> agreement   1.733401 1.449317 21.372134
+#> consistency 1.592482 1.291992  2.201003
+```
+
+- **Agreement** (1.73 here): the error of a single reading taken on some
+  other day and used as it is. It includes the day shift that affects
+  everyone (\\\sigma^2_o\\), this operator’s own drift on that day
+  (\\\sigma^2\_{io}\\), the subject’s own day-to-day change
+  (\\\sigma^2\_{po}\\) and the residual. Use it when a new measurement
+  is compared directly with an earlier one by the same operator and
+  nothing is done about day effects, the usual clinical test-retest
+  situation;
+  [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md)
+  on it gives the smallest change between two days that exceeds
+  measurement error.
+- **Consistency** (1.59 here): the two systematic parts, \\\sigma^2_o\\
+  and \\\sigma^2\_{io}\\, are set aside, leaving \\\sigma^2\_{po}\\ and
+  the residual: the error that remains even if the day’s shift for that
+  operator were known and removed. Use it when day effects are corrected
+  (recalibration, a reference sample each session), when they cancel in
+  the comparison (subjects measured by the same operator in the same
+  session), or when the shift is reported separately, as the mean change
+  between trials ([Hopkins 2000](#ref-hopkins2000); [Weir
+  2005](#ref-weir2005)).
+
+The subjects’ own day-to-day change (\\\sigma^2\_{po}\\) is error in
+both: it belongs to the subjects, not the protocol, so the consistency
+SEM is not “pure instrument noise”. With one measurement per day,
+biological variation and measurement noise cannot be separated; repeats
+within a day (two measurements per operator per day) would separate
+them.
+
+The gap between the two SEMs is what an uncorrected shift costs. Here
+the day shift and drift are a small part of the error, so the estimates
+are close, but the agreement interval is very wide: the day effect is
+estimated from only two days (`m - 1 = 1` degree of freedom), and with
+two days its uncertainty stays large however many subjects are measured.
+More days, not more subjects, would narrow it.
+
+With occasions there are two ways of getting it wrong. Treating the days
+as exchangeable repeats (leaving out `occasion`) gives the *same*
+intra-rater agreement estimate, but its interval treats the day shift,
+which every subject shares, as independent noise, so it is too narrow;
+and it cannot separate the shift from the noise at all
+(`test_retest$nested` gives that estimate). And for the consistency SEM
+it overstates the error, because the day shift is counted as noise.
+
+#### Intervals
+
+The intra-rater SEM with repeats, and the inter-rater consistency SEM
+and coefficient when `r_avg` equals the number of repeats, have exact
+intervals. The others combine several mean squares and use, by default,
+modified large-sample (MLS) intervals ([Graybill and Wang
+1980](#ref-graybill1980); [Ting et al. 1990](#ref-ting1990); [Burdick
+and Graybill 1992](#ref-burdick1992)). In simulations with normal data,
+with repeats or with occasions, the MLS intervals covered at least 0.93
+for every statistic, including agreement statistics with two operators
+or two days and a large operator bias or day effect, whereas the
+Satterthwaite alternative (`ci_method = "satterthwaite"`) fell to about
+0.7. For agreement statistics the two tails are uneven. When the bound
+driven by the operator or day variance (few degrees of freedom) is wide,
+and the other is about nominal, so the usual one-sided tests (a
+coefficient above a threshold, an SEM below an acceptable error) are
+conservative. Leaving out `occasion` when the measurements were made on
+shared days gave intra-rater SEM intervals that covered the true value
+as little as a quarter of the time. With skewed or heavy-tailed data the
+analytic intervals under-cover (0.78 to 0.90 with repeats), and
+`boot = TRUE` is better. Subjects are resampled with all their
+measurements, and for the agreement statistics a “hybrid” step adds the
+variation from drawing the operators and days. Agreement statistics from
+two or three operators (or days) remain uncertain however many subjects
+are measured.
+[`?reli_facet_test`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+gives the details.
+
+#### Other relevant R packages of note
+
+Other packages fit related models:
+[VCA](https://cran.r-project.org/web/packages/VCA/index.html) (deeper
+nesting, laboratory precision designs),
+[rptR](https://cran.r-project.org/web/packages/rptR/index.html)
+(repeatability of non-Gaussian data), gtheoryr (crossed G-studies with
+several facets, D-study optimisation),
+[SixSigma](https://cran.r-project.org/web/packages/SixSigma/index.html)
+(`ss.rr()`, gauge R&R) and
+[MethComp](https://cran.r-project.org/web/packages/MethComp/index.html)
+(method comparison with linked replicates and method-specific
+variances).
+
+In `SimplyAgree`,
+[`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md)
+adds intervals and tests for the coefficients and the intra- and
+inter-rater SEMs, and the link to
+[`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md).
 
 ## Planning a reliability study
 
@@ -916,6 +1293,12 @@ Assessing Measurement Error (Reliability) in Variables Relevant to
 Sports Medicine.” *Sports Medicine* 26 (4): 217–38.
 <https://doi.org/10.2165/00007256-199826040-00002>.
 
+Brennan, Robert L. 2001. *Generalizability Theory*. Springer.
+<https://doi.org/10.1007/978-1-4757-3456-0>.
+
+Burdick, Richard K., and Franklin A. Graybill. 1992. *Confidence
+Intervals on Variance Components*. Marcel Dekker.
+
 Carrasco, Josep L., and Lluı́s Jover. 2003. “Estimating the Generalized
 Concordance Correlation Coefficient Through Variance Components.”
 *Biometrics* 59 (4): 849–58.
@@ -929,6 +1312,11 @@ Cole, T. J. 2000. “Sympercents: Symmetric Percentage Differences on the
 Cronbach, Lee J. 1951. “Coefficient Alpha and the Internal Structure of
 Tests.” *Psychometrika* 16 (3): 297–334.
 <https://doi.org/10.1007/BF02310555>.
+
+Graybill, Franklin A., and Chih-Ming Wang. 1980. “Confidence Intervals
+on Nonnegative Linear Combinations of Variances.” *Journal of the
+American Statistical Association* 75 (372): 869–73.
+<https://doi.org/10.1080/01621459.1980.10477565>.
 
 Greenland, Sander. 2019. “Valid p-Values Behave Exactly as They Should:
 Some Misleading Criticisms of p-Values and Their Resolution with
@@ -989,6 +1377,12 @@ Personalised Medicine.” *Statistics in Medicine* 35 (7): 966–77.
 Shrout, Patrick E, and Joseph L Fleiss. 1979. “Intraclass Correlations:
 Uses in Assessing Rater Reliability.” *Psychological Bulletin* 86 (2):
 420. <https://doi.org/10.1037/0033-2909.86.2.420>.
+
+Ting, Naitee, Richard K. Burdick, Franklin A. Graybill, S. Jeyaratnam,
+and T.-F. Cathy Lu. 1990. “Confidence Intervals on Linear Combinations
+of Variance Components That Are Unrestricted in Sign.” *Journal of
+Statistical Computation and Simulation* 35 (3-4): 135–43.
+<https://doi.org/10.1080/00949659008811240>.
 
 Walter, S. D., M. Eliasziw, and A. Donner. 1998. “Sample Size and
 Optimal Designs for Reliability Studies.” *Statistics in Medicine* 17
