@@ -89,7 +89,8 @@ test_that("power_agreement_exact returns correct structure", {
 
   expect_s3_class(result, "power.htest")
   expect_named(result, c("n", "delta", "mu", "sigma", "p0_star", "p1_star",
-                         "alpha", "power", "critical_value", "method", "note"))
+                         "alpha", "power", "critical_value", "m", "icc", "n.obs",
+                         "method", "note"))
   expect_type(result$n, "double")
   expect_type(result$delta, "double")
   expect_type(result$mu, "double")
@@ -235,8 +236,9 @@ test_that("power_agreement_exact sample size increases with power", {
 
 test_that("power_agreement_exact sample size decreases with larger delta", {
   # Sample size should decrease as acceptable difference increases
+  # (delta = 0.05 would give p1_star < p0_star, so no n reaches the power)
   result_small <- power_agreement_exact(
-    delta = 0.05,
+    delta = 0.08,
     mu = 0,
     sigma = 0.044,
     p0_star = 0.80,
@@ -399,7 +401,8 @@ test_that("agree_expected_half returns correct structure", {
 
   expect_s3_class(result, "power.htest")
   expect_named(result, c("n", "conf.level", "target.delta", "actual.delta",
-                         "pstar", "sigma", "g", "c", "zp", "method"))
+                         "pstar", "sigma", "g", "c", "zp", "m", "icc", "n.obs",
+                         "method", "note"))
   expect_type(result$n, "double")
   expect_type(result$conf.level, "double")
   expect_type(result$pstar, "double")
@@ -648,7 +651,8 @@ test_that("agree_assurance returns correct structure", {
 
   expect_s3_class(result, "power.htest")
   expect_named(result, c("n", "conf.level", "assurance", "actual.assurance",
-                         "omega", "pstar", "sigma", "g", "zp", "method"))
+                         "omega", "pstar", "sigma", "g", "zp", "m", "icc", "n.obs",
+                         "method", "note"))
   expect_type(result$n, "double")
   expect_type(result$conf.level, "double")
   expect_type(result$assurance, "double")
@@ -878,3 +882,158 @@ test_that("functions are numerically stable", {
   expect_lte(result_large$power, 1)
 })
 
+
+# Input checks and edge cases fixed in 0.3.0 -------
+
+test_that("n is validated in agree_expected_half and agree_assurance", {
+  expect_error(agree_expected_half(n = 1), "'n' must be an integer >= 2")
+  expect_error(agree_expected_half(n = 10.5), "'n' must be an integer >= 2")
+  expect_error(agree_assurance(n = 1), "'n' must be an integer >= 2")
+})
+
+test_that("clustering arguments are validated", {
+  expect_error(agree_expected_half(delta = 2.5, m = 0), "'m' must be")
+  expect_error(agree_expected_half(delta = 2.5, m = 1.5), "'m' must be")
+  expect_error(agree_assurance(omega = 2.5, icc = 1), "'icc' must be")
+  expect_error(power_agreement_exact(n = 10, delta = 7, sigma = 2.5, icc = -0.1),
+               "'icc' must be")
+  expect_error(blandPowerCurve(SD = 1, delta = 3, m = 0), "'m' must be")
+})
+
+test_that("power_agreement_exact stops when power cannot exceed alpha", {
+  expect_error(
+    power_agreement_exact(delta = 0.05, mu = 0, sigma = 0.044,
+                          p0_star = 0.80, power = 0.80),
+    "p1_star"
+  )
+})
+
+test_that("power_agreement_exact warns when the n search limit is reached", {
+  # p1_star is barely above p0_star, so n > 10000 is needed
+  expect_warning(
+    res <- power_agreement_exact(delta = qnorm(0.9005), mu = 0, sigma = 1,
+                                 p0_star = 0.80, power = 0.80),
+    "Target not reached"
+  )
+  expect_equal(res$n, 10000)
+})
+
+test_that("power_agreement_exact solves delta and sigma on any scale", {
+  big <- power_agreement_exact(n = 50, mu = 0, sigma = 2.5,
+                               p0_star = 0.95, power = 0.90)
+  small <- power_agreement_exact(n = 50, mu = 0, sigma = 2.5e-5,
+                                 p0_star = 0.95, power = 0.90)
+  expect_equal(small$delta / small$sigma, big$delta / big$sigma,
+               tolerance = 1e-5)
+  expect_gte(small$power, 0.90)
+
+  s_small <- power_agreement_exact(n = 50, delta = 7e-5, mu = 5e-6,
+                                   p0_star = 0.95, power = 0.80)
+  s_big <- power_agreement_exact(n = 50, delta = 7, mu = 0.5,
+                                 p0_star = 0.95, power = 0.80)
+  expect_equal(s_small$sigma * 1e5, s_big$sigma, tolerance = 1e-5)
+  expect_gte(s_small$power, 0.80)
+})
+
+test_that("agree_assurance omega is not capped for small n", {
+  # the previous bisection stopped at 10 * sigma
+  res <- agree_assurance(n = 5, conf.level = 0.99, assurance = 0.99,
+                         pstar = 0.99, sigma = 1)
+  expect_gt(res$omega, 10)
+  expect_gte(res$actual.assurance, 0.99)
+  expect_equal(res$actual.assurance, 0.99, tolerance = 1e-6)
+})
+
+test_that("sample size searches can return n below 5", {
+  expect_lt(agree_expected_half(delta = 20, pstar = 0.9)$n, 5)
+  expect_lt(power_agreement_exact(delta = 7, mu = 0, sigma = 0.5,
+                                  p0_star = 0.8, power = 0.8)$n, 5)
+})
+
+# Clustered designs (m, icc) -------
+
+test_that("m = 1 reproduces the default (independent pairs) results", {
+  expect_identical(
+    agree_expected_half(delta = 2.5, m = 1, icc = 0.4)[c("n", "g", "c")],
+    agree_expected_half(delta = 2.5)[c("n", "g", "c")]
+  )
+  expect_identical(
+    agree_assurance(omega = 2.5, m = 1)$n,
+    agree_assurance(omega = 2.5)$n
+  )
+  expect_identical(
+    power_agreement_exact(n = 15, delta = 0.1, mu = 0.011, sigma = 0.044,
+                          p0_star = 0.80, m = 1)$power,
+    power_agreement_exact(n = 15, delta = 0.1, mu = 0.011, sigma = 0.044,
+                          p0_star = 0.80)$power
+  )
+})
+
+test_that("icc = 0 with m pairs per subject is close to n * m independent pairs", {
+  clus <- agree_expected_half(n = 20, m = 3, icc = 0)
+  iid <- agree_expected_half(n = 60)
+  expect_equal(clus$actual.delta, iid$actual.delta, tolerance = 1e-3)
+  expect_equal(clus$n.obs, 60)
+
+  clus <- power_agreement_exact(n = 20, delta = 7, mu = 0.5, sigma = 2.5,
+                                m = 3, icc = 0)
+  iid <- power_agreement_exact(n = 60, delta = 7, mu = 0.5, sigma = 2.5)
+  expect_equal(clus$power, iid$power, tolerance = 0.01)
+
+  clus <- agree_assurance(n = 20, m = 3, icc = 0)
+  iid <- agree_assurance(n = 60)
+  expect_equal(clus$omega, iid$omega, tolerance = 1e-3)
+})
+
+test_that("clustering widens intervals and lowers power", {
+  w0 <- agree_assurance(n = 20, m = 3, icc = 0.1)$omega
+  w1 <- agree_assurance(n = 20, m = 3, icc = 0.5)$omega
+  expect_lt(w0, w1)
+
+  p0 <- power_agreement_exact(n = 20, delta = 7, mu = 0.5, sigma = 2.5,
+                              m = 3, icc = 0.1)$power
+  p1 <- power_agreement_exact(n = 20, delta = 7, mu = 0.5, sigma = 2.5,
+                              m = 3, icc = 0.5)$power
+  expect_gt(p0, p1)
+})
+
+test_that("clustered sample size lies between the iid and the simple design effect answers", {
+  res <- power_agreement_exact(delta = 7, mu = 0.5, sigma = 2.5,
+                               p0_star = 0.95, power = 0.80,
+                               m = 3, icc = 0.15)
+  # 34 independent pairs; 1 + (m - 1) * icc design effect gives 15 subjects
+  expect_gte(res$n.obs, 34)
+  expect_lte(res$n, 15)
+  expect_gte(res$power, 0.80)
+})
+
+test_that("clustered calculations match simulation (balanced compound symmetry)", {
+  skip_on_cran()
+  set.seed(4202)
+  n <- 20; m <- 3; icc <- 0.3; R <- 4000
+  eh <- agree_expected_half(n = n, m = m, icc = icc)
+  as <- agree_assurance(n = n, assurance = 0.9, m = m, icc = icc)
+  pe <- power_agreement_exact(n = n, delta = 3, mu = 0.3, sigma = 1,
+                              m = m, icc = icc)
+  zp <- qnorm(0.975)
+
+  u <- matrix(rnorm(R * n, 0, sqrt(icc)), R)
+  e <- array(rnorm(R * n * m, 0, sqrt(1 - icc)), c(R, n, m))
+  ebar <- apply(e, c(1, 2), mean)
+  cm <- 0.3 + u + ebar
+  xb <- rowMeans(cm)
+  msb <- m * apply(cm, 1, var)
+  msw <- apply(sweep(e, c(1, 2), ebar)^2, 1, sum) / (n * (m - 1))
+  S <- sqrt(msb / m + (m - 1) / m * msw)
+
+  se_p <- function(p) 4 * sqrt(p * (1 - p) / R)
+  # expected half-width and tolerance coverage
+  expect_equal(mean(eh$g * S), eh$actual.delta, tolerance = 0.01)
+  expect_lt(abs(mean(abs(xb - 0.3) < eh$g * S - zp) - 0.95), se_p(0.95))
+  # assurance
+  expect_lt(abs(mean(as$g * S <= as$omega) - 0.9), se_p(0.9))
+  # power of the exact test
+  deff <- 1 + (m - 1) * icc
+  rej <- abs(xb) + pe$critical_value * S * sqrt(deff / (n * m)) < 3
+  expect_lt(abs(mean(rej) - pe$power), se_p(pe$power))
+})

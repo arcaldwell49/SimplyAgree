@@ -50,14 +50,31 @@ Returns single list with the results of the agreement analysis.
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+\code{loa_lme()} is deprecated, and for new code we recommend switching to
+\code{\link[=tolerance_limit]{tolerance_limit()}}, which fits the same random-intercept model with
+\code{model = "lme"}, gives analytic prediction and tolerance limits (no bootstrap),
+and is still under active development. It takes the two measurements (\code{x}
+and \code{y}) rather than their difference and average. Supplying \code{condition}
+gives each condition its own residual variance, as \code{het_var = TRUE} does here.
 
 This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
-The package author recommends using \code{tolerance_limit} as an alternative to this function.
+}
+\examples{
+\donttest{
+data("recpre_long")
+# Instead of loa_lme(), use:
+tolerance_limit(data = recpre_long, x = "PM", y = "AM", id = "id",
+                condition = "trial_condition", model = "lme")
+}
 }
 \references{
 Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016).
 "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients".
 PLOS One, 11(12), e0168321.
 \doi{10.1371/journal.pone.0168321}
+}
+\seealso{
+\code{\link[=tolerance_limit]{tolerance_limit()}}
 }

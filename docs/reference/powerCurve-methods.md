@@ -37,4 +37,7 @@ plot(x, ...)
 
 - `find_n`:
 
-  Find sample size at which desired power is achieved
+  Find the smallest sample size at which the desired power is achieved,
+  for each combination of settings. If the power is not reached within
+  the sample sizes evaluated, `N` is `NA` (with a warning) and the range
+  of sample sizes must be expanded.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/agree_coef.R
 \name{agree_coef}
 \alias{agree_coef}
-\title{Agreement Coefficents}
+\title{Agreement Coefficients}
 \usage{
 agree_coef(
   wide = TRUE,
@@ -12,7 +12,9 @@ agree_coef(
   id,
   data,
   weighted = FALSE,
-  conf.level = 0.95
+  conf.level = 0.95,
+  weights = NULL,
+  categories = NULL
 )
 }
 \arguments{
@@ -28,17 +30,37 @@ agree_coef(
 
 \item{data}{Data frame with all data.}
 
-\item{weighted}{Logical value (TRUE or FALSE) indicating whether to weight the responses. If TRUE (default is FALSE) then quadratic weights are utilized. This option should be set to TRUE for ordinal or continuous responses.}
+\item{weighted}{Logical value (TRUE or FALSE) indicating whether to weight the responses. If TRUE (default is FALSE) then quadratic weights are utilized. This option should be set to TRUE for ordinal or continuous responses. Ignored when \code{weights} is given.}
 
 \item{conf.level}{the confidence level required. Default is 95\%.}
+
+\item{weights}{Optional weighting scheme, as in \code{\link[=cac_test]{cac_test()}}: e.g.
+\code{"quadratic"}, \code{"linear"} or \code{"ordinal"}, or a custom weight matrix.
+Overrides \code{weighted}.}
+
+\item{categories}{All possible rating categories, as in \code{\link[=cac_test]{cac_test()}}.
+Defaults to the sorted observed ratings (or the levels of a factor).}
 }
 \value{
-Returns single data frame of inter-rater reliability coefficients.
+A data frame with one row per coefficient and the columns \code{est}
+(estimate), \code{se} (standard error), \code{lower.ci} and \code{upper.ci}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 
-agree_coef produces inter-rater reliability or "agreement coefficients" as described by Gwet.
+\code{agree_coef()} has been superseded by \code{\link[=cac_test]{cac_test()}}, which returns one
+coefficient as an \code{htest} with a hypothesis test, \code{summary()} and \code{plot()}
+methods. \code{agree_coef()} still returns a table of all four coefficients.
+
+agree_coef produces inter-rater reliability or "agreement coefficients" as
+described by Gwet: percent agreement, Gwet's AC1 (AC2 when weighted),
+Fleiss' kappa and Krippendorff's alpha.
+}
+\details{
+The estimates, standard errors and intervals are those of \code{\link[=cac_test]{cac_test()}};
+see there for details. Confidence limits are clipped to the possible range
+of each coefficient. When all ratings are in one category the
+chance-corrected coefficients are undefined and returned as \code{NA}.
 }
 \examples{
 data('reps')
@@ -47,5 +69,9 @@ agree_coef(data = reps, wide = TRUE, col.names = c("x","y"), weighted = TRUE)
 }
 \references{
 Gwet, K.L. (2014, ISBN:978-0970806284). "Handbook of Inter-Rater Reliability", 4th Edition. Advanced Analytics, LLC.
+
 Gwet, K. L. (2008). "Computing inter-rater reliability and its variance in the presence of high agreement," British Journal of Mathematical and Statistical Psychology, 61, 29-48.
+}
+\seealso{
+\code{\link[=cac_test]{cac_test()}}
 }

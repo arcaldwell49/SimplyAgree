@@ -19,8 +19,8 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Re-analysis of an Agreement Study">
 </head>
 <body>
@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -211,13 +212,13 @@ lie within the tolerance limits.</p>
 <div class="section level3">
 <h3 id="rectal-temperature-1">Rectal Temperature<a class="anchor" aria-label="anchor" href="#rectal-temperature-1"></a>
 </h3>
-<p>So we will calculate the tolerance using the <code>loa_lme</code>
-function. We will need to identify the columns with the right
-information using the <code>diff</code>, <code>avg</code>,
-<code>condition</code>, and <code>id</code> arguments. We then select
-the right data set using the <code>data</code> argument. Lastly, we
-specify the specifics of the conditions for how the limits are
-calculated. For this specific analysis I decided to calculate 95%
+<p>So we will calculate the tolerance using the
+<code>tolerance_limit</code> function. We will need to identify the
+columns with the right information using the <code>x</code>,
+<code>y</code>, <code>condition</code>, and <code>id</code> arguments.
+We then select the right data set using the <code>data</code> argument.
+Lastly, we specify the specifics of the conditions for how the limits
+are calculated. For this specific analysis I decided to calculate 95%
 prediction intervals with 95% tolerance limits, using the default
 analytic tolerance limits.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -237,10 +238,10 @@ exercise, are providing the same conclusion (poor agreement).</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296]     [-0.324, 0.834] [-0.6109, 1.1209]</span></span>
-<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116]   [-0.2687, 0.7767] [-0.5366, 1.0446]</span></span>
-<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341]   [-0.3497, 0.7117] [-0.3188, 0.6808]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits</span></span>
+<span><span class="co">#&gt;    23C/5.5 0.255 [0.0804, 0.4296] 0.2561     [-0.324, 0.834] [-0.6109, 1.1209]</span></span>
+<span><span class="co">#&gt;    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2687, 0.7767] [-0.5366, 1.0446]</span></span>
+<span><span class="co">#&gt;    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3497, 0.7117] [-0.3188, 0.6808]</span></span></code></pre></div>
 <p>Furthermore, we can visualize the results with a Bland-Altman style
 plot of the tolerance. Notice, despite the tighter cluster in the 3rd
 condition, the prediction/tolerance limits are wider. This is a curious
@@ -275,10 +276,14 @@ researchers.</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3062, 0.2682]</span></span>
-<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925]     [-0.242, 0.272] [-0.3615, 0.3915]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.4055, 0.2875] [-0.5692, 0.4512]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]</span></span>
+<span><span class="co">#&gt;    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113     [-0.242, 0.272]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-0.3062, 0.2682]</span></span>
+<span><span class="co">#&gt;  [-0.3615, 0.3915]</span></span>
+<span><span class="co">#&gt;  [-0.5692, 0.4512]</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Plot Maximal Allowable Difference with delta argument</span></span>
@@ -321,10 +326,14 @@ there is “good” agreement between the AM and PM measurements.</p>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104]     [-0.432, 0.072] [-0.5265, 0.1665]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.5996, 0.1756] [-0.7976, 0.3736]</span></span>
-<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622]   [-0.4238, 0.1318]   [-0.505, 0.213]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias            Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.180   [-0.256, -0.104] 0.1025     [-0.432, 0.072]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.212 [-0.3289, -0.0951] 0.1732   [-0.5996, 0.1756]</span></span>
+<span><span class="co">#&gt;    33C/7.5 -0.146 [-0.2298, -0.0622] 0.1062   [-0.4238, 0.1318]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;  [-0.5265, 0.1665]</span></span>
+<span><span class="co">#&gt;  [-0.7976, 0.3736]</span></span>
+<span><span class="co">#&gt;    [-0.505, 0.213]</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.post_tol</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -339,10 +348,14 @@ Limits of Agreement for Teso Post Exercise
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
 <span><span class="co">#&gt; Model: GLS, compound symmetry within id; residual SD by condition</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits</span></span>
-<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347]   [-0.2013, 0.1613]   [-0.285, 0.245]</span></span>
-<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.2277, 0.2177] [-0.3402, 0.3302]</span></span>
-<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189]     [-0.321, 0.355] [-0.4803, 0.5143]</span></span></code></pre></div>
+<span><span class="co">#&gt;  Condition   Bias           Bias CI     SD Prediction Interval</span></span>
+<span><span class="co">#&gt;    23C/5.5 -0.020 [-0.0747, 0.0347] 0.0783   [-0.2013, 0.1613]</span></span>
+<span><span class="co">#&gt;    33C/5.5 -0.005 [-0.0722, 0.0622] 0.0991   [-0.2277, 0.2177]</span></span>
+<span><span class="co">#&gt;    33C/7.5  0.017 [-0.0849, 0.1189] 0.1470     [-0.321, 0.355]</span></span>
+<span><span class="co">#&gt;   Tolerance Limits</span></span>
+<span><span class="co">#&gt;    [-0.285, 0.245]</span></span>
+<span><span class="co">#&gt;  [-0.3402, 0.3302]</span></span>
+<span><span class="co">#&gt;  [-0.4803, 0.5143]</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eso.delta_tol</span>,</span>
 <span>     delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span></code></pre></div>
@@ -410,7 +423,7 @@ Sports and Exercise</em>, ahead of print. <a href="https://doi.org/10.1249/mss.0
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

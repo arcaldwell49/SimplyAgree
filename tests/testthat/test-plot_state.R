@@ -29,7 +29,9 @@ test_that("plotting data is stored as a self-contained model frame", {
                                       data = reps, data_type = "reps"),
     tolerance_limit = tolerance_limit(x = "x", y = "y", id = "id",
                                       data = reps),
-    reli_stats = reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
+    # reps has missing cells, so reli_stats() warns that its intervals are approximate
+    reli_stats = suppressWarnings(reli_stats(data = reps, wide = TRUE,
+                                             col.names = c("x","y")))
   )
 
   for (nm in names(mods)) {
@@ -70,7 +72,8 @@ test_that("repeated measures plots render after the environment is lost (#76)", 
 
 test_that("reliability plots render after the environment is lost (#76)", {
   data("reps")
-  reli_test = reli_stats(data = reps, wide = TRUE, col.names = c("x","y"))
+  reli_test = suppressWarnings(reli_stats(data = reps, wide = TRUE,
+                                          col.names = c("x","y")))
 
   expect_s3_class(plot(strip_env(reli_test)), "ggplot")
 })

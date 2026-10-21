@@ -1,10 +1,16 @@
 #' Limits of Agreement with Linear Mixed Effects
 #'
 #' @description
-#' `r lifecycle::badge('stable')`
+#' `r lifecycle::badge('deprecated')`
+#'
+#' `loa_lme()` is deprecated, and for new code we recommend switching to
+#' [tolerance_limit()], which fits the same random-intercept model with
+#' `model = "lme"`, gives analytic prediction and tolerance limits (no bootstrap),
+#' and is still under active development. It takes the two measurements (`x`
+#' and `y`) rather than their difference and average. Supplying `condition`
+#' gives each condition its own residual variance, as `het_var = TRUE` does here.
 #'
 #' This function allows for the calculation of (parametric) bootstrapped limits of agreement when there are multiple observations per subject.
-#' The package author recommends using `tolerance_limit` as an alternative to this function.
 #'
 #' @param data A data frame containing the variables within the model.
 #' @param diff Column name of the data frame that includes the difference between the 2 measurements of interest.
@@ -38,6 +44,14 @@
 #' @import ggplot2
 #' @import boot
 #' @import emmeans
+#' @seealso [tolerance_limit()]
+#' @examples
+#' \donttest{
+#' data("recpre_long")
+#' # Instead of loa_lme(), use:
+#' tolerance_limit(data = recpre_long, x = "PM", y = "AM", id = "id",
+#'                 condition = "trial_condition", model = "lme")
+#' }
 #' @export
 #'
 
@@ -52,6 +66,7 @@ loa_lme = function(diff,
                    replicates = 999,
                    prop_bias = FALSE,
                    het_var = FALSE){
+  lifecycle::deprecate_warn("0.4.0", "loa_lme()", "tolerance_limit()")
   type = match.arg(type)
   if(is.null(condition) && het_var){
     stop("If het_var TRUE, then condition column must be provided.")

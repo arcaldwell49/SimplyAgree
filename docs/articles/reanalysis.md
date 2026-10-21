@@ -126,9 +126,9 @@ tolerance limits.
 
 ### Rectal Temperature
 
-So we will calculate the tolerance using the `loa_lme` function. We will
-need to identify the columns with the right information using the
-`diff`, `avg`, `condition`, and `id` arguments. We then select the right
+So we will calculate the tolerance using the `tolerance_limit` function.
+We will need to identify the columns with the right information using
+the `x`, `y`, `condition`, and `id` arguments. We then select the right
 data set using the `data` argument. Lastly, we specify the specifics of
 the conditions for how the limits are calculated. For this specific
 analysis I decided to calculate 95% prediction intervals with 95%
@@ -156,10 +156,10 @@ print(rec.post_tol)
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition  Bias          Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 0.255 [0.0804, 0.4296]     [-0.324, 0.834] [-0.6109, 1.1209]
-#>    33C/5.5 0.254 [0.0964, 0.4116]   [-0.2687, 0.7767] [-0.5366, 1.0446]
-#>    33C/7.5 0.181   [0.021, 0.341]   [-0.3497, 0.7117] [-0.3188, 0.6808]
+#>  Condition  Bias          Bias CI     SD Prediction Interval  Tolerance Limits
+#>    23C/5.5 0.255 [0.0804, 0.4296] 0.2561     [-0.324, 0.834] [-0.6109, 1.1209]
+#>    33C/5.5 0.254 [0.0964, 0.4116] 0.2338   [-0.2687, 0.7767] [-0.5366, 1.0446]
+#>    33C/7.5 0.181   [0.021, 0.341] 0.1478   [-0.3497, 0.7117] [-0.3188, 0.6808]
 ```
 
 Furthermore, we can visualize the results with a Bland-Altman style plot
@@ -201,10 +201,14 @@ rec.delta_tol
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.019   [-0.084, 0.046]   [-0.2345, 0.1965] [-0.3062, 0.2682]
-#>    33C/5.5  0.015 [-0.0625, 0.0925]     [-0.242, 0.272] [-0.3615, 0.3915]
-#>    33C/7.5 -0.059 [-0.1635, 0.0455]   [-0.4055, 0.2875] [-0.5692, 0.4512]
+#>  Condition   Bias           Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.019   [-0.084, 0.046] 0.0849   [-0.2345, 0.1965]
+#>    33C/5.5  0.015 [-0.0625, 0.0925] 0.1113     [-0.242, 0.272]
+#>    33C/7.5 -0.059 [-0.1635, 0.0455] 0.1509   [-0.4055, 0.2875]
+#>   Tolerance Limits
+#>  [-0.3062, 0.2682]
+#>  [-0.3615, 0.3915]
+#>  [-0.5692, 0.4512]
 ```
 
 ``` r
@@ -255,10 +259,14 @@ eso.post_tol
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias            Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.180   [-0.256, -0.104]     [-0.432, 0.072] [-0.5265, 0.1665]
-#>    33C/5.5 -0.212 [-0.3289, -0.0951]   [-0.5996, 0.1756] [-0.7976, 0.3736]
-#>    33C/7.5 -0.146 [-0.2298, -0.0622]   [-0.4238, 0.1318]   [-0.505, 0.213]
+#>  Condition   Bias            Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.180   [-0.256, -0.104] 0.1025     [-0.432, 0.072]
+#>    33C/5.5 -0.212 [-0.3289, -0.0951] 0.1732   [-0.5996, 0.1756]
+#>    33C/7.5 -0.146 [-0.2298, -0.0622] 0.1062   [-0.4238, 0.1318]
+#>   Tolerance Limits
+#>  [-0.5265, 0.1665]
+#>  [-0.7976, 0.3736]
+#>    [-0.505, 0.213]
 ```
 
 ``` r
@@ -279,10 +287,14 @@ eso.delta_tol
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias           Bias CI Prediction Interval  Tolerance Limits
-#>    23C/5.5 -0.020 [-0.0747, 0.0347]   [-0.2013, 0.1613]   [-0.285, 0.245]
-#>    33C/5.5 -0.005 [-0.0722, 0.0622]   [-0.2277, 0.2177] [-0.3402, 0.3302]
-#>    33C/7.5  0.017 [-0.0849, 0.1189]     [-0.321, 0.355] [-0.4803, 0.5143]
+#>  Condition   Bias           Bias CI     SD Prediction Interval
+#>    23C/5.5 -0.020 [-0.0747, 0.0347] 0.0783   [-0.2013, 0.1613]
+#>    33C/5.5 -0.005 [-0.0722, 0.0622] 0.0991   [-0.2277, 0.2177]
+#>    33C/7.5  0.017 [-0.0849, 0.1189] 0.1470     [-0.321, 0.355]
+#>   Tolerance Limits
+#>    [-0.285, 0.245]
+#>  [-0.3402, 0.3302]
+#>  [-0.4803, 0.5143]
 ```
 
 ``` r

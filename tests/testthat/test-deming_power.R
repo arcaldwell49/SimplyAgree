@@ -825,3 +825,51 @@ test_that(".calculate_variance rejects invalid variance type", {
     "variance_type must be"
   )
 })
+
+# Joint power uses joint_test() --------------------------------------------
+
+test_that("deming_power_sim joint power reproduces joint_test() decisions", {
+  args <- list(x_range = c(10, 100), actual_slope = 1.05,
+               y_var_params = list(beta1 = 9, beta2 = 0, J = 1, type = "constant"),
+               x_var_params = list(beta1 = 9, beta2 = 0, J = 1, type = "constant"))
+  for (m in c("sadler", "wald")) {
+    set.seed(12)
+    r <- do.call(deming_power_sim, c(list(n_sims = 40, sample_size = 12,
+                                          joint_method = m), args))
+    set.seed(12)
+    rej <- replicate(40, {
+      d <- SimplyAgree:::.generate_deming_data(12, args$x_range, "uniform", 1.05, 0,
+                                               args$y_var_params, args$x_var_params)
+      fit <- dem_reg(y ~ x, data = d, error.ratio = 1)
+      joint_test(fit, method = m)$p.value < 0.05
+    })
+    expect_equal(r$power_joint, mean(rej))
+    expect_equal(r$settings$joint_method, m)
+  }
+  expect_output(print(r), "(Wald)", fixed = TRUE)
+  expect_error(do.call(deming_power_sim, c(list(n_sims = 10, joint_method = "x"), args)))
+})
+
+test_that("deming_sample_size honours use_joint", {
+  args <- list(x_range = c(50, 100), actual_slope = 1.05, n_sims = 40,
+               initial_n = 10, max_n = 200, step_size = 10,
+               y_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant"),
+               x_var_params = list(beta1 = 4, beta2 = 0, J = 1, type = "constant"))
+  set.seed(5)
+  invisible(capture.output(r_j <- suppressWarnings(
+    do.call(deming_sample_size, c(list(use_joint = TRUE), args)))))
+  expect_equal(r_j$search, "joint")
+  expect_false(is.na(r_j$n_required_joint))
+  expect_equal(r_j$max_n_tested, r_j$n_required_joint)
+  expect_true(is.na(r_j$n_required_ci))
+  expect_output(print(r_j), "search stopped at the joint target")
+
+  set.seed(5)
+  invisible(capture.output(r_ci <- suppressWarnings(
+    do.call(deming_sample_size, modifyList(args, list(use_joint = FALSE, max_n = 400))))))
+  expect_equal(r_ci$search, "ci")
+  expect_equal(r_ci$max_n_tested, r_ci$n_required_ci)
+
+  expect_error(do.call(deming_sample_size, c(list(use_joint = NA), args)),
+               "use_joint")
+})

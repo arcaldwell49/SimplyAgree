@@ -1,7 +1,11 @@
 # Methods for simple_eiv objects
 
 Methods defined for objects returned from error-in-variables models
-(e.g., `dem_reg`, `pb_reg`).
+(e.g., `dem_reg`, `pb_reg`). The joint confidence region for the
+intercept and slope is tested with
+[`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+and plotted with
+[`plot_joint()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md).
 
 ## Usage
 
@@ -35,18 +39,6 @@ plot(
 
 # S3 method for class 'simple_eiv'
 check(x, data = NULL, ...)
-
-plot_joint(x, ...)
-
-# S3 method for class 'simple_eiv'
-plot_joint(
-  x,
-  ideal_slope = 1,
-  ideal_intercept = 0,
-  show_intervals = TRUE,
-  n_points = 100,
-  ...
-)
 
 # S3 method for class 'simple_eiv'
 vcov(object, ...)
@@ -119,20 +111,8 @@ predict(
 
 - n_points:
 
-  Number of points to use for drawing the joint confidence region
-  (default = 100).
-
-- ideal_slope:
-
-  The hypothesized slope value to test against (default = 1)
-
-- ideal_intercept:
-
-  The hypothesized intercept value to test against (default = 0)
-
-- show_intervals:
-
-  Logical. If TRUE, shows individual confidence intervals as well.
+  Number of points to use for drawing smooth interval bands (default =
+  100).
 
 - type:
 
@@ -167,10 +147,6 @@ predict(
 - `check`:
 
   Returns plots of residuals.
-
-- `plot_joint`:
-
-  Returns plot of joint confidence region (Deming only).
 
 - `predict`:
 

@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Assurance Probability for Limits of Agreement — agree_assurance"><meta name="description" content=""><meta property="og:description" content=""><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Assurance Probability for Limits of Agreement — agree_assurance"><meta name="description" content=""><meta property="og:description" content=""><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -54,7 +55,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="figures/lifecycle-maturing.svg" alt="[Maturing]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
     </div>
 
     <div class="section level2">
@@ -65,7 +66,9 @@
 <span>  omega <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pstar <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  sigma <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  n <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  n <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  m <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  icc <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -101,17 +104,30 @@ limits. Must be between 0 and 1. Common values are 0.90 or 0.95.</p></dd>
 <dt id="arg-sigma">sigma<a class="anchor" aria-label="anchor" href="#arg-sigma"></a></dt>
 <dd><p>population standard deviation of the paired differences. If the
 true value is unknown, omega can be specified in standard deviation units
-by setting sigma = 1.</p></dd>
+by setting sigma = 1. With clustered data (<code>m &gt; 1</code>), this is the <em>total</em>
+SD of the differences (between- plus within-subject variance).</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>sample size (optional). If provided, the function will solve for a
-different parameter rather than sample size.</p></dd>
+<dd><p>sample size (optional): the number of pairs, or the number of
+subjects when <code>m &gt; 1</code>. If provided, the function will solve for omega
+rather than sample size.</p></dd>
+
+
+<dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
+<dd><p>number of paired measurements per subject (default 1, independent
+pairs). See the "Clustered data" section.</p></dd>
+
+
+<dt id="arg-icc">icc<a class="anchor" aria-label="anchor" href="#arg-icc"></a></dt>
+<dd><p>intraclass correlation of the paired <em>differences</em> (between-subject
+share of the variance of the differences), in [0, 1). Ignored when <code>m = 1</code>.
+This is not the test-retest ICC of the measurements themselves.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class <code>"power.htest"</code> containing the following components:</p><ul><li><p><code>n</code>: The required sample size (number of subject pairs)</p></li>
+    <p>An object of class <code>"power.htest"</code> containing the following components:</p><ul><li><p><code>n</code>: The required sample size (number of pairs, or of subjects when <code>m &gt; 1</code>)</p></li>
 <li><p><code>conf.level</code>: The confidence level (1 - alpha)</p></li>
 <li><p><code>assurance</code>: The target assurance probability (1 - gamma)</p></li>
 <li><p><code>actual.assurance</code>: The actual assurance probability achieved (may differ
@@ -119,8 +135,11 @@ slightly from target due to discrete nature of n)</p></li>
 <li><p><code>omega</code>: The upper bound of assurance half-width</p></li>
 <li><p><code>pstar</code>: The central proportion covered (P*)</p></li>
 <li><p><code>sigma</code>: The population standard deviation</p></li>
-<li><p><code>g.factor</code>: The Odeh-Owen factor (g”) used to construct the tolerance
+<li><p><code>g</code>: The Odeh-Owen factor (g”) used to construct the tolerance
 interval, tabulated in Odeh and Owen (1980)</p></li>
+<li><p><code>zp</code>: The normal quantile for the central proportion</p></li>
+<li><p><code>m</code>, <code>icc</code>: The clustering inputs</p></li>
+<li><p><code>n.obs</code>: The total number of pairs, <code>n * m</code></p></li>
 <li><p><code>method</code>: Description of the method used</p></li>
 <li><p><code>note</code>: Additional notes about the analysis</p></li>
 </ul></div>
@@ -196,13 +215,51 @@ always rounding up.</p>
 
 <ul><li><p>The paired differences are normally distributed</p></li>
 <li><p>The variance is constant across the range of measurement</p></li>
-<li><p>Pairs are independent</p></li>
+<li><p>Pairs are independent, or (with <code>m &gt; 1</code>) follow the balanced
+compound symmetry model in the "Clustered data" section</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="clustered-data">Clustered data<a class="anchor" aria-label="anchor" href="#clustered-data"></a></h2>
+
+
+
+<p>When each of <code>n</code> subjects contributes <code>m</code> paired measurements (repeated
+measures, or several pairs per subject), the pairs are not independent and
+treating <code>n * m</code> pairs as independent overstates precision. Setting <code>m</code> and
+<code>icc</code> accounts for this under a balanced one-way random-effects
+(compound symmetry) model for the differences:</p><ul><li><p>The mean difference has variance sigma^2 \* DEFF / (n \* m), with design
+effect DEFF = 1 + (m - 1) \* icc, so the effective sample size for the mean
+is n \* m / DEFF.</p></li>
+<li><p>The total variance is estimated as S^2 = MSB / m + (m - 1) / m \* MSW, whose
+distribution is a weighted sum of two independent chi-square variables with
+n - 1 and n(m - 1) degrees of freedom. This distribution is integrated
+numerically in place of the single chi-square of the independent case.
+It is more skewed than a Satterthwaite approximation suggests, which matters
+when icc is large.</p></li>
+</ul><p>Under these assumptions the calculation is exact (it agrees with simulation
+to Monte Carlo error), and <code>m = 1</code> gives exactly the published method. The
+simple design effect 1 + (m - 1) \* icc applied to the whole sample size
+overstates the penalty, because the SD has a much smaller design effect,
+1 + (m - 1) \* icc^2. Unbalanced designs, other correlation structures, or
+several levels of nesting are not covered; use simulation for those.</p>
+<p><code>icc</code> is the ICC of the <em>differences</em>, which can be estimated from pilot data
+with an intercept-only mixed model on the differences (e.g.
+<code>lme4::lmer(diff ~ 1 + (1 | id))</code>), and <code>sigma</code> is then the square root of
+the sum of the two variance components.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Jan, S.L. and Shieh, G. (2018). The Bland-Altman range of agreement: Exact
 interval procedure and sample size determination. <em>Computers in Biology and Medicine</em>, <strong>100</strong>,
 247-252. <a href="https://doi.org/10.1016/j.compbiomed.2018.06.020" class="external-link">doi:10.1016/j.compbiomed.2018.06.020</a></p>
+<p>Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+measurement with multiple observations per individual. <em>Journal of
+Biopharmaceutical Statistics</em>, <strong>17</strong>(4), 571-582.
+<a href="https://doi.org/10.1080/10543400701329422" class="external-link">doi:10.1080/10543400701329422</a></p>
+<p>Mee, R.W. and Owen, D.B. (1983). Improved factors for one-sided tolerance
+limits for balanced one-way ANOVA random model. <em>Journal of the American
+Statistical Association</em>, <strong>78</strong>(384), 901-905.
+<a href="https://doi.org/10.1080/01621459.1983.10477038" class="external-link">doi:10.1080/01621459.1983.10477038</a></p>
 <p>Odeh, R.E. and Owen, D.B. (1980). <em>Tables for Normal Tolerance Limits,
 Sampling Plans, and Screening</em>. Marcel Dekker, Inc., New York.</p>
     </div>
@@ -231,12 +288,45 @@ of agreement tests.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                n = 115</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       conf.level = 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        assurance = 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> actual.assurance = 0.9024848</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> actual.assurance = 0.9024825</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            omega = 2.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            pstar = 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            sigma = 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                g = 2.306167</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                g = 2.306169</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               zp = 1.959964</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                m = 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              icc = 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            n.obs = 115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NOTE: n is the number of pairs. Two measurements per unit; one for each method.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Clustered data: 4 pairs per subject, ICC of the differences 0.3</span></span></span>
+<span class="r-in"><span><span class="fu">agree_assurance</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  assurance <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
+<span class="r-in"><span>  omega <span class="op">=</span> <span class="fl">2.5</span>,</span></span>
+<span class="r-in"><span>  pstar <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
+<span class="r-in"><span>  m <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>  icc <span class="op">=</span> <span class="fl">0.3</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Assurance probability &amp; sample size for Limits of Agreement </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                n = 40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       conf.level = 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        assurance = 0.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> actual.assurance = 0.9000544</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            omega = 2.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            pstar = 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            sigma = 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                g = 2.314759</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               zp = 1.959964</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                m = 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              icc = 0.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            n.obs = 160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NOTE: n is the number of subjects, each with m = 4 paired measurements (n.obs pairs in total).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Assumes balanced compound symmetry with ICC of the differences = 0.3.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
@@ -249,7 +339,7 @@ of agreement tests.</p></div>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -10,7 +10,10 @@
 #' @return
 #' \describe{
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-#'   \item{\code{find_n}}{Find sample size at which desired power is achieved}
+#'   \item{\code{find_n}}{Find the smallest sample size at which the desired
+#'   power is achieved, for each combination of settings. If the power is not
+#'   reached within the sample sizes evaluated, `N` is `NA` (with a warning)
+#'   and the range of sample sizes must be expanded.}
 #' }
 #'
 #' @name powerCurve-methods
@@ -26,23 +29,24 @@
 find_n <- function(x, power = 0.8){
   if(!inherits(x,"powerCurve")) warning("input is not a powerCurve object")
   powtest = power
+  grp = intersect(c("delta", "conf.level", "agree.level", "m", "icc"),
+                  names(x))
 
+  # smallest N at which the target power is reached
   test = x %>%
     as.data.frame() %>%
-    group_by(delta,conf.level,agree.level) %>%
-    summarise(power = nth(power, which.min(abs(power-powtest))),
-              .groups = 'drop')
-  test$N = NA
+    group_by(across(all_of(grp))) %>%
+    arrange(N, .by_group = TRUE) %>%
+    summarise(N = if (any(power >= powtest)) N[which(power >= powtest)[1]]
+                  else NA_real_,
+              power = if (any(power >= powtest)) power[which(power >= powtest)[1]]
+                      else max(power),
+              .groups = 'drop') %>%
+    relocate(power, .before = N)
 
-
-  for(i in 1:nrow(test)){
-    val = unlist(x[which(
-      x$delta == test$delta[i] &
-        x$agree.level == test$agree.level[i] &
-        x$conf.level == test$conf.level[i]  & x$power == test$power[i]
-    ), ]$N)
-
-    test$N[i] = val
+  if (any(is.na(test$N))) {
+    warning("Desired power not reached for some settings (N is NA); ",
+            "the range of sample sizes must be expanded.")
   }
 
   return(test)

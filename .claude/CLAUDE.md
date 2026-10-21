@@ -1,7 +1,7 @@
 # CLAUDE.md - SimplyAgree Package Guide
 
 ## Package Overview
-**SimplyAgree** (v0.3.0) - Flexible and Robust Agreement and Reliability Analyses
+**SimplyAgree** (v0.4.0) - Flexible and Robust Agreement and Reliability Analyses
 
 An R package for method comparison studies implementing Bland-Altman limits of agreement, tolerance intervals, concordance correlation coefficients, and reliability statistics (ICCs). Supports simple paired data, repeated measures, and nested data structures.
 
@@ -38,7 +38,7 @@ No Makefile. RStudio shortcuts: Ctrl+Shift+L (load), Ctrl+Shift+D (document), Ct
 ### Base R Class Conventions
 - **htest class**: Use for hypothesis tests (see `ccc_test.R` for example)
   - Required elements: `statistic`, `parameter`, `p.value`, `conf.int`, `estimate`, `null.value`, `alternative`, `method`, `data.name`
-- **Custom classes**: `simple_agree`, `simple_reli`, `simple_eiv`, `loa`, `loa_mermod`, `tolerance_delta`
+- **Custom classes**: `simple_agree`, `simple_reli`, `simple_eiv`, `loa`, `loa_mermod`, `tolerance_delta`, `cac_htest`
 
 ## S3 Methods
 Methods are organized in `R/methods.*.R` files:
@@ -50,6 +50,9 @@ Methods are organized in `R/methods.*.R` files:
 | simple_eiv | Yes | Yes | Yes | coef, confint, fitted, predict, residuals, summary, vcov |
 | loa, loa_mermod | Yes | Yes (ggplot2) | Yes | - |
 | tolerance_delta | Yes | Yes (ggplot2) | Yes | - |
+| reli_htest (icc_test, reli_err_test, mdc_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
+| ccc_htest (ccc_test) | htest | Yes (identity, `type = "ba"`) | Yes | summary (`style`) |
+| cac_htest (cac_test, ord_kappa_test) | htest | Yes (ggplot2, `type`) | - | summary (`style`) |
 | htest | Inherited from stats | - | - | - |
 
 ### Plot Methods
@@ -72,13 +75,21 @@ R/
 ├── agree_reps.R           # Repeated measures agreement
 ├── agree_nest.R           # Nested data agreement
 ├── agree_np.R             # Non-parametric agreement
-├── agree_coef.R           # Agreement coefficients
+├── agree_coef.R           # Agreement coefficients table (superseded)
+├── cac_test.R             # Chance-corrected agreement coefficients (htest)
+├── ord_kappa_test.R       # Model-based kappa, ordinal GLMM (htest)
+├── coef_funcs.R           # Internal engine for cac_test/agree_coef
 ├── ccc_test.R             # CCC hypothesis test (htest)
-├── reli_stats.R           # Reliability (ICC, SEM, CV)
+├── icc_test.R             # ICC test (htest; recommended)
+├── reli_err_test.R        # SEM/SEE/SEP and CV (htest; recommended)
+├── mdc_test.R             # Minimal detectable change (htest, from the SEM)
+├── power_icc.R            # power_icc(), precision_icc()
+├── reli_engine.R          # Internal reliability engine
+├── reli_stats.R           # reli_stats(), reli_aov() (superseded)
 ├── tolerance_limit.R      # Tolerance intervals
 ├── dem_reg.R              # Deming regression
 ├── pb_reg.R               # Passing-Bablok regression
-├── loa_lme.R              # Mixed-effects LoA
+├── loa_lme.R              # Mixed-effects LoA (deprecated)
 ├── power_*.R              # Power/sample size functions
 ├── methods.*.R            # S3 methods by class
 ├── *_functions.R          # Internal helpers
@@ -90,6 +101,7 @@ tests/testthat/
 vignettes/
 ├── agreement_analysis.Rmd
 ├── reliability_analysis.Rmd
+├── categorical_agreement.Rmd
 ├── power_sample_size_vignette.Rmd
 ├── Deming.Rmd
 └── agree_tests.Rmd
@@ -109,6 +121,14 @@ covr::package_coverage()            # Check coverage
 - **Tolerance**: Use tight tolerances for published results: `expect_equal(..., tolerance = 1e-5)`
 - **Validation**: Test against known published values where available
 - **Structure**: One `test_that()` per behavior; use descriptive test file names to provide context
+
+### Test Speed (CRAN vs CI)
+CRAN has complained about slow test suites, so the suite has three tiers:
+- **Runs on CRAN:** fast tests that still exercise every exported function (keep a cheap version, e.g. few bootstrap replicates, when a test is slow).
+- **`skip_on_cran()`:** slow tests (more than about 1–2 s): many-variant runs, bootstrap property checks, statistical-property simulations. GitHub Actions sets `NOT_CRAN: "true"` (R-CMD-check and test-coverage workflows) so these run there; `devtools::test()`/`check()` run them locally.
+- **`SIMPLYAGREE_SLOW_TESTS=true`:** long simulation checks (reliability functions); run on the Ubuntu CI job only.
+
+Time the suite as CRAN does with `NOT_CRAN` unset before adding heavy tests.
 
 ### Test Patterns
 ```r
@@ -176,6 +196,7 @@ Not extensively used, but consider for grouping related functions.
 - **knitr/rmarkdown**: Vignettes
 - **deming**: Reference implementation
 - **pbkrtest**: Kenward-Roger df
+- **ordinal**: `clmm()` for `ord_kappa_test()`
 
 ### Key Internal Uses
 - `lme4::lmer()` for mixed-effects reliability models
@@ -204,7 +225,11 @@ Not extensively used, but consider for grouping related functions.
 | Bland-Altman LoA | `agreement_limit()` | Simple, repeated, nested |
 | Tolerance Intervals | `tolerance_limit()` | Simple, repeated, nested |
 | CCC | `ccc_test()` | Simple, repeated, nested |
-| ICC | `reli_stats()`, `reli_aov()` | Repeated measures |
+| ICC | `icc_test()` (`reli_stats()`, `reli_aov()` superseded) | Repeated measures |
+| Categorical agreement (AC1, kappa, alpha) | `cac_test()` (`agree_coef()` superseded) | Categorical ratings |
+| Model-based kappa | `ord_kappa_test()` | Ordinal ratings, many raters |
+| SEM / CV | `reli_err_test()` | Repeated measures |
+| Minimal detectable change | `mdc_test()` | Repeated measures |
 | Deming Regression | `dem_reg()` | Paired |
 | Passing-Bablok | `pb_reg()` | Paired |
 
@@ -216,4 +241,4 @@ Not extensively used, but consider for grouping related functions.
 ### Function Lifecycle
 - `agreement_limit()` - **Recommended** for new code
 - `agree_test()` - **Superseded** (works but not actively developed)
-- `loa_lme()` - Current; replaces deprecated `loa_mixed()`
+- `loa_lme()` - **Deprecated** (0.4.0); use `tolerance_limit(model = "lme")`. Replaced deprecated `loa_mixed()`

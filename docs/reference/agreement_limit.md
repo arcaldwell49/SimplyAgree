@@ -1,6 +1,6 @@
 # Limits of Agreement
 
-**\[maturing\]**
+**\[stable\]**
 
 A function for calculating for Bland-Altman limits of agreement based on
 the difference between two measurements (difference = x-y). Please note
@@ -147,9 +147,9 @@ questions, set by `bound_type`:
   the time.
 
 - "joint": "Where are the limits of agreement?" With at least 1 -
-  `alpha` confidence, both limits of agreement lie within . Used as a
-  test against plus or minus delta, the error rate is at most `alpha`/2
-  (conservative).
+  `alpha` confidence, both limits of agreement lie between
+  `lower_loa_ci` and `upper_loa_ci`. Used as a test against plus or
+  minus delta, the error rate is at most `alpha`/2 (conservative).
 
 Because a one-sided bound on the (1 - `agree.level`)/2 percentile is a
 one-sided tolerance bound, these bounds are equal-tailed tolerance
@@ -212,6 +212,7 @@ agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "rep")
 #> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
 #>   not a joint 95% interval for the LoA
 #> SD of Differences = 1.5036
+#> Within-Subject SDs of X & Y = 0.4011 & 0.4348
 
 # Nested
 agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")

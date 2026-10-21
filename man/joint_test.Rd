@@ -3,7 +3,9 @@
 \name{joint_test}
 \alias{joint_test}
 \alias{joint_test.simple_eiv}
-\title{Joint Confidence Region Test for Method Agreement}
+\alias{plot_joint}
+\alias{plot_joint.simple_eiv}
+\title{Joint Confidence Region for Intercept and Slope}
 \usage{
 joint_test(object, ...)
 
@@ -11,13 +13,28 @@ joint_test(object, ...)
   object,
   ideal_intercept = 0,
   ideal_slope = 1,
-  conf.level = 0.95,
+  conf.level = NULL,
   test_method = c("F", "asymptotic"),
+  method = NULL,
+  ...
+)
+
+plot_joint(x, ...)
+
+\method{plot_joint}{simple_eiv}(
+  x,
+  ideal_intercept = 0,
+  ideal_slope = 1,
+  conf.level = NULL,
+  test_method = c("F", "asymptotic"),
+  show_intervals = TRUE,
+  n_points = 100,
+  method = NULL,
   ...
 )
 }
 \arguments{
-\item{object}{A \code{simple_eiv} object from \code{dem_reg()} or \code{pb_reg()}.}
+\item{object, x}{A \code{simple_eiv} object from \code{dem_reg()} or \code{pb_reg()}.}
 
 \item{...}{Additional arguments (currently unused).}
 
@@ -25,18 +42,35 @@ joint_test(object, ...)
 
 \item{ideal_slope}{The hypothesized slope value (default: 1).}
 
-\item{conf.level}{Confidence level for the test (default: 0.95).}
+\item{conf.level}{Confidence level for the region and test. The default,
+\code{NULL}, uses the level the model was fitted with (\code{object$conf.level}).}
 
-\item{test_method}{Reference distribution for the test. \code{"F"} (default)
-uses the finite-sample F(2, n-2) distribution per Sadler (2010).
-\code{"asymptotic"} uses the chi-squared(2) distribution, which is the
-large-sample approximation. The two converge for large n.}
+\item{test_method}{Reference distribution for the Wald test and ellipse
+(\code{method = "wald"} only). \code{"F"} (default) uses F(2, n-2);
+\code{"asymptotic"} uses chi-squared(2), the large-sample approximation.
+The Sadler test always uses F(2, n-2).}
+
+\item{method}{Which joint region and test. \code{NULL} (default) uses
+\code{"sadler"} for Deming fits and \code{"wald"} for Passing-Bablok fits.
+\code{"sadler"} is the sum-of-squares region of Sadler (2010), available
+for \code{dem_reg()} fits only. \code{"wald"} is the ellipse from the
+variance-covariance matrix (the only option for \code{pb_reg()}). See Details.}
+
+\item{show_intervals}{Logical (\code{plot_joint()} only). If TRUE (default),
+also shows the model's marginal confidence intervals as a rectangle. They
+are shown only when \code{conf.level} matches the level the model was fitted
+with.}
+
+\item{n_points}{Number of points used to draw the region (\code{plot_joint()}
+only; default 100).}
 }
 \value{
-An object of class \code{htest} containing:
+\code{plot_joint()} returns a ggplot. \code{joint_test()} returns an object
+of class \code{htest} containing:
 \describe{
-\item{statistic}{The Mahalanobis distance.}
-\item{parameter}{Degrees of freedom. For the F-based test, \code{df1} and
+\item{statistic}{For \code{method = "sadler"}, the F statistic; for
+\code{method = "wald"}, the Mahalanobis distance.}
+\item{parameter}{Degrees of freedom. For the F-based tests, \code{df1} and
 \code{df2}; for the asymptotic test, \code{df} (always 2).}
 \item{p.value}{The p-value for the test.}
 \item{conf.int}{The confidence level used.}
@@ -48,23 +82,76 @@ An object of class \code{htest} containing:
 }
 }
 \description{
-Tests whether the estimated intercept and slope jointly fall within a
-confidence region around specified ideal values (typically intercept=0
-and slope=1 for method comparison studies).
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+\code{joint_test()} tests whether the estimated intercept and slope jointly fall
+within a confidence region around specified ideal values (typically
+intercept = 0 and slope = 1 for method comparison studies). \code{plot_joint()}
+draws that region, with the ideal point marked as enclosed or not.
 }
 \details{
-The test computes the Mahalanobis distance between the estimated coefficients
-and the hypothesized values using the variance-covariance matrix of the
-estimates. By default, the finite-sample F(2, n-2) reference distribution
-is used (Sadler, 2010), which is more conservative than the asymptotic
-chi-squared(2) approximation for small samples.
+\subsection{Sadler region (Deming, default)}{
 
-For Deming regression, the variance-covariance matrix is computed via
-jackknife. For Passing-Bablok regression, bootstrap resampling must have
-been performed (i.e., \code{boot_ci = TRUE} in the original call).
+For a Deming fit with error ratio \eqn{\lambda} and weights \eqn{w_i}, let
+\deqn{S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2},}
+the weighted sum of squares that Deming regression minimises (Sadler, 2010,
+Eq. 11; Draper & Smith). With \eqn{\hat S} its minimum, the test of
+\eqn{(a_0, b_0)} is
+\deqn{F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat S / (n - 2)}}
+on F(2, n - 2), and the confidence region is the set of \eqn{(a, b)} where
+\eqn{F} does not exceed the critical value. No variance-covariance matrix
+is involved; only the error ratio (not the size of the errors) matters. The
+region is not an ellipse: for each slope its intercept limits have a closed
+form, and its slope limits are the roots of a quadratic, so \code{plot_joint()}
+draws it exactly. If the data are too imprecise for the slope to be bounded,
+the test is still reported but the region is not drawn.
+
+In simulations with normal errors (n = 10 to 100, narrow and wide ranges,
+error ratios 1 and 4, constant and proportional errors, and replicate data
+with the error ratio estimated), the Sadler test rejected a true null
+hypothesis 4.3-5.9\% of the time at a nominal 5\%. It was at least as
+powerful as the Wald test at the same size.
+
+The model frame must be stored (\code{dem_reg(model = TRUE)}, the default).
+\code{dem_reg(weighted = TRUE)} uses fixed weights computed from the data, while
+Sadler reweighted iteratively; the region uses the fitted model's weights.
+}
+
+\subsection{Wald ellipse}{
+
+\code{method = "wald"} computes the Mahalanobis distance between the estimated
+coefficients and the hypothesized values, using the variance-covariance
+matrix of the estimates, against 2 F(2, n - 2) (or chi-squared(2) with
+\code{test_method = "asymptotic"}).
+
+For Deming regression the matrix is the delete-one jackknife. This test is
+\strong{liberal in small samples}: in the same simulations it rejected a true
+null 7.8-9.7\% of the time at n = 10, about 7.4\% at n = 20 and 6.1\% at
+n = 50 (up to 14\% with \code{test_method = "asymptotic"}), because the jackknife
+variance is itself unstable. Prefer the Sadler test for Deming fits.
+
+For Passing-Bablok regression the model must have been fitted with
+\code{replicates > 0} and \code{se_method = "bootstrap"} or \code{"jackknife"}. Both held
+4.3-5.4\% in simulations (n = 20 to 100). The Dufey (2020) matrix
+(\code{se_method = "dufey"}) is not used for joint tests: it rejected a true
+null 8-11\% of the time.
+}
+}
+\examples{
+data("reps")
+fit <- dem_reg(y ~ x, data = reps)
+joint_test(fit)
+plot_joint(fit)
+
+# The Wald ellipse from the jackknife variance-covariance matrix
+joint_test(fit, method = "wald")
+
 }
 \references{
 Sadler, W.A. (2010). Joint parameter confidence regions improve the power of
 parametric regression in method-comparison studies. \emph{Accreditation and Quality
 Assurance}, 15, 547-554.
+
+Draper, N.R., & Smith, H. (1966). \emph{Applied Regression Analysis}. Wiley,
+New York.
 }
