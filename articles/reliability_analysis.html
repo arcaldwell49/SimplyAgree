@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/reliability_analysis.Rmd" class="external-link"><code>vignettes/reliability_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>reliability_analysis.Rmd</code></div>
@@ -146,7 +146,7 @@ interval and, optionally, a test:</p>
 which return everything at once, are superseded (see <a href="#legacy-functions">Legacy functions</a>). This was a deliberate
 design choice on my part as I thought the old function was confusing
 users.</p>
-<p>All functions accept data in three ways: a formula,
+<p>All functions accept data in three ways. Either a formula,
 <code>values ~ item | id</code>; long data, with <code>measure</code>,
 <code>item</code> and <code>id</code> column names; or wide data, one
 row per subject, with the item columns in <code>col.names</code>. An
@@ -334,13 +334,18 @@ threshold rather than labeling the estimate “good” or “poor”.</p>
 </tbody>
 </table>
 <p>The default, ICC(C,1), follows <span class="citation">Hopkins (<a href="#ref-hopkins2000">2000</a>)</span> and <span class="citation">Weir
-(<a href="#ref-weir2005">2005</a>)</span>: check for systematic change
-between trials separately (for example with <code><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test()</a></code> for
-two trials), then report the consistency ICC, which is tied to the SEM.
-Others, such as <span class="citation">Koo and Li (<a href="#ref-koo2016">2016</a>)</span>, recommend absolute agreement for
-test-retest studies. I leave the decision up to you (and whatever the
-purpose of your study is), but <em>strongly</em> recommend justifying
-your choice.</p>
+(<a href="#ref-weir2005">2005</a>)</span>. In their view, you should
+check for systematic change between trials separately (for example with
+<code><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test()</a></code> for two trials), then report the consistency ICC,
+which is tied to the SEM. Others, such as <span class="citation">Koo and
+Li (<a href="#ref-koo2016">2016</a>)</span>, recommend absolute
+agreement for test-retest studies. I can envision some situations where
+<span class="citation">Hopkins (<a href="#ref-hopkins2000">2000</a>)</span> and <span class="citation">Weir
+(<a href="#ref-weir2005">2005</a>)</span> advice stands, however, there
+are cases where I think systematic changes would be worth counting. I
+leave the decision up to you (and whatever the purpose of your study
+is), but <em>strongly</em> recommend justifying your choice and being
+explicit about the interpretation.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc_test.html">icc_test</a></span><span class="op">(</span>col.names <span class="op">=</span> <span class="va">judges</span>, data <span class="op">=</span> <span class="va">dat</span>, type <span class="op">=</span> <span class="st">"agreement"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -360,7 +365,7 @@ your choice.</p>
 <h3 id="related-coefficients-cronbachs-alpha-and-the-ccc">Related coefficients: Cronbach’s alpha and the CCC<a class="anchor" aria-label="anchor" href="#related-coefficients-cronbachs-alpha-and-the-ccc"></a>
 </h3>
 <p>There are two widely reported coefficients that many might not
-realize are ICCs in disguise.</p>
+realize are ICCs with a different name.</p>
 <p><strong>Cronbach’s alpha is ICC(C,k).</strong> With complete data,
 Cronbach’s <span class="citation">(<a href="#ref-cronbach1951">1951</a>)</span> alpha for k items equals the
 average-measure consistency ICC, <span class="math inline">\((MS_B -
@@ -387,10 +392,10 @@ it is essentially ICC(A,1): the estimators differ only in using n rather
 than n - 1 in the variances, and the difference vanishes as n grows
 <span class="citation">(<a href="#ref-nickerson1997">Nickerson 1997</a>;
 <a href="#ref-carrasco2003">Carrasco and Jover 2003</a>)</span>. The two
-answer different questions in practice: <code><a href="../reference/ccc_test.html">ccc_test()</a></code> is meant
-for comparing two methods (alongside limits of agreement),
-<code><a href="../reference/icc_test.html">icc_test()</a></code> for the reliability of a measurement across
-trials or raters.</p>
+answer different questions in practice. The the <code><a href="../reference/ccc_test.html">ccc_test()</a></code>
+is meant for comparing two methods (alongside limits of agreement),
+while <code><a href="../reference/icc_test.html">icc_test()</a></code> for the reliability of a measurement
+across trials or raters.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">two</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"judge1"</span>, <span class="st">"judge4"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>CCC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="../reference/ccc_test.html">ccc_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"judge1"</span>, y <span class="op">=</span> <span class="st">"judge4"</span>, data <span class="op">=</span> <span class="va">two</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
@@ -454,8 +459,10 @@ hypothesis:</p>
 <span><span class="co">#&gt; (McGraw &amp; Wong, 1996).</span></span></code></pre></div>
 <p>The estimation style, following <span class="citation">Greenland (<a href="#ref-greenland2019">2019</a>)</span> and <span class="citation">Rafi and Greenland (<a href="#ref-rafi2020">2020</a>)</span>, describes the interval as a range
 of values compatible with the data and converts the p-value to an
-S-value, <span class="math inline">\(s = -\log_2 p\)</span>: the bits of
-information against the tested hypothesis, as surprising as <span class="math inline">\(s\)</span> heads in a row from a fair coin.</p>
+S-value, <span class="math inline">\(s = -\log_2 p\)</span>. This is the
+bits of information against the tested hypothesis, as surprising as
+<span class="math inline">\(s\)</span> heads in a row from a fair
+coin.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span>, style <span class="op">=</span> <span class="st">"estimation"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; The estimated ICC(C,1) was 0.715 (95% lower compatibility bound 0.412).</span></span>
@@ -657,10 +664,10 @@ the line of identity.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"subjects"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reliability_analysis_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="480"></p>
-<p><code><a href="../reference/simple_agree-methods.html">check()</a></code> gives model diagnostics: the normality and
-homogeneity of the residuals, and the within-subject SD against the
-subject mean. An SD that rises with the mean means the error grows with
-the size of the measurement, and a coefficient of variation
+<p><code><a href="../reference/simple_agree-methods.html">check()</a></code> gives model diagnostics. The plot displays the
+normality and homogeneity of the residuals, and the within-subject SD
+against the subject mean. An SD that rises with the mean means the error
+grows with the size of the measurement, and a coefficient of variation
 (<code>reli_err_test(scale = "log")</code>, below) describes it better
 than an error in units.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -846,8 +853,8 @@ with measurement error alone. The consistency SEM would leave out the
 judges’ systematic differences, which are large here, and give an MDC of
 only about 2.8. For two particular raters,
 <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> reports their bias and the spread around
-it separately. The SEP is not the statistic for this: it concerns a
-change from a subject’s estimated true score, and <span class="math inline">\(1.96 \times SEP\)</span> does not bound the
+it separately. The SEP is not the statistic for this. The SEP relates to
+a change from a subject’s estimated true score, and <span class="math inline">\(1.96 \times SEP\)</span> does not bound the
 difference between two raters.</p>
 <p>I do want to quickly make an aside about what the MDC is not. I write
 this mainly as resolution to my own confusion and what I have seen
@@ -900,7 +907,7 @@ outcome is available, and it should be treated as such a fallback when
 <h2 id="repeat-measurements-and-occasions">Repeat measurements and occasions<a class="anchor" aria-label="anchor" href="#repeat-measurements-and-occasions"></a>
 </h2>
 <p>Sometimes each rater (or device) measures each subject more than
-once: say 3 sonographers each scan 20 participants twice.
+once. Let’s say 3 sonographers each scan 20 participants twice.
 <code><a href="../reference/icc_test.html">icc_test()</a></code> and <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code> stop with such
 data, because one measurement per subject and rater cannot separate two
 different error. Essentially, the scatter of one rater’s repeat scans
@@ -1047,9 +1054,34 @@ score that will be used in practice, and the result is the reliability
 of <em>that</em> score, not an average of ICCs. <code>r_avg = 2</code>
 is a score that averages 2 scans by one operator; <code>k_avg = 2</code>
 is a score that averages one scan from each of 2 operators. These are
-the generalizability (<span class="math inline">\(E\rho^2\)</span>) and
-dependability (<span class="math inline">\(\Phi\)</span>) coefficients
-of G theory.</p>
+the <a href="https://doi.org/10.5116/ijme.5278.a850" class="external-link">generalizability</a>
+(<span class="math inline">\(E\rho^2\)</span>) and <a href="https://ncme.org/wp-content/uploads/2025/10/Module-14-Generalizability-Theory-Brennan-Winter-1.pdf" class="external-link">dependability</a>
+(<span class="math inline">\(\Phi\)</span>) coefficients of G theory.
+Both divide the subjects’ variance by that variance plus the error
+variance of the planned score; they differ in what counts as error. For
+<code>facet = "inter"</code>, with a score that averages <span class="math inline">\(k'\)</span> operators (<code>k_avg</code>) and
+<span class="math inline">\(r'\)</span> repeats
+(<code>r_avg</code>):</p>
+<ul>
+<li>
+<strong>Generalizability coefficient</strong> (<span class="math inline">\(E\rho^2\)</span>,
+<code>type = "consistency"</code>): the reliability of the score when it
+is used to <em>rank</em> or compare subjects (a relative decision). Only
+error that can change subjects’ ranks counts, the <em>relative</em>
+error from the components that involve the subject: <span class="math display">\[E\rho^2 = \frac{\sigma^2_p}{\sigma^2_p +
+\sigma^2_{pi}/k' + \sigma^2_e/(k'r')}.\]</span> An
+operator’s bias moves every subject’s score by the same amount, so it
+leaves the ranks alone and is not error here.</li>
+<li>
+<strong>Dependability coefficient</strong> (<span class="math inline">\(\Phi\)</span>, <code>type = "agreement"</code>):
+the reliability of the score when its value itself is used,
+e.g. compared with a cut-off or with a score from another operator (an
+absolute decision). The <em>absolute</em> error adds the facet’s main
+effect, here the operator bias: <span class="math display">\[\Phi =
+\frac{\sigma^2_p}{\sigma^2_p + \sigma^2_i/k' + \sigma^2_{pi}/k'
++ \sigma^2_e/(k'r')}.\]</span> <span class="math inline">\(\Phi\)</span> is at most <span class="math inline">\(E\rho^2\)</span>, and equal only when the
+operators have no systematic differences.</li>
+</ul>
 <p>The two kinds of averaging remove different errors. Averaging repeats
 by the same operator shrinks only the repeat noise: the agreement error
 becomes <span class="math inline">\(\sigma^2_i + \sigma^2_{pi} +
