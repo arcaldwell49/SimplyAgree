@@ -9,7 +9,9 @@ agree_expected_half(
   delta = NULL,
   pstar = 0.95,
   sigma = 1,
-  n = NULL
+  n = NULL,
+  m = 1,
+  icc = 0
 )
 }
 \arguments{
@@ -28,31 +30,43 @@ limits. Must be between 0 and 1. Common values are 0.90 or 0.95.}
 
 \item{sigma}{population standard deviation of the paired differences. If the
 true value is unknown, delta can be specified in standard deviation units
-by setting sigma = 1.}
+by setting sigma = 1. With clustered data (\code{m > 1}), this is the \emph{total}
+SD of the differences (between- plus within-subject variance).}
 
-\item{n}{sample size (optional). If provided, the function will solve for a
+\item{n}{sample size (optional): the number of pairs, or the number of
+subjects when \code{m > 1}. If provided, the function will solve for a
 different parameter rather than sample size.}
+
+\item{m}{number of paired measurements per subject (default 1, independent
+pairs). See the "Clustered data" section.}
+
+\item{icc}{intraclass correlation of the paired \emph{differences} (between-subject
+share of the variance of the differences), in [0, 1). Ignored when \code{m = 1}.
+This is not the test-retest ICC of the measurements themselves.}
 }
 \value{
 An object of class \code{"power.htest"} containing the following components:
 \itemize{
-\item \code{n}: The required sample size (number of subject pairs)
+\item \code{n}: The required sample size (number of pairs, or of subjects when \code{m > 1})
 \item \code{conf.level}: The confidence level (1 - alpha)
-\item \code{delta.target}: The target upper bound of expected half-width
-\item \code{delta.actual}: The actual upper bound of expected half-width achieved (may
-differ slightly from target due to discrete nature of n)
+\item \code{target.delta}: The target upper bound of expected half-width
+\item \code{actual.delta}: The expected half-width achieved (may be smaller than
+the target due to discrete nature of n)
 \item \code{pstar}: The central proportion covered (P*)
 \item \code{sigma}: The population standard deviation
-\item \code{g.factor}: The Odeh-Owen factor (g'') used to construct the tolerance
+\item \code{g}: The Odeh-Owen factor (g'') used to construct the tolerance
 interval, tabulated in Odeh and Owen (1980)
-\item \code{c.factor}: The bias correction factor used in the expected half-width
-calculation
+\item \code{c}: The bias correction factor, 1 / E(S / sigma), used in the expected
+half-width calculation
+\item \code{zp}: The normal quantile for the central proportion
+\item \code{m}, \code{icc}: The clustering inputs
+\item \code{n.obs}: The total number of pairs, \code{n * m}
 \item \code{method}: Description of the method used
 \item \code{note}: Additional notes about the analysis
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 }
 \details{
 Calculate the sample size necessary for a confidence interval of the Bland-Altman
@@ -145,12 +159,46 @@ For dropout considerations, inflate the sample size using: N' = N / (1 - dropout
 always rounding up.
 }
 }
+\section{Clustered data}{
+
+
+When each of \code{n} subjects contributes \code{m} paired measurements (repeated
+measures, or several pairs per subject), the pairs are not independent and
+treating \code{n * m} pairs as independent overstates precision. Setting \code{m} and
+\code{icc} accounts for this under a balanced one-way random-effects
+(compound symmetry) model for the differences:
+\itemize{
+\item The mean difference has variance sigma^2 \* DEFF / (n \* m), with design
+effect DEFF = 1 + (m - 1) \* icc, so the effective sample size for the mean
+is n \* m / DEFF.
+\item The total variance is estimated as S^2 = MSB / m + (m - 1) / m \* MSW, whose
+distribution is a weighted sum of two independent chi-square variables with
+n - 1 and n(m - 1) degrees of freedom. This distribution is integrated
+numerically in place of the single chi-square of the independent case.
+It is more skewed than a Satterthwaite approximation suggests, which matters
+when icc is large.
+}
+
+Under these assumptions the calculation is exact (it agrees with simulation
+to Monte Carlo error), and \code{m = 1} gives exactly the published method. The
+simple design effect 1 + (m - 1) \* icc applied to the whole sample size
+overstates the penalty, because the SD has a much smaller design effect,
+1 + (m - 1) \* icc^2. Unbalanced designs, other correlation structures, or
+several levels of nesting are not covered; use simulation for those.
+
+\code{icc} is the ICC of the \emph{differences}, which can be estimated from pilot data
+with an intercept-only mixed model on the differences (e.g.
+\code{lme4::lmer(diff ~ 1 + (1 | id))}), and \code{sigma} is then the square root of
+the sum of the two variance components.
+}
+
 \section{Assumptions}{
 
 \itemize{
 \item The paired differences are normally distributed
 \item The variance is constant across the range of measurement
-\item Pairs are independent
+\item Pairs are independent, or (with \code{m > 1}) follow the balanced
+compound symmetry model in the "Clustered data" section
 }
 }
 
@@ -175,6 +223,15 @@ agree_expected_half(
   sigma = 1
 )
 
+# Example 3: Clustered data, 3 pairs per subject, ICC of the differences 0.2
+# (n is then the number of subjects)
+agree_expected_half(
+  delta = 2.4,
+  pstar = 0.90,
+  m = 3,
+  icc = 0.2
+)
+
 }
 \references{
 Jan, S.L. and Shieh, G. (2018). The Bland-Altman range of agreement: Exact
@@ -187,6 +244,16 @@ between two methods of clinical measurement. \emph{The Lancet}, \strong{327}(847
 
 Hahn, G.J. and Meeker, W.Q. (1991). \emph{Statistical Intervals: A Guide for
 Practitioners}. John Wiley & Sons, New York.
+
+Bland, J.M. and Altman, D.G. (2007). Agreement between methods of
+measurement with multiple observations per individual. \emph{Journal of
+Biopharmaceutical Statistics}, \strong{17}(4), 571-582.
+\doi{10.1080/10543400701329422}
+
+Mee, R.W. and Owen, D.B. (1983). Improved factors for one-sided tolerance
+limits for balanced one-way ANOVA random model. \emph{Journal of the American
+Statistical Association}, \strong{78}(384), 901-905.
+\doi{10.1080/01621459.1983.10477038}
 
 Odeh, R.E. and Owen, D.B. (1980). \emph{Tables for Normal Tolerance Limits,
 Sampling Plans, and Screening}. Marcel Dekker, Inc., New York.

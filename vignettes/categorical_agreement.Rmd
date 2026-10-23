@@ -1,0 +1,348 @@
+---
+title: "Agreement for Categorical and Ordinal Ratings"
+description: "Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test()."
+author: "Aaron R. Caldwell"
+date: "Last Updated: `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+bibliography: refs.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Agreement for Categorical and Ordinal Ratings}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+library(SimplyAgree)
+has_ordinal <- requireNamespace("ordinal", quietly = TRUE)
+```
+
+# Background
+
+Many measurements are not numbers on a continuous scale but classifications. For example,
+a diagnosis (present or absent), a grade (1 to 5), or a severity rating
+(none, mild, moderate, severe). When several raters classify the same
+subjects, the question is how often they agree. For continuous measurements,
+see instead the reliability analysis vignette (ICCs) and the agreement
+analysis vignette (limits of agreement).
+
+`SimplyAgree` has two functions for categorical ratings. Both return a
+standard `htest` object, with `summary()` and `plot()` methods.
+
+| Function | Estimates | Use when |
+|---|---|---|
+| `cac_test()` | Percent agreement, Gwet's AC1/AC2, Fleiss' kappa or Krippendorff's alpha | Nominal or ordinal ratings, any number of raters |
+| `ord_kappa_test()` | The model-based kappa of @nelson2015 | Ordinal ratings from many raters sampled from a population; comparing groups of raters or subjects |
+
+The older `agree_coef()`, which reports four coefficients in one table, is
+superseded by `cac_test()` (see [Legacy function](#legacy-function)).
+
+Both functions accept data in the same three ways as `icc_test()`: a
+formula, `rating ~ rater | id`; long data, with `measure`, `item` (the
+rater) and `id` column names; or wide data, one row per subject, with each
+rater's column in `col.names`. Ratings may be numeric, character or factor,
+and missing ratings are allowed.
+
+# Chance-corrected agreement coefficients
+
+## An example
+
+Take the example of @gwet: 12 subjects rated by 4 raters on a 5-point
+scale, with some ratings missing.
+
+```{r}
+ratings <- data.frame(
+  Rater1 = c(1, 2, 3, 3, 2, 1, 4, 1, 2, NA, NA, NA),
+  Rater2 = c(1, 2, 3, 3, 2, 2, 4, 1, 2, 5, NA, NA),
+  Rater3 = c(NA, 3, 3, 3, 2, 3, 4, 2, 2, 5, 1, 3),
+  Rater4 = c(1, 2, 3, 3, 2, 4, 4, 1, 2, 5, 1, NA))
+raters <- c("Rater1", "Rater2", "Rater3", "Rater4")
+```
+
+The simplest summary is the percent agreement: the proportion of pairs of
+ratings of the same subject that agree.
+
+```{r}
+cac_test(col.names = raters, data = ratings, coef = "pa")
+```
+
+Some of that agreement would happen by chance even if the raters guessed.
+The chance-corrected coefficients all take the form
+\[
+\frac{p_a - p_e}{1 - p_e},
+\]
+where \(p_a\) is the observed agreement and \(p_e\) the agreement expected by
+chance: 1 means perfect agreement and 0 means no more agreement than chance.
+The default coefficient is Gwet's AC1 [@gwet2008].
+
+```{r}
+cac_test(col.names = raters, data = ratings)
+```
+
+The results of `cac_test()` match those of the irrCAC package [@irrCAC].
+
+## Choosing a coefficient
+
+The coefficients differ in how they define chance agreement:
+
+- **Fleiss' kappa** [@fleiss1971] and **Krippendorff's alpha**
+  [@krippendorff1970] use the overall proportion of ratings in each
+  category: chance agreement is the probability that two ratings drawn at
+  random fall in the same category. Krippendorff's alpha also includes a
+  small-sample correction for the number of pairs of ratings.
+- **Gwet's AC1** [@gwet2008] uses the probability that a rater classifies
+  a subject at random, which is small when raters mostly agree.
+
+The difference matters when one category dominates. Here two readers
+classify 50 scans, nearly all of them normal, and disagree on only two.
+
+```{r}
+screen <- data.frame(
+  reader1 = c(rep("normal", 45), "abnormal", "normal", "normal",
+              "abnormal", "normal"),
+  reader2 = c(rep("normal", 45), "normal", "abnormal", "normal",
+              "abnormal", "normal"))
+readers <- c("reader1", "reader2")
+
+sapply(c("pa", "gwet", "fleiss", "krippendorff"), function(coef) {
+  unname(cac_test(col.names = readers, data = screen,
+                  coef = coef)$estimate)
+})
+```
+
+The readers agree on 96% of scans, yet Fleiss' kappa is only 0.48, because
+with 94% of ratings normal, agreement by chance is already high. This is the
+well-known "kappa paradox" [@feinstein1990]. Gwet's AC1 stays close to the
+raw agreement. Neither answer is wrong: kappa asks how well the readers
+agree *beyond the agreement expected from the prevalence*, and with so few
+abnormal scans there is little information about that. Report the percent
+agreement alongside any chance-corrected coefficient, and the category
+proportions when they are very unequal.
+
+## Ordinal ratings and weights
+
+With an ordered scale, a disagreement between 3 and 4 is less serious than
+one between 1 and 4. `weights` gives partial credit to near misses. The
+common choices are quadratic weights, which penalise a disagreement by the
+square of its distance, and linear weights, which penalise it in proportion
+to the distance [@gwet]. Weighted Gwet's AC1 is called AC2.
+
+```{r}
+sapply(c("unweighted", "linear", "quadratic"), function(w) {
+  unname(cac_test(col.names = raters, data = ratings, weights = w)$estimate)
+})
+```
+
+Other schemes (`"ordinal"`, `"radical"`, `"ratio"`, `"circular"` and
+`"bipolar"`) and custom weight matrices are also available. A custom matrix
+has one row and column per category, values between 0 and 1, and 1 on the
+diagonal. For example, to give half credit to adjacent categories only:
+
+```{r}
+w <- diag(5)
+w[abs(row(w) - col(w)) == 1] <- 0.5
+cac_test(col.names = raters, data = ratings, weights = w)$estimate
+```
+
+## The rating scale
+
+Gwet's AC1/AC2 and the weights depend on the full set of categories, not
+just those that were used. By default the categories are the observed
+ratings (or the levels of a factor). If the scale had a category no rater
+used, list the full scale in `categories`:
+
+```{r}
+# a 6-point scale on which no subject was rated 6
+cac_test(col.names = raters, data = ratings, weights = "quadratic",
+         categories = 1:6)$estimate
+cac_test(col.names = raters, data = ratings, weights = "quadratic")$estimate
+```
+
+Character ratings are ordered alphabetically, which is rarely what an
+ordinal scale needs. For ordinal labels, use a factor with the levels in
+order (unused levels are kept as categories), or give `categories`.
+
+```{r}
+severity <- c("none", "mild", "moderate", "severe", "extreme")
+ratings_f <- as.data.frame(lapply(ratings, function(x)
+  factor(severity[x], levels = severity)))
+cac_test(col.names = raters, data = ratings_f,
+         weights = "quadratic")$estimate
+```
+
+## Testing and describing the result
+
+To claim that agreement exceeds a threshold, test against it with
+`null.value`. The interval and t test use the standard error of
+@gwet2008, which treats the subjects as a random sample and the raters as
+fixed.
+
+```{r}
+res <- cac_test(col.names = raters, data = ratings, coef = "fleiss",
+                weights = "quadratic", null.value = 0.6,
+                alternative = "greater")
+res
+```
+
+`summary()` describes the result in words, either as a test decision
+(`style = "hypothesis"`) or as a compatibility interval with an S-value
+(`style = "estimation"`).
+
+```{r}
+summary(res)
+```
+
+No qualitative labels (such as "substantial" or "almost perfect") are given:
+they are arbitrary and depend on the coefficient.
+
+`plot()` shows how each rater used the scale, which reveals raters who are
+systematically more lenient or severe, or (with `type = "subjects"`) the
+ratings of each subject.
+
+```{r}
+plot(res)
+plot(res, type = "subjects")
+```
+
+# Model-based kappa for many raters
+
+Below is a new experimental function based on the published work of @nelson2015 and
+@nelson2017.
+
+## When to use it
+
+The coefficients above treat the raters in the study as fixed. In large
+agreement studies (for example, many radiologists each reading the same
+set of mammograms), the raters are a sample from a population of raters,
+and the question is how well raters *in general* agree. @nelson2015 and
+@nelson2017 proposed a model-based kappa, \(\kappa_m\), for this setting.
+
+It fits an ordinal (cumulative probit) mixed model in which the rating of
+subject \(i\) by rater \(j\) depends on a latent variable with a subject
+effect \(u_i \sim N(0, \sigma^2_u)\) and a rater effect
+\(v_j \sim N(0, \sigma^2_v)\):
+\[
+P(Y_{ij} \le c \mid u_i, v_j) = \Phi(\alpha_c - u_i - v_j).
+\]
+\(\kappa_m\) is the chance-corrected probability that two raters from the
+population put a subject from the population in the same category. It
+depends only on the number of categories and on
+\(\rho = \sigma^2_u / (\sigma^2_u + \sigma^2_v + 1)\), the share of the
+latent variance due to real differences between subjects. Because the
+thresholds \(\alpha_c\) drop out, \(\kappa_m\) is not affected by how common
+each category is, so it avoids the kappa paradox above.
+
+`ord_kappa_test()` requires the ordinal package, which fits the model by
+the Laplace approximation. At least 3 raters are needed to estimate the
+rater variance, and preferably many more; with few raters, use
+`cac_test()`.
+
+## An example
+
+As an example, simulate 60 subjects rated by 10 raters on a 5-point scale.
+
+```{r, eval = has_ordinal}
+set.seed(2017)
+d <- expand.grid(id = 1:60, rater = paste0("R", 1:10))
+latent <- rnorm(60, sd = 1.5)[d$id] + rnorm(10, sd = 0.5)[d$rater] +
+  rnorm(nrow(d))
+d$rating <- cut(latent, c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf), labels = FALSE)
+
+res_km <- ord_kappa_test(rating ~ rater | id, data = d)
+res_km
+```
+
+The interval is formed on the logit of \(\rho\), so it stays between 0 and
+1. A test against a threshold works as before, with `null.value`. The fitted
+model and its variance components are in `fit`:
+
+```{r, eval = has_ordinal}
+res_km$fit[c("sigma2_subject", "sigma2_rater", "rho", "p0")]
+```
+
+`p0` is the observed agreement at the fitted thresholds, before the
+correction for chance.
+
+For comparison, Fleiss' kappa for the same data:
+
+```{r, eval = has_ordinal}
+cac_test(rating ~ rater | id, data = d, coef = "fleiss")$estimate
+```
+
+## Individual raters
+
+The model also estimates each rater's effect (its conditional mode): how
+much higher or lower the rater tends to rate than the typical rater. Raters
+far from zero are lenient or severe relative to the others.
+
+```{r, eval = has_ordinal}
+plot(res_km, type = "effects")
+```
+
+## Comparing groups of raters or subjects
+
+Do experienced raters agree better than inexperienced ones? Do raters agree
+better on older patients' scans? With `group`, `ord_kappa_test()` fits the
+model of @nelson2017 with the group as a fixed effect and a separate rater
+(or subject) variance in each group, and compares the groups. Here the last
+five raters are made more variable.
+
+```{r, eval = has_ordinal}
+d$experience <- ifelse(d$rater %in% paste0("R", 1:5), "experienced",
+                       "novice")
+novice <- d$experience == "novice"
+d$rating2 <- cut(latent + novice * rnorm(10, sd = 1)[d$rater],
+                 c(-Inf, -1.5, -0.5, 0.5, 1.5, Inf), labels = FALSE)
+
+res_g <- ord_kappa_test(rating2 ~ rater | id, data = d,
+                        group = "experience")
+res_g
+```
+
+The estimates are \(\kappa_m\) in each group, the interval is for their
+difference, and the p-value is from a likelihood ratio test of equal rater
+variances in the two groups. `fit$subgroups` also gives \(\kappa_m\) between
+a rater from each group:
+
+```{r, eval = has_ordinal}
+res_g$fit$subgroups
+summary(res_g)
+plot(res_g, type = "effects")
+```
+
+For a subject characteristic, such as patient age, use
+`group_type = "subject"`; the group must then be constant within each
+subject (and, for rater groups, within each rater).
+
+@nelson2017 add a random slope for the group indicator and test its
+variance and correlation against a mixture of chi-square distributions.
+Because the group is constant within each rater (or subject), the
+intercept-slope covariance of that model is not identified, so
+`ord_kappa_test()` fits the equivalent model with one variance per group,
+which has the same likelihood and the same kappas, and compares the
+likelihood ratio statistic with a chi-square distribution with 1 df. In
+simulations with equal variances (60 subjects, 16 raters), its type I error
+was 0.044 at the 0.05 level.
+
+# Legacy function
+
+`agree_coef()` reports all four coefficients of `cac_test()` in one table,
+without a test. It is superseded but still works:
+
+```{r}
+agree_coef(data = ratings, wide = TRUE, col.names = raters,
+           weighted = TRUE)
+```
+
+# References

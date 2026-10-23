@@ -25,7 +25,8 @@ deming_power_sim(
   y_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
   x_var_params = list(beta1 = 1, beta2 = 0, J = 1, type = "constant"),
   weighted = FALSE,
-  conf.level = 0.95
+  conf.level = 0.95,
+  joint_method = c("sadler", "wald")
 )
 ```
 
@@ -85,6 +86,13 @@ deming_power_sim(
 
   Confidence level for tests. Default is 0.95.
 
+- joint_method:
+
+  The joint test, passed to
+  [`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+  as `method`: `"sadler"` (default, Sadler's sum-of-squares F test) or
+  `"wald"` (jackknife Wald ellipse, liberal in small samples).
+
 ## Value
 
 A list of class "deming_power" containing:
@@ -124,6 +132,17 @@ confidence region typically provides higher statistical power,
 especially when the X-range is narrow (high slope-intercept
 correlation).
 
+Each simulated data set is fitted with
+[`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
+and tested with
+[`joint_test()`](https://aaroncaldwell.us/SimplyAgree/reference/joint_test.md)
+and the marginal confidence intervals, exactly as an analysis would be,
+so the estimated power is the power of those tests. The error ratio
+passed to
+[`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
+is the ratio of the two variance functions at the mean of the simulated
+x values. Fits that fail count as non-detections.
+
 The variance functions allow flexible modeling of heteroscedastic
 errors:
 
@@ -142,10 +161,11 @@ Accreditation and Quality Assurance, 15, 547-554.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Simple example: detect 5% proportional bias with constant variance
+# (use n_sims = 1000 or more in practice)
 power_result <- deming_power_sim(
-  n_sims = 500,
+  n_sims = 200,
   sample_size = 50,
   x_range = c(10, 100),
   actual_slope = 1.05,
@@ -154,10 +174,26 @@ power_result <- deming_power_sim(
   x_var_params = list(beta1 = 20, beta2 = 0, J = 1, type = "constant")
 )
 print(power_result)
+#> 
+#> === Deming Regression Power Analysis ===
+#> 
+#> Sample Size: N = 50
+#> Simulations: 200
+#> Confidence Level: 95%
+#> Testing: slope = 1.050, intercept = 0.000
+#> Against: slope = 1.000, intercept = 0.000
+#> 
+#> Statistical Power:
+#>   Slope CI:          26.0%
+#>   Intercept CI:      4.0%
+#>   Either CI:         29.5%
+#>   Joint Region:      83.5% (Sadler)
+#> 
+#> Joint Region Advantage: +54.0 percentage points
 
 # More complex: heteroscedastic errors
 power_result2 <- deming_power_sim(
-  n_sims = 500,
+  n_sims = 200,
   sample_size = 75,
   x_range = c(1, 100),
   actual_slope = 1.03,
@@ -165,5 +201,5 @@ power_result2 <- deming_power_sim(
   x_var_params = list(beta1 = 0.4, beta2 = 0.04, J = 2, type = "power"),
   weighted = TRUE
 )
-} # }
+# }
 ```

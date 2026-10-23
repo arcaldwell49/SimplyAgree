@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Measure coverage of the full suite, including tests skipped on CRAN
+      NOT_CRAN: "true"
 
     steps:
       - uses: actions/checkout@v2
@@ -23,8 +25,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: covr, any::rcmdcheck, Matrix
-          pak-version: devel
+          extra-packages: covr, any::rcmdcheck, any::Matrix
           needs: check
 
       - name: Test coverage

@@ -19,8 +19,8 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Errors-in-Variables Regression">
 </head>
 <body>
@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -83,7 +84,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-09-24</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -125,7 +126,8 @@ referred to as “Deming regression” (e.g., <span class="citation">Linnet
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.9</span>, <span class="fl">8.2</span>, <span class="fl">9.6</span>, <span class="fl">9</span>, <span class="fl">6.5</span>, <span class="fl">7.3</span>, <span class="fl">10.2</span>, <span class="fl">10.6</span>, <span class="fl">6.3</span>, <span class="fl">5.2</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Also, we will assume, based on historical data, that the measurement
-error ratio is equal to 2.</p>
+error ratio is equal to 2 (i.e., the error variance of x is twice the
+error variance of y).</p>
 <p>The data can be run through the <code>dem_reg</code> function and the
 results printed.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -146,7 +148,7 @@ results printed.</p>
 <p>The resulting regression line can then be plotted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span>, interval <span class="op">=</span> <span class="st">"confidence"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics"></a>
@@ -157,7 +159,7 @@ and homogeneity of variance, can then be checked with the
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="fitted-values-and-residuals">Fitted Values and Residuals<a class="anchor" aria-label="anchor" href="#fitted-values-and-residuals"></a>
@@ -176,6 +178,7 @@ to the regression line.</p>
 <code>deming</code> R package.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: package 'deming' was built under R version 4.4.3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span></span>
@@ -211,11 +214,11 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="700"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -240,11 +243,11 @@ TRUE.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="700"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" width="700"></p>
 <p>The weighted model provides a better fit.</p>
 </div>
 </div>
@@ -336,13 +339,12 @@ diagnostic tests:</p>
 <span><span class="co">#&gt; 1 Intercept 0.09622 0.390603  -0.7206   0.8105 28          0     FALSE</span></span>
 <span><span class="co">#&gt; 2   method1 0.99440 0.005918   0.9840   1.0072 28          1     FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; 28 degrees of freedom</span></span>
-<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span></code></pre></div>
+<span><span class="co">#&gt; 28 degrees of freedom</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method displays the regression line with
 data:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics-1">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics-1"></a>
@@ -352,7 +354,7 @@ Passing-Bablok regression, including the CUSUM linearity test and
 Kendall’s tau correlation:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="bootstrap-confidence-intervals">Bootstrap Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
@@ -371,34 +373,33 @@ Kendall’s tau correlation:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;        term    coef       se lower.ci upper.ci df null_value reject_h0</span></span>
-<span><span class="co">#&gt; 1 Intercept 0.09622 0.088205 -0.09182   0.2539 28          0     FALSE</span></span>
-<span><span class="co">#&gt; 2   method1 0.99440 0.001291  0.99198   0.9970 28          1      TRUE</span></span>
+<span><span class="co">#&gt; 1 Intercept 0.09622 0.498965  -0.9118   0.8647 28          0     FALSE</span></span>
+<span><span class="co">#&gt; 2   method1 0.99440 0.006917   0.9836   1.0075 28          1     FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 28 degrees of freedom</span></span>
-<span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Bootstrap CIs based on 999 resamples</span></span></code></pre></div>
+<span><span class="co">#&gt; Pairs bootstrap CIs based on 999 resamples</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="joint-confidence-regions">Joint Confidence Regions<a class="anchor" aria-label="anchor" href="#joint-confidence-regions"></a>
 </h2>
-<p>A theoretically valid, but still experimental, enhancement to the
-<code>dem_reg</code> and <code>pb_reg</code> functions is the addition
-of <strong>joint confidence regions</strong> for the slope and intercept
-parameters. Traditional confidence intervals treat each parameter
-separately, but in regression analysis, these parameters are
-correlated.</p>
-<p>Joint confidence regions account for this correlation by creating an
-elliptical region in the (intercept, slope) parameter space. This
-approach, promoted by <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
+<p>An experimental enhancement to the <code>dem_reg</code> and
+<code>pb_reg</code> functions is the addition of <strong>joint
+confidence regions</strong> for the slope and intercept parameters.
+Traditional confidence intervals treat each parameter separately, but in
+regression analysis, these parameters are correlated.</p>
+<p>Joint confidence regions account for this correlation with a region
+in the (intercept, slope) parameter space. This approach, promoted by
+<span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span>, provides several
 advantages:</p>
 <ul>
 <li>
-<strong>Higher Statistical Power</strong>: The ellipse typically
-requires 20-50% fewer samples than traditional confidence intervals to
-detect the same bias</li>
+<strong>Higher Statistical Power</strong>: when the measurement
+range is narrow, the joint region can need several-fold (sometimes far)
+fewer samples than the two confidence intervals to detect the same
+bias</li>
 <li>
 <strong>Accounts for Parameter Correlation</strong>: When the
 measurement range is narrow, slope and intercept are highly negatively
@@ -411,34 +412,54 @@ separate intervals</li>
 <p>The power advantage is most pronounced when the ratio of maximum to
 minimum X values is small (&lt; 10:1), which is common in clinical
 method comparisons.</p>
+<p>Two regions are available through the <code>method</code>
+argument:</p>
+<ul>
+<li>
+<strong><code>"sadler"</code></strong> (default for Deming
+regression): the sum-of-squares region of <span class="citation">Sadler
+(<a href="#ref-sadler2010">2010</a>)</span>. It uses the Deming sum of
+squares directly, not a variance-covariance matrix, and is not exactly
+an ellipse. In simulations it rejected a true identity line 4.3-5.9% of
+the time at a nominal 5%, from n = 10 upward.</li>
+<li>
+<strong><code>"wald"</code></strong> (the only option for
+Passing-Bablok regression): an ellipse from the variance-covariance
+matrix of the estimates. For Deming regression that matrix is a
+delete-one jackknife, and the test is liberal in small samples (about
+8.5% at n = 10 and 7.4% at n = 20 at a nominal 5%). For Passing-Bablok
+regression, use bootstrap or delete-d jackknife resampling (both held
+about 5% in simulations).</li>
+</ul>
 <div class="section level3">
 <h3 id="visualizing-the-joint-confidence-region">Visualizing the Joint Confidence Region<a class="anchor" aria-label="anchor" href="#visualizing-the-joint-confidence-region"></a>
 </h3>
-<p>The <code><a href="../reference/simple_eiv-methods.html">plot_joint()</a></code> function allows visualization of the
+<p>The <code><a href="../reference/joint_test.html">plot_joint()</a></code> function allows visualization of the
 confidence region in parameter space:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">dem1</span>, </span>
 <span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"></p>
 <p>This plot shows:</p>
 <ul>
-<li>The <strong>red ellipse</strong>: Joint confidence region</li>
+<li>The <strong>red curve</strong>: Joint confidence region (Sadler’s
+region by default; <code>method = "wald"</code> draws the ellipse)</li>
 <li>The <strong>blue rectangle</strong>: Traditional confidence
 intervals</li>
 <li>The <strong>black dot</strong>: Estimated (intercept, slope)</li>
 <li>The <strong>green/red X</strong>: Ideal point (whether enclosed or
 not)</li>
 </ul>
-<p>Notice how the ellipse is smaller than the rectangle, especially in
+<p>Notice how the region is narrower than the rectangle, especially in
 the directions that matter for detecting bias.</p>
-<p>For Passing-Bablok regression, bootstrap resampling must be used to
-obtain the variance-covariance matrix needed for the joint confidence
-region:</p>
+<p>For Passing-Bablok regression, bootstrap (or delete-d jackknife)
+resampling must be used to obtain the variance-covariance matrix needed
+for the joint confidence region:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_eiv-methods.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="joint-hypothesis-test">Joint Hypothesis Test<a class="anchor" aria-label="anchor" href="#joint-hypothesis-test"></a>
@@ -449,10 +470,11 @@ within the joint confidence region:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [Sadler sum-of-squares, F-based] (H0:</span></span>
+<span><span class="co">#&gt;  intercept = 0, slope = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  y ~ x</span></span>
-<span><span class="co">#&gt; X-squared = 0.21666, df = 2, p-value = 0.8973</span></span>
+<span><span class="co">#&gt; F = 0.059522, df1 = 2, df2 = 8, p-value = 0.9426</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
 <span><span class="co">#&gt; null values:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
@@ -460,16 +482,19 @@ within the joint confidence region:</p>
 <span><span class="co">#&gt; sample estimates:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
 <span><span class="co">#&gt; 0.1284751 0.9744516</span></span></code></pre></div>
-<p>This returns an <code>htest</code> object with the Mahalanobis
-distance (chi-squared statistic) and p-value. The test can also be
-applied to Passing-Bablok models fitted with bootstrap:</p>
+<p>This returns an <code>htest</code> object with Sadler’s F statistic
+and p-value. The Wald version (Mahalanobis distance) is available with
+<code>joint_test(dem1, method = "wald")</code>. The test can also be
+applied to Passing-Bablok models fitted with bootstrap, where it is
+always the Wald test:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">joint_test</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Joint Confidence Region Test (H0: intercept = 0, slope = 1)</span></span>
+<span><span class="co">#&gt;  Joint Confidence Region Test [Wald, F-based] (H0: intercept = 0, slope</span></span>
+<span><span class="co">#&gt;  = 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; data:  method2 ~ method1</span></span>
-<span><span class="co">#&gt; X-squared = 905.61, df = 2, p-value &lt; 2.2e-16</span></span>
+<span><span class="co">#&gt; X-squared = 7.7659, df1 = 2, df2 = 28, p-value = 0.03248</span></span>
 <span><span class="co">#&gt; alternative hypothesis: true intercept and slope are not equal to the null values</span></span>
 <span><span class="co">#&gt; null values:</span></span>
 <span><span class="co">#&gt; intercept     slope </span></span>
@@ -505,20 +530,45 @@ H_0: \beta_0 = 0 \space vs. \space H_1: \beta_0 \ne 0
 \]</span></p>
 <p>Second, that the slope is equal to one:</p>
 <p><span class="math display">\[
-H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
+H_0: \beta_1 = 1 \space vs. \space H_1: \beta_1 \ne 1
 \]</span></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="joint-confidence-region-calculative-approach">Joint Confidence Region Calculative Approach<a class="anchor" aria-label="anchor" href="#joint-confidence-region-calculative-approach"></a>
 </h2>
-<p>The joint <span class="math inline">\((1-\alpha) \times
-100\%\)</span> confidence region for <span class="math inline">\((\beta_0, \beta_1)\)</span> is defined as:</p>
+<div class="section level3">
+<h3 id="sadlers-region-deming-regression-default">Sadler’s region (Deming regression, default)<a class="anchor" aria-label="anchor" href="#sadlers-region-deming-regression-default"></a>
+</h3>
+<p>Deming regression with error ratio <span class="math inline">\(\lambda\)</span> and weights <span class="math inline">\(w_i\)</span> minimises</p>
 <p><span class="math display">\[
-(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq
-\chi^2_{2,\alpha}
+S(a, b) = \sum_{i=1}^n \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2}
 \]</span></p>
-<p>Where:</p>
+<p>Following <span class="citation">Sadler (<a href="#ref-sadler2010">2010</a>)</span> (after Draper and Smith), with
+<span class="math inline">\(\hat S\)</span> the minimum, the joint <span class="math inline">\((1-\alpha) \times 100\%\)</span> confidence region
+for <span class="math inline">\((\beta_0, \beta_1)\)</span> is the set
+of <span class="math inline">\((a, b)\)</span> with</p>
+<p><span class="math display">\[
+F = \frac{(S(a, b) - \hat S)/2}{\hat S / (n - 2)} \leq F_{2, n-2,
+1-\alpha}
+\]</span></p>
+<p>and the joint test of a hypothesized <span class="math inline">\((a_0, b_0)\)</span> (e.g., <span class="math inline">\((0, 1)\)</span> for identity) compares <span class="math inline">\(F\)</span> at that point with the <span class="math inline">\(F(2, n - 2)\)</span> distribution. No
+variance-covariance matrix is needed, and only the error ratio (not the
+size of the errors) matters. For a fixed slope the condition is
+quadratic in the intercept, so the region is drawn exactly.</p>
+</div>
+<div class="section level3">
+<h3 id="wald-ellipse">Wald ellipse<a class="anchor" aria-label="anchor" href="#wald-ellipse"></a>
+</h3>
+<p>This was my original solution for this joint testing problem. I
+would, for Deming regression, stick with Sadler’s region.</p>
+<p>With <code>method = "wald"</code> the region is</p>
+<p><span class="math display">\[
+(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq 2 F_{2,
+n-2, 1-\alpha}
+\]</span></p>
+<p>(or <span class="math inline">\(\chi^2_{2, 1-\alpha}\)</span> with
+<code>test_method = "asymptotic"</code>), where:</p>
 <ul>
 <li>
 <span class="math inline">\(\hat{\beta}\)</span> = estimated
@@ -530,18 +580,19 @@ parameters <span class="math inline">\((\hat{\beta}_0,
 parameters (e.g., <span class="math inline">\((0, 1)\)</span> for
 identity)</li>
 <li>
-<span class="math inline">\(V\)</span> = variance-covariance
-matrix</li>
-<li>
-<span class="math inline">\(\chi^2_{2,\alpha}\)</span> = chi-square
-critical value with 2 degrees of freedom</li>
+<span class="math inline">\(V\)</span> = variance-covariance matrix
+(jackknife for Deming; bootstrap or delete-d jackknife for
+Passing-Bablok)</li>
 </ul>
 <p>This forms an ellipse in parameter space that accounts for the
 correlation between slope and intercept.</p>
+</div>
 <div class="section level3">
 <h3 id="measurement-error">Measurement Error<a class="anchor" aria-label="anchor" href="#measurement-error"></a>
 </h3>
-<p>A Deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant.</p>
+<p>A Deming regression model also assumes the measurement error (<span class="math inline">\(\sigma^2\)</span>) ratio is constant. In
+<code>SimplyAgree</code>, the error ratio is always the error variance
+of x divided by the error variance of y.</p>
 <p><span class="math display">\[
 \lambda = \frac{\sigma^2_\epsilon}{\sigma^2_\delta}
 \]</span></p>
@@ -555,7 +606,7 @@ then be estimated from the data itself.</p>
 coefficient of variation (if that data is available) and the mean of x
 and y (<span class="math inline">\(\bar x, \space \bar y\)</span>).</p>
 <p><span class="math display">\[
-\lambda = \frac{(CV_y \cdot \bar y)^2}{(CV_x \cdot \bar x)^2}
+\lambda = \frac{(CV_x \cdot \bar x)^2}{(CV_y \cdot \bar y)^2}
 \]</span></p>
 </div>
 <div class="section level3">
@@ -682,7 +733,7 @@ Power of Parametric Regression in Method-Comparison Studies.”</span>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

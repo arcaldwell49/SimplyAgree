@@ -58,7 +58,7 @@ Returns single loa class object with the results of the agreement analysis.
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
 Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).

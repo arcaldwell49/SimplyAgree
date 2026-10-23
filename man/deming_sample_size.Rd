@@ -9,7 +9,7 @@ deming_sample_size(
   initial_n = 20,
   max_n = 500,
   n_sims = 500,
-  use_joint = TRUE,
+  use_joint = NULL,
   step_size = 5,
   ...
 )
@@ -23,7 +23,11 @@ deming_sample_size(
 
 \item{n_sims}{Number of simulations per sample size tested. Default is 500.}
 
-\item{use_joint}{Logical. If TRUE, optimizes for joint region power; if FALSE, for CI power.}
+\item{use_joint}{Which target ends the search. \code{NULL} (default) searches until
+both the joint-region and the confidence-interval targets are reached, so
+both sample sizes (and the reduction) are reported. \code{TRUE} stops at the
+joint-region target and \code{FALSE} at the confidence-interval target; the
+other sample size is then reported only if it was reached first.}
 
 \item{step_size}{Step size for sample size increments. Default is 5.}
 
@@ -39,7 +43,7 @@ A list of class "deming_sample_size" containing:
 \item{reduction_pct}{Percentage reduction}
 }
 \description{
-#' \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Automatically determines the minimum sample size needed to achieve target statistical
 power for detecting specified bias in method comparison studies using Deming regression.
@@ -49,17 +53,28 @@ This function performs a grid search over sample sizes to find the minimum N
 needed to achieve the target power. It tests both confidence interval and
 joint confidence region approaches, allowing comparison of required sample sizes.
 
-Using joint confidence regions typically requires 20-50\% fewer samples than
+Using joint confidence regions typically requires far fewer samples than
 confidence intervals when the measurement range is narrow (max:min ratio < 10:1).
+
+Each power is a simulation estimate (Monte Carlo SE about 1.3 percentage
+points at 90\% power with \code{n_sims = 500}), and the search takes the first N
+whose estimate reaches the target, which tends to pick N slightly too small.
+In simulations the true power at the returned N was close to the target on
+average but below 85\% in up to 20\% of runs. Use a larger \code{n_sims} (or check
+the chosen N with \code{\link[=deming_power_sim]{deming_power_sim()}}) when the sample size matters. N is
+never below \code{initial_n}.
 }
 \examples{
-\dontrun{
-# Determine N needed for 90\% power to detect 5\% bias
+\donttest{
+# Determine N needed for 90\% power to detect 5\% bias with the joint
+# region (use_joint = TRUE stops there; n_sims = 500 or more in practice)
 sample_size_result <- deming_sample_size(
   target_power = 0.90,
-  initial_n = 30,
+  initial_n = 10,
   max_n = 200,
-  n_sims = 500,
+  n_sims = 200,
+  step_size = 10,
+  use_joint = TRUE,
   x_range = c(20, 200),
   actual_slope = 1.05,
   ideal_slope = 1.0,

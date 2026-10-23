@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Limits of Agreement — agreement_limit"><meta name="description" content='
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Limits of Agreement — agreement_limit"><meta name="description" content='
 A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
 Please note that the package developer recommends reporting/using tolerance limits (see "tolerance_limit" function).'><meta property="og:description" content='
 A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
@@ -17,7 +17,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +30,7 @@ Please note that the package developer recommends reporting/using tolerance limi
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -58,7 +59,7 @@ Please note that the package developer recommends reporting/using tolerance limi
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="figures/lifecycle-maturing.svg" alt="[Maturing]"></a></p>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a></p>
 <p>A function for calculating for Bland-Altman limits of agreement based on the difference between two measurements (difference = x-y).
 Please note that the package developer recommends reporting/using tolerance limits (see <code>"tolerance_limit"</code> function).</p>
     </div>
@@ -154,7 +155,7 @@ Please note that the package developer recommends reporting/using tolerance limi
 The <code>loa_calc</code> allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (<code>loa_calc = "blandaltman"</code>),
 or by the more accurate MOVER method of Zou (2013) and Donner &amp; Zou (2012) (<code>loa_calc = "mover"</code>).</p>
 <p>The confidence bounds on the limits of agreement answer one of two questions, set by <code>bound_type</code>:</p><ul><li><p>"iu" (default): "Can I conclude agreement within plus or minus delta?" If <code>lower_loa_ci</code> &gt; -delta and <code>upper_loa_ci</code> &lt; delta, reject at level <code>alpha</code> that either limit of agreement lies outside plus or minus delta. <code>conf.level</code> (1 - <code>alpha</code>) applies to each side separately; both bounds hold together only about 1 - 2 * <code>alpha</code> of the time.</p></li>
-<li><p>"joint": "Where are the limits of agreement?" With at least 1 - <code>alpha</code> confidence, both limits of agreement lie within . Used as a test against plus or minus delta, the error rate is at most <code>alpha</code>/2 (conservative).</p></li>
+<li><p>"joint": "Where are the limits of agreement?" With at least 1 - <code>alpha</code> confidence, both limits of agreement lie between <code>lower_loa_ci</code> and <code>upper_loa_ci</code>. Used as a test against plus or minus delta, the error rate is at most <code>alpha</code>/2 (conservative).</p></li>
 </ul><p>Because a one-sided bound on the (1 - <code>agree.level</code>)/2 percentile is a one-sided tolerance bound, these bounds are equal-tailed tolerance bounds; they target the same quantities as <code>tolerance_limit(bound_type = "iu")</code>.
 The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is always a two-sided 1 - <code>alpha</code> interval.</p>
     </div>
@@ -198,6 +199,7 @@ The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is al
 <span class="r-out co"><span class="r-pr">#&gt;</span> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   not a joint 95% interval for the LoA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SD of Differences = 1.5036</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Within-Subject SDs of X &amp; Y = 0.4011 &amp; 0.4348</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Nested</span></span></span>
 <span class="r-in"><span><span class="fu">agreement_limit</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span><span class="st">"y"</span>, data <span class="op">=</span> <span class="va">reps</span>, id <span class="op">=</span> <span class="st">"id"</span>, data_type <span class="op">=</span> <span class="st">"nest"</span><span class="op">)</span></span></span>
@@ -223,7 +225,7 @@ The bias confidence interval (<code>lower.CL</code>/<code>upper.CL</code>) is al
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -243,9 +243,9 @@ tolerance_limit(
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.1537 [0.0595, 0.2478]   [-0.2919, 0.5993] [-0.3674, 0.6748]
-#>         PM 0.2280 [0.1342, 0.3218]     [-0.216, 0.672] [-0.1938, 0.6498]
+#>  Condition   Bias          Bias CI     SD Prediction Interval  Tolerance Limits
+#>         AM 0.1537 [0.0595, 0.2478] 0.1878   [-0.2919, 0.5993] [-0.3674, 0.6748]
+#>         PM 0.2280 [0.1342, 0.3218] 0.1520     [-0.216, 0.672] [-0.1938, 0.6498]
 ```
 
 ### Calculative Approach
@@ -302,7 +302,7 @@ With `model = "gls"` (default), the differences follow a marginal
 generalized least squares model
 ([`nlme::gls()`](https://rdrr.io/pkg/nlme/man/gls.html)):
 
-\\ d\_{ij} = \mathbf{x}\_{ij}^\top \boldsymbol{\beta} + e\_{ij}, \qquad
+\\ d\_{ij} = \mathbf{x}\_{ij}^\top \beta + e\_{ij}, \qquad
 \text{Var}(e\_{ij}) = \sigma^2 g\_{ij}^2, \qquad \text{Cor}(e\_{ij},
 e\_{ij'}) = R\_{i, jj'} \\
 
@@ -317,16 +317,16 @@ With `model = "lme"`, the differences follow a linear mixed model
 intercept for each subject and, optionally, for each setting (inner
 level) within subject:
 
-\\ d\_{ijk} = \mathbf{x}\_{ijk}^\top \boldsymbol{\beta} + u_i +
-v\_{ij} + e\_{ijk}, \qquad u_i \sim N(0, \sigma_1^2), \quad v\_{ij} \sim
-N(0, \sigma_2^2), \quad \text{Var}(e\_{ijk}) = \sigma^2 g\_{ijk}^2 \\
+\\ d\_{ijk} = \mathbf{x}\_{ijk}^\top \\beta + u_i + v\_{ij} + e\_{ijk},
+\qquad u_i \sim N(0, \sigma_1^2), \quad v\_{ij} \sim N(0, \sigma_2^2),
+\quad \text{Var}(e\_{ijk}) = \sigma^2 g\_{ijk}^2 \\
 
 where \\v\_{ij}\\ is present only with two `id` columns, the variance
 function applies to the residuals only, and `cor_type = "ar1"` or
 `"car1"` adds serial correlation of the residuals within the innermost
 level. The variance of a single difference for a given row is
 
-\\ S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2 . \\
+\\ S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2 \\
 
 The output reports the components as `SD.between` (\\\hat\sigma_1\\),
 `SD.nested` (\\\hat\sigma_2\\), and `SD.within` (\\\hat\sigma g\\). For
@@ -359,7 +359,7 @@ bias with the variance of a single difference:
 
 and the prediction interval is
 
-\\ PI = b \pm t\_{1-\alpha_1/2,\\ df_b} \cdot SEP . \\
+\\ PI = b \pm t\_{1-\alpha_1/2,\\ df_b} \cdot SEP \\
 
 This is a “beta-expectation” tolerance interval: on average over
 repeated studies, it contains a proportion \\\beta\\ of the differences.
@@ -386,14 +386,14 @@ further below.
 with \\\nu\\ the residual degrees of freedom (\\N - p\\ without a
 variance function),
 
-\\ S_U = S \sqrt{\frac{\nu}{\chi^2\_{\alpha_2, \nu}}} . \\
+\\ S_U = S \sqrt{\frac{\nu}{\chi^2\_{\alpha_2, \nu}}} \\
 
 **Variance components** (`gls` with compound symmetry, or `lme`): write
 \\S^2 = \sum_j a_j\\, where piece \\j\\ is estimated with \\\nu_j\\
 degrees of freedom. Then
 
 \\ S_U^2 = S^2 + \sqrt{\sum_j \left\[ a_j \left(
-\frac{\nu_j}{\chi^2\_{\alpha_2, \nu_j}} - 1 \right) \right\]^2 } . \\
+\frac{\nu_j}{\chi^2\_{\alpha_2, \nu_j}} - 1 \right) \right\]^2 } \\
 
 Pieces with zero degrees of freedom are dropped. The pieces are the
 balanced nested analysis of variance decomposition of \\S^2\\ into the
@@ -445,7 +445,7 @@ gave limits that were too narrow: about 93% coverage for a 95% target.)
 a user-specified structure): \\S_U = S \sqrt{\nu / \chi^2\_{\alpha_2,
 \nu}}\\ with an effective degrees of freedom
 
-\\ \nu = \frac{2 S^4}{\widehat{\text{Var}}(S^2)}, \\
+\\ \nu = \frac{2 \cdot S^4}{\widehat{\text{Var}}(S^2)} \\
 
 where \\\widehat{\text{Var}}(S^2)\\ comes from the delta method applied
 to the approximate covariance matrix of the variance parameters (\\\log
@@ -469,7 +469,7 @@ tolerance interval: with confidence \\\gamma\\, at least a proportion
 approximation of Howe ([1969](#ref-howe1969)), as described by Francq et
 al. ([2020](#ref-francq2020tolerate)):
 
-\\ TI = b \pm z \cdot SEP \cdot \frac{S_U}{S} . \\
+\\ TI = b \pm z \cdot SEP \cdot \frac{S_U}{S} \\
 
 For independent data with only an intercept, \\SEP = S \sqrt{1 + 1/n}\\
 and \\S_U / S = \sqrt{(n-1)/\chi^2\_{\alpha_2, n-1}}\\, and this is
@@ -492,7 +492,7 @@ only about \\1 - 2\alpha_2\\ of the time, so they are not a joint
 **Independent data** (`gls` without a correlation structure): the bounds
 are exact, from the noncentral \\t\\ distribution,
 
-\\ b \mp t'\_{\gamma,\\ \nu}\\\left(\frac{zS}{SEM}\right) SEM , \\
+\\ b \mp t'\_{\gamma,\\ \nu}\\\left(\frac{zS}{SEM}\right) SEM \\
 
 where \\t'\_{\gamma, \nu}(\lambda)\\ is the \\\gamma\\ quantile of a
 noncentral \\t\\ distribution with \\\nu\\ degrees of freedom and
@@ -503,9 +503,10 @@ used.)
 **Otherwise**, the MOVER bound ([Zou 2011](#ref-zou2011)) combines the
 one-sided bounds for the bias and for \\S\\:
 
-\\ L = (b - zS) - \sqrt{\left(t\_{\gamma,\\ df_b}\\ SEM\right)^2 + z^2
-\left(S_U - S\right)^2}, \qquad U = (b + zS) + \sqrt{\left(t\_{\gamma,\\
-df_b}\\ SEM\right)^2 + z^2 \left(S_U - S\right)^2} . \\
+\\ H = \sqrt{\left(t\_{\gamma,\\ df_b}\\ SEM\right)^2 + z^2 \left(S_U -
+S\right)^2} \\
+
+\\ L = (b - zS) - H, \qquad U = (b + zS) + H \\
 
 #### Bootstrap calibration: `tol_method = "boot_cal"` (experimental)
 
@@ -514,12 +515,12 @@ limits ([Loh 1987](#ref-loh1987); [Beran 1987](#ref-beran1987)):
 
 1.  **Simulate** \\B\\ (`replicates`) new data sets from the fitted
     model, using the point estimates: \\\mathbf{d}^\* =
-    \mathbf{X}\hat{\boldsymbol\beta} + \mathbf{e}^\*\\, where
-    \\\mathbf{e}^\*\\ has the fitted marginal covariance. For subject
-    \\i\\ this is \\D_i R_i D_i\\ for `gls` and \\\hat\sigma_1^2 J +
-    \hat\sigma_2^2 B_i + D_i R_i D_i\\ for `lme`, where \\D_i\\ holds
-    the residual SDs, \\J\\ is a matrix of ones, and \\B_i\\ has ones
-    for pairs of measurements in the same setting.
+    \mathbf{X}\hat{\beta} + \mathbf{e}^\*\\, where \\\mathbf{e}^\*\\ has
+    the fitted marginal covariance. For subject \\i\\ this is \\D_i R_i
+    D_i\\ for `gls` and \\\hat\sigma_1^2 J + \hat\sigma_2^2 B_i + D_i
+    R_i D_i\\ for `lme`, where \\D_i\\ holds the residual SDs, \\J\\ is
+    a matrix of ones, and \\B_i\\ has ones for pairs of measurements in
+    the same setting.
 2.  **Refit** the model to each data set, and compute the replicate bias
     \\b^\*\\, SD \\S^\*\\, SEM\\^\*\\, and variance components (or
     effective degrees of freedom). Replicates whose model fails to
@@ -664,9 +665,12 @@ test1
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition    Bias            Bias CI Prediction Interval  Tolerance Limits
-#>         AM -0.1537 [-0.2478, -0.0595]   [-0.5993, 0.2919] [-0.6748, 0.3674]
-#>         PM -0.2280 [-0.3218, -0.1342]     [-0.672, 0.216] [-0.6498, 0.1938]
+#>  Condition    Bias            Bias CI     SD Prediction Interval
+#>         AM -0.1537 [-0.2478, -0.0595] 0.1878   [-0.5993, 0.2919]
+#>         PM -0.2280 [-0.3218, -0.1342] 0.1520     [-0.672, 0.216]
+#>   Tolerance Limits
+#>  [-0.6748, 0.3674]
+#>  [-0.6498, 0.1938]
 ```
 
 ## Agreement
@@ -837,6 +841,7 @@ a2
 #> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
 #>   not a joint 95% interval for the LoA
 #> SD of Differences = 1.5036
+#> Within-Subject SDs of X & Y = 0.4011 & 0.4348
 ```
 
 #### Calculative Steps
@@ -883,11 +888,16 @@ where \\N_x = \Sigma_i m\_{xi}\\ and \\N_y = \Sigma_i m\_{yi}\\.
 
 **MOVER Method**
 
-\\ u = s_d^2 + \sqrt{\left\[s_b^2 \left(\frac{n-1}{\chi^2\_{\alpha,
-n-1}} - 1\right)\right\]^2 + \left\[\left(1-\frac{1}{m\_{xh}}\right)
-s\_{xw}^2 \left(\frac{N_x-n}{\chi^2\_{\alpha, N_x-n}} -
-1\right)\right\]^2 + \left\[\left(1-\frac{1}{m\_{yh}}\right) s\_{yw}^2
-\left(\frac{N_y-n}{\chi^2\_{\alpha, N_y-n}} - 1\right)\right\]^2} \\
+\\ u_1 = \left\[s_b^2 \left(\frac{n-1}{\chi^2\_{\alpha, n-1}} -
+1\right)\right\]^2 \\
+
+\\ u_2 = \left\[\left(1-\frac{1}{m\_{xh}}\right) s\_{xw}^2
+\left(\frac{N_x-n}{\chi^2\_{\alpha, N_x-n}} - 1\right)\right\]^2 \\
+
+\\ u_3 = \left\[\left(1-\frac{1}{m\_{yh}}\right) s\_{yw}^2
+\left(\frac{N_y-n}{\chi^2\_{\alpha, N_y-n}} - 1\right)\right\]^2 \\
+
+\\ u = s_d^2 + \sqrt{u_1 + u_2 + u_3} \\
 
 \\ LME = \sqrt{\frac{z\_{1-\alpha}^2 \cdot s_b^2}{n} + z_A^2 \cdot
 \left(\sqrt{u}-\sqrt{s^2_d}\right)^2} \\
@@ -1109,6 +1119,8 @@ print(test_tol)
 #>  [-3.6396, 2.7057]
 #>  [-2.6667, 3.3694]
 #>  [-1.6284, 4.9729]
+#> 
+#> SD of Differences = 1.0567
 
 # See effect of proportional bias on limits
 plot(test_tol)
@@ -1149,9 +1161,9 @@ tolerance_limit(
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition  Bias          Bias CI Prediction Interval Tolerance Limits
-#>         AM 1.004 [1.0016, 1.0068]    [0.9921, 1.0165]   [0.99, 1.0186]
-#>         PM 1.006 [1.0036, 1.0088]    [0.9941, 1.0185] [0.9947, 1.0178]
+#>  Condition  Bias          Bias CI CV (%) Prediction Interval Tolerance Limits
+#>         AM 1.004 [1.0016, 1.0068] 0.5137    [0.9921, 1.0165]   [0.99, 1.0186]
+#>         PM 1.006 [1.0036, 1.0088] 0.4139    [0.9941, 1.0185] [0.9947, 1.0178]
 ```
 
 If you prefer to interpret the differences as a percentage difference,
@@ -1178,9 +1190,9 @@ tolerance_limit(
 #> Tolerance Limits: at least 95% of differences with 95% confidence
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
-#>  Condition   Bias          Bias CI Prediction Interval  Tolerance Limits
-#>         AM 0.4188 [0.1615, 0.6761]   [-0.7959, 1.6335] [-1.0041, 1.8417]
-#>         PM 0.6184 [0.3622, 0.8747]   [-0.5916, 1.8285] [-0.5288, 1.7656]
+#>  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits
+#>         AM 0.4188 [0.1615, 0.6761] 0.5123   [-0.7959, 1.6335] [-1.0041, 1.8417]
+#>         PM 0.6184 [0.3622, 0.8747] 0.4131   [-0.5916, 1.8285] [-0.5288, 1.7656]
 ```
 
 ## Visualizing “Big” Data

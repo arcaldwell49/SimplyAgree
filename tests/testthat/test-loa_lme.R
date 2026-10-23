@@ -1,7 +1,19 @@
 context("loa_lme")
 
+test_that("loa_lme is deprecated", {
+  data('recpre_long')
+  df = recpre_long
+  df$avg = (recpre_long$AM + recpre_long$PM) / 2
+  old_opts = options(lifecycle_verbosity = "warning")
+  on.exit(options(old_opts), add = TRUE)
+  expect_warning(loa_lme(diff = "diff", avg = "avg", id = "id",
+                         data = df, replicates = 10),
+                 "tolerance_limit")
+})
 
 testthat::test_that("basic runs", {
+  old_opts = options(lifecycle_verbosity = "quiet")
+  on.exit(options(old_opts), add = TRUE)
   expect_error(loa_lme(
     diff = "diff",
     avg = "avg",

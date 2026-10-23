@@ -1,6 +1,6 @@
 #' @title Tolerance Limits from an Agreement Study
 #'
-#' @description `r lifecycle::badge('maturing')`
+#' @description `r lifecycle::badge('stable')`
 #'
 #' A function for calculating tolerance limits for the difference between two measurements (difference = x-y).
 #' This is a procedure that should produce results similar to the Bland-Altman limits of agreement.
@@ -431,7 +431,7 @@ tolerance_limit = function(data,
 
 
 # tol_method argument ----
-# "approx" and "perc" were renamed to "analytic" and "boot_cal" in 0.3.1
+# "approx" and "perc" were renamed to "analytic" and "boot_cal" in 0.4.0
 # ("perc" was never a percentile bootstrap after the calibration was added).
 # The old names, including partial matches, still work with a notice.
 tol_method_arg = function(tol_method){
@@ -444,10 +444,13 @@ tol_method_arg = function(tol_method){
   new = switch(old,
                approx = "analytic",
                perc = "boot_cal")
+  # user_env is the caller of tolerance_limit(); without it lifecycle sees
+  # this helper's caller (inside the package) and never warns users
   lifecycle::deprecate_soft(
-    "0.3.1",
+    "0.4.0",
     I(paste0('tolerance_limit(tol_method = "', old, '")')),
-    I(paste0('tolerance_limit(tol_method = "', new, '")'))
+    I(paste0('tolerance_limit(tol_method = "', new, '")')),
+    user_env = parent.frame(2)
   )
   new
 }

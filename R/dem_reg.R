@@ -74,13 +74,24 @@
 #'   - `resamples`: List containing resamples from jacknife procedure (if keep_data = TRUE).
 #'
 #' @examples
-#' \dontrun{
-#' # New formula interface (recommended)
-#' model <- dem_reg(y ~ x, data = mydata)
+#' # Peak flow: mini vs Wright meter (Bland & Altman, 1986)
+#' data("ba1986")
+#' fit <- dem_reg(mini1 ~ wright1, data = ba1986)
+#' summary(fit)
+#' plot(fit)
 #'
-#' # Old interface (still works with deprecation warning)
-#' model <- dem_reg(x = "x", y = "y", data = mydata)
-#' }
+#' # Joint test of intercept = 0 and slope = 1
+#' joint_test(fit)
+#'
+#' # Known error ratio, var(x) / var(y)
+#' dem_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+#'
+#' # Replicate measurements: the error ratio is estimated from the replicates
+#' data("reps")
+#' dem_reg(y ~ x, data = reps, id = "id")
+#'
+#' # Weighted Deming regression (error proportional to the level)
+#' dem_reg(mini1 ~ wright1, data = ba1986, weighted = TRUE)
 #'
 #' @references
 #' Linnet, K. (1990) Estimation of the linear relationship between the measurements of two methods with proportional errors. Statistics in Medicine, 9, 1463-1473.
@@ -429,55 +440,4 @@ dem_reg <- function(formula = NULL,
     is_enclosed = is_enclosed,
     p_value = p_value
   )
-}
-
-.get_simple_eiv_data <- function(object) {
-  if (!inherits(object, "simple_eiv")) {
-    stop("Object must be of class 'simple_eiv'")
-  }
-
-  mf <- model.frame(object, na.action = na.pass)
-  mt <- attr(mf, "terms")
-
-  # Extract y and x from formula
-  # model.response gets column 1 (y)
-  y_vals <- model.response(mf, "numeric")
-
-  # mf[[2]] gets column 2 (x) directly from model frame, not model matrix
-  x_vals <- mf[[2]]
-
-  if (ncol(mf) == 3) {
-    # id can be either a column name (string) or the actual values
-
-    id_vals <- mf[[3]]
-
-
-    df <- data.frame(id = id_vals, x = x_vals, y = y_vals)
-    df <- df[complete.cases(df), ]
-
-    df2 <- df %>%
-      group_by(id) %>%
-      mutate(mean_y = mean(y, na.rm = TRUE),
-             mean_x = mean(x, na.rm = TRUE),
-             n_x = sum(!is.na(x)),
-             n_y = sum(!is.na(y))) %>%
-      ungroup() %>%
-      mutate(diff_y = y - mean_y,
-             diff_y2 = diff_y^2,
-             diff_x = x - mean_x,
-             diff_x2 = diff_x^2)
-
-    df3 <- df2 %>%
-      group_by(id) %>%
-      summarize(x = mean(x, na.rm = TRUE),
-                y = mean(y, na.rm = TRUE),
-                .groups = 'drop') %>%
-      drop_na()
-
-
-  } else {
-    df3 <- data.frame(x = x_vals, y = y_vals)
-    df3 <- df3[complete.cases(df3), ]
-  }
-  return(df3)
 }

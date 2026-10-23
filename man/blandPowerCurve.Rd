@@ -10,28 +10,49 @@ blandPowerCurve(
   SD,
   delta,
   conf.level = 0.95,
-  agree.level = 0.95
+  agree.level = 0.95,
+  m = 1,
+  icc = 0
 )
 }
 \arguments{
-\item{samplesizes}{vector of samples sizes at which to estimate power.}
+\item{samplesizes}{vector of samples sizes at which to estimate power: the
+number of pairs, or the number of subjects when \code{m > 1}.}
 
 \item{mu}{mean of differences}
 
-\item{SD}{standard deviation of differences}
+\item{SD}{standard deviation of differences (the \emph{total} SD when \code{m > 1})}
 
 \item{delta}{The threshold below which methods agree/can be considered equivalent, can be in any units. Equivalence Bound for Agreement. More than one delta can be provided.}
 
 \item{conf.level}{the confidence level(s) required. Default is 95\%. More than one confidence level can be provided.}
 
 \item{agree.level}{the agreement level(s) required. Default is 95\%. The proportion of data that should lie between the thresholds, for 95\% limits of agreement this should be 0.95. More than one confidence level can be provided.}
+
+\item{m}{number of paired measurements per subject (default 1, independent
+pairs).}
+
+\item{icc}{intraclass correlation of the paired \emph{differences}, in [0, 1).
+Ignored when \code{m = 1}.}
 }
 \value{
 A dataframe is returned containing the power analysis results. The results can then be plotted with the plot.powerCurve function.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 This function calculates the power for the Bland-Altman method under varying parameter settings and for a range of sample sizes.
+It is superseded by \code{\link[=power_agreement_limit]{power_agreement_limit()}}, which returns a \code{power.htest}
+object and can solve for the sample size, power, \code{delta} or the SD directly.
+This function remains available for drawing power curves.
+}
+\details{
+Power follows the approximate method of Lu et al. (2016). With clustered
+data (\code{m > 1}), the standard error of the limits uses the effective sample
+size n \* m / (1 + (m - 1) \* icc) for the mean difference and a
+Satterthwaite df for the SD, under a balanced compound symmetry model (see
+\code{\link[=agree_expected_half]{agree_expected_half()}} for the model). Like the original method, this is
+an approximation; \code{m = 1} gives the original results.
 }
 \examples{
 \donttest{

@@ -1,6 +1,9 @@
 # Methods for simple_reli objects
 
-Methods defined for objects returned from the agree functions.
+Methods defined for objects returned from
+[`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+and
+[`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md).
 
 ## Usage
 
@@ -19,20 +22,27 @@ check(x, ...)
 
 - x:
 
-  object of class `simple_reli` as returned from the reli_stats function
+  object of class `simple_reli` as returned from
+  [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+  or
+  [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md).
 
 - ...:
 
   further arguments passed through, see description of return value for
   details.
-  [`reli_stats`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md).
 
 ## Value
 
 - `print`:
 
-  Prints short summary of the Limits of Agreement
+  Prints a short summary of the reliability statistics.
 
 - `plot`:
 
-  Returns a plot of the data points used in the reliability analysis
+  Returns a plot of the data points used in the reliability analysis.
+
+- `check`:
+
+  Returns diagnostic plots (normality and heteroskedasticity) of the
+  model residuals.

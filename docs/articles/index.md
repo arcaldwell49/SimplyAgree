@@ -6,6 +6,8 @@
   Tests](https://aaroncaldwell.us/SimplyAgree/articles/agree_tests.md):
 - [Agreement & Tolerance
   Limits](https://aaroncaldwell.us/SimplyAgree/articles/agreement_analysis.md):
+- [Agreement for Categorical and Ordinal
+  Ratings](https://aaroncaldwell.us/SimplyAgree/articles/categorical_agreement.md):
 - [Errors-in-Variables
   Regression](https://aaroncaldwell.us/SimplyAgree/articles/Deming.md):
 - [Power Analysis and Sample Size Determination for Agreement

@@ -3,9 +3,9 @@
 **\[deprecated\]**
 
 `loa_mixed()` is outdated, and for new code we recommend switching to
-[`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
-or `tolerance_limit`, which are easier to use, have more features, and
-are still under active development.
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md),
+which are easier to use, have more features, and are still under active
+development.
 
 This function allows for the calculation of bootstrapped limits of
 agreement when there are multiple observations per subject.

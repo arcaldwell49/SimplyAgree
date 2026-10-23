@@ -5,7 +5,11 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for simple_eiv objects — simple_eiv-methods"><meta name="description" content="Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg)."><meta property="og:description" content="Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg)."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for simple_eiv objects — simple_eiv-methods"><meta name="description" content="Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
+The joint confidence region for the intercept and slope is tested with
+joint_test() and plotted with plot_joint()."><meta property="og:description" content="Methods defined for objects returned from error-in-variables models (e.g., dem_reg, pb_reg).
+The joint confidence region for the intercept and slope is tested with
+joint_test() and plotted with plot_joint()."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +30,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -54,7 +59,9 @@
     </div>
 
     <div class="ref-description section level2">
-    <p>Methods defined for objects returned from error-in-variables models (e.g., <code>dem_reg</code>, <code>pb_reg</code>).</p>
+    <p>Methods defined for objects returned from error-in-variables models (e.g., <code>dem_reg</code>, <code>pb_reg</code>).
+The joint confidence region for the intercept and slope is tested with
+<code><a href="joint_test.html">joint_test()</a></code> and plotted with <code><a href="joint_test.html">plot_joint()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -88,18 +95,6 @@
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span>, data <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">plot_joint</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for class 'simple_eiv'</span></span>
-<span><span class="fu">plot_joint</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  ideal_slope <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  show_intervals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_points <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'simple_eiv'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -172,19 +167,7 @@ either a vector of numbers or a vector of names. If missing, all parameters are 
 
 
 <dt id="arg-n-points">n_points<a class="anchor" aria-label="anchor" href="#arg-n-points"></a></dt>
-<dd><p>Number of points to use for drawing the joint confidence region (default = 100).</p></dd>
-
-
-<dt id="arg-ideal-slope">ideal_slope<a class="anchor" aria-label="anchor" href="#arg-ideal-slope"></a></dt>
-<dd><p>The hypothesized slope value to test against (default = 1)</p></dd>
-
-
-<dt id="arg-ideal-intercept">ideal_intercept<a class="anchor" aria-label="anchor" href="#arg-ideal-intercept"></a></dt>
-<dd><p>The hypothesized intercept value to test against (default = 0)</p></dd>
-
-
-<dt id="arg-show-intervals">show_intervals<a class="anchor" aria-label="anchor" href="#arg-show-intervals"></a></dt>
-<dd><p>Logical. If TRUE, shows individual confidence intervals as well.</p></dd>
+<dd><p>Number of points to use for drawing smooth interval bands (default = 100).</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
@@ -217,9 +200,6 @@ available and this argument is ignored with a warning.</p></dd>
 <dt><code>check</code></dt>
 <dd><p>Returns plots of residuals.</p></dd>
 
-<dt><code>plot_joint</code></dt>
-<dd><p>Returns plot of joint confidence region (Deming only).</p></dd>
-
 <dt><code>predict</code></dt>
 <dd><p>Predicts Y values for new X values.</p></dd>
 
@@ -247,7 +227,7 @@ available and this argument is ignored with a warning.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

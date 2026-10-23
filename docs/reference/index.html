@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Package index"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Package index"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/agree_tests.html">Agreement Tests</a></li>
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
+    <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
@@ -69,14 +70,14 @@
       <dl><dt>
 
           <code><a href="tolerance_limit.html">tolerance_limit()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Tolerance Limits from an Agreement Study</dd>
 
         <dt>
 
           <code><a href="agreement_limit.html">agreement_limit()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Limits of Agreement</dd>
       </dl></div><div class="section level2">
@@ -114,8 +115,57 @@
 
       <dl><dt>
 
-          <code><a href="reli_stats.html">reli_stats()</a></code> <code><a href="reli_stats.html">reli_aov()</a></code>
+          <code><a href="icc_test.html">icc_test()</a></code>
           <span class="badge lifecycle lifecycle-stable">stable</span>
+        </dt>
+        <dd>Intraclass Correlation Coefficient Test</dd>
+
+        <dt>
+
+          <code><a href="reli_err_test.html">reli_err_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Measurement Error Test</dd>
+
+        <dt>
+
+          <code><a href="mdc_test.html">mdc_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Minimal Detectable Change</dd>
+
+        <dt>
+
+          <code><a href="reli_facet_test.html">reli_facet_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Reliability Across Facets: Repeats and Occasions</dd>
+
+        <dt>
+
+          <code><a href="power_icc.html">power_icc()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Power and Sample Size for an Intraclass Correlation Test</dd>
+
+        <dt>
+
+          <code><a href="precision_icc.html">precision_icc()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Sample Size for the Precision of an Intraclass Correlation</dd>
+
+        <dt>
+
+          <code><a href="reli_htest-methods.html">summary(<i>&lt;reli_htest&gt;</i>)</a></code> <code><a href="reli_htest-methods.html">print(<i>&lt;summary.reli_htest&gt;</i>)</a></code> <code><a href="reli_htest-methods.html">plot(<i>&lt;reli_htest&gt;</i>)</a></code> <code><a href="reli_htest-methods.html">check(<i>&lt;reli_htest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for reli_htest objects</dd>
+
+        <dt>
+
+          <code><a href="reli_stats.html">reli_stats()</a></code> <code><a href="reli_stats.html">reli_aov()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
         </dt>
         <dd>Reliability Statistics</dd>
 
@@ -125,6 +175,43 @@
 
         </dt>
         <dd>Methods for simple_reli objects</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="categorical-ratings">Categorical Ratings<a class="anchor" aria-label="anchor" href="#categorical-ratings"></a></h3>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="cac_test.html">cac_test()</a></code>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
+        </dt>
+        <dd>Chance-Corrected Agreement Coefficients for Categorical Ratings</dd>
+
+        <dt>
+
+          <code><a href="ord_kappa_test.html">ord_kappa_test()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
+        </dt>
+        <dd>Model-Based Kappa for Ordinal Ratings from Many Raters</dd>
+
+        <dt>
+
+          <code><a href="cac_htest-methods.html">summary(<i>&lt;cac_htest&gt;</i>)</a></code> <code><a href="cac_htest-methods.html">print(<i>&lt;summary.cac_htest&gt;</i>)</a></code> <code><a href="cac_htest-methods.html">plot(<i>&lt;cac_htest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for cac_htest objects</dd>
+
+        <dt>
+
+          <code><a href="agree_coef.html">agree_coef()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
+        </dt>
+        <dd>Agreement Coefficients</dd>
       </dl></div><div class="section level2">
       <h2 id="error-in-variables-regression">Error-in-Variables Regression<a class="anchor" aria-label="anchor" href="#error-in-variables-regression"></a></h2>
 
@@ -151,14 +238,14 @@
 
         <dt>
 
-          <code><a href="joint_test.html">joint_test()</a></code>
-
+          <code><a href="joint_test.html">joint_test()</a></code> <code><a href="joint_test.html">plot_joint()</a></code>
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
         </dt>
-        <dd>Joint Confidence Region Test for Method Agreement</dd>
+        <dd>Joint Confidence Region for Intercept and Slope</dd>
 
         <dt>
 
-          <code><a href="simple_eiv-methods.html">print(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">formula(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">model.frame(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">summary(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">confint(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">plot(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">check(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">plot_joint()</a></code> <code><a href="simple_eiv-methods.html">vcov(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">coef(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">fitted(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">residuals(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">predict(<i>&lt;simple_eiv&gt;</i>)</a></code>
+          <code><a href="simple_eiv-methods.html">print(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">formula(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">model.frame(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">summary(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">confint(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">plot(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">check(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">vcov(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">coef(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">fitted(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">residuals(<i>&lt;simple_eiv&gt;</i>)</a></code> <code><a href="simple_eiv-methods.html">predict(<i>&lt;simple_eiv&gt;</i>)</a></code>
 
         </dt>
         <dd>Methods for simple_eiv objects</dd>
@@ -175,9 +262,16 @@
       <dl><dt>
 
           <code><a href="ccc_test.html">ccc_test()</a></code>
-
+          <span class="badge lifecycle lifecycle-experimental">experimental</span>
         </dt>
         <dd>Concordance Correlation Coefficient</dd>
+
+        <dt>
+
+          <code><a href="ccc_htest-methods.html">summary(<i>&lt;ccc_htest&gt;</i>)</a></code> <code><a href="ccc_htest-methods.html">plot(<i>&lt;ccc_htest&gt;</i>)</a></code> <code><a href="ccc_htest-methods.html">check(<i>&lt;ccc_htest&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for ccc_htest objects</dd>
       </dl></div><div class="section level2">
       <h2 id="agreement-tests">Agreement Tests<a class="anchor" aria-label="anchor" href="#agreement-tests"></a></h2>
 
@@ -223,21 +317,14 @@
 
         <dt>
 
-          <code><a href="agree_coef.html">agree_coef()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
-        </dt>
-        <dd>Agreement Coefficents</dd>
-
-        <dt>
-
           <code><a href="simple_agree-methods.html">print(<i>&lt;simple_agree&gt;</i>)</a></code> <code><a href="simple_agree-methods.html">plot(<i>&lt;simple_agree&gt;</i>)</a></code> <code><a href="simple_agree-methods.html">check()</a></code>
 
         </dt>
         <dd>Methods for simple_agree objects</dd>
       </dl></div><div class="section level2">
+      <h2 id="power">Power<a class="anchor" aria-label="anchor" href="#power"></a></h2>
 
-      <h3 id="mixed">Mixed<a class="anchor" aria-label="anchor" href="#mixed"></a></h3>
-
+      <div class="section-desc"><p>Functions for power calculations</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -246,31 +333,15 @@
 
       <dl><dt>
 
-          <code><a href="loa_lme.html">loa_lme()</a></code>
+          <code><a href="power_agreement_limit.html">power_agreement_limit()</a></code>
           <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
-        <dd>Limits of Agreement with Linear Mixed Effects</dd>
+        <dd>Power Calculation for Bland-Altman Limits of Agreement</dd>
 
         <dt>
 
-          <code><a href="loa_mermod-methods.html">print(<i>&lt;loa_mermod&gt;</i>)</a></code> <code><a href="loa_mermod-methods.html">plot(<i>&lt;loa_mermod&gt;</i>)</a></code> <code><a href="loa_mermod-methods.html">check(<i>&lt;loa_mermod&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Methods for loa_mermod objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="power">Power<a class="anchor" aria-label="anchor" href="#power"></a></h2>
-
-      <div class="section-desc"><p>Fucntions for power calculations</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
           <code><a href="blandPowerCurve.html">blandPowerCurve()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
         </dt>
         <dd>Power Curve for Bland-Altman Limits of Agreement</dd>
 
@@ -284,21 +355,21 @@
         <dt>
 
           <code><a href="agree_assurance.html">agree_assurance()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Assurance Probability for Limits of Agreement</dd>
 
         <dt>
 
           <code><a href="agree_expected_half.html">agree_expected_half()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Sample Size for Limits of Agreement Using Expected Half-Width</dd>
 
         <dt>
 
           <code><a href="power_agreement_exact.html">power_agreement_exact()</a></code>
-          <span class="badge lifecycle lifecycle-maturing">maturing</span>
+          <span class="badge lifecycle lifecycle-stable">stable</span>
         </dt>
         <dd>Power Calculation for Exact Agreement/Tolerance Test</dd>
 
@@ -376,7 +447,7 @@
         </dt>
         <dd>Reliability Analysis</dd>
       </dl></div><div class="section level2">
-      <h2 id="defunct-functions">Defunct Functions<a class="anchor" aria-label="anchor" href="#defunct-functions"></a></h2>
+      <h2 id="deprecated-functions">Deprecated Functions<a class="anchor" aria-label="anchor" href="#deprecated-functions"></a></h2>
 
       <div class="section-desc"><p>Old functions that are no longer maintained; use with caution</p></div>
 
@@ -386,6 +457,20 @@
 
 
       <dl><dt>
+
+          <code><a href="loa_lme.html">loa_lme()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
+        </dt>
+        <dd>Limits of Agreement with Linear Mixed Effects</dd>
+
+        <dt>
+
+          <code><a href="loa_mermod-methods.html">print(<i>&lt;loa_mermod&gt;</i>)</a></code> <code><a href="loa_mermod-methods.html">plot(<i>&lt;loa_mermod&gt;</i>)</a></code> <code><a href="loa_mermod-methods.html">check(<i>&lt;loa_mermod&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for loa_mermod objects</dd>
+
+        <dt>
 
           <code><a href="loa_mixed.html">loa_mixed()</a></code>
           <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
@@ -408,7 +493,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

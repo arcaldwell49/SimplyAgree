@@ -1,6 +1,6 @@
 #' Methods for loa_mermod objects
 #'
-#' Methods defined for objects returned from the loa_lme.
+#' Methods defined for objects returned from the deprecated loa_lme.
 #'
 #' @param x object of class \code{loa_mermod}.
 #' @param ... further arguments passed through, see description of return value

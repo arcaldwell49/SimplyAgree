@@ -1,5 +1,6 @@
 ---
 title: "Errors-in-Variables Regression"
+description: "Errors-in-variables regression for method comparison in R: Deming regression with dem_reg() and Passing-Bablok regression with pb_reg()."
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output: 
@@ -191,15 +192,20 @@ summary(pb2)
 
 # Joint Confidence Regions
 
-A theoretically valid, but still experimental, enhancement to the `dem_reg` and `pb_reg` functions is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated. 
+An experimental enhancement to the `dem_reg` and `pb_reg` functions is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated.
 
-Joint confidence regions account for this correlation by creating an elliptical region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
+Joint confidence regions account for this correlation with a region in the (intercept, slope) parameter space. This approach, promoted by @sadler2010, provides several advantages:
 
-- **Higher Statistical Power**: The ellipse typically requires 20-50% fewer samples than traditional confidence intervals to detect the same bias
+- **Higher Statistical Power**: when the measurement range is narrow, the joint region can need several-fold (sometimes far) fewer samples than the two confidence intervals to detect the same bias
 - **Accounts for Parameter Correlation**: When the measurement range is narrow, slope and intercept are highly negatively correlated
 - **More Appropriate Test**: Testing against a point (e.g., slope=1, intercept=0) is naturally done with a region, not separate intervals
 
 The power advantage is most pronounced when the ratio of maximum to minimum X values is small (< 10:1), which is common in clinical method comparisons.
+
+Two regions are available through the `method` argument:
+
+- **`"sadler"`** (default for Deming regression): the sum-of-squares region of @sadler2010. It uses the Deming sum of squares directly, not a variance-covariance matrix, and is not exactly an ellipse. In simulations it rejected a true identity line 4.3-5.9% of the time at a nominal 5%, from n = 10 upward.
+- **`"wald"`** (the only option for Passing-Bablok regression): an ellipse from the variance-covariance matrix of the estimates. For Deming regression that matrix is a delete-one jackknife, and the test is liberal in small samples (about 8.5% at n = 10 and 7.4% at n = 20 at a nominal 5%). For Passing-Bablok regression, use bootstrap or delete-d jackknife resampling (both held about 5% in simulations).
 
 ## Visualizing the Joint Confidence Region
 
@@ -214,14 +220,14 @@ plot_joint(dem1,
 
 This plot shows:
 
-- The **red ellipse**: Joint confidence region
+- The **red curve**: Joint confidence region (Sadler's region by default; `method = "wald"` draws the ellipse)
 - The **blue rectangle**: Traditional confidence intervals
 - The **black dot**: Estimated (intercept, slope)
 - The **green/red X**: Ideal point (whether enclosed or not)
 
-Notice how the ellipse is smaller than the rectangle, especially in the directions that matter for detecting bias.
+Notice how the region is narrower than the rectangle, especially in the directions that matter for detecting bias.
 
-For Passing-Bablok regression, bootstrap resampling must be used to obtain the variance-covariance matrix needed for the joint confidence region:
+For Passing-Bablok regression, bootstrap (or delete-d jackknife) resampling must be used to obtain the variance-covariance matrix needed for the joint confidence region:
 
 ```{r}
 plot_joint(pb2)
@@ -235,7 +241,7 @@ The `joint_test()` function provides a formal hypothesis test for whether the id
 joint_test(dem1)
 ```
 
-This returns an `htest` object with the Mahalanobis distance (chi-squared statistic) and p-value. The test can also be applied to Passing-Bablok models fitted with bootstrap:
+This returns an `htest` object with Sadler's F statistic and p-value. The Wald version (Mahalanobis distance) is available with `joint_test(dem1, method = "wald")`. The test can also be applied to Passing-Bablok models fitted with bootstrap, where it is always the Wald test:
 
 ```{r}
 joint_test(pb2)
@@ -272,23 +278,42 @@ $$
 Second, that the slope is equal to one:
 
 $$
-H_0: \beta_1 = 1 \space vs. \space H_1: \beta_0 \ne 1
+H_0: \beta_1 = 1 \space vs. \space H_1: \beta_1 \ne 1
 $$
 
 # Joint Confidence Region Calculative Approach
 
-The joint $(1-\alpha) \times 100\%$ confidence region for $(\beta_0, \beta_1)$ is defined as:
+## Sadler's region (Deming regression, default)
+
+Deming regression with error ratio $\lambda$ and weights $w_i$ minimises
 
 $$
-(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq \chi^2_{2,\alpha}
+S(a, b) = \sum_{i=1}^n \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2}
 $$
 
-Where:
+Following @sadler2010 (after Draper and Smith), with $\hat S$ the minimum, the joint $(1-\alpha) \times 100\%$ confidence region for $(\beta_0, \beta_1)$ is the set of $(a, b)$ with
+
+$$
+F = \frac{(S(a, b) - \hat S)/2}{\hat S / (n - 2)} \leq F_{2, n-2, 1-\alpha}
+$$
+
+and the joint test of a hypothesized $(a_0, b_0)$ (e.g., $(0, 1)$ for identity) compares $F$ at that point with the $F(2, n - 2)$ distribution. No variance-covariance matrix is needed, and only the error ratio (not the size of the errors) matters. For a fixed slope the condition is quadratic in the intercept, so the region is drawn exactly.
+
+## Wald ellipse
+
+This was my original solution for this joint testing problem. I would, for Deming regression, stick with Sadler's region.
+
+With `method = "wald"` the region is
+
+$$
+(\hat{\beta} - \beta_0)^T V^{-1} (\hat{\beta} - \beta_0) \leq 2 F_{2, n-2, 1-\alpha}
+$$
+
+(or $\chi^2_{2, 1-\alpha}$ with `test_method = "asymptotic"`), where:
 
 - $\hat{\beta}$ = estimated parameters $(\hat{\beta}_0, \hat{\beta}_1)$
 - $\beta_0$ = hypothesized parameters (e.g., $(0, 1)$ for identity)
-- $V$ = variance-covariance matrix
-- $\chi^2_{2,\alpha}$ = chi-square critical value with 2 degrees of freedom
+- $V$ = variance-covariance matrix (jackknife for Deming; bootstrap or delete-d jackknife for Passing-Bablok)
 
 This forms an ellipse in parameter space that accounts for the correlation between slope and intercept.
 
