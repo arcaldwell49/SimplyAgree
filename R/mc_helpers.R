@@ -1,6 +1,12 @@
 # Internal helpers for the multi-method comparison functions ----
 # (method_vc(), method_convert(), sim_methods(), mc_long())
 
+# a level as a percentage for printing: 0.95 -> "95", 2 * pnorm(2) - 1 ->
+# "95.45" (not "95.4499736103642")
+mc_pct = function(level) {
+  format(signif(100 * level, 4), drop0trailing = TRUE)
+}
+
 # transformation registry ----
 
 #' Transformation registry for method comparison

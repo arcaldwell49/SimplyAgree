@@ -68,7 +68,9 @@ and prediction SD) with confidence intervals.}
 \item{\code{coef}}{Named vector of the conversion parameters,
 \code{alpha[to|from]} and \code{beta[to|from]}.}
 \item{\code{confint}}{Matrix of confidence limits for the conversion
-parameters.}
+parameters: percentile intervals from the bootstrap estimates for
+\code{ci_method = "boot"}, otherwise from the standard errors and the
+t distribution.}
 \item{\code{predict}}{A tibble with the values converted from \code{from} to
 \code{to} on the original scale: \code{from_value}, \code{fit}, and the prediction limits
 \code{lower} and \code{upper}. Values outside the domain of the transformation give

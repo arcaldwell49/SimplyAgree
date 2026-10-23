@@ -5,6 +5,14 @@
 #' @param x,object Object of class `simple_mvc`, as returned from
 #'   [method_vc()].
 #' @param digits The number of digits to print.
+#' @param scale For `print`, the scale of the bias, limits, and repeatability
+#'   coefficients: "analysis" (default), the scale set by `transform`, or
+#'   "original", back-transformed to the units of the measurements at the
+#'   level(s) in `at`. Ignored without a transformation. See details.
+#' @param at For `print` with `scale = "original"`, the level(s), in original
+#'   units, at which to express the results. Default (`NULL`) is the median of
+#'   the item averages (computed on the analysis scale and back-transformed).
+#'   Supplying `at` implies `scale = "original"`.
 #' @param type Type of plot. "ba" (default): a Bland-Altman plot of the
 #'   differences for one pair of methods, with the bias and limits (shaded
 #'   bands show the confidence intervals of the bias and the confidence bounds
@@ -22,10 +30,28 @@
 #' @param ... further arguments passed through, see description of return
 #'   value for details.
 #'
+#' @details
+#' With a transformation, a constant bias and constant limits on the analysis
+#' scale correspond, in original units, to a bias and limits that depend on
+#' the level. `print(x, scale = "original")` expresses them at a given level
+#' \eqn{t} (on the analysis scale): a difference \eqn{d} between the methods,
+#' centered on that level, is
+#' \eqn{h(d) = g^{-1}(t + d/2) - g^{-1}(t - d/2)} in original units, where
+#' \eqn{g^{-1}} is the inverse transformation. For a fixed level, \eqn{h} is
+#' increasing in \eqn{d}, so the limits, their confidence bounds, and the
+#' tolerance limits keep their coverage and confidence exactly, and the
+#' back-transformed bias is the median difference at that level (not the
+#' mean). The repeatability coefficients are converted in the same way. The
+#' SDs and variance components stay on the analysis scale. Differences are
+#' centered on the level of the two measurements, as on the x-axis of a
+#' Bland-Altman plot, unlike `predict()`, which starts from a measurement by
+#' one method.
+#'
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints the biases, limits, and variance components.
-#'   With `transform = "log"`, biases and limits are shown as ratios.}
+#'   With `transform = "log"`, biases and limits are shown as ratios; with
+#'   `scale = "original"`, in original units at the level(s) in `at`.}
 #'   \item{\code{coef}}{Named vector: method means averaged over items
 #'   (`alpha_<method>`) and the variance component SDs (`tau`, `omega`,
 #'   `sigma_<method>`, on the transformed scale).}
@@ -59,22 +85,37 @@
 
 print.simple_mvc <- function(x,
                              digits = 4,
+                             scale = c("analysis", "original"),
+                             at = NULL,
                              ...){
+  if (!is.null(at) && missing(scale)) {
+    scale = "original"
+  }
+  scale = match.arg(scale)
   des = x$design
   tf = x$transform
   is_tol = des$interval == "tolerance"
-  is_log = tf$name == "log"
+  orig = scale == "original" && tf$name != "none"
+  is_log = tf$name == "log" && !orig
   disp = if (is_log) exp else identity
   fmt = function(v) format(round(v, digits), nsmall = 0)
   ci = function(lo, hi) paste0("[", fmt(lo), ", ", fmt(hi), "]")
 
-  b = x$bias
-  l = x$limits
+  if (orig) {
+    l = mc_original_scale(x, at = at)
+    b = l
+  } else {
+    b = x$bias
+    l = x$limits
+  }
   sep = if (is_log) " / " else " - "
   tab = data.frame(Methods = paste0(b$method1, sep, b$method2),
-                   Bias = fmt(disp(b$bias)),
-                   `Bias CI` = ci(disp(b$lower.CL), disp(b$upper.CL)),
                    check.names = FALSE)
+  if (orig) {
+    tab$At = fmt(l$at)
+  }
+  tab$Bias = fmt(disp(b$bias))
+  tab$`Bias CI` = ci(disp(b$lower.CL), disp(b$upper.CL))
   if (is_tol) {
     tab$`Lower TL` = fmt(disp(l$lower.TL))
     tab$`Upper TL` = fmt(disp(l$upper.TL))
@@ -83,14 +124,16 @@ print.simple_mvc <- function(x,
     tab$`Upper LoA` = fmt(disp(l$upper_loa))
     tab$`LoA CI` = ci(disp(l$lower_loa_ci), disp(l$upper_loa_ci))
   }
-  tab$SD = fmt(l$sd)
+  if (!orig) {
+    tab$SD = fmt(l$sd)
+  }
 
   ## header ----
   title1 = paste0("Variance Component ",
                   if (is_tol) "Tolerance Limits" else
                     "Limits of Agreement (LoA)",
                   if (is_log) " of the Ratio")
-  subtitle1 = paste0(des$pred_level * 100,
+  subtitle1 = paste0(mc_pct(des$pred_level),
                      if (is_tol) "% Content @ " else "% LoA @ ",
                      des$conf_level * 100, "% Confidence")
   design_txt = switch(
@@ -109,7 +152,7 @@ print.simple_mvc <- function(x,
   bound_note = if (is_tol) {
     switch(des$bound_type,
            joint = paste0("Tolerance limits: with ", conf * 100,
-                          "% confidence, at least ", des$pred_level * 100,
+                          "% confidence, at least ", mc_pct(des$pred_level),
                           "% of differences lie within the limits"),
            iu = paste0("Tolerance limits: one-sided ", conf * 100,
                        "% bounds on each limit of agreement; not a joint ",
@@ -139,11 +182,20 @@ print.simple_mvc <- function(x,
   if (des$include_omega) {
     cat("SD includes the item-by-replicate variation (include_omega = TRUE)\n")
   }
-  if (is_log) {
+  if (orig) {
+    cat("Original scale (back-transformed from ", tf$name, ") at ",
+        if (attr(l, "at_median")) {
+          paste0(fmt(l$at[1]), ", the median of the item averages")
+        } else "the levels in 'At'",
+        ";\n  differences centered on that level; Bias is the median ",
+        "difference there\n", sep = "")
+  } else if (is_log) {
     cat("Bias and limits are ratios (exp of the log-scale estimates);",
         "SD is on the log scale (approximately the CV)\n")
   } else if (tf$name != "none") {
-    cat("Estimates are on the ", tf$name, " scale.\n", sep = "")
+    cat("Estimates are on the ", tf$name, " scale; ",
+        "print(x, scale = \"original\") gives them in original units.\n",
+        sep = "")
   }
 
   ## variance components ----
@@ -163,30 +215,42 @@ print.simple_mvc <- function(x,
     cat("sigma: residual SD of the paired-difference model",
         "(SD of the differences / sqrt(2))\n")
   }
-  mc_print_repeat(x, digits = digits)
+  mc_print_repeat(x, digits = digits,
+                  rp = if (orig) attr(l, "repeatability") else NULL)
   invisible(x)
 }
 
-# repeatability table (shared by print and summary)
+# repeatability table (shared by print and summary); `rp` replaces the
+# stored table, e.g. with values on the original scale (with column `at`)
 mc_print_repeat = function(x,
-                           digits = 4) {
-  rp = x$repeatability
+                           digits = 4,
+                           rp = NULL) {
+  orig = !is.null(rp)
+  if (!orig) {
+    rp = x$repeatability
+  }
   if (is.null(rp)) {
     return(invisible(NULL))
   }
   fmt = function(v) format(round(v, digits), nsmall = 0)
   ci = function(lo, hi) paste0("[", fmt(lo), ", ", fmt(hi), "]")
-  tab = data.frame(Method = rp$method,
-                   RC = fmt(rp$rc),
-                   `RC CI` = ci(rp$rc_lower, rp$rc_upper),
-                   check.names = FALSE)
+  tab = data.frame(Method = rp$method, check.names = FALSE)
+  if (orig) {
+    tab$At = fmt(rp$at)
+  }
+  tab$RC = fmt(rp$rc)
+  tab$`RC CI` = ci(rp$rc_lower, rp$rc_upper)
   if ("rpc" %in% names(rp)) {
     tab$RpC = fmt(rp$rpc)
     tab$`RpC CI` = ci(rp$rpc_lower, rp$rpc_upper)
   }
-  cat("\nRepeatability Coefficients (", x$design$pred_level * 100, "%",
-      if (x$transform$name != "none") paste0(", ", x$transform$name,
-                                              " scale"), ")\n", sep = "")
+  scale_txt = if (orig) {
+    ", original scale"
+  } else if (x$transform$name != "none") {
+    paste0(", ", x$transform$name, " scale")
+  }
+  cat("\nRepeatability Coefficients (", mc_pct(x$design$pred_level), "%",
+      scale_txt, ")\n", sep = "")
   print(tab, row.names = FALSE, right = FALSE)
   cat("RC: limit for the difference between two measurements by a method",
       "under the same conditions\n")
@@ -249,7 +313,7 @@ print.summary.simple_mvc <- function(x,
   print(as.data.frame(x$varcomp), digits = digits, row.names = FALSE)
 
   cat("\n", if (des$interval == "tolerance") "Tolerance limits" else
-    "Limits of agreement", " (", des$pred_level * 100, "%, ",
+    "Limits of agreement", " (", mc_pct(des$pred_level), "%, ",
     des$bound_type, " bounds at ", des$conf_level * 100,
     "% confidence)\n", sep = "")
   print(as.data.frame(x$limits), digits = digits, row.names = FALSE)

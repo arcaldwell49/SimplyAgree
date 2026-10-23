@@ -15,7 +15,7 @@
 \usage{
 \method{predict}{simple_mvc}(object, newdata, from = NULL, to = NULL, level = NULL, ...)
 
-\method{print}{simple_mvc}(x, digits = 4, ...)
+\method{print}{simple_mvc}(x, digits = 4, scale = c("analysis", "original"), at = NULL, ...)
 
 \method{summary}{simple_mvc}(object, ...)
 
@@ -49,6 +49,16 @@ value for details.}
 
 \item{digits}{The number of digits to print.}
 
+\item{scale}{For \code{print}, the scale of the bias, limits, and repeatability
+coefficients: "analysis" (default), the scale set by \code{transform}, or
+"original", back-transformed to the units of the measurements at the
+level(s) in \code{at}. Ignored without a transformation. See details.}
+
+\item{at}{For \code{print} with \code{scale = "original"}, the level(s), in original
+units, at which to express the results. Default (\code{NULL}) is the median of
+the item averages (computed on the analysis scale and back-transformed).
+Supplying \code{at} implies \code{scale = "original"}.}
+
 \item{parm}{Which parameters to include: "all" (default), "bias", or
 "sd" (variance component SDs).}
 
@@ -72,7 +82,8 @@ afterwards.}
 \value{
 \describe{
 \item{\code{print}}{Prints the biases, limits, and variance components.
-With \code{transform = "log"}, biases and limits are shown as ratios.}
+With \code{transform = "log"}, biases and limits are shown as ratios; with
+\code{scale = "original"}, in original units at the level(s) in \code{at}.}
 \item{\code{coef}}{Named vector: method means averaged over items
 (\verb{alpha_<method>}) and the variance component SDs (\code{tau}, \code{omega},
 \verb{sigma_<method>}, on the transformed scale).}
@@ -98,4 +109,21 @@ alternatives when either p < 0.05.}
 }
 \description{
 Methods defined for objects returned from \code{\link[=method_vc]{method_vc()}}.
+}
+\details{
+With a transformation, a constant bias and constant limits on the analysis
+scale correspond, in original units, to a bias and limits that depend on
+the level. \code{print(x, scale = "original")} expresses them at a given level
+\eqn{t} (on the analysis scale): a difference \eqn{d} between the methods,
+centered on that level, is
+\eqn{h(d) = g^{-1}(t + d/2) - g^{-1}(t - d/2)} in original units, where
+\eqn{g^{-1}} is the inverse transformation. For a fixed level, \eqn{h} is
+increasing in \eqn{d}, so the limits, their confidence bounds, and the
+tolerance limits keep their coverage and confidence exactly, and the
+back-transformed bias is the median difference at that level (not the
+mean). The repeatability coefficients are converted in the same way. The
+SDs and variance components stay on the analysis scale. Differences are
+centered on the level of the two measurements, as on the x-axis of a
+Bland-Altman plot, unlike \code{predict()}, which starts from a measurement by
+one method.
 }

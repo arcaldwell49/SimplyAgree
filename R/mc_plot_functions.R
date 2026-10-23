@@ -97,7 +97,7 @@ mc_ba_plot = function(x,
     1 - 2 * (1 - conf_level)
   cap = paste0(
     if (is_tol) "Tolerance limits: " else "Agreement = ",
-    des$pred_level * 100, "%",
+    mc_pct(des$pred_level), "%",
     if (is_tol) paste0(" content, ", conf_level * 100, "% confidence (",
                        des$bound_type, ")"),
     "\nConfidence Level = ", conf_level * 100, "% (Bias)",
@@ -296,7 +296,7 @@ mc_conversion_plot = function(x,
   eq = paste0(if (tf$name != "none") tf$label(to) else to, " = ",
               signif(cv$alpha, 4), " + ", signif(cv$beta, 4), " * ",
               if (tf$name != "none") tf$label(from) else from)
-  cap = paste0(eq, "\n", x$fit_info$pred_level * 100,
+  cap = paste0(eq, "\n", mc_pct(x$fit_info$pred_level),
                "% prediction limits",
                if (tf$name != "none") " (back-transformed)")
   ggplot(data.frame(x = pts$y1_orig, y = pts$y2_orig), aes(x = x, y = y)) +
@@ -376,7 +376,7 @@ mc_conv_ba_plot = function(x,
               linetype = 2, inherit.aes = FALSE) +
     geom_point(na.rm = TRUE) +
     labs(x = x_lab, y = y_lab,
-         caption = paste0("Bias and ", x$fit_info$pred_level * 100,
+         caption = paste0("Bias and ", mc_pct(x$fit_info$pred_level),
                           "% prediction limits (", x$fit_info$bias,
                           " bias)")) +
     theme_bw()

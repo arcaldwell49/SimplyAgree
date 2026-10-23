@@ -33,7 +33,9 @@
 #'   \item{\code{coef}}{Named vector of the conversion parameters,
 #'   `alpha[to|from]` and `beta[to|from]`.}
 #'   \item{\code{confint}}{Matrix of confidence limits for the conversion
-#'   parameters.}
+#'   parameters: percentile intervals from the bootstrap estimates for
+#'   `ci_method = "boot"`, otherwise from the standard errors and the
+#'   t distribution.}
 #'   \item{\code{predict}}{A tibble with the values converted from `from` to
 #'   `to` on the original scale: `from_value`, `fit`, and the prediction limits
 #'   `lower` and `upper`. Values outside the domain of the transformation give
@@ -181,7 +183,7 @@ print.summary.simple_mconv <- function(x,
   cat("Bias model: ", fi$bias,
       if (fi$bias == "linear") paste0("; SD of differences: ", fi$variance),
       "\nReplicates: ", fi$replicates,
-      "\nPrediction level: ", fi$pred_level * 100, "%; confidence level: ",
+      "\nPrediction level: ", mc_pct(fi$pred_level), "%; confidence level: ",
       fi$conf_level * 100, "%\n", sep = "")
   if (x$transform$name != "none") {
     cat("Transformation: ", x$transform$name,
@@ -344,11 +346,25 @@ confint.simple_mconv <- function(object,
     level = object$fit_info$conf_level
   }
   cv = object$conversion
-  cv = cv[cv$to != cv$from, ]
+  off = which(cv$to != cv$from)
+  cv = cv[off, ]
   key = paste0("[", cv$to, "|", cv$from, "]")
-  q = qt((1 + level) / 2, cv$df)
-  a_ci = cbind(cv$alpha - q * cv$alpha_se, cv$alpha + q * cv$alpha_se)
-  b_ci = cbind(cv$beta - q * cv$beta_se, cv$beta + q * cv$beta_se)
+  if (identical(object$fit_info$ci_method, "boot") && !is.null(object$boot)) {
+    # percentile intervals from the bootstrap estimates; columns are alpha,
+    # beta, and sd_pred for every row of the conversion table, then varcomp
+    n_cv = nrow(object$conversion)
+    probs = c((1 - level) / 2, (1 + level) / 2)
+    pct = function(cols) {
+      t(apply(object$boot[, cols, drop = FALSE], 2, stats::quantile,
+              probs = probs, na.rm = TRUE, names = FALSE))
+    }
+    a_ci = pct(off)
+    b_ci = pct(n_cv + off)
+  } else {
+    q = qt((1 + level) / 2, cv$df)
+    a_ci = cbind(cv$alpha - q * cv$alpha_se, cv$alpha + q * cv$alpha_se)
+    b_ci = cbind(cv$beta - q * cv$beta_se, cv$beta + q * cv$beta_se)
+  }
   rownames(a_ci) = paste0("alpha", key)
   rownames(b_ci) = paste0("beta", key)
   out = switch(parm,

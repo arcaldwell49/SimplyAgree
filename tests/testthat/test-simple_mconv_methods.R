@@ -41,6 +41,33 @@ test_that("coef and confint", {
   expect_equal(colnames(ci90), c("5 %", "95 %"))
 })
 
+test_that("confint returns the bootstrap percentile intervals", {
+  dat = sim_methods(n_items = 15, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 3, tau = 0.2, sigma = 0.3, seed = 1)
+  set.seed(3)
+  sb = suppressMessages(
+    method_convert(dat, y = "y", method = "method", id = "id",
+                   replicate = "repl", bias = "scaled", tol = 1e-4,
+                   ci_method = "boot", boot_reps = 20)
+  )
+  cv = sb$conversion
+  off = which(cv$to != cv$from)
+  ci = confint(sb)
+  # matches the printed (stored) percentile intervals at the fitted level
+  expect_equal(unname(ci[1:2, ]),
+               unname(cbind(cv$alpha_lower[off], cv$alpha_upper[off])))
+  expect_equal(unname(ci[3:4, ]),
+               unname(cbind(cv$beta_lower[off], cv$beta_upper[off])))
+  # other levels come from the same bootstrap estimates
+  ci80 = confint(sb, parm = "beta", level = 0.8)
+  n_cv = nrow(cv)
+  expect_equal(unname(ci80[1, ]),
+               unname(stats::quantile(sb$boot[, n_cv + off[1]],
+                                      c(0.1, 0.9))))
+  expect_equal(colnames(ci80), c("10 %", "90 %"))
+})
+
 test_that("conversion and Bland-Altman plots", {
   cv = mconv_fit()
   p = plot(cv)

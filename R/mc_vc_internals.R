@@ -565,3 +565,75 @@ mc_vc_diag = function(fit,
   }
   list(resid = res, ranef = re)
 }
+
+# results on the original scale ----
+# A difference d on the analysis scale, centered on the level t (the average
+# of the two measurements on that scale), is
+#   h(d) = inv(t + d / 2) - inv(t - d / 2)
+# in original units. For fixed t, h is increasing in d wherever inv is
+# increasing, so quantiles (limits), confidence bounds, and the median
+# difference (the back-transformed bias) carry over exactly.
+mc_back_diff = function(tf, t, d) {
+  lo = t - d / 2
+  hi = t + d / 2
+  # ranges where the inverse is increasing
+  ok = switch(tf$name,
+              sqrt = lo >= 0 & hi >= 0,
+              asinsqrt = lo >= 0 & hi >= 0 & lo <= pi / 2 & hi <= pi / 2,
+              rep(TRUE, length(d)))
+  out = tf$inv(hi) - tf$inv(lo)
+  out[!ok] = NA_real_
+  out
+}
+
+# Bias, limits, and repeatability coefficients in original units at one or
+# more levels. `at` is on the original scale; NULL uses the median of the
+# item averages on the analysis scale. Returns the limits table, with the
+# repeatability table (if any) in attribute "repeatability".
+mc_original_scale = function(x,
+                             at = NULL) {
+  tf = x$transform
+  if (is.null(at)) {
+    item_avg = tapply(x$data$y_t, x$data$id, mean)
+    t_at = stats::median(item_avg)
+    at = tf$inv(t_at)
+    at_median = TRUE
+  } else {
+    if (!is.numeric(at) || length(at) < 1 || anyNA(at)) {
+      stop("`at` must be a numeric vector of levels on the original scale.",
+           call. = FALSE)
+    }
+    if (!isTRUE(tf$domain_check(at))) {
+      stop("`at` must be within the domain of transform '", tf$name, "' (",
+           tf$domain, ").", call. = FALSE)
+    }
+    t_at = tf$fun(at)
+    at_median = FALSE
+  }
+  is_tol = x$design$interval == "tolerance"
+  b = x$bias
+  l = x$limits
+  cols = if (is_tol) c("lower.TL", "upper.TL") else
+    c("lower_loa", "upper_loa", "lower_loa_ci", "upper_loa_ci")
+
+  lim = do.call(rbind, lapply(seq_along(t_at), function(j) {
+    h = function(d) mc_back_diff(tf, t_at[j], d)
+    out = data.frame(method1 = b$method1, method2 = b$method2, at = at[j],
+                     bias = h(b$bias), lower.CL = h(b$lower.CL),
+                     upper.CL = h(b$upper.CL))
+    for (nm in cols) out[[nm]] = h(l[[nm]])
+    out
+  }))
+
+  rp = x$repeatability
+  if (!is.null(rp)) {
+    rc_cols = intersect(c("rc", "rc_lower", "rc_upper",
+                          "rpc", "rpc_lower", "rpc_upper"), names(rp))
+    rp = do.call(rbind, lapply(seq_along(t_at), function(j) {
+      out = data.frame(method = rp$method, at = at[j])
+      for (nm in rc_cols) out[[nm]] = mc_back_diff(tf, t_at[j], rp[[nm]])
+      out
+    }))
+  }
+  structure(lim, repeatability = rp, at_median = at_median)
+}

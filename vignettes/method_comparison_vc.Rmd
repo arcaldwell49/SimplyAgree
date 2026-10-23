@@ -157,6 +157,19 @@ method_vc(dat3, y = "y", method = "method", id = "id",
 
 The bounds rely on large-sample approximations for the variance components. In simulations with 15 to 60 items, 2 or 3 replicates, and 2 or 3 methods (95% targets), the one-sided bounds of the limits of agreement covered the true limits 92% to 96% of the time, and the joint tolerance limits 92% to 96%. Coverage was lowest (about 91% to 93%) with only 15 items, so with few items the bounds should be read as slightly optimistic.
 
+## A note on MethComp's multiplier of 2
+
+MethComp, and the examples in @carstensen2010, compute the limits of agreement as the bias $\pm 2$ SD, so `method_vc()` with the defaults gives limits about 2% narrower than MethComp. The 2 is a rounded multiplier. It is somewhat larger than $z_{0.975} = 1.96$, which leaves some room for the uncertainty in the estimated SD, but it does not correspond to a stated coverage or confidence. SimplyAgree keeps the two parts separate: $z$ (from `pred_level`) defines the limits as percentiles of the differences, and the uncertainty in estimating them is stated explicitly by the confidence bounds (`conf_level`) or by tolerance limits. With 30 differences, for example, accounting for that uncertainty gives a multiplier of about 2.55 (a 95%-content, 95%-confidence tolerance interval) to 2.61 (one-sided 95% bounds on each limit), well beyond 2; see `vignette("agreement_analysis")`.
+
+To reproduce MethComp's limits and repeatability coefficients, choose `pred_level` so that $z = 2$, i.e., `pred_level = 2 * pnorm(2) - 1` (about 95.45%):
+
+```{r}
+method_vc(dat3, y = "y", method = "method", id = "id",
+          replicate = "repl", replicates = "linked",
+          pred_level = 2 * pnorm(2) - 1)$limits[, c("method1", "method2",
+                                                    "lower_loa", "upper_loa")]
+```
+
 # Repeatability and reproducibility
 
 With replicates, each method's measurement error gives its **repeatability coefficient** [@carstensen2010, ch. 9],
@@ -187,6 +200,58 @@ method_vc(dat_log, y = "y", method = "method", id = "id",
 ```
 
 For measurements bounded between 0 and 100 (e.g., oxygen saturation), `transform = "pctlogit"` analyzes the logit of the proportion [@carstensen2010, ch. 8]. Other options are `"logit"`, `"sqrt"`, `"asinsqrt"`, or a custom pair of functions, `list(fun = ..., inv = ..., name = ...)`. The Bland-Altman and matrix plots back-transform the conversion lines to the original scale.
+
+## Interpreting results on a transformed scale
+
+With a transformation other than `"log"`, the printed bias and limits stay on the transformed scale. On the `"pctlogit"` scale, $\mathrm{logit}(y/100) = \log\{y/(100 - y)\}$, so a difference between methods is a difference in log odds: $\exp(\text{bias})$ is the ratio of the odds of the two methods, and the limits of agreement are limits for that odds ratio. That is correct, but rarely a useful way to report agreement.
+
+A constant bias on the logit scale is not constant in percentage points: it is largest near 50% and shrinks toward 0 and 100. This is the point of the transformation, but it means there is no single bias or pair of limits "in percent". They have to be stated at a level.
+
+```{r}
+sat = sim_methods(n_items = 40, n_reps = 2, methods = c("Ref", "New"),
+                  alpha = c(0, -0.15), mu_mean = 1.5, mu_sd = 0.8,
+                  tau = 0.15, sigma = c(0.12, 0.18),
+                  transform = "pctlogit", seed = 7)
+fit_sat = method_vc(sat, y = "y", method = "method", id = "id",
+                    replicate = "repl", transform = "pctlogit")
+fit_sat
+```
+
+On the analysis scale, the bias $b$ (Ref minus New) means that Ref's odds are $\exp(b)$ times New's.
+
+### Limits of agreement in original units
+
+Often the question is simply where the differences between the two methods fall, in the units of the measurement, without treating either method as the reference. `print(scale = "original")` answers this at a given level. A difference $d$ on the analysis scale between two measurements whose average (on that scale) is $t$ corresponds to
+
+$$
+h(d) = g^{-1}(t + d/2) - g^{-1}(t - d/2)
+$$
+
+in original units, where $g^{-1}$ is the inverse transformation. At a fixed level, $h$ is increasing in $d$, so the limits and their confidence bounds carry over exactly, with the same coverage and confidence. The back-transformed bias is the median difference at that level, not the mean. By default the level is the median of the item averages:
+
+```{r}
+print(fit_sat, scale = "original")
+```
+
+For a full picture, give the levels that matter in practice (supplying `at` implies `scale = "original"`):
+
+```{r}
+print(fit_sat, at = c(70, 90, 98))
+```
+
+So, for example, "at a saturation of about 90%, the two methods differ by between about −4.3 and +6.6 percentage points, and by about ±1 point near 98%". The repeatability coefficients are converted in the same way. The variance components are still reported on the analysis scale, because they do not translate into a single number in original units. `plot(fit_sat)` draws the back-transformed bias and limits over the whole range.
+
+A single pair of limits "averaged" over all the items would depend on the mix of levels in the sample and would hide how the agreement changes with the level, so it is not offered. When the range of the data is narrow enough that the spread of the differences is roughly constant (check with `check()`), an analysis without a transformation answers the question directly.
+
+### Converting from one method to the other
+
+`predict()` answers a different, directional question: given a reading by New, what would Ref read? It starts from the measurement by one method rather than from the average of the two, and returns the converted value with prediction limits (the bias $\pm z$ SD, back-transformed):
+
+```{r}
+predict(fit_sat, newdata = c(70, 90, 98), from = "New", to = "Ref")
+```
+
+When New reads 90%, Ref is expected to read `fit` and, for `pred_level` of items, lies between `lower` and `upper`.
 
 # Checking the model
 
