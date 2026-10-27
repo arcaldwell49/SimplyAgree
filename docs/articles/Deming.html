@@ -19,9 +19,13 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Errors-in-Variables Regression">
+<meta name="description" content="Errors-in-variables regression for method comparison in R: Deming regression with dem_reg() and Passing-Bablok regression with pb_reg().">
+<meta property="og:description" content="Errors-in-variables regression for method comparison in R: Deming regression with dem_reg() and Passing-Bablok regression with pb_reg().">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -84,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/Deming.Rmd" class="external-link"><code>vignettes/Deming.Rmd</code></a></small>
       <div class="d-none name"><code>Deming.Rmd</code></div>
@@ -148,7 +152,7 @@ results printed.</p>
 <p>The resulting regression line can then be plotted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem1</span>, interval <span class="op">=</span> <span class="st">"confidence"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="Scatter plot of y against x with the fitted Deming regression line and its confidence band." width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics"></a>
@@ -159,7 +163,7 @@ and homogeneity of variance, can then be checked with the
 appear to be fine with regards to the assumptions.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="Two diagnostic panels for the Deming regression: homogeneity of the residuals against fitted values, and normality of the residuals." width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="fitted-values-and-residuals">Fitted Values and Residuals<a class="anchor" aria-label="anchor" href="#fitted-values-and-residuals"></a>
@@ -178,7 +182,6 @@ to the regression line.</p>
 <code>deming</code> R package.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'deming' was built under R version 4.4.3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">'ferritin'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ferritin</span><span class="op">)</span></span>
@@ -214,11 +217,11 @@ can see there is severe problem with using the “un-weighted” model.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="Scatter plot of old.lot against new.lot ferritin values with the unweighted Deming regression line." width="700"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" alt="Diagnostic panels for the unweighted Deming regression of the ferritin data: homogeneity and normality of the residuals." width="700"></p>
 <p>Now, let us see what happens when <code>weighted</code> is set to
 TRUE.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -243,11 +246,11 @@ TRUE.</p>
 <span><span class="co">#&gt; Error variance ratio (lambda): 1.0000</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="Scatter plot of old.lot against new.lot ferritin values with the weighted Deming regression line." width="700"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">dem3</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" alt="Diagnostic panels for the weighted Deming regression of the ferritin data: homogeneity and normality of the residuals." width="700"></p>
 <p>The weighted model provides a better fit.</p>
 </div>
 </div>
@@ -344,7 +347,7 @@ diagnostic tests:</p>
 data:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="Scatter plot of method2 against method1 with the fitted Passing-Bablok regression line." width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="model-diagnostics-1">Model Diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics-1"></a>
@@ -354,7 +357,7 @@ Passing-Bablok regression, including the CUSUM linearity test and
 Kendall’s tau correlation:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">pb1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Four Passing-Bablok diagnostic panels: monotonic relationship, ranked residuals, CUSUM linearity test, and the distribution of pairwise slopes." width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="bootstrap-confidence-intervals">Bootstrap Confidence Intervals<a class="anchor" aria-label="anchor" href="#bootstrap-confidence-intervals"></a>
@@ -441,7 +444,7 @@ confidence region in parameter space:</p>
 <span>           ideal_slope <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>           ideal_intercept <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>           show_intervals <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="Joint confidence region for the Deming intercept and slope as a red curve, the separate confidence intervals as a blue rectangle, the estimate as a black dot, and the ideal point of intercept 0 and slope 1 marked with an X." width="700"></p>
 <p>This plot shows:</p>
 <ul>
 <li>The <strong>red curve</strong>: Joint confidence region (Sadler’s
@@ -459,7 +462,7 @@ resampling must be used to obtain the variance-covariance matrix needed
 for the joint confidence region:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/joint_test.html">plot_joint</a></span><span class="op">(</span><span class="va">pb2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
+<p><img src="Deming_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Joint confidence ellipse for the Passing-Bablok intercept and slope, with the estimate and the ideal point of intercept 0 and slope 1 marked." width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="joint-hypothesis-test">Joint Hypothesis Test<a class="anchor" aria-label="anchor" href="#joint-hypothesis-test"></a>
@@ -733,7 +736,7 @@ Power of Parametric Regression in Method-Comparison Studies.”</span>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

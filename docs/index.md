@@ -1,10 +1,59 @@
 # SimplyAgree
 
-*Artwork courtesy of Chelsea Parlett Pelleriti*
+`SimplyAgree` is an R package and [jamovi](https://www.jamovi.org/)
+module for method comparison, agreement, and reliability studies. It
+estimates Bland-Altman limits of agreement, tolerance limits,
+concordance correlation coefficients (CCC), intraclass correlation
+coefficients (ICC), measurement error and minimal detectable change,
+chance-corrected agreement for categorical ratings (kappa, Gwet’s AC1,
+Krippendorff’s alpha), and Deming/Passing-Bablok regression, and plans
+sample sizes for agreement and reliability studies. Simple paired data,
+replicate measurements, and nested (repeated measures) designs are
+supported. Full documentation and vignettes are on the [package
+website](https://aaroncaldwell.us/SimplyAgree/).
 
-Please see the package’s
-[website](https://aaroncaldwell.us/SimplyAgree/) for updates, vignettes,
-and other details about the package.
+## Which function should I use?
+
+| Goal | Function | Data |
+|----|----|----|
+| Bland-Altman limits of agreement | [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md) | simple, replicate, or nested |
+| Tolerance limits (prediction-oriented agreement) | [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md) | simple, repeated, or nested; optional conditions |
+| Concordance correlation coefficient (CCC) | [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md) | simple, replicate, or nested |
+| Non-parametric limits of agreement | [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md) | simple or replicate |
+| Reliability: intraclass correlation (ICC) | [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md) | repeated measures (long or wide) |
+| Measurement error: SEM, SEE, SEP, coefficient of variation | [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md) | repeated measures |
+| Minimal detectable change (MDC) | [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md) | repeated measures |
+| Reliability across facets (repeats and occasions) | [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md) | multi-facet designs |
+| Categorical agreement: Gwet’s AC1, kappa, Krippendorff’s alpha | [`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md) | categorical or ordinal ratings |
+| Model-based kappa for many raters | [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md) | ordinal ratings |
+| Deming / Passing-Bablok regression | [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md), [`pb_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.md) | paired, optionally with replicates |
+| Power and sample size for agreement | [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md), [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md), [`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md), [`agree_expected_half()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_expected_half.md), [`agree_assurance()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_assurance.md) | study planning |
+| Power and sample size for reliability | [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md), [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md) | study planning |
+| Power and sample size for Deming regression | [`deming_sample_size()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_sample_size.md) | study planning |
+
+Some older functions still work but are superseded: use
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+instead of
+[`agree_test()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_test.md),
+[`agree_reps()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_reps.md),
+and
+[`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md);
+[`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
+and
+[`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
+instead of
+[`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
+and
+[`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md);
+and
+[`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md)
+instead of
+[`agree_coef()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_coef.md).
+[`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
+is deprecated in favor of `tolerance_limit(model = "lme")`, and
+[`loa_mixed()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed.md)
+is defunct. The `jmv*()` functions exist for the jamovi module and are
+not intended for use in R.
 
 # Background
 
@@ -83,8 +132,10 @@ Beyond the two core functions, `SimplyAgree` provides:
   Krippendorff’s alpha and more) and
   [`ord_kappa_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.md)
   for model-based kappa with ordinal ratings and many raters
-- **Power Analysis**: `power_exact_agreement()` and related functions
-  for sample size determination in agreement studies, and
+- **Power Analysis**:
+  [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md)
+  and related functions for sample size determination in agreement
+  studies, and
   [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)
   /
   [`precision_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/precision_icc.md)
@@ -215,6 +266,12 @@ icc_test(col.names = c("J1", "J2", "J3", "J4"), data = sf)
 ## 0.7148407
 ```
 
+Most results have
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
+(Bland-Altman and line-of-identity plots) and
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+methods for assumption diagnostics.
+
 # Contributing
 
 We are happy to receive bug reports, suggestions, questions, and (most
@@ -235,6 +292,31 @@ Please note that the SimplyAgree project is released with a [Contributor
 Code of
 Conduct](https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html). By
 contributing to this project, you agree to abide by its terms.
+
+## Development and use of AI
+
+`SimplyAgree` is developed and maintained by a single developer.
+Generative AI tools, primarily Anthropic’s Claude Opus models, allow me
+to maintain the package more thoroughly and respond to users more
+quickly than I could alone. I use AI tools in four ways:
+
+- **Testing:** stress testing code to identify bugs and edge cases.
+- **Issue triage:** a first-pass evaluation of reported issues before I
+  investigate them myself.
+- **Simulation:** writing and running simulations to examine performance
+  under specific conditions.
+- **Documentation:** drafting user-facing documentation from the source
+  code, which I then check for accuracy and edit.
+
+The statistical methods, package design, and architectural decisions are
+my own. I review every AI-assisted code change, and all changes must
+pass the package’s test suite before release. I am responsible for the
+correctness of this package. If you find an error, please [open an
+issue](https://github.com/arcaldwell49/SimplyAgree/issues).
+
+## Acknowledgements
+
+Logo artwork courtesy of Chelsea Parlett Pelleriti.
 
 # References
 

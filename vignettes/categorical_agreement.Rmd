@@ -210,7 +210,7 @@ they are arbitrary and depend on the coefficient.
 systematically more lenient or severe, or (with `type = "subjects"`) the
 ratings of each subject.
 
-```{r}
+```{r, fig.alt = c("Stacked bars showing the share of ratings in each category for each rater.", "Ratings for each subject, ordered by mean category, with point size showing how many raters chose each category.")}
 plot(res)
 plot(res, type = "subjects")
 ```
@@ -286,7 +286,7 @@ The model also estimates each rater's effect (its conditional mode): how
 much higher or lower the rater tends to rate than the typical rater. Raters
 far from zero are lenient or severe relative to the others.
 
-```{r, eval = has_ordinal}
+```{r, eval = has_ordinal, fig.alt = "Estimated effect of each rater on the latent scale with intervals; a dashed line at zero marks the typical rater."}
 plot(res_km, type = "effects")
 ```
 
@@ -315,7 +315,7 @@ difference, and the p-value is from a likelihood ratio test of equal rater
 variances in the two groups. `fit$subgroups` also gives \(\kappa_m\) between
 a rater from each group:
 
-```{r, eval = has_ordinal}
+```{r, eval = has_ordinal, fig.alt = "Estimated effect of each rater on the latent scale with intervals, coloured by experience group; a dashed line at zero marks the typical rater."}
 res_g$fit$subgroups
 summary(res_g)
 plot(res_g, type = "effects")

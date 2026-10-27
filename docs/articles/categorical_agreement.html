@@ -19,9 +19,13 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Agreement for Categorical and Ordinal Ratings">
+<meta name="description" content="Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test().">
+<meta property="og:description" content="Agreement for categorical and ordinal ratings in R: kappa, Gwet's AC1, and Krippendorff's alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test().">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -84,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/categorical_agreement.Rmd" class="external-link"><code>vignettes/categorical_agreement.Rmd</code></a></small>
       <div class="d-none name"><code>categorical_agreement.Rmd</code></div>
@@ -345,10 +349,10 @@ reveals raters who are systematically more lenient or severe, or (with
 <code>type = "subjects"</code>) the ratings of each subject.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Stacked bars showing the share of ratings in each category for each rater." width="576"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"subjects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" alt="Ratings for each subject, ordered by mean category, with point size showing how many raters chose each category." width="576"></p>
 </div>
 </div>
 <div class="section level2">
@@ -441,7 +445,7 @@ how much higher or lower the rater tends to rate than the typical rater.
 Raters far from zero are lenient or severe relative to the others.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_km</span>, type <span class="op">=</span> <span class="st">"effects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="Estimated effect of each rater on the latent scale with intervals; a dashed line at zero marks the typical rater." width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="comparing-groups-of-raters-or-subjects">Comparing groups of raters or subjects<a class="anchor" aria-label="anchor" href="#comparing-groups-of-raters-or-subjects"></a>
@@ -502,7 +506,7 @@ group:</p>
 <span><span class="co">#&gt; (chi-square, 1 df); intervals use delta-method standard errors and are</span></span>
 <span><span class="co">#&gt; approximate.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_g</span>, type <span class="op">=</span> <span class="st">"effects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="Estimated effect of each rater on the latent scale with intervals, coloured by experience group; a dashed line at zero marks the typical rater." width="576"></p>
 <p>For a subject characteristic, such as patient age, use
 <code>group_type = "subject"</code>; the group must then be constant
 within each subject (and, for rater groups, within each rater).</p>
@@ -588,7 +592,7 @@ Medicine</em> 36 (20): 3181–99. <a href="https://doi.org/10.1002/sim.7323" cla
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

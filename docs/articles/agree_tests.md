@@ -92,7 +92,10 @@ line-of-identity plot (`type = 2`).
 plot(a1, type = 1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-4-1.png)
+![Bland-Altman plot from agree_test: differences between x and y against
+their means, with the bias and 80% limits of agreement and their
+confidence
+intervals.](agree_tests_files/figure-html/unnamed-chunk-4-1.png)
 
 ``` r
 
@@ -100,7 +103,8 @@ plot(a1, type = 1)
 plot(a1, type = 2) 
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-4-2.png)
+![Line-of-identity plot of y against x from
+agree_test.](agree_tests_files/figure-html/unnamed-chunk-4-2.png)
 
 ### Calculations in for Simple Agreement
 
@@ -227,7 +231,9 @@ print(a2)
 plot(a2, type = 1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-7-1.png)
+![Bland-Altman plot from agree_reps: differences between x and y against
+their means, with the bias and 80% limits of agreement for replicate
+data.](agree_tests_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
 
@@ -235,7 +241,9 @@ plot(a2, type = 1)
 plot(a2, type = 2)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-7-2.png)
+![Line-of-identity plot of y against x from agree_reps, with points
+identified by
+subject.](agree_tests_files/figure-html/unnamed-chunk-7-2.png)
 
 ### `agree_nest`
 
@@ -286,7 +294,9 @@ print(a3)
 plot(a3, type = 1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-10-1.png)
+![Bland-Altman plot from agree_nest: differences between x and y against
+their means, with the bias and 80% limits of agreement for nested
+data.](agree_tests_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
 
@@ -294,7 +304,9 @@ plot(a3, type = 1)
 plot(a3, type = 2)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-10-2.png)
+![Line-of-identity plot of y against x from agree_nest, with points
+identified by
+subject.](agree_tests_files/figure-html/unnamed-chunk-10-2.png)
 
 ### Calculations for `agree_reps` & `agree_nest`
 
@@ -468,7 +480,9 @@ a1 = agree_test(x = reps$x,
 check(a1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-11-1.png)
+![Diagnostic panels for agree_test: normality of the differences,
+heteroskedasticity, and proportional
+bias.](agree_tests_files/figure-html/unnamed-chunk-11-1.png)
 
 ## Proportional Bias
 
@@ -512,7 +526,9 @@ print(a1)
 plot(a1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-12-1.png)
+![Bland-Altman plot from agree_test with limits of agreement that change
+with the mean to account for proportional
+bias.](agree_tests_files/figure-html/unnamed-chunk-12-1.png)
 
 ## Non-parametric Alternatives
 
@@ -564,7 +580,8 @@ print(a1)
 plot(a1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-13-1.png)
+![Bland-Altman plot from agree_np with nonparametric limits of
+agreement.](agree_tests_files/figure-html/unnamed-chunk-13-1.png)
 
 We can also perform the same analysis with proportional bias no longer
 assumed. You can see that the LoA changes but the test for agreement
@@ -601,7 +618,9 @@ print(a1)
 plot(a1)
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-14-1.png)
+![Bland-Altman plot from agree_np with nonparametric limits of agreement
+that change with the mean to account for proportional
+bias.](agree_tests_files/figure-html/unnamed-chunk-14-1.png)
 
 ## “Big” Data
 
@@ -629,7 +648,8 @@ plot(a1,
      geom = "geom_point")
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-15-1.png)
+![Bland-Altman plot of 750 simulated pairs drawn as individual
+points.](agree_tests_files/figure-html/unnamed-chunk-15-1.png)
 
 ``` r
 
@@ -639,7 +659,8 @@ plot(a1,
 #> `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-15-2.png)
+![Bland-Altman plot of 750 simulated pairs drawn as a heatmap of 2D bin
+counts.](agree_tests_files/figure-html/unnamed-chunk-15-2.png)
 
 ``` r
 
@@ -648,7 +669,8 @@ plot(a1,
      geom = "geom_density_2d")
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-15-3.png)
+![Bland-Altman plot of 750 simulated pairs drawn as 2D density contour
+lines.](agree_tests_files/figure-html/unnamed-chunk-15-3.png)
 
 ``` r
 
@@ -657,7 +679,8 @@ plot(a1,
      geom = "geom_density_2d_filled")
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-15-4.png)
+![Bland-Altman plot of 750 simulated pairs drawn as filled 2D density
+contours.](agree_tests_files/figure-html/unnamed-chunk-15-4.png)
 
 ``` r
 
@@ -666,7 +689,8 @@ plot(a1,
      geom = "stat_density_2d")
 ```
 
-![](agree_tests_files/figure-html/unnamed-chunk-15-5.png)
+![Bland-Altman plot of 750 simulated pairs drawn with
+stat_density_2d.](agree_tests_files/figure-html/unnamed-chunk-15-5.png)
 
 ## Mixed Models
 

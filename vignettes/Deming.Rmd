@@ -60,7 +60,7 @@ dem1
 
 The resulting regression line can then be plotted. 
 
-```{r}
+```{r, fig.alt = "Scatter plot of y against x with the fitted Deming regression line and its confidence band."}
 plot(dem1, interval = "confidence")
 ```
 
@@ -68,7 +68,7 @@ plot(dem1, interval = "confidence")
 
 The assumptions of the Deming regression model, primarily normality and homogeneity of variance, can then be checked with the `check` method for Deming regression results. Both plots appear to be fine with regards to the assumptions.
 
-```{r}
+```{r, fig.alt = "Two diagnostic panels for the Deming regression: homogeneity of the residuals against fitted values, and normality of the residuals."}
 check(dem1)
 ```
 
@@ -90,7 +90,7 @@ head(ferritin)
 
 Let me demonstrate the problem with using simple Deming regression when the weights are helpful. When we look at the two plots below, we can see there is severe problem with using the "un-weighted" model.
 
-```{r, eval = has_deming}
+```{r, eval = has_deming, fig.alt = c("Scatter plot of old.lot against new.lot ferritin values with the unweighted Deming regression line.", "Diagnostic panels for the unweighted Deming regression of the ferritin data: homogeneity and normality of the residuals.")}
 dem2 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
@@ -105,7 +105,7 @@ check(dem2)
 
 Now, let us see what happens when `weighted` is set to TRUE.
 
-```{r, eval = has_deming}
+```{r, eval = has_deming, fig.alt = c("Scatter plot of old.lot against new.lot ferritin values with the weighted Deming regression line.", "Diagnostic panels for the weighted Deming regression of the ferritin data: homogeneity and normality of the residuals.")}
 dem3 = dem_reg(
   old.lot ~ new.lot,
   data = ferritin,
@@ -167,7 +167,7 @@ summary(pb1)
 
 The `plot()` method displays the regression line with data:
 
-```{r}
+```{r, fig.alt = "Scatter plot of method2 against method1 with the fitted Passing-Bablok regression line."}
 plot(pb1)
 ```
 
@@ -175,7 +175,7 @@ plot(pb1)
 
 The `check()` method provides diagnostic plots specific to Passing-Bablok regression, including the CUSUM linearity test and Kendall's tau correlation:
  
-```{r}
+```{r, fig.alt = "Four Passing-Bablok diagnostic panels: monotonic relationship, ranked residuals, CUSUM linearity test, and the distribution of pairwise slopes."}
 check(pb1)
 ```
 
@@ -211,7 +211,7 @@ Two regions are available through the `method` argument:
 
 The `plot_joint()` function allows visualization of the confidence region in parameter space:
 
-```{r}
+```{r, fig.alt = "Joint confidence region for the Deming intercept and slope as a red curve, the separate confidence intervals as a blue rectangle, the estimate as a black dot, and the ideal point of intercept 0 and slope 1 marked with an X."}
 plot_joint(dem1, 
            ideal_slope = 1, 
            ideal_intercept = 0,
@@ -229,7 +229,7 @@ Notice how the region is narrower than the rectangle, especially in the directio
 
 For Passing-Bablok regression, bootstrap (or delete-d jackknife) resampling must be used to obtain the variance-covariance matrix needed for the joint confidence region:
 
-```{r}
+```{r, fig.alt = "Joint confidence ellipse for the Passing-Bablok intercept and slope, with the estimate and the ideal point of intercept 0 and slope 1 marked."}
 plot_joint(pb2)
 ```
 

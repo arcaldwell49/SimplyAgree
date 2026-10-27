@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>SimplyAgree R package • SimplyAgree</title>
+<title>SimplyAgree: Bland-Altman, Tolerance Limits &amp; Reliability (ICC) in R • SimplyAgree</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -19,11 +19,13 @@
   };
 </script><script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="SimplyAgree R package">
-<meta name="description" content="An R package for agreement and reliability estimation">
-<meta property="og:description" content="An R package for agreement and reliability estimation">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="SimplyAgree: Bland-Altman, Tolerance Limits &amp; Reliability (ICC) in R">
+<meta name="description" content="R package and jamovi module for method comparison studies: Bland-Altman limits of agreement, tolerance limits, concordance correlation (CCC), ICCs, and Deming/Passing-Bablok regression for simple, repeated, and nested data.
+">
+<meta property="og:description" content="R package and jamovi module for method comparison studies: Bland-Altman limits of agreement, tolerance limits, concordance correlation (CCC), ICCs, and Deming/Passing-Bablok regression for simple, repeated, and nested data.
+">
 <meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
 <meta property="og:image:alt" content="SimplyAgree logo">
 </head>
@@ -85,10 +87,104 @@
 <a class="anchor" aria-label="anchor" href="#simplyagree-"></a>
 </h1>
 </div>
-<p><em>Artwork courtesy of Chelsea Parlett Pelleriti</em></p>
 <!-- badges: start -->
 
-<p>Please see the package’s <a href="https://aaroncaldwell.us/SimplyAgree/">website</a> for updates, vignettes, and other details about the package.</p>
+<p><code>SimplyAgree</code> is an R package and <a href="https://www.jamovi.org/" class="external-link">jamovi</a> module for method comparison, agreement, and reliability studies. It estimates Bland-Altman limits of agreement, tolerance limits, concordance correlation coefficients (CCC), intraclass correlation coefficients (ICC), measurement error and minimal detectable change, chance-corrected agreement for categorical ratings (kappa, Gwet’s AC1, Krippendorff’s alpha), and Deming/Passing-Bablok regression, and plans sample sizes for agreement and reliability studies. Simple paired data, replicate measurements, and nested (repeated measures) designs are supported. Full documentation and vignettes are on the <a href="https://aaroncaldwell.us/SimplyAgree/">package website</a>.</p>
+<div class="section level2">
+<h2 id="which-function-should-i-use">Which function should I use?<a class="anchor" aria-label="anchor" href="#which-function-should-i-use"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Goal</th>
+<th>Function</th>
+<th>Data</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Bland-Altman limits of agreement</td>
+<td><code><a href="reference/agreement_limit.html">agreement_limit()</a></code></td>
+<td>simple, replicate, or nested</td>
+</tr>
+<tr>
+<td>Tolerance limits (prediction-oriented agreement)</td>
+<td><code><a href="reference/tolerance_limit.html">tolerance_limit()</a></code></td>
+<td>simple, repeated, or nested; optional conditions</td>
+</tr>
+<tr>
+<td>Concordance correlation coefficient (CCC)</td>
+<td><code><a href="reference/ccc_test.html">ccc_test()</a></code></td>
+<td>simple, replicate, or nested</td>
+</tr>
+<tr>
+<td>Non-parametric limits of agreement</td>
+<td><code><a href="reference/agree_np.html">agree_np()</a></code></td>
+<td>simple or replicate</td>
+</tr>
+<tr>
+<td>Reliability: intraclass correlation (ICC)</td>
+<td><code><a href="reference/icc_test.html">icc_test()</a></code></td>
+<td>repeated measures (long or wide)</td>
+</tr>
+<tr>
+<td>Measurement error: SEM, SEE, SEP, coefficient of variation</td>
+<td><code><a href="reference/reli_err_test.html">reli_err_test()</a></code></td>
+<td>repeated measures</td>
+</tr>
+<tr>
+<td>Minimal detectable change (MDC)</td>
+<td><code><a href="reference/mdc_test.html">mdc_test()</a></code></td>
+<td>repeated measures</td>
+</tr>
+<tr>
+<td>Reliability across facets (repeats and occasions)</td>
+<td><code><a href="reference/reli_facet_test.html">reli_facet_test()</a></code></td>
+<td>multi-facet designs</td>
+</tr>
+<tr>
+<td>Categorical agreement: Gwet’s AC1, kappa, Krippendorff’s alpha</td>
+<td><code><a href="reference/cac_test.html">cac_test()</a></code></td>
+<td>categorical or ordinal ratings</td>
+</tr>
+<tr>
+<td>Model-based kappa for many raters</td>
+<td><code><a href="reference/ord_kappa_test.html">ord_kappa_test()</a></code></td>
+<td>ordinal ratings</td>
+</tr>
+<tr>
+<td>Deming / Passing-Bablok regression</td>
+<td>
+<code><a href="reference/dem_reg.html">dem_reg()</a></code>, <code><a href="reference/pb_reg.html">pb_reg()</a></code>
+</td>
+<td>paired, optionally with replicates</td>
+</tr>
+<tr>
+<td>Power and sample size for agreement</td>
+<td>
+<code><a href="reference/power_agreement_limit.html">power_agreement_limit()</a></code>, <code><a href="reference/power_agreement_exact.html">power_agreement_exact()</a></code>, <code><a href="reference/blandPowerCurve.html">blandPowerCurve()</a></code>, <code><a href="reference/agree_expected_half.html">agree_expected_half()</a></code>, <code><a href="reference/agree_assurance.html">agree_assurance()</a></code>
+</td>
+<td>study planning</td>
+</tr>
+<tr>
+<td>Power and sample size for reliability</td>
+<td>
+<code><a href="reference/power_icc.html">power_icc()</a></code>, <code><a href="reference/precision_icc.html">precision_icc()</a></code>
+</td>
+<td>study planning</td>
+</tr>
+<tr>
+<td>Power and sample size for Deming regression</td>
+<td><code><a href="reference/deming_sample_size.html">deming_sample_size()</a></code></td>
+<td>study planning</td>
+</tr>
+</tbody>
+</table>
+<p>Some older functions still work but are superseded: use <code><a href="reference/agreement_limit.html">agreement_limit()</a></code> instead of <code><a href="reference/agree_test.html">agree_test()</a></code>, <code><a href="reference/agree_reps.html">agree_reps()</a></code>, and <code><a href="reference/agree_nest.html">agree_nest()</a></code>; <code><a href="reference/icc_test.html">icc_test()</a></code> and <code><a href="reference/reli_err_test.html">reli_err_test()</a></code> instead of <code><a href="reference/reli_stats.html">reli_stats()</a></code> and <code><a href="reference/reli_stats.html">reli_aov()</a></code>; and <code><a href="reference/cac_test.html">cac_test()</a></code> instead of <code><a href="reference/agree_coef.html">agree_coef()</a></code>. <code><a href="reference/loa_lme.html">loa_lme()</a></code> is deprecated in favor of <code>tolerance_limit(model = "lme")</code>, and <code><a href="reference/loa_mixed.html">loa_mixed()</a></code> is defunct. The <code>jmv*()</code> functions exist for the jamovi module and are not intended for use in R.</p>
+</div>
 </div>
 <div class="section level1">
 <h1 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
@@ -138,7 +234,7 @@
 <li>
 <strong>Categorical Agreement</strong>: <code><a href="reference/cac_test.html">cac_test()</a></code> for chance-corrected agreement coefficients (Gwet’s AC1, kappa, Krippendorff’s alpha and more) and <code><a href="reference/ord_kappa_test.html">ord_kappa_test()</a></code> for model-based kappa with ordinal ratings and many raters</li>
 <li>
-<strong>Power Analysis</strong>: <code>power_exact_agreement()</code> and related functions for sample size determination in agreement studies, and <code><a href="reference/power_icc.html">power_icc()</a></code> / <code><a href="reference/precision_icc.html">precision_icc()</a></code> for reliability studies</li>
+<strong>Power Analysis</strong>: <code><a href="reference/power_agreement_exact.html">power_agreement_exact()</a></code> and related functions for sample size determination in agreement studies, and <code><a href="reference/power_icc.html">power_icc()</a></code> / <code><a href="reference/precision_icc.html">precision_icc()</a></code> for reliability studies</li>
 <li>
 <strong>Error-in-Variables</strong>: supports “Deming” and “Passing-Bablok” regression methods for method comparison</li>
 <li>
@@ -235,6 +331,7 @@
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="do">## sample estimates:</span></span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="do">##  ICC(C,1) </span></span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="do">## 0.7148407</span></span></code></pre></div>
+<p>Most results have <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods (Bland-Altman and line-of-identity plots) and <code><a href="reference/simple_agree-methods.html">check()</a></code> methods for assumption diagnostics.</p>
 </div>
 </div>
 <div class="section level1">
@@ -252,6 +349,27 @@
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
 <p>Please note that the SimplyAgree project is released with a <a href="https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+</div>
+<div class="section level2">
+<h2 id="development-and-use-of-ai">Development and use of AI<a class="anchor" aria-label="anchor" href="#development-and-use-of-ai"></a>
+</h2>
+<p><code>SimplyAgree</code> is developed and maintained by a single developer. Generative AI tools, primarily Anthropic’s Claude Opus models, allow me to maintain the package more thoroughly and respond to users more quickly than I could alone. I use AI tools in four ways:</p>
+<ul>
+<li>
+<strong>Testing:</strong> stress testing code to identify bugs and edge cases.</li>
+<li>
+<strong>Issue triage:</strong> a first-pass evaluation of reported issues before I investigate them myself.</li>
+<li>
+<strong>Simulation:</strong> writing and running simulations to examine performance under specific conditions.</li>
+<li>
+<strong>Documentation:</strong> drafting user-facing documentation from the source code, which I then check for accuracy and edit.</li>
+</ul>
+<p>The statistical methods, package design, and architectural decisions are my own. I review every AI-assisted code change, and all changes must pass the package’s test suite before release. I am responsible for the correctness of this package. If you find an error, please <a href="https://github.com/arcaldwell49/SimplyAgree/issues" class="external-link">open an issue</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h2>
+<p>Logo artwork courtesy of Chelsea Parlett Pelleriti.</p>
 </div>
 </div>
 <div class="section level1">
@@ -333,7 +451,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

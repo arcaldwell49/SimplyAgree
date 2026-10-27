@@ -124,3 +124,25 @@ enforcement ladder](https://github.com/mozilla/diversity).
 
 For answers to common questions about this code of conduct, see the FAQ at
 <https://www.contributor-covenant.org/faq>. Translations are available at <https://www.contributor-covenant.org/translations>.
+
+## Use of generative AI
+
+Contributions developed with the help of generative AI tools are welcome,
+provided that:
+
+1. **You disclose it.** In your pull request, state which tool(s) you used
+   and what they contributed (e.g., code, tests, documentation).
+2. **You understand it.** You should be able to explain every change you
+   submit and respond to review questions about it without relying on the
+   tool.
+3. **You verify it.** Code changes must include appropriate tests and pass
+   the existing test suite. For statistical methods, please cite the source
+   or show agreement with a reference implementation where possible.
+4. **You can license it.** Do not submit code you cannot contribute under
+   the package's license, including AI output that reproduces existing
+   code.
+
+For issues, please describe the problem in your own words with a minimal
+reproducible example. Unverified AI-generated bug reports or analyses may
+be closed. Pull requests that appear to be largely unreviewed AI output may
+be declined.

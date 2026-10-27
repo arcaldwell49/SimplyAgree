@@ -697,7 +697,7 @@ Unlike the "test" functions, `agreement_limits` and `tolerance_limits` do not te
 It is up to the user to determine if the limits are within a maximal allowable difference.
 However, the results a maximal allowable difference can be visualized against the tolerance/agreement limits using the `delta` argument for the `plot` method.
 
-```{r}
+```{r, fig.alt = "Differences between trec_pre and teso_pre against their average, with the bias, tolerance limits, and the maximal allowable difference of 0.25."}
 res1 = tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
@@ -720,7 +720,7 @@ All 3 plots will have a statistical test in the bottom right corner^[No test is 
 
 ## An Example
 
-```{r}
+```{r, fig.alt = c("Diagnostic panels for agreement_limit: normality of the differences, heteroskedasticity, and proportional bias.", "Diagnostic panels for tolerance_limit: normality of the differences, heteroskedasticity, and proportional bias.")}
 test_agree = agreement_limit(x = "x",
                              y = "y",
                              data = reps)
@@ -743,7 +743,7 @@ For either `agreement_limit` or `tolerance_limit` functions, this can be accompl
 When this is set to TRUE, then the proportional bias adjusted model is utilized. 
 Plots and checks of the data should always be inspected.
 
-```{r}
+```{r, fig.alt = c("Tolerance limits for the reps data that change with the mean to account for proportional bias.", "Diagnostic panels for tolerance_limit with proportional bias modelled; the proportional bias panel is now flat.")}
 
 test_tol = tolerance_limit(x = "x",
                            y = "y",
@@ -797,7 +797,7 @@ tolerance_limit(
 
 Sometimes there may be a lot of data and individual points of data on mean difference visualization may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom` argument.
 
-```{r}
+```{r, fig.alt = c("Bland-Altman plot of 750 simulated pairs drawn as individual points.", "Bland-Altman plot of 750 simulated pairs drawn as a heatmap of 2D bin counts.", "Bland-Altman plot of 750 simulated pairs drawn as 2D density contour lines.", "Bland-Altman plot of 750 simulated pairs drawn as filled 2D density contours.", "Bland-Altman plot of 750 simulated pairs drawn with stat_density_2d.")}
 set.seed(81346)
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)

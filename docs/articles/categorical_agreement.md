@@ -267,14 +267,17 @@ subject.
 plot(res)
 ```
 
-![](categorical_agreement_files/figure-html/unnamed-chunk-11-1.png)
+![Stacked bars showing the share of ratings in each category for each
+rater.](categorical_agreement_files/figure-html/unnamed-chunk-11-1.png)
 
 ``` r
 
 plot(res, type = "subjects")
 ```
 
-![](categorical_agreement_files/figure-html/unnamed-chunk-11-2.png)
+![Ratings for each subject, ordered by mean category, with point size
+showing how many raters chose each
+category.](categorical_agreement_files/figure-html/unnamed-chunk-11-2.png)
 
 ## Model-based kappa for many raters
 
@@ -382,7 +385,9 @@ Raters far from zero are lenient or severe relative to the others.
 plot(res_km, type = "effects")
 ```
 
-![](categorical_agreement_files/figure-html/unnamed-chunk-15-1.png)
+![Estimated effect of each rater on the latent scale with intervals; a
+dashed line at zero marks the typical
+rater.](categorical_agreement_files/figure-html/unnamed-chunk-15-1.png)
 
 ### Comparing groups of raters or subjects
 
@@ -451,7 +456,9 @@ summary(res_g)
 plot(res_g, type = "effects")
 ```
 
-![](categorical_agreement_files/figure-html/unnamed-chunk-17-1.png)
+![Estimated effect of each rater on the latent scale with intervals,
+coloured by experience group; a dashed line at zero marks the typical
+rater.](categorical_agreement_files/figure-html/unnamed-chunk-17-1.png)
 
 For a subject characteristic, such as patient age, use
 `group_type = "subject"`; the group must then be constant within each

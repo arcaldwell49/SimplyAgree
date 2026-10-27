@@ -220,7 +220,9 @@ pc <- blandPowerCurve(
 plot(pc, type = 1)
 ```
 
-![](power_sample_size_vignette_files/figure-html/bland_ex1-1.png)
+![Power curve for the Bland-Altman agreement test, showing power rising
+with sample size from 10 to
+200.](power_sample_size_vignette_files/figure-html/bland_ex1-1.png)
 
 ``` r
 
@@ -691,7 +693,10 @@ abline(h = 0.8, col = "grey")
 legend("bottomright", legend = c("ICC = 0.75", "ICC = 0.80"), lty = 1:2)
 ```
 
-![](power_sample_size_vignette_files/figure-html/icc_power_curve-1.png)
+![Power against number of subjects, from 10 to 80, for testing ICC
+greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a grey
+reference line at 80%
+power.](power_sample_size_vignette_files/figure-html/icc_power_curve-1.png)
 
 ### Precision of an ICC
 
