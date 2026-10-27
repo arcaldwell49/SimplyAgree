@@ -446,7 +446,9 @@ res <- icc_test(col.names = judges, data = dat)
 plot(res)
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-13-1.png)
+![Each subject's measurements across the judges as grey lines, with the
+judge means and 95% confidence intervals in
+blue.](reliability_analysis_files/figure-html/unnamed-chunk-13-1.png)
 
 Other views are chosen with `type`: `"subjects"` orders the subjects by
 their mean and shows each subject’s measurements, which compares the
@@ -461,7 +463,9 @@ plots each pair of items against each other with the line of identity.
 plot(res, type = "subjects")
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-14-1.png)
+![Each subject's measurements, with subjects ordered by their mean,
+comparing the spread between subjects with the scatter within
+subjects.](reliability_analysis_files/figure-html/unnamed-chunk-14-1.png)
 
 [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
 gives model diagnostics. The plot displays the normality and homogeneity
@@ -476,7 +480,9 @@ error in units.
 check(res)
 ```
 
-![](reliability_analysis_files/figure-html/unnamed-chunk-15-1.png)
+![Model diagnostic panels: normality and homogeneity of the residuals,
+and the within-subject SD against the subject
+mean.](reliability_analysis_files/figure-html/unnamed-chunk-15-1.png)
 
 ## Measurement error
 

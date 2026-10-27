@@ -293,6 +293,27 @@ Code of
 Conduct](https://aaroncaldwell.us/SimplyAgree/CODE_OF_CONDUCT.html). By
 contributing to this project, you agree to abide by its terms.
 
+## Development and use of AI
+
+`SimplyAgree` is developed and maintained by a single developer.
+Generative AI tools, primarily Anthropic’s Claude Opus models, allow me
+to maintain the package more thoroughly and respond to users more
+quickly than I could alone. I use AI tools in four ways:
+
+- **Testing:** stress testing code to identify bugs and edge cases.
+- **Issue triage:** a first-pass evaluation of reported issues before I
+  investigate them myself.
+- **Simulation:** writing and running simulations to examine performance
+  under specific conditions.
+- **Documentation:** drafting user-facing documentation from the source
+  code, which I then check for accuracy and edit.
+
+The statistical methods, package design, and architectural decisions are
+my own. I review every AI-assisted code change, and all changes must
+pass the package’s test suite before release. I am responsible for the
+correctness of this package. If you find an error, please [open an
+issue](https://github.com/arcaldwell49/SimplyAgree/issues).
+
 ## Acknowledgements
 
 Logo artwork courtesy of Chelsea Parlett Pelleriti.

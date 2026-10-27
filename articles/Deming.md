@@ -66,7 +66,8 @@ The resulting regression line can then be plotted.
 plot(dem1, interval = "confidence")
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-3-1.png)
+![Scatter plot of y against x with the fitted Deming regression line and
+its confidence band.](Deming_files/figure-html/unnamed-chunk-3-1.png)
 
 ### Model Diagnostics
 
@@ -80,7 +81,9 @@ the assumptions.
 check(dem1)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-4-1.png)
+![Two diagnostic panels for the Deming regression: homogeneity of the
+residuals against fitted values, and normality of the
+residuals.](Deming_files/figure-html/unnamed-chunk-4-1.png)
 
 ### Fitted Values and Residuals
 
@@ -141,7 +144,9 @@ summary(dem2)
 plot(dem2)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-6-1.png)
+![Scatter plot of old.lot against new.lot ferritin values with the
+unweighted Deming regression
+line.](Deming_files/figure-html/unnamed-chunk-6-1.png)
 
 ``` r
 
@@ -149,7 +154,9 @@ plot(dem2)
 check(dem2)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-6-2.png)
+![Diagnostic panels for the unweighted Deming regression of the ferritin
+data: homogeneity and normality of the
+residuals.](Deming_files/figure-html/unnamed-chunk-6-2.png)
 
 Now, let us see what happens when `weighted` is set to TRUE.
 
@@ -178,7 +185,9 @@ summary(dem3)
 plot(dem3)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-7-1.png)
+![Scatter plot of old.lot against new.lot ferritin values with the
+weighted Deming regression
+line.](Deming_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
 
@@ -186,7 +195,9 @@ plot(dem3)
 check(dem3)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-7-2.png)
+![Diagnostic panels for the weighted Deming regression of the ferritin
+data: homogeneity and normality of the
+residuals.](Deming_files/figure-html/unnamed-chunk-7-2.png)
 
 The weighted model provides a better fit.
 
@@ -286,7 +297,8 @@ displays the regression line with data:
 plot(pb1)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-10-1.png)
+![Scatter plot of method2 against method1 with the fitted Passing-Bablok
+regression line.](Deming_files/figure-html/unnamed-chunk-10-1.png)
 
 ### Model Diagnostics
 
@@ -300,7 +312,9 @@ including the CUSUM linearity test and Kendall’s tau correlation:
 check(pb1)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-11-1.png)
+![Four Passing-Bablok diagnostic panels: monotonic relationship, ranked
+residuals, CUSUM linearity test, and the distribution of pairwise
+slopes.](Deming_files/figure-html/unnamed-chunk-11-1.png)
 
 ### Bootstrap Confidence Intervals
 
@@ -381,7 +395,10 @@ plot_joint(dem1,
            show_intervals = TRUE)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-13-1.png)
+![Joint confidence region for the Deming intercept and slope as a red
+curve, the separate confidence intervals as a blue rectangle, the
+estimate as a black dot, and the ideal point of intercept 0 and slope 1
+marked with an X.](Deming_files/figure-html/unnamed-chunk-13-1.png)
 
 This plot shows:
 
@@ -403,7 +420,9 @@ for the joint confidence region:
 plot_joint(pb2)
 ```
 
-![](Deming_files/figure-html/unnamed-chunk-14-1.png)
+![Joint confidence ellipse for the Passing-Bablok intercept and slope,
+with the estimate and the ideal point of intercept 0 and slope 1
+marked.](Deming_files/figure-html/unnamed-chunk-14-1.png)
 
 ### Joint Hypothesis Test
 

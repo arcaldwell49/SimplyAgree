@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-22</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/power_sample_size_vignette.Rmd" class="external-link"><code>vignettes/power_sample_size_vignette.Rmd</code></a></small>
       <div class="d-none name"><code>power_sample_size_vignette.Rmd</code></div>
@@ -325,7 +325,7 @@ over a range of sample sizes and settings, for plotting:</p>
 <span></span>
 <span><span class="co"># Plot</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pc</span>, type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="power_sample_size_vignette_files/figure-html/bland_ex1-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="power_sample_size_vignette_files/figure-html/bland_ex1-1.png" class="r-plt" alt="Power curve for the Bland-Altman agreement test, showing power rising with sample size from 10 to 200." width="672"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Find n for 80% power</span></span>
@@ -771,7 +771,7 @@ analysis, here for an ICC of 0.75 or 0.8 under the alternative:</p>
 <span>        xlab <span class="op">=</span> <span class="st">"Number of subjects"</span>, ylab <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fl">0.8</span>, col <span class="op">=</span> <span class="st">"grey"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICC = 0.75"</span>, <span class="st">"ICC = 0.80"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="power_sample_size_vignette_files/figure-html/icc_power_curve-1.png" class="r-plt" alt="" width="672"></p>
+<p><img src="power_sample_size_vignette_files/figure-html/icc_power_curve-1.png" class="r-plt" alt="Power against number of subjects, from 10 to 80, for testing ICC greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a grey reference line at 80% power." width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="precision-of-an-icc">Precision of an ICC<a class="anchor" aria-label="anchor" href="#precision-of-an-icc"></a>

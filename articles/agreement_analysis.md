@@ -1043,7 +1043,9 @@ res1 = tolerance_limit(
 plot(res1, delta = .25) # Set maximal allowable difference to .25 units
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-8-1.png)
+![Differences between trec_pre and teso_pre against their average, with
+the bias, tolerance limits, and the maximal allowable difference of
+0.25.](agreement_analysis_files/figure-html/unnamed-chunk-8-1.png)
 
 ## Checking Assumptions
 
@@ -1072,7 +1074,9 @@ test_agree = agreement_limit(x = "x",
 check(test_agree)
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-9-1.png)
+![Diagnostic panels for agreement_limit: normality of the differences,
+heteroskedasticity, and proportional
+bias.](agreement_analysis_files/figure-html/unnamed-chunk-9-1.png)
 
 ``` r
 
@@ -1084,7 +1088,9 @@ test_tol = tolerance_limit(x = "x",
 check(test_tol)
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-9-2.png)
+![Diagnostic panels for tolerance_limit: normality of the differences,
+heteroskedasticity, and proportional
+bias.](agreement_analysis_files/figure-html/unnamed-chunk-9-2.png)
 
 ## Proportional Bias
 
@@ -1127,7 +1133,9 @@ print(test_tol)
 plot(test_tol)
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-10-1.png)
+![Tolerance limits for the reps data that change with the mean to
+account for proportional
+bias.](agreement_analysis_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
 
@@ -1136,7 +1144,9 @@ plot(test_tol)
 check(test_tol)
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-10-2.png)
+![Diagnostic panels for tolerance_limit with proportional bias modelled;
+the proportional bias panel is now
+flat.](agreement_analysis_files/figure-html/unnamed-chunk-10-2.png)
 
 ## Log transformation
 
@@ -1222,7 +1232,8 @@ plot(a1,
      geom = "geom_point")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-1.png)
+![Bland-Altman plot of 750 simulated pairs drawn as individual
+points.](agreement_analysis_files/figure-html/unnamed-chunk-13-1.png)
 
 ``` r
 
@@ -1232,7 +1243,8 @@ plot(a1,
 #> `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-2.png)
+![Bland-Altman plot of 750 simulated pairs drawn as a heatmap of 2D bin
+counts.](agreement_analysis_files/figure-html/unnamed-chunk-13-2.png)
 
 ``` r
 
@@ -1241,7 +1253,8 @@ plot(a1,
      geom = "geom_density_2d")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-3.png)
+![Bland-Altman plot of 750 simulated pairs drawn as 2D density contour
+lines.](agreement_analysis_files/figure-html/unnamed-chunk-13-3.png)
 
 ``` r
 
@@ -1250,7 +1263,8 @@ plot(a1,
      geom = "geom_density_2d_filled")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-4.png)
+![Bland-Altman plot of 750 simulated pairs drawn as filled 2D density
+contours.](agreement_analysis_files/figure-html/unnamed-chunk-13-4.png)
 
 ``` r
 
@@ -1259,7 +1273,8 @@ plot(a1,
      geom = "stat_density_2d")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-5.png)
+![Bland-Altman plot of 750 simulated pairs drawn with
+stat_density_2d.](agreement_analysis_files/figure-html/unnamed-chunk-13-5.png)
 
 ## References
 

@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-22</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/categorical_agreement.Rmd" class="external-link"><code>vignettes/categorical_agreement.Rmd</code></a></small>
       <div class="d-none name"><code>categorical_agreement.Rmd</code></div>
@@ -349,10 +349,10 @@ reveals raters who are systematically more lenient or severe, or (with
 <code>type = "subjects"</code>) the ratings of each subject.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Stacked bars showing the share of ratings in each category for each rater." width="576"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"subjects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" alt="" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" alt="Ratings for each subject, ordered by mean category, with point size showing how many raters chose each category." width="576"></p>
 </div>
 </div>
 <div class="section level2">
@@ -445,7 +445,7 @@ how much higher or lower the rater tends to rate than the typical rater.
 Raters far from zero are lenient or severe relative to the others.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_km</span>, type <span class="op">=</span> <span class="st">"effects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="Estimated effect of each rater on the latent scale with intervals; a dashed line at zero marks the typical rater." width="576"></p>
 </div>
 <div class="section level3">
 <h3 id="comparing-groups-of-raters-or-subjects">Comparing groups of raters or subjects<a class="anchor" aria-label="anchor" href="#comparing-groups-of-raters-or-subjects"></a>
@@ -506,7 +506,7 @@ group:</p>
 <span><span class="co">#&gt; (chi-square, 1 df); intervals use delta-method standard errors and are</span></span>
 <span><span class="co">#&gt; approximate.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_g</span>, type <span class="op">=</span> <span class="st">"effects"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="categorical_agreement_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="Estimated effect of each rater on the latent scale with intervals, coloured by experience group; a dashed line at zero marks the typical rater." width="576"></p>
 <p>For a subject characteristic, such as patient age, use
 <code>group_type = "subject"</code>; the group must then be constant
 within each subject (and, for rater groups, within each rater).</p>
