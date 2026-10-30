@@ -122,6 +122,12 @@ summary(fit)
 confint(fit, level = 0.90)
 ```
 
+`model_equation()` writes the fitted model with its estimates:
+
+```{r}
+model_equation(fit, use_coefs = TRUE)
+```
+
 The matrix plot shows every pair. Above the diagonal each method is plotted against the other, with the line of identity (dashed) and the constant-bias conversion line with its prediction limits; below the diagonal are the Bland-Altman plots.
 
 ```{r, fig.height = 7}

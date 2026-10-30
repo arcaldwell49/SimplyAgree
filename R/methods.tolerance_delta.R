@@ -725,3 +725,12 @@ check.tolerance_delta <- function(x,
   list(p_norm = p_norm,
        p_het = p_het)
 }
+
+#' @rdname model_equation
+#' @export
+model_equation.tolerance_delta <- function(x,
+                                           use_coefs = FALSE,
+                                           coef_digits = 3,
+                                           ...) {
+  .eq_finish(.eq_tolerance(x), use_coefs, coef_digits)
+}

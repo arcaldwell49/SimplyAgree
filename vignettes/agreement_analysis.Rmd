@@ -115,7 +115,7 @@ We can use the `tolerance_limits` function demonstrate the basic calculations.
 In this example (below), we use the `temps` data set to measure the differences between esophageal and rectal temperatures between different times of day (`tod`) and controlling for the intra-subject correlation.
 
 ```{r}
-tolerance_limit(
+tl = tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
   y = "teso_pre", # Second measure
@@ -123,6 +123,7 @@ tolerance_limit(
   condition = "tod", # Identify condition that may affect differences
   cor_type = "sym" # Set correlation structure as Compound Symmetry
 )
+tl
 ```
 
 
@@ -166,7 +167,7 @@ where $g_{ij}$ is the variance function (1 without one) and $R_i$ is the correla
 With `model = "lme"`, the differences follow a linear mixed model (`nlme::lme()`) with a random intercept for each subject and, optionally, for each setting (inner level) within subject:
 
 $$
-d_{ijk} = \mathbf{x}_{ijk}^\top \\beta + u_i + v_{ij} + e_{ijk}, \qquad
+d_{ijk} = \mathbf{x}_{ijk}^\top \beta + u_i + v_{ij} + e_{ijk}, \qquad
 u_i \sim N(0, \sigma_1^2), \quad v_{ij} \sim N(0, \sigma_2^2), \quad
 \text{Var}(e_{ijk}) = \sigma^2 g_{ijk}^2
 $$
@@ -178,6 +179,12 @@ S^2 = \hat\sigma_1^2 + \hat\sigma_2^2 + \hat\sigma^2 g^2
 $$
 
 The output reports the components as `SD.between` ($\hat\sigma_1$), `SD.nested` ($\hat\sigma_2$), and `SD.within` ($\hat\sigma g$). For `gls` with compound symmetry, `SD.between` $= \sqrt{\hat\rho}\, S$ and `SD.within` $= \sqrt{1 - \hat\rho}\, S$.
+
+`model_equation()` writes out the model of a fitted result, here the example above with its estimates:
+
+```{r}
+model_equation(tl, use_coefs = TRUE)
+```
 
 ### The bias and its standard error
 

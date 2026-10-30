@@ -97,6 +97,10 @@ reference:
   - deming_power
   - deming_sample_size
 
+- title: "Model Equations"
+  contents:
+  - model_equation
+
 - title: "Data"
   contents:
   - reps

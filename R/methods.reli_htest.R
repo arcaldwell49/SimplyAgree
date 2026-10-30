@@ -920,3 +920,12 @@ check.reli_htest <- function(x, ...) {
          greater = paste0(level, " lower bound ", .fmt_num(ci[1])),
          less = paste0(level, " upper bound ", .fmt_num(ci[2])))
 }
+
+#' @rdname model_equation
+#' @export
+model_equation.reli_htest <- function(x,
+                                      use_coefs = FALSE,
+                                      coef_digits = 3,
+                                      ...) {
+  .eq_finish(.eq_reli_htest(x), use_coefs, coef_digits)
+}

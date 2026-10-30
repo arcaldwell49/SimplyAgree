@@ -446,3 +446,13 @@ predict.simple_mvc <- function(object,
   stats::predict(conv, newdata = newdata, from = from, to = to,
                  level = level)
 }
+
+#' @rdname model_equation
+#' @export
+model_equation.simple_mconv <- function(x,
+                                        use_coefs = FALSE,
+                                        coef_digits = 3,
+                                        pair = NULL,
+                                        ...) {
+  .eq_finish(.eq_simple_mconv(x, pair = pair), use_coefs, coef_digits)
+}

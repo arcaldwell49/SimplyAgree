@@ -46,14 +46,16 @@ Methods are organized in `R/methods.*.R` files:
 | Class | print | plot | check | Other |
 |-------|-------|------|-------|-------|
 | simple_agree | Yes | Yes (ggplot2) | Yes | - |
-| simple_reli | Yes | Yes (ggplot2) | Yes | - |
+| simple_reli | Yes | Yes (ggplot2) | Yes | model_equation |
 | simple_eiv | Yes | Yes | Yes | coef, confint, fitted, predict, residuals, summary, vcov |
 | loa, loa_mermod | Yes | Yes (ggplot2) | Yes | - |
-| tolerance_delta | Yes | Yes (ggplot2) | Yes | - |
-| reli_htest (icc_test, reli_err_test, mdc_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`) |
+| tolerance_delta | Yes | Yes (ggplot2) | Yes | model_equation |
+| reli_htest (icc_test, reli_err_test, mdc_test) | htest | Yes (ggplot2, `type`) | Yes | summary (`style`), model_equation |
 | ccc_htest (ccc_test) | htest | Yes (identity, `type = "ba"`) | Yes | summary (`style`) |
 | cac_htest (cac_test, ord_kappa_test) | htest | Yes (ggplot2, `type`) | - | summary (`style`) |
 | htest | Inherited from stats | - | - | - |
+
+`model_equation()` (LaTeX of the model; generic and renderer in `R/model_equation.R` and `R/model_equation_internals.R`) also has methods for `simple_mvc`, `simple_mconv`, `lm`, `lmerMod`, `gls` and `lme`.
 
 ### Plot Methods
 - All use **ggplot2** for visualization

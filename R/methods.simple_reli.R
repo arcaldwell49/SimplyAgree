@@ -115,3 +115,12 @@ check.simple_reli <- function(x, ...) {
 
   check_reli(x)
 }
+
+#' @rdname model_equation
+#' @export
+model_equation.simple_reli <- function(x,
+                                       use_coefs = FALSE,
+                                       coef_digits = 3,
+                                       ...) {
+  .eq_finish(.eq_simple_reli(x), use_coefs, coef_digits)
+}

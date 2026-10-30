@@ -619,3 +619,12 @@ check.simple_mvc <- function(x,
   attr(p, "prop_bias") = .pm_table(res)
   p
 }
+
+#' @rdname model_equation
+#' @export
+model_equation.simple_mvc <- function(x,
+                                      use_coefs = FALSE,
+                                      coef_digits = 3,
+                                      ...) {
+  .eq_finish(.eq_simple_mvc(x), use_coefs, coef_digits)
+}

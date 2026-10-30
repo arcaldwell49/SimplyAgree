@@ -44,6 +44,13 @@ Bug fixes:
 - `check()` for `agreement_limit(prop_bias = TRUE)` reported p = NA for proportional bias.
 - `check()` for `tolerance_limit(keep_model = FALSE)` failed; it now draws the proportional bias panel and notes that the other panels need the model.
 
+## Model equations
+
+- Added `model_equation()` (experimental), which writes the statistical model behind a result as LaTeX: the mean model, the distributions of the random effects and residuals, and any variance function or correlation structure.
+  - Methods for `tolerance_limit()`, `icc_test()`, `reli_err_test()`, `mdc_test()`, `reli_facet_test()`, `reli_stats()`, `reli_aov()`, `method_vc()` and `method_convert()` results, using the notation of the vignettes, and for `lm`, `lmer`, `gls` and `lme` models.
+  - Symbols by default; `use_coefs = TRUE` substitutes the estimates (`coef_digits` sets the decimals).
+  - Prints the LaTeX code at the console and renders as display math in R Markdown and Quarto. No new dependencies.
+
 # SimplyAgree 0.4.0
 
 ## Results that change
