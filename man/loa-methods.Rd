@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{loa}(x, error.ratio = NULL, ...)
+\method{check}{loa}(x, error.ratio = NULL, bias_line = c("adjusted", "expected"), ...)
 }
 \arguments{
 \item{x}{object of class \code{loa} as returned from a agreement_limit function.}
@@ -36,6 +36,12 @@ for details.
 error variances, var(error of x) / var(error of y), as in \code{\link[=dem_reg]{dem_reg()}},
 on the analysis scale (the log scale with \code{log_tf = TRUE}). Used only
 with \code{data_type = "simple"}; see "Proportional bias diagnostic".}
+
+\item{bias_line}{For \code{check}, the second (dashed) line drawn on the
+proportional bias panel when the test is corrected for measurement error
+(replicates or \code{error.ratio}): "adjusted" (default), the error-adjusted
+slope, or "expected", the slope expected from unequal measurement error
+alone. The test is the same either way. See "Choosing \code{bias_line}".}
 }
 \value{
 \describe{
@@ -66,8 +72,8 @@ What is tested depends on the design:
 \item \strong{One measurement per method} (\code{data_type = "simple"}): the
 Pitman-Morgan test (t on n - 2 df). With \code{error.ratio}, the Deming
 slope of y on x for that error ratio is tested against 1 instead (the
-test reported by \code{\link[=dem_reg]{dem_reg()}}), and the error-adjusted slope
-2(1 - b)/(1 + b) is drawn dashed.
+test reported by \code{\link[=dem_reg]{dem_reg()}}). The error variances implied by the
+Deming fit give the slope expected from unequal error.
 \item \strong{Replicates} (\code{data_type = "reps"}): the test uses subject means
 and is corrected for unequal measurement error. The covariance of the
 subject-mean differences and sums is compared with its expected value
@@ -76,14 +82,53 @@ without proportional bias, \eqn{s^2_{wx}\overline{1/m_x} -
 rather than with zero. The standard error is a jackknife over
 subjects (re-estimating the within-subject variances) with n - 1 df.
 Only the difference of the error variances enters, so an occasion
-effect shared by both methods (linked replicates) cancels. The
-error-adjusted slope is drawn dashed. Complete pairs of measurements
-are used.
+effect shared by both methods (linked replicates) cancels. Complete
+pairs of measurements are used.
 \item \strong{Nested data} (\code{data_type = "nest"}): the true value changes
 within a subject, so the error variances cannot be estimated; the slope
 is tested with a random-intercept model (likelihood ratio test) and is
 subject to the same limitation as one measurement per method.
 }
+}
+
+\section{Choosing \code{bias_line}}{
+
+When the test is corrected for measurement error (replicates or
+\code{error.ratio}), the panel shows the observed least-squares slope (solid,
+with its confidence band, which is not corrected) and a second, dashed
+line chosen by \code{bias_line}. The test and its p-value are the same for both
+choices; only the picture differs.
+\itemize{
+\item \strong{"adjusted"} (default): the error-adjusted slope, the slope of the
+differences on the means that would be seen without measurement error,
+2(1 - beta)/(1 + beta) for y = a + beta x on the true values. Without
+proportional bias it is horizontal.
+\itemize{
+\item Pros: one simple rule (is the dashed line flat?); its slope gives
+\code{beta}, the size of the proportional bias, which is reported in the
+caption; it applies in the same way to replicates and \code{error.ratio}.
+\item Cons: the test is of the covariance, not of this slope, so how far
+the line is from flat is not a direct picture of the test statistic;
+when the error variances are similar it lies on top of the observed
+line and is hard to see.
+}
+\item \strong{"expected"}: the slope expected from unequal measurement error
+alone, with no proportional bias. Without proportional bias the
+observed (solid) line should follow it.
+\itemize{
+\item Pros: the gap between the two lines is what is tested, so the
+picture matches the p-value; it shows directly how much of the
+observed slope unequal error can explain.
+\item Cons: "the solid line should follow the dashed one" is harder to
+judge than "the dashed line should be flat"; the size of the
+proportional bias (\code{beta}) is not shown (it is in the \code{"prop_bias"}
+attribute).
+}
+}
+
+Neither line shows its own uncertainty; use the p-value (and, for the
+size, \code{beta}) rather than judging the lines by eye, particularly with few
+subjects.
 }
 
 \references{

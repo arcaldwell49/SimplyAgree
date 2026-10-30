@@ -32,6 +32,10 @@
 #' @param error.ratio For `check`, an optional known ratio of the measurement
 #'   error variances, var(error of x) / var(error of y), as in [dem_reg()],
 #'   on the analysis scale. Used only without `id` and `condition`.
+#' @param bias_line For `check` with `error.ratio`, the dashed line on the
+#'   proportional bias panel: "adjusted" (default; the error-adjusted slope)
+#'   or "expected" (the slope expected from unequal measurement error alone).
+#'   See "Choosing `bias_line`" in [loa-methods] for the pros and cons.
 #'
 #' @name tolerance_delta-methods
 
@@ -548,7 +552,9 @@ plot.tolerance_delta <- function(x,
 
 check.tolerance_delta <- function(x,
                                   error.ratio = NULL,
+                                  bias_line = c("adjusted", "expected"),
                                   ...) {
+  bias_line = match.arg(bias_line)
   .pm_check_ratio(error.ratio)
   call2 = x$call
   dat = model.frame(x$call$lm_mod)
@@ -599,13 +605,15 @@ check.tolerance_delta <- function(x,
     paste(vapply(names(pb), function(nm) .pm_caption(pb[[nm]], label = nm),
                  character(1)), collapse = " \n")
   } else {
-    .pm_caption(pb[[1]])
+    .pm_caption(pb[[1]], bias_line = bias_line)
   }
+  # a second line only with error.ratio, which excludes condition
+  line2 = if (!has_cond) .pm_line(pb[[1]], bias_line)
   p_bias = plot_bias(dat2,
-                     adj_slope = if (pb[[1]]$corrected && !has_cond) {
-                       pb[[1]]$slope_adj
-                     },
+                     adj_slope = line2,
                      adj_center = mean(dat2$mean),
+                     adj_label = .pm_line_label(bias_line),
+                     subtitle = .pm_subtitle(bias_line, !is.null(line2)),
                      y_lab = "Difference (centred)",
                      x_lab = paste0("Mean of both methods",
                                     if (has_id) " (subject means)",

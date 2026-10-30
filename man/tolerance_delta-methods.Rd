@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{tolerance_delta}(x, error.ratio = NULL, ...)
+\method{check}{tolerance_delta}(x, error.ratio = NULL, bias_line = c("adjusted", "expected"), ...)
 }
 \arguments{
 \item{x}{object of class \code{tolerance_delta} as returned from a agreement_limit function.}
@@ -35,6 +35,11 @@ for details.
 \item{error.ratio}{For \code{check}, an optional known ratio of the measurement
 error variances, var(error of x) / var(error of y), as in \code{\link[=dem_reg]{dem_reg()}},
 on the analysis scale. Used only without \code{id} and \code{condition}.}
+
+\item{bias_line}{For \code{check} with \code{error.ratio}, the dashed line on the
+proportional bias panel: "adjusted" (default; the error-adjusted slope)
+or "expected" (the slope expected from unequal measurement error alone).
+See "Choosing \code{bias_line}" in \link{loa-methods} for the pros and cons.}
 }
 \value{
 \describe{

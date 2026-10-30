@@ -189,6 +189,55 @@ test_that("check() output carries the proportional bias results", {
                c("A", "B"))
 })
 
+test_that("bias_line chooses the dashed line", {
+  r = pb_reps_data(n = 20)
+  a = agreement_limit(x = "x", y = "y", id = "id", data = r,
+                      data_type = "reps")
+  pb = SimplyAgree:::.loa_check_panels(a)$pb
+  dashed_slope = function(p) {
+    ld = ggplot2::layer_data(p, 4)  # hline, points, smooth, abline
+    unique(ld$slope)
+  }
+  pa = suppressMessages(check(a))
+  pe = suppressMessages(check(a, bias_line = "expected"))
+  expect_equal(dashed_slope(pa[[3]]), pb$slope_adj)
+  expect_equal(dashed_slope(pe[[3]]), pb$slope_null)
+  expect_match(pb_caption(pa[[3]]), "beta")
+  expect_match(pb_caption(pe[[3]]), "expected")
+  expect_match(ggplot2::get_labs(pe[[3]])$subtitle, "should follow")
+  # same test either way
+  expect_equal(attr(pa, "prop_bias")$p.value, attr(pe, "prop_bias")$p.value)
+  expect_error(check(a, bias_line = "other"))
+
+  # no dashed line without a correction
+  s = agreement_limit(x = "x", y = "y", data = pb_simple_data(n = 40))
+  ps = suppressMessages(check(s, bias_line = "expected"))
+  expect_equal(length(ps[[3]]$layers), 2)
+
+  # method_vc, per pair
+  long = mc_long(r, methods = c("x", "y"), id = "id", replicate = "repl")
+  fit = method_vc(long, y = "y", method = "method", id = "id",
+                  replicate = "repl")
+  pm = suppressMessages(check(fit, pair_seed = 1, bias_line = "expected"))
+  expect_match(pb_caption(pm[[4]]), "expected")
+})
+
+test_that("known error ratio gives the expected slope from the Deming fit", {
+  d = pb_simple_data(n = 60, sx = 2, sy = 8, seed = 4)
+  r = 4 / 64
+  res = SimplyAgree:::.pm_known_ratio(d$x, d$y, error.ratio = r)
+  fit = dem_reg(y ~ x, data = d, error.ratio = r)
+  e = d$y - coef(fit)[1] - coef(fit)[2] * d$x
+  sw2y = sum(e^2) / ((60 - 2) * (1 + r * coef(fit)[2]^2))
+  expect_equal(unname(res$sw2), unname(c(r * sw2y, sw2y)), tolerance = 1e-8)
+  expect_equal(unname(res$slope_null),
+               unname(2 * (r * sw2y - sw2y) / var(d$x + d$y)),
+               tolerance = 1e-8)
+  tl = tolerance_limit(x = "x", y = "y", data = d)
+  pt = suppressMessages(check(tl, error.ratio = r, bias_line = "expected"))
+  expect_match(pb_caption(pt[[3]]), "expected")
+})
+
 test_that("check.tolerance_delta works without the model and by condition", {
   d = pb_simple_data(n = 40, sx = 3, sy = 3)
   t1 = tolerance_limit(x = "x", y = "y", data = d, keep_model = FALSE)

@@ -33,6 +33,11 @@
 #'   error variances of the two methods, var(error of the first) / var(error
 #'   of the second), as in [dem_reg()], on the analysis scale. Used only with
 #'   two methods and one measurement per item.
+#' @param bias_line For `check` with replicates or `error.ratio`, the dashed
+#'   line on the level dependence panel: "adjusted" (default; the
+#'   error-adjusted slope) or "expected" (the slope expected from unequal
+#'   measurement error alone). See "Choosing `bias_line`" in [loa-methods]
+#'   for the pros and cons.
 #' @param ... further arguments passed through, see description of return
 #'   value for details.
 #'
@@ -438,7 +443,9 @@ plot.simple_mvc <- function(x,
 check.simple_mvc <- function(x,
                              pair_seed = NULL,
                              error.ratio = NULL,
+                             bias_line = c("adjusted", "expected"),
                              ...){
+  bias_line = match.arg(bias_line)
   .pm_check_ratio(error.ratio)
   dg = x$diagnostics
   lv = levels(x$data$method)
@@ -528,10 +535,11 @@ check.simple_mvc <- function(x,
     res[[lab]] = r
     im = r$data
     pair_dat[[j]] = data.frame(pair = lab, avg = im$mean, d = im$diff)
-    if (r$corrected && is.finite(r$slope_adj)) {
+    line2 = .pm_line(r, bias_line)
+    if (!is.null(line2)) {
       adj_lines[[j]] = data.frame(
-        pair = lab, slope = r$slope_adj,
-        intercept = mean(im$diff) - r$slope_adj * mean(im$mean))
+        pair = lab, slope = line2,
+        intercept = mean(im$diff) - line2 * mean(im$mean))
     }
     p_var = NA_real_
     if (nrow(im) >= 4) {
@@ -543,15 +551,13 @@ check.simple_mvc <- function(x,
   }
   pair_dat = do.call(rbind, pair_dat)
   pair_dat$pair = factor(pair_dat$pair, levels = tests$pair)
-  cap = paste0(vapply(names(res), function(nm) .pm_caption(res[[nm]], nm),
-                      character(1)),
-               "; slope of |residual| ", vapply(tests$p_var, .fmt_test_p,
-                                                character(1)),
-               collapse = "\n")
+  cap = paste0(vapply(names(res), function(nm) {
+    .pm_caption(res[[nm]], nm, bias_line = bias_line)
+  }, character(1)),
+  "; slope of |residual| ", vapply(tests$p_var, .fmt_test_p, character(1)),
+  collapse = "\n")
   p_lvl = ggplot(pair_dat, aes(x = avg, y = d)) +
     geom_point(na.rm = TRUE, alpha = 0.7) +
-    geom_smooth(method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE,
-                color = "#0D0887") +
     facet_wrap(~ pair, scales = "free") +
     labs(x = paste0("Average of methods (item means)", tf_note),
          y = paste0("Difference", tf_note),
@@ -559,12 +565,28 @@ check.simple_mvc <- function(x,
          caption = cap) +
     theme_bw()
   if (length(adj_lines) > 0) {
+    # observed fit and bias_line, with a legend
+    keys = c("Observed", .pm_line_label(bias_line))
     adj_lines = do.call(rbind, adj_lines)
     adj_lines$pair = factor(adj_lines$pair, levels = tests$pair)
+    adj_lines$line = keys[2]
     p_lvl = p_lvl +
+      geom_smooth(aes(linetype = "Observed", colour = "Observed"),
+                  method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE) +
       geom_abline(data = adj_lines,
-                  aes(slope = .data$slope, intercept = .data$intercept),
-                  linetype = 2, color = "#cd201f")
+                  aes(slope = .data$slope, intercept = .data$intercept,
+                      linetype = .data$line, colour = .data$line)) +
+      scale_linetype_manual(values = stats::setNames(c(1, 2), keys),
+                            breaks = keys, name = NULL) +
+      scale_colour_manual(values = stats::setNames(c("#0D0887", "#cd201f"),
+                                                   keys),
+                          breaks = keys, name = NULL) +
+      labs(subtitle = .pm_subtitle(bias_line, TRUE)) +
+      theme(legend.position = "bottom")
+  } else {
+    p_lvl = p_lvl +
+      geom_smooth(method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE,
+                  color = "#0D0887")
   }
 
   p_bias = vapply(res, function(r) r$p.value, numeric(1))

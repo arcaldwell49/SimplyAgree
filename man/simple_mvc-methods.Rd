@@ -29,7 +29,13 @@
 
 \method{plot}{simple_mvc}(x, type = c("ba", "matrix", "vc"), pair = NULL, pair_seed = NULL, ...)
 
-\method{check}{simple_mvc}(x, pair_seed = NULL, error.ratio = NULL, ...)
+\method{check}{simple_mvc}(
+  x,
+  pair_seed = NULL,
+  error.ratio = NULL,
+  bias_line = c("adjusted", "expected"),
+  ...
+)
 }
 \arguments{
 \item{newdata, from, to}{Passed to the \code{predict} method of
@@ -85,6 +91,12 @@ afterwards.}
 error variances of the two methods, var(error of the first) / var(error
 of the second), as in \code{\link[=dem_reg]{dem_reg()}}, on the analysis scale. Used only with
 two methods and one measurement per item.}
+
+\item{bias_line}{For \code{check} with replicates or \code{error.ratio}, the dashed
+line on the level dependence panel: "adjusted" (default; the
+error-adjusted slope) or "expected" (the slope expected from unequal
+measurement error alone). See "Choosing \code{bias_line}" in \link{loa-methods}
+for the pros and cons.}
 }
 \value{
 \describe{

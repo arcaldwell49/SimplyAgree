@@ -764,10 +764,21 @@ Nested data (`data_type = "nest"`) and `tolerance_limit()` with an `id` cannot b
 
 - **Points**: the differences (centred on the mean difference) against the means of both methods, on the analysis scale (the log scale with `log_tf = TRUE`). With replicates, each point is a subject mean.
 - **Solid line and band**: the least-squares slope of the differences on the means, the *observed* slope. It includes any effect of unequal measurement error, and so does its band.
-- **Dashed line** (replicates or `error.ratio` only): the *error-adjusted* slope, the slope expected if both methods were measured without error. Without proportional bias it should be horizontal. The vertical gap between the solid and dashed lines is the part of the observed slope explained by unequal measurement error.
-- **Caption**: the test and its p-value; with the correction, both slopes.
+- **Dashed line** (replicates or `error.ratio` only): a second slope, chosen with the `bias_line` argument (below).
+- **Caption**: the test and its p-value; with the correction, the observed slope and the slope of the dashed line.
 
 The numbers are attached to the output of `check()` as the attribute `"prop_bias"`. The column `beta` is the scale of `y` relative to `x` implied by the error-adjusted slope $b$: $\beta = (2 - b) / (2 + b)$, so a value of 0.8 means that `y` changes by 0.8 units per unit of `x`. Use this table to report the result.
+
+### Two ways to draw the dashed line
+
+The `bias_line` argument of `check()` chooses what the dashed line shows. The test and its p-value are the same either way; only the picture differs.
+
+| `bias_line` | Dashed line | Without proportional bias | Pros | Cons |
+|---|---|---|---|---|
+| `"adjusted"` (default) | The *error-adjusted* slope: the slope that would be seen if both methods were measured without error | The dashed line is horizontal | One simple rule (is it flat?); its slope gives `beta`, the size of the proportional bias, shown in the caption; works the same for replicates and `error.ratio` | Its distance from flat is not exactly what is tested; with similar error variances it lies on top of the observed line |
+| `"expected"` | The slope *expected from unequal measurement error alone* | The observed (solid) line follows the dashed line | The gap between the lines is what is tested, so the picture matches the p-value; shows how much of the observed slope unequal error explains | "Should follow" is harder to judge by eye than "should be flat"; the size of the bias (`beta`) is only in the `"prop_bias"` table |
+
+Neither line shows its own uncertainty, so judge the result by the p-value (and its size by `beta`) rather than by eye, especially with few subjects.
 
 ## Example: unequal measurement error, no proportional bias
 
@@ -803,16 +814,24 @@ attr(chk, "prop_bias")[, c("test", "p.value", "p.uncorrected",
                            "slope_obs", "slope_adj", "beta")]
 ```
 
+With `bias_line = "expected"`, the dashed line is the slope that unequal error alone would produce, and the observed line follows it closely.
+
+```{r}
+check(all_reps, bias_line = "expected")
+```
+
 ## Example: proportional bias
 
-Here the second method reads $20 + 0.8x$ with the same precision as `x`. The error-corrected test is significant and `beta` is close to the true 0.8.
+Here the second method reads $20 + 0.8x$ with the same precision as `x`. The error-corrected test is significant and `beta` is close to the true 0.8. With `bias_line = "expected"`, unequal error alone would give an almost flat line, and the observed line departs clearly from it.
 
 ```{r}
 sim$y2 = 20 + 0.8 * true[sim$id] + rnorm(n * k, 0, 2)
 scaled = agreement_limit(x = "x", y = "y2", id = "id",
                          data = sim, data_type = "reps")
-chk2 = check(scaled)
-attr(chk2, "prop_bias")[, c("test", "p.value", "slope_adj", "beta")]
+chk2 = check(scaled, bias_line = "expected")
+chk2
+attr(chk2, "prop_bias")[, c("test", "p.value", "slope_obs",
+                            "slope_null", "beta")]
 ```
 
 ## What to do, and when

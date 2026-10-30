@@ -250,8 +250,9 @@ plot_qq = function (x,
     theme_bw()
 }
 
-# adj_slope: optional error-adjusted slope, drawn dashed through
-# (adj_center, 0) (the residuals are centred differences)
+# adj_slope: optional second slope (check()'s bias_line), drawn dashed
+# through (adj_center, 0) (the residuals are centred differences), with a
+# legend naming it adj_label and the fitted line "Observed"
 plot_bias = function(x,
                      size_line = .8,
                      size_point = 2,
@@ -260,32 +261,55 @@ plot_bias = function(x,
                      dot_alpha_level = .8,
                      adj_slope = NULL,
                      adj_center = NULL,
+                     adj_label = "Error-adjusted",
+                     subtitle = "Reference line should be horizontal",
                      y_lab = "Residuals",
                      x_lab = "Mean of both methods"){
-  adj_line = if (!is.null(adj_slope) && is.finite(adj_slope)) {
-    geom_abline(intercept = -adj_slope * adj_center,
-                slope = adj_slope,
-                linetype = 2,
-                linewidth = size_line,
-                colour = colors[3])
-  }
-  ggplot(x, aes(x = mean,
-                y = resid)) +
-    geom_point(colour = colors[2], stroke = 0, shape = 16,
-               size = size_point,
-               alpha = dot_alpha_level) +
-    stat_smooth(
+  has_adj = !is.null(adj_slope) && is.finite(adj_slope)
+  if (has_adj) {
+    keys = c("Observed", adj_label)
+    smooth = stat_smooth(
+      aes(linetype = "Observed", colour = "Observed"),
+      method = "lm",
+      se = TRUE,
+      alpha = alpha_level,
+      formula = y ~ x,
+      linewidth = size_line
+    )
+    adj_line = list(
+      geom_abline(data = data.frame(slope = adj_slope,
+                                    intercept = -adj_slope * adj_center,
+                                    line = adj_label),
+                  aes(slope = .data$slope, intercept = .data$intercept,
+                      linetype = .data$line, colour = .data$line),
+                  linewidth = size_line),
+      scale_linetype_manual(values = stats::setNames(c(1, 2), keys),
+                            breaks = keys, name = NULL),
+      scale_colour_manual(values = stats::setNames(colors[c(1, 3)], keys),
+                          breaks = keys, name = NULL)
+    )
+  } else {
+    smooth = stat_smooth(
       method = "lm",
       se = TRUE,
       alpha = alpha_level,
       formula = y ~ x,
       linewidth = size_line,
       colour = colors[1]
-    ) +
+    )
+    adj_line = NULL
+  }
+  ggplot(x, aes(x = mean,
+                y = resid)) +
+    (if (has_adj) geom_hline(yintercept = 0, colour = "grey60")) +
+    geom_point(colour = colors[2], stroke = 0, shape = 16,
+               size = size_point,
+               alpha = dot_alpha_level) +
+    smooth +
     adj_line +
     labs(
       title = "Proportional Bias",
-      subtitle = "Reference line should be horizontal",
+      subtitle = subtitle,
       y = y_lab,
       x = x_lab
     ) +
@@ -297,7 +321,8 @@ plot_bias = function(x,
       panel.grid.minor = element_blank(), #remove minor gridlines
       legend.background = element_rect(fill='transparent'), #transparent legend bg
       legend.box.background = element_rect(fill='transparent') #transparent legend panel
-    )
+    ) +
+    (if (has_adj) theme(legend.position = "bottom"))
 }
 
 # Check agree_test -----

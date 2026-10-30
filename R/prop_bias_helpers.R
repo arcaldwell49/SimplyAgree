@@ -181,6 +181,11 @@
   stat = (b - 1) / se
   d = x - y
   sm = x + y
+  # error variances implied by the fit: y - a - b * x has variance
+  # var_y * (1 + error.ratio * b^2)
+  e = y - jd$df$coef[1] - b * x
+  sw2y = sum(e^2) / ((n - 2) * (1 + error.ratio * b^2))
+  sw2x = error.ratio * sw2y
   list(n = n,
        data = data.frame(mean = sm / 2, diff = d),
        center = c(mean = mean(sm) / 2, diff = mean(d)),
@@ -193,7 +198,38 @@
        parameter = n - 2,
        p.value = 2 * stats::pt(-abs(stat), n - 2),
        p.uncorrected = stats::cor.test(d, sm)$p.value,
+       sw2 = c(x = sw2x, y = sw2y),
+       slope_null = .pm_slope(sw2x - sw2y, stats::var(sm)),
        slope_adj = 2 * (1 - b) / (1 + b))
+}
+
+# Which dashed line check() draws (bias_line) ----
+# "adjusted": the error-adjusted slope (the slope without measurement error);
+# "expected": the slope expected from unequal measurement error alone. NULL
+# when the test is not corrected.
+.pm_line = function(res,
+                    bias_line) {
+  if (!isTRUE(res$corrected)) {
+    return(NULL)
+  }
+  s = if (bias_line == "adjusted") res$slope_adj else res$slope_null
+  if (is.null(s) || !is.finite(s)) NULL else s
+}
+
+.pm_line_label = function(bias_line) {
+  if (bias_line == "adjusted") "Error-adjusted" else
+    "Expected from unequal error"
+}
+
+.pm_subtitle = function(bias_line,
+                        has_line) {
+  if (!has_line) {
+    "Reference line should be horizontal"
+  } else if (bias_line == "adjusted") {
+    "Error-adjusted (dashed) line should be horizontal"
+  } else {
+    "Observed (solid) line should follow the dashed line"
+  }
 }
 
 .pm_check_ratio = function(error.ratio) {
@@ -208,12 +244,18 @@
 
 # Caption line for a test result
 .pm_caption = function(res,
-                       label = NULL) {
+                       label = NULL,
+                       bias_line = "adjusted") {
   lab = if (is.null(label)) "" else paste0(label, ": ")
   if (isTRUE(res$corrected)) {
+    second = if (bias_line == "adjusted") {
+      paste0(", error-adjusted ", signif(res$slope_adj, 3),
+             " \nbeta (scale of y on x) = ", signif(res$beta, 3))
+    } else {
+      paste0(", expected ", signif(res$slope_null, 3))
+    }
     paste0(lab, res$method, ": ", .fmt_test_p(res$p.value),
-           " \nslope observed = ", signif(res$slope_obs, 3),
-           ", error-adjusted = ", signif(res$slope_adj, 3), " (dashed)")
+           " \nslope: observed ", signif(res$slope_obs, 3), second)
   } else {
     paste0(lab, res$method, ": ", .fmt_test_p(res$p.value))
   }

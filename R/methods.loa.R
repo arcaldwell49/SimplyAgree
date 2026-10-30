@@ -9,6 +9,11 @@
 #'   error variances, var(error of x) / var(error of y), as in [dem_reg()],
 #'   on the analysis scale (the log scale with `log_tf = TRUE`). Used only
 #'   with `data_type = "simple"`; see "Proportional bias diagnostic".
+#' @param bias_line For `check`, the second (dashed) line drawn on the
+#'   proportional bias panel when the test is corrected for measurement error
+#'   (replicates or `error.ratio`): "adjusted" (default), the error-adjusted
+#'   slope, or "expected", the slope expected from unequal measurement error
+#'   alone. The test is the same either way. See "Choosing `bias_line`".
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{agreement_limit}}.
@@ -37,8 +42,8 @@
 #'   - **One measurement per method** (`data_type = "simple"`): the
 #'     Pitman-Morgan test (t on n - 2 df). With `error.ratio`, the Deming
 #'     slope of y on x for that error ratio is tested against 1 instead (the
-#'     test reported by [dem_reg()]), and the error-adjusted slope
-#'     2(1 - b)/(1 + b) is drawn dashed.
+#'     test reported by [dem_reg()]). The error variances implied by the
+#'     Deming fit give the slope expected from unequal error.
 #'   - **Replicates** (`data_type = "reps"`): the test uses subject means
 #'     and is corrected for unequal measurement error. The covariance of the
 #'     subject-mean differences and sums is compared with its expected value
@@ -47,13 +52,45 @@
 #'     rather than with zero. The standard error is a jackknife over
 #'     subjects (re-estimating the within-subject variances) with n - 1 df.
 #'     Only the difference of the error variances enters, so an occasion
-#'     effect shared by both methods (linked replicates) cancels. The
-#'     error-adjusted slope is drawn dashed. Complete pairs of measurements
-#'     are used.
+#'     effect shared by both methods (linked replicates) cancels. Complete
+#'     pairs of measurements are used.
 #'   - **Nested data** (`data_type = "nest"`): the true value changes
 #'     within a subject, so the error variances cannot be estimated; the slope
 #'     is tested with a random-intercept model (likelihood ratio test) and is
 #'     subject to the same limitation as one measurement per method.
+#'
+#' @section Choosing `bias_line`:
+#' When the test is corrected for measurement error (replicates or
+#' `error.ratio`), the panel shows the observed least-squares slope (solid,
+#' with its confidence band, which is not corrected) and a second, dashed
+#' line chosen by `bias_line`. The test and its p-value are the same for both
+#' choices; only the picture differs.
+#'
+#'   - **"adjusted"** (default): the error-adjusted slope, the slope of the
+#'     differences on the means that would be seen without measurement error,
+#'     2(1 - beta)/(1 + beta) for y = a + beta x on the true values. Without
+#'     proportional bias it is horizontal.
+#'     - Pros: one simple rule (is the dashed line flat?); its slope gives
+#'       `beta`, the size of the proportional bias, which is reported in the
+#'       caption; it applies in the same way to replicates and `error.ratio`.
+#'     - Cons: the test is of the covariance, not of this slope, so how far
+#'       the line is from flat is not a direct picture of the test statistic;
+#'       when the error variances are similar it lies on top of the observed
+#'       line and is hard to see.
+#'   - **"expected"**: the slope expected from unequal measurement error
+#'     alone, with no proportional bias. Without proportional bias the
+#'     observed (solid) line should follow it.
+#'     - Pros: the gap between the two lines is what is tested, so the
+#'       picture matches the p-value; it shows directly how much of the
+#'       observed slope unequal error can explain.
+#'     - Cons: "the solid line should follow the dashed one" is harder to
+#'       judge than "the dashed line should be flat"; the size of the
+#'       proportional bias (`beta`) is not shown (it is in the `"prop_bias"`
+#'       attribute).
+#'
+#' Neither line shows its own uncertainty; use the p-value (and, for the
+#' size, `beta`) rather than judging the lines by eye, particularly with few
+#' subjects.
 #'
 #' @references
 #' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
@@ -273,7 +310,9 @@ plot.loa <- function(x,
 
 check.loa <- function(x,
                       error.ratio = NULL,
+                      bias_line = c("adjusted", "expected"),
                       ...) {
+  bias_line = match.arg(bias_line)
   .pm_check_ratio(error.ratio)
   if (!is.null(error.ratio) && x$call$data_type != "simple") {
     message("error.ratio is only used with data_type = 'simple' and is ",
@@ -283,7 +322,8 @@ check.loa <- function(x,
             } else ".")
     error.ratio = NULL
   }
-  panels = .loa_check_panels(x, error.ratio = error.ratio)
+  panels = .loa_check_panels(x, error.ratio = error.ratio,
+                             bias_line = bias_line)
   .pm_notify(panels$pb, design = panels$pb_design)
   p = wrap_plots(panels$p_norm, panels$p_het,
              panels$p_bias, ncol = 2) & plot_annotation(
@@ -303,7 +343,8 @@ check.loa <- function(x,
 # proportional bias), returned separately so other methods (ccc_test) can
 # reuse some of them.
 .loa_check_panels <- function(x,
-                              error.ratio = NULL) {
+                              error.ratio = NULL,
+                              bias_line = "adjusted") {
 
   call2 = x$call
   df = model.frame(x$call$lm_mod)
@@ -430,13 +471,16 @@ check.loa <- function(x,
   x_lab = paste0("Mean of both methods",
                  if (call2$data_type == "reps") " (subject means)",
                  if (isTRUE(call2$log_tf)) " (log scale)")
+  line2 = .pm_line(pb, bias_line)
   p_bias = plot_bias(dat2,
-                     adj_slope = if (pb$corrected) pb$slope_adj,
+                     adj_slope = line2,
                      adj_center = mean(dat2$mean),
+                     adj_label = .pm_line_label(bias_line),
+                     subtitle = .pm_subtitle(bias_line, !is.null(line2)),
                      y_lab = "Difference (centred)",
                      x_lab = x_lab) +
     labs(caption = paste0("Proportional Bias", " \n",
-                          .pm_caption(pb))) +
+                          .pm_caption(pb, bias_line = bias_line))) +
     theme(
       panel.background = element_rect(fill='transparent'), #transparent panel bg
       plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
