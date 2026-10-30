@@ -139,6 +139,9 @@
 #'     method's scale, with bootstrap intervals if requested; for a
 #'     conversion from a [method_vc()] fit, its variance components);
 #'     otherwise `NULL`.
+#'   - `vc_fit`: for a conversion from a [method_vc()] fit, its bias and
+#'     limits tables at `pred_level` and `conf_level`, and its design (used
+#'     by the Bland-Altman plot); otherwise absent.
 #'   - `scaled`: for the scaled model, the per-method intercepts and slopes,
 #'     the item values, the variance components on the scale of the true
 #'     values, and the iteration history (`trace`).
@@ -304,6 +307,15 @@ method_convert = function(data = NULL,
              "at pred_level = ", pred_level, ". Use variance = 'constant' ",
              "or a transformation.", call. = FALSE)
       }
+      sd_rng = da$c_sd + da$d_sd * range(pp$avg)
+      if (any(sd_rng <= 0)) {
+        warning("With variance = 'linear', the fitted SD of the differences ",
+                "of ", m1, " and ", m2, " is not positive over part of the ",
+                "observed range of the averages (from ", signif(sd_rng[1], 3),
+                " to ", signif(sd_rng[2], 3), "); the prediction limits are ",
+                "not valid there. Use variance = 'constant' or a ",
+                "transformation.", call. = FALSE)
+      }
     }
     pairs[[key]] = pp
     models[[key]] = list(da = da$fit, sd = da$sd_fit)
@@ -407,6 +419,31 @@ mc_convert_constant = function(object,
     dplyr::arrange(match(to, lv), match(from, lv))
 
   des = object$design
+  # bias and limits of the method_vc() fit at the levels of the conversion,
+  # for the Bland-Altman plot
+  qt_b = qt((1 + conf_level) / 2, b$df)
+  b_vc = b
+  b_vc$lower.CL = b$bias - qt_b * b$se
+  b_vc$upper.CL = b$bias + qt_b * b$se
+  l_vc = if (pred_level == des$pred_level && conf_level == des$conf_level) {
+    l
+  } else {
+    mc_limits(bias_tab = b_vc,
+              varcomp = vc,
+              cov_v = object$vc_cov,
+              design = des,
+              interval = des$interval,
+              pred_level = pred_level,
+              conf_level = conf_level,
+              bound_type = des$bound_type,
+              include_omega = des$include_omega)
+  }
+  vc_fit = list(bias = b_vc,
+                limits = l_vc,
+                design = utils::modifyList(des,
+                                           list(pred_level = pred_level,
+                                                conf_level = conf_level)))
+
   pairs = list()
   for (j in seq_len(nrow(b))) {
     pairs[[paste0(b$method1[j], "-", b$method2[j])]] =
@@ -419,6 +456,7 @@ mc_convert_constant = function(object,
                  limits_par = limits_par,
                  da = NULL,
                  varcomp = vc,
+                 vc_fit = vc_fit,
                  data = object$data,
                  pairs = pairs,
                  transform = object$transform,

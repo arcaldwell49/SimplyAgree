@@ -103,6 +103,9 @@ and items, and whether the SEs are cluster-robust).
 method's scale, with bootstrap intervals if requested; for a
 conversion from a \code{\link[=method_vc]{method_vc()}} fit, its variance components);
 otherwise \code{NULL}.
+\item \code{vc_fit}: for a conversion from a \code{\link[=method_vc]{method_vc()}} fit, its bias and
+limits tables at \code{pred_level} and \code{conf_level}, and its design (used
+by the Bland-Altman plot); otherwise absent.
 \item \code{scaled}: for the scaled model, the per-method intercepts and slopes,
 the item values, the variance components on the scale of the true
 values, and the iteration history (\code{trace}).

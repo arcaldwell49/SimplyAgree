@@ -19,7 +19,14 @@
 #'   the `from` method on the original scale, with the observed pairs, the
 #'   line of identity (dashed), and the conversion with its prediction limits.
 #'   "ba": a Bland-Altman plot of the differences (first minus second method
-#'   of `pair`) with the bias and prediction limits implied by the model.
+#'   of `pair`) with the bias and prediction limits implied by the model, as
+#'   lines that change with the level (linear bias or scaled model). For a
+#'   conversion from a [method_vc()] fit, the bias is constant and the plot is
+#'   that of the fit (see [simple_mvc-methods]): the bias and limits are
+#'   points with their confidence intervals, to the left of the data.
+#' @param geom,delta For `type = "ba"`, the geometry used to display the
+#'   data points and the maximal allowable difference; see
+#'   [simple_mvc-methods].
 #' @param pair Character vector of two method names. For
 #'   `type = "conversion"`, `c(from, to)`; for `type = "ba"`, the difference
 #'   is first minus second. Default is the first two methods.
@@ -47,14 +54,20 @@
 #'   the regressions of the differences on the averages (linear bias) or the
 #'   per-method intercepts and slopes (scaled), the conversions, and the
 #'   variance components.}
-#'   \item{\code{check}}{A patchwork of diagnostic plots. Linear bias: the
-#'   standardized residuals of the regressions of the differences on the
-#'   averages, their normal QQ plot, and the absolute residuals against the
-#'   averages (with p-values for a slope, i.e., a spread that changes with the
-#'   level). Scaled model: the standardized residuals of the final variance
-#'   component model against the fitted true values, their normal QQ plots by
-#'   method, and the intercepts and slopes at each iteration of the
-#'   alternating regression. Not available for conversions from
+#'   \item{\code{check}}{A patchwork of diagnostic plots, as for
+#'   [agreement_limit()], with what to look for in each subtitle and the
+#'   tests in the captions. Linear bias, for each pair: a normal QQ plot of
+#'   the standardized residuals of the regression of the differences on the
+#'   averages (Shapiro-Wilk test); the square root of the absolute
+#'   standardized residuals against the averages (Breusch-Pagan test; with
+#'   `variance = "linear"`, the residuals are divided by the fitted SD); and
+#'   the residuals against the averages (RESET test of linearity). The last
+#'   two use item means, so replicates are not counted more than once.
+#'   Scaled model: normal QQ plots of the standardized residuals of the final
+#'   variance component model by method (Shapiro-Wilk tests), the square
+#'   root of their absolute values against the fitted true values
+#'   (Breusch-Pagan tests), and the intercepts and slopes at each iteration
+#'   of the alternating regression. Not available for conversions from
 #'   [method_vc()]; use `check()` on that fit.}
 #' }
 #'
@@ -241,64 +254,74 @@ check.simple_mconv <- function(x,
 
   if (fi$bias == "linear") {
     ## residuals of the DA regressions, by pair ----
-    rd = do.call(rbind, lapply(names(x$pairs), function(key) {
-      pp = x$pairs[[key]]
+    # normality on all pairs; spread and linearity on item means, so items
+    # with replicates are not counted more than once
+    da = x$da
+    norm_dat = het_dat = lin_dat = list()
+    p_reset = numeric(0)
+    for (j in seq_len(nrow(da))) {
+      lab = paste0(da$method1[j], " - ", da$method2[j])
+      pp = x$pairs[[paste0(da$method1[j], "-", da$method2[j])]]
       fit = stats::lm(d ~ avg, data = pp)
-      data.frame(pair = sub("-", " - ", key), avg = pp$avg,
-                 resid = stats::residuals(fit),
-                 std = stats::rstandard(fit))
-    }))
-    p_var = vapply(split(rd, rd$pair), function(d) {
-      summary(stats::lm(abs(resid) ~ avg, data = d))$coefficients[2, 4]
-    }, numeric(1))
-    p1 = ggplot(rd, aes(x = avg, y = std)) +
-      geom_hline(yintercept = 0, linetype = 2) +
-      geom_point(alpha = 0.7) +
-      facet_wrap(~ pair, scales = "free_x") +
-      labs(x = paste0("Average", tf_note), y = "Standardized residual",
-           title = "Residuals of the differences on the averages") +
-      theme_bw()
-    p2 = ggplot(rd, aes(sample = std)) +
-      stat_qq() +
-      stat_qq_line() +
-      facet_wrap(~ pair) +
-      labs(x = "Theoretical quantiles", y = "Standardized residual",
-           title = "Normality of residuals") +
-      theme_bw()
-    p3 = ggplot(rd, aes(x = avg, y = abs(resid))) +
-      geom_point(alpha = 0.7) +
-      geom_smooth(method = "lm", formula = y ~ x, color = "#0D0887") +
-      facet_wrap(~ pair, scales = "free") +
-      labs(x = paste0("Average", tf_note), y = "|Residual|",
-           title = "Spread of the differences",
-           caption = paste0(names(p_var), ": slope of |residual| p = ",
-                            signif(p_var, 3), collapse = "\n")) +
-      theme_bw()
-    if (fi$variance == "constant" && any(p_var < 0.05)) {
-      message("The spread of the differences changes with the level for at ",
-              "least one pair (p < 0.05); consider variance = 'linear' or ",
-              "a transformation.")
+      r = stats::residuals(fit)
+      if (fi$variance == "linear") {
+        # residuals relative to the fitted SD of the differences
+        r = r / (da$c_sd[j] + da$d_sd[j] * pp$avg)
+        std = r
+      } else {
+        std = stats::rstandard(fit)
+      }
+      norm_dat[[j]] = data.frame(pair = lab, std = std)
+      im = stats::aggregate(cbind(r, avg, d) ~ id,
+                            data = data.frame(id = pp$id, r = r,
+                                              avg = pp$avg, d = pp$d),
+                            FUN = mean)
+      het_dat[[j]] = data.frame(pair = lab, avg = im$avg, r = im$r)
+      ft = .fitted_square_test(d ~ avg, data = im)
+      lin_dat[[j]] = data.frame(pair = lab, x = im$avg,
+                                y = stats::residuals(ft$fit))
+      p_reset[lab] = ft$p.value
     }
-    return(patchwork::wrap_plots(p1, p2, p3, ncol = 2))
+    labs_pair = paste0(da$method1, " - ", da$method2)
+    norm_dat = do.call(rbind, norm_dat)
+    het_dat = do.call(rbind, het_dat)
+    lin_dat = do.call(rbind, lin_dat)
+    norm_dat$pair = factor(norm_dat$pair, levels = labs_pair)
+    het_dat$pair = factor(het_dat$pair, levels = labs_pair)
+    lin_dat$pair = factor(lin_dat$pair, levels = labs_pair)
+    if (length(p_reset) == 1) {
+      p_reset = unname(p_reset)
+    }
+    x_lab = paste0("Average of methods",
+                   if (any(da$cluster_se)) " (item means)", tf_note)
+
+    p1 = mc_check_norm(norm_dat$std, norm_dat$pair,
+                       y_lab = if (fi$variance == "linear") {
+                         "Residuals / fitted SD"
+                       } else "Standardized residuals")
+    het = mc_check_het(het_dat$avg, het_dat$r, het_dat$pair, x_lab = x_lab)
+    p2 = het$plot
+    p3 = plot_het(lin_dat, x_lab = x_lab, y_lab = "Residuals") +
+      geom_hline(yintercept = 0, colour = "grey50") +
+      facet_wrap(~ pair, scales = "free") +
+      labs(title = "Linearity",
+           subtitle = "Reference line should be flat and horizontal",
+           caption = .check_caption("Linearity", "RESET Test", p_reset)) +
+      .check_theme()
+    if (fi$variance == "constant" && any(het$p.value < 0.05, na.rm = TRUE)) {
+      message("The spread of the differences changes with the level for at ",
+              "least one pair (Breusch-Pagan p < 0.05); consider ",
+              "variance = 'linear' or a transformation.")
+    }
+    return(patchwork::wrap_plots(p1, p2, p3, ncol = 2) &
+             plot_annotation(theme = .check_theme()))
   }
 
   ## scaled model ----
   dg = x$diagnostics
-  p1 = ggplot(dg, aes(x = fitted, y = resid, color = method)) +
-    geom_hline(yintercept = 0, linetype = 2) +
-    geom_point(alpha = 0.7) +
-    scale_color_viridis_d(option = "C", end = .8) +
-    labs(x = "Fitted true values (scale of the first method)",
-         y = "Standardized residuals", color = "",
-         title = "Residuals vs fitted") +
-    theme_bw()
-  p2 = ggplot(dg, aes(sample = resid)) +
-    stat_qq() +
-    stat_qq_line() +
-    facet_wrap(~ method) +
-    labs(x = "Theoretical quantiles", y = "Standardized residuals",
-         title = "Normality of residuals") +
-    theme_bw()
+  x_lab = "Fitted true values (scale of the first method)"
+  p1 = mc_check_norm(dg$resid, dg$method)
+  p2 = mc_check_het(dg$fitted, dg$resid, dg$method, x_lab = x_lab)$plot
   tr = x$scaled$trace
   tr_long = rbind(
     data.frame(iteration = tr$iteration, method = tr$method,
@@ -313,11 +336,17 @@ check.simple_mconv <- function(x,
     facet_wrap(~ panel, scales = "free_y") +
     scale_color_viridis_d(option = "C", end = .8) +
     labs(x = "Iteration", y = NULL, color = "",
-         title = "Convergence of the alternating regression",
-         caption = paste0(fi$iterations, " iterations; final criterion ",
-                          signif(fi$criterion, 3))) +
-    theme_bw()
-  patchwork::wrap_plots(p1, p2, p3, ncol = 2)
+         title = "Convergence of the Alternating Regression",
+         subtitle = "Lines should level off by the last iterations",
+         caption = paste0("Convergence \n", fi$iterations,
+                          " iterations; final criterion ",
+                          signif(fi$criterion, 3), "; ",
+                          if (isTRUE(fi$converged)) "converged" else
+                            "NOT converged")) +
+    theme_bw() +
+    .check_theme()
+  patchwork::wrap_plots(p1, p2, p3, ncol = 2) &
+    plot_annotation(theme = .check_theme())
 }
 
 #' @rdname simple_mconv-methods
@@ -418,11 +447,18 @@ predict.simple_mconv <- function(object,
 plot.simple_mconv <- function(x,
                               type = c("conversion", "ba"),
                               pair = NULL,
+                              geom = c("geom_point",
+                                       "geom_bin2d",
+                                       "geom_density_2d",
+                                       "geom_density_2d_filled",
+                                       "stat_density_2d"),
+                              delta = NULL,
                               ...){
   type = match.arg(type)
+  geom = match.arg(geom)
   switch(type,
          conversion = mc_conversion_plot(x, pair = pair),
-         ba = mc_conv_ba_plot(x, pair = pair))
+         ba = mc_conv_ba_plot(x, pair = pair, geom = geom, delta = delta))
 }
 
 # predict for simple_mvc ----

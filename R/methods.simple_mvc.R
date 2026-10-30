@@ -14,10 +14,11 @@
 #'   the item averages (computed on the analysis scale and back-transformed).
 #'   Supplying `at` implies `scale = "original"`.
 #' @param type Type of plot. "ba" (default): a Bland-Altman plot of the
-#'   differences for one pair of methods, with the bias and limits (shaded
-#'   bands show the confidence intervals of the bias and the confidence bounds
-#'   of the limits of agreement; with `interval = "tolerance"`, the lines are
-#'   the prediction limits and the bands extend to the tolerance limits).
+#'   differences for one pair of methods, with the bias and limits drawn as
+#'   points to the left of the data, as in [agreement_limit()]: the whiskers
+#'   show the confidence interval of the bias and the confidence bounds of the
+#'   limits of agreement (with `interval = "tolerance"`, the points are the
+#'   prediction limits and the whiskers extend to the tolerance limits).
 #'   "matrix": all pairs, with the methods named
 #'   on the diagonal, each pair of methods plotted against each other above
 #'   it (identity line dashed; constant-bias conversion line with prediction
@@ -27,8 +28,18 @@
 #' @param pair Character vector naming the two methods to plot, in the order
 #'   of the difference (first minus second). Default is the first pair.
 #' @param pair_seed Seed for the random pairing of exchangeable replicates
-#'   in the plot. The global random number generator state is restored
-#'   afterwards.
+#'   in the plot or in `check()`. The global random number generator state is
+#'   restored afterwards. With exchangeable replicates and no seed, the
+#'   pairing changes from call to call, and so do the plotted differences and
+#'   the `check()` p-values (when items have unequal numbers of replicates by
+#'   the two methods); set `pair_seed` for reproducible results.
+#' @param geom For `type = "ba"`, the geometry used to display the data
+#'   points: "geom_point" (default), "geom_bin2d", "geom_density_2d",
+#'   "geom_density_2d_filled", or "stat_density_2d", as in [loa-methods].
+#' @param delta For `type = "ba"`, the maximal allowable difference, drawn as
+#'   dashed lines: one value (drawn at `delta` and `-delta`, or, for ratios
+#'   with `transform = "log"`, at `delta` and `1/delta`) or two values, on
+#'   the plotted scale.
 #' @param error.ratio For `check`, an optional known ratio of the measurement
 #'   error variances of the two methods, var(error of the first) / var(error
 #'   of the second), as in [dem_reg()], on the analysis scale. Used only with
@@ -75,18 +86,21 @@
 #'   variance component SDs.}
 #'   \item{\code{plot}}{A ggplot object (`type = "ba"` or `"vc"`) or a
 #'   patchwork object (`type = "matrix"`).}
-#'   \item{\code{check}}{A patchwork of diagnostic plots: standardized
-#'   residuals against fitted values; normal QQ plots of the residuals by
-#'   method and of the predicted random effects; and, for each pair, the
-#'   differences against the averages with a regression line. The caption
-#'   gives p-values for the slope of the differences on the averages
-#'   (level-dependent bias) and of the absolute residuals of that regression
-#'   on the averages (level-dependent variance), computed from item means so
-#'   replicates are not counted more than once. With replicates, the test of
-#'   the slope is corrected for unequal measurement error (and, with
+#'   \item{\code{check}}{A patchwork of diagnostic plots, as for
+#'   [agreement_limit()], with what to look for in each subtitle and the
+#'   tests in the captions: normal QQ plots of the standardized residuals by
+#'   method and of the predicted random effects (Shapiro-Wilk tests, or
+#'   Kolmogorov-Smirnov with 5000 or more values); and, for each pair, the
+#'   homogeneity of variance of the differences (square root of the absolute
+#'   standardized differences against the averages, Breusch-Pagan test) and
+#'   proportional bias (centred differences against the averages, with a
+#'   regression line). The tests for each pair use item means, so replicates
+#'   are not counted more than once. With replicates, the test of the slope
+#'   is corrected for unequal measurement error (and, with
 #'   `tau = "method"`, unequal method-by-item variances), and the
 #'   error-adjusted slope is drawn dashed; see "Proportional bias diagnostic"
-#'   in [loa-methods]. A message suggests alternatives when either p < 0.05.
+#'   in [loa-methods]. A message suggests alternatives when the slope or the
+#'   Breusch-Pagan test has p < 0.05.
 #'   The proportional bias results are attached as the attribute
 #'   \code{"prop_bias"}, one row per pair (named in \code{group}); \code{beta}
 #'   is the scale of the second method of the pair relative to the first.}
@@ -427,10 +441,18 @@ plot.simple_mvc <- function(x,
                             type = c("ba", "matrix", "vc"),
                             pair = NULL,
                             pair_seed = NULL,
+                            geom = c("geom_point",
+                                     "geom_bin2d",
+                                     "geom_density_2d",
+                                     "geom_density_2d_filled",
+                                     "stat_density_2d"),
+                            delta = NULL,
                             ...){
   type = match.arg(type)
+  geom = match.arg(geom)
   switch(type,
-         ba = mc_ba_plot(x, pair = pair, pair_seed = pair_seed),
+         ba = mc_ba_plot(x, pair = pair, pair_seed = pair_seed,
+                         geom = geom, delta = delta),
          matrix = mc_matrix_plot(x, pair_seed = pair_seed),
          vc = mc_vc_plot(x))
 }
@@ -453,46 +475,35 @@ check.simple_mvc <- function(x,
     paste0(" (", x$transform$name, " scale)")
   } else ""
 
-  ## 1. residuals vs fitted ----
-  p_res = ggplot(dg$resid, aes(x = fitted, y = resid, color = method)) +
-    geom_hline(yintercept = 0, linetype = 2) +
-    geom_point(na.rm = TRUE, alpha = 0.7) +
-    scale_color_viridis_d(option = "C", end = .8) +
-    labs(x = paste0("Fitted values", tf_note),
-         y = "Standardized residuals",
-         title = "Residuals vs fitted", color = "") +
-    theme_bw()
+  ## 1. normality of the residuals, by method ----
+  rs = dg$resid
+  if (x$design$model_type == "single_2") {
+    # with one measurement by each of two methods, the residuals of the two
+    # methods are equal and opposite: one per item, for the difference
+    rs = rs[rs$method == lv[1], ]
+    rs$method = paste0(lv[1], " - ", lv[2])
+  }
+  p_norm = mc_check_norm(rs$resid, rs$method,
+                         y_lab = "Standardized residuals")
 
-  ## 2. QQ plot of residuals by method ----
-  p_qq = ggplot(dg$resid, aes(sample = resid)) +
-    stat_qq(na.rm = TRUE) +
-    stat_qq_line(na.rm = TRUE) +
-    facet_wrap(~ method) +
-    labs(x = "Theoretical quantiles", y = "Standardized residuals",
-         title = "Normality of residuals") +
-    theme_bw()
-
-  ## 3. QQ plot of predicted random effects ----
+  ## 2. normality of the predicted random effects ----
   if (is.null(dg$ranef) || nrow(dg$ranef) == 0) {
     p_re = ggplot() +
       annotate("text", x = 0.5, y = 0.5,
                label = "No random effects in this model") +
       theme_void() +
-      labs(title = "Normality of random effects")
+      labs(title = "Normality of Random Effects")
   } else {
     re = dg$ranef
     re$panel = ifelse(is.na(re$method), re$effect,
                       paste0(re$effect, " (", re$method, ")"))
-    p_re = ggplot(re, aes(sample = value)) +
-      stat_qq(na.rm = TRUE) +
-      stat_qq_line(na.rm = TRUE) +
-      facet_wrap(~ panel, scales = "free_y") +
-      labs(x = "Theoretical quantiles", y = "Predicted random effect",
-           title = "Normality of random effects") +
-      theme_bw()
+    p_re = mc_check_norm(re$value, re$panel,
+                         title = "Normality of Random Effects",
+                         y_lab = "Predicted random effect",
+                         scales = "free_y")
   }
 
-  ## 4. level dependence of the differences, per pair ----
+  ## 3. and 4. differences against the averages, per pair ----
   # tests use item means of the paired differences and averages, so items
   # with replicates are not counted more than once. With replicates, the
   # slope test is corrected for unequal measurement error (and, with
@@ -517,7 +528,6 @@ check.simple_mvc <- function(x,
   pair_dat = list()
   adj_lines = list()
   res = list()
-  tests = data.frame(pair = character(0), p_var = numeric(0))
   for (j in seq_len(nrow(prs))) {
     m = prs$method1[j]
     k = prs$method2[j]
@@ -534,65 +544,44 @@ check.simple_mvc <- function(x,
     }
     res[[lab]] = r
     im = r$data
-    pair_dat[[j]] = data.frame(pair = lab, avg = im$mean, d = im$diff)
+    pair_dat[[j]] = data.frame(pair = lab, mean = im$mean,
+                               resid = im$diff - mean(im$diff))
     line2 = .pm_line(r, bias_line)
     if (!is.null(line2)) {
-      adj_lines[[j]] = data.frame(
-        pair = lab, slope = line2,
-        intercept = mean(im$diff) - line2 * mean(im$mean))
+      adj_lines[[j]] = data.frame(pair = lab, slope = line2,
+                                  intercept = -line2 * mean(im$mean))
     }
-    p_var = NA_real_
-    if (nrow(im) >= 4) {
-      fit_d = lm(diff ~ mean, data = im)
-      fit_v = lm(abs(stats::resid(fit_d)) ~ im$mean)
-      p_var = summary(fit_v)$coefficients[2, 4]
-    }
-    tests = rbind(tests, data.frame(pair = lab, p_var = p_var))
   }
   pair_dat = do.call(rbind, pair_dat)
-  pair_dat$pair = factor(pair_dat$pair, levels = tests$pair)
-  cap = paste0(vapply(names(res), function(nm) {
-    .pm_caption(res[[nm]], nm, bias_line = bias_line)
-  }, character(1)),
-  "; slope of |residual| ", vapply(tests$p_var, .fmt_test_p, character(1)),
-  collapse = "\n")
-  p_lvl = ggplot(pair_dat, aes(x = avg, y = d)) +
-    geom_point(na.rm = TRUE, alpha = 0.7) +
-    facet_wrap(~ pair, scales = "free") +
-    labs(x = paste0("Average of methods (item means)", tf_note),
-         y = paste0("Difference", tf_note),
-         title = "Level dependence",
-         caption = cap) +
-    theme_bw()
-  if (length(adj_lines) > 0) {
-    # observed fit and bias_line, with a legend
-    keys = c("Observed", .pm_line_label(bias_line))
-    adj_lines = do.call(rbind, adj_lines)
-    adj_lines$pair = factor(adj_lines$pair, levels = tests$pair)
-    adj_lines$line = keys[2]
-    p_lvl = p_lvl +
-      geom_smooth(aes(linetype = "Observed", colour = "Observed"),
-                  method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE) +
-      geom_abline(data = adj_lines,
-                  aes(slope = .data$slope, intercept = .data$intercept,
-                      linetype = .data$line, colour = .data$line)) +
-      scale_linetype_manual(values = stats::setNames(c(1, 2), keys),
-                            breaks = keys, name = NULL) +
-      scale_colour_manual(values = stats::setNames(c("#0D0887", "#cd201f"),
-                                                   keys),
-                          breaks = keys, name = NULL) +
-      labs(subtitle = .pm_subtitle(bias_line, TRUE)) +
-      theme(legend.position = "bottom")
-  } else {
-    p_lvl = p_lvl +
-      geom_smooth(method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE,
-                  color = "#0D0887")
-  }
+  pair_dat$pair = factor(pair_dat$pair, levels = names(res))
+  x_lab = paste0("Average of methods",
+                 if (mt == "reps") " (item means)", tf_note)
 
-  p_bias = vapply(res, function(r) r$p.value, numeric(1))
+  het = mc_check_het(pair_dat$mean, pair_dat$resid, pair_dat$pair,
+                     x_lab = x_lab)
+  p_het = het$plot
+  p_var = het$p.value
+
+  adj_lines = do.call(rbind, adj_lines)
+  if (!is.null(adj_lines)) {
+    adj_lines$pair = factor(adj_lines$pair, levels = names(res))
+  }
+  p_bias = plot_bias(pair_dat,
+                     adj_data = adj_lines,
+                     adj_label = .pm_line_label(bias_line),
+                     subtitle = .pm_subtitle(bias_line, !is.null(adj_lines)),
+                     y_lab = paste0("Difference (centred)", tf_note),
+                     x_lab = x_lab) +
+    facet_wrap(~ pair, scales = "free") +
+    labs(caption = paste0("Proportional Bias \n",
+                          paste(vapply(names(res), function(nm) {
+                            .pm_caption(res[[nm]], nm, bias_line = bias_line)
+                          }, character(1)), collapse = " \n")))
+
+  p_bias_p = vapply(res, function(r) r$p.value, numeric(1))
   p_unc = vapply(res, function(r) r$p.uncorrected, numeric(1))
   corrected = vapply(res, function(r) isTRUE(r$corrected), logical(1))
-  sig = !is.na(p_bias) & p_bias < 0.05
+  sig = !is.na(p_bias_p) & p_bias_p < 0.05
   if (any(sig & !corrected)) {
     .pm_message(design = "single", which = names(res)[sig & !corrected],
                 alt = paste0("consider a conversion with non-constant bias ",
@@ -609,13 +598,14 @@ check.simple_mvc <- function(x,
   if (any(explained)) {
     .pm_message_explained(which = names(res)[explained])
   }
-  if (any(tests$p_var < 0.05, na.rm = TRUE)) {
+  if (any(p_var < 0.05, na.rm = TRUE)) {
     message("The spread of the differences changes with the level of ",
-            "measurement for at least one pair (p < 0.05); consider a ",
-            "transformation (e.g., transform = 'log').")
+            "measurement for at least one pair (Breusch-Pagan p < 0.05); ",
+            "consider a transformation (e.g., transform = 'log').")
   }
 
-  p = patchwork::wrap_plots(p_res, p_qq, p_re, p_lvl, ncol = 2)
+  p = patchwork::wrap_plots(p_norm, p_re, p_het, p_bias, ncol = 2) &
+    plot_annotation(theme = .check_theme())
   attr(p, "prop_bias") = .pm_table(res)
   p
 }

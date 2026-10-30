@@ -161,25 +161,39 @@ test_that("plot returns a Bland-Altman ggplot for any pair", {
   expect_s3_class(p, "ggplot")
   expect_equal(p$labels$y, "Difference between methods (A - B)")
 
+  # bias and limits as points with confidence intervals, left of the data
+  pr = geom_data(p, "GeomPointrange")
+  l = fit$limits[1, ]
+  expect_equal(as.character(pr$text), c("Upper LoA", "Bias", "Lower LoA"))
+  expect_equal(pr$estimate, c(l$upper_loa, fit$bias$bias[1], l$lower_loa))
+  expect_equal(pr$lower.ci, c(l$upper_loa, fit$bias$lower.CL[1],
+                              l$lower_loa_ci))
+  expect_equal(pr$upper.ci, c(l$upper_loa_ci, fit$bias$upper.CL[1],
+                              l$lower_loa))
+  expect_equal(unique(pr$x), min(p$data$avg))
+
   # reversed pair flips the limits
   p2 = plot(fit, pair = c("C", "A"))
-  lines = p2$layers[[2]]$data
+  pr2 = geom_data(p2, "GeomPointrange")
   j = fit$bias$method1 == "A" & fit$bias$method2 == "C"
-  expect_equal(lines$y, c(-fit$limits$lower_loa[j], -fit$limits$bias[j],
-                          -fit$limits$upper_loa[j]))
+  expect_equal(pr2$estimate, c(-fit$limits$lower_loa[j], -fit$limits$bias[j],
+                               -fit$limits$upper_loa[j]))
+  expect_equal(pr2$upper.ci[1], -fit$limits$lower_loa_ci[j])
+  expect_equal(pr2$lower.ci[3], -fit$limits$upper_loa_ci[j])
   expect_error(plot(fit, pair = c("A", "Z")), "two different methods")
 
-  # tolerance: lines at the prediction limits, bands out to the tolerance
-  # limits; a reversed pair flips both
+  # tolerance: points at the prediction limits, whiskers out to the
+  # tolerance limits; a reversed pair flips both
   fit_tl = mvc_fit(interval = "tolerance")
   p_tol = plot(fit_tl, pair = c("C", "A"))
   expect_s3_class(p_tol, "ggplot")
   l = fit_tl$limits[j, ]
-  expect_equal(p_tol$layers[[2]]$data$y,
-               c(-l$lower.PL, -l$bias, -l$upper.PL))
-  bands = p_tol$layers[[1]]$data
-  expect_equal(bands$ymax[1], -l$lower.TL)
-  expect_equal(bands$ymin[3], -l$upper.TL)
+  pt = geom_data(p_tol, "GeomPointrange")
+  expect_equal(as.character(pt$text),
+               c("Upper Limit", "Bias", "Lower Limit"))
+  expect_equal(pt$estimate, c(-l$lower.PL, -l$bias, -l$upper.PL))
+  expect_equal(pt$upper.ci[1], -l$lower.TL)
+  expect_equal(pt$lower.ci[3], -l$upper.TL)
 
   # exchangeable pairing is reproducible with pair_seed
   dat = sim_methods(n_items = 20, n_reps = 2, tau = 0.3, seed = 3)
@@ -203,6 +217,33 @@ test_that("plot uses the transformed or ratio scale", {
   p_l = plot(fit_l)
   expect_match(p_l$labels$y, "Ratio")
   expect_true(all(p_l$data$d > 0))
+  expect_equal(geom_data(p_l, "GeomPointrange")$estimate[2],
+               exp(fit_l$bias$bias))
+
+  # delta for ratios: delta and 1/delta
+  expect_equal(geom_data(plot(fit_l, delta = 1.25), "GeomHline")$y1,
+               c(1.25, 0.8))
+  expect_error(plot(fit_l, delta = -1), "greater than 0")
+})
+
+test_that("Bland-Altman plot takes geom and delta", {
+  fit = mvc_fit()
+  p = plot(fit, delta = 1.5)
+  expect_equal(geom_data(p, "GeomHline")$y1, c(1.5, -1.5))
+  expect_equal(p$scales$get_scales("y")$secondary.axis$name,
+               "Maximal Allowable Difference")
+  expect_equal(geom_data(plot(fit, delta = c(-1, 2)), "GeomHline")$y1,
+               c(-1, 2))
+  expect_error(plot(fit, delta = "a"), "one or two numbers")
+
+  p_bin = plot(fit, geom = "geom_bin2d")
+  expect_false(inherits(p_bin$layers[[1]]$geom, "GeomPoint"))
+  expect_s3_class(geom_data(p_bin, "GeomPointrange"), "data.frame")
+  for (g in c("geom_density_2d", "geom_density_2d_filled",
+              "stat_density_2d")) {
+    expect_s3_class(plot(fit, geom = g), "ggplot")
+  }
+  expect_error(plot(fit, geom = "geom_line"), "should be one of")
 })
 
 test_that("objects survive saveRDS/readRDS", {
@@ -300,10 +341,46 @@ test_that("check returns diagnostic plots and flags level dependence", {
   expect_message(p <- check(fit2), "method_convert")
   expect_s3_class(p, "patchwork")
 
+  # spread of the differences that grows with the level
+  set.seed(4)
+  mu = rnorm(60, 10, 3)
+  dat_h = data.frame(id = rep(1:60, 2), method = rep(c("A", "B"), each = 60),
+                     y = c(mu + rnorm(60, 0, 0.05 * mu),
+                           mu + rnorm(60, 0, 0.05 * mu)))
+  fit_h = method_vc(dat_h, y = "y", method = "method", id = "id")
+  expect_message(check(fit_h), "transformation")
+
   # works without the model, and after saveRDS/readRDS
   fit3 = mvc_fit(keep_model = FALSE)
   f = tempfile(fileext = ".rds")
   saveRDS(fit3, f)
   expect_s3_class(check(readRDS(f), pair_seed = 1), "patchwork")
   unlink(f)
+})
+
+test_that("check panels have subtitles and test captions", {
+  fit = mvc_fit()
+  pl = patch_plots(check(fit, pair_seed = 1))
+  expect_length(pl, 4)
+  for (q in pl) {
+    expect_false(is.null(q$labels$subtitle))
+  }
+  expect_match(pl[[1]]$labels$caption, "Normality \nShapiro-Wilk Test: A: p")
+  expect_match(pl[[2]]$labels$caption, "Shapiro-Wilk Test: Item-by-replicate")
+  expect_match(pl[[3]]$labels$caption, "Breusch-Pagan Test: A - B: p")
+  expect_match(pl[[4]]$labels$caption, "Pitman-Morgan")
+  expect_match(pl[[4]]$labels$subtitle, "Error-adjusted")
+  # tests for pairs use item means
+  expect_equal(nrow(pl[[3]]$data), 3 * 30)
+  expect_equal(sort(unique(as.character(pl[[3]]$data$group))),
+               c("A - B", "A - C", "B - C"))
+
+  # one measurement by two methods: one residual per item
+  dat = sim_methods(n_items = 30, methods = c("A", "B"), seed = 1)
+  f2 = method_vc(dat, y = "y", method = "method", id = "id")
+  pl2 = patch_plots(check(f2))
+  expect_equal(nrow(pl2[[1]]$data), 30)
+  expect_equal(unique(pl2[[1]]$data$group), "A - B")
+  expect_match(pl2[[2]]$labels$title, "Random Effects")
+  expect_match(pl2[[4]]$labels$subtitle, "should be horizontal")
 })

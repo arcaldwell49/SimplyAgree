@@ -221,6 +221,73 @@ plot_resid_fitted = function(fitted, resid, title, subtitle, caption,
   if (is.na(p)) "not estimable" else paste0("p = ", signif(p, 4))
 }
 
+# Normality test for the check() captions: Shapiro-Wilk, or
+# Kolmogorov-Smirnov (of the scaled values) with 5000 or more values
+.norm_test = function(res) {
+  res = res[is.finite(res)]
+  if (length(res) < 3 || stats::var(res) == 0) {
+    return(list(p.value = NA_real_, name = "Shapiro-Wilk Test"))
+  }
+  if (length(res) < 5000) {
+    list(p.value = shapiro.test(res)$p.value, name = "Shapiro-Wilk Test")
+  } else {
+    list(p.value = ks.test(as.vector(scale(res)), y = "pnorm")$p.value,
+         name = "Kolmogorov-Smirnov Test")
+  }
+}
+
+# Breusch-Pagan test as in check.loa(): the squared residuals, divided by
+# their mean, regressed on x; half the regression sum of squares is
+# chi-square with 1 df
+.bp_test = function(r,
+                    x) {
+  ok = is.finite(r) & is.finite(x)
+  r = r[ok]
+  x = x[ok]
+  if (length(r) < 3 || stats::var(x) == 0 || all(r == 0)) {
+    return(NA_real_)
+  }
+  u = r^2 / mean(r^2)
+  SS = anova(lm(u ~ x))$"Sum Sq"
+  pchisq((sum(SS) - SS[length(SS)]) / 2, df = 1, lower.tail = FALSE)
+}
+
+# Caption of a check() panel with one test result per group (named p),
+# wrapped at about `width` characters per line
+.check_caption = function(panel,
+                          test,
+                          p,
+                          width = 50) {
+  res = if (is.null(names(p))) {
+    vapply(p, .fmt_test_p, character(1))
+  } else {
+    paste0(names(p), ": ", vapply(p, .fmt_test_p, character(1)))
+  }
+  lines = paste0(test, ":")
+  for (r in res) {
+    cur = lines[length(lines)]
+    if (cur == paste0(test, ":") || nchar(cur) + nchar(r) + 2 <= width) {
+      lines[length(lines)] = paste0(cur, if (cur == paste0(test, ":")) " "
+                                    else "; ", r)
+    } else {
+      lines = c(lines, r)
+    }
+  }
+  paste0(panel, " \n", paste(lines, collapse = " \n"))
+}
+
+# Transparent background and no gridlines, as on the check() plots
+.check_theme = function() {
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent'),
+    legend.box.background = element_rect(fill = 'transparent')
+  )
+}
+
 plot_qq = function (x,
                     size_line = .8,
                     size_point = 2,
@@ -252,7 +319,9 @@ plot_qq = function (x,
 
 # adj_slope: optional second slope (check()'s bias_line), drawn dashed
 # through (adj_center, 0) (the residuals are centred differences), with a
-# legend naming it adj_label and the fitted line "Observed"
+# legend naming it adj_label and the fitted line "Observed". adj_data: in
+# place of adj_slope, a data frame of lines (slope, intercept, and the facet
+# column), one per facet.
 plot_bias = function(x,
                      size_line = .8,
                      size_point = 2,
@@ -264,9 +333,15 @@ plot_bias = function(x,
                      adj_label = "Error-adjusted",
                      subtitle = "Reference line should be horizontal",
                      y_lab = "Residuals",
-                     x_lab = "Mean of both methods"){
-  has_adj = !is.null(adj_slope) && is.finite(adj_slope)
+                     x_lab = "Mean of both methods",
+                     adj_data = NULL){
+  if (is.null(adj_data) && !is.null(adj_slope) && is.finite(adj_slope)) {
+    adj_data = data.frame(slope = adj_slope,
+                          intercept = -adj_slope * adj_center)
+  }
+  has_adj = !is.null(adj_data) && nrow(adj_data) > 0
   if (has_adj) {
+    adj_data$line = adj_label
     keys = c("Observed", adj_label)
     smooth = stat_smooth(
       aes(linetype = "Observed", colour = "Observed"),
@@ -277,9 +352,7 @@ plot_bias = function(x,
       linewidth = size_line
     )
     adj_line = list(
-      geom_abline(data = data.frame(slope = adj_slope,
-                                    intercept = -adj_slope * adj_center,
-                                    line = adj_label),
+      geom_abline(data = adj_data,
                   aes(slope = .data$slope, intercept = .data$intercept,
                       linetype = .data$line, colour = .data$line),
                   linewidth = size_line),

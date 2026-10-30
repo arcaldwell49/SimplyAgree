@@ -26,7 +26,15 @@
 
 \method{predict}{simple_mconv}(object, newdata, from = NULL, to = NULL, level = NULL, ...)
 
-\method{plot}{simple_mconv}(x, type = c("conversion", "ba"), pair = NULL, ...)
+\method{plot}{simple_mconv}(
+  x,
+  type = c("conversion", "ba"),
+  pair = NULL,
+  geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled",
+    "stat_density_2d"),
+  delta = NULL,
+  ...
+)
 }
 \arguments{
 \item{x, object}{Object of class \code{simple_mconv}, as returned from
@@ -55,11 +63,19 @@ the first method to the second.}
 the \code{from} method on the original scale, with the observed pairs, the
 line of identity (dashed), and the conversion with its prediction limits.
 "ba": a Bland-Altman plot of the differences (first minus second method
-of \code{pair}) with the bias and prediction limits implied by the model.}
+of \code{pair}) with the bias and prediction limits implied by the model, as
+lines that change with the level (linear bias or scaled model). For a
+conversion from a \code{\link[=method_vc]{method_vc()}} fit, the bias is constant and the plot is
+that of the fit (see \link{simple_mvc-methods}): the bias and limits are
+points with their confidence intervals, to the left of the data.}
 
 \item{pair}{Character vector of two method names. For
 \code{type = "conversion"}, \code{c(from, to)}; for \code{type = "ba"}, the difference
 is first minus second. Default is the first two methods.}
+
+\item{geom, delta}{For \code{type = "ba"}, the geometry used to display the
+data points and the maximal allowable difference; see
+\link{simple_mvc-methods}.}
 }
 \value{
 \describe{
@@ -82,14 +98,20 @@ scaled model, bootstrap failures), the design, the number of pairs used,
 the regressions of the differences on the averages (linear bias) or the
 per-method intercepts and slopes (scaled), the conversions, and the
 variance components.}
-\item{\code{check}}{A patchwork of diagnostic plots. Linear bias: the
-standardized residuals of the regressions of the differences on the
-averages, their normal QQ plot, and the absolute residuals against the
-averages (with p-values for a slope, i.e., a spread that changes with the
-level). Scaled model: the standardized residuals of the final variance
-component model against the fitted true values, their normal QQ plots by
-method, and the intercepts and slopes at each iteration of the
-alternating regression. Not available for conversions from
+\item{\code{check}}{A patchwork of diagnostic plots, as for
+\code{\link[=agreement_limit]{agreement_limit()}}, with what to look for in each subtitle and the
+tests in the captions. Linear bias, for each pair: a normal QQ plot of
+the standardized residuals of the regression of the differences on the
+averages (Shapiro-Wilk test); the square root of the absolute
+standardized residuals against the averages (Breusch-Pagan test; with
+\code{variance = "linear"}, the residuals are divided by the fitted SD); and
+the residuals against the averages (RESET test of linearity). The last
+two use item means, so replicates are not counted more than once.
+Scaled model: normal QQ plots of the standardized residuals of the final
+variance component model by method (Shapiro-Wilk tests), the square
+root of their absolute values against the fitted true values
+(Breusch-Pagan tests), and the intercepts and slopes at each iteration
+of the alternating regression. Not available for conversions from
 \code{\link[=method_vc]{method_vc()}}; use \code{check()} on that fit.}
 }
 }

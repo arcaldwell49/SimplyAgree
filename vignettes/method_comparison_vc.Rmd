@@ -134,7 +134,7 @@ The matrix plot shows every pair. Above the diagonal each method is plotted agai
 plot(fit, type = "matrix", pair_seed = 1)
 ```
 
-A single pair can be plotted in either direction:
+A single pair can be plotted in either direction. As in `agreement_limit()`, the bias and limits are drawn to the left of the data, with their confidence intervals; `delta` adds a maximal allowable difference and `geom` changes how the data are shown.
 
 ```{r}
 plot(fit, pair = c("DevA", "Ref"))
@@ -245,7 +245,7 @@ For a full picture, give the levels that matter in practice (supplying `at` impl
 print(fit_sat, at = c(70, 90, 98))
 ```
 
-So, for example, "at a saturation of about 90%, the two methods differ by between about −4.3 and +6.6 percentage points, and by about ±1 point near 98%". The repeatability coefficients are converted in the same way. The variance components are still reported on the analysis scale, because they do not translate into a single number in original units. `plot(fit_sat)` draws the back-transformed bias and limits over the whole range.
+So, for example, "at a saturation of about 90%, the two methods differ by between about −4.3 and +6.6 percentage points, and by about ±1 point near 98%". The repeatability coefficients are converted in the same way. The variance components are still reported on the analysis scale, because they do not translate into a single number in original units. The conversion panels of `plot(fit_sat, type = "matrix")` show the back-transformed conversion and prediction limits over the whole range.
 
 A single pair of limits "averaged" over all the items would depend on the mix of levels in the sample and would hide how the agreement changes with the level, so it is not offered. When the range of the data is narrow enough that the spread of the differences is roughly constant (check with `check()`), an analysis without a transformation answers the question directly.
 
@@ -261,13 +261,12 @@ When New reads 90%, Ref is expected to read `fit` and, for `pred_level` of items
 
 # Checking the model
 
-`check()` returns diagnostic plots: the residuals against the fitted values, normal QQ plots of the residuals and of the predicted random effects, and the differences against the averages for each pair.
+`check()` returns diagnostic plots in the style of `check()` for `agreement_limit()`, each with a subtitle saying what to look for and its test in the caption: normal QQ plots of the residuals by method and of the predicted random effects (Shapiro-Wilk tests), and, for each pair, the homogeneity of variance of the differences (Breusch-Pagan test) and proportional bias (the centred differences against the averages). The tests for each pair use the item means, so replicates are not counted more than once. With exchangeable replicates the measurements are paired at random, so set `pair_seed` for reproducible p-values.
 
-```{r, fig.height = 7, fig.width = 8}
+```{r, fig.height = 9, fig.width = 9}
 check(fit, pair_seed = 1)
 ```
 
-The caption gives, for each pair, a p-value for the slope of the differences on the averages (bias that depends on the level) and for the slope of the absolute residuals on the averages (spread that depends on the level). These use the item means, so replicates are not counted more than once.
 
 - If the **spread** of the differences grows with the level, try a transformation, such as `transform = "log"`.
 - If the **bias** depends on the level, a constant bias is not adequate, and the methods are related by a slope as well as an intercept. But a slope of the differences on the averages also appears when the two methods have unequal measurement error alone, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$ [@bland1999]. With replicates, `check()` therefore corrects the test for each method's measurement error, estimated from the replicates (the error-corrected Pitman-Morgan test), and draws the error-adjusted slope as a dashed line. Only a significant *corrected* test is evidence that the methods differ in scale; the scaled model of @carstensen2010 [ch. 7] (`method_convert(bias = "scaled")`) then estimates the relation. Without replicates the test cannot separate the two, and `check()` says so. With method-specific `tau`, the difference in method-by-item variances is also removed.

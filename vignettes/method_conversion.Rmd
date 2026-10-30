@@ -121,9 +121,9 @@ The slope of B on A is close to the true 1.2. `summary()` shows the per-method i
 summary(conv_sc)$scaled$methods
 ```
 
-`check()` shows the residuals of the final variance component model and how the estimates converged:
+`check()` shows the residuals of the final variance component model (their normality, with Shapiro-Wilk tests, and their spread against the fitted true values, with Breusch-Pagan tests) and how the estimates converged:
 
-```{r, fig.width = 8, fig.height = 6}
+```{r, fig.width = 9, fig.height = 7}
 check(conv_sc)
 ```
 
@@ -133,7 +133,7 @@ The conversion plot shows the conversion and its prediction limits with the obse
 plot(conv_sc)
 ```
 
-The Bland-Altman plot shows the bias line and limits that the model implies for the differences:
+The Bland-Altman plot shows the bias and prediction limits that the model implies for the differences, as lines that change with the level:
 
 ```{r}
 plot(conv_sc, type = "ba")

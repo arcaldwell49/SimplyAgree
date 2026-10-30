@@ -27,7 +27,16 @@
 
 \method{vcov}{simple_mvc}(object, ...)
 
-\method{plot}{simple_mvc}(x, type = c("ba", "matrix", "vc"), pair = NULL, pair_seed = NULL, ...)
+\method{plot}{simple_mvc}(
+  x,
+  type = c("ba", "matrix", "vc"),
+  pair = NULL,
+  pair_seed = NULL,
+  geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled",
+    "stat_density_2d"),
+  delta = NULL,
+  ...
+)
 
 \method{check}{simple_mvc}(
   x,
@@ -69,10 +78,11 @@ Supplying \code{at} implies \code{scale = "original"}.}
 "sd" (variance component SDs).}
 
 \item{type}{Type of plot. "ba" (default): a Bland-Altman plot of the
-differences for one pair of methods, with the bias and limits (shaded
-bands show the confidence intervals of the bias and the confidence bounds
-of the limits of agreement; with \code{interval = "tolerance"}, the lines are
-the prediction limits and the bands extend to the tolerance limits).
+differences for one pair of methods, with the bias and limits drawn as
+points to the left of the data, as in \code{\link[=agreement_limit]{agreement_limit()}}: the whiskers
+show the confidence interval of the bias and the confidence bounds of the
+limits of agreement (with \code{interval = "tolerance"}, the points are the
+prediction limits and the whiskers extend to the tolerance limits).
 "matrix": all pairs, with the methods named
 on the diagonal, each pair of methods plotted against each other above
 it (identity line dashed; constant-bias conversion line with prediction
@@ -84,8 +94,20 @@ repeatability coefficients.}
 of the difference (first minus second). Default is the first pair.}
 
 \item{pair_seed}{Seed for the random pairing of exchangeable replicates
-in the plot. The global random number generator state is restored
-afterwards.}
+in the plot or in \code{check()}. The global random number generator state is
+restored afterwards. With exchangeable replicates and no seed, the
+pairing changes from call to call, and so do the plotted differences and
+the \code{check()} p-values (when items have unequal numbers of replicates by
+the two methods); set \code{pair_seed} for reproducible results.}
+
+\item{geom}{For \code{type = "ba"}, the geometry used to display the data
+points: "geom_point" (default), "geom_bin2d", "geom_density_2d",
+"geom_density_2d_filled", or "stat_density_2d", as in \link{loa-methods}.}
+
+\item{delta}{For \code{type = "ba"}, the maximal allowable difference, drawn as
+dashed lines: one value (drawn at \code{delta} and \code{-delta}, or, for ratios
+with \code{transform = "log"}, at \code{delta} and \code{1/delta}) or two values, on
+the plotted scale.}
 
 \item{error.ratio}{For \code{check}, an optional known ratio of the measurement
 error variances of the two methods, var(error of the first) / var(error
@@ -115,18 +137,21 @@ limits, and repeatability coefficients.}
 variance component SDs.}
 \item{\code{plot}}{A ggplot object (\code{type = "ba"} or \code{"vc"}) or a
 patchwork object (\code{type = "matrix"}).}
-\item{\code{check}}{A patchwork of diagnostic plots: standardized
-residuals against fitted values; normal QQ plots of the residuals by
-method and of the predicted random effects; and, for each pair, the
-differences against the averages with a regression line. The caption
-gives p-values for the slope of the differences on the averages
-(level-dependent bias) and of the absolute residuals of that regression
-on the averages (level-dependent variance), computed from item means so
-replicates are not counted more than once. With replicates, the test of
-the slope is corrected for unequal measurement error (and, with
+\item{\code{check}}{A patchwork of diagnostic plots, as for
+\code{\link[=agreement_limit]{agreement_limit()}}, with what to look for in each subtitle and the
+tests in the captions: normal QQ plots of the standardized residuals by
+method and of the predicted random effects (Shapiro-Wilk tests, or
+Kolmogorov-Smirnov with 5000 or more values); and, for each pair, the
+homogeneity of variance of the differences (square root of the absolute
+standardized differences against the averages, Breusch-Pagan test) and
+proportional bias (centred differences against the averages, with a
+regression line). The tests for each pair use item means, so replicates
+are not counted more than once. With replicates, the test of the slope
+is corrected for unequal measurement error (and, with
 \code{tau = "method"}, unequal method-by-item variances), and the
 error-adjusted slope is drawn dashed; see "Proportional bias diagnostic"
-in \link{loa-methods}. A message suggests alternatives when either p < 0.05.
+in \link{loa-methods}. A message suggests alternatives when the slope or the
+Breusch-Pagan test has p < 0.05.
 The proportional bias results are attached as the attribute
 \code{"prop_bias"}, one row per pair (named in \code{group}); \code{beta}
 is the scale of the second method of the pair relative to the first.}

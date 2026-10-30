@@ -44,10 +44,81 @@ mc_pair_rows = function(x,
   list(m = pair[1], k = pair[2], bias = b, limits = l)
 }
 
+# base layer of a Bland-Altman plot (columns avg and d), with the geom
+# options of plot.loa()
+mc_ba_base = function(pts,
+                      geom = "geom_point") {
+  p = ggplot(pts, aes(x = avg, y = d))
+  switch(
+    geom,
+    geom_point = p + geom_point(na.rm = TRUE),
+    geom_bin2d = p + geom_bin2d(na.rm = TRUE),
+    geom_density_2d = p + geom_density_2d(na.rm = TRUE),
+    geom_density_2d_filled = p +
+      geom_density_2d_filled(na.rm = TRUE,
+                             alpha = 0.5,
+                             contour_var = "ndensity"),
+    stat_density_2d = p +
+      stat_density_2d(na.rm = TRUE,
+                      geom = "polygon",
+                      contour = TRUE,
+                      aes(fill = after_stat(level)),
+                      contour_var = "ndensity",
+                      colour = "black") +
+      scale_fill_distiller(palette = "Blues", direction = 1),
+    stop("geom option not supported", call. = FALSE)
+  )
+}
+
+# maximal allowable difference lines, as in plot.loa(); a single value is
+# +/- delta, or delta and 1/delta for ratios
+mc_ba_delta = function(p,
+                       delta,
+                       ratio = FALSE) {
+  if (is.null(delta)) {
+    return(p)
+  }
+  if (!is.numeric(delta) || !(length(delta) %in% 1:2) ||
+      any(!is.finite(delta)) || (ratio && any(delta <= 0))) {
+    stop("`delta` must be one or two numbers",
+         if (ratio) " greater than 0 (ratios)", ".", call. = FALSE)
+  }
+  if (length(delta) == 1) {
+    delta = if (ratio) c(delta, 1 / delta) else c(delta, -delta)
+  }
+  p +
+    geom_hline(data = data.frame(y1 = delta),
+               aes(yintercept = y1),
+               linetype = 2) +
+    scale_y_continuous(sec.axis = dup_axis(
+      breaks = delta,
+      name = "Maximal Allowable Difference"))
+}
+
+# axis labels for the differences of a pair on the display scale
+mc_ba_labels = function(tf,
+                        m,
+                        k) {
+  if (tf$name == "log") {
+    list(x = paste0("Geometric mean of ", m, " & ", k),
+         y = paste0("Ratio of methods (", m, " / ", k, ")"))
+  } else if (tf$name == "none") {
+    list(x = paste0("Average of ", m, " & ", k),
+         y = paste0("Difference between methods (", m, " - ", k, ")"))
+  } else {
+    list(x = paste0("Average of ", tf$label(m), " & ", tf$label(k)),
+         y = paste0("Difference (", tf$label(m), " - ", tf$label(k), ")"))
+  }
+}
+
 # Bland-Altman plot for one pair of a simple_mvc object ----
+# The bias is constant, so the bias and limits are drawn as points with
+# their confidence intervals to the left of the data, as in plot.loa().
 mc_ba_plot = function(x,
                       pair = NULL,
-                      pair_seed = NULL) {
+                      pair_seed = NULL,
+                      geom = "geom_point",
+                      delta = NULL) {
   pr = mc_pair_rows(x, pair)
   m = pr$m
   k = pr$k
@@ -58,38 +129,32 @@ mc_ba_plot = function(x,
   b = pr$bias
   l = pr$limits
   is_tol = des$interval == "tolerance"
-  # lines at the limits (LoA, or prediction limits), bands out to their
+  # points at the limits (LoA, or prediction limits), whiskers out to their
   # confidence bounds (LoA CI, or tolerance limits)
   lim_lo = if (is_tol) l$lower.PL else l$lower_loa
   lim_hi = if (is_tol) l$upper.PL else l$upper_loa
   bnd_lo = if (is_tol) l$lower.TL else l$lower_loa_ci
   bnd_hi = if (is_tol) l$upper.TL else l$upper_loa_ci
-  lim_lab = if (is_tol) c("Upper PL", "Bias", "Lower PL") else
+  lim_lab = if (is_tol) c("Upper Limit", "Bias", "Lower Limit") else
     c("Upper LoA", "Bias", "Lower LoA")
 
-  lines = data.frame(text = factor(lim_lab, levels = lim_lab),
-                     y = c(lim_hi, b$bias, lim_lo))
-  bands = data.frame(text = factor(lim_lab, levels = lim_lab),
-                     ymin = c(lim_hi, b$lower.CL, bnd_lo),
-                     ymax = c(bnd_hi, b$upper.CL, lim_lo))
+  df_loa = data.frame(text = factor(lim_lab, levels = lim_lab),
+                      estimate = c(lim_hi, b$bias, lim_lo),
+                      lower.ci = c(lim_hi, b$lower.CL, bnd_lo),
+                      upper.ci = c(bnd_hi, b$upper.CL, lim_lo))
 
   pts = data.frame(avg = pp$avg, d = pp$d)
   # display scale ----
   if (tf$name == "log") {
     pts$avg = exp(pts$avg)
     pts$d = exp(pts$d)
-    lines$y = exp(lines$y)
-    bands$ymin = exp(bands$ymin)
-    bands$ymax = exp(bands$ymax)
-    x_lab = paste0("Geometric mean of ", m, " & ", k)
-    y_lab = paste0("Ratio of methods (", m, " / ", k, ")")
-  } else if (tf$name == "none") {
-    x_lab = paste0("Average of ", m, " & ", k)
-    y_lab = paste0("Difference between methods (", m, " - ", k, ")")
-  } else {
-    x_lab = paste0("Average of ", tf$label(m), " & ", tf$label(k))
-    y_lab = paste0("Difference (", tf$label(m), " - ", tf$label(k), ")")
+    df_loa[c("estimate", "lower.ci", "upper.ci")] =
+      exp(df_loa[c("estimate", "lower.ci", "upper.ci")])
   }
+  labs_xy = mc_ba_labels(tf, m, k)
+  rng = range(pts$avg, na.rm = TRUE)
+  df_loa$x = rng[1]
+  pd2 = position_dodge2(.03 * (rng[2] - rng[1]))
 
   conf_level = des$conf_level
   lim_ci_level = if (des$bound_type == "joint") conf_level else
@@ -107,21 +172,20 @@ mc_ba_plot = function(x,
       "\nExchangeable replicates paired at random"
   )
 
-  ggplot(pts, aes(x = avg, y = d)) +
-    geom_rect(data = bands,
-              aes(xmin = -Inf, xmax = Inf, ymin = ymin, ymax = ymax,
-                  fill = text),
-              alpha = 0.25,
-              inherit.aes = FALSE) +
-    geom_hline(data = lines,
-               aes(yintercept = y, color = text),
-               linewidth = 0.8) +
-    geom_point(na.rm = TRUE) +
+  p = mc_ba_base(pts, geom = geom) +
+    geom_pointrange(data = df_loa,
+                    aes(x = x,
+                        y = estimate,
+                        ymin = lower.ci,
+                        ymax = upper.ci,
+                        color = text),
+                    position = pd2,
+                    inherit.aes = FALSE) +
     scale_color_viridis_d(option = "C", end = .8, drop = FALSE) +
-    scale_fill_viridis_d(option = "C", end = .8, drop = FALSE) +
-    labs(x = x_lab, y = y_lab, caption = cap, color = "", fill = "") +
+    labs(x = labs_xy$x, y = labs_xy$y, caption = cap, color = "") +
     theme_bw() +
     theme(legend.position = "left")
+  mc_ba_delta(p, delta, ratio = tf$name == "log")
 }
 
 # Matrix plot (MethComp plot.Meth layout) ----
@@ -295,7 +359,8 @@ mc_conversion_plot = function(x,
   cv = x$conversion[x$conversion$to == to & x$conversion$from == from, ]
   tf = x$transform
   eq = paste0(if (tf$name != "none") tf$label(to) else to, " = ",
-              signif(cv$alpha, 4), " + ", signif(cv$beta, 4), " * ",
+              signif(cv$alpha, 4), if (cv$beta < 0) " - " else " + ",
+              signif(abs(cv$beta), 4), " * ",
               if (tf$name != "none") tf$label(from) else from)
   cap = paste0(eq, "\n", mc_pct(x$fit_info$pred_level),
                "% prediction limits",
@@ -314,10 +379,19 @@ mc_conversion_plot = function(x,
 
 # Bland-Altman plot implied by the conversion model ----
 # differences pair[1] - pair[2] against averages (transformed scale, ratios
-# for log), with the bias and prediction limit lines of the model
+# for log), with the bias and prediction limit lines of the model. A
+# conversion from a method_vc() fit has a constant bias and gets the plot
+# of that fit (points with confidence intervals).
 mc_conv_ba_plot = function(x,
-                           pair = NULL) {
+                           pair = NULL,
+                           geom = "geom_point",
+                           delta = NULL) {
   pair = mc_conv_pair(x, pair)
+  if (!is.null(x$vc_fit)) {
+    vc = c(list(data = x$data, transform = x$transform), x$vc_fit)
+    return(mc_ba_plot(vc, pair = pair, pair_seed = x$call$pair_seed,
+                      geom = geom, delta = delta))
+  }
   m = pair[1]
   k = pair[2]
   tf = x$transform
@@ -357,28 +431,79 @@ mc_conv_ba_plot = function(x,
     pts$d = exp(pts$d)
     lines$avg = exp(lines$avg)
     lines[c("bias", "lo", "hi")] = exp(lines[c("bias", "lo", "hi")])
-    x_lab = paste0("Geometric mean of ", m, " & ", k)
-    y_lab = paste0("Ratio of methods (", m, " / ", k, ")")
-  } else if (tf$name == "none") {
-    x_lab = paste0("Average of ", m, " & ", k)
-    y_lab = paste0("Difference between methods (", m, " - ", k, ")")
-  } else {
-    x_lab = paste0("Average of ", tf$label(m), " & ", tf$label(k))
-    y_lab = paste0("Difference (", tf$label(m), " - ", tf$label(k), ")")
   }
-  ggplot(pts, aes(x = avg, y = d)) +
-    geom_ribbon(data = lines, aes(x = avg, ymin = lo, ymax = hi),
-                inherit.aes = FALSE, alpha = 0.15, fill = "#0D0887") +
-    geom_line(data = lines, aes(x = avg, y = bias), color = "#B12A90",
-              linewidth = 0.8, inherit.aes = FALSE) +
-    geom_line(data = lines, aes(x = avg, y = lo), color = "#0D0887",
-              linetype = 2, inherit.aes = FALSE) +
-    geom_line(data = lines, aes(x = avg, y = hi), color = "#0D0887",
-              linetype = 2, inherit.aes = FALSE) +
-    geom_point(na.rm = TRUE) +
-    labs(x = x_lab, y = y_lab,
-         caption = paste0("Bias and ", mc_pct(x$fit_info$pred_level),
-                          "% prediction limits (", x$fit_info$bias,
-                          " bias)")) +
-    theme_bw()
+  labs_xy = mc_ba_labels(tf, m, k)
+  # the bias and limits vary with the level, so they are lines, as in
+  # plot.loa() with prop_bias = TRUE (there are no confidence bands)
+  lim_lab = c("Upper Limit", "Bias", "Lower Limit")
+  df_lines = data.frame(text = factor(rep(lim_lab, each = nrow(lines)),
+                                      levels = lim_lab),
+                        x = rep(lines$avg, 3),
+                        estimate = c(lines$hi, lines$bias, lines$lo))
+  p = mc_ba_base(pts, geom = geom) +
+    geom_line(data = df_lines,
+              aes(x = x, y = estimate, color = text),
+              linewidth = 0.8,
+              inherit.aes = FALSE) +
+    scale_color_viridis_d(option = "C", end = .8) +
+    labs(x = labs_xy$x, y = labs_xy$y, color = "",
+         caption = paste0("Prediction = ", mc_pct(x$fit_info$pred_level),
+                          "% (", x$fit_info$bias, " bias",
+                          if (x$fit_info$bias == "linear")
+                            paste0(", ", x$fit_info$variance, " SD"),
+                          ")")) +
+    theme_bw() +
+    theme(legend.position = "left",
+          legend.title = element_blank())
+  mc_ba_delta(p, delta, ratio = tf$name == "log")
+}
+
+# check() panels for simple_mvc and simple_mconv objects ----
+
+# normality: QQ plots by group, with a Shapiro-Wilk test per group in the
+# caption, in the style of check.loa()
+mc_check_norm = function(y,
+                         group,
+                         title = "Normality of Residuals",
+                         y_lab = "Standardized residuals",
+                         scales = "fixed") {
+  dat = data.frame(y = y, group = group)
+  dat = dat[is.finite(dat$y), ]
+  nt = lapply(split(dat$y, dat$group, drop = TRUE), .norm_test)
+  p_val = vapply(nt, function(t) t$p.value, numeric(1))
+  if (length(p_val) == 1) {
+    p_val = unname(p_val)
+  }
+  test = paste(unique(vapply(nt, function(t) t$name, character(1))),
+               collapse = " / ")
+  plot_qq(dat) +
+    facet_wrap(~ group, scales = scales) +
+    labs(title = title,
+         y = y_lab,
+         caption = .check_caption("Normality", test, p_val)) +
+    .check_theme()
+}
+
+# homogeneity of variance: sqrt(|standardized residuals|) against x by
+# group, with a Breusch-Pagan test per group in the caption. Residuals are
+# standardized by their SD within each group. Returns the plot and the
+# p-values.
+mc_check_het = function(x,
+                        resid,
+                        group,
+                        x_lab) {
+  dat = data.frame(x = x, r = resid, group = group)
+  dat = dat[is.finite(dat$x) & is.finite(dat$r), ]
+  p_val = vapply(split(dat, dat$group, drop = TRUE),
+                 function(d) .bp_test(d$r, d$x), numeric(1))
+  if (length(p_val) == 1) {
+    p_val = unname(p_val)
+  }
+  dat$y = sqrt(abs(dat$r / stats::ave(dat$r, dat$group, FUN = stats::sd)))
+  p = plot_het(dat, x_lab = x_lab) +
+    facet_wrap(~ group, scales = "free") +
+    labs(caption = .check_caption("Heteroskedasticity",
+                                  "Breusch-Pagan Test", p_val)) +
+    .check_theme()
+  list(plot = p, p.value = p_val)
 }

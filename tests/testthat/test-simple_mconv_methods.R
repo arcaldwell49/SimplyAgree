@@ -79,21 +79,55 @@ test_that("conversion and Bland-Altman plots", {
 
   pb = plot(cv, type = "ba")
   expect_s3_class(pb, "ggplot")
-  # reversing the pair negates the bias line
+  # bias and limits as coloured lines
+  l1 = geom_data(pb, "GeomLine")
+  expect_equal(levels(l1$text), c("Upper Limit", "Bias", "Lower Limit"))
+  # reversing the pair negates the bias line and swaps the limits
   pb2 = plot(cv, type = "ba", pair = c("B", "A"))
-  l1 = pb$layers[[2]]$data
-  l2 = pb2$layers[[2]]$data
-  expect_equal(l2$bias, -l1$bias)
+  l2 = geom_data(pb2, "GeomLine")
+  expect_equal(l2$estimate[l2$text == "Bias"],
+               -l1$estimate[l1$text == "Bias"])
+  expect_equal(l2$estimate[l2$text == "Upper Limit"],
+               -l1$estimate[l1$text == "Lower Limit"])
   expect_error(plot(cv, pair = c("A", "A")), "two different methods")
+  expect_equal(geom_data(plot(cv, type = "ba", delta = 1), "GeomHline")$y1,
+               c(1, -1))
 
-  # constant bias
+  # the sign of the slope in the equation
+  expect_match(p$labels$caption, "^B = [-0-9.e]+ \\+ [0-9.e]+ \\* A")
+  cv_neg = cv
+  k = cv_neg$conversion$to == "B" & cv_neg$conversion$from == "A"
+  cv_neg$conversion$beta[k] = -cv_neg$conversion$beta[k]
+  expect_match(plot(cv_neg)$labels$caption, "^B = [-0-9.e]+ - [0-9.e]+ \\* A")
+
+  # constant bias: the plot of the method_vc() fit, at the levels of the
+  # conversion
   dat = sim_methods(n_items = 20, n_reps = 2, tau = 0.3, seed = 1)
   fit = method_vc(dat, y = "y", method = "method", id = "id",
                   replicate = "repl")
   cc = method_convert(object = fit)
+  cols = c("text", "estimate", "lower.ci", "upper.ci")
   pc = plot(cc, type = "ba")
-  expect_equal(unique(pc$layers[[2]]$data$bias), fit$bias$bias)
+  expect_equal(geom_data(pc, "GeomPointrange")[cols],
+               geom_data(plot(fit), "GeomPointrange")[cols])
+  expect_equal(geom_data(pc, "GeomPointrange")$estimate[2], fit$bias$bias)
+  fit90 = method_vc(dat, y = "y", method = "method", id = "id",
+                    replicate = "repl", pred_level = 0.9, conf_level = 0.9)
+  cc90 = method_convert(object = fit, pred_level = 0.9, conf_level = 0.9)
+  expect_equal(geom_data(plot(cc90, type = "ba"), "GeomPointrange")[cols],
+               geom_data(plot(fit90), "GeomPointrange")[cols])
   expect_s3_class(plot(cc), "ggplot")
+})
+
+test_that("variance = 'linear' warns when the fitted SD is not positive", {
+  set.seed(3)
+  mu = seq(1, 20, length.out = 60)
+  s = ifelse(mu < 8, 1, 0.01)
+  dat = data.frame(id = rep(1:60, 2), method = rep(c("A", "B"), each = 60),
+                   y = c(mu + rnorm(60, 0, s), mu + rnorm(60, 0, s)))
+  expect_warning(method_convert(dat, y = "y", method = "method", id = "id",
+                                variance = "linear"),
+                 "not positive")
 })
 
 test_that("summary and check", {
@@ -103,7 +137,20 @@ test_that("summary and check", {
   out = capture.output(print(s))
   expect_true(any(grepl("Regressions of differences", out)))
   expect_true(any(grepl("Pairs of measurements", out)))
-  expect_s3_class(check(cv), "patchwork")
+  ch_l = check(cv)
+  expect_s3_class(ch_l, "patchwork")
+  pl = patch_plots(ch_l)
+  expect_length(pl, 3)
+  for (q in pl) {
+    expect_false(is.null(q$labels$subtitle))
+  }
+  expect_match(pl[[1]]$labels$caption, "Shapiro-Wilk Test: A - B: p")
+  expect_match(pl[[2]]$labels$caption, "Breusch-Pagan Test: A - B: p")
+  expect_match(pl[[3]]$labels$caption, "RESET Test: A - B: p")
+  # spread and linearity use item means (40 items, 3 pairs)
+  expect_equal(nrow(pl[[2]]$data), 3 * 40)
+  expect_equal(nrow(pl[[3]]$data), 3 * 40)
+  expect_s3_class(check(mconv_fit(variance = "linear")), "patchwork")
 
   dat = sim_methods(n_items = 25, n_reps = 2, methods = c("A", "B"),
                     alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
@@ -118,6 +165,13 @@ test_that("summary and check", {
   expect_true(any(grepl("delta method", out_p)))
   ch = check(sc)
   expect_s3_class(ch, "patchwork")
+  pl_s = patch_plots(ch)
+  for (q in pl_s) {
+    expect_false(is.null(q$labels$subtitle))
+  }
+  expect_match(pl_s[[1]]$labels$caption, "Shapiro-Wilk Test: A: p")
+  expect_match(pl_s[[2]]$labels$caption, "Breusch-Pagan Test: A: p")
+  expect_match(pl_s[[3]]$labels$caption, "converged")
   expect_equal(nrow(sc$scaled$trace), 2 * sc$fit_info$iterations)
 
   fit = method_vc(dat, y = "y", method = "method", id = "id",
@@ -132,11 +186,12 @@ test_that("Bland-Altman plot for the scaled model", {
   sc = method_convert(dat, y = "y", method = "method", id = "id",
                       replicate = "repl", bias = "scaled", tol = 1e-4)
   p = plot(sc, type = "ba")
-  l = p$layers[[2]]$data
+  l = geom_data(p, "GeomLine")
+  l = l[l$text == "Bias", ]
   cv = sc$conversion
   b = cv$beta[cv$to == "A" & cv$from == "B"]
   a = cv$alpha[cv$to == "A" & cv$from == "B"]
   # D = A - B = 2a/(1+b) + 2(b-1)/(1+b) * avg
-  expect_equal(l$bias, 2 * a / (1 + b) + 2 * (b - 1) / (1 + b) * l$avg)
+  expect_equal(l$estimate, 2 * a / (1 + b) + 2 * (b - 1) / (1 + b) * l$x)
   expect_s3_class(plot(sc), "ggplot")
 })
