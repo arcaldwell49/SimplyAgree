@@ -50,7 +50,9 @@
 #'   \item{\code{plot}}{A ggplot object.}
 #'   \item{\code{summary}}{An object of class `summary.simple_mconv` whose
 #'   print method shows the fit details (iterations and convergence for the
-#'   scaled model, bootstrap failures), the design, the number of pairs used,
+#'   scaled model, bootstrap failures; with `estimator = "ml"`, the
+#'   log-likelihood, any zero or negative variance estimates, and the model
+#'   fit: chi-square test, RMSEA and SRMR), the design, the number of pairs used,
 #'   the regressions of the differences on the averages (linear bias) or the
 #'   per-method intercepts and slopes (scaled), the conversions, and the
 #'   variance components.}
@@ -67,7 +69,10 @@
 #'   variance component model by method (Shapiro-Wilk tests), the square
 #'   root of their absolute values against the fitted true values
 #'   (Breusch-Pagan tests), and the intercepts and slopes at each iteration
-#'   of the alternating regression. Not available for conversions from
+#'   of the alternating regression. With `estimator = "ml"`, the residuals
+#'   are from the factor scores of the true values, item-by-replicate and
+#'   method-by-item effects, and the iteration panel is replaced by a caption
+#'   with the convergence and model fit. Not available for conversions from
 #'   [method_vc()]; use `check()` on that fit.}
 #' }
 #'
@@ -101,7 +106,8 @@ print.simple_mconv <- function(x,
   title1 = switch(fi$bias,
                   constant = "Conversion Between Methods: Constant Bias",
                   linear = "Conversion Between Methods: Linear Bias",
-                  scaled = "Conversion Between Methods: Scaled Model")
+                  scaled = paste0("Conversion Between Methods: Scaled Model",
+                                  if (mc_is_ml(fi)) " (maximum likelihood)"))
   cat(title1, "\n", sep = "")
   cat("y(To) = alpha + beta * y(From); sd = prediction SD",
       if (tf$name != "none") paste0(" (", tf$name, " scale)"), "\n", sep = "")
@@ -121,21 +127,24 @@ print.simple_mconv <- function(x,
                     if (any(x$da$cluster_se))
                       ", cluster-robust by item" else "",
                     ")"),
-    scaled = if (fi$ci_method == "boot") {
+    scaled = if (mc_is_ml(fi)) {
+      paste0("CIs: Wald (maximum likelihood, structural model), t with ",
+             "items - 1 df;\n  about 92-97% coverage for 95% in simulations ",
+             "with 15-60 items; see ?method_convert")
+    } else if (fi$ci_method == "boot") {
       paste0("CIs: parametric bootstrap percentile intervals (",
              fi$boot_reps - fi$n_boot_fail, " of ", fi$boot_reps,
              " refits used); approximate, coverage not yet evaluated")
     } else {
       paste0("CIs: delta method, conditional on the predicted true values;",
              "\n  much too narrow (about 55-75% coverage for 95% in ",
-             "simulations); see ?method_convert")
+             "simulations);\n  use estimator = 'ml' for intervals; see ",
+             "?method_convert")
     }
   )
   cat(note, "\n", sep = "")
   if (fi$bias == "scaled") {
-    cat("Alternating regression: ", fi$iterations, " iterations, ",
-        if (isTRUE(fi$converged)) "converged" else "NOT converged",
-        " (criterion ", signif(fi$criterion, 3), ")\n", sep = "")
+    mc_cat_fit(fi)
     vc = x$varcomp
     vtab = tidyr::pivot_wider(vc[, c("component", "method", "sd")],
                               names_from = component, values_from = sd)
@@ -203,10 +212,9 @@ print.summary.simple_mconv <- function(x,
         " (estimates on the transformed scale)\n", sep = "")
   }
   if (fi$bias == "scaled") {
-    cat("Alternating regression: ", fi$iterations, " iterations; converged: ",
-        fi$converged, "; criterion: ", signif(fi$criterion, 3), "\n",
-        sep = "")
-    cat("Confidence intervals: ", fi$ci_method,
+    mc_cat_fit(fi, fit_measures = TRUE)
+    cat("Confidence intervals: ",
+        if (mc_is_ml(fi)) "Wald (maximum likelihood)" else fi$ci_method,
         if (fi$ci_method == "boot")
           paste0(" (", fi$boot_reps, " replicates, ", fi$n_boot_fail,
                  " failed)"), "\n", sep = "")
@@ -322,6 +330,21 @@ check.simple_mconv <- function(x,
   x_lab = "Fitted true values (scale of the first method)"
   p1 = mc_check_norm(dg$resid, dg$method)
   p2 = mc_check_het(dg$fitted, dg$resid, dg$method, x_lab = x_lab)$plot
+  if (mc_is_ml(fi)) {
+    # residuals from the factor scores; no iteration history to show
+    fm = fi$fit_measures
+    fit_note = paste0(
+      "Maximum likelihood: ",
+      if (isTRUE(fi$converged)) "converged" else "NOT converged",
+      "; model fit chi-square ", round(fm[["chisq"]], 2), " on ", fm[["df"]],
+      " df (p ", format.pval(fm[["pvalue"]], digits = 3, eps = 0.001),
+      "), RMSEA ", round(fm[["rmsea"]], 3),
+      if (length(fi$heywood) > 0)
+        paste0("\nZero or negative variance estimate(s): ",
+               paste(fi$heywood, collapse = ", ")))
+    return(patchwork::wrap_plots(p1, p2, ncol = 2) +
+             plot_annotation(caption = fit_note, theme = .check_theme()))
+  }
   tr = x$scaled$trace
   tr_long = rbind(
     data.frame(iteration = tr$iteration, method = tr$method,

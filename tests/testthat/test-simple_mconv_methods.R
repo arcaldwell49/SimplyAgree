@@ -195,3 +195,46 @@ test_that("Bland-Altman plot for the scaled model", {
   expect_equal(l$estimate, 2 * a / (1 + b) + 2 * (b - 1) / (1 + b) * l$x)
   expect_s3_class(plot(sc), "ggplot")
 })
+
+test_that("methods for a maximum likelihood scaled fit", {
+  skip_if_not_installed("lavaan")
+  dat = sim_methods(n_items = 25, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 2, tau = 0.2, sigma = 0.3, seed = 5)
+  sc = method_convert(dat, y = "y", method = "method", id = "id",
+                      replicate = "repl", bias = "scaled", estimator = "ml",
+                      tol = 1e-4)
+  out_p = capture.output(print(sc))
+  expect_true(any(grepl("Scaled Model (maximum likelihood)", out_p,
+                        fixed = TRUE)))
+  expect_true(any(grepl("CIs: Wald", out_p)))
+  expect_true(any(grepl("Maximum likelihood (lavaan)", out_p, fixed = TRUE)))
+  out_s = capture.output(print(summary(sc)))
+  expect_true(any(grepl("Model fit: chi-square", out_s)))
+  expect_true(any(grepl("Wald (maximum likelihood)", out_s, fixed = TRUE)))
+
+  ch = check(sc)
+  expect_s3_class(ch, "patchwork")
+  pl = patch_plots(ch)
+  expect_length(pl, 2)
+  expect_match(pl[[1]]$labels$caption, "Shapiro-Wilk Test: A: p")
+  expect_match(ch$patches$annotation$caption, "Maximum likelihood: converged")
+  expect_null(sc$scaled$trace)
+
+  expect_match(model_equation(sc), "\\mu_{i} &\\sim N(\\mu", fixed = TRUE)
+  alt = method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", bias = "scaled", tol = 1e-4)
+  expect_false(grepl("\\mu_{i} &\\sim", model_equation(alt), fixed = TRUE))
+  expect_true(any(grepl("estimator = 'ml'", capture.output(print(alt)),
+                        fixed = TRUE)))
+
+  expect_s3_class(plot(sc), "ggplot")
+  expect_s3_class(plot(sc, type = "ba"), "ggplot")
+  pr = predict(sc, newdata = c(8, 10, 12), from = "A", to = "B")
+  expect_equal(pr$fit, coef(sc)[["alpha[B|A]"]] +
+                 coef(sc)[["beta[B|A]"]] * c(8, 10, 12))
+  expect_null(method_convert(dat, y = "y", method = "method", id = "id",
+                             replicate = "repl", bias = "scaled",
+                             estimator = "ml", tol = 1e-4,
+                             keep_model = FALSE)$model)
+})

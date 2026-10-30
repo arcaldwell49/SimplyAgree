@@ -16,8 +16,8 @@
 #'   needed when `object` is supplied.
 #' @param bias Model for the bias between methods. "linear" (default):
 #'   regression of the differences on the averages for each pair of methods.
-#'   "scaled": the scaled model fit by alternating regression (requires
-#'   replicates). See details.
+#'   "scaled": the scaled model, fit by alternating regression or maximum
+#'   likelihood (see `estimator`; requires replicates). See details.
 #' @param variance Model for the SD of the differences with
 #'   `bias = "linear"`: "constant" (default) or "linear" in the average.
 #' @param replicates Whether replicates are "exchangeable" (default) or
@@ -27,8 +27,13 @@
 #' @param conf_level Confidence level for the conversion parameters. Default
 #'   is 0.95.
 #' @param ci_method Method for the confidence intervals of the conversion
-#'   parameters: "delta" (default; delta method) or, for `bias = "scaled"`,
-#'   "boot" (parametric bootstrap). See details.
+#'   parameters: "delta" (default; delta method) or, for `bias = "scaled"`
+#'   with `estimator = "altreg"`, "boot" (parametric bootstrap). See details.
+#' @param estimator For `bias = "scaled"`, how the model is fit:
+#'   "altreg" (default; alternating regression, as in MethComp) or "ml"
+#'   (maximum likelihood of the structural model with the lavaan package,
+#'   which must be installed). Use "ml" for confidence intervals with close
+#'   to the stated coverage. See details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
 #'   Default is 999. Each replicate refits the model, so this can take
 #'   several minutes; set a seed with [set.seed()] for reproducible
@@ -82,7 +87,8 @@
 #' method `m` is
 #' \deqn{y_{mir} = \alpha_m + \beta_m(\mu_i + a_{ir} + c_{mi}) + e_{mir},}
 #' with the variance components of [method_vc()] on the scale of the true
-#' values \eqn{\mu_i} (Carstensen, 2010, eq. 7.1). It is fit by alternating
+#' values \eqn{\mu_i} (Carstensen, 2010, eq. 7.1). With
+#' `estimator = "altreg"` (default) it is fit by alternating
 #' regression as in the `AltReg()` function of the MethComp package: each
 #' method is regressed on the current predicted true values
 #' \eqn{\mu_i + a_{ir} + c_{mi}} (with a random item intercept), and the
@@ -98,26 +104,55 @@
 #' (\eqn{\alpha = 0, \beta = 1}); the conversions do not depend on this
 #' choice.
 #'
-#' Confidence intervals for the scaled model: "delta" (default) uses the
+#' With `estimator = "ml"`, the true values are also treated as random,
+#' \eqn{\mu_i \sim N(\mu, \sigma_\mu^2)} (the structural model), and the
+#' model is fit by full maximum likelihood with the lavaan package, as a
+#' confirmatory factor model with equality constraints (one row per item;
+#' missing measurements by full-information ML, so the design need not be
+#' balanced). The alternating regression supplies the starting values. The
+#' method-by-item variance is common to all methods on the scale of the true
+#' values, as above, but is not multiplied by \eqn{I/(I-2)}, so with few
+#' items the prediction SDs are a little smaller (on average by 3% to 5%
+#' with 15 items and about 1% with 60 items, in the simulations below). The
+#' two fits estimate the same model, but they weight the data differently,
+#' and their estimates can differ when the true values are far from normal;
+#' for the oximetry data in MethComp (skewed true values), the slope of
+#' pulse on CO is 0.94 by alternating regression and 0.90 by maximum
+#' likelihood (95% CI 0.80 to 1.00). The summary reports the
+#' model's chi-square test of fit, RMSEA and SRMR. Variance estimates can
+#' be zero or negative (Heywood cases), mostly with fewer than about 20
+#' items; this gives a warning, and the corresponding SDs are reported as 0.
+#'
+#' Confidence intervals for the scaled model with `estimator = "ml"` are
+#' Wald intervals from the ML standard errors (delta method for the
+#' conversions), with t quantiles on \eqn{I - 1} degrees of freedom
+#' (\eqn{I} items); the prediction SD intervals are computed on the log
+#' scale. In simulations (15, 30 or 60 items; 2 or 3 methods; 3 replicates,
+#' linked or exchangeable; balanced data, 15% of the measurements missing,
+#' or uniform or skewed true values; 500 data sets each), 95% intervals for
+#' the conversion intercepts and slopes covered the true values 92% to 97%
+#' of the time (on average 93.6% with 15 items, 94.5% with 30 and 95.1% with
+#' 60), and those for the prediction SDs 92% to 95%. Wald intervals with
+#' normal quantiles, or with robust (sandwich) standard errors, covered less.
+#' No intervals are given for the variance components.
+#'
+#' With `estimator = "altreg"`, "delta" (default) uses the
 #' standard errors of \eqn{(\alpha_m, \beta_m)} from the final regressions of
 #' each method on the predicted true values. These treat the predicted true
-#' values as known, so they are much too narrow: in simulations (15 to 60
-#' items, 2 or 3 methods, 3 replicates, linked or exchangeable; 500 data sets
-#' each), 95% intervals for the conversion intercepts and slopes covered the
-#' true values only 53% to 73% of the time, with no improvement with more
-#' items. They are useful only as a rough indication of precision. "boot"
+#' values as known, so they are much too narrow: in the same simulations
+#' (balanced data, normal true values), 95% intervals for the conversion
+#' intercepts and slopes covered the true values only 53% to 73% of the
+#' time, with no improvement with more items. They are useful only as a
+#' rough indication of precision. "boot"
 #' simulates data from the fitted model with the observed design (the same
 #' items, methods, and replicates, and the fitted item values), refits the
 #' model, and reports percentile intervals for the conversion parameters, the
 #' prediction SDs, and the variance components. The bootstrap may improve on
-#' the delta method, but its coverage has not yet been checked by simulation,
+#' the delta method, but its coverage has not been checked by simulation,
 #' and each replicate refits the model (999 replicates can take several
 #' minutes). MethComp itself gives no intervals for the alternating
-#' regression; Carstensen (2010, ch. 7) recommends a Bayesian (MCMC) fit of
-#' the scaled model for its uncertainty, which is likely needed for
-#' intervals with the stated coverage and is not yet available here. Treat
-#' the intervals from either method as approximate. The conversions and
-#' prediction limits themselves do not depend on `ci_method`.
+#' regression. The conversions and prediction limits themselves do not
+#' depend on `ci_method`.
 #'
 #' All estimates are on the transformed scale; [predict()] and the
 #' conversion plot back-transform the conversions and limits to the original
@@ -129,7 +164,8 @@
 #'     including each method to itself: the intercept `alpha`, slope `beta`,
 #'     prediction SD `sd_pred`, their standard errors and df, and confidence
 #'     limits (`alpha_lower`, `alpha_upper`, `beta_lower`, `beta_upper`; and,
-#'     for the scaled model, `sd_lower`, `sd_upper` with the bootstrap).
+#'     for the scaled model, `sd_lower`, `sd_upper` with the bootstrap or
+#'     `estimator = "ml"`).
 #'   - `limits_par`: list, by ordered pair (named "to|from"), of the
 #'     parameters used to evaluate the prediction limits at any level.
 #'   - `da`: for `bias = "linear"`, tibble of the DA regressions for each
@@ -144,15 +180,21 @@
 #'     by the Bland-Altman plot); otherwise absent.
 #'   - `scaled`: for the scaled model, the per-method intercepts and slopes,
 #'     the item values, the variance components on the scale of the true
-#'     values, and the iteration history (`trace`).
+#'     values, and the iteration history of the alternating regression
+#'     (`trace`; `NULL` with `estimator = "ml"`). With `estimator = "ml"`,
+#'     the item values are the factor scores of the true values.
 #'   - `boot`: for `ci_method = "boot"`, the matrix of bootstrap estimates.
 #'   - `data`: the processed data.
 #'   - `pairs`: list of the paired data used for each pair of methods.
 #'   - `transform`: the transformation (functions included).
-#'   - `model`: list of the fitted `lm` objects (linear bias), or the final
-#'     variance component model (scaled), or `NULL`.
+#'   - `model`: list of the fitted `lm` objects (linear bias), the final
+#'     variance component model (scaled, alternating regression), the
+#'     lavaan fit (scaled, `estimator = "ml"`), or `NULL`.
 #'   - `fit_info`: list describing the fit and settings (including the
-#'     number of iterations, convergence, and failed bootstrap refits).
+#'     estimator, number of iterations, convergence, and failed bootstrap
+#'     refits; with `estimator = "ml"`, also the log-likelihood `logl`, the
+#'     names of zero or negative variance estimates `heywood`, and
+#'     `fit_measures`: chi-square, df, p value, RMSEA and SRMR).
 #'   - `call`: the matched call, with evaluated settings.
 #'
 #' @examples
@@ -175,6 +217,14 @@
 #' sc = method_convert(dat, y = "y", method = "method", id = "id",
 #'                     replicate = "repl", bias = "scaled", tol = 1e-4)
 #' sc
+#'
+#' # scaled model by maximum likelihood (needs lavaan), with intervals that
+#' # have close to the stated coverage
+#' if (requireNamespace("lavaan", quietly = TRUE)) {
+#'   method_convert(dat, y = "y", method = "method", id = "id",
+#'                  replicate = "repl", bias = "scaled", estimator = "ml",
+#'                  tol = 1e-4)
+#' }
 #' \donttest{
 #' # parametric bootstrap intervals (use more replicates in practice)
 #' set.seed(1)
@@ -206,6 +256,7 @@ method_convert = function(data = NULL,
                           conf_level = 0.95,
                           transform = "none",
                           ci_method = c("delta", "boot"),
+                          estimator = c("altreg", "ml"),
                           boot_reps = 999,
                           pair_seed = NULL,
                           max_iter = 100,
@@ -216,6 +267,7 @@ method_convert = function(data = NULL,
   variance = match.arg(variance)
   replicates = match.arg(replicates)
   ci_method = match.arg(ci_method)
+  estimator = match.arg(estimator)
   for (nm in c("pred_level", "conf_level")) {
     val = get(nm)
     if (!is.numeric(val) || length(val) != 1 || is.na(val) ||
@@ -230,6 +282,16 @@ method_convert = function(data = NULL,
   call2$conf_level = conf_level
   call2$ci_method = ci_method
   call2$pair_seed = pair_seed
+
+  if (estimator == "ml" && (bias != "scaled" || !is.null(object))) {
+    stop("estimator = 'ml' is only available for bias = 'scaled'.",
+         call. = FALSE)
+  }
+  if (estimator == "ml" && ci_method == "boot") {
+    stop("ci_method = 'boot' is only available with estimator = ",
+         "'altreg'; the maximum likelihood fit gives Wald intervals.",
+         call. = FALSE)
+  }
 
   # constant bias from a method_vc() fit ----
   if (!is.null(object)) {
@@ -277,6 +339,7 @@ method_convert = function(data = NULL,
 
   if (bias == "scaled") {
     call2$ci_method = ci_method
+    call2$estimator = estimator
     call2$boot_reps = boot_reps
     call2$max_iter = max_iter
     call2$tol = tol
@@ -284,6 +347,7 @@ method_convert = function(data = NULL,
                              pred_level = pred_level,
                              conf_level = conf_level,
                              ci_method = ci_method, boot_reps = boot_reps,
+                             estimator = estimator,
                              pair_seed = pair_seed, max_iter = max_iter,
                              tol = tol, keep_model = keep_model,
                              call2 = call2))
@@ -487,7 +551,8 @@ mc_convert_scaled = function(df,
                              max_iter,
                              tol,
                              keep_model,
-                             call2) {
+                             call2,
+                             estimator = "altreg") {
   if (!attr(df, "has_reps")) {
     stop("bias = 'scaled' requires replicate measurements by every method, ",
          "to separate the method-by-item variation from the measurement ",
@@ -495,18 +560,37 @@ mc_convert_scaled = function(df,
   }
   lv = levels(df$method)
   linked = replicates == "linked"
+  # the alternating regression also gives the starting values for ML
   alt = mc_altreg(df, linked = linked, max_iter = max_iter, tol = tol)
-  if (!alt$converged) {
+  if (!alt$converged && estimator == "altreg") {
     warning("The alternating regression did not converge in ", max_iter,
             " iterations (criterion ", signif(alt$criterion, 3), " > ",
             tol, "). Consider increasing max_iter.", call. = FALSE)
   }
-  conversion = mc_scaled_conversion(alt, conf_level = conf_level)
-  varcomp = mc_scaled_varcomp(alt)
-  varcomp$lower = NA_real_
-  varcomp$upper = NA_real_
-  conversion$sd_lower = NA_real_
-  conversion$sd_upper = NA_real_
+  ml = NULL
+  if (estimator == "ml") {
+    ml = mc_scaled_ml(df, alt, linked = linked, conf_level = conf_level)
+    if (!ml$converged) {
+      warning("The maximum likelihood fit did not converge; the estimates ",
+              "and intervals are unreliable. Use estimator = 'altreg'.",
+              call. = FALSE)
+    }
+    if (length(ml$heywood) > 0) {
+      warning("Variance estimate(s) zero or negative in the maximum ",
+              "likelihood fit (", paste(ml$heywood, collapse = ", "),
+              "); the intervals may be unreliable. This is most common ",
+              "with few items (fewer than about 20).", call. = FALSE)
+    }
+    conversion = ml$conversion
+    varcomp = ml$varcomp
+  } else {
+    conversion = mc_scaled_conversion(alt, conf_level = conf_level)
+    varcomp = mc_scaled_varcomp(alt)
+    varcomp$lower = NA_real_
+    varcomp$upper = NA_real_
+    conversion$sd_lower = NA_real_
+    conversion$sd_upper = NA_real_
+  }
 
   n_boot_fail = NA_integer_
   boot = NULL
@@ -556,24 +640,33 @@ mc_convert_scaled = function(df,
   methods_tab$alpha[1] = 0
   methods_tab$beta[1] = 1
 
+  scaled = if (is.null(ml)) {
+    list(methods = methods_tab,
+         mu = alt$mu,
+         trace = alt$trace,
+         mu_scale = c(tau = alt$tau_z,
+                      omega = alt$omega_z,
+                      stats::setNames(alt$sigma_z, paste0("sigma_", lv))))
+  } else {
+    list(methods = ml$methods,
+         mu = ml$mu,
+         trace = NULL,
+         mu_scale = ml$mu_scale)
+  }
+  model = if (!keep_model) NULL else if (is.null(ml)) alt$model else ml$fit
+
   structure(list(conversion = conversion,
                  limits_par = limits_par,
                  da = NULL,
                  varcomp = varcomp,
-                 scaled = list(methods = methods_tab,
-                               mu = alt$mu,
-                               trace = alt$trace,
-                               mu_scale = c(tau = alt$tau_z,
-                                            omega = alt$omega_z,
-                                            stats::setNames(alt$sigma_z,
-                                                            paste0("sigma_",
-                                                                   lv)))),
+                 scaled = scaled,
                  boot = if (!is.null(boot)) boot$reps else NULL,
                  data = df,
                  pairs = pairs,
                  transform = attr(df, "transform"),
-                 model = if (keep_model) alt$model else NULL,
-                 diagnostics = mc_scaled_diag(alt, df),
+                 model = model,
+                 diagnostics = if (is.null(ml)) mc_scaled_diag(alt, df) else
+                   ml$diagnostics,
                  fit_info = list(bias = "scaled",
                                  variance = "constant",
                                  replicates = replicates,
@@ -581,12 +674,22 @@ mc_convert_scaled = function(df,
                                  pred_level = pred_level,
                                  conf_level = conf_level,
                                  ci_method = ci_method,
+                                 estimator = estimator,
                                  boot_reps = if (ci_method == "boot")
                                    boot_reps else NA_integer_,
-                                 iterations = alt$iterations,
-                                 converged = alt$converged,
-                                 criterion = alt$criterion,
-                                 n_boot_fail = n_boot_fail),
+                                 iterations = if (is.null(ml))
+                                   alt$iterations else ml$iterations,
+                                 converged = if (is.null(ml))
+                                   alt$converged else ml$converged,
+                                 criterion = if (is.null(ml))
+                                   alt$criterion else NA_real_,
+                                 n_boot_fail = n_boot_fail,
+                                 heywood = if (is.null(ml))
+                                   NULL else ml$heywood,
+                                 logl = if (is.null(ml)) NA_real_ else
+                                   ml$logl,
+                                 fit_measures = if (is.null(ml))
+                                   NULL else ml$fit_measures),
                  call = call2),
             class = "simple_mconv")
 }

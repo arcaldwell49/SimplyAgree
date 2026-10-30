@@ -23,6 +23,7 @@ knitr::opts_chunk$set(
   fig.width = 6,
   fig.height = 4.5
 )
+has_lavaan = requireNamespace("lavaan", quietly = TRUE)
 ```
 
 ```{r}
@@ -107,7 +108,7 @@ $$
 \beta_{k|m} = \beta_k/\beta_m, \qquad \alpha_{k|m} = \alpha_k - \alpha_m \beta_k/\beta_m .
 $$
 
-`method_convert(bias = "scaled")` fits this model by alternating regression, as in MethComp's `AltReg()`: it alternates between regressing each method on the current predicted true values and refitting the variance component model to the rescaled measurements, until the conversions stop changing. It needs replicates, to separate the measurement errors from the method-by-item variation.
+`method_convert(bias = "scaled")` fits this model by alternating regression (the default, `estimator = "altreg"`), as in MethComp's `AltReg()`: it alternates between regressing each method on the current predicted true values and refitting the variance component model to the rescaled measurements, until the conversions stop changing. It needs replicates, to separate the measurement errors from the method-by-item variation. For confidence intervals, use the maximum likelihood fit instead (`estimator = "ml"`; see [below](#confidence-intervals-for-the-scaled-model)).
 
 ```{r}
 conv_sc = method_convert(dat, y = "y", method = "method", id = "id",
@@ -167,7 +168,39 @@ predict(conv_sc, newdata = data.frame(B = c(6, 12)), from = "B", to = "A")
 
 # Confidence intervals for the scaled model
 
-The default intervals (`ci_method = "delta"`) use the standard errors from the final regressions of each method on the predicted true values. These treat the predicted true values as known, so they ignore part of the uncertainty and are much too narrow (see below). `ci_method = "boot"` instead simulates data from the fitted model with the observed design, refits the model to each, and reports percentile intervals, including for the prediction SDs and the variance components. Each replicate refits the model, so this takes a while; use many more replicates in practice (the default is 999):
+The intervals from the alternating regression (`ci_method = "delta"`, the default) use the standard errors from the final regressions of each method on the predicted true values. These treat the predicted true values as known, so they ignore part of the uncertainty and are much too narrow (see the table below).
+
+For intervals, fit the model by maximum likelihood with `estimator = "ml"`. This treats the true values as normally distributed (the structural model) and fits the scaled model as a confirmatory factor model with the lavaan package, which must be installed. The alternating regression supplies the starting values, and missing measurements are handled by full-information maximum likelihood, so the design need not be balanced. The intervals are Wald intervals with $t$ quantiles on (items $-$ 1) degrees of freedom, and the prediction SDs get intervals too (on the log scale):
+
+```{r, eval = has_lavaan}
+conv_ml = method_convert(dat, y = "y", method = "method", id = "id",
+                         replicate = "repl", bias = "scaled",
+                         estimator = "ml")
+conv_ml
+```
+
+The `summary()` adds the model's chi-square test of fit, RMSEA, and SRMR; a poor fit means that the normal model for the true values and errors describes the data poorly. With few items (fewer than about 20), a variance estimate can be zero or negative (a Heywood case); `method_convert()` then gives a warning, and the intervals may be unreliable.
+
+```{r, eval = has_lavaan}
+summary(conv_ml)
+```
+
+How well do the intervals cover? In simulations of the scaled model (true slopes 1, 1.2, and 0.9; 3 replicates; balanced data and normal true values; 500 data sets per setting), the 95% intervals for the conversion slopes covered the true slope this often:
+
+| Items | Methods | Alternating regression, linked | exchangeable | Maximum likelihood, linked | exchangeable |
+|------:|--------:|-------:|-------:|-------:|-------:|
+| 15 | 2 | 57% | 66% | 93% | 94% |
+| 30 | 2 | 53% | 65% | 94% | 95% |
+| 60 | 2 | 54% | 65% | 95% | 94% |
+| 15 | 3 | 70% | 73% | 95% | 93% |
+| 30 | 3 | 67% | 71% | 94% | 95% |
+| 60 | 3 | 64% | 70% | 94% | 95% |
+
+The intercepts were similar. For the alternating regression, more items do not help, because the problem is not the sample size but treating the predicted true values as known; its point estimates were accurate (the slopes essentially unbiased and the prediction SDs within 1% to 2%), so its conversions and prediction limits can be used. The maximum likelihood intervals held up with 15% of the measurements missing and with uniform or skewed true values (92% to 97% coverage across all settings), and the intervals for the prediction SDs covered 92% to 95%. Its prediction SDs are a little low with few items (by 3% to 5% with 15 items), because, unlike the alternating regression, it does not adjust the method-by-item variance for the number of items.
+
+The two fits can give somewhat different estimates on real data, especially when the true values are far from normal. For the oximetry data in MethComp, whose true values are strongly skewed, the slope of pulse on CO is 0.94 by alternating regression and 0.90 by maximum likelihood (95% CI 0.80 to 1.00), and the model's chi-square test shows a poor fit.
+
+The alternating regression also offers a parametric bootstrap (`ci_method = "boot"`): it simulates data from the fitted model with the observed design, refits the model to each, and reports percentile intervals, including for the prediction SDs and the variance components. Each replicate refits the model, so this takes a while (the default is 999 replicates), and its coverage has not been checked by simulation:
 
 ```{r}
 set.seed(2024)
@@ -176,20 +209,5 @@ conv_boot = method_convert(dat, y = "y", method = "method", id = "id",
                            ci_method = "boot", boot_reps = 39)
 conv_boot
 ```
-
-How narrow are the delta-method intervals? In simulations of the scaled model (true slopes 1, 1.2, and 0.9; 3 replicates; 500 data sets per setting), the 95% delta-method intervals for the conversion slopes covered the true slope far less often than 95%:
-
-| Items | Methods | Linked | Exchangeable |
-|------:|--------:|-------:|-------------:|
-| 15 | 2 | 57% | 66% |
-| 30 | 2 | 53% | 65% |
-| 60 | 2 | 54% | 65% |
-| 15 | 3 | 70% | 73% |
-| 30 | 3 | 67% | 71% |
-| 60 | 3 | 64% | 70% |
-
-The intercepts were similar (53% to 72%). More items do not help, because the problem is not the sample size but treating the predicted true values as known. The point estimates themselves were accurate (the slopes were essentially unbiased and the prediction SDs within 1% to 2%), so the conversions and prediction limits can be used; it is only the confidence intervals for the conversion parameters that should not be taken at face value.
-
-The bootstrap accounts for more of the uncertainty and may do better, but its coverage has not yet been checked by simulation (it requires hundreds of refits per data set). Intervals with the stated coverage most likely need a Bayesian (MCMC) fit of the scaled model, as recommended by @carstensen2010 [ch. 7] and implemented in MethComp's `MCmcmc()`; this is planned for a future version. Until then, treat the confidence intervals from the scaled model as rough indications of precision, and prefer the bootstrap when they matter.
 
 # References

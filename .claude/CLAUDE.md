@@ -199,6 +199,7 @@ Not extensively used, but consider for grouping related functions.
 - **deming**: Reference implementation
 - **pbkrtest**: Kenward-Roger df
 - **ordinal**: `clmm()` for `ord_kappa_test()`
+- **lavaan**: maximum likelihood fit of the scaled model, `method_convert(bias = "scaled", estimator = "ml")`
 
 ### Key Internal Uses
 - `lme4::lmer()` for mixed-effects reliability models

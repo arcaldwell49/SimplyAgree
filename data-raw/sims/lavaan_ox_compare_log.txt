@@ -1,0 +1,42 @@
+items: 61  rows: 354 
+lavaan ML fit: 1.01 s; converged: TRUE 
+
+AltReg converged after  34 iterations  
+Last convergence criterion was  9.364866e-07 
+
+Point estimates (lav = lavaan ML, alt = method_convert AltReg, mc = MethComp::AltReg)
+     to  from alpha_lav alpha_alt alpha_mc beta_lav beta_alt beta_mc sd_lav sd_alt  sd_mc
+1    CO pulse   -5.8872   -2.2578  -2.2579  1.11423   1.0646  1.0646 6.4796 6.3900 6.3900
+2 pulse    CO    5.2836    2.1208   2.1208  0.89748   0.9393  0.9393 5.8153 6.0021 6.0021
+
+Standard errors (lavaan ML, lavaan MLR, AltReg delta)
+     to  from alpha_se_lav alpha_se_mlr alpha_se_alt beta_se_lav beta_se_mlr beta_se_alt
+1    CO pulse        4.698        5.001        1.832     0.06360     0.06367     0.02474
+2 pulse    CO        3.918        4.188        1.672     0.05123     0.05128     0.02183
+
+95% CIs (lavaan Wald vs AltReg delta)
+     to  from                beta_lav                beta_alt               alpha_lav              alpha_alt
+1    CO pulse 1.1142 (0.9896, 1.2389) 1.0646 (1.0156, 1.1136) -5.887 (-15.096, 3.322) -2.258 (-5.886, 1.370)
+2 pulse    CO 0.8975 (0.7971, 0.9979) 0.9393 (0.8961, 0.9825)  5.284 (-2.396, 12.963)  2.121 (-1.191, 5.432)
+
+lavaan variance estimates (item scale; s* are residual variances on each method's scale)
+      mu      om2       t2       s1       s2 
+125.2131  13.0037   8.5259   3.6075  17.1774 
+lavaan SDs: omega 3.6061  tau 2.9199  sigma 1.8993, 4.1446 
+
+method_convert (AltReg) variance components
+# A tibble: 6 × 5
+  component method    sd lower upper
+  <chr>     <chr>  <dbl> <dbl> <dbl>
+1 tau       CO      2.98    NA    NA
+2 tau       pulse   2.80    NA    NA
+3 omega     CO      3.52    NA    NA
+4 omega     pulse   3.31    NA    NA
+5 sigma     CO      2.05    NA    NA
+6 sigma     pulse   4.08    NA    NA
+
+MethComp::AltReg variance components (each method's scale)
+         s.d.
+Method       IxR      MxI      res
+  CO    3.523860 2.979013 2.049813
+  pulse 3.309956 2.798182 4.081464

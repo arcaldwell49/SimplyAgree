@@ -864,7 +864,8 @@
 # are relative to the first method; tau and omega are on its scale.
 .eq_mconv_scaled = function(methods,
                             varcomp,
-                            tf) {
+                            tf,
+                            ml = FALSE) {
   lv = methods$method
   ref = lv[1]
   vc_sd = function(comp) {
@@ -883,7 +884,10 @@
                      fixed = stats::setNames("0", ref)),
       .eq_method_fam(stats::setNames(methods$beta, lv), "\\beta",
                      fixed = stats::setNames("1", ref))),
-    re_stmts = c(if (linked) {
+    # the ML fit is structural: the true values are normally distributed
+    re_stmts = c(if (ml) {
+      list(.eq_stmt("\\mu_{i}", list("N(\\mu,\\, \\sigma^{2}_{\\mu})")))
+    }, if (linked) {
       list(.eq_stmt("a_{ir}", .eq_normal(
         .eq_var_par("\\omega^{2}", vc_sd("omega")))))
     }, list(.eq_stmt("c_{mi}", .eq_normal(
@@ -980,7 +984,8 @@
          "bias = \"linear\".", call. = FALSE)
   }
   if (bias == "scaled") {
-    return(.eq_mconv_scaled(x$scaled$methods, x$varcomp, x$transform))
+    return(.eq_mconv_scaled(x$scaled$methods, x$varcomp, x$transform,
+                            ml = mc_is_ml(x$fit_info)))
   }
   if (bias == "constant") {
     return(.eq_mvc_spec(.eq_mvc_design(x$varcomp), x$varcomp, x$transform))

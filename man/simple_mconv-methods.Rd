@@ -94,7 +94,9 @@ t distribution.}
 \item{\code{plot}}{A ggplot object.}
 \item{\code{summary}}{An object of class \code{summary.simple_mconv} whose
 print method shows the fit details (iterations and convergence for the
-scaled model, bootstrap failures), the design, the number of pairs used,
+scaled model, bootstrap failures; with \code{estimator = "ml"}, the
+log-likelihood, any zero or negative variance estimates, and the model
+fit: chi-square test, RMSEA and SRMR), the design, the number of pairs used,
 the regressions of the differences on the averages (linear bias) or the
 per-method intercepts and slopes (scaled), the conversions, and the
 variance components.}
@@ -111,7 +113,10 @@ Scaled model: normal QQ plots of the standardized residuals of the final
 variance component model by method (Shapiro-Wilk tests), the square
 root of their absolute values against the fitted true values
 (Breusch-Pagan tests), and the intercepts and slopes at each iteration
-of the alternating regression. Not available for conversions from
+of the alternating regression. With \code{estimator = "ml"}, the residuals
+are from the factor scores of the true values, item-by-replicate and
+method-by-item effects, and the iteration panel is replaced by a caption
+with the convergence and model fit. Not available for conversions from
 \code{\link[=method_vc]{method_vc()}}; use \code{check()} on that fit.}
 }
 }

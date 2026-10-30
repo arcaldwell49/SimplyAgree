@@ -360,3 +360,143 @@ test_that("sim_methods uses fixed item values", {
   expect_equal(d$y[d$method == "A"], mu)
   expect_error(sim_methods(n_items = 3, mu_values = 1:2), "mu_values")
 })
+
+# scaled model, maximum likelihood (lavaan) ----
+# Reference values from data-raw/sims/lavaan_ox_compare.R (Phase 1 of
+# data-raw/sims/HANDOFF_method_convert_scaled_ci.md).
+test_that("oximetry, scaled model by maximum likelihood", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+  skip_if_not(file.exists(test_path("fixtures", "ox.rds")))
+  ox = readRDS(test_path("fixtures", "ox.rds"))
+  sc = method_convert(ox, y = "y", method = "meth", id = "item",
+                      replicate = "repl", replicates = "linked",
+                      bias = "scaled", estimator = "ml")
+  fi = sc$fit_info
+  expect_identical(fi$estimator, "ml")
+  expect_true(fi$converged)
+  expect_length(fi$heywood, 0)
+  expect_equal(fi$logl, -1144.113, tolerance = 1e-5)
+  expect_equal(unname(fi$fit_measures[c("chisq", "df")]), c(59.753, 19),
+               tolerance = 1e-4)
+  expect_s4_class(sc$model, "lavaan")
+
+  cv = sc$conversion
+  get = function(to, from, col) cv[[col]][cv$to == to & cv$from == from]
+  expect_equal(get("pulse", "CO", "beta"), 0.897479, tolerance = 1e-5)
+  expect_equal(get("pulse", "CO", "alpha"), 5.28364, tolerance = 1e-5)
+  expect_equal(get("pulse", "CO", "sd_pred"), 5.81531, tolerance = 1e-5)
+  expect_equal(get("pulse", "CO", "beta_se"), 0.0512259, tolerance = 1e-4)
+  expect_equal(get("CO", "pulse", "beta"), 1.114232, tolerance = 1e-5)
+  expect_equal(get("CO", "pulse", "beta_se"), 0.0635976, tolerance = 1e-4)
+
+  # the two directions are consistent
+  expect_equal(get("CO", "pulse", "beta"), 1 / get("pulse", "CO", "beta"))
+  expect_equal(get("CO", "pulse", "alpha"),
+               -get("pulse", "CO", "alpha") * get("CO", "pulse", "beta"))
+
+  # t intervals with items - 1 df; sd_pred on the log scale
+  off = cv$to != cv$from
+  expect_equal(cv$df[off], rep(60, 2))
+  q = qt(0.975, 60)
+  expect_equal(cv$beta_lower[off], cv$beta[off] - q * cv$beta_se[off])
+  expect_equal(unname(confint(sc, parm = "beta")[, 1]), cv$beta_lower[off])
+  expect_true(all(cv$sd_lower[off] < cv$sd_pred[off] &
+                    cv$sd_pred[off] < cv$sd_upper[off]))
+  expect_equal(log(cv$sd_upper[off]) - log(cv$sd_pred[off]),
+               log(cv$sd_pred[off]) - log(cv$sd_lower[off]))
+  # same table layout as the alternating regression
+  alt = method_convert(ox, y = "y", method = "meth", id = "item",
+                       replicate = "repl", replicates = "linked",
+                       bias = "scaled")
+  expect_identical(names(cv), names(alt$conversion))
+  expect_identical(cv[, c("to", "from")], alt$conversion[, c("to", "from")])
+
+  # y-scale method-by-item SDs have the ratio of the slopes
+  vc = sc$varcomp
+  tau = vc$sd[vc$component == "tau"]
+  expect_equal(tau[2] / tau[1], get("pulse", "CO", "beta"))
+  expect_equal(sc$scaled$methods$beta, c(1, get("pulse", "CO", "beta")))
+
+  # transformed scale
+  tr = method_convert(ox, y = "y", method = "meth", id = "item",
+                      replicate = "repl", replicates = "linked",
+                      bias = "scaled", estimator = "ml",
+                      transform = "pctlogit")
+  pr = predict(tr, newdata = c(60, 75, 90), from = "CO", to = "pulse")
+  expect_true(all(pr$lower > 0 & pr$upper < 100 & pr$lower < pr$fit))
+})
+
+test_that("ML fit with three methods and unbalanced data", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+  sim3 = function(rp) {
+    sim_methods(n_items = 30, n_reps = 3, methods = c("A", "B", "C"),
+                alpha = c(0, 1, -0.5), beta = c(1, 1.2, 0.9), mu_mean = 10,
+                mu_sd = 2, tau = 0.3, omega = if (rp == "linked") 0.3 else 0,
+                sigma = c(0.3, 0.4, 0.5), replicates = rp, p_missing = 0.15,
+                seed = 1)
+  }
+  # values agree with the Phase 1 prototype
+  # (data-raw/sims/lavaan_scaled_helpers.R) to 1e-6
+  ref = list(
+    exchangeable = list(beta = c(0.84518180, 1.19492758, 1.18317739,
+                                 1.41381130, 0.83687080, 0.70730797),
+                        alpha_AB = -1.036876312, logl = -199.3179),
+    # with lavaan's default starting values this one converged to a local
+    # optimum with a negative variance of the true values
+    linked = list(beta = c(0.80540055, 1.14227717, 1.24161822,
+                           1.41827215, 0.87544427, 0.70508329),
+                  alpha_AB = -0.42803875, logl = -237.4163)
+  )
+  for (rp in names(ref)) {
+    sc = expect_no_warning(
+      method_convert(sim3(rp), y = "y", method = "method", id = "id",
+                     replicate = "repl", replicates = rp, bias = "scaled",
+                     estimator = "ml")
+    )
+    cv = sc$conversion[sc$conversion$to != sc$conversion$from, ]
+    expect_equal(cv$beta, ref[[rp]]$beta, tolerance = 1e-5)
+    expect_equal(cv$alpha[1], ref[[rp]]$alpha_AB, tolerance = 1e-5)
+    expect_equal(sc$fit_info$logl, ref[[rp]]$logl, tolerance = 1e-5)
+    expect_true(all(sc$varcomp$sd > 0))
+    expect_length(sc$diagnostics$resid, nrow(sc$data))
+  }
+})
+
+test_that("ML fit warns about zero or negative variances", {
+  skip_if_not_installed("lavaan")
+  dat = sim_methods(n_items = 15, n_reps = 2, methods = c("A", "B"),
+                    alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
+                    mu_sd = 2, tau = 0.05, sigma = 0.3, seed = 1)
+  expect_warning(
+    sc <- method_convert(dat, y = "y", method = "method", id = "id",
+                         replicate = "repl", bias = "scaled",
+                         estimator = "ml"),
+    "zero or negative"
+  )
+  expect_identical(sc$fit_info$heywood, "t2")
+  expect_equal(sc$varcomp$sd[sc$varcomp$component == "tau"], c(0, 0))
+  expect_true(any(grepl("Zero or negative", capture.output(print(sc)))))
+})
+
+test_that("ML estimator input checks", {
+  dat = conv_data()
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", estimator = "ml"),
+               "only available for bias = 'scaled'")
+  fit = method_vc(dat, y = "y", method = "method", id = "id",
+                  replicate = "repl")
+  expect_error(method_convert(object = fit, bias = "scaled",
+                              estimator = "ml"),
+               "only available for bias = 'scaled'")
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", bias = "scaled",
+                              estimator = "ml", ci_method = "boot"),
+               "only available with estimator = 'altreg'")
+  local_mocked_bindings(mc_has_lavaan = function() FALSE)
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", bias = "scaled",
+                              estimator = "ml", tol = 1e-4),
+               "requires the lavaan package")
+})

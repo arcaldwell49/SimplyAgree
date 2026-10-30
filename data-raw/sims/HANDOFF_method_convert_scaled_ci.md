@@ -2,6 +2,11 @@
 
 Branch `MethComp`, last updated 2026-10-30.
 
+**Status:** Phase 1 is done (`method_convert_lavaan_phase1_results.md`), and
+the lavaan fit is implemented as `method_convert(estimator = "ml")` following
+`method_convert_ml_plan.md`, with the docs listed at the end updated. Phase 2
+has not been started.
+
 ## Problem
 
 The scaled model is fit by alternating regression (AltReg). Its delta-method

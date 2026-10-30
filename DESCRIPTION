@@ -42,6 +42,7 @@ Suggests:
     ggeffects,
     deming,
     pbkrtest,
+    lavaan,
     ordinal
 VignetteBuilder:
     knitr
