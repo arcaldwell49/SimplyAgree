@@ -48,7 +48,8 @@ This is a property of the design, not of the data.}
 least three methods.}
 
 \item{interval}{Type of limits: "agreement" (default) for limits of
-agreement with confidence bounds, or "tolerance" for tolerance limits.}
+agreement with confidence bounds, or "tolerance" for prediction limits
+and tolerance limits, as in \code{\link[=tolerance_limit]{tolerance_limit()}}.}
 
 \item{pred_level}{The proportion of differences the limits should contain
 (the agreement level). Default is 0.95.}
@@ -87,7 +88,9 @@ methods, its standard error, df, and confidence limits.
 \item \code{limits}: tibble with, for each pair, the bias, the SD of the
 difference (\code{sd}) and its df (\code{df_sd}), and the limits
 (\code{lower_loa}, \code{upper_loa}, \code{lower_loa_ci}, \code{upper_loa_ci} for agreement;
-\code{lower.TL}, \code{upper.TL} for tolerance).
+the standard error of prediction \code{sep}, the prediction limits
+\code{lower.PL}, \code{upper.PL}, and the tolerance limits \code{lower.TL},
+\code{upper.TL} for tolerance).
 \item \code{varcomp}: tibble of the variance components (\code{tau}, \code{omega},
 \code{sigma}), as SDs and variances, with confidence limits and df.
 \item \code{repeatability}: tibble with, for each method, the residual SD
@@ -115,7 +118,8 @@ effects, used by \code{check()}.
 Fits the variance component model of Carstensen (2010) to measurements of
 a set of items by two or more methods, with or without replicate
 measurements, and reports the bias between each pair of methods, the
-variance components, and limits of agreement (or tolerance limits) for the
+variance components, and limits of agreement (or prediction and tolerance
+limits) for the
 difference between single measurements by two methods on a new item.
 }
 \details{
@@ -163,9 +167,19 @@ scale. \eqn{V_{mk}} is given Satterthwaite degrees of freedom
 covariance between the estimated components. With one measurement per
 item by two methods these are exactly \eqn{n - 1}.
 
+With \code{interval = "tolerance"}, the prediction limits are
+\eqn{\alpha_m - \alpha_k \pm t \cdot SEP}, with
+\eqn{SEP = \sqrt{V_{mk} + SE^2}} (\eqn{SE} the standard error of the bias)
+and \eqn{t} the \eqn{(1 + \code{pred\_level})/2} quantile of the t
+distribution with \code{df_sd} degrees of freedom, as in \code{\link[=tolerance_limit]{tolerance_limit()}}.
+They are expected to contain a single new difference with probability
+\code{pred_level} (a beta-expectation tolerance interval), but are not a
+confidence statement, and they do not depend on \code{bound_type}.
+
 The confidence bounds of the limits follow \code{\link[=agreement_limit]{agreement_limit()}}
 (\code{interval = "agreement"}, MOVER bounds) or \code{\link[=tolerance_limit]{tolerance_limit()}}
-(\code{interval = "tolerance"}), with the same meaning of \code{bound_type}:
+(\code{interval = "tolerance"}, the tolerance limits), with the same meaning of
+\code{bound_type}:
 \itemize{
 \item "iu": a one-sided \code{conf_level} bound on each limit, for an
 intersection-union test against a maximal allowable difference.

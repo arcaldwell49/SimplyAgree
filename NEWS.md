@@ -5,7 +5,7 @@
 New functions for comparing two or more methods, with or without replicate measurements, following Carstensen (2010, *Comparing Clinical Measurement Methods*) and the MethComp package. All are marked experimental.
 
 - Added `method_vc()`, which fits the variance component model for method comparison (method-by-item, item-by-replicate, and method-specific residual variances) to two or more methods at once, with linked or exchangeable replicates.
-  - Reports the bias for every pair of methods, the variance components with confidence intervals, and limits of agreement (`interval = "agreement"`, MOVER bounds as in `agreement_limit()`) or tolerance limits (`interval = "tolerance"`, as in `tolerance_limit()`), with `bound_type = "iu"` or `"joint"`.
+  - Reports the bias for every pair of methods, the variance components with confidence intervals, and limits of agreement (`interval = "agreement"`, MOVER bounds as in `agreement_limit()`) or prediction and tolerance limits (`interval = "tolerance"`, as in `tolerance_limit()`), with `bound_type = "iu"` or `"joint"` (which, as in `tolerance_limit()`, affects only the tolerance limits).
   - Reports repeatability coefficients for each method and, with linked replicates, reproducibility coefficients.
   - Supports transformations (`"log"`, `"logit"`, `"pctlogit"`, `"sqrt"`, `"asinsqrt"`, or a custom pair of functions). `print(scale = "original", at = )` gives the bias, limits, confidence bounds, and repeatability coefficients in original units at chosen levels (default: the median of the item averages).
   - With one measurement per item by two methods it reproduces `agreement_limit(data_type = "simple")` and `tolerance_limit()`; on the oximetry data of Carstensen (2010) it reproduces MethComp's `BA.est()`.

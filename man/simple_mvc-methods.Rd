@@ -65,7 +65,9 @@ Supplying \code{at} implies \code{scale = "original"}.}
 \item{type}{Type of plot. "ba" (default): a Bland-Altman plot of the
 differences for one pair of methods, with the bias and limits (shaded
 bands show the confidence intervals of the bias and the confidence bounds
-of the limits of agreement). "matrix": all pairs, with the methods named
+of the limits of agreement; with \code{interval = "tolerance"}, the lines are
+the prediction limits and the bands extend to the tolerance limits).
+"matrix": all pairs, with the methods named
 on the diagonal, each pair of methods plotted against each other above
 it (identity line dashed; constant-bias conversion line with prediction
 limits on the original scale), and Bland-Altman plots below it. "vc":
@@ -119,7 +121,7 @@ centered on that level, is
 \eqn{h(d) = g^{-1}(t + d/2) - g^{-1}(t - d/2)} in original units, where
 \eqn{g^{-1}} is the inverse transformation. For a fixed level, \eqn{h} is
 increasing in \eqn{d}, so the limits, their confidence bounds, and the
-tolerance limits keep their coverage and confidence exactly, and the
+prediction and tolerance limits keep their coverage and confidence exactly, and the
 back-transformed bias is the median difference at that level (not the
 mean). The repeatability coefficients are converted in the same way. The
 SDs and variance components stay on the analysis scale. Differences are

@@ -6,7 +6,8 @@
 #' Fits the variance component model of Carstensen (2010) to measurements of
 #' a set of items by two or more methods, with or without replicate
 #' measurements, and reports the bias between each pair of methods, the
-#' variance components, and limits of agreement (or tolerance limits) for the
+#' variance components, and limits of agreement (or prediction and tolerance
+#' limits) for the
 #' difference between single measurements by two methods on a new item.
 #'
 #' @param data A data frame in long format (one row per measurement). Wide
@@ -27,7 +28,8 @@
 #'   (default) or differs by "method". Method-specific values require at
 #'   least three methods.
 #' @param interval Type of limits: "agreement" (default) for limits of
-#'   agreement with confidence bounds, or "tolerance" for tolerance limits.
+#'   agreement with confidence bounds, or "tolerance" for prediction limits
+#'   and tolerance limits, as in [tolerance_limit()].
 #' @param pred_level The proportion of differences the limits should contain
 #'   (the agreement level). Default is 0.95.
 #' @param conf_level Confidence level for the bias, the variance components,
@@ -95,9 +97,19 @@
 #' covariance between the estimated components. With one measurement per
 #' item by two methods these are exactly \eqn{n - 1}.
 #'
+#' With `interval = "tolerance"`, the prediction limits are
+#' \eqn{\alpha_m - \alpha_k \pm t \cdot SEP}, with
+#' \eqn{SEP = \sqrt{V_{mk} + SE^2}} (\eqn{SE} the standard error of the bias)
+#' and \eqn{t} the \eqn{(1 + \code{pred\_level})/2} quantile of the t
+#' distribution with `df_sd` degrees of freedom, as in [tolerance_limit()].
+#' They are expected to contain a single new difference with probability
+#' `pred_level` (a beta-expectation tolerance interval), but are not a
+#' confidence statement, and they do not depend on `bound_type`.
+#'
 #' The confidence bounds of the limits follow [agreement_limit()]
 #' (`interval = "agreement"`, MOVER bounds) or [tolerance_limit()]
-#' (`interval = "tolerance"`), with the same meaning of `bound_type`:
+#' (`interval = "tolerance"`, the tolerance limits), with the same meaning of
+#' `bound_type`:
 #'
 #'   - "iu": a one-sided `conf_level` bound on each limit, for an
 #'     intersection-union test against a maximal allowable difference.
@@ -129,7 +141,9 @@
 #'   - `limits`: tibble with, for each pair, the bias, the SD of the
 #'     difference (`sd`) and its df (`df_sd`), and the limits
 #'     (`lower_loa`, `upper_loa`, `lower_loa_ci`, `upper_loa_ci` for agreement;
-#'     `lower.TL`, `upper.TL` for tolerance).
+#'     the standard error of prediction `sep`, the prediction limits
+#'     `lower.PL`, `upper.PL`, and the tolerance limits `lower.TL`,
+#'     `upper.TL` for tolerance).
 #'   - `varcomp`: tibble of the variance components (`tau`, `omega`,
 #'     `sigma`), as SDs and variances, with confidence limits and df.
 #'   - `repeatability`: tibble with, for each method, the residual SD

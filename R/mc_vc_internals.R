@@ -401,8 +401,11 @@ mc_vc_weights = function(varcomp,
 # - agreement: limits bias +/- z s, with confidence bounds from the MOVER as
 #   in agreement_limit(): z_side * SE(bias) combined with z * (U - s), where
 #   U is the one-sided upper confidence bound for s (sd_upper_at()).
-# - tolerance: analytic_bounds() from tolerance_limit() ("joint": Howe-type;
-#   "iu": MOVER, or the exact noncentral t for independent data).
+# - tolerance: prediction limits bias +/- t * SEP, with SEP = sqrt(s^2 +
+#   SE(bias)^2) and t on the df of s (add_pred_limits() in tolerance_limit()),
+#   and tolerance limits from analytic_bounds() ("joint": Howe-type; "iu":
+#   MOVER, or the exact noncentral t for independent data). bound_type
+#   affects only the tolerance limits.
 mc_limits = function(bias_tab,
                      varcomp,
                      cov_v,
@@ -457,6 +460,11 @@ mc_limits = function(bias_tab,
     out$lower_loa_ci = out$lower_loa - lme_ci
     out$upper_loa_ci = out$upper_loa + lme_ci
   } else {
+    sep = sqrt(s^2 + sem^2)
+    t_p = qt((1 + pred_level) / 2, nu)
+    out$sep = sep
+    out$lower.PL = b - t_p * sep
+    out$upper.PL = b + t_p * sep
     lim = analytic_bounds(b = b,
                           s = s,
                           sem = sem,
@@ -613,7 +621,7 @@ mc_original_scale = function(x,
   is_tol = x$design$interval == "tolerance"
   b = x$bias
   l = x$limits
-  cols = if (is_tol) c("lower.TL", "upper.TL") else
+  cols = if (is_tol) c("lower.PL", "upper.PL", "lower.TL", "upper.TL") else
     c("lower_loa", "upper_loa", "lower_loa_ci", "upper_loa_ci")
 
   lim = do.call(rbind, lapply(seq_along(t_at), function(j) {

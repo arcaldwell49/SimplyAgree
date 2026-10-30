@@ -17,8 +17,10 @@ test_that("print shows limits and variance components", {
   expect_true(any(grepl("intersection-union", out)))
 
   out_tol = capture.output(print(mvc_fit(interval = "tolerance")))
-  expect_true(any(grepl("Tolerance Limits", out_tol)))
-  expect_true(any(grepl("Lower TL", out_tol)))
+  expect_true(any(grepl("Prediction and Tolerance Limits", out_tol)))
+  expect_true(any(grepl("Prediction Interval", out_tol)))
+  expect_true(any(grepl("expected to contain a single new difference",
+                        out_tol)))
 })
 
 test_that("print shows ratios for log-transformed data", {
@@ -81,6 +83,8 @@ test_that("original scale: limits are h(limit) at the level", {
   os_tl = mc_original_scale(fit_tl, at = 90)
   expect_equal(c(os_tl$lower.TL, os_tl$upper.TL),
                h(c(fit_tl$limits$lower.TL, fit_tl$limits$upper.TL), t90))
+  expect_equal(c(os_tl$lower.PL, os_tl$upper.PL),
+               h(c(fit_tl$limits$lower.PL, fit_tl$limits$upper.PL), t90))
 })
 
 test_that("original scale agrees with predict() for a centered reading", {
@@ -165,8 +169,17 @@ test_that("plot returns a Bland-Altman ggplot for any pair", {
                           -fit$limits$upper_loa[j]))
   expect_error(plot(fit, pair = c("A", "Z")), "two different methods")
 
-  p_tol = plot(mvc_fit(interval = "tolerance"))
+  # tolerance: lines at the prediction limits, bands out to the tolerance
+  # limits; a reversed pair flips both
+  fit_tl = mvc_fit(interval = "tolerance")
+  p_tol = plot(fit_tl, pair = c("C", "A"))
   expect_s3_class(p_tol, "ggplot")
+  l = fit_tl$limits[j, ]
+  expect_equal(p_tol$layers[[2]]$data$y,
+               c(-l$lower.PL, -l$bias, -l$upper.PL))
+  bands = p_tol$layers[[1]]$data
+  expect_equal(bands$ymax[1], -l$lower.TL)
+  expect_equal(bands$ymin[3], -l$upper.TL)
 
   # exchangeable pairing is reproducible with pair_seed
   dat = sim_methods(n_items = 20, n_reps = 2, tau = 0.3, seed = 3)

@@ -144,7 +144,7 @@ The confidence intervals for the SDs come from the approximate covariance of the
 
 # Agreement or tolerance limits
 
-`interval = "agreement"` (default) gives the limits of agreement with confidence bounds computed by the MOVER [@donner2012closed], as in `agreement_limit()`. `interval = "tolerance"` gives tolerance limits as in `tolerance_limit()`. `bound_type` has the same meaning in both:
+`interval = "agreement"` (default) gives the limits of agreement with confidence bounds computed by the MOVER [@donner2012closed], as in `agreement_limit()`. `interval = "tolerance"` gives prediction limits and tolerance limits as in `tolerance_limit()`: the prediction limits are expected to contain a single new difference with probability `pred_level`, and the tolerance limits are their confidence bounds. `bound_type` has the same meaning in both, and in tolerance mode it affects only the tolerance limits:
 
 - `"iu"`: a one-sided `conf_level` bound on each limit; use for an intersection-union test of whether both limits lie within a maximal allowable difference. These are not a joint interval. The default for agreement.
 - `"joint"`: joint confidence for both limits (agreement), or a `pred_level`-content, `conf_level`-confidence tolerance interval: with confidence `conf_level`, at least `pred_level` of the differences lie within the limits. The default for tolerance.

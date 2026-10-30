@@ -16,7 +16,9 @@
 #' @param type Type of plot. "ba" (default): a Bland-Altman plot of the
 #'   differences for one pair of methods, with the bias and limits (shaded
 #'   bands show the confidence intervals of the bias and the confidence bounds
-#'   of the limits of agreement). "matrix": all pairs, with the methods named
+#'   of the limits of agreement; with `interval = "tolerance"`, the lines are
+#'   the prediction limits and the bands extend to the tolerance limits).
+#'   "matrix": all pairs, with the methods named
 #'   on the diagonal, each pair of methods plotted against each other above
 #'   it (identity line dashed; constant-bias conversion line with prediction
 #'   limits on the original scale), and Bland-Altman plots below it. "vc":
@@ -39,7 +41,7 @@
 #' \eqn{h(d) = g^{-1}(t + d/2) - g^{-1}(t - d/2)} in original units, where
 #' \eqn{g^{-1}} is the inverse transformation. For a fixed level, \eqn{h} is
 #' increasing in \eqn{d}, so the limits, their confidence bounds, and the
-#' tolerance limits keep their coverage and confidence exactly, and the
+#' prediction and tolerance limits keep their coverage and confidence exactly, and the
 #' back-transformed bias is the median difference at that level (not the
 #' mean). The repeatability coefficients are converted in the same way. The
 #' SDs and variance components stay on the analysis scale. Differences are
@@ -117,8 +119,8 @@ print.simple_mvc <- function(x,
   tab$Bias = fmt(disp(b$bias))
   tab$`Bias CI` = ci(disp(b$lower.CL), disp(b$upper.CL))
   if (is_tol) {
-    tab$`Lower TL` = fmt(disp(l$lower.TL))
-    tab$`Upper TL` = fmt(disp(l$upper.TL))
+    tab$`Prediction Interval` = ci(disp(l$lower.PL), disp(l$upper.PL))
+    tab$`Tolerance Limits` = ci(disp(l$lower.TL), disp(l$upper.TL))
   } else {
     tab$`Lower LoA` = fmt(disp(l$lower_loa))
     tab$`Upper LoA` = fmt(disp(l$upper_loa))
@@ -130,7 +132,7 @@ print.simple_mvc <- function(x,
 
   ## header ----
   title1 = paste0("Variance Component ",
-                  if (is_tol) "Tolerance Limits" else
+                  if (is_tol) "Prediction and Tolerance Limits" else
                     "Limits of Agreement (LoA)",
                   if (is_log) " of the Ratio")
   subtitle1 = paste0(mc_pct(des$pred_level),
@@ -150,13 +152,15 @@ print.simple_mvc <- function(x,
                       des$n_methods, " methods)")
   conf = des$conf_level
   bound_note = if (is_tol) {
-    switch(des$bound_type,
+    paste0("Prediction interval: expected to contain a single new ",
+           "difference with probability ", mc_pct(des$pred_level), "%\n",
+           switch(des$bound_type,
            joint = paste0("Tolerance limits: with ", conf * 100,
                           "% confidence, at least ", mc_pct(des$pred_level),
                           "% of differences lie within the limits"),
            iu = paste0("Tolerance limits: one-sided ", conf * 100,
                        "% bounds on each limit of agreement; not a joint ",
-                       conf * 100, "% interval"))
+                       conf * 100, "% interval")))
   } else {
     switch(des$bound_type,
            iu = paste0("LoA CI: one-sided ", conf * 100,
@@ -312,7 +316,8 @@ print.summary.simple_mvc <- function(x,
   cat("\nVariance components (SD)\n")
   print(as.data.frame(x$varcomp), digits = digits, row.names = FALSE)
 
-  cat("\n", if (des$interval == "tolerance") "Tolerance limits" else
+  cat("\n", if (des$interval == "tolerance")
+    "Prediction and tolerance limits" else
     "Limits of agreement", " (", mc_pct(des$pred_level), "%, ",
     des$bound_type, " bounds at ", des$conf_level * 100,
     "% confidence)\n", sep = "")

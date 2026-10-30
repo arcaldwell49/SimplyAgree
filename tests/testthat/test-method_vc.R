@@ -106,13 +106,21 @@ test_that("two methods, one measurement: equals agreement_limit()", {
 test_that("two methods, one measurement: equals tolerance_limit()", {
   d = equiv_data()
   dl = mc_long(d, methods = c("x", "y"))
+  m = list()
   for (bt in c("iu", "joint")) {
     tl = tolerance_limit(data = d, x = "x", y = "y", bound_type = bt)$limits
-    m = method_vc(dl, y = "y", method = "method", id = "id",
-                  interval = "tolerance", bound_type = bt)$limits
-    expect_equal(c(m$lower.TL, m$upper.TL),
+    m[[bt]] = method_vc(dl, y = "y", method = "method", id = "id",
+                        interval = "tolerance", bound_type = bt)$limits
+    expect_equal(c(m[[bt]]$lower.PL, m[[bt]]$upper.PL),
+                 c(tl$lower.PL, tl$upper.PL), tolerance = 1e-6)
+    expect_equal(m[[bt]]$sep, tl$SEP, tolerance = 1e-6)
+    expect_equal(c(m[[bt]]$lower.TL, m[[bt]]$upper.TL),
                  c(tl$lower.TL, tl$upper.TL), tolerance = 1e-6)
   }
+  # bound_type affects the tolerance limits only
+  expect_equal(m$iu[c("lower.PL", "upper.PL")],
+               m$joint[c("lower.PL", "upper.PL")])
+  expect_false(isTRUE(all.equal(m$iu$lower.TL, m$joint$lower.TL)))
   # tolerance defaults to joint bounds
   fit = method_vc(dl, y = "y", method = "method", id = "id",
                   interval = "tolerance")
@@ -363,6 +371,24 @@ test_that("repeatability is only reported with replicates", {
                    replicate = "repl")
   expect_named(fit2$repeatability,
                c("method", "sigma", "rc", "rc_lower", "rc_upper"))
+})
+
+test_that("prediction limits lie within the tolerance limits", {
+  dat = sim_methods(n_items = 30, n_reps = 3, methods = c("A", "B", "C"),
+                    alpha = c(0, 0.5, -0.2), tau = 0.3, omega = 0.4,
+                    sigma = c(0.3, 0.5, 0.4), replicates = "linked",
+                    seed = 1)
+  for (bt in c("iu", "joint")) {
+    fit = method_vc(dat, y = "y", method = "method", id = "id",
+                    replicate = "repl", replicates = "linked",
+                    interval = "tolerance", bound_type = bt)
+    l = fit$limits
+    expect_equal(l$sep^2, l$sd^2 + fit$bias$se^2)
+    expect_true(all(l$lower.TL < l$lower.PL & l$lower.PL < l$bias &
+                      l$bias < l$upper.PL & l$upper.PL < l$upper.TL))
+    t_p = qt(0.975, l$df_sd)
+    expect_equal(l$upper.PL - l$bias, t_p * l$sep)
+  }
 })
 
 # limit bounds: Satterthwaite vs MOVER over components ----

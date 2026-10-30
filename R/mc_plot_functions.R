@@ -35,6 +35,7 @@ mc_pair_rows = function(x,
       l = neg_swap(l, "lower_loa", "upper_loa")
       l = neg_swap(l, "lower_loa_ci", "upper_loa_ci")
     } else {
+      l = neg_swap(l, "lower.PL", "upper.PL")
       l = neg_swap(l, "lower.TL", "upper.TL")
     }
     b$method1 = l$method1 = pair[1]
@@ -57,22 +58,20 @@ mc_ba_plot = function(x,
   b = pr$bias
   l = pr$limits
   is_tol = des$interval == "tolerance"
-  lim_lo = if (is_tol) l$lower.TL else l$lower_loa
-  lim_hi = if (is_tol) l$upper.TL else l$upper_loa
-  lim_lab = if (is_tol) c("Upper TL", "Bias", "Lower TL") else
+  # lines at the limits (LoA, or prediction limits), bands out to their
+  # confidence bounds (LoA CI, or tolerance limits)
+  lim_lo = if (is_tol) l$lower.PL else l$lower_loa
+  lim_hi = if (is_tol) l$upper.PL else l$upper_loa
+  bnd_lo = if (is_tol) l$lower.TL else l$lower_loa_ci
+  bnd_hi = if (is_tol) l$upper.TL else l$upper_loa_ci
+  lim_lab = if (is_tol) c("Upper PL", "Bias", "Lower PL") else
     c("Upper LoA", "Bias", "Lower LoA")
 
   lines = data.frame(text = factor(lim_lab, levels = lim_lab),
                      y = c(lim_hi, b$bias, lim_lo))
-  bands = data.frame(text = factor(lim_lab[2], levels = lim_lab),
-                     ymin = b$lower.CL,
-                     ymax = b$upper.CL)
-  if (!is_tol) {
-    bands = rbind(bands,
-                  data.frame(text = factor(lim_lab[c(1, 3)], levels = lim_lab),
-                             ymin = c(l$upper_loa, l$lower_loa_ci),
-                             ymax = c(l$upper_loa_ci, l$lower_loa)))
-  }
+  bands = data.frame(text = factor(lim_lab, levels = lim_lab),
+                     ymin = c(lim_hi, b$lower.CL, bnd_lo),
+                     ymax = c(bnd_hi, b$upper.CL, lim_lo))
 
   pts = data.frame(avg = pp$avg, d = pp$d)
   # display scale ----
@@ -96,9 +95,11 @@ mc_ba_plot = function(x,
   lim_ci_level = if (des$bound_type == "joint") conf_level else
     1 - 2 * (1 - conf_level)
   cap = paste0(
-    if (is_tol) "Tolerance limits: " else "Agreement = ",
+    if (is_tol) "Prediction = " else "Agreement = ",
     mc_pct(des$pred_level), "%",
-    if (is_tol) paste0(" content, ", conf_level * 100, "% confidence (",
+    if (is_tol) paste0("; tolerance limits (bands): ",
+                       mc_pct(des$pred_level), "% content, ",
+                       conf_level * 100, "% confidence (",
                        des$bound_type, ")"),
     "\nConfidence Level = ", conf_level * 100, "% (Bias)",
     if (!is_tol) paste0(" & ", lim_ci_level * 100, "% (LoA)"),
