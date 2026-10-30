@@ -11,6 +11,8 @@
 # constant. Nominal level 95%.
 # Run from the package root:
 #   Rscript data-raw/sims/sim_method_convert_coverage.R
+# Part B only (about 2 hours on 12 cores):
+#   MC_PARTS=boot Rscript data-raw/sims/sim_method_convert_coverage.R
 # Results: data-raw/sims/method_convert_coverage.rds and
 #          data-raw/sims/method_convert_coverage_summary.rds
 
@@ -27,8 +29,17 @@ grid_a = expand.grid(I = c(15, 30, 60), M = c(2, 3),
                      part = "delta", stringsAsFactors = FALSE)
 grid_b = expand.grid(I = c(15, 30), M = 2, replicates = "linked",
                      part = "boot", stringsAsFactors = FALSE)
-# MC_NBOOTSIM = 0 runs Part A only
-grid = if (n_bootsim > 0) rbind(grid_a, grid_b) else grid_a
+# MC_NBOOTSIM = 0 runs Part A only; MC_PARTS = "boot" runs Part B only and
+# writes method_convert_coverage_boot*.rds (keeps the Part A results)
+parts = Sys.getenv("MC_PARTS", "both")
+grid = if (parts == "boot") {
+  grid_b
+} else if (n_bootsim > 0) {
+  rbind(grid_a, grid_b)
+} else {
+  grid_a
+}
+suffix = if (parts == "boot") "_boot" else ""
 
 one_rep = function(cell, seed) {
   g = grid[cell, ]
@@ -117,7 +128,7 @@ cat("Elapsed:", format(Sys.time() - t0), "\n")
 
 res = do.call(dplyr::bind_rows, res)
 saveRDS(list(grid = grid, results = res, n_boot = n_boot),
-        file.path(out_dir, "method_convert_coverage.rds"))
+        file.path(out_dir, paste0("method_convert_coverage", suffix, ".rds")))
 
 # summary ----
 ok = res[!res$failed, ]
@@ -130,5 +141,6 @@ summ$sd_ratio = aggregate(I(sd_hat / sd_true) ~ cell, data = ok,
                           FUN = mean)[, 2]
 summ$fail_rate = tapply(res$failed, res$cell, mean)[as.character(summ$cell)]
 summ = merge(cbind(cell = seq_len(nrow(grid)), grid), summ)
-saveRDS(summ, file.path(out_dir, "method_convert_coverage_summary.rds"))
+saveRDS(summ, file.path(out_dir, paste0("method_convert_coverage", suffix,
+                              "_summary.rds")))
 print(summ, digits = 3)
