@@ -12,8 +12,26 @@
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the tolerance limits, with the SD of the differences (coefficient of variation when log-transformed). If the SD differs between rows of the limits (e.g., by condition), it is shown as a column instead. For clustered models, the between- and within-subject SDs are also printed.}
 #'   \item{\code{plot}}{Returns a plot of the tolerance limits.}
-#'   \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
+#'   \item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality, heteroskedasticity, and proportional bias tests are provided as captions to the plot. With `keep_model = FALSE`, only the proportional bias panel is drawn. The proportional bias results are attached as the attribute \code{"prop_bias"} (one row per condition, named in \code{group}); see [loa-methods] for the columns.}
 #' }
+#'
+#' @section Proportional bias diagnostic:
+#' The proportional bias panel of `check()` plots the differences (centred)
+#' against the means on the analysis scale (the log scale with `log_tf`),
+#' with the Pitman-Morgan test of equal variances of the two methods (rows,
+#' or subject means if `id` was given; within each condition if `condition`
+#' was given). As explained under "Proportional bias diagnostic" in
+#' [loa-methods], a slope can come from unequal measurement error rather than
+#' proportional bias. Whether the measurements of an `id` are replicates of
+#' one true value or repeated measures of a changing one is not known here,
+#' so there is no correction for the error variances; use
+#' [agreement_limit()] with `data_type = "reps"` or [method_vc()] for that.
+#' Without `id` and `condition`, a known error variance ratio can be given
+#' with `error.ratio`, as in [check.loa()].
+#'
+#' @param error.ratio For `check`, an optional known ratio of the measurement
+#'   error variances, var(error of x) / var(error of y), as in [dem_reg()],
+#'   on the analysis scale. Used only without `id` and `condition`.
 #'
 #' @name tolerance_delta-methods
 
@@ -528,24 +546,107 @@ plot.tolerance_delta <- function(x,
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check.tolerance_delta <- function(x, ...) {
-
-
+check.tolerance_delta <- function(x,
+                                  error.ratio = NULL,
+                                  ...) {
+  .pm_check_ratio(error.ratio)
   call2 = x$call
-  df = model.frame(x$call$lm_mod)
-  colnames(df) = c("y","x","id","mean","delta")
-
-  if(x$call$prop_bias == TRUE){
-    form_lm1 = as.formula(delta ~ mean)
-    form_lmer1 = as.formula(delta ~ mean + (1|id))
-  } else {
-    form_lm1 = as.formula(delta ~ 1)
-    form_lmer1 = as.formula(delta ~ 1 + (1|id))
-  }
-
-
   dat = model.frame(x$call$lm_mod)
   colnames(dat) = c("y","x","id","mean","delta","condition","time")
+
+  if (is.null(x$model)) {
+    no_model = function(title) {
+      ggplot() +
+        annotate("text", x = 0.5, y = 0.5,
+                 label = "Model not kept (keep_model = FALSE)") +
+        theme_void() +
+        labs(title = title)
+    }
+    p_norm = no_model("Normality of Residuals")
+    p_het = no_model("Homogeneity of Variance")
+  } else {
+    p_np = .tol_check_model_panels(x, dat)
+    p_norm = p_np$p_norm
+    p_het = p_np$p_het
+  }
+
+  # Proportional Bias -----
+  # Pitman-Morgan test on the analysis scale (log scale with log_tf), on
+  # subject means when id was given, within each condition. Whether rows of an
+  # id are replicates of one true value or repeated measures of a changing one
+  # is not known here, so there is no error correction.
+  has_id = !is.null(call2$id)
+  has_cond = !is.null(call2$condition)
+  if (!is.null(error.ratio) && (has_id || has_cond)) {
+    message("error.ratio is only used without id and condition and is ",
+            "ignored here.")
+    error.ratio = NULL
+  }
+  groups = if (has_cond) split(dat, dat$condition) else list(all = dat)
+  pb = lapply(groups, function(d) {
+    if (!is.null(error.ratio)) {
+      .pm_known_ratio(d$x, d$y, error.ratio = error.ratio)
+    } else {
+      .pm_slope_test(d$x, d$y, if (has_id) d$id else seq_len(nrow(d)))
+    }
+  })
+  dat2 = do.call(rbind, lapply(names(pb), function(nm) {
+    data.frame(condition = nm,
+               mean = pb[[nm]]$data$mean,
+               resid = pb[[nm]]$data$diff - mean(pb[[nm]]$data$diff))
+  }))
+  caption = if (has_cond) {
+    paste(vapply(names(pb), function(nm) .pm_caption(pb[[nm]], label = nm),
+                 character(1)), collapse = " \n")
+  } else {
+    .pm_caption(pb[[1]])
+  }
+  p_bias = plot_bias(dat2,
+                     adj_slope = if (pb[[1]]$corrected && !has_cond) {
+                       pb[[1]]$slope_adj
+                     },
+                     adj_center = mean(dat2$mean),
+                     y_lab = "Difference (centred)",
+                     x_lab = paste0("Mean of both methods",
+                                    if (has_id) " (subject means)",
+                                    if (isTRUE(call2$log_tf)) " (log scale)")) +
+    labs(caption = paste0("Proportional Bias", " \n", caption)) +
+    theme(
+      panel.background = element_rect(fill='transparent'), #transparent panel bg
+      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+      panel.grid.major = element_blank(), #remove major gridlines
+      panel.grid.minor = element_blank(), #remove minor gridlines
+      legend.background = element_rect(fill='transparent'), #transparent legend bg
+      legend.box.background = element_rect(fill='transparent') #transparent legend panel
+    )
+  if (has_cond) {
+    p_bias = p_bias + facet_wrap(~condition)
+  }
+
+  p_vals = vapply(pb, function(r) r$p.value, numeric(1))
+  sig = names(pb)[!is.na(p_vals) & p_vals < 0.05]
+  if (length(sig) > 0) {
+    .pm_message(design = if (is.null(error.ratio)) "single" else "ratio",
+                which = if (has_cond) sig)
+  }
+
+  p = wrap_plots(p_norm, p_het,
+                 p_bias, ncol = 2) & plot_annotation(
+               theme = theme(
+                 panel.background = element_rect(fill='transparent'), #transparent panel bg
+                 plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+                 panel.grid.major = element_blank(), #remove major gridlines
+                 panel.grid.minor = element_blank(), #remove minor gridlines
+                 legend.background = element_rect(fill='transparent'), #transparent legend bg
+                 legend.box.background = element_rect(fill='transparent') #transparent legend panel
+               ))
+  attr(p, "prop_bias") = .pm_table(if (has_cond) pb else unname(pb))
+  p
+}
+
+# Normality and heteroskedasticity panels of check.tolerance_delta(); they
+# need the fitted model
+.tol_check_model_panels <- function(x, dat) {
   ## heteroskedasticity -------
 
   #stan_res = residuals(x$model, type = "pearson")
@@ -613,33 +714,6 @@ check.tolerance_delta <- function(x, ...) {
       legend.box.background = element_rect(fill='transparent') #transparent legend panel
     )
 
-  # Proportional Bias -----
-
-  dat2 = data.frame(resid = residuals(mod_check),
-                    mean = na.omit(dat$mean))
-  p_bias = plot_bias(dat2) +
-    theme(
-      panel.background = element_rect(fill='transparent'), #transparent panel bg
-      plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-      panel.grid.major = element_blank(), #remove major gridlines
-      panel.grid.minor = element_blank(), #remove minor gridlines
-      legend.background = element_rect(fill='transparent'), #transparent legend bg
-      legend.box.background = element_rect(fill='transparent') #transparent legend panel
-    )
-
-  #return(list(p_norm = p_norm,
-  #            p_het = p_het,
-  #            p_bias = p_bias))
-
-  wrap_plots(p_norm, p_het,
-             p_bias, ncol = 2) & plot_annotation(
-               theme = theme(
-                 panel.background = element_rect(fill='transparent'), #transparent panel bg
-                 plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
-                 panel.grid.major = element_blank(), #remove major gridlines
-                 panel.grid.minor = element_blank(), #remove minor gridlines
-                 legend.background = element_rect(fill='transparent'), #transparent legend bg
-                 legend.box.background = element_rect(fill='transparent') #transparent legend panel
-               ))
-
+  list(p_norm = p_norm,
+       p_het = p_het)
 }

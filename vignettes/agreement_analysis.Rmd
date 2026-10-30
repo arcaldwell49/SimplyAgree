@@ -716,7 +716,7 @@ The assumptions of normality, heteroscedasticity, and proportional bias can all 
 
 The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and proportional bias plot.
 
-All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
+All 3 plots will have a statistical test in the bottom right corner. The Shapiro-Wilk test is included for the normality plot, the Breusch-Pagan test for heterogeneity, and a test of the slope of the differences on the means for proportional bias. The next section explains what this last test can and cannot show.
 
 ## An Example
 
@@ -737,7 +737,103 @@ check(test_tol)
 
 # Proportional Bias
 
-As the check plots for `a1` show, proportional bias can sometimes occur. In these cases @bland1999 recommended adjusting the bias and LoA for the proportional bias. This is simply done by include a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
+Proportional bias means that one method reads higher than the other at one end of the range and lower at the other: on the true values, $y = a + \beta x$ with $\beta \neq 1$. The bottom panel of `check()` is meant to help decide whether a constant bias is adequate or whether the limits should allow the bias to change with the level of measurement (`prop_bias = TRUE`). This section explains what that panel can and cannot show, and what to do with the result.
+
+## What the test actually tests
+
+The panel plots the differences against the means of the two methods and tests the slope. That slope is less informative than it looks. For any two variables,
+
+$$\text{cov}(x - y,\; x + y) = \text{var}(x) - \text{var}(y),$$
+
+so the differences increase (or decrease) with the means exactly when one method has a larger variance than the other. The test of the slope is therefore the Pitman-Morgan test of equal variances of paired measurements [@pitman1939; @morgan1939]. The variances of two methods can differ for three reasons:
+
+1. **True proportional bias** ($\beta \neq 1$): one method stretches or compresses the scale.
+2. **Unequal measurement error**: the noisier method has the larger variance, even when both measure the same true values on the same scale.
+3. **Prior calibration**: if one method was calibrated against the other by ordinary regression, its values are shrunk toward the mean, and its variance is smaller.
+
+With one measurement per method per subject, these cannot be told apart [@bland1999; @hopkins2004bias]. A significant slope says that the variances differ, not why, and `check()` gives a message saying so. The causes can also cancel: if the method that compresses the scale is also the noisier one, a real proportional bias can produce no slope at all, so a non-significant slope does not rule out proportional bias either.
+
+The causes can be separated in two ways:
+
+- **Replicate measurements of the same true value.** With `agreement_limit(data_type = "reps")` (or `method_vc()` with replicates), the measurement error variance of each method is estimated from the within-subject variation. The test then asks whether the slope of the subject means is larger than unequal error alone would produce (the *error-corrected* Pitman-Morgan test). Only the difference of the two error variances is used, so an occasion effect shared by both methods (replicates taken at the same time by both methods) does not bias it.
+- **A known ratio of the error variances**, for example from published repeatability studies. For simple data, `check(error.ratio = )` fits a Deming regression with that ratio and tests $\beta = 1$, as `dem_reg()` does.
+
+Nested data (`data_type = "nest"`) and `tolerance_limit()` with an `id` cannot be corrected, because the measurements of a subject are not known to share one true value.
+
+## Reading the plot
+
+- **Points**: the differences (centred on the mean difference) against the means of both methods, on the analysis scale (the log scale with `log_tf = TRUE`). With replicates, each point is a subject mean.
+- **Solid line and band**: the least-squares slope of the differences on the means, the *observed* slope. It includes any effect of unequal measurement error, and so does its band.
+- **Dashed line** (replicates or `error.ratio` only): the *error-adjusted* slope, the slope expected if both methods were measured without error. Without proportional bias it should be horizontal. The vertical gap between the solid and dashed lines is the part of the observed slope explained by unequal measurement error.
+- **Caption**: the test and its p-value; with the correction, both slopes.
+
+The numbers are attached to the output of `check()` as the attribute `"prop_bias"`. The column `beta` is the scale of `y` relative to `x` implied by the error-adjusted slope $b$: $\beta = (2 - b) / (2 + b)$, so a value of 0.8 means that `y` changes by 0.8 units per unit of `x`. Use this table to report the result.
+
+## Example: unequal measurement error, no proportional bias
+
+The simulated data below have three replicates per subject. Method `y` is four times as noisy as method `x`, but both measure the same true values on the same scale (no proportional bias).
+
+```{r}
+set.seed(11)
+n = 40
+k = 3
+true = rnorm(n, 100, 8)
+sim = data.frame(id = rep(1:n, each = k),
+                 rep = rep(1:k, n))
+sim$x = true[sim$id] + rnorm(n * k, 0, 2) # precise method
+sim$y = true[sim$id] + rnorm(n * k, 0, 8) # noisy method, same scale
+```
+
+Using only the first replicate, the slope is clearly significant, and `check()` explains that this cannot be read as proportional bias.
+
+```{r}
+one_rep = agreement_limit(x = "x", y = "y",
+                          data = sim[sim$rep == 1, ])
+check(one_rep)
+```
+
+With all three replicates, the correction removes the slope produced by the unequal errors. The observed (uncorrected) slope is still significant, the error-corrected test is not, and `beta` is close to 1.
+
+```{r}
+all_reps = agreement_limit(x = "x", y = "y", id = "id",
+                           data = sim, data_type = "reps")
+chk = check(all_reps)
+chk
+attr(chk, "prop_bias")[, c("test", "p.value", "p.uncorrected",
+                           "slope_obs", "slope_adj", "beta")]
+```
+
+## Example: proportional bias
+
+Here the second method reads $20 + 0.8x$ with the same precision as `x`. The error-corrected test is significant and `beta` is close to the true 0.8.
+
+```{r}
+sim$y2 = 20 + 0.8 * true[sim$id] + rnorm(n * k, 0, 2)
+scaled = agreement_limit(x = "x", y = "y2", id = "id",
+                         data = sim, data_type = "reps")
+chk2 = check(scaled)
+attr(chk2, "prop_bias")[, c("test", "p.value", "slope_adj", "beta")]
+```
+
+## What to do, and when
+
+| Design | Result of `check()` | Interpretation | What to do |
+|---|---|---|---|
+| One measurement per method | Slope not significant | No evidence that the variances differ | Use a constant bias (`prop_bias = FALSE`). |
+| One measurement per method | Slope significant | The variances differ: proportional bias, unequal error, or calibration | Do not switch to `prop_bias = TRUE` on this alone. If the error variances are known, use `check(error.ratio = )`; otherwise, collect replicates if possible. If not, report the constant-bias limits and that the methods differ in variance. |
+| Replicates | Corrected test significant | Proportional bias beyond measurement error | Use `prop_bias = TRUE` for the limits, and report `beta`. For an equation to convert between methods, see `dem_reg()` (with `id`) or `method_convert(bias = "scaled")`. |
+| Replicates | Uncorrected significant, corrected not | The slope is explained by unequal measurement error | Use a constant bias. Report the within-subject SDs of each method (`sw2_x`, `sw2_y` are their squares); one method is less precise, which is itself a finding. |
+| Replicates | Neither significant | No evidence of proportional bias | Use a constant bias. With few subjects the test has little power, so also look at the size of `beta`. |
+
+A few further points:
+
+- If the spread of the differences grows with the level (the heteroskedasticity panel), consider `log_tf = TRUE` before judging proportional bias. The test is then on the log scale, where the differences are ratios.
+- The test needs several subjects. With fewer than about 10, a non-significant result says little.
+- Fitting `prop_bias = TRUE` when the slope is only due to unequal error is not wrong as a description of the data: the expected difference given the *observed* mean does change with it. But it is not a property of the methods, and the slope would change with the error of the methods or the range of the sample.
+
+## Adjusting for proportional bias
+
+If there is proportional bias, @bland1999 recommended adjusting the bias and LoA for it. This is simply done by including a slope for the average of both measurements (i.e, using an intercept + slope model rather than intercept only model).
 
 For either `agreement_limit` or `tolerance_limit` functions, this can be accomplished with the `prop_bias` argument. 
 When this is set to TRUE, then the proportional bias adjusted model is utilized. 
@@ -754,7 +850,7 @@ print(test_tol)
 # See effect of proportional bias on limits
 plot(test_tol)
 
-# Confirm its effects in proportional bias check plot (should be horizontal now)
+# The check still tests the slope of the differences on the means
 check(test_tol)
 ```
 

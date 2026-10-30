@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{loa}(x, ...)
+\method{check}{loa}(x, error.ratio = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{loa} as returned from a agreement_limit function.}
@@ -31,14 +31,65 @@ for details.
 \item{geom}{String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".}
 
 \item{delta}{The maximal allowable difference.}
+
+\item{error.ratio}{For \code{check}, an optional known ratio of the measurement
+error variances, var(error of x) / var(error of y), as in \code{\link[=dem_reg]{dem_reg()}},
+on the analysis scale (the log scale with \code{log_tf = TRUE}). Used only
+with \code{data_type = "simple"}; see "Proportional bias diagnostic".}
 }
 \value{
 \describe{
 \item{\code{print}}{Prints short summary of the Limits of Agreement.}
 \item{\code{plot}}{Returns a plot of the limits of agreement.}
-\item{\code{check}}{Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+\item{\code{check}}{Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality, heteroskedasticity, and proportional bias tests are provided as captions to the plot. The proportional bias results are attached as the attribute \code{"prop_bias"}, a data frame with the test (\code{test}, \code{corrected}, \code{n}, \code{statistic}, \code{df}, \code{p.value}, and \code{p.uncorrected}, the uncorrected Pitman-Morgan p-value), the observed slope of the differences on the means (\code{slope_obs}), the slope expected from unequal measurement error alone (\code{slope_null}) and the error-adjusted slope (\code{slope_adj}), the implied scale of y relative to x on the true values, \code{beta} = (2 - \code{slope_adj})/(2 + \code{slope_adj}), the within-subject variances (\code{sw2_x}, \code{sw2_y}), and \code{error.ratio}. Columns that do not apply are \code{NA}.}
 }
 }
 \description{
 Methods defined for objects returned from the agreement_limit function.
+}
+\section{Proportional bias diagnostic}{
+
+The proportional bias panel of \code{check()} plots the differences (centred)
+against the means, on the analysis scale (the log scale for
+log-transformed data), whether or not the fit used \code{prop_bias}. Because
+cov(x - y, x + y) = var(x) - var(y), a slope of the differences on the
+means only shows that the two methods have unequal total variance; the
+test of the slope is the Pitman-Morgan test of equal variances. Unequal
+variances arise from a true proportional bias (y = a + b x with b not 1),
+but also from unequal measurement error or from a prior calibration of one
+method on the other (Bland & Altman, 1999; Hopkins, 2004). With one
+measurement per method these cannot be told apart, and \code{check()} says so
+when the test is significant.
+
+What is tested depends on the design:
+\itemize{
+\item \strong{One measurement per method} (\code{data_type = "simple"}): the
+Pitman-Morgan test (t on n - 2 df). With \code{error.ratio}, the Deming
+slope of y on x for that error ratio is tested against 1 instead (the
+test reported by \code{\link[=dem_reg]{dem_reg()}}), and the error-adjusted slope
+2(1 - b)/(1 + b) is drawn dashed.
+\item \strong{Replicates} (\code{data_type = "reps"}): the test uses subject means
+and is corrected for unequal measurement error. The covariance of the
+subject-mean differences and sums is compared with its expected value
+without proportional bias, \eqn{s^2_{wx}\overline{1/m_x} -
+    s^2_{wy}\overline{1/m_y}}, from the pooled within-subject variances,
+rather than with zero. The standard error is a jackknife over
+subjects (re-estimating the within-subject variances) with n - 1 df.
+Only the difference of the error variances enters, so an occasion
+effect shared by both methods (linked replicates) cancels. The
+error-adjusted slope is drawn dashed. Complete pairs of measurements
+are used.
+\item \strong{Nested data} (\code{data_type = "nest"}): the true value changes
+within a subject, so the error variances cannot be estimated; the slope
+is tested with a random-intercept model (likelihood ratio test) and is
+subject to the same limitation as one measurement per method.
+}
+}
+
+\references{
+Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
+comparison studies. Statistical Methods in Medical Research, 8(2), 135-160.
+
+Hopkins, W. G. (2004). Bias in Bland-Altman but not regression validity
+analyses. Sportscience, 8, 42-46.
 }

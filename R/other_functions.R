@@ -250,12 +250,25 @@ plot_qq = function (x,
     theme_bw()
 }
 
+# adj_slope: optional error-adjusted slope, drawn dashed through
+# (adj_center, 0) (the residuals are centred differences)
 plot_bias = function(x,
                      size_line = .8,
                      size_point = 2,
                      alpha_level = 0.2,
                      colors = c("#3aaf85","#0077B5","#cd201f"),
-                     dot_alpha_level = .8){
+                     dot_alpha_level = .8,
+                     adj_slope = NULL,
+                     adj_center = NULL,
+                     y_lab = "Residuals",
+                     x_lab = "Mean of both methods"){
+  adj_line = if (!is.null(adj_slope) && is.finite(adj_slope)) {
+    geom_abline(intercept = -adj_slope * adj_center,
+                slope = adj_slope,
+                linetype = 2,
+                linewidth = size_line,
+                colour = colors[3])
+  }
   ggplot(x, aes(x = mean,
                 y = resid)) +
     geom_point(colour = colors[2], stroke = 0, shape = 16,
@@ -269,11 +282,12 @@ plot_bias = function(x,
       linewidth = size_line,
       colour = colors[1]
     ) +
+    adj_line +
     labs(
       title = "Proportional Bias",
       subtitle = "Reference line should be horizontal",
-      y = "Residuals",
-      x = "Mean of both methods"
+      y = y_lab,
+      x = x_lab
     ) +
     theme_bw()+
     theme(

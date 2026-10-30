@@ -17,7 +17,7 @@
   ...
 )
 
-\method{check}{tolerance_delta}(x, ...)
+\method{check}{tolerance_delta}(x, error.ratio = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{tolerance_delta} as returned from a agreement_limit function.}
@@ -31,14 +31,34 @@ for details.
 \item{geom}{String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".}
 
 \item{delta}{The maximal allowable difference.}
+
+\item{error.ratio}{For \code{check}, an optional known ratio of the measurement
+error variances, var(error of x) / var(error of y), as in \code{\link[=dem_reg]{dem_reg()}},
+on the analysis scale. Used only without \code{id} and \code{condition}.}
 }
 \value{
 \describe{
 \item{\code{print}}{Prints short summary of the tolerance limits, with the SD of the differences (coefficient of variation when log-transformed). If the SD differs between rows of the limits (e.g., by condition), it is shown as a column instead. For clustered models, the between- and within-subject SDs are also printed.}
 \item{\code{plot}}{Returns a plot of the tolerance limits.}
-\item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality and heteroskedasticity tests are provided as captions to the plot.}
+\item{\code{check}}{Returns plots testing the assumptions of the model. P-values for the normality, heteroskedasticity, and proportional bias tests are provided as captions to the plot. With \code{keep_model = FALSE}, only the proportional bias panel is drawn. The proportional bias results are attached as the attribute \code{"prop_bias"} (one row per condition, named in \code{group}); see \link{loa-methods} for the columns.}
 }
 }
 \description{
 Methods defined for objects returned from the tolerance_delta function(s).
 }
+\section{Proportional bias diagnostic}{
+
+The proportional bias panel of \code{check()} plots the differences (centred)
+against the means on the analysis scale (the log scale with \code{log_tf}),
+with the Pitman-Morgan test of equal variances of the two methods (rows,
+or subject means if \code{id} was given; within each condition if \code{condition}
+was given). As explained under "Proportional bias diagnostic" in
+\link{loa-methods}, a slope can come from unequal measurement error rather than
+proportional bias. Whether the measurements of an \code{id} are replicates of
+one true value or repeated measures of a changing one is not known here,
+so there is no correction for the error variances; use
+\code{\link[=agreement_limit]{agreement_limit()}} with \code{data_type = "reps"} or \code{\link[=method_vc]{method_vc()}} for that.
+Without \code{id} and \code{condition}, a known error variance ratio can be given
+with \code{error.ratio}, as in \code{\link[=check.loa]{check.loa()}}.
+}
+

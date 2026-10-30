@@ -21,6 +21,28 @@ New functions for comparing two or more methods, with or without replicate measu
 - Added `mc_long()` to convert data with one column per method to the long format.
 - New vignettes: "Comparing Several Methods with Replicate Measurements" and "Converting Between Methods".
 
+## Proportional bias diagnostics in `check()`
+
+A slope of the differences on the means only shows that the two methods have unequal variances, since cov(x - y, x + y) = var(x) - var(y). This can come from unequal measurement error as well as from proportional bias (Bland & Altman, 1999; Hopkins, 2004). The proportional bias panel of `check()` for `agreement_limit()`, `tolerance_limit()`, and `method_vc()` now says what it tests and, where possible, corrects for the error variances:
+
+- The test is labelled as the Pitman-Morgan test of equal variances. When it is significant with one measurement per method, `check()` gives a message that it cannot separate proportional bias from unequal measurement error.
+- With replicates (`agreement_limit(data_type = "reps")`, `method_vc()` with replicates), the test uses subject means and is corrected for the measurement error variances estimated from the replicates (jackknife over subjects). Only their difference is used, so linked replicates do not bias it. The error-adjusted slope is drawn as a dashed line. In simulations with unequal error and no proportional bias, it rejected at about 5% to 6.5%.
+- New `error.ratio` argument to `check()` for single-measurement designs: with a known error variance ratio, the Deming slope (as in `dem_reg()`) is tested against 1.
+- `check()` for `tolerance_limit()` now reports the Pitman-Morgan test (on subject means with `id`, by condition with `condition`).
+- The results are attached to the output of `check()` as the attribute `"prop_bias"` (a data frame with the test, the observed and error-adjusted slopes, the implied scale `beta` of one method relative to the other, and the within-subject variances), so they can be reported.
+- The "Proportional Bias" section of the agreement vignette now explains how to read the plot and the test, and what to do with the result for each design.
+
+Results that change:
+
+- `check()` for `agreement_limit(data_type = "reps")` previously tested the slope with a row-level mixed model, which pairs exchangeable replicates arbitrarily; with unequal measurement error and no proportional bias it rejected about 40% of the time at the 5% level.
+- With `log_tf = TRUE`, the test now uses the mean on the log scale (it used the mean on the original scale), so it tests equal variances on the analysis scale. The `prop_bias` models are unchanged.
+- The proportional bias panel shows the centred differences, not the residuals of the fitted model, so it no longer looks flat when `prop_bias = TRUE`.
+
+Bug fixes:
+
+- `check()` for `agreement_limit(prop_bias = TRUE)` reported p = NA for proportional bias.
+- `check()` for `tolerance_limit(keep_model = FALSE)` failed; it now draws the proportional bias panel and notes that the other panels need the model.
+
 # SimplyAgree 0.4.0
 
 ## Results that change

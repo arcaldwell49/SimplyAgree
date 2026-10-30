@@ -29,6 +29,10 @@
 #' @param pair_seed Seed for the random pairing of exchangeable replicates
 #'   in the plot. The global random number generator state is restored
 #'   afterwards.
+#' @param error.ratio For `check`, an optional known ratio of the measurement
+#'   error variances of the two methods, var(error of the first) / var(error
+#'   of the second), as in [dem_reg()], on the analysis scale. Used only with
+#'   two methods and one measurement per item.
 #' @param ... further arguments passed through, see description of return
 #'   value for details.
 #'
@@ -73,8 +77,14 @@
 #'   gives p-values for the slope of the differences on the averages
 #'   (level-dependent bias) and of the absolute residuals of that regression
 #'   on the averages (level-dependent variance), computed from item means so
-#'   replicates are not counted more than once. A message suggests
-#'   alternatives when either p < 0.05.}
+#'   replicates are not counted more than once. With replicates, the test of
+#'   the slope is corrected for unequal measurement error (and, with
+#'   `tau = "method"`, unequal method-by-item variances), and the
+#'   error-adjusted slope is drawn dashed; see "Proportional bias diagnostic"
+#'   in [loa-methods]. A message suggests alternatives when either p < 0.05.
+#'   The proportional bias results are attached as the attribute
+#'   \code{"prop_bias"}, one row per pair (named in \code{group}); \code{beta}
+#'   is the scale of the second method of the pair relative to the first.}
 #' }
 #'
 #' @name simple_mvc-methods
@@ -427,7 +437,9 @@ plot.simple_mvc <- function(x,
 
 check.simple_mvc <- function(x,
                              pair_seed = NULL,
+                             error.ratio = NULL,
                              ...){
+  .pm_check_ratio(error.ratio)
   dg = x$diagnostics
   lv = levels(x$data$method)
   tf_note = if (x$transform$name != "none") {
@@ -475,56 +487,105 @@ check.simple_mvc <- function(x,
 
   ## 4. level dependence of the differences, per pair ----
   # tests use item means of the paired differences and averages, so items
-  # with replicates are not counted more than once
+  # with replicates are not counted more than once. With replicates, the
+  # slope test is corrected for unequal measurement error (and, with
+  # tau = "method", unequal method-by-item variances); see
+  # prop_bias_helpers.R.
+  mt = x$design$model_type
+  if (!is.null(error.ratio) && mt != "single_2") {
+    message("error.ratio is only used with two methods and one measurement ",
+            "per item and is ignored here",
+            if (mt == "reps") {
+              " (the error variances are estimated from the replicates)."
+            } else ".")
+    error.ratio = NULL
+  }
+  vc = x$varcomp
+  tau_var = function(m) {
+    tv = vc[vc$component == "tau", ]
+    if (nrow(tv) == 0) 0 else if (all(is.na(tv$method))) tv$var[1] else
+      tv$var[tv$method == m]
+  }
   prs = mc_pairs(lv)
   pair_dat = list()
-  tests = data.frame(pair = character(0), p_bias = numeric(0),
-                     p_var = numeric(0))
+  adj_lines = list()
+  res = list()
+  tests = data.frame(pair = character(0), p_var = numeric(0))
   for (j in seq_len(nrow(prs))) {
     m = prs$method1[j]
     k = prs$method2[j]
     pp = mc_pair(x$data, m, k, replicates = x$design$replicates,
                  seed = pair_seed)
     lab = paste0(m, " - ", k)
-    pair_dat[[j]] = data.frame(pair = lab, avg = pp$avg, d = pp$d)
-    im = pp %>%
-      dplyr::group_by(id) %>%
-      dplyr::summarize(d = mean(d), avg = mean(avg), .groups = "drop")
-    p_bias = p_var = NA_real_
+    r = if (!is.null(error.ratio)) {
+      .pm_known_ratio(pp$y1, pp$y2, error.ratio = error.ratio)
+    } else {
+      .pm_slope_test(pp$y1, pp$y2, pp$id,
+                     correct = mt == "reps",
+                     extra_cov = tau_var(m) - tau_var(k),
+                     extra_var = tau_var(m) + tau_var(k))
+    }
+    res[[lab]] = r
+    im = r$data
+    pair_dat[[j]] = data.frame(pair = lab, avg = im$mean, d = im$diff)
+    if (r$corrected && is.finite(r$slope_adj)) {
+      adj_lines[[j]] = data.frame(
+        pair = lab, slope = r$slope_adj,
+        intercept = mean(im$diff) - r$slope_adj * mean(im$mean))
+    }
+    p_var = NA_real_
     if (nrow(im) >= 4) {
-      fit_d = lm(d ~ avg, data = im)
-      p_bias = summary(fit_d)$coefficients["avg", 4]
-      fit_v = lm(abs(stats::resid(fit_d)) ~ im$avg)
+      fit_d = lm(diff ~ mean, data = im)
+      fit_v = lm(abs(stats::resid(fit_d)) ~ im$mean)
       p_var = summary(fit_v)$coefficients[2, 4]
     }
-    tests = rbind(tests, data.frame(pair = lab, p_bias = p_bias,
-                                    p_var = p_var))
+    tests = rbind(tests, data.frame(pair = lab, p_var = p_var))
   }
   pair_dat = do.call(rbind, pair_dat)
   pair_dat$pair = factor(pair_dat$pair, levels = tests$pair)
-  cap = paste0(tests$pair, ": slope of difference p = ",
-               signif(tests$p_bias, 3),
-               "; slope of |residual| p = ", signif(tests$p_var, 3),
+  cap = paste0(vapply(names(res), function(nm) .pm_caption(res[[nm]], nm),
+                      character(1)),
+               "; slope of |residual| ", vapply(tests$p_var, .fmt_test_p,
+                                                character(1)),
                collapse = "\n")
   p_lvl = ggplot(pair_dat, aes(x = avg, y = d)) +
     geom_point(na.rm = TRUE, alpha = 0.7) +
     geom_smooth(method = "lm", formula = y ~ x, se = TRUE, na.rm = TRUE,
                 color = "#0D0887") +
     facet_wrap(~ pair, scales = "free") +
-    labs(x = paste0("Average of methods", tf_note),
+    labs(x = paste0("Average of methods (item means)", tf_note),
          y = paste0("Difference", tf_note),
          title = "Level dependence",
          caption = cap) +
     theme_bw()
+  if (length(adj_lines) > 0) {
+    adj_lines = do.call(rbind, adj_lines)
+    adj_lines$pair = factor(adj_lines$pair, levels = tests$pair)
+    p_lvl = p_lvl +
+      geom_abline(data = adj_lines,
+                  aes(slope = .data$slope, intercept = .data$intercept),
+                  linetype = 2, color = "#cd201f")
+  }
 
-  if (any(tests$p_bias < 0.05, na.rm = TRUE)) {
-    message("The differences change with the level of measurement for at ",
-            "least one pair (p < 0.05). A constant bias may not hold; ",
-            "consider a conversion with non-constant bias (method_convert()) ",
-            "or a transformation. Note that a slope of the differences on ",
-            "the averages also arises when the methods have unequal ",
-            "variances, since cov(D, A) = (var(y1) - var(y2)) / 2 ",
-            "(Bland & Altman, 1999).")
+  p_bias = vapply(res, function(r) r$p.value, numeric(1))
+  p_unc = vapply(res, function(r) r$p.uncorrected, numeric(1))
+  corrected = vapply(res, function(r) isTRUE(r$corrected), logical(1))
+  sig = !is.na(p_bias) & p_bias < 0.05
+  if (any(sig & !corrected)) {
+    .pm_message(design = "single", which = names(res)[sig & !corrected],
+                alt = paste0("consider a conversion with non-constant bias ",
+                             "(method_convert())"))
+  }
+  if (any(sig & corrected)) {
+    .pm_message(design = if (is.null(error.ratio)) "reps" else "ratio",
+                which = names(res)[sig & corrected],
+                alt = paste0("consider the scaled model ",
+                             "(method_convert(bias = 'scaled'))"))
+  }
+  explained = corrected & !sig & !is.na(p_unc) & p_unc < 0.05 &
+    is.null(error.ratio)
+  if (any(explained)) {
+    .pm_message_explained(which = names(res)[explained])
   }
   if (any(tests$p_var < 0.05, na.rm = TRUE)) {
     message("The spread of the differences changes with the level of ",
@@ -532,5 +593,7 @@ check.simple_mvc <- function(x,
             "transformation (e.g., transform = 'log').")
   }
 
-  patchwork::wrap_plots(p_res, p_qq, p_re, p_lvl, ncol = 2)
+  p = patchwork::wrap_plots(p_res, p_qq, p_re, p_lvl, ncol = 2)
+  attr(p, "prop_bias") = .pm_table(res)
+  p
 }

@@ -566,8 +566,9 @@ test_that("check shows linearity instead of proportional bias", {
   tst <- SimplyAgree:::.fitted_square_test(y ~ x, d)
   ref <- anova(lm(y ~ x, d), lm(y ~ x + I(x^2), d))
   expect_equal(tst$p.value, ref$`Pr(>F)`[2], tolerance = 1e-8)
-  # check.loa() itself is unchanged
-  loa <- check(agreement_limit(x = "x", y = "y", data = reps))
+  # check.loa() itself is unchanged (the variances of x and y differ in reps)
+  expect_message(loa <- check(agreement_limit(x = "x", y = "y", data = reps)),
+                 "equal variances")
   expect_equal(loa$labels$title, "Proportional Bias")
 })
 

@@ -29,7 +29,7 @@
 
 \method{plot}{simple_mvc}(x, type = c("ba", "matrix", "vc"), pair = NULL, pair_seed = NULL, ...)
 
-\method{check}{simple_mvc}(x, pair_seed = NULL, ...)
+\method{check}{simple_mvc}(x, pair_seed = NULL, error.ratio = NULL, ...)
 }
 \arguments{
 \item{newdata, from, to}{Passed to the \code{predict} method of
@@ -80,6 +80,11 @@ of the difference (first minus second). Default is the first pair.}
 \item{pair_seed}{Seed for the random pairing of exchangeable replicates
 in the plot. The global random number generator state is restored
 afterwards.}
+
+\item{error.ratio}{For \code{check}, an optional known ratio of the measurement
+error variances of the two methods, var(error of the first) / var(error
+of the second), as in \code{\link[=dem_reg]{dem_reg()}}, on the analysis scale. Used only with
+two methods and one measurement per item.}
 }
 \value{
 \describe{
@@ -105,8 +110,14 @@ differences against the averages with a regression line. The caption
 gives p-values for the slope of the differences on the averages
 (level-dependent bias) and of the absolute residuals of that regression
 on the averages (level-dependent variance), computed from item means so
-replicates are not counted more than once. A message suggests
-alternatives when either p < 0.05.}
+replicates are not counted more than once. With replicates, the test of
+the slope is corrected for unequal measurement error (and, with
+\code{tau = "method"}, unequal method-by-item variances), and the
+error-adjusted slope is drawn dashed; see "Proportional bias diagnostic"
+in \link{loa-methods}. A message suggests alternatives when either p < 0.05.
+The proportional bias results are attached as the attribute
+\code{"prop_bias"}, one row per pair (named in \code{group}); \code{beta}
+is the scale of the second method of the pair relative to the first.}
 }
 }
 \description{

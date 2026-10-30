@@ -907,7 +907,9 @@ test_that("nested lme works with condition, AR(1), methods, and boot_cal", {
   expect_false(anyNA(t1$limits$lower.TL))
   expect_equal(logLik(stats::update(t1$model, . ~ .)), logLik(t1$model))
   expect_equal(nrow(nlme::getData(t1$model)), nrow(d))
-  expect_silent(check(t1))
+  # y has the error of x plus more, so the variances differ
+  expect_message(p <- check(t1), "equal variances")
+  expect_s3_class(p, "patchwork")
   expect_s3_class(plot(t1), "ggplot")
 
   set.seed(1)

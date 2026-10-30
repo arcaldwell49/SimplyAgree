@@ -261,9 +261,18 @@ When New reads 90%, Ref is expected to read `fit` and, for `pred_level` of items
 check(fit, pair_seed = 1)
 ```
 
-The caption gives, for each pair, p-values for the slope of the differences on the averages (bias that depends on the level) and for the slope of the absolute residuals on the averages (spread that depends on the level). These use the item means, so replicates are not counted more than once.
+The caption gives, for each pair, a p-value for the slope of the differences on the averages (bias that depends on the level) and for the slope of the absolute residuals on the averages (spread that depends on the level). These use the item means, so replicates are not counted more than once.
 
 - If the **spread** of the differences grows with the level, try a transformation, such as `transform = "log"`.
-- If the **bias** depends on the level, a constant bias is not adequate, and the methods are related by a slope as well as an intercept. Be careful, though: a slope of the differences on the averages also appears when the two methods have unequal measurement error alone, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$ [@bland1999]. Errors-in-variables methods such as `dem_reg()` and `pb_reg()`, or the scaled model of @carstensen2010 [ch. 7], are better suited to estimating such a relation.
+- If the **bias** depends on the level, a constant bias is not adequate, and the methods are related by a slope as well as an intercept. But a slope of the differences on the averages also appears when the two methods have unequal measurement error alone, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$ [@bland1999]. With replicates, `check()` therefore corrects the test for each method's measurement error, estimated from the replicates (the error-corrected Pitman-Morgan test), and draws the error-adjusted slope as a dashed line. Only a significant *corrected* test is evidence that the methods differ in scale; the scaled model of @carstensen2010 [ch. 7] (`method_convert(bias = "scaled")`) then estimates the relation. Without replicates the test cannot separate the two, and `check()` says so. With method-specific `tau`, the difference in method-by-item variances is also removed.
+
+The results for each pair are attached to the output as the attribute `"prop_bias"`; `beta` is the scale of the second method of the pair relative to the first implied by the error-adjusted slope.
+
+```{r}
+attr(check(fit, pair_seed = 1), "prop_bias")[, c("group", "p.value",
+                                                  "p.uncorrected", "beta")]
+```
+
+See the "Proportional Bias" section of `vignette("agreement_analysis")` for how to read the plot and what to do with the result.
 
 # References

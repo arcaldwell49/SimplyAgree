@@ -5,6 +5,10 @@
 #' @param x object of class \code{loa} as returned from a agreement_limit function.
 #' @param delta The maximal allowable difference.
 #' @param digits The number of digits to print.
+#' @param error.ratio For `check`, an optional known ratio of the measurement
+#'   error variances, var(error of x) / var(error of y), as in [dem_reg()],
+#'   on the analysis scale (the log scale with `log_tf = TRUE`). Used only
+#'   with `data_type = "simple"`; see "Proportional bias diagnostic".
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{agreement_limit}}.
@@ -12,8 +16,51 @@
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement.}
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement.}
-#'   \item{\code{check}}{Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.}
+#'   \item{\code{check}}{Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality, heteroskedasticity, and proportional bias tests are provided as captions to the plot. The proportional bias results are attached as the attribute \code{"prop_bias"}, a data frame with the test (\code{test}, \code{corrected}, \code{n}, \code{statistic}, \code{df}, \code{p.value}, and \code{p.uncorrected}, the uncorrected Pitman-Morgan p-value), the observed slope of the differences on the means (\code{slope_obs}), the slope expected from unequal measurement error alone (\code{slope_null}) and the error-adjusted slope (\code{slope_adj}), the implied scale of y relative to x on the true values, \code{beta} = (2 - \code{slope_adj})/(2 + \code{slope_adj}), the within-subject variances (\code{sw2_x}, \code{sw2_y}), and \code{error.ratio}. Columns that do not apply are \code{NA}.}
 #' }
+#'
+#' @section Proportional bias diagnostic:
+#' The proportional bias panel of `check()` plots the differences (centred)
+#' against the means, on the analysis scale (the log scale for
+#' log-transformed data), whether or not the fit used `prop_bias`. Because
+#' cov(x - y, x + y) = var(x) - var(y), a slope of the differences on the
+#' means only shows that the two methods have unequal total variance; the
+#' test of the slope is the Pitman-Morgan test of equal variances. Unequal
+#' variances arise from a true proportional bias (y = a + b x with b not 1),
+#' but also from unequal measurement error or from a prior calibration of one
+#' method on the other (Bland & Altman, 1999; Hopkins, 2004). With one
+#' measurement per method these cannot be told apart, and `check()` says so
+#' when the test is significant.
+#'
+#' What is tested depends on the design:
+#'
+#'   - **One measurement per method** (`data_type = "simple"`): the
+#'     Pitman-Morgan test (t on n - 2 df). With `error.ratio`, the Deming
+#'     slope of y on x for that error ratio is tested against 1 instead (the
+#'     test reported by [dem_reg()]), and the error-adjusted slope
+#'     2(1 - b)/(1 + b) is drawn dashed.
+#'   - **Replicates** (`data_type = "reps"`): the test uses subject means
+#'     and is corrected for unequal measurement error. The covariance of the
+#'     subject-mean differences and sums is compared with its expected value
+#'     without proportional bias, \eqn{s^2_{wx}\overline{1/m_x} -
+#'     s^2_{wy}\overline{1/m_y}}, from the pooled within-subject variances,
+#'     rather than with zero. The standard error is a jackknife over
+#'     subjects (re-estimating the within-subject variances) with n - 1 df.
+#'     Only the difference of the error variances enters, so an occasion
+#'     effect shared by both methods (linked replicates) cancels. The
+#'     error-adjusted slope is drawn dashed. Complete pairs of measurements
+#'     are used.
+#'   - **Nested data** (`data_type = "nest"`): the true value changes
+#'     within a subject, so the error variances cannot be estimated; the slope
+#'     is tested with a random-intercept model (likelihood ratio test) and is
+#'     subject to the same limitation as one measurement per method.
+#'
+#' @references
+#' Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
+#' comparison studies. Statistical Methods in Medical Research, 8(2), 135-160.
+#'
+#' Hopkins, W. G. (2004). Bias in Bland-Altman but not regression validity
+#' analyses. Sportscience, 8, 42-46.
 #'
 #' @name loa-methods
 
@@ -224,9 +271,21 @@ plot.loa <- function(x,
 #' @importFrom stats residuals lm na.omit pchisq shapiro.test ks.test rstudent df.residual anova rstandard sigma resid
 #' @export
 
-check.loa <- function(x, ...) {
-  panels = .loa_check_panels(x)
-  wrap_plots(panels$p_norm, panels$p_het,
+check.loa <- function(x,
+                      error.ratio = NULL,
+                      ...) {
+  .pm_check_ratio(error.ratio)
+  if (!is.null(error.ratio) && x$call$data_type != "simple") {
+    message("error.ratio is only used with data_type = 'simple' and is ",
+            "ignored here",
+            if (x$call$data_type == "reps") {
+              " (the error variances are estimated from the replicates)."
+            } else ".")
+    error.ratio = NULL
+  }
+  panels = .loa_check_panels(x, error.ratio = error.ratio)
+  .pm_notify(panels$pb, design = panels$pb_design)
+  p = wrap_plots(panels$p_norm, panels$p_het,
              panels$p_bias, ncol = 2) & plot_annotation(
                theme = theme(
                  panel.background = element_rect(fill='transparent'), #transparent panel bg
@@ -236,12 +295,15 @@ check.loa <- function(x, ...) {
                  legend.background = element_rect(fill='transparent'), #transparent legend bg
                  legend.box.background = element_rect(fill='transparent') #transparent legend panel
                ))
+  attr(p, "prop_bias") = .pm_table(list(panels$pb))
+  p
 }
 
 # The three diagnostic panels of check.loa() (normality, heteroskedasticity,
 # proportional bias), returned separately so other methods (ccc_test) can
 # reuse some of them.
-.loa_check_panels <- function(x) {
+.loa_check_panels <- function(x,
+                              error.ratio = NULL) {
 
   call2 = x$call
   df = model.frame(x$call$lm_mod)
@@ -332,26 +394,49 @@ check.loa <- function(x, ...) {
     )
 
   # Proportional Bias -----
-  if(call2$data_type == "simple"){
-    mod2 = lm(delta ~ mean,
-              data = dat)
-    aov2 = as.data.frame(anova(mod_check, mod2))
-    colnames(aov2) = c("df1","RSS","df2","SS","f","p")
-    lin_pval = aov2$p[2]
+  # Slope of the differences on the means on the analysis scale (log scale
+  # with log_tf), whether or not prop_bias was used in the fit. See
+  # prop_bias_helpers.R.
+  pb_design = "single"
+  if (call2$data_type == "nest") {
+    # true values vary within subjects, so the pairs are linked by occasion
+    # and the error variances cannot be estimated
+    dat_pb = data.frame(delta = dat$delta,
+                        m_tf = (dat$x + dat$y) / 2,
+                        id = dat$id)
+    m0 = suppressMessages(lmer(delta ~ 1 + (1 | id), data = dat_pb))
+    m1 = suppressMessages(lmer(delta ~ m_tf + (1 | id), data = dat_pb))
+    aov2 = suppressMessages(as.data.frame(anova(m0, m1)))
+    pb = list(method = "Mixed model test of the slope",
+              corrected = FALSE,
+              n = nrow(dat_pb),
+              statistic = aov2[2, "Chisq"],
+              parameter = aov2[2, "Df"],
+              p.value = aov2[2, "Pr(>Chisq)"],
+              slope_obs = unname(lme4::fixef(m1)[["m_tf"]]),
+              data = data.frame(mean = dat_pb$m_tf, diff = dat_pb$delta))
+  } else if (call2$data_type == "reps") {
+    pb = .pm_slope_test(dat$x, dat$y, dat$id, correct = TRUE)
+    if (pb$corrected) pb_design = "reps"
+  } else if (!is.null(error.ratio)) {
+    pb = .pm_known_ratio(dat$x, dat$y, error.ratio = error.ratio)
+    pb_design = "ratio"
   } else {
-    mod2 = lmer(data = dat,
-                delta ~ mean + (1 | id))
-    aov2 = suppressMessages(as.data.frame(anova(mod_check, mod2)))
-    colnames(aov2) = c("npar","AIC","BIC","log_lik","dev","chisq","df","p")
-    lin_pval = aov2$p[2]
+    pb = .pm_slope_test(dat$x, dat$y)
   }
 
-  dat2 = data.frame(resid = residuals(mod_check),
-                    mean = na.omit(dat$mean))
-  p_bias = plot_bias(dat2) +
+  dat2 = data.frame(resid = pb$data$diff - mean(pb$data$diff),
+                    mean = pb$data$mean)
+  x_lab = paste0("Mean of both methods",
+                 if (call2$data_type == "reps") " (subject means)",
+                 if (isTRUE(call2$log_tf)) " (log scale)")
+  p_bias = plot_bias(dat2,
+                     adj_slope = if (pb$corrected) pb$slope_adj,
+                     adj_center = mean(dat2$mean),
+                     y_lab = "Difference (centred)",
+                     x_lab = x_lab) +
     labs(caption = paste0("Proportional Bias", " \n",
-                          "Test for Linear Bias", ": p = ",
-                          signif(lin_pval,4))) +
+                          .pm_caption(pb))) +
     theme(
       panel.background = element_rect(fill='transparent'), #transparent panel bg
       plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
@@ -363,5 +448,7 @@ check.loa <- function(x, ...) {
 
   list(p_norm = p_norm,
        p_het = p_het,
-       p_bias = p_bias)
+       p_bias = p_bias,
+       pb = pb,
+       pb_design = pb_design)
 }
