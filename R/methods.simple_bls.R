@@ -20,8 +20,16 @@
 #'   the Working-Hotelling multiplier `sqrt(2 F(2, n - 2))`, so it contains
 #'   exactly the lines (intercept, slope) that [joint_test()] does not
 #'   reject; BivRegBLS's band also multiplies by `sqrt((n - 1) / (n - 2))`.
+#'   `"tolerance"` (experimental) gives tolerance limits: with confidence
+#'   `tol_level`, they contain at least a proportion `level` of new
+#'   measurements (see [cbls_reg()]).
 #' @param level Level of the intervals. Default is the `conf.level` of the fit
-#'   for confidence intervals and its `pred_level` for prediction intervals.
+#'   for confidence intervals and the band, and its `pred_level` for
+#'   prediction intervals and tolerance limits (the proportion of new
+#'   measurements they contain).
+#' @param tol_level,bound_type For tolerance limits: the confidence level, and
+#'   `"joint"` or `"iu"` as in [tolerance_limit()]. Default: the values given
+#'   to [cbls_reg()].
 #' @param reps_x,reps_y For prediction intervals: the new values are means of
 #'   this many replicates of each method. Default is 1.
 #' @param se.fit For `predict()`: if TRUE, also return the standard errors of
@@ -128,8 +136,10 @@ predict.simple_bls <- function(object,
                                newdata = NULL,
                                type = c("xy", "md"),
                                interval = c("none", "confidence", "band",
-                                            "prediction"),
+                                            "prediction", "tolerance"),
                                level = NULL,
+                               tol_level = NULL,
+                               bound_type = NULL,
                                reps_x = 1,
                                reps_y = 1,
                                se.fit = FALSE,
@@ -137,8 +147,19 @@ predict.simple_bls <- function(object,
   type <- match.arg(type)
   interval <- match.arg(interval)
   if (is.null(level)) {
-    level <- if (interval == "prediction") object$pred_level else object$conf.level
+    level <- if (interval %in% c("prediction", "tolerance")) {
+      object$pred_level
+    } else {
+      object$conf.level
+    }
   }
+  if (is.null(tol_level)) {
+    tol_level <- if (is.null(object$tol_level)) 0.95 else object$tol_level
+  }
+  if (is.null(bound_type)) {
+    bound_type <- if (is.null(object$bound_type)) "joint" else object$bound_type
+  }
+  bound_type <- match.arg(bound_type, c("joint", "iu"))
   x_name <- attr(object$terms, "term.labels")[1]
   if (type == "xy") {
     cf <- object$coefficients
@@ -177,9 +198,9 @@ predict.simple_bls <- function(object,
   } else {
     e <- object$errors
     if (!e$known) {
-      stop("Prediction intervals need the measurement error variances; ",
-           "only their ratio was given. Refit with var_x and var_y, or with ",
-           "replicates.")
+      stop("Prediction and tolerance intervals need the measurement error ",
+           "variances; only their ratio was given. Refit with var_x and ",
+           "var_y, or with replicates.")
     }
     if (!is.numeric(reps_x) || !is.numeric(reps_y) || reps_x < 1 || reps_y < 1) {
       stop("reps_x and reps_y must be at least 1.")
@@ -208,12 +229,82 @@ predict.simple_bls <- function(object,
     if (!isTRUE(tau2 > 0)) tau2 <- 0
     b_xy <- unname(object$coefficients[2])
     v_eq <- a_x * tau2 + a_y * b_xy^2 * tau2
-    var_pred <- var_line + a_x * vx + a_y * vy + v_eq
-    df_pred <- var_pred^2 /
-      (var_line^2 / df_res + (a_x * vx)^2 / e$df_var_x +
-         (a_y * vy)^2 / e$df_var_y + v_eq^2 / df_res)
-    q <- stats::qt(1 - (1 - level) / 2, df_pred)
-    half <- q * sqrt(var_pred)
+    if (interval == "prediction") {
+      var_pred <- var_line + a_x * vx + a_y * vy + v_eq
+      df_pred <- var_pred^2 /
+        (var_line^2 / df_res + (a_x * vx)^2 / e$df_var_x +
+           (a_y * vy)^2 / e$df_var_y + v_eq^2 / df_res)
+      q <- stats::qt(1 - (1 - level) / 2, df_pred)
+      half <- q * sqrt(var_pred)
+    } else {
+      # tolerance limits (experimental). New values are N(line + delta, s^2)
+      # about the fitted line, delta the error of the fitted line and s^2 =
+      # a_x vx + a_y vy + v_eq the spread about the true line.
+      if (!is.numeric(tol_level) || length(tol_level) != 1 ||
+          tol_level <= 0 || tol_level >= 1) {
+        stop("tol_level must be a single number between 0 and 1.")
+      }
+      pieces <- cbind(a_x * vx, a_y * vy, v_eq + 0 * u)
+      s2 <- rowSums(pieces)
+      if (tau2 > 0) {
+        # With equation error, the residuals estimate, on n - 2 df, the
+        # spread of the subject means about the line: s2_means, their
+        # measurement error (with the average numbers of replicates) plus
+        # the equation error. The single-measurement error variances are
+        # known from the replicates, so only s2_means is uncertain:
+        # s^2 is bounded by s^2 + s2_means ((n - 2) / chi2 - 1), and the line
+        # (whose variance scales with the dispersion) by the same factor.
+        # With one measurement per subject this is the textbook regression
+        # tolerance factor (Wallis).
+        mod <- object$model
+        m_x <- if (is.null(mod)) 1 else mean(mod$n_x)
+        m_y <- if (is.null(mod)) 1 else mean(mod$n_y)
+        s2_means <- a_x * vx * reps_x / m_x + a_y * vy * reps_y / m_y + v_eq
+        r2 <- df_res / stats::qchisq(1 - tol_level, df_res)
+        u_s <- sqrt(s2 + s2_means * (r2 - 1))
+        c_line <- sqrt(var_line * r2)
+        if (bound_type == "iu") {
+          # MOVER bound on each prediction limit, as in tolerance_limit()
+          zp <- stats::qnorm((1 + level) / 2)
+          h_b <- stats::qt(tol_level, df_res) * sqrt(var_line)
+          move <- sqrt(h_b^2 + zp^2 * (u_s - sqrt(s2))^2)
+          lim <- list(lower = fit - zp * sqrt(s2) - move,
+                      upper = fit + zp * sqrt(s2) + move)
+        } else {
+          half <- tdi_exact(c_line, u_s, level)
+          lim <- list(lower = fit - half, upper = fit + half)
+        }
+      } else {
+        # Only measurement error: the pieces have the df of the error
+        # variances (a known piece, infinite df, adds no uncertainty;
+        # sd_upper_at() drops pieces with 0 df), and the line its own
+        # uncertainty on n - 2 df.
+        cap <- function(d) if (is.finite(d)) d else 0
+        info <- list(type = "comp",
+                     shares = pieces[, 1:2, drop = FALSE] / s2,
+                     df = matrix(c(cap(e$df_var_x), cap(e$df_var_y)),
+                                 nrow = length(u), ncol = 2, byrow = TRUE))
+        if (bound_type == "iu") {
+          lim <- analytic_bounds(b = fit, s = sqrt(s2), sem = sqrt(var_line),
+                                 df = df_res, level = tol_level, info = info,
+                                 pred_level = level, bound_type = "iu",
+                                 independent = FALSE)
+        } else {
+          # with |delta| <= c (a t bound for the line) and the SD at most
+          # u_s, the `level` quantile of |N(c, u_s^2)| contains at least that
+          # proportion of N(delta, s^2) (tdi_exact())
+          u_s <- sd_upper_at(sqrt(s2), tol_level, info)
+          c_line <- stats::qt((1 + tol_level) / 2, df_res) * sqrt(var_line)
+          half <- tdi_exact(c_line, u_s, level)
+          lim <- list(lower = fit - half, upper = fit + half)
+        }
+      }
+      res <- data.frame(fit = fit, lwr = lim$lower, upr = lim$upper)
+      if (se.fit) {
+        return(list(fit = res, se.fit = sqrt(var_line), df = df_res))
+      }
+      return(res)
+    }
   }
   res <- data.frame(fit = fit, lwr = fit - half, upr = fit + half)
   if (se.fit) {
@@ -228,7 +319,7 @@ predict.simple_bls <- function(object,
 plot.simple_bls <- function(x,
                             type = c("xy", "md"),
                             interval = c("none", "confidence", "band",
-                                         "prediction"),
+                                         "prediction", "tolerance"),
                             level = NULL,
                             x_name = NULL,
                             y_name = NULL,
@@ -237,7 +328,7 @@ plot.simple_bls <- function(x,
   type <- match.arg(type)
   interval <- match.arg(interval)
   if (is.null(level)) {
-    level <- if (interval == "prediction") x$pred_level else x$conf.level
+    level <- if (interval %in% c("prediction", "tolerance")) x$pred_level else x$conf.level
   }
   if (is.null(x_name)) {
     x_name <- attr(x$terms, "term.labels")[1]
@@ -280,6 +371,7 @@ plot.simple_bls <- function(x,
                              switch(interval,
                                     confidence = "confidence interval",
                                     band = "simultaneous confidence band",
+                                    tolerance = "tolerance limits (experimental)",
                                     prediction = "prediction interval")))
   }
   if (type == "xy") {

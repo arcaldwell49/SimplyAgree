@@ -162,14 +162,18 @@ Done since (2026-10-31, second round):
   `var_model = "constant"/"proportional"/"power"` from replicates; variances
   evaluated at the estimated true values, refit until stable.
 
-Left:
+Done in the third round (2026-10-31):
 
 - Equation error: done (common tau, `equation_error = TRUE`; dispersion
   test in `summary()`); see `cbls_sims/README.md` study 3.
-- Beta-content tolerance intervals around the line (Francq & Govaerts 2016;
-  full text needed).
-- CBLS in `method_convert(bias = "linear", estimator = "cbls")`: per pair,
-  CBLS's D-on-M line is the same model as the DA regression, so it can feed
-  `mc_da_conversion()`; needs per-method error variances from the replicates
-  and the equation-error decision above (`method_vc()`'s tau is exactly
-  that).
+- Tolerance limits around the line: done, experimental (own construction;
+  Francq & Govaerts 2016 give only horizontal tolerance intervals); see
+  `cbls_sims/README.md` study 4.
+- CBLS in `method_convert(bias = "linear", estimator = "cbls")`: done
+  (exchangeable replicates, constant variance).
+
+Still open: linked replicates for `estimator = "cbls"` (the item means of
+the two methods share occasion effects, so their errors are correlated;
+the CBLS engine supports a covariance, which would need the occasion
+variance from `method_vc()`); variance functions in `method_convert()`;
+method-specific equation error with three or more methods.

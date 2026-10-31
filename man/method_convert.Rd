@@ -17,7 +17,7 @@ method_convert(
   conf_level = 0.95,
   transform = "none",
   ci_method = c("delta", "boot"),
-  estimator = c("altreg", "ml"),
+  estimator = c("altreg", "ml", "cbls"),
   boot_reps = 999,
   pair_seed = NULL,
   max_iter = 100,
@@ -72,7 +72,11 @@ with \code{estimator = "altreg"}, "boot" (parametric bootstrap). See details.}
 "altreg" (default; alternating regression, as in MethComp) or "ml"
 (maximum likelihood of the structural model with the lavaan package,
 which must be installed). Use "ml" for confidence intervals with close
-to the stated coverage. See details.}
+to the stated coverage. For \code{bias = "linear"}, "cbls" fits the
+regression of the differences on the averages by correlated bivariate
+least squares (\code{\link[=cbls_reg]{cbls_reg()}}) instead of least squares; it needs
+exchangeable replicates of both methods and \code{variance = "constant"}.
+See details.}
 
 \item{boot_reps}{Number of bootstrap replicates for \code{ci_method = "boot"}.
 Default is 999. Each replicate refits the model, so this can take
@@ -171,6 +175,18 @@ When items contribute several pairs (replicates), the covariance of
 \eqn{(a, b)} is cluster-robust by item, with (items - 1) degrees of
 freedom. Confidence intervals for the conversion intercepts and slopes use
 the delta method.
+
+The least squares slope \eqn{b} is biased whenever the two methods have
+different measurement errors, because the errors of \eqn{D} and \eqn{A}
+are then correlated (Francq & Govaerts, 2016). With \code{estimator = "cbls"},
+\eqn{D = a + bA} is instead fit by correlated bivariate least squares
+(\code{\link[=cbls_reg]{cbls_reg()}}) on the item means, with the measurement error variance of
+each method estimated from its (exchangeable) replicates and a common
+method-by-item variance when the scatter about the line exceeds the
+measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then
+come from that fit, and \eqn{s} is the SD of a new single difference about
+the line implied by the measurement error and method-by-item variances.
+The conversion is the BLS line of one method on the other.
 
 A slope of the differences on the averages does not by itself show that
 the methods are related by a slope other than 1. Whenever the two methods

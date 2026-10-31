@@ -112,8 +112,13 @@ print.simple_mconv <- function(x,
   cat("y(To) = alpha + beta * y(From); sd = prediction SD",
       if (tf$name != "none") paste0(" (", tf$name, " scale)"), "\n", sep = "")
   if (fi$bias == "linear") {
-    cat("Regression of differences on averages, ",
-        fi$variance, " SD of the differences\n", sep = "")
+    if (identical(fi$estimator, "cbls")) {
+      cat("Regression of differences on averages by correlated bivariate ",
+          "least squares (CBLS)\n", sep = "")
+    } else {
+      cat("Regression of differences on averages, ",
+          fi$variance, " SD of the differences\n", sep = "")
+    }
   }
   cat("\n")
   print(tab, row.names = FALSE, right = FALSE)
@@ -123,10 +128,16 @@ print.simple_mconv <- function(x,
     fi$bias,
     constant = paste0("From method_vc(): slope fixed at 1; intercept CIs ",
                       "are those of the biases"),
-    linear = paste0("CIs: approximate (delta method",
-                    if (any(x$da$cluster_se))
-                      ", cluster-robust by item" else "",
-                    ")"),
+    linear = if (identical(fi$estimator, "cbls")) {
+      paste0("CIs: delta method from the CBLS fit (measurement errors from ",
+             "the replicates;\n  common method-by-item variance), t with ",
+             "items - 2 df; see ?cbls_reg")
+    } else {
+      paste0("CIs: approximate (delta method",
+             if (any(x$da$cluster_se))
+               ", cluster-robust by item" else "",
+             ")")
+    },
     scaled = if (mc_is_ml(fi)) {
       paste0("CIs: Wald (maximum likelihood, structural model), t with ",
              "items - 1 df;\n  about 92-97% coverage for 95% in simulations ",
@@ -164,9 +175,10 @@ print.simple_mconv <- function(x,
           " * average\n", sep = "")
     }
   }
-  if (fi$bias == "linear") {
+  if (fi$bias == "linear" && !identical(fi$estimator, "cbls")) {
     cat("A slope of the differences on the averages can arise from unequal",
-        "measurement errors alone;\n  see ?method_convert\n")
+        "measurement errors alone;\n  see ?method_convert (estimator = 'cbls'",
+        "corrects for it)\n")
   }
   if (tf$name != "none") {
     cat("Use predict() for conversions on the original scale.\n")

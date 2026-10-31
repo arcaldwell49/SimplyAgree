@@ -329,3 +329,64 @@ test_that("dispersion and equation error", {
   expect_error(cbls_reg(y ~ x, data = long, id = "id", equation_error = NA),
                "TRUE or FALSE")
 })
+
+test_that("tolerance limits (experimental)", {
+  d <- bls_sim(n = 30, seed = 4)
+  fit <- cbls_reg(y ~ x, data = d$long, id = "id")
+  xs <- c(6, 10, 14)
+  pi <- predict(fit, xs, interval = "prediction")
+  tj <- predict(fit, xs, interval = "tolerance")
+  ti <- predict(fit, xs, interval = "tolerance", bound_type = "iu")
+  expect_equal(tj$fit, pi$fit)
+  expect_true(all(tj$upr > pi$upr & tj$lwr < pi$lwr))
+  expect_true(all(ti$upr > pi$upr & ti$lwr < pi$lwr))
+  # higher confidence or content gives wider limits
+  t99 <- predict(fit, xs, interval = "tolerance", tol_level = 0.99)
+  expect_true(all(t99$upr > tj$upr))
+  t90 <- predict(fit, xs, interval = "tolerance", level = 0.90)
+  expect_true(all(t90$upr < tj$upr))
+  # known variances, no equation error: the spread s is known, so the joint
+  # limits are the 95% quantile of |N(c, s^2)|, c a t bound for the line
+  dk <- bls_sim(m = 1, n = 30, seed = 8)
+  datk <- data.frame(x = dk$wide[[1]], y = dk$wide[[2]])
+  fk <- cbls_reg(y ~ x, data = datk, var_x = 0.36, var_y = 0.81,
+                 equation_error = FALSE)
+  se <- predict(fk, xs, se.fit = TRUE)$se.fit
+  s2 <- 0.81 + coef(fk)[[2]]^2 * 0.36
+  tk <- predict(fk, xs, interval = "tolerance")
+  cl <- qt(0.975, fk$df.residual) * se
+  expect_equal(tk$upr - tk$fit,
+               sqrt(s2) * sqrt(qchisq(0.95, 1, ncp = cl^2 / s2)),
+               tolerance = 1e-5)
+  # Bland-Altman plot and plotting
+  expect_named(predict(fit, 10, type = "md", interval = "tolerance"),
+               c("fit", "lwr", "upr"))
+  expect_s3_class(plot(fit, type = "md", interval = "tolerance"), "ggplot")
+  expect_error(predict(fit, xs, interval = "tolerance", tol_level = 2),
+               "tol_level")
+  expect_error(cbls_reg(y ~ x, data = d$long, id = "id", tol_level = 0),
+               "tol_level")
+  r <- cbls_reg(y ~ x, data = d$long[!duplicated(d$long$id), ],
+                error.ratio = 1)
+  expect_error(predict(r, xs, interval = "tolerance"), "only their ratio")
+})
+
+test_that("with equation error and one measurement each, tolerance limits use Wallis' factor", {
+  set.seed(14)
+  n <- 30
+  t <- rnorm(n, 20, 5)
+  dat <- data.frame(x = t + rnorm(n, 0, 1) + rnorm(n, 0, 0.6),
+                    y = 1 + 1.1 * (t + rnorm(n, 0, 1)) + rnorm(n, 0, 0.9))
+  f <- cbls_reg(y ~ x, data = dat, var_x = 0.36, var_y = 0.81)
+  expect_gt(f$dispersion$tau2, 0)
+  xs <- c(15, 25)
+  se <- predict(f, xs, se.fit = TRUE)$se.fit
+  b <- coef(f)[[2]]
+  s2 <- 0.81 + b^2 * 0.36 + 2 * b^2 * f$dispersion$tau2
+  r <- sqrt((n - 2) / qchisq(0.05, n - 2))
+  tl <- predict(f, xs, interval = "tolerance")
+  # half-width r s sqrt(qchisq(p, 1, ncp = se^2 / s^2))
+  expect_equal(tl$upr - tl$fit,
+               r * sqrt(s2) * sqrt(qchisq(0.95, 1, ncp = se^2 / s2)),
+               tolerance = 1e-6)
+})

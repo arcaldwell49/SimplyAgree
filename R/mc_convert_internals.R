@@ -70,6 +70,52 @@ mc_da_fit = function(pp,
        sd_fit = sd_fit)
 }
 
+# CBLS fit for one pair, in the form of mc_da_fit() ----
+# Francq & Govaerts (2016): the regression of D = y1 - y2 on A = (y1 + y2)/2
+# by correlated bivariate least squares (cbls_reg(), with x = y1, y = y2),
+# which accounts for the measurement errors of both methods (estimated from
+# the replicates, exchangeable) and their correlation in (A, D), and for a
+# common method-by-item variance (equation error). The SD of a new single
+# difference about the line (without the line's own uncertainty, as for the
+# DA regression) is
+#   sqrt(v1 (1 - b/2)^2 + v2 (1 + b/2)^2 + tau2 [(1 - b/2)^2 + beta^2 (1 + b/2)^2])
+# with v1, v2 the single-measurement error variances, b the CBLS slope, and
+# beta the BLS slope of y2 on y1.
+mc_cbls_fit = function(df,
+                       m1,
+                       m2) {
+  d1 = df[df$method == m1, c("id", "y_t")]
+  d2 = df[df$method == m2, c("id", "y_t")]
+  dat = rbind(data.frame(id = d1$id, x = d1$y_t, y = NA_real_),
+              data.frame(id = d2$id, x = NA_real_, y = d2$y_t))
+  fit = tryCatch(
+    cbls_reg(y ~ x, data = dat, id = "id"),
+    error = function(e) {
+      stop("estimator = 'cbls' needs replicate measurements of both ", m1,
+           " and ", m2, " to estimate their measurement errors: ",
+           conditionMessage(e), call. = FALSE)
+    })
+  cf = fit$cbls$coefficients
+  b = unname(cf[2])
+  beta = unname(fit$coefficients[2])
+  e = fit$errors
+  tau2 = fit$dispersion$tau2
+  s = sqrt(e$var_x * (1 - b / 2)^2 + e$var_y * (1 + b / 2)^2 +
+             tau2 * ((1 - b / 2)^2 + beta^2 * (1 + b / 2)^2))
+  list(a = unname(cf[1]),
+       b = b,
+       vcov = unname(fit$cbls$vcov),
+       df = fit$df.residual,
+       s = s,
+       c_sd = s,
+       d_sd = 0,
+       clustered = FALSE,
+       n_pairs = nrow(fit$model),
+       n_items = nrow(fit$model),
+       fit = fit,
+       sd_fit = NULL)
+}
+
 # conversion parameters from a DA fit ----
 # Carstensen (2010) eq. 4.11: y1 = a/(1 - b/2) + (1 + b/2)/(1 - b/2) y2, and
 # y2 = -a/(1 + b/2) + (1 - b/2)/(1 + b/2) y1. Delta-method SEs from the

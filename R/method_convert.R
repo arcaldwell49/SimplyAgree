@@ -33,7 +33,11 @@
 #'   "altreg" (default; alternating regression, as in MethComp) or "ml"
 #'   (maximum likelihood of the structural model with the lavaan package,
 #'   which must be installed). Use "ml" for confidence intervals with close
-#'   to the stated coverage. See details.
+#'   to the stated coverage. For `bias = "linear"`, "cbls" fits the
+#'   regression of the differences on the averages by correlated bivariate
+#'   least squares ([cbls_reg()]) instead of least squares; it needs
+#'   exchangeable replicates of both methods and `variance = "constant"`.
+#'   See details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
 #'   Default is 999. Each replicate refits the model, so this can take
 #'   several minutes; set a seed with [set.seed()] for reproducible
@@ -75,6 +79,18 @@
 #' \eqn{(a, b)} is cluster-robust by item, with (items - 1) degrees of
 #' freedom. Confidence intervals for the conversion intercepts and slopes use
 #' the delta method.
+#'
+#' The least squares slope \eqn{b} is biased whenever the two methods have
+#' different measurement errors, because the errors of \eqn{D} and \eqn{A}
+#' are then correlated (Francq & Govaerts, 2016). With `estimator = "cbls"`,
+#' \eqn{D = a + bA} is instead fit by correlated bivariate least squares
+#' ([cbls_reg()]) on the item means, with the measurement error variance of
+#' each method estimated from its (exchangeable) replicates and a common
+#' method-by-item variance when the scatter about the line exceeds the
+#' measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then
+#' come from that fit, and \eqn{s} is the SD of a new single difference about
+#' the line implied by the measurement error and method-by-item variances.
+#' The conversion is the BLS line of one method on the other.
 #'
 #' A slope of the differences on the averages does not by itself show that
 #' the methods are related by a slope other than 1. Whenever the two methods
@@ -256,7 +272,7 @@ method_convert = function(data = NULL,
                           conf_level = 0.95,
                           transform = "none",
                           ci_method = c("delta", "boot"),
-                          estimator = c("altreg", "ml"),
+                          estimator = c("altreg", "ml", "cbls"),
                           boot_reps = 999,
                           pair_seed = NULL,
                           max_iter = 100,
@@ -286,6 +302,22 @@ method_convert = function(data = NULL,
   if (estimator == "ml" && (bias != "scaled" || !is.null(object))) {
     stop("estimator = 'ml' is only available for bias = 'scaled'.",
          call. = FALSE)
+  }
+  if (estimator == "cbls") {
+    if (bias != "linear" || !is.null(object)) {
+      stop("estimator = 'cbls' is only available for bias = 'linear'.",
+           call. = FALSE)
+    }
+    if (variance != "constant") {
+      stop("estimator = 'cbls' models the measurement error variances ",
+           "directly; use variance = 'constant'.", call. = FALSE)
+    }
+    if (replicates != "exchangeable") {
+      stop("estimator = 'cbls' is only available for exchangeable ",
+           "replicates: with linked replicates, the errors of the item ",
+           "means of the two methods share the occasion effects.",
+           call. = FALSE)
+    }
   }
   if (estimator == "ml" && ci_method == "boot") {
     stop("ci_method = 'boot' is only available with estimator = ",
@@ -322,6 +354,7 @@ method_convert = function(data = NULL,
   call2$id = id
   call2$replicate = replicate
   call2$bias = bias
+  if (estimator == "cbls") call2$estimator = estimator
   call2$variance = variance
   call2$replicates = replicates
   call2$keep_model = keep_model
@@ -362,7 +395,11 @@ method_convert = function(data = NULL,
     m2 = prs$method2[j]
     key = paste0(m1, "-", m2)
     pp = mc_pair(df, m1, m2, replicates = replicates, seed = pair_seed)
-    da = mc_da_fit(pp, variance = variance)
+    da = if (estimator == "cbls") {
+      mc_cbls_fit(df, m1, m2)
+    } else {
+      mc_da_fit(pp, variance = variance)
+    }
     if (variance == "linear") {
       z = qnorm((1 + pred_level) / 2)
       if (any(abs(da$b + c(-1, 1) * z * da$d_sd) >= 2)) {
@@ -421,6 +458,7 @@ method_convert = function(data = NULL,
                  transform = tf,
                  model = if (keep_model) models else NULL,
                  fit_info = list(bias = bias,
+                                 estimator = if (estimator == "cbls") "cbls" else "ols",
                                  variance = variance,
                                  replicates = replicates,
                                  has_reps = attr(df, "has_reps"),

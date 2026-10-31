@@ -19,8 +19,10 @@
   object,
   newdata = NULL,
   type = c("xy", "md"),
-  interval = c("none", "confidence", "band", "prediction"),
+  interval = c("none", "confidence", "band", "prediction", "tolerance"),
   level = NULL,
+  tol_level = NULL,
+  bound_type = NULL,
   reps_x = 1,
   reps_y = 1,
   se.fit = FALSE,
@@ -30,7 +32,7 @@
 \method{plot}{simple_bls}(
   x,
   type = c("xy", "md"),
-  interval = c("none", "confidence", "band", "prediction"),
+  interval = c("none", "confidence", "band", "prediction", "tolerance"),
   level = NULL,
   x_name = NULL,
   y_name = NULL,
@@ -64,10 +66,19 @@ whole line), or \code{"prediction"} (for a new measurement by \code{y}, or a new
 difference, given a new measurement by \code{x}, or a new mean). The band uses
 the Working-Hotelling multiplier \verb{sqrt(2 F(2, n - 2))}, so it contains
 exactly the lines (intercept, slope) that \code{\link[=joint_test]{joint_test()}} does not
-reject; BivRegBLS's band also multiplies by \code{sqrt((n - 1) / (n - 2))}.}
+reject; BivRegBLS's band also multiplies by \code{sqrt((n - 1) / (n - 2))}.
+\code{"tolerance"} (experimental) gives tolerance limits: with confidence
+\code{tol_level}, they contain at least a proportion \code{level} of new
+measurements (see \code{\link[=cbls_reg]{cbls_reg()}}).}
 
 \item{level}{Level of the intervals. Default is the \code{conf.level} of the fit
-for confidence intervals and its \code{pred_level} for prediction intervals.}
+for confidence intervals and the band, and its \code{pred_level} for
+prediction intervals and tolerance limits (the proportion of new
+measurements they contain).}
+
+\item{tol_level, bound_type}{For tolerance limits: the confidence level, and
+\code{"joint"} or \code{"iu"} as in \code{\link[=tolerance_limit]{tolerance_limit()}}. Default: the values given
+to \code{\link[=cbls_reg]{cbls_reg()}}.}
 
 \item{reps_x, reps_y}{For prediction intervals: the new values are means of
 this many replicates of each method. Default is 1.}

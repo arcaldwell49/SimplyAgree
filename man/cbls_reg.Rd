@@ -17,6 +17,8 @@ cbls_reg(
   equation_error = TRUE,
   conf.level = 0.95,
   pred_level = 0.95,
+  tol_level = 0.95,
+  bound_type = c("joint", "iu"),
   model = TRUE,
   ...
 )
@@ -64,7 +66,18 @@ all the scatter. FALSE always gives BivRegBLS's results. See Details.}
 \item{conf.level}{Confidence level for the coefficients and the line.
 Default is 0.95.}
 
-\item{pred_level}{Default level for prediction intervals. Default is 0.95.}
+\item{pred_level}{Default level for prediction intervals, and the
+proportion of new measurements that tolerance limits contain. Default is
+0.95.}
+
+\item{tol_level}{Default confidence level of the tolerance limits
+(experimental; \code{predict(interval = "tolerance")}). Default is 0.95.}
+
+\item{bound_type}{Default type of tolerance limits, as in
+\code{\link[=tolerance_limit]{tolerance_limit()}}: \code{"joint"} (default), limits that together contain a
+proportion \code{pred_level} of new measurements with confidence \code{tol_level};
+or \code{"iu"}, a \code{tol_level} confidence bound on each of the \code{pred_level}
+prediction limits.}
 
 \item{model}{Logical. If TRUE (default), the subject-level data (means,
 numbers of replicates, and error variances) are stored in the returned
@@ -152,6 +165,32 @@ Satterthwaite degrees of freedom from \code{n - 2}, \code{df_var_x} and \code{df
 For CBLS, the covariance between the errors of the new difference and the
 new mean is included (BivRegBLS omits it; the two agree when
 \code{var_x = var_y}).
+
+\strong{Tolerance limits (experimental).} \code{predict(interval = "tolerance")}
+gives tolerance limits around the line: with confidence \code{tol_level}, they
+contain at least a proportion \code{pred_level} of new measurements by \code{y} at
+the given \code{x} (\code{bound_type = "joint"}), or bound each prediction limit
+(\code{"iu"}). New measurements are normal about the true line with the spread
+\code{s^2} (their measurement error variances and any equation error), and the
+fitted line is off by an unknown amount with its standard error. Without
+equation error, \code{s^2} gets an upper confidence bound from the df of the
+error variances (MOVER, as in \code{\link[=tolerance_limit]{tolerance_limit()}}; exact when they are
+known) and the line a \code{t} bound on \code{n - 2} df; the joint limits are then
+the \code{pred_level} quantile of the absolute value of a normal variable with
+these bounds as mean and SD. With equation error, the residuals estimate
+the spread of the subject means about the line on \code{n - 2} df, and that
+part of \code{s^2} and the variance of the line share a chi-square bound;
+with one measurement per subject the joint limits are then the textbook
+regression tolerance limits (Wallis's approximation). The \code{"iu"} limits
+bound each prediction limit with the MOVER. Francq and Govaerts (2016)
+give tolerance intervals only for a constant bias (see
+\code{\link[=tolerance_limit]{tolerance_limit()}}); these limits around a line are SimplyAgree's own
+extension and are marked experimental. In simulations (95\% content and
+confidence; 10 to 60 subjects), their confidence was 0.93 to 0.97 with
+known error variances or with equation error and replicates, conservative
+(up to 0.99) with replicates and no equation error, and 0.875 with 10
+subjects, known variances, and equation error (study 4 in
+\verb{references/general/cbls_sims/} of the package source).
 
 \strong{Dispersion and equation error.} BLS assumes that the measurement errors
 explain all the scatter about the line, i.e., that the true values lie on

@@ -44,7 +44,16 @@
 #'   all the scatter. FALSE always gives BivRegBLS's results. See Details.
 #' @param conf.level Confidence level for the coefficients and the line.
 #'   Default is 0.95.
-#' @param pred_level Default level for prediction intervals. Default is 0.95.
+#' @param pred_level Default level for prediction intervals, and the
+#'   proportion of new measurements that tolerance limits contain. Default is
+#'   0.95.
+#' @param tol_level Default confidence level of the tolerance limits
+#'   (experimental; `predict(interval = "tolerance")`). Default is 0.95.
+#' @param bound_type Default type of tolerance limits, as in
+#'   [tolerance_limit()]: `"joint"` (default), limits that together contain a
+#'   proportion `pred_level` of new measurements with confidence `tol_level`;
+#'   or `"iu"`, a `tol_level` confidence bound on each of the `pred_level`
+#'   prediction limits.
 #' @param model Logical. If TRUE (default), the subject-level data (means,
 #'   numbers of replicates, and error variances) are stored in the returned
 #'   object. They are needed by `plot()`, `check()`, `fitted()`,
@@ -101,6 +110,32 @@
 #' For CBLS, the covariance between the errors of the new difference and the
 #' new mean is included (BivRegBLS omits it; the two agree when
 #' `var_x = var_y`).
+#'
+#' **Tolerance limits (experimental).** `predict(interval = "tolerance")`
+#' gives tolerance limits around the line: with confidence `tol_level`, they
+#' contain at least a proportion `pred_level` of new measurements by `y` at
+#' the given `x` (`bound_type = "joint"`), or bound each prediction limit
+#' (`"iu"`). New measurements are normal about the true line with the spread
+#' `s^2` (their measurement error variances and any equation error), and the
+#' fitted line is off by an unknown amount with its standard error. Without
+#' equation error, `s^2` gets an upper confidence bound from the df of the
+#' error variances (MOVER, as in [tolerance_limit()]; exact when they are
+#' known) and the line a `t` bound on `n - 2` df; the joint limits are then
+#' the `pred_level` quantile of the absolute value of a normal variable with
+#' these bounds as mean and SD. With equation error, the residuals estimate
+#' the spread of the subject means about the line on `n - 2` df, and that
+#' part of `s^2` and the variance of the line share a chi-square bound;
+#' with one measurement per subject the joint limits are then the textbook
+#' regression tolerance limits (Wallis's approximation). The `"iu"` limits
+#' bound each prediction limit with the MOVER. Francq and Govaerts (2016)
+#' give tolerance intervals only for a constant bias (see
+#' [tolerance_limit()]); these limits around a line are SimplyAgree's own
+#' extension and are marked experimental. In simulations (95% content and
+#' confidence; 10 to 60 subjects), their confidence was 0.93 to 0.97 with
+#' known error variances or with equation error and replicates, conservative
+#' (up to 0.99) with replicates and no equation error, and 0.875 with 10
+#' subjects, known variances, and equation error (study 4 in
+#' `references/general/cbls_sims/` of the package source).
 #'
 #' **Dispersion and equation error.** BLS assumes that the measurement errors
 #' explain all the scatter about the line, i.e., that the true values lie on
@@ -196,15 +231,18 @@ cbls_reg <- function(formula,
                      equation_error = TRUE,
                      conf.level = 0.95,
                      pred_level = 0.95,
+                     tol_level = 0.95,
+                     bound_type = c("joint", "iu"),
                      model = TRUE,
                      ...) {
   call2 <- match.call()
   var_model <- match.arg(var_model)
+  bound_type <- match.arg(bound_type)
   if (!is.logical(equation_error) || length(equation_error) != 1 ||
       is.na(equation_error)) {
     stop("equation_error must be TRUE or FALSE.")
   }
-  for (lv in c("conf.level", "pred_level")) {
+  for (lv in c("conf.level", "pred_level", "tol_level")) {
     v <- get(lv)
     if (!is.numeric(v) || length(v) != 1 || v <= 0 || v >= 1) {
       stop(lv, " must be a single number between 0 and 1.")
@@ -425,6 +463,8 @@ cbls_reg <- function(formula,
       weights = bls$weights,
       conf.level = conf.level,
       pred_level = pred_level,
+      tol_level = tol_level,
+      bound_type = bound_type,
       method = "Bivariate least squares (BLS) regression",
       cbls = list(coefficients = cb_coefs,
                   model_table = tab(cb_coefs, cb_vc, c(0, 0)),
