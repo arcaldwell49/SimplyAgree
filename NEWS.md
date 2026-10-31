@@ -1,5 +1,12 @@
 # NEWS
 
+# SimplyAgree 0.4.1 (development version)
+
+## Bug fixes
+
+- **Nested limits of agreement** (`agreement_limit(data_type = "nest")`): the confidence bounds of the limits were too narrow. The bias variance and the variance piece with n - 1 degrees of freedom used the between-subject variance alone, rather than the variance of the subject mean differences (between + within / m_h; Zou, 2011), so the within-subject part of it got no uncertainty. In simulations (10 to 40 subjects, 2 to 5 pairs each), the default MOVER bounds covered 85% to 94% of the time instead of 95%, worst when the within-subject variance dominates; after the fix, 94% to 97%. The bounds now reproduce Zou's published example (and `agree_nest()`) closely. The limits themselves and the bias are unchanged. (`agree_nest()` with `prop_bias = TRUE`, superseded, has the same substitution and is unchanged.)
+
+
 # SimplyAgree 0.4.0
 
 ## Results that change

@@ -567,8 +567,13 @@ calc_loa_nest = function(df,
   infl = if(prop_bias) bias_inflation(model, bias_values$avg) else 1
 
   # LoA Variance ----
-  loa_var = (between_variance*infl/n_sub) + agreeq^2 / (2*total_variance) *
-    ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
+  # The total variance splits into the variance of the subject mean
+  # differences, between + within/mh, on n_sub - 1 df (which also gives the
+  # variance of the bias, mean_var/n_sub), and the rest of the within-subject
+  # variance, (1 - 1/mh) * within, on n_obs - n_sub df (Zou, 2011).
+  mean_var = between_variance + within_variance/mh
+  loa_var = (mean_var*infl/n_sub) + agreeq^2 / (2*total_variance) *
+    ((mean_var)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
   if(loa_calc == "blandaltman"){
 
@@ -591,12 +596,12 @@ calc_loa_nest = function(df,
   if(loa_calc == "mover"){
 
     # MOVER Components -----
-    move_u_1 = (between_variance*((n_sub-1)/(qchisq(alpha.u,n_sub-1))-1))^2
+    move_u_1 = (mean_var*((n_sub-1)/(qchisq(alpha.u,n_sub-1))-1))^2
     move_u_2 = ((1-1/mh)*within_variance*((n_obs-n_sub)/(qchisq(alpha.u,n_obs-n_sub))-1))^2
     move_u = total_variance + sqrt(move_u_1+move_u_2)
 
     # LME -----
-    LME = sqrt(confq2^2*(between_variance*infl/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
+    LME = sqrt(confq2^2*(mean_var*infl/n_sub)+agreeq^2*(sqrt(move_u)-sqrt(total_variance))^2)
 
     df_loa <- bias_values %>%
       mutate(

@@ -65,13 +65,15 @@ nest_loa_by_hand = function(dat, loa_calc, alpha = 0.05, agree = 0.95){
   mh = n / sum(1 / m_i)
   zA = qnorm(1 - (1 - agree) / 2)
   za = qnorm(1 - alpha)
+  # variance of the subject mean differences (n - 1 df; Zou, 2011)
+  sm2 = sb2 + sw2 / mh
   if(loa_calc == "mover"){
-    u = sd2 + sqrt((sb2 * ((n - 1) / qchisq(alpha, n - 1) - 1))^2 +
+    u = sd2 + sqrt((sm2 * ((n - 1) / qchisq(alpha, n - 1) - 1))^2 +
                    ((1 - 1 / mh) * sw2 * ((N - n) / qchisq(alpha, N - n) - 1))^2)
-    lme = sqrt(za^2 * sb2 / n + zA^2 * (sqrt(u) - sqrt(sd2))^2)
+    lme = sqrt(za^2 * sm2 / n + zA^2 * (sqrt(u) - sqrt(sd2))^2)
   } else {
-    lme = za * sqrt(sb2 / n + zA^2 / (2 * sd2) *
-                      (sb2^2 / (n - 1) + (1 - 1 / mh)^2 * sw2^2 / (N - n)))
+    lme = za * sqrt(sm2 / n + zA^2 / (2 * sd2) *
+                      (sm2^2 / (n - 1) + (1 - 1 / mh)^2 * sw2^2 / (N - n)))
   }
   bias = unname(lme4::fixef(m))
   c(bias - zA * sqrt(sd2) - lme, bias + zA * sqrt(sd2) + lme)
