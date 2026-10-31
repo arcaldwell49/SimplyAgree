@@ -6,6 +6,8 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/Deming.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/index.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/intro_vignette.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/articles/method_comparison_vc.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/articles/method_conversion.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/power_sample_size_vignette.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/reanalysis.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/articles/reliability_analysis.html</loc></url>
@@ -44,7 +46,11 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mermod-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/loa_mixed_bs-methods.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/mc_long.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/method_convert.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/method_vc.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/model_equation.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/ord_kappa_test.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/pb_reg.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.html</loc></url>
@@ -58,8 +64,11 @@
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/simple_reli-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/SimplyAgree-package.html</loc></url>
+<url><loc>https://aaroncaldwell.us/SimplyAgree/reference/sim_methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/temps.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/tolerance_delta-methods.html</loc></url>
 <url><loc>https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.html</loc></url>

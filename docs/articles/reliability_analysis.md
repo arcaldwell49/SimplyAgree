@@ -34,7 +34,7 @@ which return everything at once, are superseded (see [Legacy
 functions](#legacy-functions)). This was a deliberate design choice on
 my part as I thought the old function was confusing users.
 
-All functions accept data in three ways: a formula,
+All functions accept data in three ways. Either a formula,
 `values ~ item | id`; long data, with `measure`, `item` and `id` column
 names; or wide data, one row per subject, with the item columns in
 `col.names`. An *item* is whatever is repeated: a trial, an occasion, a
@@ -126,12 +126,17 @@ The three arguments map onto the names used by McGraw and Wong
 | twoway  | consistency | average | ICC(C,k)      | ICC(3,k)        |
 
 The default, ICC(C,1), follows Hopkins ([2000](#ref-hopkins2000)) and
-Weir ([2005](#ref-weir2005)): check for systematic change between trials
-separately (for example with
+Weir ([2005](#ref-weir2005)). In their view, you should check for
+systematic change between trials separately (for example with
 [`t.test()`](https://rdrr.io/r/stats/t.test.html) for two trials), then
 report the consistency ICC, which is tied to the SEM. Others, such as
 Koo and Li ([2016](#ref-koo2016)), recommend absolute agreement for
-test-retest studies:
+test-retest studies. I can envision some situations where Hopkins
+([2000](#ref-hopkins2000)) and Weir ([2005](#ref-weir2005)) advice
+stands, however, there are cases where I think systematic changes would
+be worth counting. I leave the decision up to you (and whatever the
+purpose of your study is), but *strongly* recommend justifying your
+choice and being explicit about the interpretation.
 
 ``` r
 
@@ -153,7 +158,7 @@ icc_test(col.names = judges, data = dat, type = "agreement")
 ### Related coefficients: Cronbach’s alpha and the CCC
 
 There are two widely reported coefficients that many might not realize
-are ICCs in disguise.
+are ICCs with a different name.
 
 **Cronbach’s alpha is ICC(C,k).** With complete data, Cronbach’s
 ([1951](#ref-cronbach1951)) alpha for k items equals the average-measure
@@ -184,9 +189,10 @@ two methods it is essentially ICC(A,1): the estimators differ only in
 using n rather than n - 1 in the variances, and the difference vanishes
 as n grows ([Nickerson 1997](#ref-nickerson1997); [Carrasco and Jover
 2003](#ref-carrasco2003)). The two answer different questions in
-practice:
+practice. The the
 [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
 is meant for comparing two methods (alongside limits of agreement),
+while
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 for the reliability of a measurement across trials or raters.
 
@@ -205,14 +211,14 @@ few dozen subjects the two estimates agree to about two decimal places.
 
 ### Testing against a threshold
 
-By default. no test is done. This, like many things in `SimplyAgree`,
+By default, no test is done. This, like many things in `SimplyAgree`,
 was a design choice on my part as I tend to see ICCs are most often used
 for estimation rather than hypothesis testing, and a test of whether an
-ICC differs from zero is rarely informative. Additionally, the package
-provides no qualitative labels (“good”, “excellent”), because published
-cutoffs disagree and the ICC depends on how much subjects differ from
-each other ([Weir 2005](#ref-weir2005)). To claim that reliability
-exceeds a value, test against it:
+ICC differs from zero is rarely informative in my opinion. Additionally,
+the package provides no qualitative labels (“good”, “excellent”),
+because published cutoffs disagree and the ICC depends on how much
+subjects differ from each other ([Weir 2005](#ref-weir2005)). To claim
+that reliability exceeds a value, test against it:
 
 ``` r
 
@@ -261,9 +267,9 @@ summary(res)
 The estimation style, following Greenland ([2019](#ref-greenland2019))
 and Rafi and Greenland ([2020](#ref-rafi2020)), describes the interval
 as a range of values compatible with the data and converts the p-value
-to an S-value, \\s = -\log_2 p\\: the bits of information against the
-tested hypothesis, as surprising as \\s\\ heads in a row from a fair
-coin.
+to an S-value, \\s = -\log_2 p\\. This is the bits of information
+against the tested hypothesis, as surprising as \\s\\ heads in a row
+from a fair coin.
 
 ``` r
 
@@ -458,11 +464,12 @@ plot(res, type = "subjects")
 ![](reliability_analysis_files/figure-html/unnamed-chunk-14-1.png)
 
 [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
-gives model diagnostics: the normality and homogeneity of the residuals,
-and the within-subject SD against the subject mean. An SD that rises
-with the mean means the error grows with the size of the measurement,
-and a coefficient of variation (`reli_err_test(scale = "log")`, below)
-describes it better than an error in units.
+gives model diagnostics. The plot displays the normality and homogeneity
+of the residuals, and the within-subject SD against the subject mean. An
+SD that rises with the mean means the error grows with the size of the
+measurement, and a coefficient of variation
+(`reli_err_test(scale = "log")`, below) describes it better than an
+error in units.
 
 ``` r
 
@@ -672,9 +679,9 @@ systematic differences, which are large here, and give an MDC of only
 about 2.8. For two particular raters,
 [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
 reports their bias and the spread around it separately. The SEP is not
-the statistic for this: it concerns a change from a subject’s estimated
-true score, and \\1.96 \times SEP\\ does not bound the difference
-between two raters.
+the statistic for this. The SEP relates to a change from a subject’s
+estimated true score, and \\1.96 \times SEP\\ does not bound the
+difference between two raters.
 
 I do want to quickly make an aside about what the MDC is not. I write
 this mainly as resolution to my own confusion and what I have seen
@@ -729,8 +736,8 @@ else is available.
 
 ## Repeat measurements and occasions
 
-Sometimes each rater (or device) measures each subject more than once:
-say 3 sonographers each scan 20 participants twice.
+Sometimes each rater (or device) measures each subject more than once.
+Let’s say 3 sonographers each scan 20 participants twice.
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 and
 [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md)
@@ -856,8 +863,32 @@ The arguments `k_avg` and `r_avg` describe the score that will be used
 in practice, and the result is the reliability of *that* score, not an
 average of ICCs. `r_avg = 2` is a score that averages 2 scans by one
 operator; `k_avg = 2` is a score that averages one scan from each of 2
-operators. These are the generalizability (\\E\rho^2\\) and
-dependability (\\\Phi\\) coefficients of G theory.
+operators. These are the
+[generalizability](https://doi.org/10.5116/ijme.5278.a850) (\\E\rho^2\\)
+and
+[dependability](https://ncme.org/wp-content/uploads/2025/10/Module-14-Generalizability-Theory-Brennan-Winter-1.pdf)
+(\\\Phi\\) coefficients of G theory. Both divide the subjects’ variance
+by that variance plus the error variance of the planned score; they
+differ in what counts as error. For `facet = "inter"`, with a score that
+averages \\k'\\ operators (`k_avg`) and \\r'\\ repeats (`r_avg`):
+
+- **Generalizability coefficient** (\\E\rho^2\\,
+  `type = "consistency"`): the reliability of the score when it is used
+  to *rank* or compare subjects (a relative decision). Only error that
+  can change subjects’ ranks counts, the *relative* error from the
+  components that involve the subject: \\E\rho^2 =
+  \frac{\sigma^2_p}{\sigma^2_p + \sigma^2\_{pi}/k' +
+  \sigma^2_e/(k'r')}.\\ An operator’s bias moves every subject’s score
+  by the same amount, so it leaves the ranks alone and is not error
+  here.
+- **Dependability coefficient** (\\\Phi\\, `type = "agreement"`): the
+  reliability of the score when its value itself is used, e.g. compared
+  with a cut-off or with a score from another operator (an absolute
+  decision). The *absolute* error adds the facet’s main effect, here the
+  operator bias: \\\Phi = \frac{\sigma^2_p}{\sigma^2_p + \sigma^2_i/k' +
+  \sigma^2\_{pi}/k' + \sigma^2_e/(k'r')}.\\ \\\Phi\\ is at most
+  \\E\rho^2\\, and equal only when the operators have no systematic
+  differences.
 
 The two kinds of averaging remove different errors. Averaging repeats by
 the same operator shrinks only the repeat noise: the agreement error
@@ -1164,7 +1195,12 @@ measurements, as in Weir ([2005](#ref-weir2005)). See
 [`?reli_stats`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md)
 for the other changes.
 
-## Calculative approach
+## Calculative approach for ICCs
+
+I tend to try and document the calculative approaches where possible.
+
+Below is the step-by-step process for the ICC calculations and their
+intervals.
 
 ### Model and mean squares
 

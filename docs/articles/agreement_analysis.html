@@ -19,9 +19,13 @@
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Agreement &amp; Tolerance Limits">
+<meta name="description" content="Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data.">
+<meta property="og:description" content="Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data.">
+<meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png">
+<meta property="og:image:alt" content="SimplyAgree logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +52,8 @@
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
     <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/method_conversion.html">Converting Between Methods</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -84,7 +90,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-21</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-10-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -356,7 +362,7 @@ esophageal and rectal temperatures between different times of day
 (<code>tod</code>) and controlling for the intra-subject
 correlation.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">tl</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
 <span>  y <span class="op">=</span> <span class="st">"teso_pre"</span>, <span class="co"># Second measure</span></span>
@@ -364,6 +370,7 @@ correlation.</p>
 <span>  condition <span class="op">=</span> <span class="st">"tod"</span>, <span class="co"># Identify condition that may affect differences</span></span>
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">tl</span></span>
 <span><span class="co">#&gt; Agreement between Measures (Difference: x-y)</span></span>
 <span><span class="co">#&gt; 95% CI for Bias; 95% Prediction Interval</span></span>
 <span><span class="co">#&gt; Tolerance Limits: at least 95% of differences with 95% confidence</span></span>
@@ -464,7 +471,7 @@ mixed model (<code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="extern
 subject and, optionally, for each setting (inner level) within
 subject:</p>
 <p><span class="math display">\[
-d_{ijk} = \mathbf{x}_{ijk}^\top \\beta + u_i + v_{ij} + e_{ijk}, \qquad
+d_{ijk} = \mathbf{x}_{ijk}^\top \beta + u_i + v_{ij} + e_{ijk}, \qquad
 u_i \sim N(0, \sigma_1^2), \quad v_{ij} \sim N(0, \sigma_2^2), \quad
 \text{Var}(e_{ijk}) = \sigma^2 g_{ijk}^2
 \]</span></p>
@@ -483,6 +490,23 @@ g\)</span>). For <code>gls</code> with compound symmetry,
 <code>SD.between</code> <span class="math inline">\(= \sqrt{\hat\rho}\,
 S\)</span> and <code>SD.within</code> <span class="math inline">\(=
 \sqrt{1 - \hat\rho}\, S\)</span>.</p>
+<p><code><a href="../reference/model_equation.html">model_equation()</a></code> writes out the model of a fitted
+result, here the example above with its estimates:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/model_equation.html">model_equation</a></span><span class="op">(</span><span class="va">tl</span>, use_coefs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><span class="math display">\[
+\begin{aligned}
+d_{ij} &amp;= 0.154 + 0.074\,\mathrm{I}(\mathrm{tod}_{ij} = \mathrm{PM})
++ e_{ij} \\
+e_{ij} &amp;\sim N\left(0,\,
+0.188^{2}\delta^{2}_{\mathrm{tod}_{ij}}\right), \quad
+\delta_{\mathrm{AM}} = 1.000,\ \delta_{\mathrm{PM}} = 0.810 \\
+\operatorname{Cor}(e_{ij}, e_{ij'}) &amp;= 0.201, \quad j \neq
+j' \\
+&amp; \text{where } d_{ij} = \mathrm{trec\_pre}_{ij} -
+\mathrm{teso\_pre}_{ij}
+\end{aligned}
+\]</span></p>
 </div>
 <div class="section level4">
 <h4 id="the-bias-and-its-standard-error">The bias and its standard error<a class="anchor" aria-label="anchor" href="#the-bias-and-its-standard-error"></a>
@@ -981,7 +1005,7 @@ bias when the two methods have unequal measurement error variances <span class="
 </ul>
 <p>For example, a random intercept model with serial correlation of the
 residuals, and one with nested random intercepts:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># random intercept for each subject, plus AR(1) correlation of the residuals</span></span>
 <span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
@@ -1010,7 +1034,7 @@ residuals, and one with nested random intercepts:</p>
 temperature at varying times of day. Let us assume we want to measure
 pre-exercise agreement between esophageal and rectal temperature while
 controlling for time of day (<code>tod</code>).</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>                        x <span class="op">=</span> <span class="st">"teso_pre"</span>,</span>
 <span>                        y <span class="op">=</span> <span class="st">"trec_pre"</span>,</span>
@@ -1094,7 +1118,7 @@ this scenario each pair of observations (x and y) are
 subject/participant that is uncorrelated with other pairs.</p>
 <p>The data for the two measurements are put into the <code>x</code> and
 <code>y</code> arguments.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calc. LoA</span></span>
 <span><span class="va">a1</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">reps</span>,</span>
 <span>                     x <span class="op">=</span> <span class="st">"x"</span>,</span>
@@ -1182,7 +1206,7 @@ in duplicate/triplicate.</p>
 first (<code>x</code> argument) and second (<code>y</code> argument)
 must then be provided. An additional column indicating the subject
 identifier (<code>id</code>) must also be provided.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a2</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -1317,7 +1341,7 @@ utilized in <code>agreement_limit</code> is similar to, but not the
 exact same as those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>. However, the results should be
 <em>approximately</em> the same as <code>agree_nest</code> and should
 provide estimates that are very close to those described by <span class="citation">Zou (<a href="#ref-zou2011">2011</a>)</span>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">a3</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                id <span class="op">=</span> <span class="st">"id"</span>,</span>
@@ -1425,7 +1449,7 @@ limits are within a maximal allowable difference. However, the results a
 maximal allowable difference can be visualized against the
 tolerance/agreement limits using the <code>delta</code> argument for the
 <code>plot</code> method.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res1</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  x <span class="op">=</span> <span class="st">"trec_pre"</span>, <span class="co"># First measure</span></span>
@@ -1435,7 +1459,7 @@ tolerance/agreement limits using the <code>delta</code> argument for the
 <span>  cor_type <span class="op">=</span> <span class="st">"sym"</span> <span class="co"># Set correlation structure as Compound Symmetry</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res1</span>, delta <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span> <span class="co"># Set maximal allowable difference to .25 units</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 id="checking-assumptions">Checking Assumptions<a class="anchor" aria-label="anchor" href="#checking-assumptions"></a>
@@ -1445,48 +1469,350 @@ bias can all be checked using the <code>check</code> method for either
 agreement or tolerance limits.</p>
 <p>The function will provide 3 plots: Q-Q normality plot, standardized
 residuals plot, and proportional bias plot.</p>
-<p>All 3 plots will have a statistical test in the bottom right corner<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;No test is included for proportional bias for
-&lt;code&gt;tolerance_limit&lt;/code&gt; results at this time.&lt;/p&gt;"><sup>2</sup></a>. The
-Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch
-test for heterogeneity, and the test for linear slope on the residuals
-plot. Please note that there is no formal test of proportional bias for
-the tolerance limits, but a plot is still included for visual
-checks.</p>
+<p>All 3 plots will have a statistical test in the bottom right corner.
+The Shapiro-Wilk test is included for the normality plot, the
+Breusch-Pagan test for heterogeneity, and a test of the slope of the
+differences on the means for proportional bias. The next section
+explains what this last test can and cannot show.</p>
 <div class="section level3">
 <h3 id="an-example">An Example<a class="anchor" aria-label="anchor" href="#an-example"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_agree</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                             y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                             data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_agree</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_agree</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The differences change with the mean (p &lt; 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                           data <span class="op">=</span> <span class="va">reps</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" width="700"></p>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The differences change with the mean (p &lt; 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="proportional-bias">Proportional Bias<a class="anchor" aria-label="anchor" href="#proportional-bias"></a>
 </h2>
-<p>As the check plots for <code>a1</code> show, proportional bias can
-sometimes occur. In these cases <span class="citation">Bland and Altman
-(<a href="#ref-bland1999">1999</a>)</span> recommended adjusting the
-bias and LoA for the proportional bias. This is simply done by include a
-slope for the average of both measurements (i.e, using an intercept +
-slope model rather than intercept only model).</p>
+<p>Proportional bias means that one method reads higher than the other
+at one end of the range and lower at the other: on the true values,
+<span class="math inline">\(y = a + \beta x\)</span> with <span class="math inline">\(\beta \neq 1\)</span>. The bottom panel of
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> is meant to help decide whether a constant bias is
+adequate or whether the limits should allow the bias to change with the
+level of measurement (<code>prop_bias = TRUE</code>). This section
+explains what that panel can and cannot show, and what to do with the
+result.</p>
+<div class="section level3">
+<h3 id="what-the-test-actually-tests">What the test actually tests<a class="anchor" aria-label="anchor" href="#what-the-test-actually-tests"></a>
+</h3>
+<p>The panel plots the differences against the means of the two methods
+and tests the slope. That slope is less informative than it looks. For
+any two variables,</p>
+<p><span class="math display">\[\text{cov}(x - y,\; x + y) =
+\text{var}(x) - \text{var}(y),\]</span></p>
+<p>so the differences increase (or decrease) with the means exactly when
+one method has a larger variance than the other. The test of the slope
+is therefore the Pitman-Morgan test of equal variances of paired
+measurements <span class="citation">(<a href="#ref-pitman1939">Pitman
+1939</a>; <a href="#ref-morgan1939">Morgan 1939</a>)</span>. The
+variances of two methods can differ for three reasons:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>True proportional bias</strong> (<span class="math inline">\(\beta \neq 1\)</span>): one method stretches or
+compresses the scale.</li>
+<li>
+<strong>Unequal measurement error</strong>: the noisier method has
+the larger variance, even when both measure the same true values on the
+same scale.</li>
+<li>
+<strong>Prior calibration</strong>: if one method was calibrated
+against the other by ordinary regression, its values are shrunk toward
+the mean, and its variance is smaller.</li>
+</ol>
+<p>With one measurement per method per subject, these cannot be told
+apart <span class="citation">(<a href="#ref-bland1999">Bland and Altman
+1999</a>; <a href="#ref-hopkins2004bias">Hopkins 2004</a>)</span>. A
+significant slope says that the variances differ, not why, and
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> gives a message saying so. The causes can also
+cancel: if the method that compresses the scale is also the noisier one,
+a real proportional bias can produce no slope at all, so a
+non-significant slope does not rule out proportional bias either.</p>
+<p>The causes can be separated in two ways:</p>
+<ul>
+<li>
+<strong>Replicate measurements of the same true value.</strong> With
+<code>agreement_limit(data_type = "reps")</code> (or
+<code><a href="../reference/method_vc.html">method_vc()</a></code> with replicates), the measurement error
+variance of each method is estimated from the within-subject variation.
+The test then asks whether the slope of the subject means is larger than
+unequal error alone would produce (the <em>error-corrected</em>
+Pitman-Morgan test). Only the difference of the two error variances is
+used, so an occasion effect shared by both methods (replicates taken at
+the same time by both methods) does not bias it.</li>
+<li>
+<strong>A known ratio of the error variances</strong>, for example
+from published repeatability studies. For simple data,
+<code>check(error.ratio = )</code> fits a Deming regression with that
+ratio and tests <span class="math inline">\(\beta = 1\)</span>, as
+<code><a href="../reference/dem_reg.html">dem_reg()</a></code> does.</li>
+</ul>
+<p>Nested data (<code>data_type = "nest"</code>) and
+<code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> with an <code>id</code> cannot be
+corrected, because the measurements of a subject are not known to share
+one true value.</p>
+</div>
+<div class="section level3">
+<h3 id="reading-the-plot">Reading the plot<a class="anchor" aria-label="anchor" href="#reading-the-plot"></a>
+</h3>
+<ul>
+<li>
+<strong>Points</strong>: the differences (centred on the mean
+difference) against the means of both methods, on the analysis scale
+(the log scale with <code>log_tf = TRUE</code>). With replicates, each
+point is a subject mean.</li>
+<li>
+<strong>Solid line and band</strong>: the least-squares slope of the
+differences on the means, the <em>observed</em> slope. It includes any
+effect of unequal measurement error, and so does its band.</li>
+<li>
+<strong>Dashed line</strong> (replicates or <code>error.ratio</code>
+only): a second slope, chosen with the <code>bias_line</code> argument
+(below).</li>
+<li>
+<strong>Caption</strong>: the test and its p-value; with the
+correction, the observed slope and the slope of the dashed line.</li>
+</ul>
+<p>The numbers are attached to the output of <code><a href="../reference/simple_agree-methods.html">check()</a></code> as the
+attribute <code>"prop_bias"</code>. The column <code>beta</code> is the
+scale of <code>y</code> relative to <code>x</code> implied by the
+error-adjusted slope <span class="math inline">\(b\)</span>: <span class="math inline">\(\beta = (2 - b) / (2 + b)\)</span>, so a value of
+0.8 means that <code>y</code> changes by 0.8 units per unit of
+<code>x</code>. Use this table to report the result.</p>
+<div class="section level4">
+<h4 id="two-ways-to-draw-the-dashed-line">Two ways to draw the dashed line<a class="anchor" aria-label="anchor" href="#two-ways-to-draw-the-dashed-line"></a>
+</h4>
+<p>The <code>bias_line</code> argument of <code><a href="../reference/simple_agree-methods.html">check()</a></code> chooses
+what the dashed line shows. The test and its p-value are the same either
+way; only the picture differs.</p>
+<table class="table">
+<colgroup>
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+</colgroup>
+<thead><tr class="header">
+<th><code>bias_line</code></th>
+<th>Dashed line</th>
+<th>Without proportional bias</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>"adjusted"</code> (default)</td>
+<td>The <em>error-adjusted</em> slope: the slope that would be seen if
+both methods were measured without error</td>
+<td>The dashed line is horizontal</td>
+<td>One simple rule (is it flat?); its slope gives <code>beta</code>,
+the size of the proportional bias, shown in the caption; works the same
+for replicates and <code>error.ratio</code>
+</td>
+<td>Its distance from flat is not exactly what is tested; with similar
+error variances it lies on top of the observed line</td>
+</tr>
+<tr class="even">
+<td><code>"expected"</code></td>
+<td>The slope <em>expected from unequal measurement error
+alone</em>
+</td>
+<td>The observed (solid) line follows the dashed line</td>
+<td>The gap between the lines is what is tested, so the picture matches
+the p-value; shows how much of the observed slope unequal error
+explains</td>
+<td>“Should follow” is harder to judge by eye than “should be flat”; the
+size of the bias (<code>beta</code>) is only in the
+<code>"prop_bias"</code> table</td>
+</tr>
+</tbody>
+</table>
+<p>Neither line shows its own uncertainty, so judge the result by the
+p-value (and its size by <code>beta</code>) rather than by eye,
+especially with few subjects.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="example-unequal-measurement-error-no-proportional-bias">Example: unequal measurement error, no proportional bias<a class="anchor" aria-label="anchor" href="#example-unequal-measurement-error-no-proportional-bias"></a>
+</h3>
+<p>The simulated data below have three replicates per subject. Method
+<code>y</code> is four times as noisy as method <code>x</code>, but both
+measure the same true values on the same scale (no proportional
+bias).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">=</span> <span class="fl">40</span></span>
+<span><span class="va">k</span> <span class="op">=</span> <span class="fl">3</span></span>
+<span><span class="va">true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">100</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, each <span class="op">=</span> <span class="va">k</span><span class="op">)</span>,</span>
+<span>                 rep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">k</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">sim</span><span class="op">$</span><span class="va">x</span> <span class="op">=</span> <span class="va">true</span><span class="op">[</span><span class="va">sim</span><span class="op">$</span><span class="va">id</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">k</span>, <span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># precise method</span></span>
+<span><span class="va">sim</span><span class="op">$</span><span class="va">y</span> <span class="op">=</span> <span class="va">true</span><span class="op">[</span><span class="va">sim</span><span class="op">$</span><span class="va">id</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">k</span>, <span class="fl">0</span>, <span class="fl">8</span><span class="op">)</span> <span class="co"># noisy method, same scale</span></span></code></pre></div>
+<p>Using only the first replicate, the slope is clearly significant, and
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> explains that this cannot be read as proportional
+bias.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">one_rep</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>                          data <span class="op">=</span> <span class="va">sim</span><span class="op">[</span><span class="va">sim</span><span class="op">$</span><span class="va">rep</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">one_rep</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The differences change with the mean (p &lt; 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+<p>With all three replicates, the correction removes the slope produced
+by the unequal errors. The observed (uncorrected) slope is still
+significant, the error-corrected test is not, and <code>beta</code> is
+close to 1.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">all_reps</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>, id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>                           data <span class="op">=</span> <span class="va">sim</span>, data_type <span class="op">=</span> <span class="st">"reps"</span><span class="op">)</span></span>
+<span><span class="va">chk</span> <span class="op">=</span> <span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">all_reps</span><span class="op">)</span></span>
+<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
+<span><span class="co">#&gt; The differences change with the mean (uncorrected p &lt; 0.05), but the slope is consistent with unequal measurement error alone (error-corrected p &gt;= 0.05).</span></span>
+<span><span class="va">chk</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">chk</span>, <span class="st">"prop_bias"</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"test"</span>, <span class="st">"p.value"</span>, <span class="st">"p.uncorrected"</span>,</span>
+<span>                           <span class="st">"slope_obs"</span>, <span class="st">"slope_adj"</span>, <span class="st">"beta"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                                 test   p.value p.uncorrected  slope_obs</span></span>
+<span><span class="co">#&gt; 1 Error-corrected Pitman-Morgan test 0.5202474   0.004319079 -0.2544308</span></span>
+<span><span class="co">#&gt;     slope_adj     beta</span></span>
+<span><span class="co">#&gt; 1 -0.07386845 1.076701</span></span></code></pre></div>
+<p>With <code>bias_line = "expected"</code>, the dashed line is the
+slope that unequal error alone would produce, and the observed line
+follows it closely.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">all_reps</span>, bias_line <span class="op">=</span> <span class="st">"expected"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
+<span><span class="co">#&gt; The differences change with the mean (uncorrected p &lt; 0.05), but the slope is consistent with unequal measurement error alone (error-corrected p &gt;= 0.05).</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="example-proportional-bias">Example: proportional bias<a class="anchor" aria-label="anchor" href="#example-proportional-bias"></a>
+</h3>
+<p>Here the second method reads <span class="math inline">\(20 +
+0.8x\)</span> with the same precision as <code>x</code>. The
+error-corrected test is significant and <code>beta</code> is close to
+the true 0.8. With <code>bias_line = "expected"</code>, unequal error
+alone would give an almost flat line, and the observed line departs
+clearly from it.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sim</span><span class="op">$</span><span class="va">y2</span> <span class="op">=</span> <span class="fl">20</span> <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> <span class="va">true</span><span class="op">[</span><span class="va">sim</span><span class="op">$</span><span class="va">id</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">k</span>, <span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">scaled</span> <span class="op">=</span> <span class="fu"><a href="../reference/agreement_limit.html">agreement_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y2"</span>, id <span class="op">=</span> <span class="st">"id"</span>,</span>
+<span>                         data <span class="op">=</span> <span class="va">sim</span>, data_type <span class="op">=</span> <span class="st">"reps"</span><span class="op">)</span></span>
+<span><span class="va">chk2</span> <span class="op">=</span> <span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">scaled</span>, bias_line <span class="op">=</span> <span class="st">"expected"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; After correcting for the measurement error variances estimated from the replicates, the differences still change with the mean (p &lt; 0.05), which suggests a proportional bias.</span></span>
+<span><span class="va">chk2</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">chk2</span>, <span class="st">"prop_bias"</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"test"</span>, <span class="st">"p.value"</span>, <span class="st">"slope_obs"</span>,</span>
+<span>                            <span class="st">"slope_null"</span>, <span class="st">"beta"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                                 test   p.value slope_obs  slope_null      beta</span></span>
+<span><span class="co">#&gt; 1 Error-corrected Pitman-Morgan test 0.0019001 0.2089186 0.003172005 0.8097641</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="what-to-do-and-when">What to do, and when<a class="anchor" aria-label="anchor" href="#what-to-do-and-when"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Design</th>
+<th>Result of <code><a href="../reference/simple_agree-methods.html">check()</a></code>
+</th>
+<th>Interpretation</th>
+<th>What to do</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>One measurement per method</td>
+<td>Slope not significant</td>
+<td>No evidence that the variances differ</td>
+<td>Use a constant bias (<code>prop_bias = FALSE</code>).</td>
+</tr>
+<tr class="even">
+<td>One measurement per method</td>
+<td>Slope significant</td>
+<td>The variances differ: proportional bias, unequal error, or
+calibration</td>
+<td>Do not switch to <code>prop_bias = TRUE</code> on this alone. If the
+error variances are known, use <code>check(error.ratio = )</code>;
+otherwise, collect replicates if possible. If not, report the
+constant-bias limits and that the methods differ in variance.</td>
+</tr>
+<tr class="odd">
+<td>Replicates</td>
+<td>Corrected test significant</td>
+<td>Proportional bias beyond measurement error</td>
+<td>Use <code>prop_bias = TRUE</code> for the limits, and report
+<code>beta</code>. For an equation to convert between methods, see
+<code><a href="../reference/dem_reg.html">dem_reg()</a></code> (with <code>id</code>) or
+<code>method_convert(bias = "scaled")</code>.</td>
+</tr>
+<tr class="even">
+<td>Replicates</td>
+<td>Uncorrected significant, corrected not</td>
+<td>The slope is explained by unequal measurement error</td>
+<td>Use a constant bias. Report the within-subject SDs of each method
+(<code>sw2_x</code>, <code>sw2_y</code> are their squares); one method
+is less precise, which is itself a finding.</td>
+</tr>
+<tr class="odd">
+<td>Replicates</td>
+<td>Neither significant</td>
+<td>No evidence of proportional bias</td>
+<td>Use a constant bias. With few subjects the test has little power, so
+also look at the size of <code>beta</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>A few further points:</p>
+<ul>
+<li>If the spread of the differences grows with the level (the
+heteroskedasticity panel), consider <code>log_tf = TRUE</code> before
+judging proportional bias. The test is then on the log scale, where the
+differences are ratios.</li>
+<li>The test needs several subjects. With fewer than about 10, a
+non-significant result says little.</li>
+<li>Fitting <code>prop_bias = TRUE</code> when the slope is only due to
+unequal error is not wrong as a description of the data: the expected
+difference given the <em>observed</em> mean does change with it. But it
+is not a property of the methods, and the slope would change with the
+error of the methods or the range of the sample.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="adjusting-for-proportional-bias">Adjusting for proportional bias<a class="anchor" aria-label="anchor" href="#adjusting-for-proportional-bias"></a>
+</h3>
+<p>If there is proportional bias, <span class="citation">Bland and
+Altman (<a href="#ref-bland1999">1999</a>)</span> recommended adjusting
+the bias and LoA for it. This is simply done by including a slope for
+the average of both measurements (i.e, using an intercept + slope model
+rather than intercept only model).</p>
 <p>For either <code>agreement_limit</code> or
 <code>tolerance_limit</code> functions, this can be accomplished with
 the <code>prop_bias</code> argument. When this is set to TRUE, then the
 proportional bias adjusted model is utilized. Plots and checks of the
 data should always be inspected.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">test_tol</span> <span class="op">=</span> <span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>                           y <span class="op">=</span> <span class="st">"y"</span>,</span>
@@ -1511,12 +1837,14 @@ data should always be inspected.</p>
 <span></span>
 <span><span class="co"># See effect of proportional bias on limits</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="co"># Confirm its effects in proportional bias check plot (should be horizontal now)</span></span>
-<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" width="700"></p>
+<span><span class="co"># The check still tests the slope of the differences on the means</span></span>
+<span><span class="fu"><a href="../reference/simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">test_tol</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The differences change with the mean (p &lt; 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.</span></span></code></pre></div>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-16-2.png" class="r-plt" alt="" width="700"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="log-transformation">Log transformation<a class="anchor" aria-label="anchor" href="#log-transformation"></a>
@@ -1527,7 +1855,7 @@ mean. The interpretation is also easy because the differences (when back
 transformed) can be interpreted as ratios. The log transformation
 (natural base) can be accomplished with the <code>log_tf</code>
 argument.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># natural log transformation of responses</span></span>
@@ -1552,7 +1880,7 @@ difference” which is the log transformed differences between the
 measures, <span class="math inline">\(s\% = (log(x)-log(y) ) \cdot 100\%
 = log(x/y) \cdot 100\%\)</span>, and can be interpreted as a percentage
 difference between the two paired measures.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tolerance_limit.html">tolerance_limit</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">temps</span>,</span>
 <span>  log_tf <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># natural log transformation of responses</span></span>
@@ -1579,7 +1907,7 @@ difference between the two paired measures.</p>
 mean difference visualization may be less than ideal. In order to change
 the plots from showing the individual data points we can modify the
 <code>geom</code> argument.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">81346</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">750</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -1595,28 +1923,28 @@ the plots from showing the individual data points we can modify the
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_point"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_bin2d"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-2.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-2.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-3.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-3.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"geom_density_2d_filled"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-4.png" class="r-plt" width="700"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-4.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span>,</span>
 <span>     geom <span class="op">=</span> <span class="st">"stat_density_2d"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-13-5.png" class="r-plt" width="700"></p>
+<p><img src="agreement_analysis_files/figure-html/unnamed-chunk-19-5.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -1652,6 +1980,10 @@ Tolerate or to Agree: A Tutorial on Tolerance Intervals in Method
 Comparison Studies with BivRegBLS r Package.”</span> <em>Statistics in
 Medicine</em> 39 (28): 4334–49.
 </div>
+<div id="ref-hopkins2004bias" class="csl-entry">
+Hopkins, Will G. 2004. <span>“Bias in <span>Bland-Altman</span> but Not
+Regression Validity Analyses.”</span> <em>Sportscience</em> 8: 42–46.
+</div>
 <div id="ref-howe1969" class="csl-entry">
 Howe, W. G. 1969. <span>“Two-Sided Tolerance Limits for Normal
 Populations<span></span>some Improvements.”</span> <em>Journal of the
@@ -1666,6 +1998,15 @@ Kuznetsova, Alexandra, Per B Brockhoff, and Rune HB Christensen. 2017.
 Loh, Wei-Yin. 1987. <span>“Calibrating Confidence Coefficients.”</span>
 <em>Journal of the American Statistical Association</em> 82 (397):
 155–62. <a href="https://doi.org/10.1080/01621459.1987.10478408" class="external-link">https://doi.org/10.1080/01621459.1987.10478408</a>.
+</div>
+<div id="ref-morgan1939" class="csl-entry">
+Morgan, W. A. 1939. <span>“A Test for the Significance of the Difference
+Between the Two Variances in a Sample from a Normal Bivariate
+Population.”</span> <em>Biometrika</em> 31 (1/2): 13–19.
+</div>
+<div id="ref-pitman1939" class="csl-entry">
+Pitman, E. J. G. 1939. <span>“A Note on Normal Correlation.”</span>
+<em>Biometrika</em> 31 (1/2): 9–12.
 </div>
 <div id="ref-satterthwaite1946" class="csl-entry">
 Satterthwaite, Franklin E. 1946. <span>“An Approximate Distribution of
@@ -1697,7 +2038,7 @@ Per Individual.”</span> <em>Statistical Methods in Medical Research</em>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

@@ -88,6 +88,39 @@
   [`predict(`*`<simple_eiv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_eiv-methods.md)
   : Methods for simple_eiv objects
 
+## Method Comparison (Several Methods)
+
+- [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+  **\[experimental\]** : Variance Component Limits for Comparing Several
+  Methods
+- [`method_convert()`](https://aaroncaldwell.us/SimplyAgree/reference/method_convert.md)
+  **\[experimental\]** : Conversion Equations Between Measurement
+  Methods
+- [`predict(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`print(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`summary(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`print(`*`<summary.simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`confint(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`coef(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`vcov(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`plot(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  [`check(`*`<simple_mvc>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mvc-methods.md)
+  : Methods for simple_mvc objects
+- [`print(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`summary(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`print(`*`<summary.simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`check(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`coef(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`confint(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`predict(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  [`plot(`*`<simple_mconv>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/simple_mconv-methods.md)
+  : Methods for simple_mconv objects
+- [`sim_methods()`](https://aaroncaldwell.us/SimplyAgree/reference/sim_methods.md)
+  **\[experimental\]** : Simulate Method Comparison Data
+- [`mc_long()`](https://aaroncaldwell.us/SimplyAgree/reference/mc_long.md)
+  **\[experimental\]** : Convert Wide Method Comparison Data to Long
+  Format
+
 ### Other Miscellaneous Functions
 
 - [`ccc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/ccc_test.md)
@@ -138,6 +171,12 @@ Functions for power calculations
 - [`deming_sample_size()`](https://aaroncaldwell.us/SimplyAgree/reference/deming_sample_size.md)
   **\[experimental\]** : Determine Required Sample Size for Deming
   Regression
+
+## Model Equations
+
+- [`model_equation()`](https://aaroncaldwell.us/SimplyAgree/reference/model_equation.md)
+  [`print(`*`<model_equation>`*`)`](https://aaroncaldwell.us/SimplyAgree/reference/model_equation.md)
+  **\[experimental\]** : LaTeX Equation of a Fitted Model
 
 ## Data
 

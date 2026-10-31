@@ -230,7 +230,7 @@ intra-subject correlation.
 
 ``` r
 
-tolerance_limit(
+tl = tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
   y = "teso_pre", # Second measure
@@ -238,6 +238,7 @@ tolerance_limit(
   condition = "tod", # Identify condition that may affect differences
   cor_type = "sym" # Set correlation structure as Compound Symmetry
 )
+tl
 #> Agreement between Measures (Difference: x-y)
 #> 95% CI for Bias; 95% Prediction Interval
 #> Tolerance Limits: at least 95% of differences with 95% confidence
@@ -317,7 +318,7 @@ With `model = "lme"`, the differences follow a linear mixed model
 intercept for each subject and, optionally, for each setting (inner
 level) within subject:
 
-\\ d\_{ijk} = \mathbf{x}\_{ijk}^\top \\beta + u_i + v\_{ij} + e\_{ijk},
+\\ d\_{ijk} = \mathbf{x}\_{ijk}^\top \beta + u_i + v\_{ij} + e\_{ijk},
 \qquad u_i \sim N(0, \sigma_1^2), \quad v\_{ij} \sim N(0, \sigma_2^2),
 \quad \text{Var}(e\_{ijk}) = \sigma^2 g\_{ijk}^2 \\
 
@@ -332,6 +333,23 @@ The output reports the components as `SD.between` (\\\hat\sigma_1\\),
 `SD.nested` (\\\hat\sigma_2\\), and `SD.within` (\\\hat\sigma g\\). For
 `gls` with compound symmetry, `SD.between` \\= \sqrt{\hat\rho}\\ S\\ and
 `SD.within` \\= \sqrt{1 - \hat\rho}\\ S\\.
+
+[`model_equation()`](https://aaroncaldwell.us/SimplyAgree/reference/model_equation.md)
+writes out the model of a fitted result, here the example above with its
+estimates:
+
+``` r
+
+model_equation(tl, use_coefs = TRUE)
+```
+
+\\ \begin{aligned} d\_{ij} &= 0.154 +
+0.074\\\mathrm{I}(\mathrm{tod}\_{ij} = \mathrm{PM}) + e\_{ij} \\ e\_{ij}
+&\sim N\left(0,\\ 0.188^{2}\delta^{2}\_{\mathrm{tod}\_{ij}}\right),
+\quad \delta\_{\mathrm{AM}} = 1.000,\\ \delta\_{\mathrm{PM}} = 0.810 \\
+\operatorname{Cor}(e\_{ij}, e\_{ij'}) &= 0.201, \quad j \neq j' \\ &
+\text{where } d\_{ij} = \mathrm{trec\\pre}\_{ij} -
+\mathrm{teso\\pre}\_{ij} \end{aligned} \\
 
 #### The bias and its standard error
 
@@ -1042,7 +1060,7 @@ res1 = tolerance_limit(
 plot(res1, delta = .25) # Set maximal allowable difference to .25 units
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-8-1.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-9-1.png)
 
 ## Checking Assumptions
 
@@ -1053,12 +1071,11 @@ tolerance limits.
 The function will provide 3 plots: Q-Q normality plot, standardized
 residuals plot, and proportional bias plot.
 
-All 3 plots will have a statistical test in the bottom right corner[^2].
-The Shapiro-Wilk test is included for the normality plot, the
-Bagan-Preusch test for heterogeneity, and the test for linear slope on
-the residuals plot. Please note that there is no formal test of
-proportional bias for the tolerance limits, but a plot is still included
-for visual checks.
+All 3 plots will have a statistical test in the bottom right corner. The
+Shapiro-Wilk test is included for the normality plot, the Breusch-Pagan
+test for heterogeneity, and a test of the slope of the differences on
+the means for proportional bias. The next section explains what this
+last test can and cannot show.
 
 ### An Example
 
@@ -1069,9 +1086,10 @@ test_agree = agreement_limit(x = "x",
                              data = reps)
 
 check(test_agree)
+#> The differences change with the mean (p < 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-9-1.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
 
@@ -1081,17 +1099,242 @@ test_tol = tolerance_limit(x = "x",
                            data = reps)
 
 check(test_tol)
+#> The differences change with the mean (p < 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-9-2.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-10-2.png)
 
 ## Proportional Bias
 
-As the check plots for `a1` show, proportional bias can sometimes occur.
-In these cases Bland and Altman ([1999](#ref-bland1999)) recommended
-adjusting the bias and LoA for the proportional bias. This is simply
-done by include a slope for the average of both measurements (i.e, using
-an intercept + slope model rather than intercept only model).
+Proportional bias means that one method reads higher than the other at
+one end of the range and lower at the other: on the true values, \\y =
+a + \beta x\\ with \\\beta \neq 1\\. The bottom panel of
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+is meant to help decide whether a constant bias is adequate or whether
+the limits should allow the bias to change with the level of measurement
+(`prop_bias = TRUE`). This section explains what that panel can and
+cannot show, and what to do with the result.
+
+### What the test actually tests
+
+The panel plots the differences against the means of the two methods and
+tests the slope. That slope is less informative than it looks. For any
+two variables,
+
+\\\text{cov}(x - y,\\ x + y) = \text{var}(x) - \text{var}(y),\\
+
+so the differences increase (or decrease) with the means exactly when
+one method has a larger variance than the other. The test of the slope
+is therefore the Pitman-Morgan test of equal variances of paired
+measurements ([Pitman 1939](#ref-pitman1939); [Morgan
+1939](#ref-morgan1939)). The variances of two methods can differ for
+three reasons:
+
+1.  **True proportional bias** (\\\beta \neq 1\\): one method stretches
+    or compresses the scale.
+2.  **Unequal measurement error**: the noisier method has the larger
+    variance, even when both measure the same true values on the same
+    scale.
+3.  **Prior calibration**: if one method was calibrated against the
+    other by ordinary regression, its values are shrunk toward the mean,
+    and its variance is smaller.
+
+With one measurement per method per subject, these cannot be told apart
+([Bland and Altman 1999](#ref-bland1999); [Hopkins
+2004](#ref-hopkins2004bias)). A significant slope says that the
+variances differ, not why, and
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+gives a message saying so. The causes can also cancel: if the method
+that compresses the scale is also the noisier one, a real proportional
+bias can produce no slope at all, so a non-significant slope does not
+rule out proportional bias either.
+
+The causes can be separated in two ways:
+
+- **Replicate measurements of the same true value.** With
+  `agreement_limit(data_type = "reps")` (or
+  [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+  with replicates), the measurement error variance of each method is
+  estimated from the within-subject variation. The test then asks
+  whether the slope of the subject means is larger than unequal error
+  alone would produce (the *error-corrected* Pitman-Morgan test). Only
+  the difference of the two error variances is used, so an occasion
+  effect shared by both methods (replicates taken at the same time by
+  both methods) does not bias it.
+- **A known ratio of the error variances**, for example from published
+  repeatability studies. For simple data, `check(error.ratio = )` fits a
+  Deming regression with that ratio and tests \\\beta = 1\\, as
+  [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md)
+  does.
+
+Nested data (`data_type = "nest"`) and
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+with an `id` cannot be corrected, because the measurements of a subject
+are not known to share one true value.
+
+### Reading the plot
+
+- **Points**: the differences (centred on the mean difference) against
+  the means of both methods, on the analysis scale (the log scale with
+  `log_tf = TRUE`). With replicates, each point is a subject mean.
+- **Solid line and band**: the least-squares slope of the differences on
+  the means, the *observed* slope. It includes any effect of unequal
+  measurement error, and so does its band.
+- **Dashed line** (replicates or `error.ratio` only): a second slope,
+  chosen with the `bias_line` argument (below).
+- **Caption**: the test and its p-value; with the correction, the
+  observed slope and the slope of the dashed line.
+
+The numbers are attached to the output of
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+as the attribute `"prop_bias"`. The column `beta` is the scale of `y`
+relative to `x` implied by the error-adjusted slope \\b\\: \\\beta =
+(2 - b) / (2 + b)\\, so a value of 0.8 means that `y` changes by 0.8
+units per unit of `x`. Use this table to report the result.
+
+#### Two ways to draw the dashed line
+
+The `bias_line` argument of
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+chooses what the dashed line shows. The test and its p-value are the
+same either way; only the picture differs.
+
+| `bias_line` | Dashed line | Without proportional bias | Pros | Cons |
+|----|----|----|----|----|
+| `"adjusted"` (default) | The *error-adjusted* slope: the slope that would be seen if both methods were measured without error | The dashed line is horizontal | One simple rule (is it flat?); its slope gives `beta`, the size of the proportional bias, shown in the caption; works the same for replicates and `error.ratio` | Its distance from flat is not exactly what is tested; with similar error variances it lies on top of the observed line |
+| `"expected"` | The slope *expected from unequal measurement error alone* | The observed (solid) line follows the dashed line | The gap between the lines is what is tested, so the picture matches the p-value; shows how much of the observed slope unequal error explains | “Should follow” is harder to judge by eye than “should be flat”; the size of the bias (`beta`) is only in the `"prop_bias"` table |
+
+Neither line shows its own uncertainty, so judge the result by the
+p-value (and its size by `beta`) rather than by eye, especially with few
+subjects.
+
+### Example: unequal measurement error, no proportional bias
+
+The simulated data below have three replicates per subject. Method `y`
+is four times as noisy as method `x`, but both measure the same true
+values on the same scale (no proportional bias).
+
+``` r
+
+set.seed(11)
+n = 40
+k = 3
+true = rnorm(n, 100, 8)
+sim = data.frame(id = rep(1:n, each = k),
+                 rep = rep(1:k, n))
+sim$x = true[sim$id] + rnorm(n * k, 0, 2) # precise method
+sim$y = true[sim$id] + rnorm(n * k, 0, 8) # noisy method, same scale
+```
+
+Using only the first replicate, the slope is clearly significant, and
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+explains that this cannot be read as proportional bias.
+
+``` r
+
+one_rep = agreement_limit(x = "x", y = "y",
+                          data = sim[sim$rep == 1, ])
+check(one_rep)
+#> The differences change with the mean (p < 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.
+```
+
+![](agreement_analysis_files/figure-html/unnamed-chunk-12-1.png)
+
+With all three replicates, the correction removes the slope produced by
+the unequal errors. The observed (uncorrected) slope is still
+significant, the error-corrected test is not, and `beta` is close to 1.
+
+``` r
+
+all_reps = agreement_limit(x = "x", y = "y", id = "id",
+                           data = sim, data_type = "reps")
+chk = check(all_reps)
+#> boundary (singular) fit: see help('isSingular')
+#> The differences change with the mean (uncorrected p < 0.05), but the slope is consistent with unequal measurement error alone (error-corrected p >= 0.05).
+chk
+```
+
+![](agreement_analysis_files/figure-html/unnamed-chunk-13-1.png)
+
+``` r
+
+attr(chk, "prop_bias")[, c("test", "p.value", "p.uncorrected",
+                           "slope_obs", "slope_adj", "beta")]
+#>                                 test   p.value p.uncorrected  slope_obs
+#> 1 Error-corrected Pitman-Morgan test 0.5202474   0.004319079 -0.2544308
+#>     slope_adj     beta
+#> 1 -0.07386845 1.076701
+```
+
+With `bias_line = "expected"`, the dashed line is the slope that unequal
+error alone would produce, and the observed line follows it closely.
+
+``` r
+
+check(all_reps, bias_line = "expected")
+#> boundary (singular) fit: see help('isSingular')
+#> The differences change with the mean (uncorrected p < 0.05), but the slope is consistent with unequal measurement error alone (error-corrected p >= 0.05).
+```
+
+![](agreement_analysis_files/figure-html/unnamed-chunk-14-1.png)
+
+### Example: proportional bias
+
+Here the second method reads \\20 + 0.8x\\ with the same precision as
+`x`. The error-corrected test is significant and `beta` is close to the
+true 0.8. With `bias_line = "expected"`, unequal error alone would give
+an almost flat line, and the observed line departs clearly from it.
+
+``` r
+
+sim$y2 = 20 + 0.8 * true[sim$id] + rnorm(n * k, 0, 2)
+scaled = agreement_limit(x = "x", y = "y2", id = "id",
+                         data = sim, data_type = "reps")
+chk2 = check(scaled, bias_line = "expected")
+#> After correcting for the measurement error variances estimated from the replicates, the differences still change with the mean (p < 0.05), which suggests a proportional bias.
+chk2
+```
+
+![](agreement_analysis_files/figure-html/unnamed-chunk-15-1.png)
+
+``` r
+
+attr(chk2, "prop_bias")[, c("test", "p.value", "slope_obs",
+                            "slope_null", "beta")]
+#>                                 test   p.value slope_obs  slope_null      beta
+#> 1 Error-corrected Pitman-Morgan test 0.0019001 0.2089186 0.003172005 0.8097641
+```
+
+### What to do, and when
+
+| Design | Result of [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md) | Interpretation | What to do |
+|----|----|----|----|
+| One measurement per method | Slope not significant | No evidence that the variances differ | Use a constant bias (`prop_bias = FALSE`). |
+| One measurement per method | Slope significant | The variances differ: proportional bias, unequal error, or calibration | Do not switch to `prop_bias = TRUE` on this alone. If the error variances are known, use `check(error.ratio = )`; otherwise, collect replicates if possible. If not, report the constant-bias limits and that the methods differ in variance. |
+| Replicates | Corrected test significant | Proportional bias beyond measurement error | Use `prop_bias = TRUE` for the limits, and report `beta`. For an equation to convert between methods, see [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md) (with `id`) or `method_convert(bias = "scaled")`. |
+| Replicates | Uncorrected significant, corrected not | The slope is explained by unequal measurement error | Use a constant bias. Report the within-subject SDs of each method (`sw2_x`, `sw2_y` are their squares); one method is less precise, which is itself a finding. |
+| Replicates | Neither significant | No evidence of proportional bias | Use a constant bias. With few subjects the test has little power, so also look at the size of `beta`. |
+
+A few further points:
+
+- If the spread of the differences grows with the level (the
+  heteroskedasticity panel), consider `log_tf = TRUE` before judging
+  proportional bias. The test is then on the log scale, where the
+  differences are ratios.
+- The test needs several subjects. With fewer than about 10, a
+  non-significant result says little.
+- Fitting `prop_bias = TRUE` when the slope is only due to unequal error
+  is not wrong as a description of the data: the expected difference
+  given the *observed* mean does change with it. But it is not a
+  property of the methods, and the slope would change with the error of
+  the methods or the range of the sample.
+
+### Adjusting for proportional bias
+
+If there is proportional bias, Bland and Altman ([1999](#ref-bland1999))
+recommended adjusting the bias and LoA for it. This is simply done by
+including a slope for the average of both measurements (i.e, using an
+intercept + slope model rather than intercept only model).
 
 For either `agreement_limit` or `tolerance_limit` functions, this can be
 accomplished with the `prop_bias` argument. When this is set to TRUE,
@@ -1126,16 +1369,17 @@ print(test_tol)
 plot(test_tol)
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-10-1.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-16-1.png)
 
 ``` r
 
 
-# Confirm its effects in proportional bias check plot (should be horizontal now)
+# The check still tests the slope of the differences on the means
 check(test_tol)
+#> The differences change with the mean (p < 0.05). This slope tests whether the two methods have equal variances (Pitman-Morgan): cov(difference, sum) = var(x) - var(y). Without replicate measurements of the same true value, it cannot separate a proportional bias from unequal measurement error (or a prior calibration of one method on the other). Use replicate measurements or a known error variance ratio (check(error.ratio = )) to separate them.
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-10-2.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-16-2.png)
 
 ## Log transformation
 
@@ -1221,7 +1465,7 @@ plot(a1,
      geom = "geom_point")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-1.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-19-1.png)
 
 ``` r
 
@@ -1231,7 +1475,7 @@ plot(a1,
 #> `stat_bin2d()` using `bins = 30`. Pick better value `binwidth`.
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-2.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-19-2.png)
 
 ``` r
 
@@ -1240,7 +1484,7 @@ plot(a1,
      geom = "geom_density_2d")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-3.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-19-3.png)
 
 ``` r
 
@@ -1249,7 +1493,7 @@ plot(a1,
      geom = "geom_density_2d_filled")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-4.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-19-4.png)
 
 ``` r
 
@@ -1258,7 +1502,7 @@ plot(a1,
      geom = "stat_density_2d")
 ```
 
-![](agreement_analysis_files/figure-html/unnamed-chunk-13-5.png)
+![](agreement_analysis_files/figure-html/unnamed-chunk-19-5.png)
 
 ## References
 
@@ -1288,6 +1532,9 @@ Tolerate or to Agree: A Tutorial on Tolerance Intervals in Method
 Comparison Studies with BivRegBLS r Package.” *Statistics in Medicine*
 39 (28): 4334–49.
 
+Hopkins, Will G. 2004. “Bias in Bland-Altman but Not Regression Validity
+Analyses.” *Sportscience* 8: 42–46.
+
 Howe, W. G. 1969. “Two-Sided Tolerance Limits for Normal Populationssome
 Improvements.” *Journal of the American Statistical Association* 64
 (326): 610–20. <https://doi.org/10.1080/01621459.1969.10500999>.
@@ -1299,6 +1546,13 @@ Statistical Software* 82: 1–26.
 Loh, Wei-Yin. 1987. “Calibrating Confidence Coefficients.” *Journal of
 the American Statistical Association* 82 (397): 155–62.
 <https://doi.org/10.1080/01621459.1987.10478408>.
+
+Morgan, W. A. 1939. “A Test for the Significance of the Difference
+Between the Two Variances in a Sample from a Normal Bivariate
+Population.” *Biometrika* 31 (1/2): 13–19.
+
+Pitman, E. J. G. 1939. “A Note on Normal Correlation.” *Biometrika* 31
+(1/2): 9–12.
 
 Satterthwaite, Franklin E. 1946. “An Approximate Distribution of
 Estimates of Variance Components.” *Biometrics Bulletin* 2 (6): 110–14.
@@ -1313,6 +1567,3 @@ Limits of Agreement with Multiple Observations Per Individual.”
 
 [^1]: Pinheiro, J.C., and Bates, D.M. (2000) “Mixed-Effects Models in S
     and S-PLUS”, Springer, pp. 100, 461.
-
-[^2]: No test is included for proportional bias for `tolerance_limit`
-    results at this time.

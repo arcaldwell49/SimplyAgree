@@ -5,37 +5,39 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reliability Across Facets: Repeats and Occasions — reli_facet_test"><meta name="description" content='
-The name of this function is experimental and may change (it was
-briefly gstudy_test() during development); its arguments may change
-too.
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reliability Across Facets: Repeats and Occasions — reli_facet_test"><meta name="description" content="
+This function is experimental and may change; its arguments and name may change
+too even if its functionality is retained.
 Estimates one reliability coefficient or one standard error of
 measurement (SEM) when each subject is measured more than once by each
-item (rater, device): for example 3 operators each scanning 20
+item (rater, device). For example, 3 operators each scanning 20
 participants twice. The extra measurements separate error within a
 rater from disagreement between raters, which icc_test() and
 reli_err_test() cannot do with one measurement per subject and item.
 The measurements can be exchangeable repeats within each subject-by-item
 cell (the default), or shared occasions (occasion: every rater measured
 every subject on day 1 and again on day 2). The model is the
-generalizability-theory (G-study) model for that design. Returns an
-object of class "htest" with a confidence interval and an optional
-test.'><meta property="og:description" content='
-The name of this function is experimental and may change (it was
-briefly gstudy_test() during development); its arguments may change
-too.
+generalizability-theory (G-study) model for that design.
+It's G-study capabilities are narrow, which is purposeful at this time.
+Returns an
+object of class &quot;htest&quot; with a confidence interval and an optional
+test."><meta property="og:description" content="
+This function is experimental and may change; its arguments and name may change
+too even if its functionality is retained.
 Estimates one reliability coefficient or one standard error of
 measurement (SEM) when each subject is measured more than once by each
-item (rater, device): for example 3 operators each scanning 20
+item (rater, device). For example, 3 operators each scanning 20
 participants twice. The extra measurements separate error within a
 rater from disagreement between raters, which icc_test() and
 reli_err_test() cannot do with one measurement per subject and item.
 The measurements can be exchangeable repeats within each subject-by-item
 cell (the default), or shared occasions (occasion: every rater measured
 every subject on day 1 and again on day 2). The model is the
-generalizability-theory (G-study) model for that design. Returns an
-object of class "htest" with a confidence interval and an optional
-test.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+generalizability-theory (G-study) model for that design.
+It's G-study capabilities are narrow, which is purposeful at this time.
+Returns an
+object of class &quot;htest&quot; with a confidence interval and an optional
+test."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -43,7 +45,7 @@ test.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/i
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +60,8 @@ test.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/i
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
     <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/method_conversion.html">Converting Between Methods</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -86,19 +90,20 @@ test.'><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/i
 
     <div class="ref-description section level2">
     <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a></p>
-<p><strong>The name of this function is experimental and may change</strong> (it was
-briefly <code>gstudy_test()</code> during development); its arguments may change
-too.</p>
+<p><strong>This function is experimental and may change</strong>; its arguments and name may change
+too even if its functionality is retained.</p>
 <p>Estimates one reliability coefficient or one standard error of
 measurement (SEM) when each subject is measured more than once by each
-item (rater, device): for example 3 operators each scanning 20
+item (rater, device). For example, 3 operators each scanning 20
 participants twice. The extra measurements separate error <em>within</em> a
 rater from disagreement <em>between</em> raters, which <code><a href="icc_test.html">icc_test()</a></code> and
 <code><a href="reli_err_test.html">reli_err_test()</a></code> cannot do with one measurement per subject and item.
 The measurements can be exchangeable repeats within each subject-by-item
 cell (the default), or shared occasions (<code>occasion</code>: every rater measured
 every subject on day 1 and again on day 2). The model is the
-generalizability-theory (G-study) model for that design. Returns an
+generalizability-theory (G-study) model for that design.
+It's G-study capabilities are narrow, which is purposeful at this time.
+Returns an
 object of class <code>"htest"</code> with a confidence interval and an optional
 test.</p>
     </div>
@@ -293,7 +298,7 @@ repeat model (occasions ignored) would give.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Nested or crossed.</strong> Ask whether "measurement 2" is the same event for
+    <p>When considered nested versus crossed, ask whether "measurement 2" is the same event for
 every item. If each operator simply scanned each participant twice, in no
 shared order, the measurements are exchangeable repeats nested in the
 subject-by-item cell: leave <code>occasion = NULL</code>. If every operator measured
@@ -303,7 +308,8 @@ repeat error, so the intra-rater error looks larger and cannot be split
 into a systematic shift (fixable) and noise. With <code>occasion</code>, the result
 (in <code>nested</code>) and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> also give what the repeat model would have
 estimated.</p>
-<p><strong>Model.</strong> All effects are random. Without <code>occasion</code>, with n subjects, k
+<p>For the model, all effects are random.
+Without <code>occasion</code>, with n subjects, k
 items and r repeats per cell,
 $$y_{pir} = \mu + p + i + (pi) + e_{pir};$$
 with <code>occasion</code> (m occasions),
@@ -319,7 +325,7 @@ its share of the variance of a single measurement. The model is the
 unrestricted (random facets) one used by lme4 and by McGraw and Wong
 (1996); for the consistency forms the items may be regarded as fixed,
 which changes the interpretation but not the computation.</p>
-<p><strong>Estimands.</strong> Following Brennan (2001), the facet that stays the same is
+<p>Following Brennan (2001), the facet that stays the same is
 part of the subject's score, and the facets that vary are error. For a
 planned score that is the mean of \(k'\) items (<code>k_avg</code>), \(m'\)
 occasions (<code>m_avg</code>) and \(r'\) repeats (<code>r_avg</code>), the error variance
@@ -334,7 +340,7 @@ for raters on the same occasion, what most inter-rater studies report;
 the generalizability (\(E\rho^2\)) and dependability (\(\Phi\))
 coefficients of G theory. In gauge R&amp;R terms (repeats), \(\sigma^2_e\)
 is repeatability and \(\sigma^2_i + \sigma^2_{pi}\) reproducibility.</p>
-<p><strong>What averaging does.</strong> Without <code>occasion</code> and with \(r' = r\) (the
+<p>It is important to know what averaging does for this function. Without <code>occasion</code> and with \(r' = r\) (the
 score averages as many repeats as the study had), the inter-rater
 consistency coefficient is the consistency ICC of the cell means,
 \((F - 1)/(F - 1 + k/k')\) with \(F = MS_P/MS_{PI}\), identical to
@@ -342,9 +348,9 @@ consistency coefficient is the consistency ICC of the cell means,
 measurement unless r = 1. Averaging the repeats before calling
 <code><a href="icc_test.html">icc_test()</a></code> is therefore only right when the scores used in practice
 are also means of r repeats.</p>
-<p><strong>Intervals and tests.</strong> An estimand that is a multiple of one mean
+<p>An estimand that is a multiple of one mean
 square (an SEM) or a function of the ratio of two (a coefficient) has an
-exact interval and test: without <code>occasion</code>, the intra SEM (\(\chi^2\)
+exact interval and test. Without <code>occasion</code>, the intra SEM (\(\chi^2\)
 on \(MS_W\)) and the inter-rater consistency SEM and coefficient with
 \(r' = r\). The others are approximate:</p><ul><li><p><code>"mls"</code>: modified large-sample intervals for linear combinations of
 mean squares (Graybill &amp; Wang, 1980; Ting et al., 1990; Burdick &amp;
@@ -360,18 +366,18 @@ ICC(A,1)), and the interval inverts it.</p></li>
 <li><p><code>"auto"</code> uses MLS, chosen in simulations (see "Simulations").</p></li>
 </ul><p>SEMs with <code>scale = "mean"</code> use a Wald interval on the log scale with a
 delta-method SE that includes the uncertainty of the grand mean.</p>
-<p><strong>Bootstrap.</strong> <code>boot = TRUE</code> resamples subjects, each with all its
+<p>When wanting bootstrapped results, <code>boot = TRUE</code> resamples subjects, each with all its
 measurements, as in <code><a href="icc_test.html">icc_test()</a></code>. Resampling subjects keeps the same
 items and occasions, so for statistics that count systematic differences
 between them as error, the mean squares of the effects without subjects
 (items, occasions, items by occasions) are also multiplied by independent
 \(\chi^2_{df}/df\) draws (the hybrid step). The p-value inverts the
 interval and is approximate.</p>
-<p><strong>Unbalanced data.</strong> <code>method = "reml"</code> fits the model with lme4 and keeps
+<p>When there is unbalanced data, <code>method = "reml"</code> fits the model with lme4 and keeps
 the analytic inference, with degrees of freedom from the observed data
 and the harmonic mean number of repeats in place of r, and gives a
 warning.</p>
-<p><strong>Simulations.</strong> Repeats (no <code>occasion</code>): with 10 or 30 subjects, 2, 3
+<p>In simulations, repeats (no <code>occasion</code>): with 10 or 30 subjects, 2, 3
 or 5 items, 2 or 3 repeats, four mixes of variance components and normal
 data (2000 data sets per setting), the exact intervals covered 0.940 to
 0.951 and the MLS intervals at least 0.939 for every estimand (0.95 to
@@ -388,7 +394,7 @@ sets per setting): the MLS intervals covered at least 0.934 with 30
 subjects and 0.928 with 10, for every facet, type and statistic; the
 Satterthwaite intervals fell to 0.69 to 0.79 for the agreement
 statistics.</p>
-<p><strong>Uneven tails for agreement statistics.</strong> The agreement statistics
+<p><strong>Warning:</strong> there are uneven tails for agreement statistics. The agreement statistics
 include a component estimated from very few degrees of freedom (items,
 or occasions: k - 1 or m - 1). The MLS bound that this component drives
 is wide, and the other bound is close to nominal. With 30 subjects and
@@ -422,7 +428,8 @@ same <code>"auto"</code> choices and helped for the consistency statistics (0.92
 to 0.93 with skewed data), but for the agreement statistics the MLS
 interval was as good or better even with skewed data, and every interval
 under-covered when a day effect on 2 days dominated the error.</p>
-<p><strong>Other software.</strong> VCA (variance components for deeper nesting and
+<p><strong>Other software:</strong> Given the narrow range of application, I want highlight a few R packages.
+VCA (variance components for deeper nesting and
 laboratory precision designs), rptR (repeatability for non-Gaussian
 data), gtheoryr (crossed multi-facet G-studies and D-study design
 optimisation), SixSigma (<code>ss.rr()</code>, gauge R&amp;R summaries) and MethComp
@@ -595,7 +602,7 @@ subject and item; <code><a href="mdc_test.html">mdc_test()</a></code>; <a href="
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

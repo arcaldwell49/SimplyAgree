@@ -1,5 +1,240 @@
 # Changelog
 
+## SimplyAgree 0.5.0 (development version)
+
+New functions for comparing two or more methods, with or without
+replicate measurements, following Carstensen (2010, *Comparing Clinical
+Measurement Methods*) and the MethComp package. All are marked
+experimental.
+
+- Added
+  [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md),
+  which fits the variance component model for method comparison
+  (method-by-item, item-by-replicate, and method-specific residual
+  variances) to two or more methods at once, with linked or exchangeable
+  replicates.
+  - Reports the bias for every pair of methods, the variance components
+    with confidence intervals, and limits of agreement
+    (`interval = "agreement"`, MOVER bounds as in
+    [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md))
+    or prediction and tolerance limits (`interval = "tolerance"`, as in
+    [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)),
+    with `bound_type = "iu"` or `"joint"` (which, as in
+    [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md),
+    affects only the tolerance limits).
+  - Reports repeatability coefficients for each method and, with linked
+    replicates, reproducibility coefficients.
+  - Supports transformations (`"log"`, `"logit"`, `"pctlogit"`,
+    `"sqrt"`, `"asinsqrt"`, or a custom pair of functions).
+    `print(scale = "original", at = )` gives the bias, limits,
+    confidence bounds, and repeatability coefficients in original units
+    at chosen levels (default: the median of the item averages).
+  - With one measurement per item by two methods it reproduces
+    `agreement_limit(data_type = "simple")` and
+    [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md);
+    on the oximetry data of Carstensen (2010) it reproduces MethComp’s
+    `BA.est()`.
+  - With one measurement per item and three or more methods, the items
+    are random effects (with fixed item effects the likelihood is
+    unbounded) and the method-specific residual SDs absorb the
+    method-by-item variation.
+  - In simulations (15 to 60 items, 2 or 3 replicates, 2 or 3 methods;
+    95% targets), coverage of the bias CIs was 0.94 to 0.96 and of the
+    confidence bounds of the limits 0.91 to 0.96, lowest (slightly
+    liberal) with 15 items.
+  - Methods: [`print()`](https://rdrr.io/r/base/print.html),
+    [`summary()`](https://rdrr.io/r/base/summary.html),
+    [`coef()`](https://rdrr.io/r/stats/coef.html),
+    [`confint()`](https://rdrr.io/r/stats/confint.html),
+    [`vcov()`](https://rdrr.io/r/stats/vcov.html),
+    [`predict()`](https://rdrr.io/r/stats/predict.html),
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+    (`type = "ba"`, `"matrix"`, `"vc"`), and
+    [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md).
+- Added
+  [`method_convert()`](https://aaroncaldwell.us/SimplyAgree/reference/method_convert.md)
+  for conversion equations between methods, with prediction limits:
+  - from a
+    [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+    fit (constant bias, `object =`);
+  - `bias = "linear"`: regression of the differences on the averages for
+    each pair, with constant or linear SD of the differences, and
+    cluster-robust standard errors with replicates;
+  - `bias = "scaled"`: the scaled model, fit by alternating regression
+    (`estimator = "altreg"`, the default), which reproduces MethComp’s
+    `AltReg()` on the oximetry data, or by maximum likelihood of the
+    structural model (`estimator = "ml"`, with the lavaan package, now
+    in Suggests).
+    - Maximum likelihood gives Wald intervals for the conversion
+      intercepts, slopes, and prediction SDs, with t quantiles on
+      (items - 1) df. In simulations with 15 to 60 items, 2 or 3
+      methods, linked or exchangeable replicates, missing measurements,
+      and uniform or skewed true values, 95% intervals covered 92% to
+      97% (prediction SDs 92% to 95%). The summary reports the model’s
+      chi-square test of fit, RMSEA, and SRMR; zero or negative variance
+      estimates give a warning.
+    - The alternating regression gives delta-method (default) or
+      parametric bootstrap (`ci_method = "boot"`) intervals. The
+      delta-method intervals treat the predicted true values as known
+      and are much too narrow (53% to 73% coverage of 95% intervals in
+      the same simulations); the bootstrap has not been checked by
+      simulation.
+  - Methods: [`print()`](https://rdrr.io/r/base/print.html),
+    [`summary()`](https://rdrr.io/r/base/summary.html),
+    [`coef()`](https://rdrr.io/r/stats/coef.html),
+    [`confint()`](https://rdrr.io/r/stats/confint.html),
+    [`predict()`](https://rdrr.io/r/stats/predict.html)
+    (back-transformed to the original scale),
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+    (`type = "conversion"`, `"ba"`), and
+    [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md).
+  - With `variance = "linear"`, a warning is given when the fitted SD of
+    the differences is not positive over part of the observed range of
+    the averages.
+- The Bland-Altman plots and
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  of
+  [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+  and
+  [`method_convert()`](https://aaroncaldwell.us/SimplyAgree/reference/method_convert.md)
+  follow the style of
+  [`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md)
+  and
+  [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md):
+  - With a constant bias, the bias and limits are drawn as points with
+    their confidence intervals to the left of the data; with a bias that
+    changes with the level, as coloured lines.
+    [`plot()`](https://rdrr.io/r/graphics/plot.default.html) takes the
+    `geom` and `delta` (maximal allowable difference) arguments of
+    [`plot.loa()`](https://aaroncaldwell.us/SimplyAgree/reference/loa-methods.md).
+  - Each
+    [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+    panel has a subtitle saying what to look for, and the tests are
+    given in its caption: Shapiro-Wilk for normality, Breusch-Pagan for
+    homogeneity of variance, Pitman-Morgan for proportional bias, and
+    (linear conversions) a RESET test of linearity. Tests for pairs of
+    methods use item means, so replicates are not counted more than
+    once.
+- Added
+  [`sim_methods()`](https://aaroncaldwell.us/SimplyAgree/reference/sim_methods.md)
+  to simulate method comparison data from the scaled variance component
+  model, with the true limits, repeatability coefficients, and
+  conversions in the `truth` attribute.
+- Added
+  [`mc_long()`](https://aaroncaldwell.us/SimplyAgree/reference/mc_long.md)
+  to convert data with one column per method to the long format.
+- New vignettes: “Comparing Several Methods with Replicate Measurements”
+  and “Converting Between Methods”.
+
+### Proportional bias diagnostics in `check()`
+
+A slope of the differences on the means only shows that the two methods
+have unequal variances, since cov(x - y, x + y) = var(x) - var(y). This
+can come from unequal measurement error as well as from proportional
+bias (Bland & Altman, 1999; Hopkins, 2004). The proportional bias panel
+of
+[`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+for
+[`agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/agreement_limit.md),
+[`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md),
+and
+[`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+now says what it tests and, where possible, corrects for the error
+variances:
+
+- The test is labelled as the Pitman-Morgan test of equal variances.
+  When it is significant with one measurement per method,
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  gives a message that it cannot separate proportional bias from unequal
+  measurement error.
+- With replicates (`agreement_limit(data_type = "reps")`,
+  [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+  with replicates), the test uses subject means and is corrected for the
+  measurement error variances estimated from the replicates (jackknife
+  over subjects). Only their difference is used, so linked replicates do
+  not bias it. The error-adjusted slope is drawn as a dashed line. In
+  simulations with unequal error and no proportional bias, it rejected
+  at about 5% to 6.5%.
+- New `error.ratio` argument to
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  for single-measurement designs: with a known error variance ratio, the
+  Deming slope (as in
+  [`dem_reg()`](https://aaroncaldwell.us/SimplyAgree/reference/dem_reg.md))
+  is tested against 1.
+- New `bias_line` argument to
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  chooses the dashed line drawn with the corrected test: `"adjusted"`
+  (default), the error-adjusted slope, which should be flat without
+  proportional bias and gives its size (`beta`); or `"expected"`, the
+  slope expected from unequal measurement error alone, which the
+  observed line should follow. The help pages (“Choosing `bias_line`” in
+  [`?check.loa`](https://aaroncaldwell.us/SimplyAgree/reference/loa-methods.md))
+  and the agreement vignette describe the pros and cons of each. The
+  panel now has a legend for the two lines.
+- [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  for
+  [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
+  now reports the Pitman-Morgan test (on subject means with `id`, by
+  condition with `condition`).
+- The results are attached to the output of
+  [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  as the attribute `"prop_bias"` (a data frame with the test, the
+  observed and error-adjusted slopes, the implied scale `beta` of one
+  method relative to the other, and the within-subject variances), so
+  they can be reported.
+- The “Proportional Bias” section of the agreement vignette now explains
+  how to read the plot and the test, and what to do with the result for
+  each design.
+
+Results that change:
+
+- [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  for `agreement_limit(data_type = "reps")` previously tested the slope
+  with a row-level mixed model, which pairs exchangeable replicates
+  arbitrarily; with unequal measurement error and no proportional bias
+  it rejected about 40% of the time at the 5% level.
+- With `log_tf = TRUE`, the test now uses the mean on the log scale (it
+  used the mean on the original scale), so it tests equal variances on
+  the analysis scale. The `prop_bias` models are unchanged.
+- The proportional bias panel shows the centred differences, not the
+  residuals of the fitted model, so it no longer looks flat when
+  `prop_bias = TRUE`.
+
+Bug fixes:
+
+- [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  for `agreement_limit(prop_bias = TRUE)` reported p = NA for
+  proportional bias.
+- [`check()`](https://aaroncaldwell.us/SimplyAgree/reference/simple_agree-methods.md)
+  for `tolerance_limit(keep_model = FALSE)` failed; it now draws the
+  proportional bias panel and notes that the other panels need the
+  model.
+
+### Model equations
+
+- Added
+  [`model_equation()`](https://aaroncaldwell.us/SimplyAgree/reference/model_equation.md)
+  (experimental), which writes the statistical model behind a result as
+  LaTeX: the mean model, the distributions of the random effects and
+  residuals, and any variance function or correlation structure.
+  - Methods for
+    [`tolerance_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md),
+    [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md),
+    [`reli_err_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_err_test.md),
+    [`mdc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/mdc_test.md),
+    [`reli_facet_test()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_facet_test.md),
+    [`reli_stats()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md),
+    [`reli_aov()`](https://aaroncaldwell.us/SimplyAgree/reference/reli_stats.md),
+    [`method_vc()`](https://aaroncaldwell.us/SimplyAgree/reference/method_vc.md)
+    and
+    [`method_convert()`](https://aaroncaldwell.us/SimplyAgree/reference/method_convert.md)
+    results, using the notation of the vignettes, and for `lm`, `lmer`,
+    `gls` and `lme` models.
+  - Symbols by default; `use_coefs = TRUE` substitutes the estimates
+    (`coef_digits` sets the decimals).
+  - Prints the LaTeX code at the console and renders as display math in
+    R Markdown and Quarto. No new dependencies.
+
 ## SimplyAgree 0.4.0
 
 ### Results that change

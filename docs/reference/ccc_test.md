@@ -182,8 +182,10 @@ ordinary least squares. Deming regression estimates the relationship
 identity, whereas the CCC summarizes that deviation in a single index.
 
 **Simple data.** Lin's (1989) estimator and asymptotic standard error
-are used, from the complete pairs; these match `DescTools::CCC()` and
-`epiR::epi.ccc()` (with `ci = "z-transform"`).
+are used, from the complete pairs; these match
+[`DescTools::CCC()`](https://andrisignorell.github.io/DescTools/reference/CCC.html)
+and [`epiR::epi.ccc()`](https://rdrr.io/pkg/epiR/man/epi.ccc.html) (with
+`ci = "z-transform"`).
 
 **Replicate data** (`"reps"`; the true value is constant within a
 subject). The CCC is estimated from variance components (Carrasco &

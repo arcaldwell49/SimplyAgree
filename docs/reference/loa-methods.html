@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for loa objects — loa-methods"><meta name="description" content="Methods defined for objects returned from the agreement_limit function."><meta property="og:description" content="Methods defined for objects returned from the agreement_limit function."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for loa objects — loa-methods"><meta name="description" content="Methods defined for objects returned from the agreement_limit function."><meta property="og:description" content="Methods defined for objects returned from the agreement_limit function."><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,8 @@
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
     <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/method_conversion.html">Converting Between Methods</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -73,7 +75,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'loa'</span></span>
-<span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="simple_agree-methods.html">check</a></span><span class="op">(</span><span class="va">x</span>, error.ratio <span class="op">=</span> <span class="cn">NULL</span>, bias_line <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"adjusted"</span>, <span class="st">"expected"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -101,6 +103,21 @@ for details.
 <dt id="arg-delta">delta<a class="anchor" aria-label="anchor" href="#arg-delta"></a></dt>
 <dd><p>The maximal allowable difference.</p></dd>
 
+
+<dt id="arg-error-ratio">error.ratio<a class="anchor" aria-label="anchor" href="#arg-error-ratio"></a></dt>
+<dd><p>For <code>check</code>, an optional known ratio of the measurement
+error variances, var(error of x) / var(error of y), as in <code><a href="dem_reg.html">dem_reg()</a></code>,
+on the analysis scale (the log scale with <code>log_tf = TRUE</code>). Used only
+with <code>data_type = "simple"</code>; see "Proportional bias diagnostic".</p></dd>
+
+
+<dt id="arg-bias-line">bias_line<a class="anchor" aria-label="anchor" href="#arg-bias-line"></a></dt>
+<dd><p>For <code>check</code>, the second (dashed) line drawn on the
+proportional bias panel when the test is corrected for measurement error
+(replicates or <code>error.ratio</code>): "adjusted" (default), the error-adjusted
+slope, or "expected", the slope expected from unequal measurement error
+alone. The test is the same either way. See "Choosing <code>bias_line</code>".</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -112,10 +129,85 @@ for details.
 <dd><p>Returns a plot of the limits of agreement.</p></dd>
 
 <dt><code>check</code></dt>
-<dd><p>Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality and heteroskedascity tests are provided as captions to the plot.</p></dd>
+<dd><p>Returns plots testing the assumptions of a Bland-Altman analysis. P-values for the normality, heteroskedasticity, and proportional bias tests are provided as captions to the plot. The proportional bias results are attached as the attribute <code>"prop_bias"</code>, a data frame with the test (<code>test</code>, <code>corrected</code>, <code>n</code>, <code>statistic</code>, <code>df</code>, <code>p.value</code>, and <code>p.uncorrected</code>, the uncorrected Pitman-Morgan p-value), the observed slope of the differences on the means (<code>slope_obs</code>), the slope expected from unequal measurement error alone (<code>slope_null</code>) and the error-adjusted slope (<code>slope_adj</code>), the implied scale of y relative to x on the true values, <code>beta</code> = (2 - <code>slope_adj</code>)/(2 + <code>slope_adj</code>), the within-subject variances (<code>sw2_x</code>, <code>sw2_y</code>), and <code>error.ratio</code>. Columns that do not apply are <code>NA</code>.</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="proportional-bias-diagnostic">Proportional bias diagnostic<a class="anchor" aria-label="anchor" href="#proportional-bias-diagnostic"></a></h2>
+
+
+<p>The proportional bias panel of <code><a href="simple_agree-methods.html">check()</a></code> plots the differences (centred)
+against the means, on the analysis scale (the log scale for
+log-transformed data), whether or not the fit used <code>prop_bias</code>. Because
+cov(x - y, x + y) = var(x) - var(y), a slope of the differences on the
+means only shows that the two methods have unequal total variance; the
+test of the slope is the Pitman-Morgan test of equal variances. Unequal
+variances arise from a true proportional bias (y = a + b x with b not 1),
+but also from unequal measurement error or from a prior calibration of one
+method on the other (Bland &amp; Altman, 1999; Hopkins, 2004). With one
+measurement per method these cannot be told apart, and <code><a href="simple_agree-methods.html">check()</a></code> says so
+when the test is significant.</p>
+<p>What is tested depends on the design:</p><ul><li><p><strong>One measurement per method</strong> (<code>data_type = "simple"</code>): the
+Pitman-Morgan test (t on n - 2 df). With <code>error.ratio</code>, the Deming
+slope of y on x for that error ratio is tested against 1 instead (the
+test reported by <code><a href="dem_reg.html">dem_reg()</a></code>). The error variances implied by the
+Deming fit give the slope expected from unequal error.</p></li>
+<li><p><strong>Replicates</strong> (<code>data_type = "reps"</code>): the test uses subject means
+and is corrected for unequal measurement error. The covariance of the
+subject-mean differences and sums is compared with its expected value
+without proportional bias, \(s^2_{wx}\overline{1/m_x} -
+    s^2_{wy}\overline{1/m_y}\), from the pooled within-subject variances,
+rather than with zero. The standard error is a jackknife over
+subjects (re-estimating the within-subject variances) with n - 1 df.
+Only the difference of the error variances enters, so an occasion
+effect shared by both methods (linked replicates) cancels. Complete
+pairs of measurements are used.</p></li>
+<li><p><strong>Nested data</strong> (<code>data_type = "nest"</code>): the true value changes
+within a subject, so the error variances cannot be estimated; the slope
+is tested with a random-intercept model (likelihood ratio test) and is
+subject to the same limitation as one measurement per method.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="choosing-bias-line">Choosing <code>bias_line</code><a class="anchor" aria-label="anchor" href="#choosing-bias-line"></a></h2>
+
+
+<p>When the test is corrected for measurement error (replicates or
+<code>error.ratio</code>), the panel shows the observed least-squares slope (solid,
+with its confidence band, which is not corrected) and a second, dashed
+line chosen by <code>bias_line</code>. The test and its p-value are the same for both
+choices; only the picture differs.</p><ul><li><p><strong>"adjusted"</strong> (default): the error-adjusted slope, the slope of the
+differences on the means that would be seen without measurement error,
+2(1 - beta)/(1 + beta) for y = a + beta x on the true values. Without
+proportional bias it is horizontal.</p><ul><li><p>Pros: one simple rule (is the dashed line flat?); its slope gives
+<code>beta</code>, the size of the proportional bias, which is reported in the
+caption; it applies in the same way to replicates and <code>error.ratio</code>.</p></li>
+<li><p>Cons: the test is of the covariance, not of this slope, so how far
+the line is from flat is not a direct picture of the test statistic;
+when the error variances are similar it lies on top of the observed
+line and is hard to see.</p></li>
+</ul></li>
+<li><p><strong>"expected"</strong>: the slope expected from unequal measurement error
+alone, with no proportional bias. Without proportional bias the
+observed (solid) line should follow it.</p><ul><li><p>Pros: the gap between the two lines is what is tested, so the
+picture matches the p-value; it shows directly how much of the
+observed slope unequal error can explain.</p></li>
+<li><p>Cons: "the solid line should follow the dashed one" is harder to
+judge than "the dashed line should be flat"; the size of the
+proportional bias (<code>beta</code>) is not shown (it is in the <code>"prop_bias"</code>
+attribute).</p></li>
+</ul></li>
+</ul><p>Neither line shows its own uncertainty; use the p-value (and, for the
+size, <code>beta</code>) rather than judging the lines by eye, particularly with few
+subjects.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Bland, J. M., &amp; Altman, D. G. (1999). Measuring agreement in method
+comparison studies. Statistical Methods in Medical Research, 8(2), 135-160.</p>
+<p>Hopkins, W. G. (2004). Bias in Bland-Altman but not regression validity
+analyses. Sportscience, 8, 42-46.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
@@ -126,7 +218,7 @@ for details.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -100,7 +100,6 @@ R package.
 ``` r
 
 library(deming)
-#> Warning: package 'deming' was built under R version 4.4.3
 data('ferritin')
 
 head(ferritin)

@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Articles"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Articles"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,8 @@
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
     <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/method_conversion.html">Converting Between Methods</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -57,19 +59,23 @@
       <div class="section-desc"></div>
 
       <dl><dt><a href="agree_tests.html">Agreement Tests</a></dt>
-        <dd>
+        <dd><p>Legacy agreement tests in SimplyAgree (agree_test, agree_reps, agree_nest), plus concordance correlation (CCC) and non-parametric limits of agreement with agree_np.</p>
         </dd><dt><a href="agreement_analysis.html">Agreement &amp; Tolerance Limits</a></dt>
-        <dd>
+        <dd><p>Bland-Altman limits of agreement and tolerance limits in R with agreement_limit() and tolerance_limit(), for simple, replicate, and nested data.</p>
         </dd><dt><a href="categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></dt>
-        <dd>
+        <dd><p>Agreement for categorical and ordinal ratings in R: kappa, Gwet’s AC1, and Krippendorff’s alpha with cac_test(), and model-based kappa for many raters with ord_kappa_test().</p>
         </dd><dt><a href="Deming.html">Errors-in-Variables Regression</a></dt>
+        <dd><p>Errors-in-variables regression for method comparison in R: Deming regression with dem_reg() and Passing-Bablok regression with pb_reg().</p>
+        </dd><dt><a href="method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></dt>
+        <dd>
+        </dd><dt><a href="method_conversion.html">Converting Between Methods</a></dt>
         <dd>
         </dd><dt><a href="power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></dt>
-        <dd>
+        <dd><p>Power analysis and sample size planning for Bland-Altman agreement studies: exact agreement tests, limits of agreement power, expected CI half-width, and assurance.</p>
         </dd><dt><a href="reanalysis.html">Re-analysis of an Agreement Study</a></dt>
-        <dd>
+        <dd><p>Worked example re-analysing a published agreement study of rectal vs. esophageal temperature with concordance correlation, limits of agreement, and tolerance limits.</p>
         </dd><dt><a href="reliability_analysis.html">Reliability Analysis</a></dt>
-        <dd>
+        <dd><p>Test-retest and inter-rater reliability in R: intraclass correlation (ICC) with icc_test(), SEM and coefficient of variation, minimal detectable change, and study planning.</p>
       </dd></dl></div>
   </main></div>
 
@@ -79,7 +85,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

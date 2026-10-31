@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Changelog"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Changelog"><meta property="og:image" content="https://aaroncaldwell.us/SimplyAgree/images/sticker.png"><meta property="og:image:alt" content="SimplyAgree logo"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,8 @@
     <li><a class="dropdown-item" href="../articles/agreement_analysis.html">Agreement &amp; Tolerance Limits</a></li>
     <li><a class="dropdown-item" href="../articles/categorical_agreement.html">Agreement for Categorical and Ordinal Ratings</a></li>
     <li><a class="dropdown-item" href="../articles/Deming.html">Errors-in-Variables Regression</a></li>
+    <li><a class="dropdown-item" href="../articles/method_comparison_vc.html">Comparing Several Methods with Replicate Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/method_conversion.html">Converting Between Methods</a></li>
     <li><a class="dropdown-item" href="../articles/power_sample_size_vignette.html">Power Analysis and Sample Size Determination for Agreement Studies</a></li>
     <li><a class="dropdown-item" href="../articles/reanalysis.html">Re-analysis of an Agreement Study</a></li>
     <li><a class="dropdown-item" href="../articles/reliability_analysis.html">Reliability Analysis</a></li>
@@ -53,6 +55,69 @@
       <small>Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="simplyagree-050-development-version">SimplyAgree 0.5.0 (development version)<a class="anchor" aria-label="anchor" href="#simplyagree-050-development-version"></a></h2>
+<p>New functions for comparing two or more methods, with or without replicate measurements, following Carstensen (2010, <em>Comparing Clinical Measurement Methods</em>) and the MethComp package. All are marked experimental.</p>
+<ul><li>Added <code><a href="../reference/method_vc.html">method_vc()</a></code>, which fits the variance component model for method comparison (method-by-item, item-by-replicate, and method-specific residual variances) to two or more methods at once, with linked or exchangeable replicates.
+<ul><li>Reports the bias for every pair of methods, the variance components with confidence intervals, and limits of agreement (<code>interval = "agreement"</code>, MOVER bounds as in <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>) or prediction and tolerance limits (<code>interval = "tolerance"</code>, as in <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>), with <code>bound_type = "iu"</code> or <code>"joint"</code> (which, as in <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>, affects only the tolerance limits).</li>
+<li>Reports repeatability coefficients for each method and, with linked replicates, reproducibility coefficients.</li>
+<li>Supports transformations (<code>"log"</code>, <code>"logit"</code>, <code>"pctlogit"</code>, <code>"sqrt"</code>, <code>"asinsqrt"</code>, or a custom pair of functions). <code>print(scale = "original", at = )</code> gives the bias, limits, confidence bounds, and repeatability coefficients in original units at chosen levels (default: the median of the item averages).</li>
+<li>With one measurement per item by two methods it reproduces <code>agreement_limit(data_type = "simple")</code> and <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>; on the oximetry data of Carstensen (2010) it reproduces MethComp’s <code>BA.est()</code>.</li>
+<li>With one measurement per item and three or more methods, the items are random effects (with fixed item effects the likelihood is unbounded) and the method-specific residual SDs absorb the method-by-item variation.</li>
+<li>In simulations (15 to 60 items, 2 or 3 replicates, 2 or 3 methods; 95% targets), coverage of the bias CIs was 0.94 to 0.96 and of the confidence bounds of the limits 0.91 to 0.96, lowest (slightly liberal) with 15 items.</li>
+<li>Methods: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (<code>type = "ba"</code>, <code>"matrix"</code>, <code>"vc"</code>), and <code><a href="../reference/simple_agree-methods.html">check()</a></code>.</li>
+</ul></li>
+<li>Added <code><a href="../reference/method_convert.html">method_convert()</a></code> for conversion equations between methods, with prediction limits:
+<ul><li>from a <code><a href="../reference/method_vc.html">method_vc()</a></code> fit (constant bias, <code>object =</code>);</li>
+<li>
+<code>bias = "linear"</code>: regression of the differences on the averages for each pair, with constant or linear SD of the differences, and cluster-robust standard errors with replicates;</li>
+<li>
+<code>bias = "scaled"</code>: the scaled model, fit by alternating regression (<code>estimator = "altreg"</code>, the default), which reproduces MethComp’s <code>AltReg()</code> on the oximetry data, or by maximum likelihood of the structural model (<code>estimator = "ml"</code>, with the lavaan package, now in Suggests).
+<ul><li>Maximum likelihood gives Wald intervals for the conversion intercepts, slopes, and prediction SDs, with t quantiles on (items - 1) df. In simulations with 15 to 60 items, 2 or 3 methods, linked or exchangeable replicates, missing measurements, and uniform or skewed true values, 95% intervals covered 92% to 97% (prediction SDs 92% to 95%). The summary reports the model’s chi-square test of fit, RMSEA, and SRMR; zero or negative variance estimates give a warning.</li>
+<li>The alternating regression gives delta-method (default) or parametric bootstrap (<code>ci_method = "boot"</code>) intervals. The delta-method intervals treat the predicted true values as known and are much too narrow (53% to 73% coverage of 95% intervals in the same simulations); the bootstrap has not been checked by simulation.</li>
+</ul></li>
+<li>Methods: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> (back-transformed to the original scale), <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (<code>type = "conversion"</code>, <code>"ba"</code>), and <code><a href="../reference/simple_agree-methods.html">check()</a></code>.</li>
+<li>With <code>variance = "linear"</code>, a warning is given when the fitted SD of the differences is not positive over part of the observed range of the averages.</li>
+</ul></li>
+<li>The Bland-Altman plots and <code><a href="../reference/simple_agree-methods.html">check()</a></code> of <code><a href="../reference/method_vc.html">method_vc()</a></code> and <code><a href="../reference/method_convert.html">method_convert()</a></code> follow the style of <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code> and <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>:
+<ul><li>With a constant bias, the bias and limits are drawn as points with their confidence intervals to the left of the data; with a bias that changes with the level, as coloured lines. <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> takes the <code>geom</code> and <code>delta</code> (maximal allowable difference) arguments of <code><a href="../reference/loa-methods.html">plot.loa()</a></code>.</li>
+<li>Each <code><a href="../reference/simple_agree-methods.html">check()</a></code> panel has a subtitle saying what to look for, and the tests are given in its caption: Shapiro-Wilk for normality, Breusch-Pagan for homogeneity of variance, Pitman-Morgan for proportional bias, and (linear conversions) a RESET test of linearity. Tests for pairs of methods use item means, so replicates are not counted more than once.</li>
+</ul></li>
+<li>Added <code><a href="../reference/sim_methods.html">sim_methods()</a></code> to simulate method comparison data from the scaled variance component model, with the true limits, repeatability coefficients, and conversions in the <code>truth</code> attribute.</li>
+<li>Added <code><a href="../reference/mc_long.html">mc_long()</a></code> to convert data with one column per method to the long format.</li>
+<li>New vignettes: “Comparing Several Methods with Replicate Measurements” and “Converting Between Methods”.</li>
+</ul><div class="section level3">
+<h3 id="proportional-bias-diagnostics-in-check-0-5-0">Proportional bias diagnostics in <code>check()</code>
+<a class="anchor" aria-label="anchor" href="#proportional-bias-diagnostics-in-check-0-5-0"></a></h3>
+<p>A slope of the differences on the means only shows that the two methods have unequal variances, since cov(x - y, x + y) = var(x) - var(y). This can come from unequal measurement error as well as from proportional bias (Bland &amp; Altman, 1999; Hopkins, 2004). The proportional bias panel of <code><a href="../reference/simple_agree-methods.html">check()</a></code> for <code><a href="../reference/agreement_limit.html">agreement_limit()</a></code>, <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>, and <code><a href="../reference/method_vc.html">method_vc()</a></code> now says what it tests and, where possible, corrects for the error variances:</p>
+<ul><li>The test is labelled as the Pitman-Morgan test of equal variances. When it is significant with one measurement per method, <code><a href="../reference/simple_agree-methods.html">check()</a></code> gives a message that it cannot separate proportional bias from unequal measurement error.</li>
+<li>With replicates (<code>agreement_limit(data_type = "reps")</code>, <code><a href="../reference/method_vc.html">method_vc()</a></code> with replicates), the test uses subject means and is corrected for the measurement error variances estimated from the replicates (jackknife over subjects). Only their difference is used, so linked replicates do not bias it. The error-adjusted slope is drawn as a dashed line. In simulations with unequal error and no proportional bias, it rejected at about 5% to 6.5%.</li>
+<li>New <code>error.ratio</code> argument to <code><a href="../reference/simple_agree-methods.html">check()</a></code> for single-measurement designs: with a known error variance ratio, the Deming slope (as in <code><a href="../reference/dem_reg.html">dem_reg()</a></code>) is tested against 1.</li>
+<li>New <code>bias_line</code> argument to <code><a href="../reference/simple_agree-methods.html">check()</a></code> chooses the dashed line drawn with the corrected test: <code>"adjusted"</code> (default), the error-adjusted slope, which should be flat without proportional bias and gives its size (<code>beta</code>); or <code>"expected"</code>, the slope expected from unequal measurement error alone, which the observed line should follow. The help pages (“Choosing <code>bias_line</code>” in <code><a href="../reference/loa-methods.html">?check.loa</a></code>) and the agreement vignette describe the pros and cons of each. The panel now has a legend for the two lines.</li>
+<li>
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> for <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code> now reports the Pitman-Morgan test (on subject means with <code>id</code>, by condition with <code>condition</code>).</li>
+<li>The results are attached to the output of <code><a href="../reference/simple_agree-methods.html">check()</a></code> as the attribute <code>"prop_bias"</code> (a data frame with the test, the observed and error-adjusted slopes, the implied scale <code>beta</code> of one method relative to the other, and the within-subject variances), so they can be reported.</li>
+<li>The “Proportional Bias” section of the agreement vignette now explains how to read the plot and the test, and what to do with the result for each design.</li>
+</ul><p>Results that change:</p>
+<ul><li>
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> for <code>agreement_limit(data_type = "reps")</code> previously tested the slope with a row-level mixed model, which pairs exchangeable replicates arbitrarily; with unequal measurement error and no proportional bias it rejected about 40% of the time at the 5% level.</li>
+<li>With <code>log_tf = TRUE</code>, the test now uses the mean on the log scale (it used the mean on the original scale), so it tests equal variances on the analysis scale. The <code>prop_bias</code> models are unchanged.</li>
+<li>The proportional bias panel shows the centred differences, not the residuals of the fitted model, so it no longer looks flat when <code>prop_bias = TRUE</code>.</li>
+</ul><p>Bug fixes:</p>
+<ul><li>
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> for <code>agreement_limit(prop_bias = TRUE)</code> reported p = NA for proportional bias.</li>
+<li>
+<code><a href="../reference/simple_agree-methods.html">check()</a></code> for <code>tolerance_limit(keep_model = FALSE)</code> failed; it now draws the proportional bias panel and notes that the other panels need the model.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="model-equations-0-5-0">Model equations<a class="anchor" aria-label="anchor" href="#model-equations-0-5-0"></a></h3>
+<ul><li>Added <code><a href="../reference/model_equation.html">model_equation()</a></code> (experimental), which writes the statistical model behind a result as LaTeX: the mean model, the distributions of the random effects and residuals, and any variance function or correlation structure.
+<ul><li>Methods for <code><a href="../reference/tolerance_limit.html">tolerance_limit()</a></code>, <code><a href="../reference/icc_test.html">icc_test()</a></code>, <code><a href="../reference/reli_err_test.html">reli_err_test()</a></code>, <code><a href="../reference/mdc_test.html">mdc_test()</a></code>, <code><a href="../reference/reli_facet_test.html">reli_facet_test()</a></code>, <code><a href="../reference/reli_stats.html">reli_stats()</a></code>, <code><a href="../reference/reli_stats.html">reli_aov()</a></code>, <code><a href="../reference/method_vc.html">method_vc()</a></code> and <code><a href="../reference/method_convert.html">method_convert()</a></code> results, using the notation of the vignettes, and for <code>lm</code>, <code>lmer</code>, <code>gls</code> and <code>lme</code> models.</li>
+<li>Symbols by default; <code>use_coefs = TRUE</code> substitutes the estimates (<code>coef_digits</code> sets the decimals).</li>
+<li>Prints the LaTeX code at the console and renders as display math in R Markdown and Quarto. No new dependencies.</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="simplyagree-040">SimplyAgree 0.4.0<a class="anchor" aria-label="anchor" href="#simplyagree-040"></a></h2>
 <div class="section level3">
@@ -232,7 +297,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

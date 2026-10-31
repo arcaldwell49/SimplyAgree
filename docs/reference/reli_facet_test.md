@@ -2,13 +2,12 @@
 
 **\[experimental\]**
 
-**The name of this function is experimental and may change** (it was
-briefly `gstudy_test()` during development); its arguments may change
-too.
+**This function is experimental and may change**; its arguments and name
+may change too even if its functionality is retained.
 
 Estimates one reliability coefficient or one standard error of
 measurement (SEM) when each subject is measured more than once by each
-item (rater, device): for example 3 operators each scanning 20
+item (rater, device). For example, 3 operators each scanning 20
 participants twice. The extra measurements separate error *within* a
 rater from disagreement *between* raters, which
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
@@ -18,7 +17,8 @@ cannot do with one measurement per subject and item. The measurements
 can be exchangeable repeats within each subject-by-item cell (the
 default), or shared occasions (`occasion`: every rater measured every
 subject on day 1 and again on day 2). The model is the
-generalizability-theory (G-study) model for that design. Returns an
+generalizability-theory (G-study) model for that design. It's G-study
+capabilities are narrow, which is purposeful at this time. Returns an
 object of class `"htest"` with a confidence interval and an optional
 test.
 
@@ -224,27 +224,27 @@ A list of class `c("reli_htest", "htest")` containing:
 
 ## Details
 
-**Nested or crossed.** Ask whether "measurement 2" is the same event for
-every item. If each operator simply scanned each participant twice, in
-no shared order, the measurements are exchangeable repeats nested in the
-subject-by-item cell: leave `occasion = NULL`. If every operator
-measured everyone on day 1 and again on day 2, the days are shared
-occasions: give `occasion`. Treating occasions as repeats counts
-day-to-day shifts as repeat error, so the intra-rater error looks larger
-and cannot be split into a systematic shift (fixable) and noise. With
-`occasion`, the result (in `nested`) and
+When considered nested versus crossed, ask whether "measurement 2" is
+the same event for every item. If each operator simply scanned each
+participant twice, in no shared order, the measurements are exchangeable
+repeats nested in the subject-by-item cell: leave `occasion = NULL`. If
+every operator measured everyone on day 1 and again on day 2, the days
+are shared occasions: give `occasion`. Treating occasions as repeats
+counts day-to-day shifts as repeat error, so the intra-rater error looks
+larger and cannot be split into a systematic shift (fixable) and noise.
+With `occasion`, the result (in `nested`) and
 [`summary()`](https://rdrr.io/r/base/summary.html) also give what the
 repeat model would have estimated.
 
-**Model.** All effects are random. Without `occasion`, with n subjects,
-k items and r repeats per cell, \$\$y\_{pir} = \mu + p + i + (pi) +
-e\_{pir};\$\$ with `occasion` (m occasions), \$\$y\_{pio} = \mu + p +
-i + o + (pi) + (po) + (io) + (pio, e),\$\$ where with one measurement
-per subject, item and occasion the three-way interaction and the error
-are not separable (the residual). Further repeats within each subject,
-item and occasion are allowed and add a separate repeat error. The ANOVA
-estimators are unconstrained: a negative variance component estimate is
-kept (as
+For the model, all effects are random. Without `occasion`, with n
+subjects, k items and r repeats per cell, \$\$y\_{pir} = \mu + p + i +
+(pi) + e\_{pir};\$\$ with `occasion` (m occasions), \$\$y\_{pio} = \mu +
+p + i + o + (pi) + (po) + (io) + (pio, e),\$\$ where with one
+measurement per subject, item and occasion the three-way interaction and
+the error are not separable (the residual). Further repeats within each
+subject, item and occasion are allowed and add a separate repeat error.
+The ANOVA estimators are unconstrained: a negative variance component
+estimate is kept (as
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 keeps a negative ICC), so a coefficient can be negative. The component
 table in `components` (and
@@ -255,11 +255,10 @@ McGraw and Wong (1996); for the consistency forms the items may be
 regarded as fixed, which changes the interpretation but not the
 computation.
 
-**Estimands.** Following Brennan (2001), the facet that stays the same
-is part of the subject's score, and the facets that vary are error. For
-a planned score that is the mean of \\k'\\ items (`k_avg`), \\m'\\
-occasions (`m_avg`) and \\r'\\ repeats (`r_avg`), the error variance
-(SEM\\^2\\) is:
+Following Brennan (2001), the facet that stays the same is part of the
+subject's score, and the facets that vary are error. For a planned score
+that is the mean of \\k'\\ items (`k_avg`), \\m'\\ occasions (`m_avg`)
+and \\r'\\ repeats (`r_avg`), the error variance (SEM\\^2\\) is:
 
 |  |  |  |  |
 |----|----|----|----|
@@ -284,10 +283,11 @@ coefficients are the generalizability (\\E\rho^2\\) and dependability
 \\\sigma^2_e\\ is repeatability and \\\sigma^2_i + \sigma^2\_{pi}\\
 reproducibility.
 
-**What averaging does.** Without `occasion` and with \\r' = r\\ (the
-score averages as many repeats as the study had), the inter-rater
-consistency coefficient is the consistency ICC of the cell means, \\(F -
-1)/(F - 1 + k/k')\\ with \\F = MS_P/MS\_{PI}\\, identical to
+It is important to know what averaging does for this function. Without
+`occasion` and with \\r' = r\\ (the score averages as many repeats as
+the study had), the inter-rater consistency coefficient is the
+consistency ICC of the cell means, \\(F - 1)/(F - 1 + k/k')\\ with \\F =
+MS_P/MS\_{PI}\\, identical to
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 on the cell means; it is not the reliability of a *single* measurement
 unless r = 1. Averaging the repeats before calling
@@ -295,11 +295,11 @@ unless r = 1. Averaging the repeats before calling
 is therefore only right when the scores used in practice are also means
 of r repeats.
 
-**Intervals and tests.** An estimand that is a multiple of one mean
-square (an SEM) or a function of the ratio of two (a coefficient) has an
-exact interval and test: without `occasion`, the intra SEM (\\\chi^2\\
-on \\MS_W\\) and the inter-rater consistency SEM and coefficient with
-\\r' = r\\. The others are approximate:
+An estimand that is a multiple of one mean square (an SEM) or a function
+of the ratio of two (a coefficient) has an exact interval and test.
+Without `occasion`, the intra SEM (\\\chi^2\\ on \\MS_W\\) and the
+inter-rater consistency SEM and coefficient with \\r' = r\\. The others
+are approximate:
 
 - `"mls"`: modified large-sample intervals for linear combinations of
   mean squares (Graybill & Wang, 1980; Ting et al., 1990; Burdick &
@@ -319,8 +319,8 @@ on \\MS_W\\) and the inter-rater consistency SEM and coefficient with
 SEMs with `scale = "mean"` use a Wald interval on the log scale with a
 delta-method SE that includes the uncertainty of the grand mean.
 
-**Bootstrap.** `boot = TRUE` resamples subjects, each with all its
-measurements, as in
+When wanting bootstrapped results, `boot = TRUE` resamples subjects,
+each with all its measurements, as in
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md).
 Resampling subjects keeps the same items and occasions, so for
 statistics that count systematic differences between them as error, the
@@ -328,13 +328,13 @@ mean squares of the effects without subjects (items, occasions, items by
 occasions) are also multiplied by independent \\\chi^2\_{df}/df\\ draws
 (the hybrid step). The p-value inverts the interval and is approximate.
 
-**Unbalanced data.** `method = "reml"` fits the model with lme4 and
-keeps the analytic inference, with degrees of freedom from the observed
-data and the harmonic mean number of repeats in place of r, and gives a
-warning.
+When there is unbalanced data, `method = "reml"` fits the model with
+lme4 and keeps the analytic inference, with degrees of freedom from the
+observed data and the harmonic mean number of repeats in place of r, and
+gives a warning.
 
-**Simulations.** Repeats (no `occasion`): with 10 or 30 subjects, 2, 3
-or 5 items, 2 or 3 repeats, four mixes of variance components and normal
+In simulations, repeats (no `occasion`): with 10 or 30 subjects, 2, 3 or
+5 items, 2 or 3 repeats, four mixes of variance components and normal
 data (2000 data sets per setting), the exact intervals covered 0.940 to
 0.951 and the MLS intervals at least 0.939 for every estimand (0.95 to
 0.96 on average; slightly conservative for \\\Phi\\), hence
@@ -352,15 +352,15 @@ subjects and 0.928 with 10, for every facet, type and statistic; the
 Satterthwaite intervals fell to 0.69 to 0.79 for the agreement
 statistics.
 
-**Uneven tails for agreement statistics.** The agreement statistics
-include a component estimated from very few degrees of freedom (items,
-or occasions: k - 1 or m - 1). The MLS bound that this component drives
-is wide, and the other bound is close to nominal. With 30 subjects and
-95% two-sided intervals, the agreement coefficients fell below their
-lower limit 0 to 1% of the time and above their upper limit about 3%
-(nominal 2.5% each; two-sided coverage up to 0.97 to 0.99 with
-occasions), and the agreement SEMs fell above their upper limit 0 to
-0.6% of the time and below their lower limit 3 to 6%. So the usual
+**Warning:** there are uneven tails for agreement statistics. The
+agreement statistics include a component estimated from very few degrees
+of freedom (items, or occasions: k - 1 or m - 1). The MLS bound that
+this component drives is wide, and the other bound is close to nominal.
+With 30 subjects and 95% two-sided intervals, the agreement coefficients
+fell below their lower limit 0 to 1% of the time and above their upper
+limit about 3% (nominal 2.5% each; two-sided coverage up to 0.97 to 0.99
+with occasions), and the agreement SEMs fell above their upper limit 0
+to 0.6% of the time and below their lower limit 3 to 6%. So the usual
 one-sided tests are conservative: a coefficient greater than a threshold
 (`alternative = "greater"`) and an SEM less than an acceptable error
 (`alternative = "less"`). The opposite one-sided tests can be somewhat
@@ -389,8 +389,9 @@ skewed data), but for the agreement statistics the MLS interval was as
 good or better even with skewed data, and every interval under-covered
 when a day effect on 2 days dominated the error.
 
-**Other software.** VCA (variance components for deeper nesting and
-laboratory precision designs), rptR (repeatability for non-Gaussian
+**Other software:** Given the narrow range of application, I want
+highlight a few R packages. VCA (variance components for deeper nesting
+and laboratory precision designs), rptR (repeatability for non-Gaussian
 data), gtheoryr (crossed multi-facet G-studies and D-study design
 optimisation), SixSigma (`ss.rr()`, gauge R&R summaries) and MethComp
 (method comparison with linked replicates and method-specific variances)
