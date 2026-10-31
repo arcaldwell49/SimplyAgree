@@ -19,7 +19,7 @@
   object,
   newdata = NULL,
   type = c("xy", "md"),
-  interval = c("none", "confidence", "prediction"),
+  interval = c("none", "confidence", "band", "prediction"),
   level = NULL,
   reps_x = 1,
   reps_y = 1,
@@ -30,7 +30,7 @@
 \method{plot}{simple_bls}(
   x,
   type = c("xy", "md"),
-  interval = c("none", "confidence", "prediction"),
+  interval = c("none", "confidence", "band", "prediction"),
   level = NULL,
   x_name = NULL,
   y_name = NULL,
@@ -58,9 +58,13 @@ subjects' values are used.}
 \code{x}, or \code{"md"} for the CBLS line in the Bland-Altman plot (differences
 \code{x - y} against means).}
 
-\item{interval}{\code{"none"} (default), \code{"confidence"} (for the line), or
-\code{"prediction"} (for a new measurement by \code{y}, or a new difference, given
-a new measurement by \code{x}, or a new mean).}
+\item{interval}{\code{"none"} (default), \code{"confidence"} (pointwise, for the
+line at each value), \code{"band"} (simultaneous confidence band for the
+whole line), or \code{"prediction"} (for a new measurement by \code{y}, or a new
+difference, given a new measurement by \code{x}, or a new mean). The band uses
+the Working-Hotelling multiplier \verb{sqrt(2 F(2, n - 2))}, so it contains
+exactly the lines (intercept, slope) that \code{\link[=joint_test]{joint_test()}} does not
+reject; BivRegBLS's band also multiplies by \code{sqrt((n - 1) / (n - 2))}.}
 
 \item{level}{Level of the intervals. Default is the \code{conf.level} of the fit
 for confidence intervals and its \code{pred_level} for prediction intervals.}

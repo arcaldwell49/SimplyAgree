@@ -149,12 +149,27 @@ implementation):
   Deming identity, minimiser of the BLS objective with unequal replicates,
   CBLS line = transformed BLS line.
 
+Done since (2026-10-31, second round):
+
+- Coverage simulations (`references/general/cbls_sims/`): constant
+  variances (known, balanced/unbalanced replicates) and proportional error
+  (known functions, `var_model = "proportional"`/`"power"`); 93-97%
+  coverage, joint test size 4-6.5%.
+- Simultaneous band: `predict(interval = "band")`, Working-Hotelling
+  `sqrt(2 F(2, n - 2))`, dual to `joint_test()` (BivRegBLS adds
+  `sqrt((n - 1)/(n - 2))`).
+- Variance functions: `var_x`/`var_y` as functions of the level;
+  `var_model = "constant"/"proportional"/"power"` from replicates; variances
+  evaluated at the estimated true values, refit until stable.
+
 Left:
 
-- Beta-content tolerance intervals around the line (Francq 2016; not in
-  BivRegBLS's `BLS()`/`CBLS()` output either).
-- Simultaneous confidence band (BivRegBLS's "CB").
-- Heteroscedastic variance functions (variance changing with the level,
-  beyond unequal replicates), e.g. a `varPower`-style option.
-- Coverage simulation (`references/general/cbls_sims/`).
-- `method_convert(bias = "linear", estimator = "cbls")` for several methods.
+- Equation error: done (common tau, `equation_error = TRUE`; dispersion
+  test in `summary()`); see `cbls_sims/README.md` study 3.
+- Beta-content tolerance intervals around the line (Francq & Govaerts 2016;
+  full text needed).
+- CBLS in `method_convert(bias = "linear", estimator = "cbls")`: per pair,
+  CBLS's D-on-M line is the same model as the DA regression, so it can feed
+  `mc_da_conversion()`; needs per-method error variances from the replicates
+  and the equation-error decision above (`method_vc()`'s tau is exactly
+  that).

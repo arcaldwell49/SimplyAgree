@@ -13,9 +13,13 @@
 #'   the mean of the two methods for `type = "md"`. A numeric vector, or a
 #'   data frame with a column named as `x` (or `avg`). If omitted, the
 #'   subjects' values are used.
-#' @param interval `"none"` (default), `"confidence"` (for the line), or
-#'   `"prediction"` (for a new measurement by `y`, or a new difference, given
-#'   a new measurement by `x`, or a new mean).
+#' @param interval `"none"` (default), `"confidence"` (pointwise, for the
+#'   line at each value), `"band"` (simultaneous confidence band for the
+#'   whole line), or `"prediction"` (for a new measurement by `y`, or a new
+#'   difference, given a new measurement by `x`, or a new mean). The band uses
+#'   the Working-Hotelling multiplier `sqrt(2 F(2, n - 2))`, so it contains
+#'   exactly the lines (intercept, slope) that [joint_test()] does not
+#'   reject; BivRegBLS's band also multiplies by `sqrt((n - 1) / (n - 2))`.
 #' @param level Level of the intervals. Default is the `conf.level` of the fit
 #'   for confidence intervals and its `pred_level` for prediction intervals.
 #' @param reps_x,reps_y For prediction intervals: the new values are means of
@@ -73,18 +77,47 @@ summary.simple_bls <- function(object, ...) {
   print(object$cbls$model_table, digits = 4)
   cat(sprintf("\n%d degrees of freedom\n", object$df.residual))
   if (e$known) {
-    fmt_df <- function(d) if (is.finite(d)) format(d) else "known"
-    cat(sprintf("Measurement error variances (single measurement): x %.4g (df %s), y %.4g (df %s); %s\n",
-                e$var_x, fmt_df(e$df_var_x), e$var_y, fmt_df(e$df_var_y),
+    fmt_df <- function(d) if (is.finite(d)) format(round(d, 1)) else "known"
+    describe <- function(model, v, p) {
+      switch(model,
+             constant = sprintf("constant, variance %.4g", v),
+             proportional = sprintf("proportional, CV %.4g", p[["cv"]]),
+             power = sprintf("power, variance %.4g * level^(2 * %.3f)",
+                             p[["sigma"]]^2, p[["theta"]]),
+             "given function of the level")
+    }
+    cat(sprintf("Measurement error variance (single measurement), %s:\n",
                 switch(e$source,
                        known = "given",
                        replicates = "estimated from the replicates",
                        "given / estimated from the replicates")))
+    cat(sprintf("  x: %s (df %s)\n", describe(e$model_x, e$var_x, e$params_x),
+                fmt_df(e$df_var_x)))
+    cat(sprintf("  y: %s (df %s)\n", describe(e$model_y, e$var_y, e$params_y),
+                fmt_df(e$df_var_y)))
   } else {
     cat("Measurement error variances: only their ratio is given; ",
         "prediction intervals are not available\n", sep = "")
   }
-  cat(sprintf("Error variance ratio var(x)/var(y): %.4f\n", object$error.ratio))
+  constant <- e$model_x == "constant" && e$model_y == "constant"
+  cat(sprintf("Error variance ratio var(x)/var(y): %.4f%s\n", object$error.ratio,
+              if (constant) "" else " (at the mean level)"))
+  d <- object$dispersion
+  if (!is.null(d) && is.finite(d$p.value)) {
+    test <- if (is.finite(d$df2)) {
+      sprintf("F(%d, %.1f)", as.integer(d$df1), d$df2)
+    } else {
+      sprintf("chi-squared(%d) / %d", as.integer(d$df1), as.integer(d$df1))
+    }
+    cat(sprintf("Dispersion (1 if the measurement errors explain the scatter): %.3f; %s, p = %.4g\n",
+                d$s2, test, d$p.value))
+    if (isTRUE(d$tau2 > 0)) {
+      cat(sprintf("Equation error: SD %.4g of each method's deviations from the line (true-value scale, common to both); included in the fit and the intervals\n",
+                  sqrt(d$tau2)))
+    } else if (!isTRUE(object$equation_error) && d$p.value < 0.05) {
+      cat("Equation error is not modeled (equation_error = FALSE); with a dispersion above 1 the prediction intervals are too narrow\n")
+    }
+  }
   invisible(object)
 }
 
@@ -94,7 +127,8 @@ summary.simple_bls <- function(object, ...) {
 predict.simple_bls <- function(object,
                                newdata = NULL,
                                type = c("xy", "md"),
-                               interval = c("none", "confidence", "prediction"),
+                               interval = c("none", "confidence", "band",
+                                            "prediction"),
                                level = NULL,
                                reps_x = 1,
                                reps_y = 1,
@@ -138,6 +172,8 @@ predict.simple_bls <- function(object,
   if (interval == "confidence") {
     q <- stats::qt(1 - (1 - level) / 2, df_res)
     half <- q * sqrt(var_line)
+  } else if (interval == "band") {
+    half <- sqrt(2 * stats::qf(level, 2, df_res)) * sqrt(var_line)
   } else {
     e <- object$errors
     if (!e$known) {
@@ -148,8 +184,12 @@ predict.simple_bls <- function(object,
     if (!is.numeric(reps_x) || !is.numeric(reps_y) || reps_x < 1 || reps_y < 1) {
       stop("reps_x and reps_y must be at least 1.")
     }
-    vx <- e$var_x / reps_x
-    vy <- e$var_y / reps_y
+    # error variances of the new measurements, at their levels: x and the
+    # fitted y, or (Bland-Altman plot) x = M + D / 2 and y = M - D / 2
+    lev_x <- if (type == "xy") u else u + fit / 2
+    lev_y <- if (type == "xy") fit else u - fit / 2
+    vx <- .bls_eval(e$fun_x, lev_x, "var_x") / reps_x
+    vy <- .bls_eval(e$fun_y, lev_y, "var_y") / reps_y
     b1 <- unname(cf[2])
     # the error variance of a new point, as a_x vx + a_y vy
     if (type == "xy") {
@@ -161,10 +201,17 @@ predict.simple_bls <- function(object,
       a_x <- (1 - b1 / 2)^2
       a_y <- (1 + b1 / 2)^2
     }
-    var_pred <- var_line + a_x * vx + a_y * vy
+    # equation error (common tau): the new subject's true value deviates
+    # from the line by tau2 for x and b^2 tau2 for y (b the BLS slope),
+    # estimated on n - 2 df
+    tau2 <- object$dispersion$tau2
+    if (!isTRUE(tau2 > 0)) tau2 <- 0
+    b_xy <- unname(object$coefficients[2])
+    v_eq <- a_x * tau2 + a_y * b_xy^2 * tau2
+    var_pred <- var_line + a_x * vx + a_y * vy + v_eq
     df_pred <- var_pred^2 /
       (var_line^2 / df_res + (a_x * vx)^2 / e$df_var_x +
-         (a_y * vy)^2 / e$df_var_y)
+         (a_y * vy)^2 / e$df_var_y + v_eq^2 / df_res)
     q <- stats::qt(1 - (1 - level) / 2, df_pred)
     half <- q * sqrt(var_pred)
   }
@@ -180,7 +227,8 @@ predict.simple_bls <- function(object,
 #' @export
 plot.simple_bls <- function(x,
                             type = c("xy", "md"),
-                            interval = c("none", "confidence", "prediction"),
+                            interval = c("none", "confidence", "band",
+                                         "prediction"),
                             level = NULL,
                             x_name = NULL,
                             y_name = NULL,
@@ -228,9 +276,11 @@ plot.simple_bls <- function(x,
     p <- p +
       geom_ribbon(data = band, aes(x = u, ymin = lwr, ymax = upr),
                   fill = "red", alpha = 0.2, inherit.aes = FALSE) +
-      labs(caption = sprintf("%.0f%% %s interval shown", level * 100,
-                             ifelse(interval == "confidence", "confidence",
-                                    "prediction")))
+      labs(caption = sprintf("%.0f%% %s shown", level * 100,
+                             switch(interval,
+                                    confidence = "confidence interval",
+                                    band = "simultaneous confidence band",
+                                    prediction = "prediction interval")))
   }
   if (type == "xy") {
     lims <- range(c(pd$u, pd$v, band$lwr, band$upr), na.rm = TRUE)

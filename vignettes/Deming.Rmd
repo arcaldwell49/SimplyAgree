@@ -210,7 +210,22 @@ plot(bls1, interval = "prediction")
 plot(bls1, type = "md", interval = "prediction")
 ```
 
-`joint_test()` tests intercept 0 and slope 1 with the Wald statistic from the BLS variance-covariance matrix, and `check()` shows the standardized residuals. The estimates, standard errors, and confidence and prediction intervals reproduce BivRegBLS; its joint test multiplies the critical value by a Hotelling factor, $(n - 1)/(n - 2)$, so its p-values are slightly larger. The CBLS prediction intervals here also include the covariance between the errors of a new difference and a new mean, which BivRegBLS leaves out (the two agree when the error variances are equal).
+When the error grows with the level, as is common for laboratory measurements with a roughly constant coefficient of variation, the error variances can be given as functions of the level, or estimated from the replicates with `var_model = "proportional"` (constant CV) or `"power"`. The variances are then evaluated at each subject's estimated true values, and the prediction intervals widen with the level:
+
+```{r, fig.width = 7, fig.height = 4}
+data("ba1986")
+bls2 <- cbls_reg(mini1 ~ wright1, data = ba1986,
+                 var_x = function(level) (0.05 * level)^2,
+                 var_y = function(level) (0.07 * level)^2)
+predict(bls2, newdata = c(200, 600), interval = "prediction")
+plot(bls2, interval = "prediction")
+```
+
+In simulations, ignoring proportional error (`var_model = "constant"`) gave 95% prediction intervals that covered every new measurement at low levels but only about 81% at high levels.
+
+BLS assumes that the measurement errors explain all the scatter about the line. `summary()` reports the **dispersion**, which should be near 1, with a test. A dispersion clearly above 1 means that the subjects' true values deviate from the line (equation error, e.g. matrix effects: one method reading some samples high for reasons the replicates cannot reveal). By default (`equation_error = TRUE`), these deviations are estimated, assuming the same variance for both methods (as `method_vc(tau = "common")`), and included in the fit and the prediction intervals; otherwise the prediction intervals would be too narrow. With two methods, the data cannot show how the deviations divide between the methods, so the slope depends on that assumption [@carstensen2010].
+
+`joint_test()` tests intercept 0 and slope 1 with the Wald statistic from the BLS variance-covariance matrix; `predict(interval = "band")` and `plot(interval = "band")` give the corresponding simultaneous confidence band for the whole line, which contains exactly the lines the joint test does not reject. `check()` shows the standardized residuals. The estimates, standard errors, and confidence and prediction intervals reproduce BivRegBLS; its joint test multiplies the critical value by a Hotelling factor, $(n - 1)/(n - 2)$, so its p-values are slightly larger. The CBLS prediction intervals here also include the covariance between the errors of a new difference and a new mean, which BivRegBLS leaves out (the two agree when the error variances are equal).
 
 # Joint Confidence Regions
 

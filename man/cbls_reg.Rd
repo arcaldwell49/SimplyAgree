@@ -13,6 +13,8 @@ cbls_reg(
   df_var_x = Inf,
   df_var_y = Inf,
   error.ratio = NULL,
+  var_model = c("constant", "proportional", "power"),
+  equation_error = TRUE,
   conf.level = 0.95,
   pred_level = 0.95,
   model = TRUE,
@@ -29,8 +31,10 @@ missing).}
 \item{id}{Column with the subject identifier, for replicate measurements.}
 
 \item{var_x, var_y}{Measurement error variance of a single measurement by
-each method, if known (e.g., from a validation study). When missing,
-they are estimated from the replicates (pooled within-subject variance).}
+each method, if known (e.g., from a validation study): a number, or a
+function of the level that returns the variance, e.g.
+\code{function(level) (0.05 * level)^2} for a coefficient of variation of 5\%.
+When missing, they are estimated from the replicates (see \code{var_model}).}
 
 \item{df_var_x, df_var_y}{Degrees of freedom of \code{var_x} and \code{var_y} when
 given (default \code{Inf}, treated as known). Used only for the prediction
@@ -41,6 +45,21 @@ var(x)/var(y), as in \code{\link[=dem_reg]{dem_reg()}}. Used only when neither v
 given or estimable (one measurement per subject); the estimates and
 confidence intervals are then available, but not the prediction
 intervals, which need the variances themselves.}
+
+\item{var_model}{How the error variances are estimated from the
+replicates (for a method whose variance is not given): \code{"constant"}
+(default; the pooled within-subject variance), \code{"proportional"} (the
+error SD is proportional to the level, a constant coefficient of
+variation), or \code{"power"} (variance \code{sigma^2 * level^(2 * theta)}, with
+\code{theta} estimated). The last two need positive measurements. See
+Details.}
+
+\item{equation_error}{Logical. If TRUE (default), equation error is
+modeled: deviations of the subjects' true values from the line (e.g.,
+method-by-item or matrix effects), estimated from the excess scatter
+about the line, are included in the fit and the intervals. It is 0, and
+the results are those of BivRegBLS, when the measurement errors explain
+all the scatter. FALSE always gives BivRegBLS's results. See Details.}
 
 \item{conf.level}{Confidence level for the coefficients and the line.
 Default is 0.95.}
@@ -62,8 +81,11 @@ elements of \code{\link[=dem_reg]{dem_reg()}} results (\code{coefficients}, \cod
 \itemize{
 \item \code{cbls}: the CBLS fit in the Bland-Altman plot (\code{coefficients},
 \code{model_table}, \code{vcov});
-\item \code{errors}: the measurement error variances of a single measurement, their
-df and source (\code{"known"}, \code{"replicates"}, or \code{"ratio"});
+\item \code{errors}: the measurement error variances of a single measurement
+(\code{var_x}, \code{var_y}, at the mean level), the functions of the level
+(\code{fun_x}, \code{fun_y}), the models (\code{model_x}, \code{model_y}) and their
+parameters, their df, and their source (\code{"known"}, \code{"replicates"}, or
+\code{"ratio"});
 \item \code{pred_level}, \code{method}, \code{iterations}, \code{converged}.
 }
 
@@ -87,6 +109,23 @@ by \code{x} and its \code{n_yi} measurements by \code{y}. The variance of the me
 error of these means is \code{var_x / n_xi} and \code{var_y / n_yi}, so subjects
 with more replicates get more weight; with the same number of replicates
 for every subject the variances are constant.
+
+\strong{Error variances that change with the level.} When \code{var_x} or \code{var_y} is
+a function, or \code{var_model} is \code{"proportional"} or \code{"power"}, the error
+variance of each subject's measurements is evaluated at its estimated
+true values (the points on the line nearest the data, given the error
+variances), not at the observed means, whose own errors would bias the
+weights. The fit starts with the variances at the observed means and is
+repeated, re-evaluating them at the new estimated true values, until the
+line is stable. With replicates, \code{"proportional"} estimates the
+coefficient of variation from the within-subject variances relative to
+the squared subject means (\code{sum(n_i - 1)} df); \code{"power"} regresses the log
+within-subject variances (corrected for the bias of the log of a variance
+estimate) on the log subject means, weighted by their df
+(\code{sum(n_i - 1) - 1} df). For prediction intervals, the variances of the new
+measurements are evaluated at the new value of \code{x} and the fitted \code{y} (or,
+in the Bland-Altman plot, at the mean plus and minus half the fitted
+difference); the uncertainty in an estimated \code{theta} is not included.
 
 \strong{BLS.} The line \verb{y = b0 + b1 x} minimises
 \verb{sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))} and is found by the
@@ -114,6 +153,27 @@ For CBLS, the covariance between the errors of the new difference and the
 new mean is included (BivRegBLS omits it; the two agree when
 \code{var_x = var_y}).
 
+\strong{Dispersion and equation error.} BLS assumes that the measurement errors
+explain all the scatter about the line, i.e., that the true values lie on
+it. Then the weighted residuals \verb{e_i^2 / (var_yi + b1^2 var_xi)} average 1;
+their mean, the dispersion \code{s^2}, is reported by \code{summary()} with a test of
+\code{s^2 = 1} (chi-square when the error variances are known, F against their
+df when estimated). The confidence intervals of the coefficients are scaled
+by \code{s^2} in any case. Item-specific deviations of the true values from the
+line (equation error, e.g. method-by-item or matrix effects) make
+\code{s^2 > 1}. They act like extra error variance that the replicates cannot
+estimate, so ignoring them gives prediction intervals that are too narrow
+and, through a wrong error ratio, a biased slope. With
+\code{equation_error = TRUE}, each subject's true value is taken to deviate by
+\code{c_xi} for \code{x} and \verb{b1 c_yi} for \code{y}, with \code{c ~ N(0, tau^2)} for both
+methods (as \code{method_vc(tau = "common")}), so the error variances become
+\code{var_xi + tau^2} and \verb{var_yi + b1^2 tau^2}. \code{tau^2} solves
+\verb{sum(e_i^2 / (var_yi + b1^2 var_xi + 2 b1^2 tau^2)) = n - 2} (0 if the
+dispersion is at most 1), and the fit is repeated until stable; the
+prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
+both methods is an assumption: with two methods, how the equation error
+divides between them cannot be estimated.
+
 The joint test of intercept 0 and slope 1 (\code{\link[=joint_test]{joint_test()}}) uses the Wald
 statistic with the BLS variance-covariance matrix and the \code{F(2, n - 2)}
 distribution. BivRegBLS multiplies the critical value by the Hotelling
@@ -132,6 +192,12 @@ joint_test(fit)
 # known error variances from a validation study, one measurement each
 data("ba1986")
 cbls_reg(mini1 ~ wright1, data = ba1986, var_x = 400, var_y = 600)
+
+# error SD proportional to the level (constant CV), known or estimated
+cbls_reg(mini1 ~ wright1, data = ba1986,
+         var_x = function(level) (0.05 * level)^2,
+         var_y = function(level) (0.07 * level)^2)
+cbls_reg(y ~ x, data = reps, id = "id", var_model = "proportional")
 
 }
 \references{

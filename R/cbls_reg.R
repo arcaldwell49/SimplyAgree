@@ -17,8 +17,10 @@
 #'   missing).
 #' @param id Column with the subject identifier, for replicate measurements.
 #' @param var_x,var_y Measurement error variance of a single measurement by
-#'   each method, if known (e.g., from a validation study). When missing,
-#'   they are estimated from the replicates (pooled within-subject variance).
+#'   each method, if known (e.g., from a validation study): a number, or a
+#'   function of the level that returns the variance, e.g.
+#'   `function(level) (0.05 * level)^2` for a coefficient of variation of 5%.
+#'   When missing, they are estimated from the replicates (see `var_model`).
 #' @param df_var_x,df_var_y Degrees of freedom of `var_x` and `var_y` when
 #'   given (default `Inf`, treated as known). Used only for the prediction
 #'   intervals.
@@ -27,6 +29,19 @@
 #'   given or estimable (one measurement per subject); the estimates and
 #'   confidence intervals are then available, but not the prediction
 #'   intervals, which need the variances themselves.
+#' @param var_model How the error variances are estimated from the
+#'   replicates (for a method whose variance is not given): `"constant"`
+#'   (default; the pooled within-subject variance), `"proportional"` (the
+#'   error SD is proportional to the level, a constant coefficient of
+#'   variation), or `"power"` (variance `sigma^2 * level^(2 * theta)`, with
+#'   `theta` estimated). The last two need positive measurements. See
+#'   Details.
+#' @param equation_error Logical. If TRUE (default), equation error is
+#'   modeled: deviations of the subjects' true values from the line (e.g.,
+#'   method-by-item or matrix effects), estimated from the excess scatter
+#'   about the line, are included in the fit and the intervals. It is 0, and
+#'   the results are those of BivRegBLS, when the measurement errors explain
+#'   all the scatter. FALSE always gives BivRegBLS's results. See Details.
 #' @param conf.level Confidence level for the coefficients and the line.
 #'   Default is 0.95.
 #' @param pred_level Default level for prediction intervals. Default is 0.95.
@@ -43,6 +58,23 @@
 #' error of these means is `var_x / n_xi` and `var_y / n_yi`, so subjects
 #' with more replicates get more weight; with the same number of replicates
 #' for every subject the variances are constant.
+#'
+#' **Error variances that change with the level.** When `var_x` or `var_y` is
+#' a function, or `var_model` is `"proportional"` or `"power"`, the error
+#' variance of each subject's measurements is evaluated at its estimated
+#' true values (the points on the line nearest the data, given the error
+#' variances), not at the observed means, whose own errors would bias the
+#' weights. The fit starts with the variances at the observed means and is
+#' repeated, re-evaluating them at the new estimated true values, until the
+#' line is stable. With replicates, `"proportional"` estimates the
+#' coefficient of variation from the within-subject variances relative to
+#' the squared subject means (`sum(n_i - 1)` df); `"power"` regresses the log
+#' within-subject variances (corrected for the bias of the log of a variance
+#' estimate) on the log subject means, weighted by their df
+#' (`sum(n_i - 1) - 1` df). For prediction intervals, the variances of the new
+#' measurements are evaluated at the new value of `x` and the fitted `y` (or,
+#' in the Bland-Altman plot, at the mean plus and minus half the fitted
+#' difference); the uncertainty in an estimated `theta` is not included.
 #'
 #' **BLS.** The line `y = b0 + b1 x` minimises
 #' `sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))` and is found by the
@@ -70,6 +102,27 @@
 #' new mean is included (BivRegBLS omits it; the two agree when
 #' `var_x = var_y`).
 #'
+#' **Dispersion and equation error.** BLS assumes that the measurement errors
+#' explain all the scatter about the line, i.e., that the true values lie on
+#' it. Then the weighted residuals `e_i^2 / (var_yi + b1^2 var_xi)` average 1;
+#' their mean, the dispersion `s^2`, is reported by `summary()` with a test of
+#' `s^2 = 1` (chi-square when the error variances are known, F against their
+#' df when estimated). The confidence intervals of the coefficients are scaled
+#' by `s^2` in any case. Item-specific deviations of the true values from the
+#' line (equation error, e.g. method-by-item or matrix effects) make
+#' `s^2 > 1`. They act like extra error variance that the replicates cannot
+#' estimate, so ignoring them gives prediction intervals that are too narrow
+#' and, through a wrong error ratio, a biased slope. With
+#' `equation_error = TRUE`, each subject's true value is taken to deviate by
+#' `c_xi` for `x` and `b1 c_yi` for `y`, with `c ~ N(0, tau^2)` for both
+#' methods (as `method_vc(tau = "common")`), so the error variances become
+#' `var_xi + tau^2` and `var_yi + b1^2 tau^2`. `tau^2` solves
+#' `sum(e_i^2 / (var_yi + b1^2 var_xi + 2 b1^2 tau^2)) = n - 2` (0 if the
+#' dispersion is at most 1), and the fit is repeated until stable; the
+#' prediction intervals include `tau^2` (on `n - 2` df). Equal deviations for
+#' both methods is an assumption: with two methods, how the equation error
+#' divides between them cannot be estimated.
+#'
 #' The joint test of intercept 0 and slope 1 ([joint_test()]) uses the Wald
 #' statistic with the BLS variance-covariance matrix and the `F(2, n - 2)`
 #' distribution. BivRegBLS multiplies the critical value by the Hotelling
@@ -82,8 +135,11 @@
 #'
 #'   - `cbls`: the CBLS fit in the Bland-Altman plot (`coefficients`,
 #'     `model_table`, `vcov`);
-#'   - `errors`: the measurement error variances of a single measurement, their
-#'     df and source (`"known"`, `"replicates"`, or `"ratio"`);
+#'   - `errors`: the measurement error variances of a single measurement
+#'     (`var_x`, `var_y`, at the mean level), the functions of the level
+#'     (`fun_x`, `fun_y`), the models (`model_x`, `model_y`) and their
+#'     parameters, their df, and their source (`"known"`, `"replicates"`, or
+#'     `"ratio"`);
 #'   - `pred_level`, `method`, `iterations`, `converged`.
 #'
 #'   The stored data (`model`) have one row per subject: the means `x`, `y`,
@@ -103,6 +159,12 @@
 #' # known error variances from a validation study, one measurement each
 #' data("ba1986")
 #' cbls_reg(mini1 ~ wright1, data = ba1986, var_x = 400, var_y = 600)
+#'
+#' # error SD proportional to the level (constant CV), known or estimated
+#' cbls_reg(mini1 ~ wright1, data = ba1986,
+#'          var_x = function(level) (0.05 * level)^2,
+#'          var_y = function(level) (0.07 * level)^2)
+#' cbls_reg(y ~ x, data = reps, id = "id", var_model = "proportional")
 #'
 #' @references
 #' Francq, B. G., & Govaerts, B. B. (2014). Measurement methods comparison
@@ -130,22 +192,35 @@ cbls_reg <- function(formula,
                      df_var_x = Inf,
                      df_var_y = Inf,
                      error.ratio = NULL,
+                     var_model = c("constant", "proportional", "power"),
+                     equation_error = TRUE,
                      conf.level = 0.95,
                      pred_level = 0.95,
                      model = TRUE,
                      ...) {
   call2 <- match.call()
+  var_model <- match.arg(var_model)
+  if (!is.logical(equation_error) || length(equation_error) != 1 ||
+      is.na(equation_error)) {
+    stop("equation_error must be TRUE or FALSE.")
+  }
   for (lv in c("conf.level", "pred_level")) {
     v <- get(lv)
     if (!is.numeric(v) || length(v) != 1 || v <= 0 || v >= 1) {
       stop(lv, " must be a single number between 0 and 1.")
     }
   }
-  for (nm in c("var_x", "var_y", "error.ratio")) {
+  for (nm in c("var_x", "var_y")) {
     v <- get(nm)
-    if (!is.null(v) && (!is.numeric(v) || length(v) != 1 || !(v > 0))) {
-      stop(nm, " must be a single positive number.")
+    if (!is.null(v) && !is.function(v) &&
+        (!is.numeric(v) || length(v) != 1 || !(v > 0))) {
+      stop(nm, " must be a single positive number or a function of the level.")
     }
+  }
+  if (!is.null(error.ratio) &&
+      (!is.numeric(error.ratio) || length(error.ratio) != 1 ||
+       !(error.ratio > 0))) {
+    stop("error.ratio must be a single positive number.")
   }
   for (nm in c("df_var_x", "df_var_y")) {
     v <- get(nm)
@@ -187,27 +262,16 @@ cbls_reg <- function(formula,
     stop("At least 3 subjects with measurements by both methods are needed.")
   }
 
-  # measurement error variances of a single measurement
-  pooled <- function(ss, n_i) {
-    d <- sum(n_i - 1)
-    if (d > 0) c(var = sum(ss) / d, df = d) else c(var = NA_real_, df = NA_real_)
-  }
-  px <- pooled(sub$ss_x, sub$n_x)
-  py <- pooled(sub$ss_y, sub$n_y)
-  vx1 <- if (!is.null(var_x)) var_x else px[["var"]]
-  vy1 <- if (!is.null(var_y)) var_y else py[["var"]]
-  dfx <- if (!is.null(var_x)) df_var_x else px[["df"]]
-  dfy <- if (!is.null(var_y)) df_var_y else py[["df"]]
-  if (!is.null(var_x) && isTRUE(px[["df"]] > 0)) {
-    message("var_x is given; the replicates of x are not used to estimate it.")
-  }
-  if (!is.null(var_y) && isTRUE(py[["df"]] > 0)) {
-    message("var_y is given; the replicates of y are not used to estimate it.")
-  }
-  known <- is.finite(vx1) && is.finite(vy1)
-  if (known) {
-    source <- if (!is.null(var_x) && !is.null(var_y)) "known" else
-      if (is.null(var_x) && is.null(var_y)) "replicates" else "known/replicates"
+  # measurement error variance of a single measurement, as a function of
+  # the level: given (number or function) or estimated from the replicates
+  ex <- .bls_error_model(var_x, df_var_x, sub$ss_x, sub$n_x, sub$x,
+                         var_model, "x")
+  ey <- .bls_error_model(var_y, df_var_y, sub$ss_y, sub$n_y, sub$y,
+                         var_model, "y")
+  if (!is.null(ex) && !is.null(ey)) {
+    sources <- c(ex$source, ey$source)
+    source <- if (all(sources == "known")) "known" else
+      if (all(sources == "replicates")) "replicates" else "known/replicates"
     if (!is.null(error.ratio)) {
       message("error.ratio is ignored: the error variances are known or ",
               "estimated from the replicates.")
@@ -215,37 +279,95 @@ cbls_reg <- function(formula,
   } else if (!is.null(error.ratio)) {
     # only the ratio is known: fix the scale (the estimates and their
     # standard errors do not depend on it)
-    if (is.finite(vx1)) {
-      vy1 <- vx1 / error.ratio
-    } else if (is.finite(vy1)) {
-      vx1 <- vy1 * error.ratio
-    } else {
-      vx1 <- error.ratio
-      vy1 <- 1
+    if (is.function(var_x) || is.function(var_y) || var_model != "constant") {
+      stop("With error.ratio, the error variances must be constant.")
     }
-    dfx <- dfy <- NA_real_
+    const <- function(v) .bls_const_model(v, NA_real_, "ratio")
+    if (!is.null(ex)) {
+      ey <- const(ex$fun(1) / error.ratio)
+    } else if (!is.null(ey)) {
+      ex <- const(ey$fun(1) * error.ratio)
+    } else {
+      ex <- const(error.ratio)
+      ey <- const(1)
+    }
+    ex$df <- ey$df <- NA_real_
     source <- "ratio"
   } else {
     stop("The measurement error variances are not known and cannot be ",
          "estimated (one measurement per subject). Give var_x and var_y, ",
          "replicate measurements with id, or error.ratio = var(x) / var(y).")
   }
-  if (!(vx1 > 0) || !(vy1 > 0)) {
-    stop("The measurement error variances must be positive.")
-  }
-  sub$var_x <- vx1 / sub$n_x
-  sub$var_y <- vy1 / sub$n_y
+  constant <- ex$model == "constant" && ey$model == "constant"
 
-  # BLS in the (x, y) plot, started from Deming with lambda = var_y / var_x
-  lam <- mean(sub$var_y) / mean(sub$var_x)
-  sxx <- sum((sub$x - mean(sub$x))^2)
-  syy <- sum((sub$y - mean(sub$y))^2)
-  sxy <- sum((sub$x - mean(sub$x)) * (sub$y - mean(sub$y)))
-  b1 <- (syy - lam * sxx + sqrt((syy - lam * sxx)^2 + 4 * lam * sxy^2)) /
-    (2 * sxy)
-  start <- c(mean(sub$y) - b1 * mean(sub$x), b1)
-  bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x,
-                     var_v = sub$var_y, cov_uv = 0, start = start)
+  # BLS in the (x, y) plot. The variances are evaluated at the estimated true
+  # values of each subject, starting from the subject means, and the fit is
+  # repeated until the line is stable (one pass with constant variances).
+  lev_x <- sub$x
+  lev_y <- sub$y
+  coef_old <- c(Inf, Inf)
+  for (pass in seq_len(100)) {
+    sub$var_x <- .bls_eval(ex$fun, lev_x, "var_x") / sub$n_x
+    sub$var_y <- .bls_eval(ey$fun, lev_y, "var_y") / sub$n_y
+    # started from Deming with lambda = var_y / var_x
+    lam <- mean(sub$var_y) / mean(sub$var_x)
+    sxx <- sum((sub$x - mean(sub$x))^2)
+    syy <- sum((sub$y - mean(sub$y))^2)
+    sxy <- sum((sub$x - mean(sub$x)) * (sub$y - mean(sub$y)))
+    b1 <- (syy - lam * sxx + sqrt((syy - lam * sxx)^2 + 4 * lam * sxy^2)) /
+      (2 * sxy)
+    start <- c(mean(sub$y) - b1 * mean(sub$x), b1)
+    bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x,
+                       var_v = sub$var_y, cov_uv = 0, start = start)
+    if (constant ||
+        max(abs(bls$coef - coef_old) / pmax(abs(bls$coef), 1)) < 1e-10) {
+      break
+    }
+    coef_old <- bls$coef
+    e <- sub$y - bls$coef[1] - bls$coef[2] * sub$x
+    s2 <- sub$var_y + bls$coef[2]^2 * sub$var_x
+    lev_x <- sub$x + bls$coef[2] * sub$var_x * e / s2
+    lev_y <- bls$coef[1] + bls$coef[2] * lev_x
+  }
+  passes_ok <- constant || pass < 100
+
+  # dispersion of the measurement-error-only fit (the test of no equation
+  # error), then, with equation_error, the common-tau equation error: each
+  # subject's true value deviates from the line by c_xi for x and b c_yi for
+  # y, c ~ N(0, tau2), as for the method-by-item effects of method_vc(tau =
+  # "common"). The effective error variances are var_x + tau2 and
+  # var_y + b^2 tau2; tau2 solves sum(e_i^2 / (s_i + 2 b^2 tau2)) = n - 2
+  # (0 if the dispersion is at most 1), and the fit is repeated until stable.
+  e_i <- sub$y - bls$coef[1] - bls$coef[2] * sub$x
+  disp <- .bls_dispersion(e_i, sub$var_y + bls$coef[2]^2 * sub$var_x,
+                          bls$coef[2], sub, ex$df, ey$df,
+                          known = source != "ratio")
+  tau2 <- 0
+  tau_ok <- TRUE
+  if (equation_error && isTRUE(disp$s2 > 1) && source != "ratio") {
+    tau_ok <- FALSE
+    for (k in seq_len(200)) {
+      b <- bls$coef[2]
+      e_i <- sub$y - bls$coef[1] - b * sub$x
+      s_i <- sub$var_y + b^2 * sub$var_x
+      tau2_new <- .bls_tau2(e_i, s_i, b)
+      bls <- .bls_engine(u = sub$x, v = sub$y,
+                         var_u = sub$var_x + tau2_new,
+                         var_v = sub$var_y + b^2 * tau2_new,
+                         cov_uv = 0, start = bls$coef)
+      if (abs(tau2_new - tau2) <= 1e-10 * max(tau2_new, 1e-300) &&
+          abs(bls$coef[2] - b) <= 1e-10 * max(abs(b), 1)) {
+        tau2 <- tau2_new
+        tau_ok <- TRUE
+        break
+      }
+      tau2 <- tau2_new
+    }
+  }
+  disp$tau2 <- tau2
+  # effective error variances of the subject means
+  vx_eff <- sub$var_x + tau2
+  vy_eff <- sub$var_y + bls$coef[2]^2 * tau2
 
   # CBLS in the Bland-Altman plot (D = x - y, M = (x + y) / 2), started from
   # the BLS line: y = a + b x is D = -2a / (1 + b) + 2 (1 - b) / (1 + b) M
@@ -254,9 +376,9 @@ cbls_reg <- function(formula,
   m_i <- (sub$x + sub$y) / 2
   d_i <- sub$x - sub$y
   cbls <- .bls_engine(u = m_i, v = d_i,
-                      var_u = (sub$var_x + sub$var_y) / 4,
-                      var_v = sub$var_x + sub$var_y,
-                      cov_uv = (sub$var_x - sub$var_y) / 2,
+                      var_u = (vx_eff + vy_eff) / 4,
+                      var_v = vx_eff + vy_eff,
+                      cov_uv = (vx_eff - vy_eff) / 2,
                       start = c(-2 * a / (1 + b), 2 * (1 - b) / (1 + b)))
 
   df_res <- n - 2
@@ -278,12 +400,18 @@ cbls_reg <- function(formula,
                row.names = names(est))
   }
 
-  if (!bls$converged || !cbls$converged) {
+  converged <- bls$converged && cbls$converged && passes_ok && tau_ok
+  if (!converged) {
     warning("The BLS iterations did not converge; the estimates may be ",
             "inaccurate.")
   }
 
   sub_out <- sub[, c("id", "x", "y", "n_x", "n_y", "var_x", "var_y")]
+  # the error variances at the mean level, for the printed ratio
+  mid_x <- mean(lev_x)
+  mid_y <- mean(lev_y)
+  vx1 <- ex$fun(mid_x)
+  vy1 <- ey$fun(mid_y)
   structure(
     list(
       coefficients = coefs,
@@ -301,13 +429,134 @@ cbls_reg <- function(formula,
       cbls = list(coefficients = cb_coefs,
                   model_table = tab(cb_coefs, cb_vc, c(0, 0)),
                   vcov = cb_vc),
-      errors = list(var_x = vx1, var_y = vy1, df_var_x = dfx, df_var_y = dfy,
+      errors = list(var_x = vx1, var_y = vy1,
+                    fun_x = ex$fun, fun_y = ey$fun,
+                    model_x = ex$model, model_y = ey$model,
+                    params_x = ex$params, params_y = ey$params,
+                    df_var_x = ex$df, df_var_y = ey$df,
+                    level_x = mid_x, level_y = mid_y,
                     source = source, known = source != "ratio"),
-      iterations = c(bls = bls$iterations, cbls = cbls$iterations),
-      converged = bls$converged && cbls$converged
+      dispersion = disp,
+      equation_error = equation_error,
+      iterations = c(passes = pass, bls = bls$iterations,
+                     cbls = cbls$iterations),
+      converged = converged
     ),
     class = c("simple_bls", "simple_eiv")
   )
+}
+
+# Dispersion. Under the model (true values on the line), e_i^2 / s_i,
+# s_i = var_yi + b1^2 var_xi, average 1 and their sum is chi-square on n - 2
+# df (F against the df of estimated error variances, combined by
+# Satterthwaite).
+.bls_dispersion <- function(e, s, b1, sub, df_x, df_y, known) {
+  n <- length(e)
+  q <- sum(e^2 / s)
+  s2 <- q / (n - 2)
+  if (!known) {
+    return(list(s2 = s2, statistic = NA_real_, df1 = n - 2, df2 = NA_real_,
+                p.value = NA_real_))
+  }
+  # df of the measurement error part of s_i
+  a_x <- mean(b1^2 * sub$var_x / s)
+  a_y <- mean(sub$var_y / s)
+  df2 <- (a_x + a_y)^2 / (a_x^2 / df_x + a_y^2 / df_y)
+  p <- if (is.finite(df2)) {
+    stats::pf(s2, n - 2, df2, lower.tail = FALSE)
+  } else {
+    stats::pchisq(q, n - 2, lower.tail = FALSE)
+  }
+  list(s2 = s2, statistic = s2, df1 = n - 2, df2 = df2, p.value = p)
+}
+
+# Common-tau equation error: the residual variance of subject i is
+# s_i + 2 b1^2 tau2; tau2 solves sum(e_i^2 / (s_i + 2 b1^2 tau2)) = n - 2 (a
+# Paule-Mandel type moment estimator), 0 if the dispersion is at most 1.
+.bls_tau2 <- function(e, s, b1) {
+  n <- length(e)
+  k <- 2 * b1^2
+  f <- function(v) sum(e^2 / (s + k * v)) - (n - 2)
+  if (f(0) <= 0 || k == 0) {
+    return(0)
+  }
+  hi <- (max(s) + max(e^2)) / k
+  while (f(hi) > 0) hi <- 2 * hi
+  stats::uniroot(f, c(0, hi), tol = 1e-12 * hi)$root
+}
+
+# A constant error model
+.bls_const_model <- function(v, df, source) {
+  list(fun = function(level) rep(v, length(level)), df = df,
+       model = "constant", params = c(var = v), source = source)
+}
+
+# The error variance of a single measurement by one method, as a function
+# of the level:
+# - given as a number (constant) or a function of the level, with df `df_given`
+# - else estimated from the replicates (subjects with n_i > 1):
+#   "constant": pooled within-subject variance, sum(n_i - 1) df;
+#   "proportional": var = cv^2 level^2, cv^2 = sum(ss_i / level_i^2) /
+#     sum(n_i - 1), at the subject means, sum(n_i - 1) df;
+#   "power": var = sigma^2 level^(2 theta), from the df-weighted regression
+#     of log(s_i^2) - (digamma(d_i / 2) - log(d_i / 2)) (unbiased for
+#     log(var)) on log(level_i), sum(n_i - 1) - 1 df.
+# Returns NULL if the variance is neither given nor estimable.
+.bls_error_model <- function(given, df_given, ss, n_i, level, var_model, nm) {
+  if (!is.null(given) && any(n_i > 1)) {
+    message("var_", nm, " is given; the replicates of ", nm,
+            " are not used to estimate it.")
+  }
+  if (is.function(given)) {
+    return(list(fun = given, df = df_given, model = "function",
+                params = NULL, source = "known"))
+  }
+  if (!is.null(given)) {
+    return(.bls_const_model(given, df_given, "known"))
+  }
+  ok <- n_i > 1
+  d <- n_i[ok] - 1
+  if (sum(d) == 0) {
+    return(NULL)
+  }
+  if (var_model == "constant") {
+    return(.bls_const_model(sum(ss[ok]) / sum(d), sum(d), "replicates"))
+  }
+  lev <- level[ok]
+  if (any(lev <= 0)) {
+    stop("var_model = '", var_model, "' needs positive measurements by ", nm,
+         " (the error SD is modeled as a function of the level).")
+  }
+  if (var_model == "proportional") {
+    cv2 <- sum(ss[ok] / lev^2) / sum(d)
+    return(list(fun = function(level) cv2 * level^2, df = sum(d),
+                model = "proportional", params = c(cv = sqrt(cv2)),
+                source = "replicates"))
+  }
+  s2 <- ss[ok] / d
+  keep <- s2 > 0
+  if (sum(keep) < 3) {
+    stop("var_model = 'power' needs at least 3 subjects with replicates of ",
+         nm, " that are not all equal.")
+  }
+  z <- log(s2[keep]) - (digamma(d[keep] / 2) - log(d[keep] / 2))
+  cf <- stats::coef(stats::lm(z ~ log(lev[keep]), weights = d[keep]))
+  sigma2 <- exp(unname(cf[1]))
+  theta <- unname(cf[2]) / 2
+  list(fun = function(level) sigma2 * level^(2 * theta), df = sum(d) - 1,
+       model = "power", params = c(sigma = sqrt(sigma2), theta = theta),
+       source = "replicates")
+}
+
+# Evaluate an error variance function at the given levels
+.bls_eval <- function(fun, level, nm) {
+  v <- fun(level)
+  if (length(v) == 1 && length(level) > 1) v <- rep(v, length(level))
+  if (length(v) != length(level) || any(!is.finite(v)) || any(v <= 0)) {
+    stop("The error variance function for ", nm, " must return one ",
+         "positive value per level.")
+  }
+  v
 }
 
 # Iterative (correlated) bivariate least squares for v = b0 + b1 u, where
