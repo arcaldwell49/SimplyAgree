@@ -255,6 +255,14 @@ method_vc(dat3, y = "y", method = "method", id = "id",
                                                     "lower_loa", "upper_loa")]
 ```
 
+# Total deviation index
+
+MethComp's `TDI()` reports the total deviation index for paired data: the value that a proportion $p$ of the absolute differences between two methods do not exceed [@lin2000tdi]. `tdi()` computes it, with an upper confidence bound, for every pair in a `method_vc()` fit, using the bias and the SD of a single difference from the variance component model. With `delta`, it also gives the proportion of differences within `delta` and tests whether the TDI is below it (see `vignette("agreement_analysis")` for details):
+
+```{r}
+tdi(fit, delta = 3, seed = 1)
+```
+
 # Repeatability and reproducibility
 
 With replicates, each method's measurement error gives its **repeatability coefficient** [@carstensen2010, ch. 9],

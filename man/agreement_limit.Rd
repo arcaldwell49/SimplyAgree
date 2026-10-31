@@ -30,7 +30,7 @@ agreement_limit(
 
 \item{data}{Data frame with all data.}
 
-\item{data_type}{The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).}
+\item{data_type}{The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points). In the terms of \code{\link[=method_vc]{method_vc()}}, "reps" corresponds to exchangeable replicates and "nest" to linked replicates (each row is a shared occasion); see \code{vignette("method_comparison_vc")}.}
 
 \item{loa_calc}{The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).}
 

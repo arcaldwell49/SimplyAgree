@@ -25,7 +25,17 @@ New functions for comparing two or more methods, with or without replicate measu
   - Each `check()` panel has a subtitle saying what to look for, and the tests are given in its caption: Shapiro-Wilk for normality, Breusch-Pagan for homogeneity of variance, Pitman-Morgan for proportional bias, and (linear conversions) a RESET test of linearity. Tests for pairs of methods use item means, so replicates are not counted more than once.
 - Added `sim_methods()` to simulate method comparison data from the scaled variance component model, with the true limits, repeatability coefficients, and conversions in the `truth` attribute.
 - Added `mc_long()` to convert data with one column per method to the long format.
-- New vignettes: "Comparing Several Methods with Replicate Measurements" and "Converting Between Methods".
+- New vignettes: "The MethComp Approach, Part 1: Agreement from Variance Components" and "Part 2: Converting Between Methods", which credit Carstensen's approach, compare it with `agreement_limit()`/`tolerance_limit()`, and note the criticisms of Francq and colleagues.
+
+## Total deviation index
+
+- Added `tdi()` (experimental; issue #82) for the results of `agreement_limit()`, `tolerance_limit()`, and `method_vc()`: the total deviation index (the value that a proportion `p` of the absolute differences do not exceed; Lin, 2000), computed exactly, with Lin's approximation for reference, and a one-sided upper confidence bound. With `delta`, also the coverage probability of `delta` with a lower bound, and the test of `H0: TDI >= delta`, which agrees with both bounds.
+  - Bounds by generalized pivotal quantities (`method = "gpq"`, default), the delta method on the log scale (`"delta"`), or a one-sided tolerance bound for the quantile of the differences that defines the TDI (`"tolerance"`; Escaramis et al., 2010). The point estimates match TDIagree; its tolerance bound counts measurements rather than differences and is narrower, and the tests check that the same formula reproduces it with TDIagree's inputs. TDIagree and MethComp are now in Suggests.
+  - `p` and the confidence level default to those of the object. Rows for `prop_bias`, conditions, and pairs of methods are all reported; the printed result is the row with the largest bound. On the log scale the TDI is reported as a ratio.
+  - For replicated and nested data, the generalized pivotal quantities draw each component of the variance separately; `agreement_limit()` results now keep these components (`var_comp`). In simulations (10 to 50 subjects; bias of 0 to 1.5 SDs; independent, replicated, and nested data), 95% bounds covered the true TDI 94% to 99% of the time with `"gpq"`, 91% to 97% with `"delta"`, and 93% to 99% with `"tolerance"` (`references/general/tdi_sims/`).
+  - When the degrees of freedom of the SD are unavailable (e.g., `method_vc()` with a variance component estimated at zero), the TDI is estimated without a bound, with a warning.
+  - Methods: `print()`, `summary()` (`style`), and `plot()`.
+- `agreement_limit()` output gains a `df_sd` column: the degrees of freedom of the SD of a single difference (Satterthwaite for `data_type = "reps"` and `"nest"`).
 
 ## Proportional bias diagnostics in `check()`
 

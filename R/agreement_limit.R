@@ -14,7 +14,7 @@
 #' @param alpha The alpha-level for confidence levels.
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
-#' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).
+#' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points). In the terms of [method_vc()], "reps" corresponds to exchangeable replicates and "nest" to linked replicates (each row is a shared occasion); see `vignette("method_comparison_vc")`.
 #' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
 #' @param bound_type Which claim the confidence bounds of the limits of agreement (`lower_loa_ci`/`upper_loa_ci`) support. "iu" (default) gives a one-sided 1 - `alpha` bound on each limit (the outer ends of 1 - 2 * `alpha` two-sided intervals). These give an intersection-union test, at level `alpha`, of whether both limits of agreement lie within a maximal allowable difference, but are not a joint 1 - `alpha` interval for the limits. "joint" gives a one-sided 1 - `alpha`/2 bound on each limit (the outer ends of 1 - `alpha` two-sided intervals, the Bland-Altman convention), with at least 1 - `alpha` joint confidence for both limits. See details.
 #' @param lmer_df Degrees of freedom method, only matters for if data_type is "nest". Default is "satterthwaite". The "asymptotic" method is faster but more liberal.
@@ -167,8 +167,13 @@ agreement_limit = function(x,
   lm_mod = plot_frame(y = df$y, x = df$x, id = df$id,
                       avg = df$avg, delta = df$delta)
   call2$lm_mod = lm_mod
+  # independent pieces of the variance of a single difference, with their
+  # df; the first also determines the SE of the bias (used by tdi())
+  var_comp = attr(df_loa, "var_comp")
+  attr(df_loa, "var_comp") = NULL
   res = structure(list(loa = df_loa,
-                       call = call2),
+                       call = call2,
+                       var_comp = var_comp),
                  class = "loa")
   return(res)
 }
@@ -310,6 +315,8 @@ calc_loa_simple = function(df,
       )
   }
 
+  df_loa$df_sd = dfs
+  attr(df_loa, "var_comp") = list(v = delta.sd^2, df = dfs)
 
   return(df_loa)
 }
@@ -457,8 +464,21 @@ calc_loa_reps = function(df,
       )
   }
 
+  # independent pieces of the total variance and their df (used by tdi()):
+  # the variance of the subject mean differences, which also gives the SE of
+  # the bias, and the rest of the within-subject variance of each method
+  vc = list(v = c(d_var, (1-1/mxh)*sxw2, (1-1/myh)*syw2),
+            df = c(df.residual(model), dfx, dfy))
+  df_loa$df_sd = satt_df(vc$v, vc$df)
+  attr(df_loa, "var_comp") = vc
+
   return(df_loa)
 
+}
+
+# Satterthwaite df of a sum of independent variance estimates
+satt_df = function(v, df){
+  sum(v)^2 / sum(v^2 / df)
 }
 
 
@@ -567,6 +587,12 @@ calc_loa_nest = function(df,
   infl = if(prop_bias) bias_inflation(model, bias_values$avg) else 1
 
   # LoA Variance ----
+  # TODO: check the decomposition used here and in the MOVER below (see
+  # references/general/TODO.md). The piece with n_sub - 1 df is the variance
+  # of the subject means, between + within/mh, but only between_variance is
+  # used, so within/mh is left out of both the bias SE and the bound.
+  # calc_loa_reps(), tolerance_limit() (sd_bound_info) and tdi() (df_sd below)
+  # use between + within/mh.
   loa_var = (between_variance*infl/n_sub) + agreeq^2 / (2*total_variance) *
     ((between_variance)^2/(n_sub-1) + (1 - 1/mh)^2 * (within_variance)^2/(n_obs-n_sub))
 
@@ -612,6 +638,14 @@ calc_loa_nest = function(df,
         upper_loa_ci = (upper_loa  + lme)
       )
   }
+
+  # Satterthwaite df of the total variance (used by tdi()): the variance of
+  # the subject means (n_sub - 1 df) plus the rest of the within variance
+  vc = list(v = c(between_variance + within_variance/mh,
+                  (1-1/mh)*within_variance),
+            df = c(n_sub - 1 - prop_bias, n_obs - n_sub))
+  df_loa$df_sd = satt_df(vc$v, vc$df)
+  attr(df_loa, "var_comp") = vc
 
   return(df_loa)
 }

@@ -33,6 +33,11 @@ reference:
   - loa-methods
   - tolerance_delta-methods
 
+- subtitle: "Total Deviation Index"
+  contents:
+  - tdi
+  - tdi_htest-methods
+
 - title: "Reliability"
   contents:
   - icc_test

@@ -716,6 +716,45 @@ res1 = tolerance_limit(
 plot(res1, delta = .25) # Set maximal allowable difference to .25 units
 ```
 
+## Total deviation index and coverage probability
+
+The limits of agreement answer "within what range do most differences lie?". When a maximal allowable difference $\delta$ is set in advance, the question can be asked directly in two equivalent ways [@lin2000tdi]:
+
+- the **total deviation index**, TDI$_p$: the value that a proportion $p$ of the *absolute* differences do not exceed, $P(|D| \le \text{TDI}_p) = p$;
+- the **coverage probability**, CP$(\delta)$: the proportion of absolute differences that do not exceed $\delta$.
+
+Agreement is acceptable when TDI$_p < \delta$, or equivalently when CP$(\delta) > p$. Unlike the limits of agreement, the TDI is a single number that already combines the bias and the SD: two methods with a large bias and a small SD, or no bias and a large SD, can have the same TDI.
+
+`tdi()` takes the result of `agreement_limit()`, `tolerance_limit()`, or `method_vc()`, computes the TDI exactly from the bias and the SD of a single difference (assuming normally distributed differences), and gives a one-sided upper confidence bound. With `delta`, it also gives the CP and its lower bound, and tests $H_0: \text{TDI}_p \ge \delta$; the test rejects exactly when the upper bound is below $\delta$ (and when the lower bound for the CP is above $p$). By default, $p$ is the agreement or prediction level of the object, so the TDI is comparable with its limits.
+
+```{r}
+res_tdi = tdi(res1, delta = 0.25, seed = 1)
+res_tdi
+```
+
+With a separate variance for each condition, the TDI is computed for each, and the printed estimate and bound are those of the condition with the largest bound. `summary()` describes the result in words, and `plot()` adds the TDI (dashed), its bound (solid), and $\delta$ (dotted) to a Bland-Altman plot:
+
+```{r}
+summary(res_tdi)
+plot(res_tdi)
+```
+
+The upper bound can be computed three ways (`method`):
+
+- `"gpq"` (default): generalized pivotal quantities [@krishnamoorthy2009]. The bias and the SD are drawn from their sampling distributions (with `B` draws; set `seed` to make the result reproducible), and the bound is the upper quantile of the TDI computed from the draws.
+- `"delta"`: the delta method on the log scale [@lin2000tdi].
+- `"tolerance"`: the approach of @escaramis2010. The TDI is $|\mu| + z_q \sigma$ for the quantile $q$ that makes this the $p$ quantile of $|D|$, and the bound is a one-sided upper tolerance bound for the $q$ quantile of the differences, the same kind of bound that `tolerance_limit(bound_type = "iu")` gives for each limit (exact for independent differences). Because $q$ is estimated from the data, the bound is approximate. The TDIagree package also implements this bound, but counts measurements rather than differences, so its bound is narrower.
+
+In simulations (95% bounds; 10 to 50 subjects; bias of 0 to 1.5 SDs; independent, replicated, and nested data, through `agreement_limit()`, `tolerance_limit()`, and `method_vc()`), the bounds covered the true TDI this often:
+
+| Method | Coverage | Notes |
+|---|---|---|
+| `"gpq"` | 0.94 to 0.99 | Close to nominal when the bias is large; somewhat conservative (0.97 to 0.99) without bias |
+| `"delta"` | 0.91 to 0.97 | Somewhat liberal with large bias and few subjects |
+| `"tolerance"` | 0.93 to 0.99 | Close to `"gpq"` for independent differences; somewhat liberal with replicates, a bias, and few subjects |
+
+For replicated and nested data, the generalized pivotal quantities draw each component of the variance separately (the variance of a subject mean, and the rest of the within-subject variance), which is what keeps them at or above nominal; drawing the total variance on its Satterthwaite degrees of freedom gave coverage as low as 0.91 with 10 subjects. The bound for the CP is the dual of the bound for the TDI (the largest proportion whose TDI bound is below $\delta$), so it has the same coverage, and the CP bound, the TDI bound, and the test always agree.
+
 
 # Checking Assumptions
 
