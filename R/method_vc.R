@@ -23,7 +23,10 @@
 #'   "linked". Replicates are linked when all methods measure an item on the
 #'   same occasion (replicate `r` by every method shares the occasion), so
 #'   measurements on the same occasion share an item-by-replicate effect.
-#'   This is a property of the design, not of the data.
+#'   This is a property of the design, not of the data. With two methods,
+#'   "exchangeable" corresponds to `data_type = "reps"` and "linked" to
+#'   `data_type = "nest"` in [agreement_limit()]; see
+#'   `vignette("method_comparison_vc")`.
 #' @param tau Whether the method-by-item variance is "common" to all methods
 #'   (default) or differs by "method". Method-specific values require at
 #'   least three methods.

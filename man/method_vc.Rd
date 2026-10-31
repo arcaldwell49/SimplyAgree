@@ -41,7 +41,10 @@ when an item is measured more than once by the same method.}
 "linked". Replicates are linked when all methods measure an item on the
 same occasion (replicate \code{r} by every method shares the occasion), so
 measurements on the same occasion share an item-by-replicate effect.
-This is a property of the design, not of the data.}
+This is a property of the design, not of the data. With two methods,
+"exchangeable" corresponds to \code{data_type = "reps"} and "linked" to
+\code{data_type = "nest"} in \code{\link[=agreement_limit]{agreement_limit()}}; see
+\code{vignette("method_comparison_vc")}.}
 
 \item{tau}{Whether the method-by-item variance is "common" to all methods
 (default) or differs by "method". Method-specific values require at

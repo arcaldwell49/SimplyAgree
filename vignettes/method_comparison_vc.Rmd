@@ -1,5 +1,5 @@
 ---
-title: "Comparing Several Methods with Replicate Measurements"
+title: "The MethComp Approach, Part 1: Agreement from Variance Components"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output:
@@ -9,7 +9,7 @@ output:
 bibliography: refs.bib
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Comparing Several Methods with Replicate Measurements}
+  %\VignetteIndexEntry{The MethComp Approach, Part 1: Agreement from Variance Components}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
@@ -29,45 +29,26 @@ knitr::opts_chunk$set(
 library(SimplyAgree)
 ```
 
-`agreement_limit()` and `tolerance_limit()` compare **two** methods supplied as paired columns. When a study measures each item with **several methods**, or measures it **more than once with each method**, the variance component model of @carstensen2008 and @carstensen2010 uses all of the data in one model. `method_vc()` fits that model and reports, for every pair of methods, the bias, the limits of agreement (or tolerance limits), the variance components behind them, and the repeatability of each method.
+This is the first of two vignettes on the approach to method comparison developed by **Bendix Carstensen**: the variance component model for replicate measurements [@carstensen2008], the book *Comparing Clinical Measurement Methods* [@carstensen2010], and the MethComp R package that implements both [@methcomp], written by Carstensen with Lyle Gurrin, Claus Thorn Ekstrøm, and Michal Figurski. `method_vc()` and `method_convert()` follow their models closely, and we are grateful to them for developing the approach and for making it available in MethComp. Where SimplyAgree does something differently (the multiplier for the limits, the confidence and tolerance bounds, a maximum likelihood fit of the scaled model), the vignettes say so.
+
+- **Part 1** (this vignette): limits of agreement, variance components, and repeatability from the variance component model, with `method_vc()`.
+- **Part 2**, `vignette("method_conversion")`: converting a measurement by one method into the scale of another, including when the bias is not constant, with `method_convert()`.
+
+# Two routes to the same question
+
+`agreement_limit()` and `tolerance_limit()` follow Bland and Altman: they start from the **differences** between paired measurements by two methods and describe their distribution (the bias and the limits within which most differences lie). This is the natural starting point for two methods, and it works well.
+
+Carstensen's approach is an **alternative** to this, not just an extension for replicate data. It starts from a model for the **measurements themselves**: each measurement is a method-specific mean, plus the item's true value, plus random effects for the sources of variation. The limits of agreement follow from the fitted model, and so do the repeatability of each method and the equations to convert between methods (Part 2). @carstensen2010 gives several reasons to prefer this:
+
+- **One model for all the questions.** Bias, limits of agreement, repeatability, and conversion between methods come from the same fit and are consistent with one another.
+- **Any number of methods.** All methods enter one model, and every pair is compared using all of the data, rather than in a separate paired analysis for each pair.
+- **Where the disagreement comes from.** The model separates the persistent, item-specific deviation of a method (the method-by-item interaction) from its measurement error and from variation between occasions. Two pairs of methods can have the same limits of agreement for quite different reasons, and only measurement error can be reduced by averaging repeated measurements.
+- **The design is explicit.** Whether replicates are linked across methods or exchangeable is stated in the model, not handled implicitly by how the data are paired.
+- **Conversion is the practical question.** When methods do not agree, clinicians want to know what one method would have read, given a measurement by the other. A model for the measurements answers this directly, and extends to methods on different scales (Part 2).
+
+The price is a model with more assumptions (normal random effects, a constant or linear relation between methods), and replicate measurements are needed to separate the variance components.
 
 The data must be in the long format: one row per measurement, with columns for the value, the method, the item (subject), and, with replicates, the replicate. `mc_long()` converts data with one column per method.
-
-# Why paired differences are not enough with replicates
-
-Limits of agreement describe the difference between **a single measurement** by each method on a new item. With replicates, two shortcuts are tempting, and both get this wrong:
-
-- **Averaging the replicates** within each item before taking differences removes part of the measurement error, so the SD of the differences of the means is too *small* for single measurements.
-- **Treating every replicate pair as an independent item** gets the SD about right, but the pairs from the same item are correlated, so the confidence intervals (and the bias SE) are too narrow, and the pairing of exchangeable replicates is arbitrary.
-
-A small simulation shows the first problem. Two methods measure 40 items 3 times each. The `truth` attribute of simulated data holds the true SD of the difference between single measurements.
-
-```{r}
-dat = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
-                  alpha = c(0, 0.2), tau = 0.3, sigma = c(0.5, 0.7),
-                  seed = 42)
-attr(dat, "truth")$pairs
-
-# SD of the differences of the item means: too small
-item_means = tapply(dat$y, list(dat$id, dat$method), mean)
-sd(item_means[, "A"] - item_means[, "B"])
-
-# the variance component model
-fit_ab = method_vc(dat, y = "y", method = "method", id = "id",
-                   replicate = "repl")
-fit_ab$limits[, c("bias", "sd", "lower_loa", "upper_loa")]
-```
-
-The model separates the variation of the method-by-item effects (`tau`) from the measurement error of each method (`sigma`), and recombines them for single measurements.
-
-# Linked or exchangeable replicates?
-
-This is a question about the **design**, not something to test from the data [@carstensen2010, ch. 5]:
-
-- **Exchangeable** (`replicates = "exchangeable"`, the default): the replicates of an item by one method are interchangeable, and replicate 1 by method A has nothing more to do with replicate 1 by method B than with replicate 2. For example, each method measures a sample in random order, or on different days.
-- **Linked** (`replicates = "linked"`): all methods measure the item on the same occasion, so replicate `r` is a shared occasion. For example, two oximeters read at the same time, three times per patient. Measurements on the same occasion share an item-by-replicate effect (`omega`) that does not affect the difference between methods on that occasion.
-
-With linked replicates, `replicate` must identify the occasion in the same way for all methods.
 
 # The variance component model
 
@@ -94,6 +75,104 @@ $$
 and the limits of agreement are $\alpha_m - \alpha_k \pm z \sqrt{V_{mk}}$. With linked replicates $\omega$ cancels, because both methods share the occasion. If the methods would be applied on different occasions in practice, `include_omega = TRUE` adds $2\omega^2$.
 
 Without replicates, the method-by-item variation cannot be separated from the measurement error: with two methods only $V_{12}$ can be estimated (the classical paired-difference analysis, identical to `agreement_limit()`), and with three or more methods the method-specific residual SDs absorb $\tau_m$.
+
+# Linked or exchangeable replicates?
+
+Which of these applies is a question about the **design**, not something to test from the data [@carstensen2010, ch. 5]:
+
+- **Exchangeable** (`replicates = "exchangeable"`, the default): the replicates of an item by one method are interchangeable, and replicate 1 by method A has nothing more to do with replicate 1 by method B than with replicate 2. For example, each method measures a sample in random order, or on different days.
+- **Linked** (`replicates = "linked"`): all methods measure the item on the same occasion, so replicate `r` is a shared occasion. For example, two oximeters read at the same time, three times per patient. Measurements on the same occasion share an item-by-replicate effect (`omega`) that does not affect the difference between methods on that occasion.
+
+With linked replicates, `replicate` must identify the occasion in the same way for all methods.
+
+The same distinction appears elsewhere in SimplyAgree under other names:
+
+| Design | `method_vc()`, `method_convert()` | `agreement_limit()` | `reli_facet_test()` |
+|---|---|---|---|
+| Replicates are not shared across methods | `replicates = "exchangeable"` | `data_type = "reps"` | exchangeable repeats (`occasion = NULL`) |
+| Replicates are shared occasions | `replicates = "linked"` | `data_type = "nest"` | shared occasions (`occasion = `) |
+
+The names differ because they describe different things. `data_type` describes the *data*: with `"reps"`, the true value is assumed constant across an item's replicates; with `"nest"`, each row is a pair of measurements taken together, and the true value may change between pairs. `replicates` describes the *design*, following @carstensen2010: whether replicate $r$ by one method is tied to replicate $r$ by the others. Here we keep Carstensen's terms because they name what the model needs to know, they are the terms used in his book and in MethComp, and "nested" would be misleading with several methods, where occasions are crossed with methods within each item. For two methods the options correspond as in the table, and the next section shows that they give the same results. `tolerance_limit()` has no `data_type`: it always models the differences of paired rows, so with `id` (and `cor_type = "sym"`) it corresponds to `data_type = "nest"` and to linked replicates.
+
+# When the two approaches give the same answer
+
+With two methods and a constant bias, the two routes estimate the same quantity, and with balanced data they give the same numbers. Without replicates, the variance component model reduces to the paired differences, and `method_vc()` reproduces `agreement_limit()` exactly, including the confidence bounds:
+
+```{r}
+d1 = sim_methods(n_items = 40, n_reps = 1, methods = c("A", "B"),
+                 alpha = c(0, 0.2), tau = 0.3, sigma = c(0.5, 0.7),
+                 seed = 1)
+w1 = tidyr::pivot_wider(d1[, c("id", "method", "y")],
+                        names_from = method, values_from = y)
+
+method_vc(d1, y = "y", method = "method", id = "id")$limits[
+  , c("bias", "lower_loa", "upper_loa", "lower_loa_ci", "upper_loa_ci")]
+agreement_limit(x = "A", y = "B", data = w1)$loa[
+  , c("bias", "lower_loa", "upper_loa", "lower_loa_ci", "upper_loa_ci")]
+```
+
+With **exchangeable** replicates, `agreement_limit(data_type = "reps")` estimates the same bias, SD, and limits. The confidence bounds differ slightly, because `method_vc()` takes the degrees of freedom for the SD from the covariance of the variance components (Satterthwaite) rather than from the number of items:
+
+```{r}
+d2 = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
+                 alpha = c(0, 0.2), tau = 0.3, sigma = c(0.5, 0.7),
+                 seed = 42)
+w2 = tidyr::pivot_wider(d2[, c("id", "repl", "method", "y")],
+                        names_from = method, values_from = y)
+
+method_vc(d2, y = "y", method = "method", id = "id",
+          replicate = "repl")$limits[
+  , c("bias", "sd", "lower_loa", "upper_loa", "lower_loa_ci", "upper_loa_ci")]
+agreement_limit(x = "A", y = "B", id = "id", data = w2,
+                data_type = "reps")$loa[
+  , c("bias", "sd_delta", "lower_loa", "upper_loa", "lower_loa_ci",
+      "upper_loa_ci")]
+```
+
+With **linked** replicates, `method_vc()` removes the variation between occasions ($\omega$), which both methods share. `data_type = "reps"` does not know that the replicates are linked, so its SD includes that variation and its limits are wider. `data_type = "nest"`, which keeps each occasion as a pair, matches `method_vc()`:
+
+```{r}
+d3 = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
+                 alpha = c(0, 0.2), tau = 0.3, omega = 0.6,
+                 sigma = c(0.5, 0.7), replicates = "linked", seed = 42)
+w3 = tidyr::pivot_wider(d3[, c("id", "repl", "method", "y")],
+                        names_from = method, values_from = y)
+
+method_vc(d3, y = "y", method = "method", id = "id", replicate = "repl",
+          replicates = "linked")$limits[
+  , c("bias", "sd", "lower_loa", "upper_loa")]
+agreement_limit(x = "A", y = "B", id = "id", data = w3,
+                data_type = "reps")$loa[
+  , c("bias", "sd_delta", "lower_loa", "upper_loa")]
+agreement_limit(x = "A", y = "B", id = "id", data = w3,
+                data_type = "nest")$loa[
+  , c("bias", "sd_delta", "lower_loa", "upper_loa")]
+```
+
+The results diverge when the model has something to add: with three or more methods (all of the data inform every pair, and `tau = "method"` gives each method its own method-by-item variance), with unbalanced replicates, when the variance components themselves are of interest (repeatability), and when the bias is not constant (Part 2). For two methods with a constant bias and no interest in the components, `agreement_limit()` or `tolerance_limit()` is simpler and gives the same answer.
+
+# What the components add
+
+Limits of agreement describe the difference between **a single measurement** by each method on a new item. Averaging the replicates within each item before taking differences removes part of the measurement error, so the SD of the differences of the means is too *small* for single measurements. Here two methods measure 40 items 3 times each. The `truth` attribute of simulated data holds the true SD of the difference between single measurements.
+
+```{r}
+dat = sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
+                  alpha = c(0, 0.2), tau = 0.3, sigma = c(0.5, 0.7),
+                  seed = 42)
+attr(dat, "truth")$pairs
+
+# SD of the differences of the item means: too small
+item_means = tapply(dat$y, list(dat$id, dat$method), mean)
+sd(item_means[, "A"] - item_means[, "B"])
+
+# the variance component model
+fit_ab = method_vc(dat, y = "y", method = "method", id = "id",
+                   replicate = "repl")
+fit_ab$limits[, c("bias", "sd", "lower_loa", "upper_loa")]
+fit_ab$varcomp
+```
+
+The model separates the variation of the method-by-item effects (`tau`) from the measurement error of each method (`sigma`), and recombines them for single measurements. `agreement_limit(data_type = "reps")` also gets the SD right, as shown above; what the model adds is the separation itself. Here most of the disagreement is measurement error, which averaging repeated measurements would reduce; a large `tau` would instead mean that the methods disagree persistently for some items, and averaging would not help.
 
 # A worked example: three methods, linked replicates
 
@@ -279,5 +358,14 @@ attr(check(fit, pair_seed = 1), "prop_bias")[, c("group", "p.value",
 ```
 
 See the "Proportional Bias" section of `vignette("agreement_analysis")` for how to read the plot and what to do with the result.
+
+# Criticisms and open questions
+
+Bernard Francq and colleagues, the authors of the BivRegBLS package, have criticized two practices that are central to the Bland-Altman tradition, and to MethComp:
+
+- **Limits of agreement as bias $\pm z$ SD.** @francq2020tolerate show that this interval is approximate and too narrow, and that its coverage collapses in small samples, because it ignores the uncertainty in the estimated bias and SD. Adding a confidence interval around each limit, they argue, is a confusing patch on an approximate interval. They recommend prediction (or $\beta$-expectation tolerance) intervals, which are exact, or $\beta$-content, $\gamma$-confidence tolerance intervals, which add a stated confidence. MethComp's bias $\pm 2$ SD is the same kind of interval, with a rounded multiplier (see [the note above](#a-note-on-methcomps-multiplier-of-2)). `method_vc(interval = "tolerance")` gives prediction and tolerance limits from the variance component model, so the two approaches can be combined: Carstensen's model for the variance, and tolerance intervals for the conclusion.
+- **Regression in the Bland-Altman plot.** When the differences change with the level, horizontal limits are no longer valid. @francq2016 show that the errors of the differences and the averages are correlated, and that ignoring this correlation makes the regression of the differences on the averages biased, with poor coverage. They propose errors-in-variables regressions instead (bivariate least squares, BLS, and its correlated version for the Bland-Altman plot, CBLS), which allow the measurement errors of the two methods to differ and to change with the level [@francq2014]. This bears on the "linear bias" model of Part 2, which, like MethComp, regresses the differences on the averages; see `vignette("method_conversion")`.
+
+These papers do not single out MethComp, and Carstensen's scaled model (Part 2) answers some of the same concerns in a different way, by modeling each method's measurement error explicitly. What neither SimplyAgree nor MethComp offers yet is what BivRegBLS does for two methods: an errors-in-variables regression with prediction and tolerance intervals around a non-constant bias, and with measurement errors that change with the level. Bringing these into `method_convert()` is a possible direction for future development.
 
 # References

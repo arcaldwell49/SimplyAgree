@@ -1,5 +1,5 @@
 ---
-title: "Converting Between Methods"
+title: "The MethComp Approach, Part 2: Converting Between Methods"
 author: "Aaron R. Caldwell"
 date: "Last Updated: `r Sys.Date()`"
 output:
@@ -9,7 +9,7 @@ output:
 bibliography: refs.bib
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Converting Between Methods}
+  %\VignetteIndexEntry{The MethComp Approach, Part 2: Converting Between Methods}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
@@ -30,13 +30,15 @@ has_lavaan = requireNamespace("lavaan", quietly = TRUE)
 library(SimplyAgree)
 ```
 
-Limits of agreement answer "how far apart are two methods?". When the methods do not agree, the next question is often "what would method B have read, given a measurement by method A?". `method_convert()` estimates **conversion equations** between every pair of methods,
+This is the second of two vignettes on the approach to method comparison developed by Bendix Carstensen in his book [@carstensen2010] and the MethComp package [@methcomp], with Lyle Gurrin, Claus Thorn Ekstrøm, and Michal Figurski. [Part 1](method_comparison_vc.html) (`vignette("method_comparison_vc")`) introduces the approach, explains how it differs from the Bland-Altman style of `agreement_limit()` and `tolerance_limit()`, and fits the variance component model with `method_vc()`. The models here, and the alternating regression for the scaled model, are theirs; we thank them for developing them.
+
+Limits of agreement answer "how far apart are two methods?". When the methods do not agree, the next question is often "what would method B have read, given a measurement by method A?". For @carstensen2010 this is the question that matters in practice, and it is where a model for the measurements, rather than for their differences, pays off. `method_convert()` estimates **conversion equations** between every pair of methods,
 
 $$
 y_{\text{to}} = \alpha_{\text{to}|\text{from}} + \beta_{\text{to}|\text{from}}\, y_{\text{from}},
 $$
 
-with a prediction SD and prediction limits, under three models for the bias between methods [@carstensen2010]. The data are in the long format used by `method_vc()` (see `vignette("method_comparison_vc")`).
+with a prediction SD and prediction limits, under three models for the bias between methods [@carstensen2010]. The data are in the long format used by `method_vc()`.
 
 We use simulated data throughout. Method B reads about 1 unit higher and 20% steeper than method A ($\beta_B = 1.2$), so the bias is not constant:
 
@@ -93,6 +95,8 @@ method_convert(dat, y = "y", method = "method", id = "id",
 ```
 
 **A caveat.** The slope $b$ is biased whenever the two methods have different measurement errors, because $\mathrm{cov}(D, A) = (\mathrm{var}(y_1) - \mathrm{var}(y_2))/2$: two methods with the same scale but different precision show a "proportional bias" on this plot. In these data method B is noisier than A, which pushes $b$ away from its true value. The scaled model below, or errors-in-variables regression (`dem_reg()`, `pb_reg()`), accounts for the measurement errors.
+
+@francq2016 make this point more generally: in the Bland-Altman plot the errors of $D$ and $A$ are correlated whenever the two methods have different measurement errors, and an ordinary regression of $D$ on $A$ that ignores the correlation gives biased estimates and intervals with poor coverage. Their alternative is the correlated bivariate least squares (CBLS) regression in the Bland-Altman plot, equivalent to bivariate least squares (BLS) in the plot of one method against the other, which uses the measurement error variances (known, or estimated from replicates) and allows them to change with the level [@francq2014]; it is implemented in the BivRegBLS package. `method_convert()` does not offer this yet. With replicates, the scaled model is the better choice here; without them, `dem_reg()` with a known error ratio is the closest option.
 
 # The scaled model
 
