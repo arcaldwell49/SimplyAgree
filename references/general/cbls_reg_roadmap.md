@@ -1,6 +1,8 @@
 # `cbls_reg()`: roadmap
 
-Status (2026-10-31): **planned, not started.** Nothing is implemented. This
+Status (2026-10-31): **first version implemented** (`R/cbls_reg.R`,
+`R/methods.simple_bls.R`, `tests/testthat/test-cbls_reg.R`); see "Done and
+left" at the end. The rest of this note is the original plan. This
 note records the goal, sources, API sketch, how the function fits into the
 existing errors-in-variables (EIV) family, and how to validate it.
 
@@ -124,3 +126,35 @@ cbls_reg(formula, data, id = NULL,
   model like `method_vc()`).
 - Whether CBLS should replace the default of
   `method_convert(bias = "linear")`.
+
+## Done and left (2026-10-31)
+
+Done, following BivRegBLS 1.1.1's source (read for the formulas; our own
+implementation):
+
+- `cbls_reg()` returns `c("simple_bls", "simple_eiv")`: BLS in (X, Y) and
+  CBLS in (M, D), with D = x - y (the `agreement_limit()` convention;
+  BivRegBLS uses y - x). One engine (`.bls_engine()`) for both, iterated to
+  convergence with per-subject error variances `var / n_i` (BivRegBLS takes
+  one step from Deming and assumes balanced replicates; identical when
+  balanced).
+- Variances: `var_x`/`var_y` (+ `df_var_x`/`df_var_y`), pooled
+  within-subject variances from replicates, or `error.ratio` only (no PIs).
+- `predict()`: CI and PI (single or `reps_x`/`reps_y` means; BivRegBLS's
+  "GI"), Satterthwaite df, in both plots. CBLS PIs include the D-M error
+  covariance (BivRegBLS omits it).
+- `joint_test()`: Wald, F(2, n - 2), no Hotelling factor (BivRegBLS uses
+  2(n - 1)/(n - 2) instead of 2). Sadler disabled for BLS.
+- Tests reproduce BivRegBLS to 1e-8 (estimates, SEs, CIs, PIs, GIs, CBLS),
+  Deming identity, minimiser of the BLS objective with unequal replicates,
+  CBLS line = transformed BLS line.
+
+Left:
+
+- Beta-content tolerance intervals around the line (Francq 2016; not in
+  BivRegBLS's `BLS()`/`CBLS()` output either).
+- Simultaneous confidence band (BivRegBLS's "CB").
+- Heteroscedastic variance functions (variance changing with the level,
+  beyond unequal replicates), e.g. a `varPower`-style option.
+- Coverage simulation (`references/general/cbls_sims/`).
+- `method_convert(bias = "linear", estimator = "cbls")` for several methods.

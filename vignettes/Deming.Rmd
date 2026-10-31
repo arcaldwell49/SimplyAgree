@@ -190,6 +190,28 @@ pb2 <- pb_reg(method2 ~ method1,
 summary(pb2)
 ```
 
+# Bivariate Least Squares (BLS and CBLS)
+
+`cbls_reg()` implements the bivariate least squares regressions of @francq2014 and @francq2016, as in the BivRegBLS package. Like Deming regression, BLS allows for measurement error in both methods, but it uses the error variances themselves, known from a validation study (`var_x`, `var_y`) or estimated from replicates (`id`), rather than only their ratio. Each subject's mean is weighted by the error variance of that mean, so subjects with more replicates count for more, and the variances may differ between the methods. With constant variances, BLS gives the same line as Deming regression with `error.ratio = var_x / var_y`.
+
+Because the variances are known, BLS also gives exact standard errors (without the jackknife) and **prediction intervals**: where a new measurement by one method is expected to fall, given a new measurement by the other.
+
+```{r}
+data("reps")
+bls1 <- cbls_reg(y ~ x, data = reps, id = "id")
+summary(bls1)
+predict(bls1, newdata = c(4, 6), interval = "prediction")
+```
+
+The same line can be fitted in the Bland-Altman plot (differences `x - y` against means). There, the errors of the differences and of the means are correlated whenever the two methods have different error variances, which an ordinary regression of the differences on the means ignores (see `vignette("method_conversion")`). Correlated BLS (CBLS) accounts for this [@francq2016]; it is reported with the BLS fit and drawn by `plot(type = "md")`. A slope of zero in this plot means a constant bias.
+
+```{r, fig.width = 7, fig.height = 4}
+plot(bls1, interval = "prediction")
+plot(bls1, type = "md", interval = "prediction")
+```
+
+`joint_test()` tests intercept 0 and slope 1 with the Wald statistic from the BLS variance-covariance matrix, and `check()` shows the standardized residuals. The estimates, standard errors, and confidence and prediction intervals reproduce BivRegBLS; its joint test multiplies the critical value by a Hotelling factor, $(n - 1)/(n - 2)$, so its p-values are slightly larger. The CBLS prediction intervals here also include the covariance between the errors of a new difference and a new mean, which BivRegBLS leaves out (the two agree when the error variances are equal).
+
 # Joint Confidence Regions
 
 An experimental enhancement to the `dem_reg` and `pb_reg` functions is the addition of **joint confidence regions** for the slope and intercept parameters. Traditional confidence intervals treat each parameter separately, but in regression analysis, these parameters are correlated.

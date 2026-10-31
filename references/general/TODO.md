@@ -54,4 +54,4 @@ the difference is small.
 
 ## Planned features
 
-- `cbls_reg()`: see `cbls_reg_roadmap.md`.
+- `cbls_reg()`: first version done; what is left (tolerance intervals, simultaneous band, variance functions, coverage simulation, CBLS in `method_convert()`) is listed at the end of `cbls_reg_roadmap.md`.

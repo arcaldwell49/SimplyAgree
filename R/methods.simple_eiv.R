@@ -1064,14 +1064,22 @@ joint_test <- function(object, ...) {
 # Joint-test method: Sadler for Deming fits, Wald for Passing-Bablok fits
 .joint_method <- function(object, method, test_method_given, test_method) {
   is_pb <- !is.null(object$method) && grepl("Passing-Bablok", object$method)
+  # BLS (cbls_reg()): the error variances can differ between points, so the
+  # Sadler region (which assumes weights w_i / (1 + lambda b^2)) does not
+  # apply; the Wald test uses the BLS variance-covariance matrix
+  is_bls <- inherits(object, "simple_bls")
   if (is.null(method)) {
-    method <- if (is_pb) "wald" else "sadler"
+    method <- if (is_pb || is_bls) "wald" else "sadler"
   } else {
     method <- match.arg(method, c("sadler", "wald"))
   }
   if (is_pb && method == "sadler") {
     stop("method = 'sadler' is only available for Deming regression (dem_reg()). ",
          "Passing-Bablok fits use method = 'wald'.")
+  }
+  if (is_bls && method == "sadler") {
+    stop("method = 'sadler' is only available for Deming regression (dem_reg()). ",
+         "BLS fits (cbls_reg()) use method = 'wald'.")
   }
   if (method == "sadler" && test_method_given && test_method == "asymptotic") {
     stop("test_method applies only to method = 'wald'; ",

@@ -27,6 +27,14 @@ New functions for comparing two or more methods, with or without replicate measu
 - Added `mc_long()` to convert data with one column per method to the long format.
 - New vignettes: "The MethComp Approach, Part 1: Agreement from Variance Components" and "Part 2: Converting Between Methods", which credit Carstensen's approach, compare it with `agreement_limit()`/`tolerance_limit()`, and note the criticisms of Francq and colleagues.
 
+## Bivariate least squares regression
+
+- Added `cbls_reg()` (experimental): bivariate least squares (BLS) regression of one method on the other and correlated BLS (CBLS) in the Bland-Altman plot (Francq & Govaerts, 2014, 2016), as in the BivRegBLS package. The measurement error variances are given (`var_x`, `var_y`, with optional df) or estimated from replicates (`id`), may differ between the methods, and the error variance of each subject's mean depends on its number of replicates (BLS is then fitted iteratively; with constant variances it is Deming regression). With only `error.ratio`, the estimates and confidence intervals are available but not the prediction intervals.
+  - Exact standard errors and t-based confidence intervals; `predict()` gives confidence and prediction intervals (for single measurements or means of `reps_x`/`reps_y` replicates, Satterthwaite df) in either plot (`type = "xy"` or `"md"`).
+  - Methods: `print()`, `summary()`, `plot()` (`type = "xy"`, `"md"`, with interval bands), `check()`, `fitted()`, `residuals()`; as a `simple_eiv` object also `coef()`, `vcov()`, `confint()`, `joint_test()` (Wald, `F(2, n - 2)`; Sadler's region does not apply) and `plot_joint()`.
+  - The estimates, standard errors, and confidence and prediction intervals reproduce BivRegBLS (tests; BivRegBLS is now in Suggests). Differences: the joint test does not use BivRegBLS's Hotelling factor, and the CBLS prediction intervals include the covariance between the errors of a new difference and a new mean, which BivRegBLS omits. The differences are `x - y`, as in `agreement_limit()` (BivRegBLS uses `y - x`).
+  - New section in `vignette("Deming")`; the MethComp vignettes point to it.
+
 ## Total deviation index
 
 - Added `tdi()` (experimental; issue #82) for the results of `agreement_limit()`, `tolerance_limit()`, and `method_vc()`: the total deviation index (the value that a proportion `p` of the absolute differences do not exceed; Lin, 2000), computed exactly, with Lin's approximation for reference, and a one-sided upper confidence bound. With `delta`, also the coverage probability of `delta` with a lower bound, and the test of `H0: TDI >= delta`, which agrees with both bounds.
