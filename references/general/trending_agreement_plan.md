@@ -66,7 +66,96 @@ What the existing slope tools see:
 
 So this release documents the limitation and gives a recipe; it does not add a slope function.
 
+## Step 0: check what the existing methods already give (do this first)
+
+Most of what trending agreement asks for may already be estimable. The change LoA is `mdc_test()` on D. Within-person
+reliability is ω² / (ω² + σ_m²) from `method_vc(replicates = "linked")`, or `icc_test()` with device as the rater on
+subject-centred data. If those cover it, the work below is mainly documentation and worked examples, not new code.
+Answer these with a script in `trending_checks/` (simulated data from `issue_checks.R`: tracking, partial and
+non-tracking devices, small and large within-subject ranges):
+
+1. **`method_vc(replicates = "linked")` with two methods and one measurement per method per occasion.** Does it fit,
+   and are σ_1, σ_2 and ω separately identified? (Within subject there are 3 moments, var(x_c), var(y_c) and
+   cov(x_c, y_c), and 3 unknowns, ω², σ_1² and σ_2², so they should be identified *given a unit slope*; to be
+   confirmed.) Does z·√2·√(σ_1² + σ_2²) match the change LoA from `mdc_test()` on D?
+2. **Within-person reliability.** Compare ω² / (ω² + σ_m²) from `method_vc()` with `icc_test()` / `reli_err_test()`
+   on subject-centred data (device as `item`, subject–occasion as `id`). How far off are the centred-data CIs
+   (N − 2 instead of about N − n − 1 residual df)?
+3. **Non-tracking.** With a within-subject slope of 0, what do `method_vc()` and the centred ICC report? Expectation
+   (unverified): cov(x_c, y_c) ≈ 0, so ω → 0 and the true within-subject change is pushed into σ_ref, i.e. the misfit
+   is visible as an implausible ω and σ split rather than as a small change LoA. Does `linked_reps_test()` or
+   `check()` flag it?
+4. **Gaps no existing function fills.** Expected: the quadrant and polar plots, the within-subject residual plot,
+   and ω for users of `agreement_limit(nest)` / `tolerance_limit(lme)` (who could instead be pointed to
+   `method_vc()`).
+
+### Results (2026-11-01, `trending_checks/step0_checks.R`)
+
+100 subjects × 6 occasions, one data set per row; error SD of ref 0.25; method-by-item SD 0.25.
+
+| within SD of true value | within slope | alt error SD | ω | σ_ref | σ_alt | change LoA `method_vc` / `mdc_test` | reliability `method_vc` / centred ICC (CI) | `linked_reps_test` p |
+|---|---|---|---|---|---|---|---|---|
+| 0.3 | 1 | 0.25 | 0.32 | 0.25 | 0.27 | 1.009 / 1.009 | 0.60 / 0.60 (0.55, 0.65) | – |
+| 1.5 | 1 | 0.25 | 1.58 | 0.23 | 0.29 | 1.009 / 1.009 | 0.97 / 0.97 (0.97, 0.98) | – |
+| 0.3 | 0.5 | 0.25 | 0.23 | 0.33 | 0.22 | 1.092 / 1.092 | 0.39 / 0.39 (0.33, 0.46) | 0.05 |
+| 1.5 | 0.5 | 0.25 | 0.83 | **0.87** | **0.00** | 2.399 / 2.399 | 0.65 / 0.77 (0.73, 0.80) | 0.05 |
+| 0.3 | 0 | 0.25 | 0.05 | 0.40 | 0.27 | 1.324 / 1.324 | 0.02 / 0.02 (−0.06, 0.10) | 0.35 |
+| 1.5 | 0 | 0.25 | **0.00** | **1.57** | 0.27 | 4.428 / 4.430 | 0.00 / 0.00 (−0.08, 0.08) | 0.60 |
+| 0.3 | 1 | 0.60 | 0.32 | 0.24 | 0.65 | 1.907 / 1.907 | 0.30 / 0.30 (0.23, 0.37) | – |
+| 1.5 | 1 | 0.60 | 1.58 | 0.24 | 0.65 | 1.907 / 1.907 | 0.91 / 0.91 (0.90, 0.93) | – |
+
+(`linked_reps_test` was run with only 19 permutations, so 0.05 is its smallest possible p.)
+
+Coverage of the centred-ICC 95% CI (300 data sets each, unit slope): 0.89 (20 subjects × 3 occasions),
+0.92 (20 × 6), 0.86 (60 × 3), 0.89 (20 × 3, larger ω).
+
+1. **Yes.** With two methods and one measurement per method per occasion, `method_vc(linked)` fits, and with a unit
+   slope it recovers ω, σ_ref and σ_alt separately. Its change LoA, z·√2·√(σ_ref² + σ_alt²), equals `mdc_test()` on D
+   to three decimals. Open question 5 is answered.
+2. **Same point estimate, worse CIs.** ω²/(ω² + mean σ²) from `method_vc()` equals the centred ICC whenever the fit is
+   not at a boundary. The centred-ICC CIs undercover (0.86–0.92), worse with fewer occasions per subject, because the
+   lost subject df are ignored. So the centred-ICC recipe is fine for a point estimate but not for inference.
+   `method_vc()` has the covariance of the variance components (`vc_cov`) needed for a delta-method CI, but does not
+   report the reliability.
+3. **Non-tracking is visible, but as a misfit, and nothing flags it.**
+   - Slope 0: ω → 0, the reference method's error SD absorbs the true change (σ_ref 1.57 against a true 0.25), and the
+     reliability → 0. So the reliability does catch a device that does not track; the change LoA alone did not
+     when the range was small (1.32).
+   - Slope 0.5, wide range: the misfit is worse. σ_alt hits 0 (boundary) and σ_ref is 0.87, so the *non-tracking*
+     device looks error-free. Here the `method_vc()` reliability (0.65) and the centred ICC (0.77, which assumes equal
+     error SDs) disagree.
+   - The tell-tale sign is an implausible σ_ref (compared with the reference's known repeatability) or a σ at 0.
+   - `linked_reps_test()` does not detect it: it tests whether replicates are linked (ω > 0), so with slope 0 it
+     is *not* significant and would suggest treating replicates as exchangeable.
+4. **Gaps confirmed:** the quadrant and polar plots, the within-subject residual plot, a within-person reliability
+   with a valid CI, and a diagnostic for a non-unit within-subject slope.
+
+**Outcome.** `method_vc(replicates = "linked")` is the trending analysis: ω is the range of applicability, `rc` and the
+pair's change LoA come from it, and its point estimate of the within-person reliability matches the ICC. Item 1's
+extra model for the average is dropped (users of `agreement_limit(nest)` / `tolerance_limit(lme)` are pointed to
+`method_vc()`). New code reduces to:
+
+- a within-person reliability per method and for the pair in `simple_mvc` output (linked only), with delta-method
+  CIs from `vc_cov` (a coverage check is needed);
+- the plots (item 2), on `simple_mvc` first;
+- possibly a warning in `method_vc()` when a σ is at the boundary with linked replicates, pointing to a non-unit
+  slope as one cause.
+
+Everything else is documentation and worked examples (item 3), including how a non-tracking device shows up in
+`method_vc()` output and why `linked_reps_test()` does not detect it.
+
+**Decision rule (as written before the checks).**
+
+- If 1–3 hold, drop item 1's new model fit: document `method_vc(replicates = "linked")` as the trending analysis,
+  with ω as the range of applicability, `rc` and the pair's change LoA, and at most add the within-person reliability
+  to `simple_mvc`'s print/summary as a derived quantity. Item 3 (documentation and examples) becomes the main
+  deliverable; item 2 (plots) is the only clearly new code.
+- If `method_vc()` cannot be used for this design (e.g. σ_1 and σ_2 not identified, or fitting fails with one
+  measurement per method per occasion), keep item 1 as written for `agreement_limit()` and `tolerance_limit()`.
+
 ## Work items
+
+Items 1 and 4 depend on the outcome of step 0.
 
 ### 1. Within-subject spread of the measured quantity, and the within-subject plot
 
@@ -156,6 +245,9 @@ plot(x, type = "polar",    exclusion = 0, relative = FALSE)
 4. Item 3: should `dem_reg(id)` / `pb_reg(id)` also warn when replicates are clearly not exchangeable, or is the
    docs change enough?
 5. `method_vc()` with two methods and linked replicates: are σ_1 and σ_2 separately identified (see above)?
+   Step 0, question 1 answers this: yes, given a unit slope.
+6. If step 0 shows `method_vc()` covers the analysis, is a within-person reliability in `simple_mvc` output worth
+   adding, or do docs pointing to `icc_test()` on centred data suffice?
 
 ## References
 
