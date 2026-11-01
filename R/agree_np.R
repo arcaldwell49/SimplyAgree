@@ -151,55 +151,20 @@ agree_np <- function(x,
     quan_mod2 = rq(formula =  delta ~ mean,
                   data = df,
                   tau = c(agree.u,.5,agree.l))
-    #rq_obj = suppressWarnings(quantreg::summary.rq(quan_mod2, se = "boot"))
-    #co <- as.data.frame(rq_obj[["coefficients"]])
-    #tidy.rq(quan_mod2, se.type = "boot")
-    #broom:::tidy.rqs(quan_mod2)
-    rq_summary <- suppressWarnings(summary.rqs(quan_mod2,
-                                                         se ="boot",
-                                                         alpha = 1 - conf.level))
-    df_test = data.frame()
-
-    for(i in 1:length(rq_summary)){
-      temp = process_rq(rq_summary[[i]])
-      df_test = rbind(df_test,temp)
-    }
+    # bootstrap standard errors (see rq_boot_vcov())
+    df_test = rq_boot_coef(quan_mod2, rq_boot_vcov(quan_mod2))
     df_test = df_test[c(4),]
     if(df_test$p.value < (1-conf.level)){
       warning("Evidence of proportional bias. Consider setting prop_bias to TRUE.")
     }
 
-    quan_coef_med =  suppressWarnings(summary.rqs(quan_mod,
-                                                        se =
-                                                          "boot",
-                                                        alpha = 1 - conf.level))
-
-    quan_coef_lim =  suppressWarnings(summary.rqs(quan_mod,
-                                                        se =
-                                                          "boot",
-                                                        alpha = 1 - conf2))
-    df_coef = data.frame()
-    for(i in 1:length(quan_coef_med)){
-      temp = process_rq(quan_coef_med[[i]],
-                        conf.int =  TRUE,
-                        conf.level = conf.level)
-      df_coef = rbind(df_coef,temp)
-    }
-
-    df_coef2 = data.frame()
-    for(i in 1:length(quan_coef_lim)){
-      temp = process_rq(quan_coef_lim[[i]],
-                        conf.int =  TRUE,
-                        conf.level = conf.level)
-      df_coef2 = rbind(df_coef,temp)
-    }
+    df_coef = rq_boot_coef(quan_mod, rq_boot_vcov(quan_mod),
+                           conf.level = conf.level)
+    # TODO: the bounds of the limits are at conf.level, although ci.level
+    # reports conf2 (as in earlier versions).
     df_coeff = data.frame(estimate = df_coef$estimate,
-                         lower.ci = c(df_coef2$conf.low[1],
-                                      df_coef$conf.low[2],
-                                      df_coef2$conf.low[3]),
-                         upper.ci = c(df_coef2$conf.high[1],
-                                      df_coef$conf.high[2],
-                                      df_coef2$conf.high[3]),
+                         lower.ci = df_coef$conf.low,
+                         upper.ci = df_coef$conf.high,
                          ci.level = c(conf2,
                                       conf.level,
                                       conf2))
@@ -211,26 +176,20 @@ agree_np <- function(x,
     minavg = min(df$mean)
     medavg = median(df$mean)
     maxavg = max(df$mean)
-    ref_med = ref_grid(quan_mod, se = "boot",
-                    tau = .5,
-                    at = list(mean = c(minavg,medavg,maxavg)))
-    # set se to bootstrapped
-    #summary(quan_mod, se = "boot", covariance = TRUE)
-    quan_emm_med = as.data.frame(confint(emmeans(ref_med,
-                           ~ mean), level = conf.level))
+    # bootstrap standard errors (see rq_boot_vcov())
+    V = rq_boot_vcov(quan_mod)
+    quan_emm_med = rq_boot_ci(quan_mod, V, tau = .5,
+                              at = c(minavg,medavg,maxavg),
+                              conf.level = conf.level)
     quan_emm_med$at = paste0("Bias @ ",signif(quan_emm_med$mean,3))
     df_coef_med = data.frame(row.names = quan_emm_med$at,
                              estimate = quan_emm_med$emmean,
                              lower.ci = quan_emm_med$lower.CL,
                              upper.ci = quan_emm_med$upper.CL)
     df_coef_med$ci.level = conf.level
-    ref_lloa = ref_grid(quan_mod, se = "boot",
-                       tau = agree.u,
-                       at = list(mean = c(minavg,medavg,maxavg)))
-    # set se to bootstrapped
-    #summary(quan_mod, se = "boot", covariance = TRUE)
-    quan_emm_lloa = as.data.frame(confint(emmeans(ref_lloa,
-                                                 ~ mean), level = conf2))
+    quan_emm_lloa = rq_boot_ci(quan_mod, V, tau = agree.u,
+                               at = c(minavg,medavg,maxavg),
+                               conf.level = conf2)
     quan_emm_lloa$at = paste0("Lower LoA @ ", signif(quan_emm_lloa$mean,3))
     df_coef_lloa = data.frame(row.names = quan_emm_lloa$at,
                              estimate = quan_emm_lloa$emmean,
@@ -238,13 +197,9 @@ agree_np <- function(x,
                              upper.ci = quan_emm_lloa$upper.CL)
     df_coef_lloa$ci.level = conf2
 
-    ref_uloa = ref_grid(quan_mod, se = "boot",
-                        tau = agree.l,
-                        at = list(mean = c(minavg,medavg,maxavg)))
-    # set se to bootstrapped
-    #summary(quan_mod, se = "boot", covariance = TRUE)
-    quan_emm_uloa = as.data.frame(confint(emmeans(ref_uloa,
-                                                  ~ mean), level = conf2))
+    quan_emm_uloa = rq_boot_ci(quan_mod, V, tau = agree.l,
+                               at = c(minavg,medavg,maxavg),
+                               conf.level = conf2)
     quan_emm_uloa$at = paste0("Upper LoA @ ", signif(quan_emm_uloa$mean,3))
     df_coef_uloa = data.frame(row.names = quan_emm_uloa$at,
                               estimate = quan_emm_uloa$emmean,

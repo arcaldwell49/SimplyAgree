@@ -85,6 +85,10 @@ Bug fixes:
   - Symbols by default; `use_coefs = TRUE` substitutes the estimates (`coef_digits` sets the decimals).
   - Prints the LaTeX code at the console and renders as display math in R Markdown and Quarto. No new dependencies.
 
+## Non-parametric limits of agreement
+
+- `agree_np()` and its `plot()` could run without end on data with many exact ties (for example, the data of GitHub issue #50), depending on the random number state. The bootstrap standard errors of the quantile regressions came from quantreg's `summary(se = "boot")`, whose simplex fits can cycle on such resamples. The bootstrap now uses the same resampling of (x, y) pairs (200 resamples) but fits each resample with the Frisch-Newton interior point method (`quantreg::rq.fit.fnb()`), which always ends. The estimates are unchanged; the standard errors agree with quantreg's bootstrap up to Monte Carlo error.
+
 # SimplyAgree 0.4.0
 
 ## Results that change
