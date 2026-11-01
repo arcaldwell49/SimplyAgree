@@ -114,7 +114,9 @@ testthat::test_that("examples from Zou", {
                          tolerance = .001)
   testthat::expect_equal(nest_test_newlog$loa$bias,0.1138129,
                          tolerance = .0001)
-  testthat::expect_equal(nest_test_newlog$loa$lme,1.030285,
+  # 1.030285 before 0.4.1 (bias variance and MOVER piece used the
+  # between-subject variance only; see NEWS)
+  testthat::expect_equal(nest_test_newlog$loa$lme,1.0394525,
                          tolerance = .0001)
   testthat::expect_equal(class(nest_test_newlog), "loa")
   pr1 = print(nest_test_newlog)
@@ -159,10 +161,13 @@ testthat::test_that("examples from Zou", {
                                 nest_test_new$loa$upper_loa),
                               c(.7255,-2.14,3.59),
                               tolerance = 0.005)
+  # Zou's published bounds (-9.83, 11.27); the variance of the subject mean
+  # differences, not the between-subject variance alone, carries the n - 1 df
+  # (before 0.4.1: -9.74, 11.19)
   testthat::expect_equivalent(c(nest_test_new$loa$lower_loa_ci,
                                 nest_test_new$loa$upper_loa_ci),
-                              c(-9.8,11.2),
-                              tolerance = 0.01)
+                              c(-9.83,11.27),
+                              tolerance = 0.002)
   testthat::expect_equivalent(nest_test$loa$lower.ci[2:3],
                               c(-9.83,1.77),
                               tolerance = 0.01)
