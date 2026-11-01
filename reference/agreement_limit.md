@@ -222,7 +222,7 @@ agreement_limit(x = "x", y ="y", data = reps, id = "id", data_type = "nest")
 #> Nested Data
 #> 
 #>    Bias           Bias CI Lower LoA Upper LoA            LoA CI
-#>  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.4979, 8.9071]
+#>  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.5633, 8.9724]
 #> 
 #> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
 #>   not a joint 95% interval for the LoA

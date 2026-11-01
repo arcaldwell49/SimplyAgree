@@ -336,10 +336,10 @@ res_km
 #> 
 #> alternative hypothesis: two.sided
 #> 95 percent confidence interval:
-#>  0.2073107 0.3290734
+#>  0.2073110 0.3290738
 #> sample estimates:
-#>   kappa_m 
-#> 0.2650767
+#>  kappa_m 
+#> 0.265077
 ```
 
 The interval is formed on the logit of \\\rho\\, so it stays between 0
@@ -350,16 +350,16 @@ The fitted model and its variance components are in `fit`:
 
 res_km$fit[c("sigma2_subject", "sigma2_rater", "rho", "p0")]
 #> $sigma2_subject
-#> [1] 2.953056
+#> [1] 2.953061
 #> 
 #> $sigma2_rater
-#> [1] 0.1716571
+#> [1] 0.1716563
 #> 
 #> $rho
-#> [1] 0.7159422
+#> [1] 0.7159427
 #> 
 #> $p0
-#> [1] 0.4208257
+#> [1] 0.420826
 ```
 
 `p0` is the observed agreement at the fitted thresholds, before the
@@ -418,10 +418,10 @@ res_g
 #> LRT = 4.3937, p-value = 0.03607
 #> alternative hypothesis: true difference in kappa_m is not equal to 0
 #> 95 percent confidence interval:
-#>  -0.190612428 -0.003347573
+#>  -0.190614100 -0.003348201
 #> sample estimates:
 #> kappa_m (experienced)      kappa_m (novice) 
-#>             0.2823913             0.1854113
+#>             0.2823929             0.1854117
 ```
 
 The estimates are \\\kappa_m\\ in each group, the interval is for their
@@ -433,9 +433,9 @@ rater variances in the two groups. `fit$subgroups` also gives
 
 res_g$fit$subgroups
 #>                subgroup   kappa_m         se     lower     upper
-#> 1           experienced 0.2823913 0.03379464 0.2210622 0.3530237
-#> 2                novice 0.1854113 0.05032463 0.1059146 0.3042702
-#> 3 experienced vs novice 0.2201790 0.04262553 0.1478965 0.3147400
+#> 1           experienced 0.2823929 0.03379463 0.2210638 0.3530252
+#> 2                novice 0.1854117 0.05032505 0.1059145 0.3042717
+#> 3 experienced vs novice 0.2201798 0.04262593 0.1478967 0.3147417
 summary(res_g)
 #> The likelihood ratio test is statistically significant (LRT = 4.39, p =
 #> 0.036) at the 0.05 alpha level: it can be stated that agreement differs

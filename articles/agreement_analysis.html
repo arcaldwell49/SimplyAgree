@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-10-27</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-11-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/agreement_analysis.Rmd" class="external-link"><code>vignettes/agreement_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>agreement_analysis.Rmd</code></div>
@@ -1336,7 +1336,7 @@ provide estimates that are very close to those described by <span class="citatio
 <span><span class="co">#&gt; Nested Data</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    Bias           Bias CI Lower LoA Upper LoA            LoA CI</span></span>
-<span><span class="co">#&gt;  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.4979, 8.9071]</span></span>
+<span><span class="co">#&gt;  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.5633, 8.9724]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;</span></span>
 <span><span class="co">#&gt;   not a joint 95% interval for the LoA</span></span>
@@ -1371,12 +1371,16 @@ m_h = \frac{n}{\Sigma_{i=1}^n m_i^{-1}}
 \]</span></p>
 <p>and <span class="math inline">\(N = \Sigma_i m_i\)</span> is the
 total number of measurements.</p>
+<p>The total variance is split into two independent pieces <span class="citation">(<a href="#ref-zou2011">Zou 2011</a>)</span>: the
+variance of the subject mean differences, <span class="math inline">\(s_m^2 = s_b^2 + s_w^2 / m_h\)</span>, with <span class="math inline">\(n - 1\)</span> degrees of freedom (which also
+gives the variance of the bias, <span class="math inline">\(s_m^2 /
+n\)</span>), and the rest of the within-subject variance, <span class="math inline">\((1 - 1/m_h) s_w^2\)</span>, with <span class="math inline">\(N - n\)</span> degrees of freedom, so that <span class="math inline">\(s_d^2 = s_m^2 + (1 - 1/m_h) s_w^2\)</span>.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Compute LME</li>
 </ol>
 <p><strong>MOVER Method</strong></p>
 <p><span class="math display">\[
-u_1 = \left[s_b^2
+u_1 = \left[s_m^2
 \left(\frac{n-1}{\chi^2_{\alpha,n-1}}-1\right)\right]^2
 \]</span></p>
 <p><span class="math display">\[
@@ -1387,15 +1391,22 @@ u_2 = \left[\left(1-\frac{1}{m_h}\right) s_w^2
 u = s_d^2 + \sqrt{u_1 + u_2}
 \]</span></p>
 <p><span class="math display">\[
-LME = \sqrt{\frac{z^2_{1-\alpha} \cdot s_b^2}{n} + z^2_A \cdot
+LME = \sqrt{\frac{z^2_{1-\alpha} \cdot s_m^2}{n} + z^2_A \cdot
 \left(\sqrt{u} - \sqrt{s^2_d}\right)^2}
 \]</span></p>
 <p><strong>Bland-Altman Method</strong></p>
 <p><span class="math display">\[
-S_{LoA}^2 = \frac{s_b^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
-\left(\frac{s_b^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2
+S_{LoA}^2 = \frac{s_m^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
+\left(\frac{s_m^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2
 \frac{s_{w}^4}{N-n}\right)
 \]</span></p>
+<p>Before version 0.4.1, <span class="math inline">\(s_b^2\)</span> was
+used in place of <span class="math inline">\(s_m^2\)</span>, which left
+<span class="math inline">\(s_w^2 / m_h\)</span> out of the bias
+variance and the bound. The confidence bounds were then too narrow, most
+when the within-subject variance is large: in simulations, the MOVER
+bounds covered 85% to 94% of the time instead of 95%, and 94% to 97%
+after the correction.</p>
 <p><span class="math display">\[
 LME = z_{1-\alpha} \cdot S_{LoA}
 \]</span></p>

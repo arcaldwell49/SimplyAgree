@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,14 @@
       <small>Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="simplyagree-041-development-version">SimplyAgree 0.4.1 (development version)<a class="anchor" aria-label="anchor" href="#simplyagree-041-development-version"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-1"></a></h3>
+<ul><li>
+<strong>Nested limits of agreement</strong> (<code>agreement_limit(data_type = "nest")</code>): the confidence bounds of the limits were too narrow. The bias variance and the variance piece with n - 1 degrees of freedom used the between-subject variance alone, rather than the variance of the subject mean differences (between + within / m_h; Zou, 2011), so the within-subject part of it got no uncertainty. In simulations (10 to 40 subjects, 2 to 5 pairs each), the default MOVER bounds covered 85% to 94% of the time instead of 95%, worst when the within-subject variance dominates; after the fix, 94% to 97%. The bounds now reproduce Zou’s published example (and <code><a href="../reference/agree_nest.html">agree_nest()</a></code>) closely. The limits themselves and the bias are unchanged. (<code><a href="../reference/agree_nest.html">agree_nest()</a></code> with <code>prop_bias = TRUE</code>, superseded, has the same substitution and is unchanged.)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="simplyagree-040">SimplyAgree 0.4.0<a class="anchor" aria-label="anchor" href="#simplyagree-040"></a></h2>
 <div class="section level3">

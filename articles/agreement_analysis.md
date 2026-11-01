@@ -952,7 +952,7 @@ a3
 #> Nested Data
 #> 
 #>    Bias           Bias CI Lower LoA Upper LoA            LoA CI
-#>  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.4979, 8.9071]
+#>  0.7046 [-1.5512, 2.9604]    -2.153     3.562 [-7.5633, 8.9724]
 #> 
 #> LoA CI: one-sided 95% bounds (outer ends of 90% CIs) for an intersection-union test against a maximal allowable difference;
 #>   not a joint 95% interval for the LoA
@@ -986,11 +986,18 @@ subject \\i\\) is also calculated:
 
 and \\N = \Sigma_i m_i\\ is the total number of measurements.
 
+The total variance is split into two independent pieces ([Zou
+2011](#ref-zou2011)): the variance of the subject mean differences,
+\\s_m^2 = s_b^2 + s_w^2 / m_h\\, with \\n - 1\\ degrees of freedom
+(which also gives the variance of the bias, \\s_m^2 / n\\), and the rest
+of the within-subject variance, \\(1 - 1/m_h) s_w^2\\, with \\N - n\\
+degrees of freedom, so that \\s_d^2 = s_m^2 + (1 - 1/m_h) s_w^2\\.
+
 3.  Compute LME
 
 **MOVER Method**
 
-\\ u_1 = \left\[s_b^2
+\\ u_1 = \left\[s_m^2
 \left(\frac{n-1}{\chi^2\_{\alpha,n-1}}-1\right)\right\]^2 \\
 
 \\ u_2 = \left\[\left(1-\frac{1}{m_h}\right) s_w^2
@@ -998,14 +1005,20 @@ and \\N = \Sigma_i m_i\\ is the total number of measurements.
 
 \\ u = s_d^2 + \sqrt{u_1 + u_2} \\
 
-\\ LME = \sqrt{\frac{z^2\_{1-\alpha} \cdot s_b^2}{n} + z^2_A \cdot
+\\ LME = \sqrt{\frac{z^2\_{1-\alpha} \cdot s_m^2}{n} + z^2_A \cdot
 \left(\sqrt{u} - \sqrt{s^2_d}\right)^2} \\
 
 **Bland-Altman Method**
 
-\\ S\_{LoA}^2 = \frac{s_b^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
-\left(\frac{s_b^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2
+\\ S\_{LoA}^2 = \frac{s_m^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot
+\left(\frac{s_m^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2
 \frac{s\_{w}^4}{N-n}\right) \\
+
+Before version 0.4.1, \\s_b^2\\ was used in place of \\s_m^2\\, which
+left \\s_w^2 / m_h\\ out of the bias variance and the bound. The
+confidence bounds were then too narrow, most when the within-subject
+variance is large: in simulations, the MOVER bounds covered 85% to 94%
+of the time instead of 95%, and 94% to 97% after the correction.
 
 \\ LME = z\_{1-\alpha} \cdot S\_{LoA} \\
 
