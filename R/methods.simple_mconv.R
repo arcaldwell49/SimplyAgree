@@ -131,7 +131,7 @@ print.simple_mconv <- function(x,
     linear = if (identical(fi$estimator, "cbls")) {
       paste0("CIs: delta method from the CBLS fit (measurement errors from ",
              "the replicates;\n  common method-by-item variance), t with ",
-             "items - 2 df; see ?cbls_reg")
+             "items - 2 df; see ?bls_reg")
     } else {
       paste0("CIs: approximate (delta method",
              if (any(x$da$cluster_se))

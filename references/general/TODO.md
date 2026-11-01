@@ -54,4 +54,78 @@ the difference is small.
 
 ## Planned features
 
-- `cbls_reg()`: first version done; what is left (tolerance intervals, simultaneous band, variance functions, coverage simulation, CBLS in `method_convert()`) is listed at the end of `cbls_reg_roadmap.md`.
+- `bls_reg()` (renamed from `cbls_reg()`): done, including tolerance limits, the simultaneous band, variance functions, per-subject variances, the log scale, `error_ratio_profile()` and CBLS in `method_convert()`. What is left is under "Still open" and "Gaps against BivRegBLS and MethComp" in `bls_reg_roadmap.md`.
+
+## Next steps (handoff, 2026-11-01)
+
+State of branch `MethComp`: everything up to `bls_reg()` (rename),
+`error_ratio_profile()`, `linked_reps_test()`, per-subject variances and
+`transform = "log"` in `bls_reg()` is implemented, documented (NEWS,
+pkgdown, Deming and Part 1 vignettes) and tested. Work through these in
+order:
+
+**Unresolved before step 1: slow `R CMD check` tests (2026-11-01).** After
+the `bls_reg()` rename, `devtools::check()` passed everything up to the
+tests (install, vignettes, examples with and without `--run-donttest` all
+OK), but the tests step ran for over 30 minutes without finishing (the
+whole check took 8m 41s on the previous round) and was stopped. The test
+process was busy, not hung, and no other R process was running. The
+filtered tests (`bls_reg|error_ratio|method_convert|linked_reps|eiv|tdi`,
+649 expectations) all pass, and `linked_reps_test`'s tests take about 12 s,
+so the slow file is probably elsewhere. Possibly related: that run reported
+`covr` as not installed, which earlier runs did not, so it may have used a
+different library. To find it, time each test file with `NOT_CRAN=true`,
+e.g. a loop over `list.files("tests/testthat", "^test-")` calling
+`testthat::test_file(f, reporter = "silent", package = "SimplyAgree")` and
+recording the elapsed time. Then run `devtools::check()` before the
+simulation.
+
+Lead: timing each file (same R) gave under 20 s for every file from
+`test-agree_coef.R` to `test-cac_test.R`, then `test-call_args.R` ran for
+several minutes without finishing. That file was not changed in this work;
+it renders ggplots to `grDevices::pdf(NULL)`. The run used R 4.5.3 (the
+newest R under `C:/Program Files/R`, picked automatically), whose library
+lacks `covr`, so suspect the environment (R version, graphics device or
+package versions) before the code. Run `test-call_args.R` alone first.
+
+1. **Run the `linked_reps_test()` simulation** on a machine with many
+   cores: `references/general/linked_reps_sims/README.md` (question,
+   criteria, how to run, about 22 core-hours). Then write up the results
+   there and add the size and power to NEWS, the `linked_reps_test()` docs
+   and the Part 1 vignette.
+2. **Random raters in `method_vc()`** (gap 5 in `bls_reg_roadmap.md`, which
+   lists the design questions). Proposed design, not yet agreed with the
+   maintainer; confirm before starting:
+   - scope: `method_vc()` only (not `method_convert()` for now);
+   - model: methods as a random effect with crossed method-by-item and
+     item-by-replicate effects and a common residual SD, fitted with lme4
+     (already imported), since nlme does not do crossed effects easily;
+   - output: a rater SD in `varcomp`, and one limits row for two randomly
+     chosen raters (bias 0, SD sqrt(2 (sigma_rater^2 + tau^2 + sigma^2)),
+     plus 2 omega^2 with `include_omega`) instead of one row per pair;
+   - bounds: MOVER with the rater variance on M - 1 df by default, an
+     optional parametric bootstrap, and a warning with fewer than about 5
+     raters;
+   - downstream: print/summary/plot/check/`tdi()` for `simple_mvc`; a
+     coverage simulation like `method_vc()`'s.
+3. **After the `fix-loa-nest-bounds` PR is merged into master**: merge
+   master into this branch, resolve the `NEWS.md` and `calc_loa_nest()`
+   conflicts (take master's fix), and remove the `calc_loa_nest()` TODO
+   comment and the entry at the top of this file.
+4. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
+   `method_convert(estimator = "cbls")`; variance functions in
+   `method_convert()`; method-specific equation error with three or more
+   methods; the per-ratio ellipses and an MD-plot version of
+   `error_ratio_profile()`.
+
+Environment notes:
+
+- Suggests needed for the full tests and vignettes: BivRegBLS, MethComp,
+  TDIagree, lavaan, ordinal, deming, pbkrtest (and covr for coverage).
+- `devtools::check()` takes about 9 minutes with the slow tests
+  (`NOT_CRAN` set by devtools). On Windows outside RStudio, set
+  `RSTUDIO_PANDOC` to RStudio's pandoc folder (e.g.
+  `C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools`) or the
+  vignettes fail with "Pandoc is required".
+- The `docs/` folder has pkgdown changes from before this work; do not
+  include them in commits.

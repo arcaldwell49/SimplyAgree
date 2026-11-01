@@ -72,7 +72,7 @@ mc_da_fit = function(pp,
 
 # CBLS fit for one pair, in the form of mc_da_fit() ----
 # Francq & Govaerts (2016): the regression of D = y1 - y2 on A = (y1 + y2)/2
-# by correlated bivariate least squares (cbls_reg(), with x = y1, y = y2),
+# by correlated bivariate least squares (bls_reg(), with x = y1, y = y2),
 # which accounts for the measurement errors of both methods (estimated from
 # the replicates, exchangeable) and their correlation in (A, D), and for a
 # common method-by-item variance (equation error). The SD of a new single
@@ -89,7 +89,7 @@ mc_cbls_fit = function(df,
   dat = rbind(data.frame(id = d1$id, x = d1$y_t, y = NA_real_),
               data.frame(id = d2$id, x = NA_real_, y = d2$y_t))
   fit = tryCatch(
-    cbls_reg(y ~ x, data = dat, id = "id"),
+    bls_reg(y ~ x, data = dat, id = "id"),
     error = function(e) {
       stop("estimator = 'cbls' needs replicate measurements of both ", m1,
            " and ", m2, " to estimate their measurement errors: ",

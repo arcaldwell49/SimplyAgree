@@ -1,4 +1,4 @@
-# cbls_reg(): coverage of the intervals and size of the joint test
+# bls_reg(): coverage of the intervals and size of the joint test
 
 Status (2026-10-31): both studies run; all criteria met (study 2: with the
 right variance model).
@@ -7,7 +7,7 @@ right variance model).
 
 Do the 95% confidence intervals (intercept, slope, line), prediction
 intervals (XY and Bland-Altman plots), CBLS slope interval, and the joint
-test of `cbls_reg()` hold their nominal levels with known variances and
+test of `bls_reg()` hold their nominal levels with known variances and
 with balanced or unbalanced replicates?
 
 Criteria (set before running): coverage 0.935-0.965 and joint test size
@@ -68,7 +68,7 @@ levels, and an inflated joint test size.
 Item-specific deviations of the true values from the line (method-by-item
 or matrix effects) make the dispersion `s^2 > 1`. BLS/CBLS and BivRegBLS
 model only measurement error, so their prediction intervals are too narrow
-and the error ratio (from replicates) is wrong. `cbls_reg(equation_error =
+and the error ratio (from replicates) is wrong. `bls_reg(equation_error =
 TRUE)` (default) estimates a common-tau equation error (var_x + tau^2,
 var_y + b^2 tau^2, as `method_vc(tau = "common")`) and refits.
 

@@ -35,7 +35,7 @@
 #'   which must be installed). Use "ml" for confidence intervals with close
 #'   to the stated coverage. For `bias = "linear"`, "cbls" fits the
 #'   regression of the differences on the averages by correlated bivariate
-#'   least squares ([cbls_reg()]) instead of least squares; it needs
+#'   least squares ([bls_reg()]) instead of least squares; it needs
 #'   exchangeable replicates of both methods and `variance = "constant"`.
 #'   See details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
@@ -84,7 +84,7 @@
 #' different measurement errors, because the errors of \eqn{D} and \eqn{A}
 #' are then correlated (Francq & Govaerts, 2016). With `estimator = "cbls"`,
 #' \eqn{D = a + bA} is instead fit by correlated bivariate least squares
-#' ([cbls_reg()]) on the item means, with the measurement error variance of
+#' ([bls_reg()]) on the item means, with the measurement error variance of
 #' each method estimated from its (exchangeable) replicates and a common
 #' method-by-item variance when the scatter about the line exceeds the
 #' measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then

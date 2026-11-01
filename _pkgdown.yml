@@ -62,15 +62,18 @@ reference:
   contents:
   - dem_reg
   - pb_reg
-  - cbls_reg
+  - bls_reg
+  - error_ratio_profile
   - joint_test
   - simple_eiv-methods
   - simple_bls-methods
+  - eiv_ratio_profile-methods
 
 - title: "Method Comparison (Several Methods)"
   contents:
   - method_vc
   - method_convert
+  - linked_reps_test
   - simple_mvc-methods
   - simple_mconv-methods
   - sim_methods

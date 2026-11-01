@@ -1,10 +1,17 @@
-# `cbls_reg()`: roadmap
+# `bls_reg()`: roadmap
 
-Status (2026-10-31): **first version implemented** (`R/cbls_reg.R`,
-`R/methods.simple_bls.R`, `tests/testthat/test-cbls_reg.R`); see "Done and
+Status (2026-10-31): **first version implemented** (`R/bls_reg.R`,
+`R/methods.simple_bls.R`, `tests/testthat/test-bls_reg.R`); see "Done and
 left" at the end. The rest of this note is the original plan. This
 note records the goal, sources, API sketch, how the function fits into the
 existing errors-in-variables (EIV) family, and how to validate it.
+
+Renamed from `cbls_reg()` to `bls_reg()` on 2026-11-01, before release: the
+main fit is the BLS line in the (x, y) plot, with CBLS (Bland-Altman plot)
+as its companion (`$cbls`, `type = "md"`), as `dem_reg()` and `pb_reg()`
+are named for their fits. The simulation folder keeps the name
+`cbls_sims/`, and `method_convert(estimator = "cbls")` keeps its name
+because it uses the CBLS fit.
 
 ## Why
 
@@ -67,7 +74,7 @@ non-constant bias**.
 ## API sketch (SimplyAgree style)
 
 ```r
-cbls_reg(formula, data, id = NULL,
+bls_reg(formula, data, id = NULL,
          var_x = NULL, var_y = NULL, error.ratio = NULL,
          space = c("xy", "md"),
          conf.level = 0.95, pred_level = 0.95, tol_level = 0.95,
@@ -132,7 +139,7 @@ cbls_reg(formula, data, id = NULL,
 Done, following BivRegBLS 1.1.1's source (read for the formulas; our own
 implementation):
 
-- `cbls_reg()` returns `c("simple_bls", "simple_eiv")`: BLS in (X, Y) and
+- `bls_reg()` returns `c("simple_bls", "simple_eiv")`: BLS in (X, Y) and
   CBLS in (M, D), with D = x - y (the `agreement_limit()` convention;
   BivRegBLS uses y - x). One engine (`.bls_engine()`) for both, iterated to
   convergence with per-subject error variances `var / n_i` (BivRegBLS takes
@@ -181,7 +188,7 @@ method-specific equation error with three or more methods.
 ## Gaps against BivRegBLS and MethComp (2026-11-01)
 
 Compared with the exports of BivRegBLS 1.1.1 and MethComp 1.30.2. Most of
-both packages is covered (`cbls_reg()`, `dem_reg()`, `pb_reg()`,
+both packages is covered (`bls_reg()`, `dem_reg()`, `pb_reg()`,
 `method_vc()`, `method_convert()`, `tdi()`, `ccc_test()`, `sim_methods()`,
 `joint_test()`). In priority order:
 
@@ -189,14 +196,14 @@ both packages is covered (`cbls_reg()`, `dem_reg()`, `pb_reg()`,
    `GraphFullCIs.MD`). With no replicates and an unknown error ratio, show
    the slope and intercept estimates and CIs over the whole range of ratios
    (0 to Inf: OLS of y on x through to OLS of x on y). Candidate:
-   `plot(..., type = "lambda")` or a helper for `dem_reg()`/`cbls_reg()`
+   `plot(..., type = "lambda")` or a helper for `dem_reg()`/`bls_reg()`
    objects. Validate against BivRegBLS on its data sets.
-2. **Per-row error variances in `cbls_reg()`** (BivRegBLS `var.x.col`,
+2. **Per-row error variances in `bls_reg()`** (BivRegBLS `var.x.col`,
    `nxi.col`, `df.var.x.col`). Let `var_x`/`var_y` also be a column name or
    a vector of length n (with per-row replicate counts and df), e.g.
    variances from a separate validation study. Currently `var_x`/`var_y`
    take a number or a function of the level only.
-3. **Log scale in `cbls_reg()`** (BivRegBLS `antilog.pred`). A `transform`
+3. **Log scale in `bls_reg()`** (BivRegBLS `antilog.pred`). A `transform`
    argument (`"none"`, `"log"`), as in `method_vc()`/`method_convert()`,
    that fits on the log scale and back-transforms predictions and
    intervals for `predict()` and `plot()`.
@@ -220,3 +227,35 @@ Lower priority, probably not worth it:
 - BivRegBLS `OLSh`, `raw.plot`, `desc.stat`; MethComp `Meth` class,
   `make.repl`, `sample.Meth`, `bothlines`. Cosmetic or covered by
   `check()` and `mc_long()`.
+
+### Status (2026-11-01, later)
+
+- Item 1 done: `error_ratio_profile()` (R/error_ratio_profile.R), reproducing
+  `FullCIs.XY()` (estimates, BLS and exact Creasy CIs, intercept CIs).
+  The joint test is the Wald F without BivRegBLS's Hotelling factor, as in
+  `joint_test()`. Not done: the per-ratio ellipses and hyperbolic bands of
+  `FullCIs.XY()`/`GraphFullCIs.*`, and an MD-plot version (`FullCIs.MD`).
+- Item 2 done: `var_x`/`var_y` (and `df_var_x`/`df_var_y`) can name columns
+  of per-subject values; reproduces `BLS.ht()` estimates and CIs. A new
+  measurement gets the mean variance (Satterthwaite df). Not done: per-row
+  variance formulas for new X values (`BLS.ht(var.x.formula = )`); a
+  function of the level already covers that.
+- Item 3 done: `bls_reg(transform = "log")` with back-transformed
+  `predict()`/`plot()`. Log scale only (no general transform pairs).
+- Item 4 done: `linked_reps_test()` (R/linked_reps_test.R), a one-sided
+  permutation test of omega with the permuted limits. About 0.7 s per refit
+  for 30 items x 3 methods x 3 replicates.
+- Item 5 open: random raters. Needs a design decision (see below).
+
+Random raters, design questions:
+- Model: methods as a random effect, `y ~ id + (1 | method) + (1 | method:id)
+  [+ (1 | id:repl)]` with a common residual SD (exchangeable raters). Crossed
+  effects with linked replicates need lme4 rather than nlme.
+- Limits: one row for "two randomly chosen raters", bias 0 and
+  SD sqrt(2 (sigma_alpha^2 + tau^2 + sigma^2)) (plus 2 omega^2 with
+  `include_omega`), instead of one row per pair.
+- Confidence bounds: sigma_alpha^2 has only (M - 1) df, so the bounds are
+  wide with few raters. MOVER with approximate df per component, or a
+  parametric bootstrap (slow).
+- Downstream: print/summary/plot/check/tdi for `simple_mvc`, and whether
+  `method_convert()` gets it (MethComp's `DA.reg(random.raters = )`).

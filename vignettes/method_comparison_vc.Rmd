@@ -85,6 +85,8 @@ Which of these applies is a question about the **design**, not something to test
 
 With linked replicates, `replicate` must identify the occasion in the same way for all methods.
 
+When it is not clear whether the replicates really were taken together, `linked_reps_test()` shows whether the linking matters. Following MethComp's `perm.repl()`, it permutes the replicate labels within each item and method, which breaks any link, and refits the model. An observed `omega` larger than those of the permuted fits is evidence of an occasion effect, and the limits of the permuted fits show how much the conclusions depend on the linking (see the worked example below). The test does not replace knowledge of the design: replicates taken on separate occasions are exchangeable whatever it says.
+
 The same distinction appears elsewhere in SimplyAgree under other names:
 
 | Design | `method_vc()`, `method_convert()` | `agreement_limit()` | `reli_facet_test()` |
@@ -193,6 +195,12 @@ The printed table has one row per pair (first minus second method in the order o
 
 ```{r}
 summary(fit)
+```
+
+The data were simulated with an occasion effect (`omega = 0.6`), and the permutation test finds it: no permuted fit has an `omega` as large as the observed one, and their limits are wider, close to those of an analysis with exchangeable replicates. (Use more permutations in practice; the default is 100.)
+
+```{r}
+linked_reps_test(fit, n_perm = 20, seed = 1)
 ```
 
 `confint()` gives the intervals for the biases and the SDs, at any level:
@@ -374,7 +382,7 @@ Bernard Francq and colleagues, the authors of the BivRegBLS package, have critic
 - **Limits of agreement as bias $\pm z$ SD.** @francq2020tolerate show that this interval is approximate and too narrow, and that its coverage collapses in small samples, because it ignores the uncertainty in the estimated bias and SD. Adding a confidence interval around each limit, they argue, is a confusing patch on an approximate interval. They recommend prediction (or $\beta$-expectation tolerance) intervals, which are exact, or $\beta$-content, $\gamma$-confidence tolerance intervals, which add a stated confidence. MethComp's bias $\pm 2$ SD is the same kind of interval, with a rounded multiplier (see [the note above](#a-note-on-methcomps-multiplier-of-2)). `method_vc(interval = "tolerance")` gives prediction and tolerance limits from the variance component model, so the two approaches can be combined: Carstensen's model for the variance, and tolerance intervals for the conclusion.
 - **Regression in the Bland-Altman plot.** When the differences change with the level, horizontal limits are no longer valid. @francq2016 show that the measurement errors of the differences and the averages are correlated whenever the two methods are not equally precise (a correlation of 0.6 when one method is twice as precise as the other), and that the ordinary regression of the differences on the averages, which ignores it, is biased, with poor coverage. Here they address @carstensen2010 directly: he proposes that regression (or the conversion from the plot of one method against the other) and considers the correlation small enough not to matter much in practice. They also note that his suggestion for predicting single measurements from replicates, regressing all (or randomly paired) replicate pairs, ignores the correlation between pairs from the same item. Their alternative is errors-in-variables regression: bivariate least squares (BLS) in the plot of one method against the other, and its correlated version (CBLS) in the Bland-Altman plot, which allow the measurement errors of the two methods to differ [@francq2014]. This bears on the "linear bias" model of Part 2, which, like MethComp, regresses the differences on the averages; see `vignette("method_conversion")`.
 
-The criticism runs both ways. BLS and CBLS, as proposed, model only measurement error: they assume that the items' true values lie exactly on the line. Carstensen's model allows for item-specific deviations (the method-by-item variance $\tau^2$), which the replicates cannot estimate and which, when ignored, make prediction intervals too narrow and the error ratio wrong. For two methods, `cbls_reg()` provides what BivRegBLS does (BLS, CBLS, error variances known or estimated from replicates, confidence and prediction intervals around a non-constant bias) and, by default, adds such a method-by-item variance, common to both methods, when the scatter about the line exceeds the measurement error (see `vignette("Deming")`). `method_convert(estimator = "cbls")` uses it for the "linear bias" model of Part 2.
+The criticism runs both ways. BLS and CBLS, as proposed, model only measurement error: they assume that the items' true values lie exactly on the line. Carstensen's model allows for item-specific deviations (the method-by-item variance $\tau^2$), which the replicates cannot estimate and which, when ignored, make prediction intervals too narrow and the error ratio wrong. For two methods, `bls_reg()` provides what BivRegBLS does (BLS, CBLS, error variances known or estimated from replicates, confidence and prediction intervals around a non-constant bias) and, by default, adds such a method-by-item variance, common to both methods, when the scatter about the line exceeds the measurement error (see `vignette("Deming")`). `method_convert(estimator = "cbls")` uses it for the "linear bias" model of Part 2.
 
 
 # References

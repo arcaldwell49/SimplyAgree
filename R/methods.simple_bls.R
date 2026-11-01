@@ -1,11 +1,11 @@
 #' Methods for simple_bls objects
 #'
-#' Methods for the results of [cbls_reg()]. The results are also
+#' Methods for the results of [bls_reg()]. The results are also
 #' `simple_eiv` objects, so [coef()], [vcov()], [confint()], [joint_test()],
 #' and [plot_joint()] work as for [dem_reg()]; the methods here add the CBLS
 #' fit in the Bland-Altman plot and prediction intervals.
 #'
-#' @param x,object A `simple_bls` object from [cbls_reg()].
+#' @param x,object A `simple_bls` object from [bls_reg()].
 #' @param type `"xy"` (default) for the BLS line in the plot of `y` against
 #'   `x`, or `"md"` for the CBLS line in the Bland-Altman plot (differences
 #'   `x - y` against means).
@@ -22,18 +22,23 @@
 #'   reject; BivRegBLS's band also multiplies by `sqrt((n - 1) / (n - 2))`.
 #'   `"tolerance"` (experimental) gives tolerance limits: with confidence
 #'   `tol_level`, they contain at least a proportion `level` of new
-#'   measurements (see [cbls_reg()]).
+#'   measurements (see [bls_reg()]).
 #' @param level Level of the intervals. Default is the `conf.level` of the fit
 #'   for confidence intervals and the band, and its `pred_level` for
 #'   prediction intervals and tolerance limits (the proportion of new
 #'   measurements they contain).
 #' @param tol_level,bound_type For tolerance limits: the confidence level, and
 #'   `"joint"` or `"iu"` as in [tolerance_limit()]. Default: the values given
-#'   to [cbls_reg()].
+#'   to [bls_reg()].
 #' @param reps_x,reps_y For prediction intervals: the new values are means of
 #'   this many replicates of each method. Default is 1.
 #' @param se.fit For `predict()`: if TRUE, also return the standard errors of
-#'   the fitted line.
+#'   the fitted line (on the log scale for a fit with `transform = "log"`).
+#' @param back_transform For a fit with `transform = "log"`: if TRUE
+#'   (default), `newdata` is on the original scale (`x`, or the geometric
+#'   mean of the two methods for `type = "md"`) and the results are
+#'   back-transformed (`y`, or the ratio `x / y`); if FALSE, everything is on
+#'   the log scale, as are `fitted()`, `residuals()` and `check()`.
 #' @param x_name,y_name Axis labels for `plot()`.
 #' @param n_points Number of points for the interval bands in `plot()`.
 #' @param ... Not used.
@@ -45,7 +50,7 @@
 #'
 #' @examples
 #' data("reps")
-#' fit <- cbls_reg(y ~ x, data = reps, id = "id")
+#' fit <- bls_reg(y ~ x, data = reps, id = "id")
 #' predict(fit, newdata = c(4, 6), interval = "prediction")
 #' predict(fit, newdata = c(4, 6), type = "md", interval = "confidence")
 #' plot(fit, type = "md", interval = "prediction")
@@ -66,6 +71,7 @@ print.simple_bls <- function(x, ...) {
   print(x$coefficients, digits = 4)
   cat("\nBland-Altman plot (CBLS, x - y on mean):\n")
   print(x$cbls$coefficients, digits = 4)
+  .bls_log_note(x)
   cat("\n")
   invisible(x)
 }
@@ -79,6 +85,7 @@ summary.simple_bls <- function(object, ...) {
       object$conf.level * 100, "% C.I.\n\n", sep = "")
   cat("Call:\n")
   print(object$call)
+  .bls_log_note(object)
   cat("\nBLS, y on x (H0: intercept = 0, slope = 1):\n")
   print(object$model_table, digits = 4)
   cat("\nCBLS, Bland-Altman plot, x - y on mean (H0: intercept = 0, slope = 0):\n")
@@ -92,6 +99,7 @@ summary.simple_bls <- function(object, ...) {
              proportional = sprintf("proportional, CV %.4g", p[["cv"]]),
              power = sprintf("power, variance %.4g * level^(2 * %.3f)",
                              p[["sigma"]]^2, p[["theta"]]),
+             subject = sprintf("one per subject, mean %.4g", p[["mean"]]),
              "given function of the level")
     }
     cat(sprintf("Measurement error variance (single measurement), %s:\n",
@@ -143,9 +151,33 @@ predict.simple_bls <- function(object,
                                reps_x = 1,
                                reps_y = 1,
                                se.fit = FALSE,
+                               back_transform = TRUE,
                                ...) {
   type <- match.arg(type)
   interval <- match.arg(interval)
+  if (identical(object$transform, "log") && isTRUE(back_transform)) {
+    # predict on the log scale, then back-transform
+    col <- if (type == "xy") attr(object$terms, "term.labels")[1] else "avg"
+    if (!is.null(newdata)) {
+      v <- if (is.data.frame(newdata)) newdata[[col]] else newdata
+      if (is.null(v)) stop("Variable '", col, "' not found in newdata.")
+      if (any(v <= 0, na.rm = TRUE)) {
+        stop("newdata must be positive (transform = 'log').")
+      }
+      if (is.data.frame(newdata)) newdata[[col]] <- log(v) else
+        newdata <- log(as.numeric(v))
+    }
+    res <- predict.simple_bls(object, newdata = newdata, type = type,
+                              interval = interval, level = level,
+                              tol_level = tol_level, bound_type = bound_type,
+                              reps_x = reps_x, reps_y = reps_y,
+                              se.fit = se.fit, back_transform = FALSE)
+    if (is.list(res) && !is.data.frame(res)) {
+      res$fit <- exp(res$fit)
+      return(res)
+    }
+    return(exp(res))
+  }
   if (is.null(level)) {
     level <- if (interval %in% c("prediction", "tolerance")) {
       object$pred_level
@@ -337,6 +369,12 @@ plot.simple_bls <- function(x,
     y_name <- deparse(attr(x$terms, "variables")[[2]])
   }
   df <- .bls_model(x)
+  logt <- identical(x$transform, "log")
+  if (logt) {
+    # back to the original scale: x and y, or geometric mean and ratio x / y
+    df$x <- exp(df$x)
+    df$y <- exp(df$y)
+  }
   if (type == "xy") {
     pd <- data.frame(u = df$x, v = df$y)
     cf <- x$coefficients
@@ -344,23 +382,45 @@ plot.simple_bls <- function(x,
     labs_xy <- labs(x = paste0("Method: ", x_name),
                     y = paste0("Method: ", y_name))
   } else {
-    pd <- data.frame(u = (df$x + df$y) / 2, v = df$x - df$y)
+    pd <- if (logt) {
+      data.frame(u = sqrt(df$x * df$y), v = df$x / df$y)
+    } else {
+      data.frame(u = (df$x + df$y) / 2, v = df$x - df$y)
+    }
     cf <- x$cbls$coefficients
-    ref <- geom_hline(yintercept = 0, colour = "black")
-    labs_xy <- labs(x = "Average of Both Methods",
-                    y = paste0("Difference between Methods (", x_name,
-                               " - ", y_name, ")"))
+    ref <- geom_hline(yintercept = if (logt) 1 else 0, colour = "black")
+    labs_xy <- if (logt) {
+      labs(x = "Geometric Mean of Both Methods",
+           y = paste0("Ratio of Methods (", x_name, " / ", y_name, ")"))
+    } else {
+      labs(x = "Average of Both Methods",
+           y = paste0("Difference between Methods (", x_name,
+                      " - ", y_name, ")"))
+    }
+  }
+  # the fitted line (a curve on the original scale for log fits)
+  fit_line <- if (logt) {
+    u_fit <- exp(seq(log(min(pd$u)), log(max(pd$u)), length.out = n_points))
+    geom_line(data = data.frame(u = u_fit,
+                                v = predict(x, newdata = u_fit, type = type)),
+              linetype = "dashed", colour = "red")
+  } else {
+    geom_abline(intercept = cf[1], slope = cf[2], linetype = "dashed",
+                colour = "red")
   }
   p <- ggplot(pd, aes(x = u, y = v)) +
     ref +
     geom_point(na.rm = TRUE) +
-    geom_abline(intercept = cf[1], slope = cf[2], linetype = "dashed",
-                colour = "red") +
+    fit_line +
     labs_xy +
     theme_bw()
   band <- NULL
   if (interval != "none") {
-    u_seq <- seq(min(pd$u), max(pd$u), length.out = n_points)
+    u_seq <- if (logt) {
+      exp(seq(log(min(pd$u)), log(max(pd$u)), length.out = n_points))
+    } else {
+      seq(min(pd$u), max(pd$u), length.out = n_points)
+    }
     band <- predict(x, newdata = u_seq, type = type, interval = interval,
                     level = level)
     band$u <- u_seq
@@ -455,12 +515,21 @@ check.simple_bls <- function(x, ...) {
 
 utils::globalVariables(c("u", "v", "lwr", "upr"))
 
-# subject-level data stored by cbls_reg() (with the error variances of the
+.bls_log_note <- function(x) {
+  if (identical(x$transform, "log")) {
+    cat("\nFitted on the log scale: log(y) = b0 + b1 log(x), and log(x / y) ",
+        "on the mean of the logs (y = ",
+        format(exp(unname(x$coefficients[1])), digits = 4), " x^",
+        format(unname(x$coefficients[2]), digits = 4), ")\n", sep = "")
+  }
+}
+
+# subject-level data stored by bls_reg() (with the error variances of the
 # means, which cannot be rebuilt from the raw data and formula alone)
 .bls_model <- function(object) {
   if (is.null(object$model)) {
     stop("The subject-level data were not stored (model = FALSE); refit ",
-         "cbls_reg() with model = TRUE.")
+         "bls_reg() with model = TRUE.")
   }
   object$model
 }

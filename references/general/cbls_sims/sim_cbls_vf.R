@@ -1,4 +1,4 @@
-# Coverage of cbls_reg() with error variances that change with the level
+# Coverage of bls_reg() with error variances that change with the level
 # (see README.md, study 2).
 # Run from the package root: Rscript references/general/cbls_sims/sim_cbls_vf.R
 library(parallel)
@@ -37,10 +37,10 @@ one_cell <- function(i, g, n_sim, conf) {
   }
   fit_one <- function(dat) {
     if (fit_type == "known") {
-      cbls_reg(y ~ x, data = dat, var_x = vfx, var_y = vfy,
+      bls_reg(y ~ x, data = dat, var_x = vfx, var_y = vfy,
                conf.level = conf, pred_level = conf)
     } else {
-      cbls_reg(y ~ x, data = dat, id = "id", var_model = fit_type,
+      bls_reg(y ~ x, data = dat, id = "id", var_model = fit_type,
                conf.level = conf, pred_level = conf)
     }
   }

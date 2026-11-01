@@ -192,13 +192,13 @@ summary(pb2)
 
 # Bivariate Least Squares (BLS and CBLS)
 
-`cbls_reg()` implements the bivariate least squares regressions of @francq2014 and @francq2016, as in the BivRegBLS package. Like Deming regression, BLS allows for measurement error in both methods, but it uses the error variances themselves, known from a validation study (`var_x`, `var_y`) or estimated from replicates (`id`), rather than only their ratio. Each subject's mean is weighted by the error variance of that mean, so subjects with more replicates count for more, and the variances may differ between the methods. With constant variances, BLS gives the same line as Deming regression with `error.ratio = var_x / var_y`.
+`bls_reg()` implements the bivariate least squares regressions of @francq2014 and @francq2016, as in the BivRegBLS package. Like Deming regression, BLS allows for measurement error in both methods, but it uses the error variances themselves, known from a validation study (`var_x`, `var_y`) or estimated from replicates (`id`), rather than only their ratio. Each subject's mean is weighted by the error variance of that mean, so subjects with more replicates count for more, and the variances may differ between the methods. With constant variances, BLS gives the same line as Deming regression with `error.ratio = var_x / var_y`.
 
 Because the variances are known, BLS also gives exact standard errors (without the jackknife) and **prediction intervals**: where a new measurement by one method is expected to fall, given a new measurement by the other.
 
 ```{r}
 data("reps")
-bls1 <- cbls_reg(y ~ x, data = reps, id = "id")
+bls1 <- bls_reg(y ~ x, data = reps, id = "id")
 summary(bls1)
 predict(bls1, newdata = c(4, 6), interval = "prediction")
 ```
@@ -214,7 +214,7 @@ When the error grows with the level, as is common for laboratory measurements wi
 
 ```{r, fig.width = 7, fig.height = 4}
 data("ba1986")
-bls2 <- cbls_reg(mini1 ~ wright1, data = ba1986,
+bls2 <- bls_reg(mini1 ~ wright1, data = ba1986,
                  var_x = function(level) (0.05 * level)^2,
                  var_y = function(level) (0.07 * level)^2)
 predict(bls2, newdata = c(200, 600), interval = "prediction")
@@ -223,9 +223,30 @@ plot(bls2, interval = "prediction")
 
 In simulations, ignoring proportional error (`var_model = "constant"`) gave 95% prediction intervals that covered every new measurement at low levels but only about 81% at high levels.
 
+Two other ways to describe the error are available. When each subject's error variance is known separately (for example, from that subject's replicates in an earlier study), `var_x` and `var_y` can name columns of the data holding them, with `df_var_x` and `df_var_y` naming columns of their degrees of freedom; this reproduces BivRegBLS's `BLS.ht()`. A new measurement is then given the mean of the subjects' variances. When the error SD is proportional to the level, `transform = "log"` fits the line to the logarithms, `log(y) = b0 + b1 log(x)`, with constant error variances on the log scale. `predict()` and `plot()` back-transform: fitted values and limits for `y` in the plot of `y` against `x`, and ratios `x / y` against the geometric mean in the Bland-Altman plot.
+
+```{r, fig.width = 7, fig.height = 4}
+bls3 <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 1,
+                 transform = "log")
+bls3
+plot(bls3, type = "md")
+```
+
 BLS assumes that the measurement errors explain all the scatter about the line. `summary()` reports the **dispersion**, which should be near 1, with a test. A dispersion clearly above 1 means that the subjects' true values deviate from the line (equation error, e.g. matrix effects: one method reading some samples high for reasons the replicates cannot reveal). By default (`equation_error = TRUE`), these deviations are estimated, assuming the same variance for both methods (as `method_vc(tau = "common")`), and included in the fit and the prediction intervals; otherwise the prediction intervals would be too narrow. With two methods, the data cannot show how the deviations divide between the methods, so the slope depends on that assumption [@carstensen2010].
 
 `joint_test()` tests intercept 0 and slope 1 with the Wald statistic from the BLS variance-covariance matrix; `predict(interval = "band")` and `plot(interval = "band")` give the corresponding simultaneous confidence band for the whole line, which contains exactly the lines the joint test does not reject. `check()` shows the standardized residuals. The estimates, standard errors, and confidence and prediction intervals reproduce BivRegBLS; its joint test multiplies the critical value by a Hotelling factor, $(n - 1)/(n - 2)$, so its p-values are slightly larger. The CBLS prediction intervals here also include the covariance between the errors of a new difference and a new mean, which BivRegBLS leaves out (the two agree when the error variances are equal).
+
+## When the error ratio is unknown
+
+Without replicates or a validation study, the error ratio needed by Deming regression is often a guess. `error_ratio_profile()` refits the line for every ratio from 0 (all error in `y`: ordinary least squares of `y` on `x`) to infinity (all error in `x`: least squares of `x` on `y`), as BivRegBLS's `FullCIs.XY()` does [@francq2014]. The **full confidence intervals** are the values of the slope and intercept that the data do not exclude whatever the ratio. When they exclude identity, or the joint test rejects it at every ratio, the conclusion does not depend on the guess.
+
+```{r, fig.width = 7, fig.height = 3.5}
+prof <- error_ratio_profile(dem_reg(mini1 ~ wright1, data = ba1986))
+prof
+plot(prof)
+```
+
+For the peak flow data, the slope moves only from 0.92 to 1.03 over all ratios, and identity is not rejected at any of them. The exact interval for the slope [@creasy1956] is shown when every subject has the same number of replicates by each method.
 
 # Joint Confidence Regions
 

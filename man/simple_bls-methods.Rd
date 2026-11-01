@@ -26,6 +26,7 @@
   reps_x = 1,
   reps_y = 1,
   se.fit = FALSE,
+  back_transform = TRUE,
   ...
 )
 
@@ -47,7 +48,7 @@
 \method{check}{simple_bls}(x, ...)
 }
 \arguments{
-\item{x, object}{A \code{simple_bls} object from \code{\link[=cbls_reg]{cbls_reg()}}.}
+\item{x, object}{A \code{simple_bls} object from \code{\link[=bls_reg]{bls_reg()}}.}
 
 \item{...}{Not used.}
 
@@ -69,7 +70,7 @@ exactly the lines (intercept, slope) that \code{\link[=joint_test]{joint_test()}
 reject; BivRegBLS's band also multiplies by \code{sqrt((n - 1) / (n - 2))}.
 \code{"tolerance"} (experimental) gives tolerance limits: with confidence
 \code{tol_level}, they contain at least a proportion \code{level} of new
-measurements (see \code{\link[=cbls_reg]{cbls_reg()}}).}
+measurements (see \code{\link[=bls_reg]{bls_reg()}}).}
 
 \item{level}{Level of the intervals. Default is the \code{conf.level} of the fit
 for confidence intervals and the band, and its \code{pred_level} for
@@ -78,13 +79,19 @@ measurements they contain).}
 
 \item{tol_level, bound_type}{For tolerance limits: the confidence level, and
 \code{"joint"} or \code{"iu"} as in \code{\link[=tolerance_limit]{tolerance_limit()}}. Default: the values given
-to \code{\link[=cbls_reg]{cbls_reg()}}.}
+to \code{\link[=bls_reg]{bls_reg()}}.}
 
 \item{reps_x, reps_y}{For prediction intervals: the new values are means of
 this many replicates of each method. Default is 1.}
 
 \item{se.fit}{For \code{predict()}: if TRUE, also return the standard errors of
-the fitted line.}
+the fitted line (on the log scale for a fit with \code{transform = "log"}).}
+
+\item{back_transform}{For a fit with \code{transform = "log"}: if TRUE
+(default), \code{newdata} is on the original scale (\code{x}, or the geometric
+mean of the two methods for \code{type = "md"}) and the results are
+back-transformed (\code{y}, or the ratio \code{x / y}); if FALSE, everything is on
+the log scale, as are \code{fitted()}, \code{residuals()} and \code{check()}.}
 
 \item{x_name, y_name}{Axis labels for \code{plot()}.}
 
@@ -101,14 +108,14 @@ fitted values, or a data frame with \code{fit}, \code{lwr}, and \code{upr} (and,
 return ggplot2 objects; \code{fitted()} and \code{residuals()} return vectors.
 }
 \description{
-Methods for the results of \code{\link[=cbls_reg]{cbls_reg()}}. The results are also
+Methods for the results of \code{\link[=bls_reg]{bls_reg()}}. The results are also
 \code{simple_eiv} objects, so \code{\link[=coef]{coef()}}, \code{\link[=vcov]{vcov()}}, \code{\link[=confint]{confint()}}, \code{\link[=joint_test]{joint_test()}},
 and \code{\link[=plot_joint]{plot_joint()}} work as for \code{\link[=dem_reg]{dem_reg()}}; the methods here add the CBLS
 fit in the Bland-Altman plot and prediction intervals.
 }
 \examples{
 data("reps")
-fit <- cbls_reg(y ~ x, data = reps, id = "id")
+fit <- bls_reg(y ~ x, data = reps, id = "id")
 predict(fit, newdata = c(4, 6), interval = "prediction")
 predict(fit, newdata = c(4, 6), type = "md", interval = "confidence")
 plot(fit, type = "md", interval = "prediction")

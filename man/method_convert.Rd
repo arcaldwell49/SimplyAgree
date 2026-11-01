@@ -74,7 +74,7 @@ with \code{estimator = "altreg"}, "boot" (parametric bootstrap). See details.}
 which must be installed). Use "ml" for confidence intervals with close
 to the stated coverage. For \code{bias = "linear"}, "cbls" fits the
 regression of the differences on the averages by correlated bivariate
-least squares (\code{\link[=cbls_reg]{cbls_reg()}}) instead of least squares; it needs
+least squares (\code{\link[=bls_reg]{bls_reg()}}) instead of least squares; it needs
 exchangeable replicates of both methods and \code{variance = "constant"}.
 See details.}
 
@@ -180,7 +180,7 @@ The least squares slope \eqn{b} is biased whenever the two methods have
 different measurement errors, because the errors of \eqn{D} and \eqn{A}
 are then correlated (Francq & Govaerts, 2016). With \code{estimator = "cbls"},
 \eqn{D = a + bA} is instead fit by correlated bivariate least squares
-(\code{\link[=cbls_reg]{cbls_reg()}}) on the item means, with the measurement error variance of
+(\code{\link[=bls_reg]{bls_reg()}}) on the item means, with the measurement error variance of
 each method estimated from its (exchangeable) replicates and a common
 method-by-item variance when the scatter about the line exceeds the
 measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then

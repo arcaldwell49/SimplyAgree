@@ -1,4 +1,4 @@
-# Coverage of cbls_reg() intervals and size of its joint test (see README.md).
+# Coverage of bls_reg() intervals and size of its joint test (see README.md).
 # Run from the package root: Rscript references/general/cbls_sims/sim_cbls.R
 library(parallel)
 
@@ -34,10 +34,10 @@ one_cell <- function(i, g, n_sim, conf) {
   }
   fit_one <- function(dat) {
     if (reps == "known") {
-      cbls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
+      bls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
                conf.level = conf, pred_level = conf)
     } else {
-      cbls_reg(y ~ x, data = dat, id = "id", conf.level = conf,
+      bls_reg(y ~ x, data = dat, id = "id", conf.level = conf,
                pred_level = conf)
     }
   }

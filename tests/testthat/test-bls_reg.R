@@ -12,7 +12,7 @@ bls_sim <- function(n = 25, m = 3, seed = 5, sx = 0.6, sy = 0.9) {
 test_that("BLS and CBLS reproduce BivRegBLS with replicates", {
   skip_if_not_installed("BivRegBLS")
   d <- bls_sim()
-  fit <- cbls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
   expect_s3_class(fit, c("simple_bls", "simple_eiv"))
   b <- BivRegBLS::BLS(data = d$wide, xcol = 1:3, ycol = 4:6, npoints = 10,
                       xpred = c(6, 10, 14))
@@ -23,7 +23,7 @@ test_that("BLS and CBLS reproduce BivRegBLS with replicates", {
                tolerance = 1e-8)
   expect_equal(fit$model_table$lower.ci, as.numeric(est[1:2, 4]),
                tolerance = 1e-8)
-  # CBLS: BivRegBLS uses D = y - x, cbls_reg() D = x - y
+  # CBLS: BivRegBLS uses D = y - x, bls_reg() D = x - y
   cb <- BivRegBLS::CBLS(data = d$wide, xcol = 1:3, ycol = 4:6, npoints = 10)
   expect_equal(unname(fit$cbls$coefficients),
                -as.numeric(cb$Estimate.CBLS[1:2, "Estimate"]), tolerance = 1e-8)
@@ -49,7 +49,7 @@ test_that("known error variances reproduce BivRegBLS, including CBLS PIs", {
   skip_if_not_installed("BivRegBLS")
   d <- bls_sim(m = 1, n = 30, seed = 8)
   dat <- data.frame(x = d$wide[[1]], y = d$wide[[2]])
-  fit <- cbls_reg(y ~ x, data = dat, var_x = 0.5, var_y = 0.5,
+  fit <- bls_reg(y ~ x, data = dat, var_x = 0.5, var_y = 0.5,
                   equation_error = FALSE)
   expect_equal(fit$errors$source, "known")
   b <- BivRegBLS::BLS(data = dat, xcol = 1, ycol = 2, var.x = 0.5,
@@ -69,7 +69,7 @@ test_that("known error variances reproduce BivRegBLS, including CBLS PIs", {
 
 test_that("with constant variances BLS is Deming regression", {
   data("reps")
-  fit <- cbls_reg(y ~ x, data = reps, var_x = 0.3, var_y = 0.6)
+  fit <- bls_reg(y ~ x, data = reps, var_x = 0.3, var_y = 0.6)
   dem <- dem_reg(y ~ x, data = reps, error.ratio = 0.5)
   expect_equal(unname(fit$coefficients), unname(dem$coefficients),
                tolerance = 1e-8)
@@ -85,7 +85,7 @@ test_that("unequal replicates: BLS minimises the weighted sum of squares", {
   long <- data.frame(id = id,
                      x = tx[id] + rnorm(length(id), 0, 1),
                      y = 2 + 0.9 * tx[id] + rnorm(length(id), 0, 1.5))
-  fit <- cbls_reg(y ~ x, data = long, id = "id")
+  fit <- bls_reg(y ~ x, data = long, id = "id")
   expect_true(fit$converged)
   s <- fit$model
   expect_false(length(unique(s$var_x)) == 1)
@@ -108,22 +108,22 @@ test_that("unequal replicates: BLS minimises the weighted sum of squares", {
 
 test_that("only the error ratio: estimates, but no prediction intervals", {
   data("ba1986")
-  r <- cbls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+  r <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
   # scale invariance (without equation error, which needs the variances)
-  k <- cbls_reg(mini1 ~ wright1, data = ba1986, var_x = 200, var_y = 100,
+  k <- bls_reg(mini1 ~ wright1, data = ba1986, var_x = 200, var_y = 100,
                 equation_error = FALSE)
   expect_equal(r$errors$source, "ratio")
   expect_false(r$errors$known)
   expect_equal(r$coefficients, k$coefficients, tolerance = 1e-8)
   expect_equal(r$vcov, k$vcov, tolerance = 1e-8)
   expect_error(predict(r, 300, interval = "prediction"), "only their ratio")
-  expect_error(cbls_reg(mini1 ~ wright1, data = ba1986),
+  expect_error(bls_reg(mini1 ~ wright1, data = ba1986),
                "cannot be estimated")
 })
 
 test_that("methods work", {
   data("reps")
-  fit <- cbls_reg(y ~ x, data = reps, id = "id")
+  fit <- bls_reg(y ~ x, data = reps, id = "id")
   expect_output(print(fit), "Bivariate Least Squares")
   expect_output(summary(fit), "CBLS")
   expect_equal(dim(confint(fit)), c(2, 2))
@@ -143,27 +143,27 @@ test_that("methods work", {
   expect_match(jt$method, "Wald, F-based")
   expect_error(joint_test(fit, method = "sadler"), "BLS fits")
   expect_s3_class(plot_joint(fit), "ggplot")
-  nomod <- cbls_reg(y ~ x, data = reps, id = "id", model = FALSE)
+  nomod <- bls_reg(y ~ x, data = reps, id = "id", model = FALSE)
   expect_error(plot(nomod), "model = TRUE")
   expect_equal(predict(nomod, c(4, 6)), predict(fit, c(4, 6)))
 })
 
 test_that("input validation", {
   data("reps")
-  expect_error(cbls_reg(y ~ x, data = reps, id = "id", conf.level = 2),
+  expect_error(bls_reg(y ~ x, data = reps, id = "id", conf.level = 2),
                "between 0 and 1")
-  expect_error(cbls_reg(y ~ x, data = reps, var_x = -1, var_y = 1),
+  expect_error(bls_reg(y ~ x, data = reps, var_x = -1, var_y = 1),
                "positive")
-  expect_error(cbls_reg(y ~ x, data = reps, var_x = 1, var_y = 1,
+  expect_error(bls_reg(y ~ x, data = reps, var_x = 1, var_y = 1,
                         df_var_x = 0), "positive")
-  expect_error(cbls_reg("y ~ x", data = reps), "formula")
-  expect_message(cbls_reg(y ~ x, data = reps, id = "id", var_x = 0.3),
+  expect_error(bls_reg("y ~ x", data = reps), "formula")
+  expect_message(bls_reg(y ~ x, data = reps, id = "id", var_x = 0.3),
                  "var_x is given")
 })
 
 test_that("the simultaneous band matches the joint test and BivRegBLS", {
   d <- bls_sim()
-  fit <- cbls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
   n <- fit$df.residual + 2
   xs <- c(6, 10, 14)
   band <- predict(fit, xs, interval = "band")
@@ -204,8 +204,8 @@ vf_sim <- function(n = 40, m = 3, seed = 21) {
 
 test_that("a constant variance function equals a constant variance", {
   data("reps")
-  f1 <- cbls_reg(y ~ x, data = reps, var_x = 0.3, var_y = 0.6)
-  f2 <- cbls_reg(y ~ x, data = reps, var_x = function(l) 0.3,
+  f1 <- bls_reg(y ~ x, data = reps, var_x = 0.3, var_y = 0.6)
+  f2 <- bls_reg(y ~ x, data = reps, var_x = function(l) 0.3,
                  var_y = function(l) rep(0.6, length(l)))
   expect_equal(f1$coefficients, f2$coefficients)
   expect_equal(f1$vcov, f2$vcov)
@@ -215,7 +215,7 @@ test_that("a constant variance function equals a constant variance", {
 
 test_that("variance functions are evaluated at the estimated true values", {
   dat <- vf_sim()
-  fit <- suppressMessages(cbls_reg(y ~ x, data = dat, id = "id",
+  fit <- suppressMessages(bls_reg(y ~ x, data = dat, id = "id",
                                    var_x = function(l) (0.05 * l)^2,
                                    var_y = function(l) (0.08 * l)^2))
   expect_true(fit$converged)
@@ -237,7 +237,7 @@ test_that("variance functions are evaluated at the estimated true values", {
 
 test_that("proportional and power error models are estimated from replicates", {
   dat <- vf_sim()
-  fp <- cbls_reg(y ~ x, data = dat, id = "id", var_model = "proportional")
+  fp <- bls_reg(y ~ x, data = dat, id = "id", var_model = "proportional")
   expect_equal(fp$errors$model_x, "proportional")
   expect_equal(unname(fp$errors$params_x), 0.05, tolerance = 0.15)
   expect_equal(unname(fp$errors$params_y), 0.08, tolerance = 0.15)
@@ -247,12 +247,12 @@ test_that("proportional and power error models are estimated from replicates", {
   mx <- ave(d$x, d$id)
   expect_equal(unname(fp$errors$params_x)^2,
                sum((d$x - mx)^2 / mx^2) / 80, tolerance = 1e-10)
-  fw <- cbls_reg(y ~ x, data = dat, id = "id", var_model = "power")
+  fw <- bls_reg(y ~ x, data = dat, id = "id", var_model = "power")
   expect_named(fw$errors$params_x, c("sigma", "theta"))
   expect_equal(fw$errors$df_var_x, 79)
   expect_output(summary(fw), "power")
   # close to the fit with the true variance functions
-  fk <- suppressMessages(cbls_reg(y ~ x, data = dat, id = "id",
+  fk <- suppressMessages(bls_reg(y ~ x, data = dat, id = "id",
                                   var_x = function(l) (0.05 * l)^2,
                                   var_y = function(l) (0.08 * l)^2))
   expect_equal(unname(fp$coefficients[2]), unname(fk$coefficients[2]),
@@ -263,15 +263,15 @@ test_that("variance function input validation", {
   dat <- vf_sim()
   neg <- dat
   neg$x[1] <- -5
-  expect_error(cbls_reg(y ~ x, data = transform(neg, x = x - 50), id = "id",
+  expect_error(bls_reg(y ~ x, data = transform(neg, x = x - 50), id = "id",
                         var_model = "proportional"), "positive measurements")
-  expect_error(cbls_reg(y ~ x, data = dat[!duplicated(dat$id), ],
+  expect_error(bls_reg(y ~ x, data = dat[!duplicated(dat$id), ],
                         error.ratio = 2, var_model = "proportional"),
                "must be constant")
-  expect_error(cbls_reg(y ~ x, data = dat, var_x = function(l) -l,
+  expect_error(bls_reg(y ~ x, data = dat, var_x = function(l) -l,
                         var_y = 1), "positive value")
-  expect_error(cbls_reg(y ~ x, data = dat, var_x = "a", var_y = 1),
-               "number or a function")
+  expect_error(bls_reg(y ~ x, data = dat, var_x = "a", var_y = 1),
+               "function of the level")
 })
 
 test_that("dispersion and equation error", {
@@ -283,8 +283,8 @@ test_that("dispersion and equation error", {
   id <- rep(seq_len(n), each = 3)
   long <- data.frame(id = id, x = t[id] + rnorm(3 * n, 0, 0.6),
                      y = 1 + 1.1 * t[id] + dev[id] + rnorm(3 * n, 0, 0.9))
-  f1 <- cbls_reg(y ~ x, data = long, id = "id")
-  f0 <- cbls_reg(y ~ x, data = long, id = "id", equation_error = FALSE)
+  f1 <- bls_reg(y ~ x, data = long, id = "id")
+  f0 <- bls_reg(y ~ x, data = long, id = "id", equation_error = FALSE)
   d <- f1$dispersion
   expect_gt(d$s2, 2)
   expect_lt(d$p.value, 0.001)
@@ -303,7 +303,7 @@ test_that("dispersion and equation error", {
   expect_equal(f0$dispersion$tau2, 0)
   expect_false(isTRUE(all.equal(coef(f1), coef(f0))))
   # symmetric: x on y gives the same line
-  f_yx <- cbls_reg(x ~ y, data = long, id = "id")
+  f_yx <- bls_reg(x ~ y, data = long, id = "id")
   expect_equal(unname(coef(f_yx)[2]), 1 / b[2], tolerance = 1e-6)
   expect_equal(unname(coef(f_yx)[1]), -b[1] / b[2], tolerance = 1e-6)
   p1 <- predict(f1, 20, interval = "prediction")
@@ -315,24 +315,24 @@ test_that("dispersion and equation error", {
   expect_output(summary(f1), "Equation error: SD")
   # without equation error the estimate is usually 0 and nothing changes
   dd <- bls_sim(n = 40, seed = 2)
-  g1 <- cbls_reg(y ~ x, data = dd$long, id = "id")
+  g1 <- bls_reg(y ~ x, data = dd$long, id = "id")
   if (g1$dispersion$tau2 == 0) {
     expect_equal(predict(g1, 10, interval = "prediction"),
-                 predict(cbls_reg(y ~ x, data = dd$long, id = "id",
+                 predict(bls_reg(y ~ x, data = dd$long, id = "id",
                                   equation_error = FALSE),
                          10, interval = "prediction"))
   }
   # only the ratio: no test
   data("ba1986")
-  r <- cbls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+  r <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
   expect_true(is.na(r$dispersion$p.value))
-  expect_error(cbls_reg(y ~ x, data = long, id = "id", equation_error = NA),
+  expect_error(bls_reg(y ~ x, data = long, id = "id", equation_error = NA),
                "TRUE or FALSE")
 })
 
 test_that("tolerance limits (experimental)", {
   d <- bls_sim(n = 30, seed = 4)
-  fit <- cbls_reg(y ~ x, data = d$long, id = "id")
+  fit <- bls_reg(y ~ x, data = d$long, id = "id")
   xs <- c(6, 10, 14)
   pi <- predict(fit, xs, interval = "prediction")
   tj <- predict(fit, xs, interval = "tolerance")
@@ -349,7 +349,7 @@ test_that("tolerance limits (experimental)", {
   # limits are the 95% quantile of |N(c, s^2)|, c a t bound for the line
   dk <- bls_sim(m = 1, n = 30, seed = 8)
   datk <- data.frame(x = dk$wide[[1]], y = dk$wide[[2]])
-  fk <- cbls_reg(y ~ x, data = datk, var_x = 0.36, var_y = 0.81,
+  fk <- bls_reg(y ~ x, data = datk, var_x = 0.36, var_y = 0.81,
                  equation_error = FALSE)
   se <- predict(fk, xs, se.fit = TRUE)$se.fit
   s2 <- 0.81 + coef(fk)[[2]]^2 * 0.36
@@ -364,9 +364,9 @@ test_that("tolerance limits (experimental)", {
   expect_s3_class(plot(fit, type = "md", interval = "tolerance"), "ggplot")
   expect_error(predict(fit, xs, interval = "tolerance", tol_level = 2),
                "tol_level")
-  expect_error(cbls_reg(y ~ x, data = d$long, id = "id", tol_level = 0),
+  expect_error(bls_reg(y ~ x, data = d$long, id = "id", tol_level = 0),
                "tol_level")
-  r <- cbls_reg(y ~ x, data = d$long[!duplicated(d$long$id), ],
+  r <- bls_reg(y ~ x, data = d$long[!duplicated(d$long$id), ],
                 error.ratio = 1)
   expect_error(predict(r, xs, interval = "tolerance"), "only their ratio")
 })
@@ -377,7 +377,7 @@ test_that("with equation error and one measurement each, tolerance limits use Wa
   t <- rnorm(n, 20, 5)
   dat <- data.frame(x = t + rnorm(n, 0, 1) + rnorm(n, 0, 0.6),
                     y = 1 + 1.1 * (t + rnorm(n, 0, 1)) + rnorm(n, 0, 0.9))
-  f <- cbls_reg(y ~ x, data = dat, var_x = 0.36, var_y = 0.81)
+  f <- bls_reg(y ~ x, data = dat, var_x = 0.36, var_y = 0.81)
   expect_gt(f$dispersion$tau2, 0)
   xs <- c(15, 25)
   se <- predict(f, xs, se.fit = TRUE)$se.fit
@@ -389,4 +389,95 @@ test_that("with equation error and one measurement each, tolerance limits use Wa
   expect_equal(tl$upr - tl$fit,
                r * sqrt(s2) * sqrt(qchisq(0.95, 1, ncp = se^2 / s2)),
                tolerance = 1e-6)
+})
+
+test_that("per-subject error variances match BivRegBLS BLS.ht", {
+  skip_if_not_installed("BivRegBLS")
+  set.seed(3)
+  n <- 25
+  mu <- runif(n, 10, 100)
+  vx <- runif(n, 1, 9)
+  vy <- runif(n, 2, 16)
+  d <- data.frame(id = 1:n, x = mu + rnorm(n, sd = sqrt(vx)),
+                  y = 2 + 1.1 * mu + rnorm(n, sd = sqrt(vy)),
+                  vx = vx, vy = vy, dfx = 4, dfy = 4)
+  fit <- bls_reg(y ~ x, data = d, var_x = "vx", var_y = "vy",
+                  df_var_x = "dfx", df_var_y = "dfy",
+                  equation_error = FALSE)
+  ref <- BivRegBLS::BLS.ht(data = d, xcol = "x", ycol = "y",
+                           var.x.col = "vx", var.y.col = "vy",
+                           df.var.x.col = "dfx", df.var.y.col = "dfy")
+  est <- ref$Estimate.BLS.ht
+  expect_equal(unname(coef(fit)), as.numeric(est[1:2, 2]), tolerance = 1e-6)
+  expect_equal(fit$model_table$lower.ci, as.numeric(est[1:2, 4]),
+               tolerance = 1e-6)
+  expect_equal(fit$model_table$upper.ci, as.numeric(est[1:2, 5]),
+               tolerance = 1e-6)
+  expect_equal(fit$errors$model_x, "subject")
+  expect_equal(fit$model$var_x, vx)
+  # a new measurement gets the mean variance, Satterthwaite df
+  expect_equal(fit$errors$var_x, mean(vx))
+  expect_equal(fit$errors$df_var_x, sum(vx)^2 / sum(vx^2 / 4))
+  expect_output(summary(fit), "one per subject")
+  pr <- predict(fit, newdata = data.frame(x = c(30, 60)),
+                interval = "prediction")
+  expect_true(all(pr[, "lwr"] < pr[, "fit"] & pr[, "fit"] < pr[, "upr"]))
+})
+
+test_that("per-subject variance columns with replicates and validation", {
+  data("reps")
+  r <- reps[stats::complete.cases(reps), ]
+  r$vx <- 0.5 + as.numeric(factor(r$id)) / 10
+  r$vy <- 1
+  fit <- bls_reg(y ~ x, data = r, id = "id", var_x = "vx", var_y = "vy")
+  sub_v <- tapply(r$vx, r$id, `[`, 1)
+  n_x <- tapply(r$x, r$id, length)
+  expect_equal(fit$model$var_x,
+               as.vector(sub_v[fit$model$id] / n_x[fit$model$id]))
+  expect_equal(fit$errors$df_var_x, Inf)
+  r$vbad <- r$vx + seq_len(nrow(r)) / 100
+  expect_error(bls_reg(y ~ x, data = r, id = "id", var_x = "vbad",
+                        var_y = "vy"), "one value per subject")
+  r$vneg <- -1
+  expect_error(bls_reg(y ~ x, data = r, id = "id", var_x = "vneg",
+                        var_y = "vy"), "positive value")
+  expect_error(bls_reg(y ~ x, data = r, var_x = "nope", var_y = 1),
+               "name of a column")
+  r$dfx <- 3
+  expect_error(bls_reg(y ~ x, data = r, id = "id", var_x = 1, var_y = 1,
+                        df_var_x = "dfx"), "column name only when")
+})
+
+test_that("transform = 'log' fits the logs and back-transforms", {
+  set.seed(5)
+  n <- 30
+  id <- rep(1:n, each = 2)
+  mu <- exp(runif(n, log(5), log(200)))
+  d <- data.frame(id = id, x = mu[id] * exp(rnorm(2 * n, sd = 0.08)),
+                  y = 1.3 * mu[id]^0.95 * exp(rnorm(2 * n, sd = 0.06)))
+  fit <- bls_reg(y ~ x, data = d, id = "id", transform = "log")
+  dl <- transform(d, x = log(x), y = log(y))
+  fl <- bls_reg(y ~ x, data = dl, id = "id")
+  expect_equal(coef(fit), coef(fl))
+  expect_equal(fit$transform, "log")
+  pl <- predict(fl, newdata = log(c(10, 100)), interval = "prediction")
+  pr <- predict(fit, newdata = c(10, 100), interval = "prediction")
+  expect_equal(pr, exp(pl))
+  expect_equal(predict(fit, newdata = log(c(10, 100)),
+                       interval = "prediction", back_transform = FALSE), pl)
+  # Bland-Altman plot: ratio x / y at the geometric mean
+  expect_equal(predict(fit, newdata = data.frame(avg = 50), type = "md"),
+               exp(predict(fl, newdata = data.frame(avg = log(50)),
+                           type = "md")))
+  se <- predict(fit, newdata = 10, se.fit = TRUE)
+  expect_equal(se$fit, exp(predict(fl, newdata = log(10))))
+  expect_output(print(fit), "Fitted on the log scale")
+  expect_output(summary(fit), "Fitted on the log scale")
+  expect_s3_class(plot(fit, interval = "prediction"), "ggplot")
+  expect_s3_class(plot(fit, type = "md", interval = "confidence"), "ggplot")
+  expect_error(predict(fit, newdata = -1), "positive")
+  expect_error(bls_reg(y ~ x, data = transform(d, x = x - 10), id = "id",
+                        transform = "log"), "positive measurements")
+  expect_error(bls_reg(y ~ x, data = d, id = "id", transform = "log",
+                        var_model = "proportional"), "constant on the log")
 })

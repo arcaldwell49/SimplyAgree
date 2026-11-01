@@ -1,4 +1,4 @@
-# cbls_reg() with equation error (see README.md, study 3).
+# bls_reg() with equation error (see README.md, study 3).
 # Run from the package root: Rscript references/general/cbls_sims/sim_cbls_eq.R
 library(parallel)
 
@@ -39,10 +39,10 @@ one_cell <- function(i, g, n_sim, conf) {
   }
   fit_one <- function(dat, eq) {
     if (reps == "known") {
-      cbls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
+      bls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
                equation_error = eq)
     } else {
-      cbls_reg(y ~ x, data = dat, id = "id", equation_error = eq)
+      bls_reg(y ~ x, data = dat, id = "id", equation_error = eq)
     }
   }
   res <- matrix(NA, n_sim, 6,

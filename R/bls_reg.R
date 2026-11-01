@@ -19,11 +19,15 @@
 #' @param var_x,var_y Measurement error variance of a single measurement by
 #'   each method, if known (e.g., from a validation study): a number, or a
 #'   function of the level that returns the variance, e.g.
-#'   `function(level) (0.05 * level)^2` for a coefficient of variation of 5%.
-#'   When missing, they are estimated from the replicates (see `var_model`).
+#'   `function(level) (0.05 * level)^2` for a coefficient of variation of 5%,
+#'   or the name of a column of `data` with each subject's own variance
+#'   (the same on all rows of a subject; e.g., from that subject's
+#'   replicates in a separate study). When missing, they are estimated from
+#'   the replicates (see `var_model`).
 #' @param df_var_x,df_var_y Degrees of freedom of `var_x` and `var_y` when
-#'   given (default `Inf`, treated as known). Used only for the prediction
-#'   intervals.
+#'   given (default `Inf`, treated as known): a number, or, with a column of
+#'   variances, the name of a column with each subject's df. Used only for
+#'   the prediction intervals and the dispersion test.
 #' @param error.ratio Ratio of the measurement error variances,
 #'   var(x)/var(y), as in [dem_reg()]. Used only when neither variance is
 #'   given or estimable (one measurement per subject); the estimates and
@@ -42,6 +46,15 @@
 #'   about the line, are included in the fit and the intervals. It is 0, and
 #'   the results are those of BivRegBLS, when the measurement errors explain
 #'   all the scatter. FALSE always gives BivRegBLS's results. See Details.
+#' @param transform `"none"` (default) or `"log"`. With `"log"`, the
+#'   line is fitted to the logarithms of the measurements (which must be
+#'   positive): `log(y) = b0 + b1 log(x)`, i.e. `y = exp(b0) x^b1`, and in
+#'   the Bland-Altman plot the log ratio `log(x / y)` against the mean of the
+#'   logs. Use it when the error SD is proportional to the level. The error
+#'   variances (given or estimated) are then on the log scale (a coefficient
+#'   of variation `cv` is a variance of about `log(1 + cv^2)`), and must be
+#'   constant. [predict()] and [plot()] back-transform to the original
+#'   scale (fitted values and limits for `y`, or ratios `x / y`).
 #' @param conf.level Confidence level for the coefficients and the line.
 #'   Default is 0.95.
 #' @param pred_level Default level for prediction intervals, and the
@@ -183,7 +196,7 @@
 #'
 #' @examples
 #' data("reps")
-#' fit <- cbls_reg(y ~ x, data = reps, id = "id")
+#' fit <- bls_reg(y ~ x, data = reps, id = "id")
 #' fit
 #' summary(fit)
 #' predict(fit, newdata = c(4, 6), interval = "prediction")
@@ -193,13 +206,13 @@
 #'
 #' # known error variances from a validation study, one measurement each
 #' data("ba1986")
-#' cbls_reg(mini1 ~ wright1, data = ba1986, var_x = 400, var_y = 600)
+#' bls_reg(mini1 ~ wright1, data = ba1986, var_x = 400, var_y = 600)
 #'
 #' # error SD proportional to the level (constant CV), known or estimated
-#' cbls_reg(mini1 ~ wright1, data = ba1986,
+#' bls_reg(mini1 ~ wright1, data = ba1986,
 #'          var_x = function(level) (0.05 * level)^2,
 #'          var_y = function(level) (0.07 * level)^2)
-#' cbls_reg(y ~ x, data = reps, id = "id", var_model = "proportional")
+#' bls_reg(y ~ x, data = reps, id = "id", var_model = "proportional")
 #'
 #' @references
 #' Francq, B. G., & Govaerts, B. B. (2014). Measurement methods comparison
@@ -219,7 +232,7 @@
 #' @seealso [dem_reg()], [pb_reg()], [joint_test()], [agreement_limit()]
 #' @export
 
-cbls_reg <- function(formula,
+bls_reg <- function(formula,
                      data,
                      id = NULL,
                      var_x = NULL,
@@ -229,6 +242,7 @@ cbls_reg <- function(formula,
                      error.ratio = NULL,
                      var_model = c("constant", "proportional", "power"),
                      equation_error = TRUE,
+                     transform = c("none", "log"),
                      conf.level = 0.95,
                      pred_level = 0.95,
                      tol_level = 0.95,
@@ -238,6 +252,12 @@ cbls_reg <- function(formula,
   call2 <- match.call()
   var_model <- match.arg(var_model)
   bound_type <- match.arg(bound_type)
+  transform <- match.arg(transform)
+  if (transform == "log" &&
+      (is.function(var_x) || is.function(var_y) || var_model != "constant")) {
+    stop("With transform = 'log', the error variances must be constant on ",
+         "the log scale (var_model = 'constant', no variance functions).")
+  }
   if (!is.logical(equation_error) || length(equation_error) != 1 ||
       is.na(equation_error)) {
     stop("equation_error must be TRUE or FALSE.")
@@ -250,9 +270,15 @@ cbls_reg <- function(formula,
   }
   for (nm in c("var_x", "var_y")) {
     v <- get(nm)
-    if (!is.null(v) && !is.function(v) &&
-        (!is.numeric(v) || length(v) != 1 || !(v > 0))) {
-      stop(nm, " must be a single positive number or a function of the level.")
+    if (is.character(v)) {
+      if (length(v) != 1 || !(v %in% names(data))) {
+        stop(nm, " must be a single positive number, a function of the ",
+             "level, or the name of a column of data.")
+      }
+    } else if (!is.null(v) && !is.function(v) &&
+               (!is.numeric(v) || length(v) != 1 || !(v > 0))) {
+      stop(nm, " must be a single positive number, a function of the ",
+           "level, or the name of a column of data.")
     }
   }
   if (!is.null(error.ratio) &&
@@ -262,7 +288,13 @@ cbls_reg <- function(formula,
   }
   for (nm in c("df_var_x", "df_var_y")) {
     v <- get(nm)
-    if (!is.numeric(v) || length(v) != 1 || !(v > 0)) {
+    if (is.character(v)) {
+      if (length(v) != 1 || !(v %in% names(data)) ||
+          !is.character(get(sub("df_", "", nm)))) {
+        stop(nm, " can be a column name only when ", sub("df_", "", nm),
+             " is a column of data.")
+      }
+    } else if (!is.numeric(v) || length(v) != 1 || !(v > 0)) {
       stop(nm, " must be a single positive number (or Inf).")
     }
   }
@@ -280,7 +312,19 @@ cbls_reg <- function(formula,
   x_name <- names(mf)[2]
   raw <- data.frame(x = mf[[2]], y = model.response(mf, "numeric"))
   raw$id <- if (!is.null(id)) mf[[3]] else seq_len(nrow(raw))
+  # per-row error variances (and df) given as columns of data
+  for (nm in c("var_x", "var_y", "df_var_x", "df_var_y")) {
+    v <- get(nm)
+    raw[[nm]] <- if (is.character(v)) data[[v]] else NA_real_
+  }
   raw <- raw[!is.na(raw$id) & !(is.na(raw$x) & is.na(raw$y)), ]
+  if (transform == "log") {
+    if (any(raw$x <= 0, na.rm = TRUE) || any(raw$y <= 0, na.rm = TRUE)) {
+      stop("transform = 'log' needs positive measurements.")
+    }
+    raw$x <- log(raw$x)
+    raw$y <- log(raw$y)
+  }
 
   # subject means, numbers of replicates, within-subject sums of squares
   agg <- function(v, f) {
@@ -294,6 +338,16 @@ cbls_reg <- function(formula,
                     ss_x = as.vector(agg(raw$x, function(z) sum((z - mean(z))^2))),
                     ss_y = as.vector(agg(raw$y, function(z) sum((z - mean(z))^2))),
                     stringsAsFactors = FALSE)
+  for (nm in c("var_x", "var_y", "df_var_x", "df_var_y")) {
+    if (is.character(get(nm))) {
+      sub[[paste0("given_", nm)]] <- as.vector(agg(raw[[nm]], function(z) {
+        if (length(z) && diff(range(z)) > 1e-8 * max(abs(z))) {
+          stop("The column ", get(nm), " must have one value per subject.")
+        }
+        if (length(z)) z[1] else NA_real_
+      }))
+    }
+  }
   sub <- sub[sub$n_x > 0 & sub$n_y > 0, ]
   n <- nrow(sub)
   if (n < 3) {
@@ -302,10 +356,20 @@ cbls_reg <- function(formula,
 
   # measurement error variance of a single measurement, as a function of
   # the level: given (number or function) or estimated from the replicates
-  ex <- .bls_error_model(var_x, df_var_x, sub$ss_x, sub$n_x, sub$x,
-                         var_model, "x")
-  ey <- .bls_error_model(var_y, df_var_y, sub$ss_y, sub$n_y, sub$y,
-                         var_model, "y")
+  given_col <- function(nm) {
+    if (!is.character(get(nm))) return(get(nm))
+    v <- sub[[paste0("given_", nm)]]
+    ok <- if (grepl("^df_", nm)) all(v > 0) else all(is.finite(v) & v > 0)
+    if (anyNA(v) || !ok) {
+      stop("The column ", get(nm), " must have a positive value for ",
+           "every subject.")
+    }
+    v
+  }
+  ex <- .bls_error_model(given_col("var_x"), given_col("df_var_x"),
+                         sub$ss_x, sub$n_x, sub$x, var_model, "x")
+  ey <- .bls_error_model(given_col("var_y"), given_col("df_var_y"),
+                         sub$ss_y, sub$n_y, sub$y, var_model, "y")
   if (!is.null(ex) && !is.null(ey)) {
     sources <- c(ex$source, ey$source)
     source <- if (all(sources == "known")) "known" else
@@ -317,7 +381,8 @@ cbls_reg <- function(formula,
   } else if (!is.null(error.ratio)) {
     # only the ratio is known: fix the scale (the estimates and their
     # standard errors do not depend on it)
-    if (is.function(var_x) || is.function(var_y) || var_model != "constant") {
+    if (is.function(var_x) || is.function(var_y) || is.character(var_x) ||
+        is.character(var_y) || var_model != "constant") {
       stop("With error.ratio, the error variances must be constant.")
     }
     const <- function(v) .bls_const_model(v, NA_real_, "ratio")
@@ -336,7 +401,9 @@ cbls_reg <- function(formula,
          "estimated (one measurement per subject). Give var_x and var_y, ",
          "replicate measurements with id, or error.ratio = var(x) / var(y).")
   }
-  constant <- ex$model == "constant" && ey$model == "constant"
+  # subject variances do not depend on the level: no iteration needed
+  constant <- ex$model %in% c("constant", "subject") &&
+    ey$model %in% c("constant", "subject")
 
   # BLS in the (x, y) plot. The variances are evaluated at the estimated true
   # values of each subject, starting from the subject means, and the fit is
@@ -345,8 +412,10 @@ cbls_reg <- function(formula,
   lev_y <- sub$y
   coef_old <- c(Inf, Inf)
   for (pass in seq_len(100)) {
-    sub$var_x <- .bls_eval(ex$fun, lev_x, "var_x") / sub$n_x
-    sub$var_y <- .bls_eval(ey$fun, lev_y, "var_y") / sub$n_y
+    sub$var_x <- (if (!is.null(ex$values)) ex$values else
+      .bls_eval(ex$fun, lev_x, "var_x")) / sub$n_x
+    sub$var_y <- (if (!is.null(ey$values)) ey$values else
+      .bls_eval(ey$fun, lev_y, "var_y")) / sub$n_y
     # started from Deming with lambda = var_y / var_x
     lam <- mean(sub$var_y) / mean(sub$var_x)
     sxx <- sum((sub$x - mean(sub$x))^2)
@@ -465,6 +534,7 @@ cbls_reg <- function(formula,
       pred_level = pred_level,
       tol_level = tol_level,
       bound_type = bound_type,
+      transform = transform,
       method = "Bivariate least squares (BLS) regression",
       cbls = list(coefficients = cb_coefs,
                   model_table = tab(cb_coefs, cb_vc, c(0, 0)),
@@ -550,6 +620,17 @@ cbls_reg <- function(formula,
   if (is.function(given)) {
     return(list(fun = given, df = df_given, model = "function",
                 params = NULL, source = "known"))
+  }
+  if (length(given) > 1) {
+    # one variance per subject. A new measurement (prediction) gets their
+    # mean, with the Satterthwaite df of the mean of independent estimates.
+    df_i <- rep_len(df_given, length(given))
+    m <- mean(given)
+    df_m <- if (all(is.infinite(df_i))) Inf else
+      sum(given)^2 / sum(given^2 / df_i)
+    return(list(fun = function(level) rep(m, length(level)), values = given,
+                df = df_m, model = "subject", params = c(mean = m),
+                source = "known"))
   }
   if (!is.null(given)) {
     return(.bls_const_model(given, df_given, "known"))

@@ -501,7 +501,7 @@ test_that("ML estimator input checks", {
                "requires the lavaan package")
 })
 
-test_that("estimator = 'cbls' uses cbls_reg() for each pair", {
+test_that("estimator = 'cbls' uses bls_reg() for each pair", {
   dat <- sim_methods(n_items = 40, n_reps = 3, methods = c("A", "B"),
                      alpha = c(0, 1), beta = c(1, 1.2), mu_mean = 10,
                      mu_sd = 3, tau = 0.2, sigma = c(0.3, 0.5), seed = 101)
@@ -509,12 +509,12 @@ test_that("estimator = 'cbls' uses cbls_reg() for each pair", {
                        replicate = "repl", estimator = "cbls")
   expect_s3_class(cb, "simple_mconv")
   expect_equal(cb$fit_info$estimator, "cbls")
-  # the same CBLS fit as cbls_reg() with x = A, y = B
+  # the same CBLS fit as bls_reg() with x = A, y = B
   long <- rbind(data.frame(id = dat$id[dat$method == "A"],
                            x = dat$y[dat$method == "A"], y = NA_real_),
                 data.frame(id = dat$id[dat$method == "B"], x = NA_real_,
                            y = dat$y[dat$method == "B"]))
-  f <- cbls_reg(y ~ x, data = long, id = "id")
+  f <- bls_reg(y ~ x, data = long, id = "id")
   expect_equal(c(cb$da$a, cb$da$b), unname(f$cbls$coefficients),
                tolerance = 1e-10)
   # conversion of B from A is the BLS line of B on A

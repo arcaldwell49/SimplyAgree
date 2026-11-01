@@ -1,4 +1,4 @@
-# Coverage of the experimental tolerance limits of cbls_reg() (README.md,
+# Coverage of the experimental tolerance limits of bls_reg() (README.md,
 # study 4).
 # Run from the package root: Rscript references/general/cbls_sims/sim_cbls_tl.R
 library(parallel)
@@ -36,10 +36,10 @@ one_cell <- function(i, g, n_sim) {
   }
   fit_one <- function(dat) {
     if (reps == "known") {
-      cbls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
+      bls_reg(y ~ x, data = dat, var_x = sx^2, var_y = sy^2,
                pred_level = p, tol_level = conf)
     } else {
-      cbls_reg(y ~ x, data = dat, id = "id", pred_level = p,
+      bls_reg(y ~ x, data = dat, id = "id", pred_level = p,
                tol_level = conf)
     }
   }
