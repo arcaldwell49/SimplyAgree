@@ -177,3 +177,46 @@ the two methods share occasion effects, so their errors are correlated;
 the CBLS engine supports a covariance, which would need the occasion
 variance from `method_vc()`); variance functions in `method_convert()`;
 method-specific equation error with three or more methods.
+
+## Gaps against BivRegBLS and MethComp (2026-11-01)
+
+Compared with the exports of BivRegBLS 1.1.1 and MethComp 1.30.2. Most of
+both packages is covered (`cbls_reg()`, `dem_reg()`, `pb_reg()`,
+`method_vc()`, `method_convert()`, `tdi()`, `ccc_test()`, `sim_methods()`,
+`joint_test()`). In priority order:
+
+1. **Error-ratio sensitivity** (BivRegBLS `FullCIs.XY`, `GraphFullCIs.XY`,
+   `GraphFullCIs.MD`). With no replicates and an unknown error ratio, show
+   the slope and intercept estimates and CIs over the whole range of ratios
+   (0 to Inf: OLS of y on x through to OLS of x on y). Candidate:
+   `plot(..., type = "lambda")` or a helper for `dem_reg()`/`cbls_reg()`
+   objects. Validate against BivRegBLS on its data sets.
+2. **Per-row error variances in `cbls_reg()`** (BivRegBLS `var.x.col`,
+   `nxi.col`, `df.var.x.col`). Let `var_x`/`var_y` also be a column name or
+   a vector of length n (with per-row replicate counts and df), e.g.
+   variances from a separate validation study. Currently `var_x`/`var_y`
+   take a number or a function of the level only.
+3. **Log scale in `cbls_reg()`** (BivRegBLS `antilog.pred`). A `transform`
+   argument (`"none"`, `"log"`), as in `method_vc()`/`method_convert()`,
+   that fits on the log scale and back-transforms predictions and
+   intervals for `predict()` and `plot()`.
+4. **Replicate-permutation sensitivity for `method_vc()`** (MethComp
+   `perm.repl`). Randomly permute replicate labels within item and method
+   and refit, to show whether the linked/exchangeable choice changes the
+   limits. Cheap to add (a few refits).
+5. **Random raters in `method_vc()`/`method_convert()`** (MethComp
+   `random.raters` in `BA.est` and `DA.reg`). Treat the methods as a
+   random sample of raters, so the method effect is a variance component
+   and the limits apply to a new rater.
+
+Lower priority, probably not worth it:
+
+- MethComp `MCmcmc`: Bayesian (JAGS) fit of the full model. The frequentist
+  routes cover the estimates; would add a JAGS dependency.
+- MethComp `corMxI`: correlated method-by-item effects. Niche.
+- MethComp `choose.trans`/`check.trans`: arbitrary user transform pairs
+  (e.g. logit); check whether the `transform` argument of `method_vc()`
+  and `method_convert()` should accept a function pair.
+- BivRegBLS `OLSh`, `raw.plot`, `desc.stat`; MethComp `Meth` class,
+  `make.repl`, `sample.Meth`, `bothlines`. Cosmetic or covered by
+  `check()` and `mc_long()`.
