@@ -33,23 +33,28 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   LoA bands (`get_qemm()`) still use the outer end of a `conf.level`
   interval for the limits, for both `prop_bias` settings; not changed.
 
+- **Random raters in `method_vc()`: first version done** (design agreed
+  2026-11-01; gap 5 in `bls_reg_roadmap.md`). `methods = c("fixed",
+  "random")` and `sigma = c("common", "method")`; nlme with a rater
+  `pdIdent` block for a constant outer group; one limits row for two random
+  raters; agreement limits only. Tests in `test-method_vc_random.R`;
+  coverage study in `method_vc_random_sims/` (bounds 0.94 to 1.00 with the
+  MOVER over the components, which replaced the Satterthwaite chi-square
+  for random raters). MethComp's `BA.est(random.raters = TRUE)` on `sbp`
+  stops at a rater variance of 0 with a lower REML likelihood, so the fit
+  was checked against `lme4::lmer()` instead.
+
 Remaining, in order:
 
-1. **Random raters in `method_vc()`** (gap 5 in `bls_reg_roadmap.md`, which
-   lists the design questions). Proposed design, not yet agreed with the
-   maintainer; confirm before starting:
-   - scope: `method_vc()` only (not `method_convert()` for now);
-   - model: methods as a random effect with crossed method-by-item and
-     item-by-replicate effects and a common residual SD, fitted with lme4
-     (already imported), since nlme does not do crossed effects easily;
-   - output: a rater SD in `varcomp`, and one limits row for two randomly
-     chosen raters (bias 0, SD sqrt(2 (sigma_rater^2 + tau^2 + sigma^2)),
-     plus 2 omega^2 with `include_omega`) instead of one row per pair;
-   - bounds: MOVER with the rater variance on M - 1 df by default, an
-     optional parametric bootstrap, and a warning with fewer than about 5
-     raters;
-   - downstream: print/summary/plot/check/`tdi()` for `simple_mvc`; a
-     coverage simulation like `method_vc()`'s.
+1. Random-rater follow-ups (in `method_vc_random_sims/README.md`):
+   - the rater SD interval (M - 1 df) undercovers when the rater SD is small
+     (0.79 to 0.91); try Satterthwaite df from the method mean square;
+   - no bounds when the rater SD is estimated at zero (up to 10% with 3
+     raters); e.g. refit without the rater effect for the other
+     components and use a one-sided bound for the rater variance;
+   - `tdi()` uses the Satterthwaite `df_sd`, so its bounds for random
+     raters may be liberal; pass the component information instead;
+   - tolerance limits and an optional parametric bootstrap.
 2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in
    `method_convert()`; method-specific equation error with three or more

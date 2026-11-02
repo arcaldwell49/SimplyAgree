@@ -30,6 +30,15 @@
 #' @param tau Whether the method-by-item variance is "common" to all methods
 #'   (default) or differs by "method". Method-specific values require at
 #'   least three methods.
+#' @param methods Whether the method effects are "fixed" (default; a bias
+#'   for each pair of methods) or "random": the methods are a random sample
+#'   of raters (observers, devices, laboratories), and the limits are for
+#'   the difference between two randomly chosen raters. Needs at least three
+#'   methods. See "Random raters" in details.
+#' @param sigma Whether the residual SD is "common" to all methods or
+#'   differs by "method". The default (`NULL`) is "method" with
+#'   `methods = "fixed"` and "common" with `methods = "random"`. With one
+#'   measurement per item by two methods only a common SD is identifiable.
 #' @param interval Type of limits: "agreement" (default) for limits of
 #'   agreement with confidence bounds, or "tolerance" for prediction limits
 #'   and tolerance limits, as in [tolerance_limit()].
@@ -62,7 +71,8 @@
 #' \deqn{y_{mir} = \alpha_m + \mu_i + a_{ir} + c_{mi} + e_{mir},}
 #' with fixed item effects \eqn{\mu_i}, method-by-item effects
 #' \eqn{c_{mi} \sim N(0, \tau_m^2)}, residuals
-#' \eqn{e_{mir} \sim N(0, \sigma_m^2)} with a separate SD for each method, and,
+#' \eqn{e_{mir} \sim N(0, \sigma_m^2)} with a separate SD for each method (or
+#' one common SD with `sigma = "common"`), and,
 #' for linked replicates only, item-by-replicate effects
 #' \eqn{a_{ir} \sim N(0, \omega^2)} common to all methods. The model is fit by
 #' REML with [nlme::lme()].
@@ -128,6 +138,39 @@
 #' with 15 items, where the bounds are slightly liberal. The RC intervals had
 #' 0.94 to 0.98, and the RpC intervals 0.93 to 0.95.
 #'
+#' **Random raters.** With `methods = "random"` the method effects
+#' \eqn{\alpha_m} are a random sample from \eqn{N(0, \sigma_\alpha^2)}
+#' (MethComp's `random.raters`), crossed with the items, and the item
+#' effects are fixed. The bias between two randomly chosen raters is 0, and
+#' the variance of the difference between single measurements by two such
+#' raters on a new item is
+#' \deqn{V = 2(\sigma_\alpha^2 + \bar\tau^2 + \bar\sigma^2),}
+#' plus \eqn{2\omega^2} with `include_omega = TRUE`, where
+#' \eqn{\bar\tau^2} and \eqn{\bar\sigma^2} are the common variances or the
+#' means of the method-specific ones (as in MethComp's `BA.est()`). There is
+#' one limits row, \eqn{\pm z \sqrt{V}}. Because \eqn{\sigma_\alpha^2} is
+#' estimated from only \eqn{M} rater effects, its confidence interval uses a
+#' chi-square distribution on \eqn{M - 1} degrees of freedom. The upper
+#' confidence bound for \eqn{V} combines the components by the MOVER, each
+#' with its own df (the rater variance with \eqn{M - 1}), rather than one
+#' chi-square on the Satterthwaite df, which was liberal when the rater
+#' variance dominates. The bounds of the limits are therefore wide with few
+#' raters (a warning is given with fewer than five). `df_sd` is still the
+#' Satterthwaite df, which [tdi()] uses, so its bounds for random raters may
+#' be liberal. In simulations (3 to 10 raters, 15 or 30 items, 95% targets)
+#' the one-sided bounds of the limits covered 0.94 to 0.97 when the rater
+#' variance dominated and 0.98 to 1.00 otherwise. The interval for the rater
+#' SD covered 0.93 to 0.95 for a large rater SD but only 0.79 to 0.91 when
+#' it was smaller than \eqn{\tau} and \eqn{\sigma}. When the rater SD is
+#' estimated at zero (up to 10% of data sets with 3 raters), the bounds are
+#' not computed. Without replicates, the method-by-item variation is absorbed
+#' into a common residual SD. Only `interval = "agreement"` is available, and
+#' fits with random raters cannot be used for conversion between methods
+#' ([method_convert()], `predict()`). The model is fit with
+#' [nlme::lme()], the rater effects being a `pdIdent` block for a constant
+#' outer group, with the method-by-item and item-by-replicate effects nested
+#' in it.
+#'
 #' With replicates, the repeatability coefficient of method `m`,
 #' \eqn{RC_m = z \sqrt{2} \sigma_m} (Carstensen, 2010, ch. 9), is the limit
 #' that the absolute difference between two measurements by the method on the
@@ -140,21 +183,23 @@
 #' @return An object of class `simple_mvc`, a list with:
 #'
 #'   - `bias`: tibble with the bias (`method1` - `method2`) for each pair of
-#'     methods, its standard error, df, and confidence limits.
+#'     methods, its standard error, df, and confidence limits (with
+#'     `methods = "random"`, one row for two random raters, with bias 0).
 #'   - `limits`: tibble with, for each pair, the bias, the SD of the
 #'     difference (`sd`) and its df (`df_sd`), and the limits
 #'     (`lower_loa`, `upper_loa`, `lower_loa_ci`, `upper_loa_ci` for agreement;
 #'     the standard error of prediction `sep`, the prediction limits
 #'     `lower.PL`, `upper.PL`, and the tolerance limits `lower.TL`,
 #'     `upper.TL` for tolerance).
-#'   - `varcomp`: tibble of the variance components (`tau`, `omega`,
-#'     `sigma`), as SDs and variances, with confidence limits and df.
+#'   - `varcomp`: tibble of the variance components (`rater` with
+#'     `methods = "random"`, `tau`, `omega`, `sigma`), as SDs and
+#'     variances, with confidence limits and df.
 #'   - `repeatability`: tibble with, for each method, the residual SD
 #'     (`sigma`), the repeatability coefficient (`rc`) with confidence limits,
 #'     and for linked replicates the reproducibility coefficient (`rpc`) with
 #'     confidence limits; `NULL` without replicates. See details.
 #'   - `alpha`: list with the method means averaged over items (`alpha`) and
-#'     their covariance matrix (`vcov`).
+#'     their covariance matrix (`vcov`); `NULL` with `methods = "random"`.
 #'   - `vc_cov`: approximate covariance matrix of the estimated variances in
 #'     `varcomp`.
 #'   - `diagnostics`: fitted values, Pearson residuals, and predicted random
@@ -183,6 +228,13 @@
 #'                    sigma = 0.5, seed = 2)
 #' method_vc(dat2, y = "y", method = "method", id = "id")
 #'
+#' # five raters as a random sample: limits for two randomly chosen raters
+#' dat3 = sim_methods(n_items = 30, n_reps = 2, methods = LETTERS[1:5],
+#'                    alpha = c(0, 0.5, -0.3, 0.2, 0.1), tau = 0.3,
+#'                    sigma = rep(0.4, 5), seed = 3)
+#' method_vc(dat3, y = "y", method = "method", id = "id",
+#'           replicate = "repl", methods = "random")
+#'
 #' @references
 #' Carstensen, B. (2010). Comparing Clinical Measurement Methods: A Practical
 #' Guide. Wiley.
@@ -207,6 +259,8 @@ method_vc = function(data,
                      replicate = NULL,
                      replicates = c("exchangeable", "linked"),
                      tau = c("common", "method"),
+                     methods = c("fixed", "random"),
+                     sigma = NULL,
                      interval = c("agreement", "tolerance"),
                      pred_level = 0.95,
                      conf_level = 0.95,
@@ -217,7 +271,16 @@ method_vc = function(data,
                      control = nlme::lmeControl(returnObject = TRUE)) {
   replicates = match.arg(replicates)
   tau = match.arg(tau)
+  methods = match.arg(methods)
+  if (is.null(sigma)) {
+    sigma = if (methods == "random") "common" else "method"
+  }
+  sigma = match.arg(sigma, c("common", "method"))
   interval = match.arg(interval)
+  if (methods == "random" && interval == "tolerance") {
+    stop("interval = 'tolerance' is not yet available with methods = ",
+         "'random'.", call. = FALSE)
+  }
   if (is.null(bound_type)) {
     bound_type = if (interval == "agreement") "iu" else "joint"
   }
@@ -253,6 +316,8 @@ method_vc = function(data,
   call2$replicate = replicate
   call2$replicates = replicates
   call2$tau = tau
+  call2$methods = methods
+  call2$sigma = sigma
   call2$interval = interval
   call2$pred_level = pred_level
   call2$conf_level = conf_level
@@ -262,7 +327,8 @@ method_vc = function(data,
   call2$keep_model = keep_model
 
   # model ----
-  design = mc_vc_design(df, replicates = replicates, tau = tau)
+  design = mc_vc_design(df, replicates = replicates, tau = tau,
+                        methods = methods, sigma = sigma)
   if (include_omega && !design$linked) {
     message("include_omega = TRUE has no effect without linked replicates.")
     include_omega = FALSE
@@ -277,10 +343,15 @@ method_vc = function(data,
   mc_vc_boundary(varcomp)
 
   # bias and limits ----
-  alpha = mc_vc_alpha(fit, lv = lv)
-  bias_df = mc_vc_bias_df(df)
-  bias_tab = mc_vc_bias(alpha, lv = lv, bias_df = bias_df,
-                        conf_level = conf_level)
+  if (methods == "random") {
+    alpha = NULL
+    bias_tab = mc_vc_bias_random()
+  } else {
+    alpha = mc_vc_alpha(fit, lv = lv)
+    bias_df = mc_vc_bias_df(df)
+    bias_tab = mc_vc_bias(alpha, lv = lv, bias_df = bias_df,
+                          conf_level = conf_level)
+  }
   limits = mc_limits(bias_tab = bias_tab,
                      varcomp = varcomp,
                      cov_v = vc_unc$cov,

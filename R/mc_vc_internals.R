@@ -13,24 +13,56 @@
 # - "reps":      replicates. Fixed item effects, random method-by-item effects
 #                (tau), method-specific residual SDs, and for linked
 #                replicates a random item-by-replicate effect (omega).
+#
+# With methods = "random" (random raters) the method effects are a random
+# sample, with variance sigma_rater^2, and the items are fixed in every
+# design ("reps", or "single_r" without replicates, where tau is absorbed
+# into a common residual SD).
 mc_vc_design = function(df,
                         replicates,
-                        tau) {
+                        tau,
+                        methods = "fixed",
+                        sigma = "method") {
   M = attr(df, "n_methods")
   n_mi = table(df$method, df$id)
   any_reps = any(n_mi > 1)
   has_reps = attr(df, "has_reps")
+  random = methods == "random"
 
   if (tau == "method" && M == 2) {
     stop("Method-specific tau is not identifiable with two methods; only ",
          "their sum is used in the limits. Use tau = 'common'.",
          call. = FALSE)
   }
+  if (random) {
+    if (M < 3) {
+      stop("methods = 'random' needs at least three methods (raters); with ",
+           "two, the rater variance cannot be estimated.", call. = FALSE)
+    }
+    if (M < 5) {
+      warning("Only ", M, " methods (raters): the rater variance has ", M - 1,
+              " degrees of freedom, so the confidence bounds of the limits ",
+              "are wide.", call. = FALSE)
+    }
+  }
 
   if (!any_reps) {
     if (replicates == "linked") {
       message("No item has replicate measurements, so replicates = 'linked' ",
               "has no effect.")
+    }
+    if (random) {
+      if (sigma == "method") {
+        stop("Method-specific residual SDs need replicate measurements with ",
+             "methods = 'random'. Use sigma = 'common'.", call. = FALSE)
+      }
+      message("No replicate measurements: the method-by-item variation is ",
+              "absorbed into the residual SD, and repeatability cannot be ",
+              "estimated.")
+      return(list(model_type = "single_r", linked = FALSE, tau = "absorbed",
+                  has_reps = FALSE, n_methods = M,
+                  n_items = attr(df, "n_items"), methods = methods,
+                  sigma = sigma))
     }
     if (M >= 3) {
       message("No replicate measurements: the method-by-item variation is ",
@@ -42,7 +74,8 @@ mc_vc_design = function(df,
     }
     return(list(model_type = model_type, linked = FALSE, tau = "absorbed",
                 has_reps = FALSE, n_methods = M,
-                n_items = attr(df, "n_items")))
+                n_items = attr(df, "n_items"), methods = methods,
+                sigma = if (model_type == "single_2") "common" else sigma))
   }
 
   if (!has_reps) {
@@ -74,7 +107,9 @@ mc_vc_design = function(df,
        tau = tau,
        has_reps = TRUE,
        n_methods = M,
-       n_items = attr(df, "n_items"))
+       n_items = attr(df, "n_items"),
+       methods = methods,
+       sigma = sigma)
 }
 
 # fitting ----
@@ -83,14 +118,35 @@ mc_vc_design = function(df,
 # (as in MethComp::VC.est). The pdBlocked parameterization with an
 # item-by-replicate indicator is equivalent, but has more random effects than
 # observations per item, which lme does not allow.
+#
+# Random raters: the fixed part has the items only, and the method effects
+# are random, crossed with the items. They enter as a pdIdent block for a
+# constant outer group (`one`), with the item-level effects nested in it:
+# random = list(one = pdIdent(~ method - 1), id = ..., repl = ~ 1).
 mc_vc_fit = function(df,
                      design,
                      control) {
-  vf = nlme::varIdent(form = ~ 1 | method)
+  vf = if (design$sigma == "method") {
+    nlme::varIdent(form = ~ 1 | method)
+  } else {
+    NULL
+  }
+  random_methods = identical(design$methods, "random")
+  if (random_methods) {
+    df$one = factor(1)
+  }
 
   fit_fun = function() {
     switch(
       design$model_type,
+      single_r = {
+        fixed = y_t ~ id
+        random = list(one = nlme::pdIdent(~ method - 1))
+        fit = nlme::lme(fixed = fixed, random = random, data = df,
+                        control = control)
+        mc_self_contained(fit, df, fixed = fixed, random = random,
+                          control = control)
+      },
       single_2 = {
         fixed = y_t ~ -1 + method + id
         fit = nlme::gls(fixed, data = df)
@@ -105,7 +161,7 @@ mc_vc_fit = function(df,
                           weights = vf, control = control)
       },
       reps = {
-        fixed = y_t ~ -1 + method + id
+        fixed = if (random_methods) y_t ~ id else y_t ~ -1 + method + id
         pd = if (design$tau == "method") {
           nlme::pdDiag(~ method - 1)
         } else {
@@ -115,6 +171,9 @@ mc_vc_fit = function(df,
           list(id = pd, repl = ~ 1)
         } else {
           list(id = pd)
+        }
+        if (random_methods) {
+          random = c(list(one = nlme::pdIdent(~ method - 1)), random)
         }
         fit = nlme::lme(fixed = fixed, random = random, weights = vf,
                         data = df, control = control)
@@ -178,13 +237,14 @@ mc_vc_extract = function(fit,
   }
 
   sig = fit$sigma
-  ratio = stats::coef(fit$modelStruct$varStruct, unconstrained = FALSE,
-                      allCoef = TRUE)
-  sigma_m = sig * unname(ratio[lv])
+  re = as.matrix(fit$modelStruct$reStruct)
 
   rows = list()
+  if (identical(design$methods, "random")) {
+    rows$rater = dplyr::tibble(component = "rater", method = NA_character_,
+                               var = unname(re$one[1, 1]) * sig^2)
+  }
   if (design$model_type == "reps") {
-    re = as.matrix(fit$modelStruct$reStruct)
     tau_v = diag(re$id) * sig^2
     if (design$tau == "common") {
       rows$tau = dplyr::tibble(component = "tau", method = NA_character_,
@@ -198,8 +258,14 @@ mc_vc_extract = function(fit,
                                  var = unname(re$repl[1, 1]) * sig^2)
     }
   }
-  rows$sigma = dplyr::tibble(component = "sigma", method = lv,
-                             var = sigma_m^2)
+  rows$sigma = if (design$sigma == "method") {
+    ratio = stats::coef(fit$modelStruct$varStruct, unconstrained = FALSE,
+                        allCoef = TRUE)
+    dplyr::tibble(component = "sigma", method = lv,
+                  var = (sig * unname(ratio[lv]))^2)
+  } else {
+    dplyr::tibble(component = "sigma", method = NA_character_, var = sig^2)
+  }
 
   dplyr::bind_rows(rows) %>%
     dplyr::mutate(sd = sqrt(var)) %>%
@@ -224,9 +290,11 @@ mc_vc_parmap = function(fit,
       A[j, nm] = 1
     } else if (comp == "omega") {
       A[j, "reStruct.repl"] = 1
+    } else if (comp == "rater") {
+      A[j, "reStruct.one"] = 1
     } else if (comp == "sigma") {
       A[j, "lSigma"] = 1
-      g = match(m, vs_groups)
+      g = if (is.na(m)) 1 else match(m, vs_groups)
       if (g > 1) {
         A[j, vs_pars[g - 1]] = 1
       }
@@ -284,13 +352,27 @@ mc_vc_delta = function(fit,
   varcomp$lower = exp(log(varcomp$sd) - q * se_log_sd)
   varcomp$upper = exp(log(varcomp$sd) + q * se_log_sd)
   varcomp$df = 2 / diag(cov_log)
+
+  # random raters: the rater variance is estimated from M method effects, so
+  # it gets a chi-square on M - 1 df (rather than the asymptotic Wald df),
+  # and is treated as independent of the other components.
+  j = which(varcomp$component == "rater")
+  if (length(j) == 1) {
+    nu = length(lv) - 1
+    v_r = varcomp$var[j]
+    varcomp$df[j] = nu
+    varcomp$lower[j] = sqrt(nu * v_r / qchisq((1 + conf_level) / 2, nu))
+    varcomp$upper[j] = sqrt(nu * v_r / qchisq((1 - conf_level) / 2, nu))
+    cov_v[j, ] = cov_v[, j] = 0
+    cov_v[j, j] = 2 * v_r^2 / nu
+  }
   list(varcomp = varcomp,
        cov = cov_v)
 }
 
 # boundary estimates ----
 mc_vc_boundary = function(varcomp) {
-  re = varcomp[varcomp$component %in% c("tau", "omega"), ]
+  re = varcomp[varcomp$component %in% c("rater", "tau", "omega"), ]
   if (nrow(re) == 0) {
     return(invisible(NULL))
   }
@@ -371,15 +453,31 @@ mc_vc_bias = function(alpha,
                 upper.CL = est + qt_b * se)
 }
 
+# Random raters: the difference between two randomly chosen raters has mean
+# 0 by definition, so there is one row with bias 0.
+mc_vc_bias_random = function() {
+  dplyr::tibble(method1 = "random rater",
+                method2 = "random rater",
+                bias = 0,
+                se = 0,
+                df = NA_real_,
+                lower.CL = 0,
+                upper.CL = 0)
+}
+
 # limits ----
 # Weights of each variance component in the variance of a difference between
 # single measurements of methods m and k on a new item (Carstensen 2010,
 # p. 57). omega cancels when both methods are applied on the same occasion;
 # include_omega adds 2 * omega^2 (methods applied on different occasions).
+# For two randomly chosen raters (n_methods given), the rater variance enters
+# twice and method-specific components are averaged over the methods (each
+# gets weight 2 / M), as in MethComp's BA.est(random.raters = TRUE).
 mc_vc_weights = function(varcomp,
                          m,
                          k,
-                         include_omega = FALSE) {
+                         include_omega = FALSE,
+                         n_methods = NULL) {
   w = numeric(nrow(varcomp))
   for (j in seq_len(nrow(varcomp))) {
     comp = varcomp$component[j]
@@ -388,6 +486,8 @@ mc_vc_weights = function(varcomp,
       w[j] = if (include_omega) 2 else 0
     } else if (is.na(meth)) {
       w[j] = 2
+    } else if (!is.null(n_methods)) {
+      w[j] = 2 / n_methods
     } else {
       w[j] = as.numeric(meth %in% c(m, k))
     }
@@ -415,8 +515,16 @@ mc_limits = function(bias_tab,
                      conf_level,
                      bound_type,
                      include_omega,
-                     sd_df = c("satterthwaite", "components")) {
-  sd_df = match.arg(sd_df)
+                     sd_df = NULL) {
+  # random raters: the rater variance (M - 1 df) can dominate, and one
+  # chi-square on the Satterthwaite df then gives liberal upper bounds
+  # (coverage 0.75 to 0.94 in simulations); the MOVER over the components
+  # gave 0.94 to 0.98 (references/general/method_vc_random_sims)
+  if (is.null(sd_df)) {
+    sd_df = if (identical(design$methods, "random")) "components" else
+      "satterthwaite"
+  }
+  sd_df = match.arg(sd_df, c("satterthwaite", "components"))
   z = qnorm((1 + pred_level) / 2)
   n = nrow(bias_tab)
   K = nrow(varcomp)
@@ -424,7 +532,10 @@ mc_limits = function(bias_tab,
   shares = df_comp = matrix(0, n, K)
   for (j in seq_len(n)) {
     w = mc_vc_weights(varcomp, bias_tab$method1[j], bias_tab$method2[j],
-                      include_omega = include_omega)
+                      include_omega = include_omega,
+                      n_methods = if (identical(design$methods, "random")) {
+                        design$n_methods
+                      })
     s2 = sum(w * varcomp$var)
     v_s2 = drop(t(w) %*% cov_v %*% w)
     s[j] = sqrt(s2)
@@ -439,7 +550,7 @@ mc_limits = function(bias_tab,
                       bias = b,
                       sd = s,
                       df_sd = nu)
-  # "satterthwaite" (default): one chi-square for s^2 with df nu, which
+  # "satterthwaite" (default with fixed methods): one chi-square for s^2 with df nu, which
   # accounts for the covariance of the estimated components.
   # "components": MOVER over the components, each with its own df, treating
   # them as independent (kept for comparison in simulations).
@@ -548,10 +659,18 @@ mc_vc_diag = function(fit,
   if (inherits(fit, "lme")) {
     rr = nlme::ranef(fit)
     if (is.data.frame(rr)) {
-      rr = list(id = rr)
+      rr = if (design$model_type == "single_r") list(one = rr) else
+        list(id = rr)
     }
     parts = list()
-    if (design$model_type == "reps") {
+    if (!is.null(rr$one)) {
+      parts$rater = dplyr::tibble(effect = "Rater",
+                                  method = sub("^method", "", names(rr$one)),
+                                  value = unlist(rr$one[1, ], use.names = FALSE))
+    }
+    if (design$model_type == "single_r") {
+      # no item-level random effects (the items are fixed)
+    } else if (design$model_type == "reps") {
       for (cn in names(rr$id)) {
         parts[[cn]] = dplyr::tibble(
           effect = "Method-by-item",

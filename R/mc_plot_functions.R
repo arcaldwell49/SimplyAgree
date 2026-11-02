@@ -95,6 +95,19 @@ mc_ba_delta = function(p,
       name = "Maximal Allowable Difference"))
 }
 
+# axis labels for the pooled differences of random raters
+mc_ba_labels_raters = function(tf) {
+  if (tf$name == "log") {
+    list(x = "Geometric mean of the two raters",
+         y = "Ratio of raters (earlier / later method)")
+  } else {
+    list(x = paste0("Average of the two raters",
+                    if (tf$name != "none") paste0(" (", tf$name, " scale)")),
+         y = paste0("Difference between raters (earlier - later method)",
+                    if (tf$name != "none") paste0(", ", tf$name, " scale")))
+  }
+}
+
 # axis labels for the differences of a pair on the display scale
 mc_ba_labels = function(tf,
                         m,
@@ -111,20 +124,47 @@ mc_ba_labels = function(tf,
   }
 }
 
+# differences of every pair of methods (earlier level minus later), pooled:
+# the data for the limits of two randomly chosen raters
+mc_rater_pairs = function(x,
+                          pair_seed = NULL) {
+  pr = mc_pairs(levels(x$data$method))
+  do.call(rbind, lapply(seq_len(nrow(pr)), function(j) {
+    pp = mc_pair(x$data, pr$method1[j], pr$method2[j],
+                 replicates = x$design$replicates,
+                 seed = if (!is.null(pair_seed)) pair_seed + j)
+    data.frame(pair = paste(pr$method1[j], "-", pr$method2[j]),
+               avg = pp$avg, d = pp$d)
+  }))
+}
+
 # Bland-Altman plot for one pair of a simple_mvc object ----
 # The bias is constant, so the bias and limits are drawn as points with
 # their confidence intervals to the left of the data, as in plot.loa().
+# With random raters, the differences of all pairs are pooled around the
+# limits of two randomly chosen raters (`pair` is ignored).
 mc_ba_plot = function(x,
                       pair = NULL,
                       pair_seed = NULL,
                       geom = "geom_point",
                       delta = NULL) {
-  pr = mc_pair_rows(x, pair)
-  m = pr$m
-  k = pr$k
   tf = x$transform
   des = x$design
-  pp = mc_pair(x$data, m, k, replicates = des$replicates, seed = pair_seed)
+  random = identical(des$methods, "random")
+  if (random) {
+    if (!is.null(pair)) {
+      message("`pair` is ignored with methods = 'random': the plot shows ",
+              "the differences of all pairs of methods.")
+    }
+    pr = list(m = "rater", k = "rater", bias = x$bias, limits = x$limits)
+    pp = mc_rater_pairs(x, pair_seed = pair_seed)
+  } else {
+    pr = mc_pair_rows(x, pair)
+    pp = mc_pair(x$data, pr$m, pr$k, replicates = des$replicates,
+                 seed = pair_seed)
+  }
+  m = pr$m
+  k = pr$k
 
   b = pr$bias
   l = pr$limits
@@ -151,7 +191,7 @@ mc_ba_plot = function(x,
     df_loa[c("estimate", "lower.ci", "upper.ci")] =
       exp(df_loa[c("estimate", "lower.ci", "upper.ci")])
   }
-  labs_xy = mc_ba_labels(tf, m, k)
+  labs_xy = if (random) mc_ba_labels_raters(tf) else mc_ba_labels(tf, m, k)
   rng = range(pts$avg, na.rm = TRUE)
   df_loa$x = rng[1]
   pd2 = position_dodge2(.03 * (rng[2] - rng[1]))
@@ -169,7 +209,8 @@ mc_ba_plot = function(x,
     "\nConfidence Level = ", conf_level * 100, "% (Bias)",
     if (!is_tol) paste0(" & ", lim_ci_level * 100, "% (LoA)"),
     if (des$replicates == "exchangeable" && des$has_reps)
-      "\nExchangeable replicates paired at random"
+      "\nExchangeable replicates paired at random",
+    if (random) "\nRandom raters: differences of all pairs of methods"
   )
 
   p = mc_ba_base(pts, geom = geom) +
@@ -195,6 +236,11 @@ mc_ba_plot = function(x,
 # Bland-Altman plot for the pair (column method - row method).
 mc_matrix_plot = function(x,
                           pair_seed = NULL) {
+  if (identical(x$design$methods, "random")) {
+    stop("type = 'matrix' needs fixed method effects (the conversion ",
+         "between two specific methods); use type = 'ba' with methods = ",
+         "'random'.", call. = FALSE)
+  }
   lv = levels(x$data$method)
   M = length(lv)
   if (M > 5) {
@@ -269,7 +315,8 @@ mc_conv_panel = function(x,
 # (and reproducibility) coefficients.
 mc_vc_plot = function(x) {
   vc = x$varcomp
-  comp_lab = c(tau = "tau (method x item)",
+  comp_lab = c(rater = "rater (random raters)",
+               tau = "tau (method x item)",
                omega = "omega (item x replicate)",
                sigma = "sigma (residual)")
   df = data.frame(facet = unname(comp_lab[vc$component]),
@@ -280,13 +327,13 @@ mc_vc_plot = function(x) {
   rp = x$repeatability
   if (!is.null(rp)) {
     df = rbind(df, data.frame(facet = "RC (repeatability)",
-                              label = rp$method,
+                              label = ifelse(is.na(rp$method), "common", rp$method),
                               est = rp$rc,
                               lower = rp$rc_lower,
                               upper = rp$rc_upper))
     if ("rpc" %in% names(rp)) {
       df = rbind(df, data.frame(facet = "RpC (reproducibility)",
-                                label = rp$method,
+                                label = ifelse(is.na(rp$method), "common", rp$method),
                                 est = rp$rpc,
                                 lower = rp$rpc_lower,
                                 upper = rp$rpc_upper))

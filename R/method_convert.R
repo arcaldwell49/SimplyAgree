@@ -331,6 +331,11 @@ method_convert = function(data = NULL,
       stop("`object` must be a method_vc() fit (class 'simple_mvc').",
            call. = FALSE)
     }
+    if (identical(object$design$methods, "random")) {
+      stop("Conversion between two specific methods needs fixed method ",
+           "effects; refit method_vc() with methods = 'fixed'.",
+           call. = FALSE)
+    }
     call2$bias = "constant"
     return(mc_convert_constant(object, pred_level = pred_level,
                                conf_level = conf_level, call2 = call2))

@@ -271,6 +271,37 @@ MethComp's `TDI()` reports the total deviation index for paired data: the value 
 tdi(fit, delta = 3, seed = 1)
 ```
 
+# Random raters
+
+So far the methods have been specific devices, each with its own bias. Sometimes the "methods" are instead a sample of raters (observers, technicians, laboratories) from a larger pool, and the question is how well two raters picked at random agree, not how rater A compares with rater B. MethComp handles this with `random.raters = TRUE`; in `method_vc()` it is `methods = "random"`. The rater effects $\alpha_m$ are then random, $N(0, \sigma_\alpha^2)$, and the difference between single measurements by two randomly chosen raters on a new item has mean 0 and variance
+
+$$
+V = 2\left(\sigma_\alpha^2 + \tau^2 + \sigma^2\right),
+$$
+
+(with means of the method-specific variances if `tau` or `sigma` is `"method"`). There is one row of limits instead of one per pair. The residual SD is common to all raters by default (`sigma = "common"`), since a new rater's own SD is unknown.
+
+```{r}
+set.seed(11)
+dat_r = sim_methods(n_items = 30, n_reps = 2,
+                    methods = paste0("Rater", 1:6),
+                    alpha = rnorm(6, 0, 0.5), mu_mean = 50, mu_sd = 8,
+                    tau = 0.3, omega = 0.4, sigma = rep(0.5, 6),
+                    replicates = "linked", seed = 11)
+fit_r = method_vc(dat_r, y = "y", method = "method", id = "id",
+                  replicate = "repl", replicates = "linked",
+                  methods = "random")
+fit_r
+```
+
+The rater variance is estimated from only $M$ rater effects, so its interval uses a chi-square on $M - 1$ degrees of freedom, and the upper bounds of the limits, which combine the components by the MOVER, are wide with few raters (`method_vc()` warns with fewer than five). In simulations with 3 to 10 raters the one-sided 95% bounds covered 0.94 to 0.97 when the rater variance dominated, and were conservative otherwise; the interval for the rater SD itself was too narrow (coverage 0.79 to 0.91) when the rater SD was small relative to $\tau$ and $\sigma$. With three raters the rater SD is often estimated at zero, and then no bounds are given. The Bland-Altman plot pools the differences of all pairs of raters:
+
+```{r fig.width=7, fig.height=4.5}
+plot(fit_r, pair_seed = 1)
+```
+
+Random raters give agreement limits only (not tolerance limits), and there is no conversion between specific raters (`method_convert()`, `predict()`); fit with `methods = "fixed"` for those.
+
 # Repeatability and reproducibility
 
 With replicates, each method's measurement error gives its **repeatability coefficient** [@carstensen2010, ch. 9],

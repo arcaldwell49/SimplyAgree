@@ -12,6 +12,8 @@ method_vc(
   replicate = NULL,
   replicates = c("exchangeable", "linked"),
   tau = c("common", "method"),
+  methods = c("fixed", "random"),
+  sigma = NULL,
   interval = c("agreement", "tolerance"),
   pred_level = 0.95,
   conf_level = 0.95,
@@ -50,6 +52,17 @@ This is a property of the design, not of the data. With two methods,
 (default) or differs by "method". Method-specific values require at
 least three methods.}
 
+\item{methods}{Whether the method effects are "fixed" (default; a bias
+for each pair of methods) or "random": the methods are a random sample
+of raters (observers, devices, laboratories), and the limits are for
+the difference between two randomly chosen raters. Needs at least three
+methods. See "Random raters" in details.}
+
+\item{sigma}{Whether the residual SD is "common" to all methods or
+differs by "method". The default (\code{NULL}) is "method" with
+\code{methods = "fixed"} and "common" with \code{methods = "random"}. With one
+measurement per item by two methods only a common SD is identifiable.}
+
 \item{interval}{Type of limits: "agreement" (default) for limits of
 agreement with confidence bounds, or "tolerance" for prediction limits
 and tolerance limits, as in \code{\link[=tolerance_limit]{tolerance_limit()}}.}
@@ -87,21 +100,23 @@ returned object. Default is \code{TRUE}.}
 An object of class \code{simple_mvc}, a list with:
 \itemize{
 \item \code{bias}: tibble with the bias (\code{method1} - \code{method2}) for each pair of
-methods, its standard error, df, and confidence limits.
+methods, its standard error, df, and confidence limits (with
+\code{methods = "random"}, one row for two random raters, with bias 0).
 \item \code{limits}: tibble with, for each pair, the bias, the SD of the
 difference (\code{sd}) and its df (\code{df_sd}), and the limits
 (\code{lower_loa}, \code{upper_loa}, \code{lower_loa_ci}, \code{upper_loa_ci} for agreement;
 the standard error of prediction \code{sep}, the prediction limits
 \code{lower.PL}, \code{upper.PL}, and the tolerance limits \code{lower.TL},
 \code{upper.TL} for tolerance).
-\item \code{varcomp}: tibble of the variance components (\code{tau}, \code{omega},
-\code{sigma}), as SDs and variances, with confidence limits and df.
+\item \code{varcomp}: tibble of the variance components (\code{rater} with
+\code{methods = "random"}, \code{tau}, \code{omega}, \code{sigma}), as SDs and
+variances, with confidence limits and df.
 \item \code{repeatability}: tibble with, for each method, the residual SD
 (\code{sigma}), the repeatability coefficient (\code{rc}) with confidence limits,
 and for linked replicates the reproducibility coefficient (\code{rpc}) with
 confidence limits; \code{NULL} without replicates. See details.
 \item \code{alpha}: list with the method means averaged over items (\code{alpha}) and
-their covariance matrix (\code{vcov}).
+their covariance matrix (\code{vcov}); \code{NULL} with \code{methods = "random"}.
 \item \code{vc_cov}: approximate covariance matrix of the estimated variances in
 \code{varcomp}.
 \item \code{diagnostics}: fitted values, Pearson residuals, and predicted random
@@ -131,7 +146,8 @@ eq. 5.1 and 5.2) as
 \deqn{y_{mir} = \alpha_m + \mu_i + a_{ir} + c_{mi} + e_{mir},}
 with fixed item effects \eqn{\mu_i}, method-by-item effects
 \eqn{c_{mi} \sim N(0, \tau_m^2)}, residuals
-\eqn{e_{mir} \sim N(0, \sigma_m^2)} with a separate SD for each method, and,
+\eqn{e_{mir} \sim N(0, \sigma_m^2)} with a separate SD for each method (or
+one common SD with \code{sigma = "common"}), and,
 for linked replicates only, item-by-replicate effects
 \eqn{a_{ir} \sim N(0, \omega^2)} common to all methods. The model is fit by
 REML with \code{\link[nlme:lme]{nlme::lme()}}.
@@ -199,6 +215,39 @@ tolerance limits 0.92 to 0.96; the lowest values (about 0.91 to 0.93) were
 with 15 items, where the bounds are slightly liberal. The RC intervals had
 0.94 to 0.98, and the RpC intervals 0.93 to 0.95.
 
+\strong{Random raters.} With \code{methods = "random"} the method effects
+\eqn{\alpha_m} are a random sample from \eqn{N(0, \sigma_\alpha^2)}
+(MethComp's \code{random.raters}), crossed with the items, and the item
+effects are fixed. The bias between two randomly chosen raters is 0, and
+the variance of the difference between single measurements by two such
+raters on a new item is
+\deqn{V = 2(\sigma_\alpha^2 + \bar\tau^2 + \bar\sigma^2),}
+plus \eqn{2\omega^2} with \code{include_omega = TRUE}, where
+\eqn{\bar\tau^2} and \eqn{\bar\sigma^2} are the common variances or the
+means of the method-specific ones (as in MethComp's \code{BA.est()}). There is
+one limits row, \eqn{\pm z \sqrt{V}}. Because \eqn{\sigma_\alpha^2} is
+estimated from only \eqn{M} rater effects, its confidence interval uses a
+chi-square distribution on \eqn{M - 1} degrees of freedom. The upper
+confidence bound for \eqn{V} combines the components by the MOVER, each
+with its own df (the rater variance with \eqn{M - 1}), rather than one
+chi-square on the Satterthwaite df, which was liberal when the rater
+variance dominates. The bounds of the limits are therefore wide with few
+raters (a warning is given with fewer than five). \code{df_sd} is still the
+Satterthwaite df, which \code{\link[=tdi]{tdi()}} uses, so its bounds for random raters may
+be liberal. In simulations (3 to 10 raters, 15 or 30 items, 95\% targets)
+the one-sided bounds of the limits covered 0.94 to 0.97 when the rater
+variance dominated and 0.98 to 1.00 otherwise. The interval for the rater
+SD covered 0.93 to 0.95 for a large rater SD but only 0.79 to 0.91 when
+it was smaller than \eqn{\tau} and \eqn{\sigma}. When the rater SD is
+estimated at zero (up to 10\% of data sets with 3 raters), the bounds are
+not computed. Without replicates, the method-by-item variation is absorbed
+into a common residual SD. Only \code{interval = "agreement"} is available, and
+fits with random raters cannot be used for conversion between methods
+(\code{\link[=method_convert]{method_convert()}}, \code{predict()}). The model is fit with
+\code{\link[nlme:lme]{nlme::lme()}}, the rater effects being a \code{pdIdent} block for a constant
+outer group, with the method-by-item and item-by-replicate effects nested
+in it.
+
 With replicates, the repeatability coefficient of method \code{m},
 \eqn{RC_m = z \sqrt{2} \sigma_m} (Carstensen, 2010, ch. 9), is the limit
 that the absolute difference between two measurements by the method on the
@@ -222,6 +271,13 @@ fit
 dat2 = sim_methods(n_items = 40, methods = c("A", "B"), alpha = c(0, 0.3),
                    sigma = 0.5, seed = 2)
 method_vc(dat2, y = "y", method = "method", id = "id")
+
+# five raters as a random sample: limits for two randomly chosen raters
+dat3 = sim_methods(n_items = 30, n_reps = 2, methods = LETTERS[1:5],
+                   alpha = c(0, 0.5, -0.3, 0.2, 0.1), tau = 0.3,
+                   sigma = rep(0.4, 5), seed = 3)
+method_vc(dat3, y = "y", method = "method", id = "id",
+          replicate = "repl", methods = "random")
 
 }
 \references{

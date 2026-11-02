@@ -167,16 +167,21 @@ print.simple_mvc <- function(x,
   subtitle1 = paste0(mc_pct(des$pred_level),
                      if (is_tol) "% Content @ " else "% LoA @ ",
                      des$conf_level * 100, "% Confidence")
+  sig_txt = mc_sigma_txt(des)
   design_txt = switch(
     des$model_type,
     single_2 = "One measurement per item and method",
-    single_m = paste0("One measurement per item and method; ",
-                      "method-specific residual SDs"),
+    single_m = paste0("One measurement per item and method; ", sig_txt),
+    single_r = paste0("One measurement per item and method; ", sig_txt),
     reps = paste0(if (des$linked) "Linked" else "Exchangeable",
                   " replicates; ",
                   if (des$tau == "method") "method-specific" else "common",
-                  " method-by-item variance (tau)")
+                  " method-by-item variance (tau)",
+                  if (identical(des$sigma, "common")) paste0("; ", sig_txt))
   )
+  if (identical(des$methods, "random")) {
+    design_txt = paste0(design_txt, "; random raters")
+  }
   design_txt = paste0(design_txt, " (", des$n_items, " items, ",
                       des$n_methods, " methods)")
   conf = des$conf_level
@@ -248,9 +253,23 @@ print.simple_mvc <- function(x,
     cat("sigma: residual SD of the paired-difference model",
         "(SD of the differences / sqrt(2))\n")
   }
+  if (identical(des$methods, "random")) {
+    cat("Random raters: limits for the difference between two randomly",
+        "chosen raters (methods);\n  rater: SD of the rater effects,",
+        "with", des$n_methods - 1, "df\n")
+  }
   mc_print_repeat(x, digits = digits,
                   rp = if (orig) attr(l, "repeatability") else NULL)
   invisible(x)
+}
+
+# description of the residual SDs
+mc_sigma_txt = function(des) {
+  if (identical(des$sigma, "common")) {
+    "common residual SD"
+  } else {
+    "method-specific residual SDs"
+  }
 }
 
 # repeatability table (shared by print and summary); `rp` replaces the
@@ -267,7 +286,8 @@ mc_print_repeat = function(x,
   }
   fmt = function(v) format(round(v, digits), nsmall = 0)
   ci = function(lo, hi) paste0("[", fmt(lo), ", ", fmt(hi), "]")
-  tab = data.frame(Method = rp$method, check.names = FALSE)
+  tab = data.frame(Method = ifelse(is.na(rp$method), "all", rp$method),
+                   check.names = FALSE)
   if (orig) {
     tab$At = fmt(rp$at)
   }
@@ -320,14 +340,20 @@ print.summary.simple_mvc <- function(x,
                                      ...){
   des = x$design
   cat("Variance Component Model for Method Comparison\n")
+  random = identical(des$methods, "random")
+  sig_txt = mc_sigma_txt(des)
   cat("Model: ",
       switch(des$model_type,
              single_2 = "paired differences (gls, common residual SD)",
-             single_m = paste0("method effects, random items, ",
-                               "method-specific residual SDs (lme)"),
-             reps = paste0("method and item effects, random method-by-item",
+             single_m = paste0("method effects, random items, ", sig_txt,
+                               " (lme)"),
+             single_r = paste0("item effects, random rater effects, ",
+                               sig_txt, " (lme)"),
+             reps = paste0(if (random) "item effects, random rater," else
+                             "method and item effects, random",
+                           " method-by-item",
                            if (des$linked) " and item-by-replicate",
-                           " effects, method-specific residual SDs (lme)")),
+                           " effects, ", sig_txt, " (lme)")),
       "\n", sep = "")
   if (x$transform$name != "none") {
     cat("Transformation: ", x$transform$name,
@@ -379,21 +405,32 @@ confint.simple_mvc <- function(object,
   }
   b = object$bias
   vc = object$varcomp
+  random = identical(object$design$methods, "random")
+  if (random && parm == "bias") {
+    stop("With methods = 'random' there are no fixed biases; the bias of ",
+         "two randomly chosen raters is 0.", call. = FALSE)
+  }
 
   qt_b = qt((1 + level) / 2, b$df)
   bias_ci = cbind(b$bias - qt_b * b$se, b$bias + qt_b * b$se)
   rownames(bias_ci) = paste0("bias_", b$method1, "-", b$method2)
-
-  if (object$design$model_type == "single_2") {
-    # exact chi-square interval
-    sd_ci = cbind(sqrt(vc$df * vc$var / qchisq((1 + level) / 2, vc$df)),
-                  sqrt(vc$df * vc$var / qchisq((1 - level) / 2, vc$df)))
-  } else {
-    # Wald on the log-SD scale: var(log v) = 2 / df
-    se_log_sd = sqrt(2 / vc$df) / 2
-    q = qnorm((1 + level) / 2)
-    sd_ci = cbind(vc$sd * exp(-q * se_log_sd), vc$sd * exp(q * se_log_sd))
+  if (random) {
+    bias_ci = bias_ci[0, , drop = FALSE]
   }
+
+  # exact chi-square interval for the paired-difference model and for the
+  # rater SD (M - 1 df); Wald on the log-SD scale otherwise:
+  # var(log v) = 2 / df
+  chisq = vc$component == "rater" |
+    rep(object$design$model_type == "single_2", nrow(vc))
+  se_log_sd = sqrt(2 / vc$df) / 2
+  q = qnorm((1 + level) / 2)
+  sd_ci = cbind(ifelse(chisq,
+                       sqrt(vc$df * vc$var / qchisq((1 + level) / 2, vc$df)),
+                       vc$sd * exp(-q * se_log_sd)),
+                ifelse(chisq,
+                       sqrt(vc$df * vc$var / qchisq((1 - level) / 2, vc$df)),
+                       vc$sd * exp(q * se_log_sd)))
   rownames(sd_ci) = ifelse(is.na(vc$method), vc$component,
                            paste0(vc$component, "_", vc$method))
 
@@ -417,8 +454,10 @@ coef.simple_mvc <- function(object,
   vc_nm = ifelse(is.na(vc$method), vc$component,
                  paste0(vc$component, "_", vc$method))
   alpha = object$alpha$alpha
-  c(stats::setNames(alpha, paste0("alpha_", names(alpha))),
-    stats::setNames(vc$sd, vc_nm))
+  if (!is.null(alpha)) {
+    alpha = stats::setNames(alpha, paste0("alpha_", names(alpha)))
+  }
+  c(alpha, stats::setNames(vc$sd, vc_nm))
 }
 
 #' @rdname simple_mvc-methods
@@ -427,6 +466,10 @@ coef.simple_mvc <- function(object,
 
 vcov.simple_mvc <- function(object,
                             ...){
+  if (is.null(object$alpha)) {
+    stop("With methods = 'random' the method effects are random; there are ",
+         "no fixed method means.", call. = FALSE)
+  }
   V = object$alpha$vcov
   dimnames(V) = list(paste0("alpha_", rownames(V)),
                      paste0("alpha_", colnames(V)))

@@ -247,7 +247,10 @@ Lower priority, probably not worth it:
   for 30 items x 3 methods x 3 replicates.
 - Item 5 open: random raters. Needs a design decision (see below).
 
-Random raters, design questions:
+Random raters: design agreed 2026-11-01 (nlme, `methods = c("fixed",
+"random")`, a `sigma` argument for common or method-specific residual SDs,
+agreement limits with MOVER bounds first); see "Next steps" in `TODO.md`.
+The original questions:
 - Model: methods as a random effect, `y ~ id + (1 | method) + (1 | method:id)
   [+ (1 | id:repl)]` with a common residual SD (exchangeable raters). Crossed
   effects with linked replicates need lme4 rather than nlme.

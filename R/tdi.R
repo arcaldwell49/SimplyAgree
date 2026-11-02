@@ -278,14 +278,24 @@ tdi.simple_mvc <- function(object, p = NULL, delta = NULL, conf.level = NULL,
     scale_sd = identical(d$model_type, "single_2"),
     stringsAsFactors = FALSE
   )
+  random <- identical(d$methods, "random")
+  if (random) {
+    # two randomly chosen raters: bias 0 by definition, no estimation error
+    inputs$df_bias <- Inf
+  }
   info <- list(type = "df", nu = inputs$df_sd)
   tf_name <- if (is.null(object$transform$name)) "none" else object$transform$name
-  plot_data <- do.call(rbind, lapply(seq_len(nrow(l)), function(j) {
-    pr <- mc_pair(object$data, as.character(l$method1[j]),
-                  as.character(l$method2[j]),
-                  replicates = d$replicates, seed = pair_seed)
-    data.frame(panel = panel[j], avg = pr$avg, delta = pr$d)
-  }))
+  plot_data <- if (random) {
+    pr <- mc_rater_pairs(object, pair_seed = pair_seed)
+    data.frame(panel = panel[1], avg = pr$avg, delta = pr$d)
+  } else {
+    do.call(rbind, lapply(seq_len(nrow(l)), function(j) {
+      pr <- mc_pair(object$data, as.character(l$method1[j]),
+                    as.character(l$method2[j]),
+                    replicates = d$replicates, seed = pair_seed)
+      data.frame(panel = panel[j], avg = pr$avg, delta = pr$d)
+    }))
+  }
   res <- .tdi_run(inputs = inputs, info = info, comps = .tdi_comps(inputs),
                   p = if (is.null(p)) d$pred_level else p,
                   delta = delta,

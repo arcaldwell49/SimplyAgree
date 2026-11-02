@@ -762,6 +762,36 @@
   sig_fam = list(.eq_method_fam(vc_fam("sigma"), "\\sigma"))
   sum_note = list(.eq_note("\\textstyle\\sum_{i} \\mu_{i} = 0"))
   type = design$model_type
+  # random raters: alpha_m ~ N(0, sigma_alpha^2) and the item effects are
+  # unconstrained item means
+  random = identical(design$methods, "random")
+  rater_stmts = if (random) {
+    list(.eq_stmt("\\alpha_{m}", .eq_normal(
+      .eq_var_par("\\sigma^{2}_{\\alpha}", vc_sd("rater")))))
+  }
+  if (random) {
+    sum_note = list()
+  }
+  # residual: one SD, or one per method
+  sig_common = !any(varcomp$component == "sigma" & !is.na(varcomp$method))
+  resid = function(lhs) {
+    if (sig_common) {
+      .eq_stmt(lhs, .eq_normal(.eq_var_par("\\sigma^{2}", vc_sd("sigma"))))
+    } else {
+      .eq_stmt(lhs, .eq_normal("\\sigma^{2}_{m}"), fams = sig_fam)
+    }
+  }
+
+  if (type == "single_r") {
+    return(.eq_assemble(
+      lhs = .eq_tf_lhs(tf, "y_{mi}"),
+      mean_terms = list(.eq_term(NULL, "\\alpha_{m}"),
+                        .eq_term(NULL, "\\mu_{i}"),
+                        .eq_term(NULL, "e_{mi}")),
+      re_stmts = rater_stmts,
+      resid_stmt = resid("e_{mi}"),
+      notes = .eq_tf_note(tf)))
+  }
 
   if (type == "single_2") {
     return(.eq_assemble(
@@ -785,8 +815,7 @@
       mean_fams = alpha_fam,
       re_stmts = list(.eq_stmt("\\mu_{i}", .eq_normal(
         .eq_var_par("\\sigma^{2}_{\\mu}", sigma_mu)))),
-      resid_stmt = .eq_stmt("e_{mi}", .eq_normal("\\sigma^{2}_{m}"),
-                            fams = sig_fam),
+      resid_stmt = resid("e_{mi}"),
       notes = .eq_tf_note(tf)))
   }
 
@@ -806,12 +835,11 @@
                    list(.eq_term(NULL, "c_{mi}"),
                         .eq_term(NULL, "e_{mir}"))),
     mean_fams = alpha_fam,
-    re_stmts = c(if (design$linked) {
+    re_stmts = c(rater_stmts, if (design$linked) {
       list(.eq_stmt("a_{ir}", .eq_normal(
         .eq_var_par("\\omega^{2}", vc_sd("omega")))))
     }, list(tau_stmt)),
-    resid_stmt = .eq_stmt("e_{mir}", .eq_normal("\\sigma^{2}_{m}"),
-                          fams = sig_fam),
+    resid_stmt = resid("e_{mir}"),
     notes = c(sum_note, .eq_tf_note(tf)))
 }
 
