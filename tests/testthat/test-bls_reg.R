@@ -12,7 +12,8 @@ bls_sim <- function(n = 25, m = 3, seed = 5, sx = 0.6, sy = 0.9) {
 test_that("BLS and CBLS reproduce BivRegBLS with replicates", {
   skip_if_not_installed("BivRegBLS")
   d <- bls_sim()
-  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE,
+                 se_method = "bivregbls")
   expect_s3_class(fit, c("simple_bls", "simple_eiv"))
   b <- BivRegBLS::BLS(data = d$wide, xcol = 1:3, ycol = 4:6, npoints = 10,
                       xpred = c(6, 10, 14))
@@ -50,6 +51,7 @@ test_that("known error variances reproduce BivRegBLS, including CBLS PIs", {
   d <- bls_sim(m = 1, n = 30, seed = 8)
   dat <- data.frame(x = d$wide[[1]], y = d$wide[[2]])
   fit <- bls_reg(y ~ x, data = dat, var_x = 0.5, var_y = 0.5,
+                  se_method = "bivregbls",
                   equation_error = FALSE)
   expect_equal(fit$errors$source, "known")
   b <- BivRegBLS::BLS(data = dat, xcol = 1, ycol = 2, var.x = 0.5,
@@ -115,7 +117,17 @@ test_that("only the error ratio: estimates, but no prediction intervals", {
   expect_equal(r$errors$source, "ratio")
   expect_false(r$errors$known)
   expect_equal(r$coefficients, k$coefficients, tolerance = 1e-8)
-  expect_equal(r$vcov, k$vcov, tolerance = 1e-8)
+  rb <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2,
+                se_method = "bivregbls")
+  kb <- bls_reg(mini1 ~ wright1, data = ba1986, var_x = 200, var_y = 100,
+                equation_error = FALSE, se_method = "bivregbls")
+  expect_equal(rb$vcov, kb$vcov, tolerance = 1e-8)
+  # with only the ratio, the errors-in-variables term uses the variances
+  # scaled by the dispersion: the same as giving those variances
+  s2 <- r$dispersion$s2
+  ks <- bls_reg(mini1 ~ wright1, data = ba1986, var_x = 2 * s2, var_y = s2,
+                equation_error = FALSE)
+  expect_equal(r$vcov, ks$vcov, tolerance = 1e-6)
   expect_error(predict(r, 300, interval = "prediction"), "only their ratio")
   expect_error(bls_reg(mini1 ~ wright1, data = ba1986),
                "cannot be estimated")
@@ -163,7 +175,8 @@ test_that("input validation", {
 
 test_that("the simultaneous band matches the joint test and BivRegBLS", {
   d <- bls_sim()
-  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  fit <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE,
+                 se_method = "bivregbls")
   n <- fit$df.residual + 2
   xs <- c(6, 10, 14)
   band <- predict(fit, xs, interval = "band")
@@ -403,7 +416,7 @@ test_that("per-subject error variances match BivRegBLS BLS.ht", {
                   vx = vx, vy = vy, dfx = 4, dfy = 4)
   fit <- bls_reg(y ~ x, data = d, var_x = "vx", var_y = "vy",
                   df_var_x = "dfx", df_var_y = "dfy",
-                  equation_error = FALSE)
+                  equation_error = FALSE, se_method = "bivregbls")
   ref <- BivRegBLS::BLS.ht(data = d, xcol = "x", ycol = "y",
                            var.x.col = "vx", var.y.col = "vy",
                            df.var.x.col = "dfx", df.var.y.col = "dfy")
@@ -480,4 +493,41 @@ test_that("transform = 'log' fits the logs and back-transforms", {
                         transform = "log"), "positive measurements")
   expect_error(bls_reg(y ~ x, data = d, id = "id", transform = "log",
                         var_model = "proportional"), "constant on the log")
+})
+
+test_that("default SEs: errors-in-variables sandwich plus the delta term", {
+  set.seed(11)
+  n <- 30
+  t <- rnorm(n, 10, 2)
+  dat <- data.frame(x = t + rnorm(n, 0, 1), y = 1 + 1.1 * t + rnorm(n, 0, 1))
+  # known variances: the sandwich only (no estimated parameters)
+  fit <- bls_reg(y ~ x, data = dat, var_x = 1, var_y = 1,
+                 equation_error = FALSE)
+  fb <- bls_reg(y ~ x, data = dat, var_x = 1, var_y = 1,
+                equation_error = FALSE, se_method = "bivregbls")
+  expect_equal(coef(fit), coef(fb))
+  b <- unname(coef(fit))
+  e <- dat$y - b[1] - b[2] * dat$x
+  w <- 1 / (1 + b[2]^2)
+  s2 <- sum(w * e^2) / (n - 2)
+  xh <- dat$x + b[2] * e * w
+  R <- matrix(c(n * w, w * sum(xh), w * sum(xh), w * sum(xh^2)), 2)
+  A <- R
+  A[2, 2] <- A[2, 2] - n * w * (1 - b[2]^2 * w)
+  expect_equal(unname(fit$vcov), unname(solve(A) %*% R %*% solve(A) * s2))
+  expect_equal(unname(fb$vcov), unname(solve(matrix(
+    c(n * w, w * sum(dat$x), w * sum(dat$x), w * sum(dat$x^2)), 2)) * s2))
+  # larger than BivRegBLS's when x has non-negligible error
+  expect_gt(fit$vcov[2, 2], fb$vcov[2, 2])
+  expect_equal(fit$call$se_method, "delta")
+
+  # estimated variances add the delta-method term
+  d <- bls_sim()
+  f_d <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  f_b <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE,
+                 se_method = "bivregbls")
+  expect_gt(f_d$vcov[2, 2], f_b$vcov[2, 2])
+  expect_gt(f_d$cbls$vcov[2, 2], f_b$cbls$vcov[2, 2])
+  expect_error(bls_reg(y ~ x, data = dat, var_x = 1, var_y = 1,
+                       se_method = "nope"))
 })

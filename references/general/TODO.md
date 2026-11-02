@@ -84,10 +84,9 @@ Remaining, in order:
 2. Lower priority (in `bls_reg_roadmap.md`): variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of
-   `error_ratio_profile()`; BLS/CBLS standard errors that include the
-   uncertainty in the estimated error variances (and, with linked
-   replicates, their covariance), which are liberal (0.91-0.95) with large
-   occasion effects (TODO comment in `R/bls_reg.R`; `cbls_sims/` study 5).
+   `error_ratio_profile()`; the uncertainty in the estimated equation error
+   (tau^2) in the BLS standard errors (the delta-method SEs of 2026-11-02
+   cover the error variances and correlation, not tau^2).
 
 Environment notes:
 

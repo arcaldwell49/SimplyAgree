@@ -49,7 +49,9 @@ test_that("each ratio reproduces the fit at that ratio", {
   prof <- error_ratio_profile(fit, ratios = 2)
   expect_equal(prof$table$slope, unname(coef(fit)[2]), tolerance = 1e-8)
   expect_equal(prof$table$intercept, unname(coef(fit)[1]), tolerance = 1e-6)
-  bls <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
+  # the profile's BLS intervals are BivRegBLS's (FullCIs.XY)
+  bls <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2,
+                 se_method = "bivregbls")
   pb <- error_ratio_profile(bls, ratios = 2)
   expect_equal(pb$table$slope_lower, bls$model_table$lower.ci[2],
                tolerance = 1e-8)

@@ -21,6 +21,7 @@ bls_reg(
   pred_level = 0.95,
   tol_level = 0.95,
   bound_type = c("joint", "iu"),
+  se_method = c("delta", "bivregbls"),
   model = TRUE,
   ...
 )
@@ -101,6 +102,11 @@ proportion \code{pred_level} of new measurements with confidence \code{tol_level
 or \code{"iu"}, a \code{tol_level} confidence bound on each of the \code{pred_level}
 prediction limits.}
 
+\item{se_method}{How the standard errors of the coefficients are
+computed: \code{"delta"} (default), an errors-in-variables sandwich plus a
+delta-method term for estimated error variances, or \code{"bivregbls"}, the
+standard errors of BivRegBLS. See "Standard errors" in Details.}
+
 \item{model}{Logical. If TRUE (default), the subject-level data (means,
 numbers of replicates, and error variances) are stored in the returned
 object. They are needed by \code{plot()}, \code{check()}, \code{fitted()},
@@ -170,11 +176,32 @@ difference); the uncertainty in an estimated \code{theta} is not included.
 \verb{sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))} and is found by the
 iterative BLS algorithm (Lisy et al., 1990; Francq & Govaerts, 2014),
 started from the Deming solution. With constant variances it is Deming
-regression with \code{error.ratio = var_x / var_y}. The variance-covariance
-matrix of \verb{(b0, b1)} is \verb{s^2 R^-1}, where \code{R} is the weighted cross-product
-matrix of \verb{(1, x_i)} with weights \verb{1 / (var_yi + b1^2 var_xi)} and \code{s^2} the
-weighted residual variance on \code{n - 2} df; confidence intervals use \code{t} on
-\code{n - 2} df.
+regression with \code{error.ratio = var_x / var_y}. Confidence intervals use
+\code{t} on \code{n - 2} df with the standard errors below.
+
+\strong{Standard errors.} BivRegBLS (\code{se_method = "bivregbls"}) uses
+\verb{s^2 R^-1}, where \code{R} is the weighted cross-product matrix of \verb{(1, x_i)}
+with weights \verb{1 / (var_yi + b1^2 var_xi)} and \code{s^2} the weighted residual
+variance on \code{n - 2} df. This treats the observed \code{x_i} as if they were the
+true values and the error variances as known, and is too small when the
+error of \code{x} is not small relative to the spread of the true values (in
+simulations, coverage of 95\% intervals fell to 0.87 with one measurement
+each and to 0.71 with linked replicates). The default
+(\code{se_method = "delta"}) has two parts. The first is the sandwich of the
+estimating equations with \code{R} built from the estimated true values and
+the error left in them removed, which with equal weights is the
+errors-in-variables variance of Fuller (1987, sec. 1.3). The second, when
+the error variances are estimated (from replicates, or given with finite
+\code{df_var_x}, \code{df_var_y}), is a delta-method term for their uncertainty:
+the derivatives of the coefficients with respect to the log error
+variances (and, with linked replicates, the error correlation), taken
+numerically over the whole fit, times their sampling covariance on their
+df. With only \code{error.ratio}, the error variances are scaled by \code{s^2}. In
+simulations the default covered 0.93 to 0.98 where BivRegBLS's covered
+0.71 to 0.96, and the two agree when the true values are widely spread.
+The uncertainty in the estimated equation error (\code{tau^2}) and in the
+shape of a \code{"power"} variance function is not included.
+\code{\link[=error_ratio_profile]{error_ratio_profile()}} uses the BivRegBLS standard errors.
 
 \strong{CBLS.} In the Bland-Altman plot, with \code{D = x - y} and \code{M = (x + y) / 2}
 (the convention of \code{\link[=agreement_limit]{agreement_limit()}}), the errors of \code{D} and \code{M} are
@@ -261,10 +288,9 @@ variance from a separate study does not include the occasion effects. In
 simulations (15 or 40 subjects, 2 or 4 occasions), the prediction
 intervals covered 0.95 to 0.97 (an exchangeable fit of the same data
 covered up to 1.00, with intervals up to 2.9 times as wide), and the
-confidence intervals of the coefficients 0.94 to 0.96 with a small
-occasion effect but 0.91 to 0.95 when it was about three times the
-larger measurement error SD: their standard errors treat the estimated
-variances and covariance as known.
+confidence intervals of the coefficients 0.94 to 0.96 (0.91 to 0.95 with
+\code{se_method = "bivregbls"} when the occasion effect was about three times
+the larger measurement error SD).
 This is the CBLS fit used by \code{\link[=method_convert]{method_convert()}} with
 \code{replicates = "linked"} and \code{estimator = "cbls"}.
 
@@ -304,6 +330,9 @@ Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a
 Bland-Altman plot? Review and contribution based on tolerance intervals
 and correlated-errors-in-variables models. Statistics in Medicine, 35(14),
 2328-2358. \doi{10.1002/sim.6872}
+
+Fuller, W. A. (1987). Measurement Error Models. Wiley.
+\doi{10.1002/9780470316665}
 
 Lisy, J. M., Cholvadova, A., & Kutej, J. (1990). Multiple straight-line
 least-squares analysis with uncertainties in all variables. Computers &

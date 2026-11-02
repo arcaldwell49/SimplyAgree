@@ -188,9 +188,16 @@ correlation of x and y comes from the paired occasions (not from omega of
 `method_vc()`, so the occasion effects may have any scale on each method),
 standardised by the variance functions; given variances are not allowed
 (they would lack the occasion effects). Coverage in `cbls_sims/` study 5:
-PIs 0.95-0.97; coefficient CIs 0.91-0.95 with large occasion effects (the
-SEs treat the estimated variances and covariance as known; an SE with that
-uncertainty is a possible follow-up).
+PIs 0.95-0.97; coefficient CIs 0.94-0.96 with the delta-method SEs below
+(0.91-0.95 with BivRegBLS's).
+
+Done (2026-11-02): default standard errors `se_method = "delta"`, an
+errors-in-variables sandwich (Fuller's variance with equal weights) plus a
+delta-method term for the estimated error variances and correlation;
+`se_method = "bivregbls"` keeps BivRegBLS's `s^2 R^-1` (used by the
+reproduction tests and `error_ratio_profile()`). BivRegBLS's SEs covered
+down to 0.71 at low reliability of x (`cbls_sims/` study 6); the default
+0.93-0.98 in all six studies. Open: the uncertainty in tau^2.
 
 ## Gaps against BivRegBLS and MethComp (2026-11-01)
 

@@ -1,8 +1,20 @@
 # bls_reg(): coverage of the intervals and size of the joint test
 
-Status (2026-10-31; study 5 2026-11-02): studies run; all criteria met (study 2: with the
-right variance model), except in study 5 the slope and intercept CIs with a
-large occasion effect (0.913-0.947).
+Status (2026-10-31; studies 5-6 and a rerun of all 2026-11-02): all criteria
+met (study 2: with the right variance model; study 3: when the equation
+error is split as assumed).
+
+**Standard errors (2026-11-02).** All studies were rerun after the default
+standard errors changed to `se_method = "delta"`: an errors-in-variables
+sandwich (Fuller's variance with equal weights) plus a delta-method term
+for the estimated error variances and correlation. The tables below are
+the rerun; values with the earlier SEs (`se_method = "bivregbls"`, those of
+BivRegBLS) are given where they differ. Study 6 shows why: the BivRegBLS SEs
+are too small when the error of x is not small relative to the spread of
+the true values, down to 0.71 coverage. In studies 1-4 the true values are
+widely spread (reliability of x about 0.96 or more), so the change is small:
+the coefficient CIs moved up by at most 0.02, and so did the prediction and tolerance
+intervals (which also use the variance of the line).
 
 ## Question
 
@@ -27,15 +39,15 @@ by each method. The line CI at x = 12, 20, 28.
 
 | design | intercept | slope | line (3 points) | PI, XY | PI, MD | CBLS slope | joint test size |
 |---|---|---|---|---|---|---|---|
-| known  | 0.937-0.942 | 0.932-0.945 | 0.934-0.960 | 0.950-0.958 | 0.950-0.956 | 0.934-0.946 | 0.045-0.060 |
-| 2 reps | 0.942-0.952 | 0.942-0.953 | 0.934-0.965 | 0.935-0.953 | 0.935-0.953 | 0.940-0.953 | 0.050-0.057 |
-| 3 reps | 0.946-0.952 | 0.941-0.953 | 0.941-0.957 | 0.943-0.962 | 0.943-0.962 | 0.944-0.957 | 0.040-0.062 |
-| 1-4    | 0.941-0.957 | 0.942-0.957 | 0.942-0.960 | 0.944-0.957 | 0.944-0.957 | 0.941-0.959 | 0.047-0.057 |
+| known  | 0.945-0.950 | 0.944-0.950 | 0.940-0.960 | 0.957-0.966 | 0.958-0.964 | 0.943-0.952 | 0.042-0.057 |
+| 2 reps | 0.945-0.954 | 0.948-0.956 | 0.934-0.966 | 0.943-0.968 | 0.942-0.966 | 0.947-0.957 | 0.047-0.056 |
+| 3 reps | 0.949-0.955 | 0.942-0.954 | 0.942-0.959 | 0.946-0.966 | 0.945-0.966 | 0.945-0.958 | 0.038-0.060 |
+| 1-4    | 0.946-0.959 | 0.948-0.961 | 0.942-0.961 | 0.950-0.963 | 0.950-0.963 | 0.943-0.961 | 0.044-0.054 |
 
 All fits converged; none failed. The intervals are close to nominal
-throughout. With known variances and one measurement each, the intercept
-and slope intervals are slightly liberal (about 0.94): `s^2` is estimated
-on n - 2 df, although the error variances are known. The joint test
+throughout. With the BivRegBLS SEs, the intercept and slope intervals
+were slightly liberal with known variances and one measurement each (0.932-0.945);
+the errors-in-variables term brings them to 0.944-0.950. The joint test
 (Wald, F(2, n - 2), without BivRegBLS's Hotelling factor) holds its size.
 
 Study 2 below covers error variances that change with the level.
@@ -53,10 +65,10 @@ Carlo SE about 0.007). Results in `summary_vf.csv`.
 
 | fit | intercept, slope, line | PI low | PI high | PI (MD) | joint test size |
 |---|---|---|---|---|---|
-| known        | 0.933-0.950 | 0.944-0.946 | 0.936-0.952 | 0.947 | 0.053-0.055 |
-| proportional | 0.933-0.960 | 0.948-0.965 | 0.944-0.956 | 0.948-0.955 | 0.041-0.056 |
-| power        | 0.945-0.968 | 0.933-0.951 | 0.940-0.958 | 0.935-0.953 | 0.056-0.064 |
-| constant     | 0.918-0.995 | 0.999-1.000 | 0.809-0.831 | 0.904-0.915 | 0.072-0.085 |
+| known        | 0.938-0.958 | 0.962-0.964 | 0.940-0.954 | 0.953-0.958 | 0.045-0.052 |
+| proportional | 0.934-0.967 | 0.956-0.975 | 0.946-0.956 | 0.952-0.963 | 0.036-0.054 |
+| power        | 0.945-0.975 | 0.956-0.964 | 0.940-0.960 | 0.951-0.961 | 0.051-0.054 |
+| constant     | 0.921-0.995 | 0.999-1.000 | 0.818-0.846 | 0.909-0.924 | 0.072-0.084 |
 
 With the right variance model (known, or estimated as proportional or
 power), all intervals are close to nominal and the joint test holds its
@@ -80,9 +92,9 @@ replicates; 1000 data sets per cell (`summary_eq.csv`).
 
 | sd_eq | slope CI | PI, equation_error = TRUE | PI, FALSE (BivRegBLS) | dispersion test rejects |
 |---|---|---|---|---|
-| 0   | 0.942-0.958 | 0.949-0.963 | 0.940-0.958 | 0.041-0.059 (size) |
-| 0.5 | 0.934-0.955 | 0.941-0.959 | 0.913-0.939 | 0.15-0.76 |
-| 1.5 | 0.861-0.938 | 0.941-0.957 | 0.764-0.808 | 0.92-1.00 |
+| 0   | 0.943-0.958 | 0.949-0.963 | 0.940-0.959 | 0.041-0.059 (size) |
+| 0.5 | 0.936-0.958 | 0.941-0.961 | 0.913-0.939 | 0.15-0.76 |
+| 1.5 | 0.867-0.944 | 0.940-0.960 | 0.761-0.809 | 0.92-1.00 |
 
 `sim_cbls_eq_side.R`: sd_eq = 1.5, with the same total deviation variance
 placed in y only, in x only, or equally in both (common tau true);
@@ -90,9 +102,9 @@ placed in y only, in x only, or equally in both (common tau true);
 
 | deviations in | slope CI | PI (XY) | PI (MD) | PI without equation error |
 |---|---|---|---|---|
-| both (common tau) | 0.942-0.953 | 0.936-0.951 | 0.935-0.951 | 0.770-0.801 |
-| y only | 0.879-0.938 | 0.946-0.951 | 0.948-0.951 | 0.764-0.797 |
-| x only | 0.834-0.914 | 0.943-0.962 | 0.942-0.962 | 0.785-0.807 |
+| both (common tau) | 0.951-0.959 | 0.936-0.951 | 0.935-0.951 | 0.766-0.802 |
+| y only | 0.892-0.947 | 0.946-0.951 | 0.948-0.952 | 0.765-0.804 |
+| x only | 0.852-0.926 | 0.944-0.962 | 0.942-0.962 | 0.785-0.810 |
 
 - The prediction intervals hold (0.94-0.96) whenever equation error is
   modeled, wherever the deviations are; without it they cover 0.76-0.81.
@@ -169,31 +181,65 @@ intercept CIs and the prediction intervals.
 
 | omega | tau | slope CI | intercept CI | PI (xy / md) | slope CI, exchangeable | PI, exchangeable | PI width, linked / exchangeable |
 |---|---|---|---|---|---|---|---|
-| 0.5 | 0   | 0.950-0.955 | 0.946-0.958 | 0.950-0.957 | 0.951-0.956 | 0.976-0.984 | 0.84-0.88 |
-| 0.5 | 0.5 | 0.945-0.952 | 0.943-0.956 | 0.946-0.958 | 0.947-0.952 | 0.961-0.972 | 0.90-0.94 |
-| 2   | 0   | 0.930-0.941 | 0.924-0.946 | 0.950-0.967 | 0.938-0.951 | 1.000 | 0.35-0.39 |
-| 2   | 0.5 | 0.913-0.942 | 0.920-0.947 | 0.948-0.952 | 0.937-0.965 | 1.000 | 0.42-0.45 |
+| 0.5 | 0   | 0.951-0.956 | 0.948-0.958 | 0.950-0.957 | 0.952-0.956 | 0.976-0.984 | 0.84-0.89 |
+| 0.5 | 0.5 | 0.949-0.955 | 0.948-0.957 | 0.946-0.959 | 0.949-0.954 | 0.961-0.972 | 0.90-0.94 |
+| 2   | 0   | 0.944-0.960 (0.930-0.941) | 0.936-0.960 (0.924-0.946) | 0.950-0.969 | 0.944-0.962 | 1.000 | 0.35-0.39 |
+| 2   | 0.5 | 0.949-0.962 (0.913-0.942) | 0.948-0.956 (0.920-0.947) | 0.948-0.953 | 0.950-0.967 | 1.000 | 0.42-0.45 |
 
-The estimated error correlation was unbiased (0.31-0.34 and 0.88-0.89,
-true 0.33 and 0.89).
+Values in parentheses: the first run, with `se_method = "bivregbls"`. The
+estimated error correlation was unbiased (0.31-0.34 and 0.88-0.89, true
+0.33 and 0.89).
 
-1. **Prediction intervals: criterion met** (0.946-0.967). Ignoring the
+1. **Prediction intervals: criterion met** (0.946-0.969). Ignoring the
    linking (the exchangeable fit) counts the occasion effects of both
    methods as independent errors: its intervals covered 0.96-1.00 and were
    up to 2.9 times as wide.
-2. **Slope and intercept CIs: met with a small occasion effect; slightly
-   liberal with a large one** (omega = 2, about 3 times the larger error
-   SD): 0.913-0.947; below 0.93 for the slope in 1 of 8 cells and for the
-   intercept in 2 (lowest 0.913 for the
-   slope with 40 items, 2 occasions and equation error). In that cell the
-   slope is unbiased (mean 1.097 in a check with 400 data sets) but its SD
-   (0.039) is 13% larger than the mean SE (0.034): like every BLS standard
-   error, it treats the error variances, and here the covariance, as known,
-   and with a large occasion effect the error variance of a residual,
-   `var_y + b^2 var_x - 2 b cov`, is a small difference of large estimated
-   terms. The exchangeable fit happened to cover 0.94-0.97 here, because
-   the spread of the true values (SD 5) dominates; it is not a valid
-   model for these data (its prediction intervals).
-3. Not changed: an SE that includes the uncertainty in the estimated
-   variances and covariance (delta method or bootstrap) would address 2;
-   documented as a limitation instead.
+2. **Slope and intercept CIs: criterion met with the delta-method SEs**
+   (0.936-0.962). With the BivRegBLS SEs they were slightly liberal with a
+   large occasion effect (omega = 2, about 3 times the larger error SD):
+   0.913-0.947. In the worst cell (40 items, 2 occasions, equation error)
+   the slope was unbiased (mean 1.097 with 400 data sets) but its SD
+   (0.039) was 13% larger than the mean BivRegBLS SE (0.034). Oracle fits
+   (error parameters known, no equation error) separated two causes. The
+   BivRegBLS SE was about 10% too small even with the parameters known
+   (oracle SD 0.0271, SE 0.0245), because R uses the observed means, whose
+   spread includes the error of x; Fuller's variance (the
+   errors-in-variables sandwich) gave 0.0267. And estimating the variances
+   and correlation added variance (7.7e-5), 87% of which the delta-method
+   term recovers (6.7e-5). With a large occasion effect, the residual
+   variance `var_y + b^2 var_x - 2 b cov` is a small difference of large
+   estimated terms, so both matter more.
+## Study 6: standard errors and the reliability of x (2026-11-02)
+
+`sim_cbls_se.R`, `summary_se.csv`. Both SE methods on the same fits, as
+the reliability of x falls: t ~ N(20, t_sd^2) with t_sd = 1.5, 3, 6;
+x = t + e_x (SD 1), y = 1 + 1.1 t + e_y (SD 1.2); n = 15 or 40; one
+measurement each with known variances, 3 exchangeable replicates, or 3
+linked occasions with a shared occasion effect (SD 2). No equation error
+(`equation_error = FALSE`); 1000 data sets per cell.
+
+Criteria (set before running): coverage 0.93-0.97 for the slope,
+intercept, and CBLS slope CIs.
+
+| design | t_sd | slope / intercept / CBLS slope, delta | same, bivregbls | SE delta / bivregbls |
+|---|---|---|---|---|
+| known  | 1.5 | 0.959-0.970 | 0.869-0.897 | 1.38-1.51 |
+| known  | 3   | 0.939-0.956 | 0.922-0.935 | 1.09-1.11 |
+| known  | 6   | 0.951-0.962 | 0.948-0.958 | 1.02-1.03 |
+| reps   | 1.5 | 0.952-0.964 | 0.923-0.939 | 1.14-1.16 |
+| reps   | 3   | 0.936-0.954 | 0.931-0.946 | 1.03-1.04 |
+| reps   | 6   | 0.934-0.950 | 0.934-0.948 | 1.01 |
+| linked | 1.5 | 0.969-0.976 | 0.707-0.734 | 2.23-5.72 |
+| linked | 3   | 0.938-0.965 | 0.859-0.906 | 1.24-1.40 |
+| linked | 6   | 0.948-0.959 | 0.937-0.949 | 1.06-1.07 |
+
+1. **Delta-method SEs: criterion met** (0.934-0.976), slightly
+   conservative (0.97-0.98) only for linked occasions with the lowest
+   reliability, where the occasion effect is larger than the spread of
+   the true values.
+2. **BivRegBLS SEs: too small at low reliability**, down to 0.71 (linked)
+   and 0.87 (one measurement each). They are fine (0.93-0.96) when the
+   true values are widely spread (t_sd = 6), as in studies 1-4.
+3. Remaining limit: the uncertainty in the estimated equation error
+   (tau^2) is not included; with a large equation error placed in one
+   method only, the slope is biased anyway (study 3).

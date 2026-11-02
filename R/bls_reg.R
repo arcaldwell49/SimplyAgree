@@ -72,6 +72,10 @@
 #'   proportion `pred_level` of new measurements with confidence `tol_level`;
 #'   or `"iu"`, a `tol_level` confidence bound on each of the `pred_level`
 #'   prediction limits.
+#' @param se_method How the standard errors of the coefficients are
+#'   computed: `"delta"` (default), an errors-in-variables sandwich plus a
+#'   delta-method term for estimated error variances, or `"bivregbls"`, the
+#'   standard errors of BivRegBLS. See "Standard errors" in Details.
 #' @param model Logical. If TRUE (default), the subject-level data (means,
 #'   numbers of replicates, and error variances) are stored in the returned
 #'   object. They are needed by `plot()`, `check()`, `fitted()`,
@@ -107,11 +111,32 @@
 #' `sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))` and is found by the
 #' iterative BLS algorithm (Lisy et al., 1990; Francq & Govaerts, 2014),
 #' started from the Deming solution. With constant variances it is Deming
-#' regression with `error.ratio = var_x / var_y`. The variance-covariance
-#' matrix of `(b0, b1)` is `s^2 R^-1`, where `R` is the weighted cross-product
-#' matrix of `(1, x_i)` with weights `1 / (var_yi + b1^2 var_xi)` and `s^2` the
-#' weighted residual variance on `n - 2` df; confidence intervals use `t` on
-#' `n - 2` df.
+#' regression with `error.ratio = var_x / var_y`. Confidence intervals use
+#' `t` on `n - 2` df with the standard errors below.
+#'
+#' **Standard errors.** BivRegBLS (`se_method = "bivregbls"`) uses
+#' `s^2 R^-1`, where `R` is the weighted cross-product matrix of `(1, x_i)`
+#' with weights `1 / (var_yi + b1^2 var_xi)` and `s^2` the weighted residual
+#' variance on `n - 2` df. This treats the observed `x_i` as if they were the
+#' true values and the error variances as known, and is too small when the
+#' error of `x` is not small relative to the spread of the true values (in
+#' simulations, coverage of 95% intervals fell to 0.87 with one measurement
+#' each and to 0.71 with linked replicates). The default
+#' (`se_method = "delta"`) has two parts. The first is the sandwich of the
+#' estimating equations with `R` built from the estimated true values and
+#' the error left in them removed, which with equal weights is the
+#' errors-in-variables variance of Fuller (1987, sec. 1.3). The second, when
+#' the error variances are estimated (from replicates, or given with finite
+#' `df_var_x`, `df_var_y`), is a delta-method term for their uncertainty:
+#' the derivatives of the coefficients with respect to the log error
+#' variances (and, with linked replicates, the error correlation), taken
+#' numerically over the whole fit, times their sampling covariance on their
+#' df. With only `error.ratio`, the error variances are scaled by `s^2`. In
+#' simulations the default covered 0.93 to 0.98 where BivRegBLS's covered
+#' 0.71 to 0.96, and the two agree when the true values are widely spread.
+#' The uncertainty in the estimated equation error (`tau^2`) and in the
+#' shape of a `"power"` variance function is not included.
+#' [error_ratio_profile()] uses the BivRegBLS standard errors.
 #'
 #' **CBLS.** In the Bland-Altman plot, with `D = x - y` and `M = (x + y) / 2`
 #' (the convention of [agreement_limit()]), the errors of `D` and `M` are
@@ -198,10 +223,9 @@
 #' simulations (15 or 40 subjects, 2 or 4 occasions), the prediction
 #' intervals covered 0.95 to 0.97 (an exchangeable fit of the same data
 #' covered up to 1.00, with intervals up to 2.9 times as wide), and the
-#' confidence intervals of the coefficients 0.94 to 0.96 with a small
-#' occasion effect but 0.91 to 0.95 when it was about three times the
-#' larger measurement error SD: their standard errors treat the estimated
-#' variances and covariance as known.
+#' confidence intervals of the coefficients 0.94 to 0.96 (0.91 to 0.95 with
+#' `se_method = "bivregbls"` when the occasion effect was about three times
+#' the larger measurement error SD).
 #' This is the CBLS fit used by [method_convert()] with
 #' `replicates = "linked"` and `estimator = "cbls"`.
 #'
@@ -263,6 +287,9 @@
 #' and correlated-errors-in-variables models. Statistics in Medicine, 35(14),
 #' 2328-2358. \doi{10.1002/sim.6872}
 #'
+#' Fuller, W. A. (1987). Measurement Error Models. Wiley.
+#' \doi{10.1002/9780470316665}
+#'
 #' Lisy, J. M., Cholvadova, A., & Kutej, J. (1990). Multiple straight-line
 #' least-squares analysis with uncertainties in all variables. Computers &
 #' Chemistry, 14(3), 189-192.
@@ -286,9 +313,11 @@ bls_reg <- function(formula,
                      pred_level = 0.95,
                      tol_level = 0.95,
                      bound_type = c("joint", "iu"),
+                     se_method = c("delta", "bivregbls"),
                      model = TRUE,
                      ...) {
   call2 <- match.call()
+  se_method <- match.arg(se_method)
   var_model <- match.arg(var_model)
   bound_type <- match.arg(bound_type)
   transform <- match.arg(transform)
@@ -356,6 +385,7 @@ bls_reg <- function(formula,
   call2$pred_level <- pred_level
   call2$id <- id
   call2$replicates <- replicates
+  call2$se_method <- se_method
 
   fml <- if (!is.null(id)) update(formula, ~ . + id) else formula
   environment(fml) <- environment(formula)
@@ -492,10 +522,14 @@ bls_reg <- function(formula,
     rho <- sum(sub$sxy[ok] / sqrt(fx0[ok] * fy0[ok])) / df_rho
     rho <- max(min(rho, 1), -1)
   }
+
+  # The fit for given error parameters: the error variances scaled by kx and
+  # ky and the error correlation rho. Called once at the estimates (kx = ky
+  # = 1) and again, perturbed, for the delta-method standard errors below.
+  fit_core <- function(kx, ky, rho) {
   cov_means <- function(vx1, vy1) {
     rho * sqrt(vx1 * vy1) * sub$k / (sub$n_x * sub$n_y)
   }
-
   # BLS in the (x, y) plot. The variances are evaluated at the estimated true
   # values of each subject, starting from the subject means, and the fit is
   # repeated until the line is stable (one pass with constant variances).
@@ -503,10 +537,10 @@ bls_reg <- function(formula,
   lev_y <- sub$y
   coef_old <- c(Inf, Inf)
   for (pass in seq_len(100)) {
-    vx1 <- if (!is.null(ex$values)) ex$values else
-      .bls_eval(ex$fun, lev_x, "var_x")
-    vy1 <- if (!is.null(ey$values)) ey$values else
-      .bls_eval(ey$fun, lev_y, "var_y")
+    vx1 <- kx * (if (!is.null(ex$values)) ex$values else
+      .bls_eval(ex$fun, lev_x, "var_x"))
+    vy1 <- ky * (if (!is.null(ey$values)) ey$values else
+      .bls_eval(ey$fun, lev_y, "var_y"))
     sub$var_x <- vx1 / sub$n_x
     sub$var_y <- vy1 / sub$n_y
     sub$cov_xy <- cov_means(vx1, vy1)
@@ -519,7 +553,8 @@ bls_reg <- function(formula,
       (2 * sxy)
     start <- c(mean(sub$y) - b1 * mean(sub$x), b1)
     bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x,
-                       var_v = sub$var_y, cov_uv = sub$cov_xy, start = start)
+                       var_v = sub$var_y, cov_uv = sub$cov_xy, start = start,
+                       scale_from_dispersion = source == "ratio")
     if (constant ||
         max(abs(bls$coef - coef_old) / pmax(abs(bls$coef), 1)) < 1e-10) {
       break
@@ -583,23 +618,84 @@ bls_reg <- function(formula,
                       var_u = (vx_eff + vy_eff + 2 * c_eff) / 4,
                       var_v = vx_eff + vy_eff - 2 * c_eff,
                       cov_uv = (vx_eff - vy_eff) / 2,
-                      start = c(-2 * a / (1 + b), 2 * (1 - b) / (1 + b)))
+                      start = c(-2 * a / (1 + b), 2 * (1 - b) / (1 + b)),
+                      scale_from_dispersion = source == "ratio")
+  list(bls = bls, cbls = cbls, disp = disp, tau2 = tau2, sub = sub,
+       lev_x = lev_x, lev_y = lev_y, pass = pass,
+       passes_ok = passes_ok, tau_ok = tau_ok)
+  }
+  fc <- fit_core(1, 1, rho)
+  bls <- fc$bls
+  cbls <- fc$cbls
+  disp <- fc$disp
+  tau2 <- fc$tau2
+  sub <- fc$sub
+  lev_x <- fc$lev_x
+  lev_y <- fc$lev_y
+  pass <- fc$pass
+  passes_ok <- fc$passes_ok
+  tau_ok <- fc$tau_ok
+
+  # Standard errors (se_method):
+  # - "bivregbls": s^2 R^-1 of the engine (Lisy et al.; BivRegBLS), with
+  #   the error parameters treated as known. Too small when the error of x
+  #   is not small relative to the spread of the true values (coverage down
+  #   to 0.81 in simulations), and when the estimated error parameters are
+  #   uncertain (with linked replicates and large occasion effects the
+  #   residual variance var_y + b1^2 var_x - 2 b1 cov is a small difference
+  #   of large estimated terms; references/general/cbls_sims, study 5).
+  # - "delta" (default): the errors-in-variables sandwich of the engine
+  #   (vcov_eiv, Fuller's variance with equal weights), plus a delta-method
+  #   term for the estimated error parameters p = (log kx, log ky, rho), the
+  #   scales of the two error variance functions and the error correlation.
+  #   Their sampling covariance Sig is that of within-subject (co)variances
+  #   on their df (log variance 2 / df; with linked replicates, paired on
+  #   df_rho: cov(log s2_x, log s2_y) = 2 rho^2 / df, cov(log s2, rho) =
+  #   rho (1 - rho^2) / df, var(rho) = (1 - rho^2)^2 / df), independent of
+  #   the subject means. The coefficients' derivatives J are taken
+  #   numerically over the whole fit (including the equation error), and
+  #   J Sig J' is added. The variance functions' shape parameters (theta of
+  #   "power") are taken as known.
+  if (se_method == "delta") {
+    bls$vcov <- bls$vcov_eiv
+    cbls$vcov <- cbls$vcov_eiv
+    Sig <- matrix(0, 3, 3)
+    if (source != "ratio") {
+      v_log <- function(d) if (is.finite(d) && d > 0) 2 / d else 0
+      Sig[1, 1] <- v_log(ex$df)
+      Sig[2, 2] <- v_log(ey$df)
+      if (linked) {
+        Sig[3, 3] <- (1 - rho^2)^2 / df_rho
+        Sig[1, 2] <- Sig[2, 1] <- 2 * rho^2 / df_rho
+        Sig[1, 3] <- Sig[3, 1] <- Sig[2, 3] <- Sig[3, 2] <-
+          rho * (1 - rho^2) / df_rho
+      }
+    }
+    if (any(Sig != 0)) {
+      coef_at <- function(p) {
+        f <- fit_core(exp(p[1]), exp(p[2]), p[3])
+        c(f$bls$coef, f$cbls$coef)
+      }
+      p0 <- c(0, 0, rho)
+      h <- 1e-4
+      J <- vapply(1:3, function(j) {
+        if (all(Sig[j, ] == 0)) return(numeric(4))
+        lo <- hi <- p0
+        lo[j] <- p0[j] - h
+        hi[j] <- p0[j] + h
+        if (j == 3) {
+          lo[3] <- max(lo[3], -1)
+          hi[3] <- min(hi[3], 1)
+        }
+        (coef_at(hi) - coef_at(lo)) / (hi[j] - lo[j])
+      }, numeric(4))
+      add <- J %*% Sig %*% t(J)
+      bls$vcov <- bls$vcov + add[1:2, 1:2]
+      cbls$vcov <- cbls$vcov + add[3:4, 3:4]
+    }
+  }
 
   df_res <- n - 2
-  # TODO: the BLS/CBLS standard errors (s^2 R^-1 from .bls_engine()) treat
-  # the error variances, and with linked replicates their covariance, as
-  # known: the uncertainty in the estimated var_x, var_y and rho (which set
-  # the weights and the implied error ratio) is ignored. Usually this is
-  # small, but with linked replicates and a large occasion effect the
-  # residual variance var_y + b1^2 var_x - 2 b1 cov is a small difference of
-  # large estimated terms, and the coefficient CIs are liberal: coverage
-  # 0.913-0.947 with omega about 3 times the larger error SD, where the
-  # slope's SD was 13% larger than its mean SE (study 5 in
-  # references/general/cbls_sims/README.md). A fix could add that
-  # uncertainty by the delta method (derivatives of the coefficients with
-  # respect to var_x, var_y and rho, with their sampling variances on their
-  # df) or use a parametric bootstrap, and should be checked against the
-  # earlier studies, where the current SEs cover 0.93-0.97.
   coefs <- stats::setNames(bls$coef, c("(Intercept)", x_name))
   vc <- bls$vcov
   dimnames(vc) <- list(names(coefs), names(coefs))
@@ -807,10 +903,27 @@ bls_reg <- function(formula,
 # 2016). Each step solves R b = g, with weights w_i = 1 / s2_i,
 # s2_i = var_v + b1^2 var_u - 2 b1 cov_uv,
 # R = sum w_i (1, u_i)'(1, u_i), g = sum w_i v_i (1, u_i)' plus the gradient
-# correction sum (e_i w_i)^2 (b1 var_u - cov_uv) for the slope. The
-# variance-covariance matrix is s^2 R^-1 with s^2 = sum w_i e_i^2 / (n - 2).
+# correction sum (e_i w_i)^2 (b1 var_u - cov_uv) for the slope.
+#
+# Two variance-covariance matrices, both scaled by the dispersion
+# s^2 = sum w_i e_i^2 / (n - 2):
+# - vcov: s^2 R^-1 (Lisy et al.; BivRegBLS). R uses the observed u, whose
+#   spread includes its measurement error, so it is too small when the
+#   error of u is not small relative to the spread of the true values
+#   (coverage down to 0.81 in simulations).
+# - vcov_eiv: the sandwich of the estimating equations
+#   psi_i = (e_i / s2_i) (1, xh_i), xh_i = u_i + (b1 var_u - cov_uv) e_i w_i
+#   the adjusted (estimated true) values: s^2 A^-1 R* A^-1, with
+#   R* = sum w_i (1, xh_i)'(1, xh_i) and A = R* less sum w_i var(r_i) in
+#   the slope term, var(r_i) = var_u - (cov_uv - b1 var_u)^2 w_i the error
+#   left in xh_i. With equal weights this is the variance of Fuller (1987,
+#   sec. 1.3) for an errors-in-variables slope with known error covariance.
+#   With only the error ratio known (scale_from_dispersion = TRUE), the
+#   error variances are the assumed ones times the dispersion, so the
+#   error left in xh_i is scaled by s^2 as well.
 .bls_engine <- function(u, v, var_u, var_v, cov_uv, start,
-                        tol = 1e-12, max_iter = 500) {
+                        tol = 1e-12, max_iter = 500,
+                        scale_from_dispersion = FALSE) {
   n <- length(u)
   b <- unname(start)
   converged <- FALSE
@@ -834,7 +947,25 @@ bls_reg <- function(formula,
   }
   sy <- step_sys(b)
   e <- v - b[1] - b[2] * u
-  s2 <- sum(sy$w * e^2) / (n - 2)
-  list(coef = b, vcov = solve(sy$R) * s2, weights = sy$w, s2 = s2,
-       iterations = it, converged = converged)
+  w <- rep_len(sy$w, n)
+  s2 <- sum(w * e^2) / (n - 2)
+  # errors-in-variables sandwich (see above)
+  vu <- rep_len(var_u, n)
+  cu <- rep_len(cov_uv, n)
+  xh <- u + (b[2] * vu - cu) * e * w
+  r_var <- pmax(vu - (cu - b[2] * vu)^2 * w, 0)
+  R_star <- matrix(c(sum(w), sum(w * xh), sum(w * xh), sum(w * xh^2)), 2, 2)
+  A <- R_star
+  A[2, 2] <- A[2, 2] -
+    sum(w * r_var) * (if (scale_from_dispersion) s2 else 1)
+  A_inv <- tryCatch(solve(A), error = function(err) NULL)
+  vcov_eiv <- if (is.null(A_inv) || det(A) <= 0) {
+    # the adjusted values do not separate the true spread from the error
+    # (very low reliability of u): fall back to R*
+    solve(R_star) * s2
+  } else {
+    A_inv %*% R_star %*% A_inv * s2
+  }
+  list(coef = b, vcov = solve(sy$R) * s2, vcov_eiv = vcov_eiv,
+       weights = sy$w, s2 = s2, iterations = it, converged = converged)
 }
