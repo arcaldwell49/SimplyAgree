@@ -256,9 +256,18 @@ the rater SD was small). With 3 raters the rater SD is often estimated at
 zero (up to 19\% of data sets); the bounds then leave out the rater
 variance, which is liberal when a large rater SD is hidden by three
 similar rater effects (coverage 0.92 with rater SD 0.5 and 30 items).
+With \code{interval = "tolerance"} the prediction limits are \eqn{\pm t
+\sqrt{V}} (the bias is 0 with no estimation error) and the tolerance
+limits are \eqn{\pm z U}, with \eqn{U} the one-sided \code{conf_level} upper
+bound for \eqn{\sqrt{V}} from the MOVER: because the centre is known, a
+limit is beyond its true value exactly when \eqn{U} is, so the tolerance
+limits are the same for both \code{bound_type}s and equal the "iu" bounds of
+the limits of agreement. \code{df_sd} (also used for \eqn{t}) is the
+Satterthwaite df of the components, with the rater variance on
+\eqn{M - 1} df.
 Without replicates, the method-by-item variation is absorbed
-into a common residual SD. Only \code{interval = "agreement"} is available, and
-fits with random raters cannot be used for conversion between methods
+into a common residual SD. Fits with random raters cannot be used for
+conversion between methods
 (\code{\link[=method_convert]{method_convert()}}, \code{predict()}). The model is fit with
 \code{\link[nlme:lme]{nlme::lme()}}, the rater effects being a \code{pdIdent} block for a constant
 outer group, with the method-by-item and item-by-replicate effects nested

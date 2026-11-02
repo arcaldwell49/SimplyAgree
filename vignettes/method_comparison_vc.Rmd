@@ -300,7 +300,15 @@ The rater variance is estimated from only $M$ rater effects, so it has $M - 1$ d
 plot(fit_r, pair_seed = 1)
 ```
 
-Random raters give agreement limits only (not tolerance limits), and there is no conversion between specific raters (`method_convert()`, `predict()`); fit with `methods = "fixed"` for those.
+With `interval = "tolerance"`, the prediction limits are $\pm t$ SD and the tolerance limits are $z$ times the upper confidence bound for the SD. Because the bias between two random raters is known to be 0, the tolerance limits are the same for both `bound_type`s and equal the upper bounds of the limits of agreement:
+
+```{r}
+method_vc(dat_r, y = "y", method = "method", id = "id",
+          replicate = "repl", replicates = "linked",
+          methods = "random", interval = "tolerance")$limits
+```
+
+There is no conversion between specific raters (`method_convert()`, `predict()`); fit with `methods = "fixed"` for that.
 
 # Repeatability and reproducibility
 

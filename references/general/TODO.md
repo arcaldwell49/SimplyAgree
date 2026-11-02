@@ -68,10 +68,18 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   1000 (was up to 46), coverage 0.93 to 0.98; `linked_reps_test()` size
   and power unchanged.
 
+- **Random-rater tolerance limits** (2026-11-02): `interval = "tolerance"`
+  with `methods = "random"`. Bias 0 is known, so the tolerance limits are
+  ±z U for both bound types and equal `upper_loa_ci` (tested); prediction
+  limits ±t SD on the components' Satterthwaite df (now also `df_sd` for
+  random raters), expected content 0.94 to 0.95 in the random-raters
+  simulation.
+
 Remaining, in order:
 
-1. Random-rater follow-up: tolerance limits and an optional parametric
-   bootstrap (which might also address the 3-rater case above).
+1. Random-rater follow-up: an optional parametric bootstrap (which might
+   address the 3-rater case above, where a large rater SD estimated at
+   zero gives bound coverage 0.92).
 2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in
    `method_convert()`; method-specific equation error with three or more

@@ -727,6 +727,15 @@ mc_limits = function(bias_tab,
   } else {
     list(type = "comp", shares = shares, df = df_comp)
   }
+  # random raters: the bias is 0 with no estimation error, and the df of s
+  # (reported, and for the prediction limits) are the Satterthwaite df of
+  # the components, so that the rater variance counts with M - 1 df
+  random = identical(design$methods, "random")
+  if (random) {
+    nu = sd_df_at(s, info)
+    out$df_sd = nu
+  }
+  bias_df = if (random) rep(Inf, n) else bias_tab$df
 
   if (interval == "agreement") {
     side_level = switch(bound_type,
@@ -747,7 +756,7 @@ mc_limits = function(bias_tab,
     lim = analytic_bounds(b = b,
                           s = s,
                           sem = sem,
-                          df = bias_tab$df,
+                          df = bias_df,
                           level = conf_level,
                           info = info,
                           pred_level = pred_level,

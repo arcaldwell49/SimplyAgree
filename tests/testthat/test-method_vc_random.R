@@ -127,6 +127,41 @@ test_that("the rater variance has M - 1 df and a MOVER interval", {
                                                        "omega"])
 })
 
+test_that("random-rater tolerance limits: bias 0, component df", {
+  dat = rr_dat()
+  ag = method_vc(dat, y = "y", method = "method", id = "id",
+                 replicate = "repl", replicates = "linked",
+                 methods = "random")
+  tl = method_vc(dat, y = "y", method = "method", id = "id",
+                 replicate = "repl", replicates = "linked",
+                 methods = "random", interval = "tolerance")
+  tj = method_vc(dat, y = "y", method = "method", id = "id",
+                 replicate = "repl", replicates = "linked",
+                 methods = "random", interval = "tolerance",
+                 bound_type = "joint")
+  l = tl$limits
+  expect_equal(nrow(l), 1)
+  expect_equal(l$sd, ag$limits$sd)
+  # df of the SD: Satterthwaite over the components, rater on M - 1 df
+  vc = tl$varcomp
+  w = c(2, 2, 0, 2)
+  pc = w * vc$var
+  expect_equal(l$df_sd, sum(pc)^2 / sum(pc^2 / vc$df))
+  expect_equal(ag$limits$df_sd, l$df_sd)
+  # prediction limits: bias 0 and SE 0, so +/- t s
+  expect_equal(l$sep, l$sd)
+  expect_equal(l$upper.PL, qt(0.975, l$df_sd) * l$sd)
+  expect_equal(l$lower.PL, -l$upper.PL)
+  # with a known mean, both bound types are z times the one-sided upper
+  # bound for s, the upper bound of the agreement limit (iu)
+  expect_equal(l$upper.TL, ag$limits$upper_loa_ci)
+  expect_equal(l$lower.TL, ag$limits$lower_loa_ci)
+  expect_equal(tj$limits$upper.TL, l$upper.TL)
+  expect_true(l$upper.TL > l$upper.PL)
+  expect_output(print(tl), "Tolerance Limits")
+  expect_s3_class(plot(tl), "ggplot")
+})
+
 test_that("random raters: input checks and warnings", {
   dat = rr_dat(M = 3)
   expect_warning(method_vc(dat, y = "y", method = "method", id = "id",
@@ -137,10 +172,6 @@ test_that("random raters: input checks and warnings", {
   expect_error(method_vc(d2, y = "y", method = "method", id = "id",
                          replicate = "repl", methods = "random"),
                "at least three methods")
-  expect_error(method_vc(dat, y = "y", method = "method", id = "id",
-                         replicate = "repl", methods = "random",
-                         interval = "tolerance"),
-               "not yet available")
   expect_error(suppressWarnings(suppressMessages(
     method_vc(dat[dat$repl == 1, ], y = "y", method = "method", id = "id",
               methods = "random", sigma = "method"))),

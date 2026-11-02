@@ -1,6 +1,8 @@
 # method_vc(methods = "random"): coverage of the limits for random raters
 
-Status (2026-11-01; updated 2026-11-02): **run**. Bounds of the limits:
+Status (2026-11-01; updated 2026-11-02): **run**. Tolerance limits (equal
+to the bounds below) and prediction limits (expected content 0.94 to
+0.95) added 2026-11-02. Bounds of the limits:
 criterion met (MOVER over the components) in every cell with M >= 5; with 3
 raters one cell is at 0.923. `tdi()` GPQ bound: criterion met with M >= 5.
 Rater SD interval (MOVER): 0.94 to 0.98, lower side of the criterion met,
@@ -171,3 +173,17 @@ SD is below 1e-3 times sigma.
    draws are the SD times a constant, and the draws are the same for a
    given seed. `method = "tolerance"` equals the MOVER bound of the limits
    at p = 0.95 (tested), so its coverage is the bound coverage above.
+6. **Tolerance limits (`interval = "tolerance"`, added 2026-11-02).** The
+   bias between two random raters is 0 with no estimation error, so the
+   tolerance limits are ±z U (U the one-sided 95% MOVER bound for the SD)
+   for both `bound_type`s and equal the bounds of the limits of agreement
+   (tested): their content is at least 95% exactly when the bound covers,
+   so their confidence is the bound coverage above. The prediction limits
+   are ±t SD, with t on `df_sd`, now the Satterthwaite df of the
+   components with the rater variance on M - 1 df (median 10 to 212; the
+   delta-method df used before were 11 to 283, larger when the rater share
+   was small). Their expected content (`pl_content`, the mean over data
+   sets of the true probability that a new difference lies within them;
+   target 0.95) was 0.946 to 0.951 with 5 or 10 raters, and 0.940 to 0.953
+   with 3 (lowest in cell 8, 0.940, and cell 2, 0.945: rater SD 0.5).
+   This rerun reproduced every other column of the table exactly.

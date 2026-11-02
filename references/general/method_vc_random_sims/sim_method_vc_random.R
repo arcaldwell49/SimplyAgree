@@ -64,7 +64,8 @@ one_rep <- function(s, g) {
   upper_true <- stats::qnorm(0.975) * sd_true
   out <- c(ok = 0, sd = NA, cover_upper = NA, cover_lower = NA,
            cover_both = NA, cover_rater = NA, rater_hat = NA,
-           rater_zero = NA, df_sd = NA, cover_tdi95 = NA, cover_tdi80 = NA)
+           rater_zero = NA, df_sd = NA, cover_tdi95 = NA, cover_tdi80 = NA,
+           pl_content = NA)
   fit <- tryCatch(suppressWarnings(suppressMessages(
     method_vc(dat, y = "y", method = "method", id = "id",
               replicate = "repl", replicates = g$replicates,
@@ -89,7 +90,12 @@ one_rep <- function(s, g) {
     cover_rater = r$lower <= g$rater & r$upper >= g$rater,
     rater_hat = r$sd, rater_zero = as.numeric(r$sd < 1e-3 * 0.4),
     df_sd = l$df_sd, cover_tdi95 = tdi_cover(0.95),
-    cover_tdi80 = tdi_cover(0.8))
+    cover_tdi80 = tdi_cover(0.8),
+    # expected content of the prediction limits of interval = "tolerance",
+    # +/- t s on df_sd (the tolerance limits equal the agreement bounds,
+    # tests/testthat/test-method_vc_random.R)
+    pl_content = 2 * stats::pnorm(stats::qt(0.975, l$df_sd) * l$sd /
+                                    sd_true) - 1)
 }
 clusterExport(cl, "one_rep")
 
@@ -123,6 +129,7 @@ summ <- do.call(rbind, lapply(files, function(f) {
              cover_rater = mean(d$cover_rater[ok]),
              cover_tdi95 = mean(d$cover_tdi95[ok]),
              cover_tdi80 = mean(d$cover_tdi80[ok]),
+             pl_content = mean(d$pl_content[ok]),
              rater_zero = mean(d$rater_zero[ok]),
              sd_true = sd_true,
              sd_mean = mean(d$sd[ok]),

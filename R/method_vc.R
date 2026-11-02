@@ -179,9 +179,18 @@
 #' zero (up to 19% of data sets); the bounds then leave out the rater
 #' variance, which is liberal when a large rater SD is hidden by three
 #' similar rater effects (coverage 0.92 with rater SD 0.5 and 30 items).
+#' With `interval = "tolerance"` the prediction limits are \eqn{\pm t
+#' \sqrt{V}} (the bias is 0 with no estimation error) and the tolerance
+#' limits are \eqn{\pm z U}, with \eqn{U} the one-sided `conf_level` upper
+#' bound for \eqn{\sqrt{V}} from the MOVER: because the centre is known, a
+#' limit is beyond its true value exactly when \eqn{U} is, so the tolerance
+#' limits are the same for both `bound_type`s and equal the "iu" bounds of
+#' the limits of agreement. `df_sd` (also used for \eqn{t}) is the
+#' Satterthwaite df of the components, with the rater variance on
+#' \eqn{M - 1} df.
 #' Without replicates, the method-by-item variation is absorbed
-#' into a common residual SD. Only `interval = "agreement"` is available, and
-#' fits with random raters cannot be used for conversion between methods
+#' into a common residual SD. Fits with random raters cannot be used for
+#' conversion between methods
 #' ([method_convert()], `predict()`). The model is fit with
 #' [nlme::lme()], the rater effects being a `pdIdent` block for a constant
 #' outer group, with the method-by-item and item-by-replicate effects nested
@@ -293,10 +302,6 @@ method_vc = function(data,
   }
   sigma = match.arg(sigma, c("common", "method"))
   interval = match.arg(interval)
-  if (methods == "random" && interval == "tolerance") {
-    stop("interval = 'tolerance' is not yet available with methods = ",
-         "'random'.", call. = FALSE)
-  }
   if (is.null(bound_type)) {
     bound_type = if (interval == "agreement") "iu" else "joint"
   }
