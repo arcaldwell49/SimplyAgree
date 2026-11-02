@@ -156,6 +156,14 @@ test_that("random raters: methods and downstream functions", {
   td = tdi(fit, seed = 1, B = 2000)
   expect_equal(unname(td$estimate), qnorm(0.975) * fit$limits$sd,
                tolerance = 1e-6)
+  # bounds from the components on their own df, as in method_vc(): with
+  # bias 0 the tolerance bound at p = pred_level is the upper LoA bound
+  td_t = tdi(fit, method = "tolerance")
+  expect_equal(td_t$conf.int[2], fit$limits$upper_loa_ci, tolerance = 1e-8)
+  expect_gt(td$conf.int[2],
+            qnorm(0.975) * fit$limits$sd *
+              sqrt(fit$limits$df_sd / qchisq(0.05, fit$limits$df_sd)))
+  expect_error(tdi(fit, method = "delta"), "Satterthwaite")
   eq = model_equation(fit)
   expect_match(as.character(eq), "sigma^{2}_{\\alpha}", fixed = TRUE)
   expect_false(grepl("sum_{i}", as.character(eq), fixed = TRUE))

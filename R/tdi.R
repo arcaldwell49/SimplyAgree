@@ -65,7 +65,10 @@
 #'   the bias depends on the first piece, so `mu* = mu - Z SE sqrt(v_1* /
 #'   v_1)`. For `method_vc()` and other correlation structures, the variance
 #'   is drawn on its Satterthwaite df and `mu* = mu - T SE`, with `T` on the
-#'   df of the bias. The bound for the TDI is the `conf.level`
+#'   df of the bias. For `method_vc(methods = "random")`, the bias is 0 and
+#'   each variance component is drawn on its own df (the rater variance on
+#'   M - 1), as in the bounds of its limits (`"tolerance"` then reproduces
+#'   them; `"delta"` is not available). The bound for the TDI is the `conf.level`
 #'   quantile of `TDI(mu*, sigma*)`, the bound for the CP the `1 -
 #'   conf.level` quantile of `CP(delta; mu*, sigma*)`, and the p-value is the
 #'   proportion of draws with `TDI(mu*, sigma*) >= delta`.
@@ -279,11 +282,27 @@ tdi.simple_mvc <- function(object, p = NULL, delta = NULL, conf.level = NULL,
     stringsAsFactors = FALSE
   )
   random <- identical(d$methods, "random")
+  info <- list(type = "df", nu = inputs$df_sd)
+  comps <- .tdi_comps(inputs)
   if (random) {
+    if (method == "delta") {
+      stop("method = \"delta\" puts the SD on one Satterthwaite df, which ",
+           "gives liberal bounds with random raters; use method = \"gpq\" ",
+           "or \"tolerance\".", call. = FALSE)
+    }
     # two randomly chosen raters: bias 0 by definition, no estimation error
     inputs$df_bias <- Inf
+    # as in method_vc(): each component on its own df (the rater variance on
+    # M - 1), since one chi-square on the Satterthwaite df gives liberal
+    # bounds when the rater variance dominates
+    pc <- mc_vc_pieces(object$varcomp, l$method1, l$method2, design = d,
+                       include_omega = isTRUE(d$include_omega))
+    info <- list(type = "comp", shares = pc$shares, df = pc$df)
+    comps <- lapply(seq_len(nrow(inputs)), function(j) {
+      list(v = pc$shares[j, ] * inputs$sd[j]^2, df = pc$df[j, ],
+           scale = FALSE)
+    })
   }
-  info <- list(type = "df", nu = inputs$df_sd)
   tf_name <- if (is.null(object$transform$name)) "none" else object$transform$name
   plot_data <- if (random) {
     pr <- mc_rater_pairs(object, pair_seed = pair_seed)
@@ -296,7 +315,7 @@ tdi.simple_mvc <- function(object, p = NULL, delta = NULL, conf.level = NULL,
       data.frame(panel = panel[j], avg = pr$avg, delta = pr$d)
     }))
   }
-  res <- .tdi_run(inputs = inputs, info = info, comps = .tdi_comps(inputs),
+  res <- .tdi_run(inputs = inputs, info = info, comps = comps,
                   p = if (is.null(p)) d$pred_level else p,
                   delta = delta,
                   conf.level = if (is.null(conf.level)) d$conf_level else conf.level,

@@ -137,7 +137,10 @@ within-subject variance of each method; for \code{data_type = "nest"} and
 remaining within-subject (and nested) variance. The standard error of
 the bias depends on the first piece, so \verb{mu* = mu - Z SE sqrt(v_1* / v_1)}. For \code{method_vc()} and other correlation structures, the variance
 is drawn on its Satterthwaite df and \verb{mu* = mu - T SE}, with \code{T} on the
-df of the bias. The bound for the TDI is the \code{conf.level}
+df of the bias. For \code{method_vc(methods = "random")}, the bias is 0 and
+each variance component is drawn on its own df (the rater variance on
+M - 1), as in the bounds of its limits (\code{"tolerance"} then reproduces
+them; \code{"delta"} is not available). The bound for the TDI is the \code{conf.level}
 quantile of \verb{TDI(mu*, sigma*)}, the bound for the CP the \code{1 - conf.level} quantile of \verb{CP(delta; mu*, sigma*)}, and the p-value is the
 proportion of draws with \verb{TDI(mu*, sigma*) >= delta}.
 \item \code{"delta"}: the delta method for \code{log(TDI)} (and \code{logit(CP)}), with

@@ -43,6 +43,10 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   for random raters). MethComp's `BA.est(random.raters = TRUE)` on `sbp`
   stops at a rater variance of 0 with a lower REML likelihood, so the fit
   was checked against `lme4::lmer()` instead.
+- **`tdi()` for random raters uses the components** (2026-11-02): GPQ
+  draws each component on its own df and `"tolerance"` uses the component
+  MOVER, so it equals `upper_loa_ci` at p = pred_level (tested);
+  `"delta"` errors for random raters. The GPQ bound was not simulated.
 
 Remaining, in order:
 
@@ -52,8 +56,6 @@ Remaining, in order:
    - no bounds when the rater SD is estimated at zero (up to 10% with 3
      raters); e.g. refit without the rater effect for the other
      components and use a one-sided bound for the rater variance;
-   - `tdi()` uses the Satterthwaite `df_sd`, so its bounds for random
-     raters may be liberal; pass the component information instead;
    - tolerance limits and an optional parametric bootstrap.
 2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in

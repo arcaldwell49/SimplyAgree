@@ -495,6 +495,29 @@ mc_vc_weights = function(varcomp,
   w
 }
 
+# Weights of the components in the variance of a difference for each pair
+# (rows), with each component's share of that variance and its df (0 for
+# components with weight 0): the "components" info for sd_upper_at() and
+# analytic_bounds(), also used by tdi() for random raters.
+mc_vc_pieces = function(varcomp,
+                        method1,
+                        method2,
+                        design,
+                        include_omega = FALSE) {
+  n = length(method1)
+  K = nrow(varcomp)
+  w = shares = df = matrix(0, n, K)
+  n_methods = if (identical(design$methods, "random")) design$n_methods
+  for (j in seq_len(n)) {
+    w[j, ] = mc_vc_weights(varcomp, method1[j], method2[j],
+                           include_omega = include_omega,
+                           n_methods = n_methods)
+    shares[j, ] = w[j, ] * varcomp$var / sum(w[j, ] * varcomp$var)
+    df[j, ] = ifelse(w[j, ] > 0, varcomp$df, 0)
+  }
+  list(w = w, shares = shares, df = df)
+}
+
 # Limits for each pair. The SD of the difference, s = sqrt(sum w_j v_j), has
 # Satterthwaite df 2 s^4 / var(s^2), with var(s^2) = w' Cov(v) w from the
 # delta method (accounting for the covariance of the estimated components).
@@ -527,22 +550,18 @@ mc_limits = function(bias_tab,
   sd_df = match.arg(sd_df, c("satterthwaite", "components"))
   z = qnorm((1 + pred_level) / 2)
   n = nrow(bias_tab)
-  K = nrow(varcomp)
   s = nu = numeric(n)
-  shares = df_comp = matrix(0, n, K)
+  pieces = mc_vc_pieces(varcomp, bias_tab$method1, bias_tab$method2,
+                        design = design, include_omega = include_omega)
   for (j in seq_len(n)) {
-    w = mc_vc_weights(varcomp, bias_tab$method1[j], bias_tab$method2[j],
-                      include_omega = include_omega,
-                      n_methods = if (identical(design$methods, "random")) {
-                        design$n_methods
-                      })
+    w = pieces$w[j, ]
     s2 = sum(w * varcomp$var)
     v_s2 = drop(t(w) %*% cov_v %*% w)
     s[j] = sqrt(s2)
     nu[j] = 2 * s2^2 / v_s2
-    shares[j, ] = w * varcomp$var / s2
-    df_comp[j, ] = ifelse(w > 0, varcomp$df, 0)
   }
+  shares = pieces$shares
+  df_comp = pieces$df
   b = bias_tab$bias
   sem = bias_tab$se
   out = dplyr::tibble(method1 = bias_tab$method1,
