@@ -27,6 +27,17 @@
 #' data do not show an occasion effect; the linked and exchangeable analyses
 #' then usually give similar limits, which the `limits` table shows.
 #'
+#' In simulations (two methods unless stated, residual SD `sigma` for every
+#' method, 49 permutations), the test held its level. The power to detect an
+#' occasion SD `omega` equal to `sigma` was about 50% with 15 items and 2
+#' replicates, about 80% with 30 items and 2 replicates or 15 items and 3
+#' replicates, and about 99% with 30 items and 3 replicates; for
+#' `omega = sigma / 2` it was 12% to 40% (68% with three methods, 30 items
+#' and 3 replicates). A large p-value in a small study is therefore weak
+#' evidence that the replicates are exchangeable. The SD of the differences
+#' over the permuted fits was close to, but up to 4% smaller than, that of a
+#' fit with `replicates = "exchangeable"`.
+#'
 #' @return A list with class `c("mvc_perm_htest", "htest")`:
 #'   \item{statistic}{The observed `omega` (SD of the item-by-replicate
 #'   effects).}

@@ -57,6 +57,17 @@ settings of \code{object} (\code{tau}, \code{interval}, \code{transform}, levels
 A small p-value supports \code{replicates = "linked"}. A large one means the
 data do not show an occasion effect; the linked and exchangeable analyses
 then usually give similar limits, which the \code{limits} table shows.
+
+In simulations (two methods unless stated, residual SD \code{sigma} for every
+method, 49 permutations), the test held its level. The power to detect an
+occasion SD \code{omega} equal to \code{sigma} was about 50\% with 15 items and 2
+replicates, about 80\% with 30 items and 2 replicates or 15 items and 3
+replicates, and about 99\% with 30 items and 3 replicates; for
+\code{omega = sigma / 2} it was 12\% to 40\% (68\% with three methods, 30 items
+and 3 replicates). A large p-value in a small study is therefore weak
+evidence that the replicates are exchangeable. The SD of the differences
+over the permuted fits was close to, but up to 4\% smaller than, that of a
+fit with \code{replicates = "exchangeable"}.
 }
 \examples{
 dat = sim_methods(n_items = 20, n_reps = 3, methods = c("A", "B"),

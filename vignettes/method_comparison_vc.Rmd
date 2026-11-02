@@ -85,7 +85,7 @@ Which of these applies is a question about the **design**, not something to test
 
 With linked replicates, `replicate` must identify the occasion in the same way for all methods.
 
-When it is not clear whether the replicates really were taken together, `linked_reps_test()` shows whether the linking matters. Following MethComp's `perm.repl()`, it permutes the replicate labels within each item and method, which breaks any link, and refits the model. An observed `omega` larger than those of the permuted fits is evidence of an occasion effect, and the limits of the permuted fits show how much the conclusions depend on the linking (see the worked example below). The test does not replace knowledge of the design: replicates taken on separate occasions are exchangeable whatever it says.
+When it is not clear whether the replicates really were taken together, `linked_reps_test()` shows whether the linking matters. Following MethComp's `perm.repl()`, it permutes the replicate labels within each item and method, which breaks any link, and refits the model. An observed `omega` larger than those of the permuted fits is evidence of an occasion effect, and the limits of the permuted fits show how much the conclusions depend on the linking (see the worked example below). The test does not replace knowledge of the design: replicates taken on separate occasions are exchangeable whatever it says. Nor is a large p-value strong evidence against linking in a small study. In simulations with two methods, the test held its level, but detected an occasion SD (`omega`) equal to the residual SD only about half the time with 15 items and 2 replicates; about 30 items with 2 replicates, or 15 items with 3 replicates, gave about 80% power. Occasion effects half that size were usually missed with two methods (power 12% to 40%).
 
 The same distinction appears elsewhere in SimplyAgree under other names:
 
@@ -197,7 +197,7 @@ The printed table has one row per pair (first minus second method in the order o
 summary(fit)
 ```
 
-The data were simulated with an occasion effect (`omega = 0.6`), and the permutation test finds it: no permuted fit has an `omega` as large as the observed one, and their limits are wider, close to those of an analysis with exchangeable replicates. (Use more permutations in practice; the default is 100.)
+The data were simulated with an occasion effect (`omega = 0.6`), and the permutation test finds it: no permuted fit has an `omega` as large as the observed one, and their limits are wider, close to (in simulations, a few percent narrower than) those of an analysis with exchangeable replicates. (Use more permutations in practice; the default is 100.)
 
 ```{r}
 linked_reps_test(fit, n_perm = 20, seed = 1)
