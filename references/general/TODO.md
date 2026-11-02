@@ -55,6 +55,7 @@ the difference is small.
 ## Planned features
 
 - `bls_reg()` (renamed from `cbls_reg()`): done, including tolerance limits, the simultaneous band, variance functions, per-subject variances, the log scale, `error_ratio_profile()` and CBLS in `method_convert()`. What is left is under "Still open" and "Gaps against BivRegBLS and MethComp" in `bls_reg_roadmap.md`.
+- Within-subject (trending) agreement for 0.5.0: the within-subject spread of the average and a within-subject residual plot, 4-quadrant/polar options in `plot()` for `loa`, `tolerance_delta` and `simple_mvc`, and documentation (change LoA via `mdc_test()`, the non-unit slope limitation, the `dem_reg(id)`/`pb_reg(id)` assumption). Plan, evidence and open questions are in `trending_agreement_plan.md`; check scripts are in `trending_checks/`. "Step 0" was run (2026-11-01): `method_vc(replicates = "linked")` covers the analysis, so the work is documentation, the new plot types, a within-person reliability with CIs in `simple_mvc` output, and possibly a boundary-σ warning. Not started.
 
 ## Next steps (handoff, 2026-11-01)
 
