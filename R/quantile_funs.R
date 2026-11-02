@@ -55,12 +55,20 @@ rq_boot_ci <- function(quan_mod, V, tau, at, conf.level) {
 }
 
 
+# Bands for the plot of agree_np(): the bias with a two-sided conf.level
+# interval and each limit with its outer conf2 bound, the levels of the
+# printed table (conf2 = conf.level unless TOST). V is the bootstrap
+# covariance stored by agree_np(), so the bands match the printed bounds.
 get_qemm = function(quan_mod,
                     df,
                     agree.l,
                     agree.u,
-                    conf.level){
-  V = rq_boot_vcov(quan_mod)
+                    conf.level,
+                    conf2 = conf.level,
+                    V = NULL){
+  if (is.null(V)) {
+    V = rq_boot_vcov(quan_mod)
+  }
   at = seq(min(df$mean, na.rm = TRUE),
            max(df$mean, na.rm = TRUE),
            length.out = 100)
@@ -73,7 +81,7 @@ get_qemm = function(quan_mod,
                            text = "Bias")
 
   quan_emm_lloa = rq_boot_ci(quan_mod, V, tau = agree.u, at = at,
-                             conf.level = conf.level)
+                             conf.level = conf2)
   df_coef_lloa = data.frame(at = quan_emm_lloa$mean,
                             estimate = quan_emm_lloa$emmean,
                             lower.ci = quan_emm_lloa$lower.CL,
@@ -81,7 +89,7 @@ get_qemm = function(quan_mod,
                             text = "Lower LoA")
 
   quan_emm_uloa = rq_boot_ci(quan_mod, V, tau = agree.l, at = at,
-                             conf.level = conf.level)
+                             conf.level = conf2)
   df_coef_uloa = data.frame(at = quan_emm_uloa$mean,
                             estimate = quan_emm_uloa$emmean,
                             lower.ci = quan_emm_uloa$emmean,

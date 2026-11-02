@@ -23,6 +23,8 @@
 #'   - `agree`: A data frame of the binomial proportion of results in agreement.
 #'   - `h0_test`: Decision from hypothesis test.
 #'   - `qr_mod`: The quantile regression model.
+#'   - `qr_vcov`: The bootstrap covariance matrices of its coefficients (one
+#'     per quantile), used for the confidence limits and the plot.
 #'   - `call`: The matched call
 #'
 #' @examples
@@ -235,6 +237,7 @@ agree_np <- function(x,
                  agree = df_agree,
                  h0_test = rej_text,
                  qr_mod = quan_mod,
+                 qr_vcov = V,
                  call = call2),
             class = "simple_agree")
 

@@ -286,14 +286,18 @@ bias_ba_plot = function(x,
   delta = get_call(x$call$delta)
 
   if(as.character(x$call[1]) == "agree_np" | as.character(x$call[1]) == "SimplyAgree::agree_np"){
-    quan_mod = rq(formula =  delta ~ mean,
-                  data = df,
-                  tau = c(agree.u,.5,agree.l))
+    # the fitted model (delta ~ 1 unless prop_bias) and its bootstrap
+    # covariance, so the bands are the printed limits and bounds
+    quan_mod = x$qr_mod
+    conf2 = if (isTRUE(get_call(x$call$TOST))) 1 - (1 - conf.level) * 2 else
+      conf.level
     emm = get_qemm(quan_mod,
                    df,
                    agree.l,
                    agree.u,
-                   conf.level)
+                   conf.level,
+                   conf2 = conf2,
+                   V = x$qr_vcov)
 
     if(geom == "geom_point"){
       bland_alt.plot = ggplot(df,

@@ -226,3 +226,35 @@ testthat::test_that("LoA bounds use conf2, the bias bounds conf.level", {
     expect_equal(res$loa$estimate - res$loa$lower.ci, half)
   }
 })
+
+testthat::test_that("plot bands are the printed limits and bounds", {
+  data("reps")
+  band = function(p) {
+    Filter(function(d) is.data.frame(d) && "text" %in% names(d),
+           lapply(p$layers, function(l) l$data))[[1]]
+  }
+  for (tost in c(TRUE, FALSE)) {
+    # constant limits (prop_bias = FALSE): flat bands at the printed values
+    a = suppressWarnings(agree_np(x = "x", y = "y", data = reps,
+                                  delta = 2.5, TOST = tost))
+    e = band(plot(a))
+    lo = e[e$text == "Lower LoA", ]
+    up = e[e$text == "Upper LoA", ]
+    bi = e[e$text == "Bias", ]
+    expect_equal(unique(lo$estimate), a$loa["Lower LoA", "estimate"])
+    expect_equal(unique(lo$lower.ci), a$loa["Lower LoA", "lower.ci"])
+    expect_equal(unique(up$upper.ci), a$loa["Upper LoA", "upper.ci"])
+    expect_equal(unique(bi$lower.ci), a$loa["Bias", "lower.ci"])
+    expect_equal(a$loa["Upper LoA", "ci.level"],
+                 if (tost) 0.9 else 0.95)
+
+    # proportional bias: the bands at the smallest and largest mean
+    b = agree_np(x = "x", y = "y", data = reps, delta = 2.5,
+                 prop_bias = TRUE, TOST = tost)
+    e = band(plot(b))
+    lo = e[e$text == "Lower LoA", ]
+    up = e[e$text == "Upper LoA", ]
+    expect_equal(lo$lower.ci[c(1, 100)], b$loa$lower.ci[c(1, 3)])
+    expect_equal(up$upper.ci[c(1, 100)], b$loa$upper.ci[c(7, 9)])
+  }
+})
