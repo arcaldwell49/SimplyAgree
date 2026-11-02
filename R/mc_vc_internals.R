@@ -123,6 +123,10 @@ mc_vc_design = function(df,
 # are random, crossed with the items. They enter as a pdIdent block for a
 # constant outer group (`one`), with the item-level effects nested in it:
 # random = list(one = pdIdent(~ method - 1), id = ..., repl = ~ 1).
+#
+# design$drop (from mc_vc_refit_boundary()) names random components left out
+# because they were estimated at zero: "rater", "tau" (omega then becomes an
+# item-by-replicate intercept, id_repl) or "omega"; with none left, gls.
 mc_vc_fit = function(df,
                      design,
                      control) {
@@ -131,9 +135,15 @@ mc_vc_fit = function(df,
   } else {
     NULL
   }
+  drop = design$drop
   random_methods = identical(design$methods, "random")
-  if (random_methods) {
+  keep_rater = random_methods && !"rater" %in% drop
+  if (keep_rater) {
     df$one = factor(1)
+  }
+  fit_gls = function(fixed) {
+    fit = nlme::gls(fixed, weights = vf, data = df)
+    mc_self_contained(fit, df, fixed = fixed, weights = vf)
   }
 
   fit_fun = function() {
@@ -141,6 +151,9 @@ mc_vc_fit = function(df,
       design$model_type,
       single_r = {
         fixed = y_t ~ id
+        if (!keep_rater) {
+          return(fit_gls(fixed))
+        }
         random = list(one = nlme::pdIdent(~ method - 1))
         fit = nlme::lme(fixed = fixed, random = random, data = df,
                         control = control)
@@ -167,13 +180,22 @@ mc_vc_fit = function(df,
         } else {
           nlme::pdIdent(~ method - 1)
         }
-        random = if (design$linked) {
-          list(id = pd, repl = ~ 1)
-        } else {
-          list(id = pd)
+        keep_omega = design$linked && !"omega" %in% drop
+        random = list()
+        if (keep_rater) {
+          random$one = nlme::pdIdent(~ method - 1)
         }
-        if (random_methods) {
-          random = c(list(one = nlme::pdIdent(~ method - 1)), random)
+        if (!"tau" %in% drop) {
+          random$id = pd
+          if (keep_omega) {
+            random$repl = ~ 1
+          }
+        } else if (keep_omega) {
+          df$id_repl = interaction(df$id, df$repl, drop = TRUE)
+          random$id_repl = ~ 1
+        }
+        if (length(random) == 0) {
+          return(fit_gls(fixed))
         }
         fit = nlme::lme(fixed = fixed, random = random, weights = vf,
                         data = df, control = control)
@@ -214,6 +236,7 @@ mc_self_contained = function(fit,
   } else {
     fit$call[[1]] = quote(nlme::gls)
     fit$call$model = fixed
+    fit$call$weights = weights
   }
   fit$call$data = call("get", "mc_data", envir = data_env)
   fit
@@ -237,15 +260,17 @@ mc_vc_extract = function(fit,
   }
 
   sig = fit$sigma
-  re = as.matrix(fit$modelStruct$reStruct)
-
+  re = if (inherits(fit, "lme")) as.matrix(fit$modelStruct$reStruct) else
+    list()
+  # components left out of a refit (design$drop) are 0
   rows = list()
   if (identical(design$methods, "random")) {
+    rater_v = if ("rater" %in% design$drop) 0 else re$one[1, 1] * sig^2
     rows$rater = dplyr::tibble(component = "rater", method = NA_character_,
-                               var = unname(re$one[1, 1]) * sig^2)
+                               var = unname(rater_v))
   }
   if (design$model_type == "reps") {
-    tau_v = diag(re$id) * sig^2
+    tau_v = if ("tau" %in% design$drop) rep(0, M) else diag(re$id) * sig^2
     if (design$tau == "common") {
       rows$tau = dplyr::tibble(component = "tau", method = NA_character_,
                                var = unname(tau_v[1]))
@@ -254,8 +279,10 @@ mc_vc_extract = function(fit,
                                var = unname(tau_v))
     }
     if (design$linked) {
+      om = if ("omega" %in% design$drop) 0 else
+        re[[mc_vc_omega_name(design)]][1, 1] * sig^2
       rows$omega = dplyr::tibble(component = "omega", method = NA_character_,
-                                 var = unname(re$repl[1, 1]) * sig^2)
+                                 var = unname(om))
     }
   }
   rows$sigma = if (design$sigma == "method") {
@@ -272,7 +299,14 @@ mc_vc_extract = function(fit,
     dplyr::select(component, method, sd, var)
 }
 
-# A matrix: rows = components (as in mc_vc_extract), columns = apVar pars
+# name of the item-by-replicate random effect: nested in the items (repl),
+# or its own grouping factor when tau is left out of a refit
+mc_vc_omega_name = function(design) {
+  if ("tau" %in% design$drop) "id_repl" else "repl"
+}
+
+# A matrix: rows = components (as in mc_vc_extract), columns = apVar pars;
+# components left out of a refit have no parameter (a row of zeros)
 mc_vc_parmap = function(fit,
                         design,
                         varcomp,
@@ -285,11 +319,14 @@ mc_vc_parmap = function(fit,
   for (j in seq_len(nrow(varcomp))) {
     comp = varcomp$component[j]
     m = varcomp$method[j]
+    if (comp %in% design$drop) {
+      next
+    }
     if (comp == "tau") {
       nm = if (is.na(m)) "reStruct.id" else paste0("reStruct.id", match(m, lv))
       A[j, nm] = 1
     } else if (comp == "omega") {
-      A[j, "reStruct.repl"] = 1
+      A[j, paste0("reStruct.", mc_vc_omega_name(design))] = 1
     } else if (comp == "rater") {
       A[j, "reStruct.one"] = 1
     } else if (comp == "sigma") {
@@ -304,54 +341,65 @@ mc_vc_parmap = function(fit,
 }
 
 # Approximate covariance of the variance components (delta method on apVar),
-# Wald CIs on the log-SD scale, and component df 2 * v^2 / var(v).
+# Wald CIs on the log-SD scale, and component df 2 * v^2 / var(v). `ok` is
+# FALSE (with NA intervals) when apVar is unavailable, which often happens
+# when a component is estimated at zero (method_vc() refits without such
+# components, mc_vc_refit_boundary()). Components left out of a refit are 0, with
+# interval 0 to NA and no df (the rater: see below).
 mc_vc_delta = function(fit,
                        design,
                        varcomp,
                        lv,
-                       conf_level) {
+                       conf_level,
+                       warn = TRUE) {
   q = qnorm((1 + conf_level) / 2)
   K = nrow(varcomp)
+  dropped = varcomp$component %in% design$drop
 
-  ## exact: common residual, paired differences ----
-  if (design$model_type == "single_2") {
+  if (design$model_type == "single_2" ||
+      (inherits(fit, "gls") && is.null(fit$modelStruct$varStruct))) {
+    ## exact: common residual (paired differences, or a refit without any
+    ## random effect) ----
     nu = fit$dims$N - fit$dims$p
     v = varcomp$var
     varcomp$lower = sqrt(nu * v / qchisq((1 + conf_level) / 2, nu))
     varcomp$upper = sqrt(nu * v / qchisq((1 - conf_level) / 2, nu))
     varcomp$df = nu
-    return(list(varcomp = varcomp,
-                cov = matrix(2 * v^2 / nu, 1, 1)))
-  }
+    cov_v = diag(2 * v^2 / nu, K)
+  } else {
+    av = fit$apVar
+    ok = !is.null(av) && !is.character(av)
+    if (ok) {
+      A = tryCatch(mc_vc_parmap(fit, design, varcomp, lv),
+                   error = function(e) NULL)
+      pars = attr(av, "Pars")
+      # check that the map reproduces the estimates
+      ok = !is.null(A) &&
+        isTRUE(all.equal(unname(exp(2 * drop(A %*% pars)))[!dropped],
+                         unname(varcomp$var)[!dropped], tolerance = 1e-6))
+    }
+    if (!ok) {
+      if (warn) {
+        mc_vc_warn_no_cov()
+      }
+      varcomp$lower = varcomp$upper = varcomp$df = NA_real_
+      return(list(varcomp = varcomp,
+                  cov = matrix(NA_real_, K, K),
+                  ok = FALSE))
+    }
 
-  av = fit$apVar
-  ok = !is.null(av) && !is.character(av)
-  if (ok) {
-    A = tryCatch(mc_vc_parmap(fit, design, varcomp, lv),
-                 error = function(e) NULL)
-    pars = attr(av, "Pars")
-    # check that the map reproduces the estimates
-    ok = !is.null(A) &&
-      isTRUE(all.equal(unname(exp(2 * drop(A %*% pars))), unname(varcomp$var),
-                       tolerance = 1e-6))
+    cov_log = 4 * A %*% av %*% t(A)
+    v = varcomp$var
+    cov_v = cov_log * outer(v, v)
+    se_log_sd = sqrt(diag(cov_log)) / 2
+    varcomp$lower = exp(log(varcomp$sd) - q * se_log_sd)
+    varcomp$upper = exp(log(varcomp$sd) + q * se_log_sd)
+    varcomp$df = 2 / diag(cov_log)
   }
-  if (!ok) {
-    warning("Approximate covariance of the variance components is ",
-            "unavailable (a component may be estimated near zero). ",
-            "Confidence intervals for variance components, RC, and limits ",
-            "are not computed.", call. = FALSE)
-    varcomp$lower = varcomp$upper = varcomp$df = NA_real_
-    return(list(varcomp = varcomp,
-                cov = matrix(NA_real_, K, K)))
-  }
-
-  cov_log = 4 * A %*% av %*% t(A)
-  v = varcomp$var
-  cov_v = cov_log * outer(v, v)
-  se_log_sd = sqrt(diag(cov_log)) / 2
-  varcomp$lower = exp(log(varcomp$sd) - q * se_log_sd)
-  varcomp$upper = exp(log(varcomp$sd) + q * se_log_sd)
-  varcomp$df = 2 / diag(cov_log)
+  varcomp$lower[dropped] = 0
+  varcomp$upper[dropped] = NA_real_
+  varcomp$df[dropped] = NA_real_
+  cov_v[dropped, ] = cov_v[, dropped] = 0
 
   # random raters: the rater variance is estimated from M method effects, so
   # it gets M - 1 df (rather than the asymptotic Wald df) in the bounds of
@@ -370,7 +418,51 @@ mc_vc_delta = function(fit,
     cov_v[j, j] = 2 * v_r^2 / nu
   }
   list(varcomp = varcomp,
-       cov = cov_v)
+       cov = cov_v,
+       ok = TRUE)
+}
+
+mc_vc_warn_no_cov = function() {
+  warning("Approximate covariance of the variance components is ",
+          "unavailable (a component may be estimated near zero). ",
+          "Confidence intervals for variance components, RC, and limits ",
+          "are not computed.", call. = FALSE)
+}
+
+# When random components are estimated at zero (as in mc_vc_boundary()),
+# refit without them: the REML likelihood is the same, and the remaining
+# components get a covariance (apVar is often unavailable at the boundary,
+# and otherwise gives meaningless Wald intervals for the zero component).
+# Method-specific tau is left out only when all of its SDs are zero. Returns
+# NULL when nothing can be left out, the refit fails, or its likelihood is
+# lower (the zero was not a boundary estimate).
+mc_vc_refit_boundary = function(fit,
+                                df,
+                                design,
+                                varcomp,
+                                control) {
+  min_sigma = min(varcomp$sd[varcomp$component == "sigma"])
+  is_re = varcomp$component %in% c("rater", "tau", "omega")
+  small = is_re & varcomp$sd < mc_vc_zero_tol * min_sigma
+  drop = unique(varcomp$component[small])
+  if ("tau" %in% drop &&
+      !all(small[varcomp$component == "tau"])) {
+    drop = setdiff(drop, "tau")
+  }
+  if (length(drop) == 0) {
+    return(NULL)
+  }
+  design2 = design
+  design2$drop = drop
+  fit2 = tryCatch(suppressWarnings(mc_vc_fit(df, design = design2,
+                                             control = control)),
+                  error = function(e) NULL)
+  if (is.null(fit2) ||
+      as.numeric(stats::logLik(fit2)) <
+      as.numeric(stats::logLik(fit)) - 1e-3) {
+    return(NULL)
+  }
+  list(fit = fit2, design = design2)
 }
 
 # Interval for the rater SD. The M method means vary by v + c around the
@@ -415,19 +507,31 @@ mc_vc_rater_ci = function(varcomp,
 }
 
 # boundary estimates ----
-mc_vc_boundary = function(varcomp) {
+# A random component is treated as zero when its SD is below this fraction of
+# the smallest residual SD: nlme works on the log-SD scale and stops short of
+# zero (estimates of 1e-5 to 5e-4 times sigma at the boundary in the
+# random-raters simulations). mc_vc_refit_boundary() keeps a refit only
+# if its REML likelihood is not lower, so a small real component is kept.
+mc_vc_zero_tol = 1e-3
+mc_vc_boundary = function(varcomp,
+                          drop = NULL) {
   re = varcomp[varcomp$component %in% c("rater", "tau", "omega"), ]
   if (nrow(re) == 0) {
     return(invisible(NULL))
   }
   min_sigma = min(varcomp$sd[varcomp$component == "sigma"])
-  small = re$sd < 1e-4 * min_sigma
+  small = re$sd < mc_vc_zero_tol * min_sigma
   if (any(small)) {
     lab = ifelse(is.na(re$method[small]), re$component[small],
                  paste0(re$component[small], " (", re$method[small], ")"))
     warning("Variance component(s) ", paste(lab, collapse = ", "),
-            " estimated at or near zero (boundary estimate). Confidence ",
-            "intervals that depend on them may be unreliable.",
+            " estimated at or near zero (boundary estimate). ",
+            if (length(drop) > 0) {
+              paste0("The confidence intervals come from a refit without ",
+                     paste(drop, collapse = " and "), ".")
+            } else {
+              "Confidence intervals that depend on them may be unreliable."
+            },
             call. = FALSE)
   }
   invisible(NULL)
@@ -557,7 +661,8 @@ mc_vc_pieces = function(varcomp,
                            include_omega = include_omega,
                            n_methods = n_methods)
     shares[j, ] = w[j, ] * varcomp$var / sum(w[j, ] * varcomp$var)
-    df[j, ] = ifelse(w[j, ] > 0, varcomp$df, 0)
+    # a component left out of a boundary refit is exactly 0 (no df)
+    df[j, ] = ifelse(w[j, ] > 0 & varcomp$var > 0, varcomp$df, 0)
   }
   list(w = w, shares = shares, df = df)
 }

@@ -253,6 +253,16 @@ print.simple_mvc <- function(x,
     cat("sigma: residual SD of the paired-difference model",
         "(SD of the differences / sqrt(2))\n")
   }
+  if (length(des$drop) > 0) {
+    no_up = intersect(des$drop, c("tau", "omega"))
+    cat("Estimated at zero: ", paste(des$drop, collapse = ", "),
+        "; the intervals come from a refit without ",
+        if (length(des$drop) > 1) "them" else "it",
+        if (length(no_up) > 0) {
+          paste0(" (no upper bound for ", paste(no_up, collapse = ", "), ")")
+        },
+        "\n", sep = "")
+  }
   if (identical(des$methods, "random")) {
     cat("Random raters: limits for the difference between two randomly",
         "chosen raters (methods);\n  rater: SD of the rater effects",
@@ -429,6 +439,10 @@ confint.simple_mvc <- function(object,
                 ifelse(chisq,
                        sqrt(vc$df * vc$var / qchisq((1 - level) / 2, vc$df)),
                        vc$sd * exp(q * se_log_sd)))
+  # components left out of a boundary refit: 0 to an unknown upper bound
+  dropped = vc$component %in% object$design$drop
+  sd_ci[dropped, 1] = 0
+  sd_ci[dropped, 2] = NA_real_
   j = which(vc$component == "rater")
   if (length(j) == 1) {
     sd_ci[j, ] = mc_vc_rater_ci(vc, object$vc_cov,

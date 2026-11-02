@@ -53,14 +53,22 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   on its delta-method df; coverage 0.94 to 0.98 (was 0.49 to 0.95 with the
   chi-square on M - 1 df; Satterthwaite df were tried and not enough). The
   limits and `tdi()` keep M - 1 df for the rater variance.
+- **Variance components at zero: refit** (2026-11-02; random and fixed
+  methods): `mc_vc_refit_boundary()` refits without every rater, tau or
+  omega below 1e-3 times sigma (`mc_vc_zero_tol`), kept if the REML
+  likelihood is not lower; dropped components are 0 with interval 0 to NA
+  (rater: MOVER from 0) and add nothing to the bounds (agreed). Random-
+  raters simulation: 998 to 1000 data sets per cell with bounds (was 826
+  to 1000). Tests in `test-method_vc_boundary.R`. Known limit: with 3
+  raters a large rater SD estimated at zero is missed (cell 8: 0.923); the
+  MOVER rater term instead of 0 did not help there. The fixed-method
+  simulations (`linked_reps_sims`, method_vc coverage) were not rerun; they
+  change only for fits with a component at zero.
 
 Remaining, in order:
 
-1. Random-rater follow-ups (in `method_vc_random_sims/README.md`):
-   - no bounds when the rater SD is estimated at zero (up to 10% with 3
-     raters and 17% with rater SD 0.05); e.g. refit without the rater effect for the other
-     components and use a one-sided bound for the rater variance;
-   - tolerance limits and an optional parametric bootstrap.
+1. Random-rater follow-up: tolerance limits and an optional parametric
+   bootstrap (which might also address the 3-rater case above).
 2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in
    `method_convert()`; method-specific equation error with three or more

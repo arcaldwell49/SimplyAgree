@@ -186,6 +186,17 @@ scale. \eqn{V_{mk}} is given Satterthwaite degrees of freedom
 covariance between the estimated components. With one measurement per
 item by two methods these are exactly \eqn{n - 1}.
 
+A random component (rater, \eqn{\tau} or \eqn{\omega}) whose SD is
+estimated at zero (below 0.001 times the smallest residual SD) has no
+usable uncertainty from the model: the approximate covariance is often
+unavailable, and otherwise gives meaningless Wald intervals. The model is
+then refit without such components, which leaves the REML likelihood
+unchanged, and the covariance of the other components comes from the
+refit (the original fit is kept for the biases, diagnostics and
+\code{keep_model}). A component left out is reported as 0, with interval 0 to
+\code{NA} (the rater SD: 0 to the upper limit described below), and adds
+nothing to the limits or their bounds. A warning names the components.
+
 With \code{interval = "tolerance"}, the prediction limits are
 \eqn{\alpha_m - \alpha_k \pm t \cdot SEP}, with
 \eqn{SEP = \sqrt{V_{mk} + SE^2}} (\eqn{SE} the standard error of the bias)
@@ -238,12 +249,14 @@ fewer than five). The interval for the rater SD writes
 \eqn{(\bar\tau^2 + \bar\sigma^2 / r) / n}, and combines the two by the
 MOVER, as for a between-group variance. In simulations (3 to 10 raters,
 15 or 30 items, 95\% targets) the one-sided bounds of the limits covered
-0.94 to 0.97 when the rater variance dominated and 0.98 to 1.00
-otherwise, and the interval for the rater SD covered 0.94 to 0.98 (a
-chi-square on \eqn{M - 1} df alone covered as little as 0.49 when the
-rater SD was small). When the rater SD is
-estimated at zero (up to 10\% of data sets with 3 raters), the bounds are
-not computed. Without replicates, the method-by-item variation is absorbed
+0.94 to 0.96 with 5 or 10 raters when the rater variance dominated and
+0.98 to 1.00 otherwise, and the interval for the rater SD covered 0.94 to
+0.98 (a chi-square on \eqn{M - 1} df alone covered as little as 0.49 when
+the rater SD was small). With 3 raters the rater SD is often estimated at
+zero (up to 19\% of data sets); the bounds then leave out the rater
+variance, which is liberal when a large rater SD is hidden by three
+similar rater effects (coverage 0.92 with rater SD 0.5 and 30 items).
+Without replicates, the method-by-item variation is absorbed
 into a common residual SD. Only \code{interval = "agreement"} is available, and
 fits with random raters cannot be used for conversion between methods
 (\code{\link[=method_convert]{method_convert()}}, \code{predict()}). The model is fit with

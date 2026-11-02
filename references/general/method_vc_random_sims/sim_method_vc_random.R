@@ -87,7 +87,7 @@ one_rep <- function(s, g) {
   c(ok = as.numeric(!is.na(l$upper_loa_ci)), sd = l$sd,
     cover_upper = up, cover_lower = lo, cover_both = up & lo,
     cover_rater = r$lower <= g$rater & r$upper >= g$rater,
-    rater_hat = r$sd, rater_zero = as.numeric(r$sd < 1e-4 * 0.4),
+    rater_hat = r$sd, rater_zero = as.numeric(r$sd < 1e-3 * 0.4),
     df_sd = l$df_sd, cover_tdi95 = tdi_cover(0.95),
     cover_tdi80 = tdi_cover(0.8))
 }
