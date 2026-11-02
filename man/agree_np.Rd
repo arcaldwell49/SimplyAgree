@@ -42,6 +42,8 @@ Returns simple_agree object with the results of the agreement analysis.
 \item \code{agree}: A data frame of the binomial proportion of results in agreement.
 \item \code{h0_test}: Decision from hypothesis test.
 \item \code{qr_mod}: The quantile regression model.
+\item \code{qr_vcov}: The bootstrap covariance matrices of its coefficients (one
+per quantile), used for the confidence limits and the plot.
 \item \code{call}: The matched call
 }
 }

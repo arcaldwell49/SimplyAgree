@@ -30,8 +30,9 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   NEWS keeps master's 0.4.1 bug-fix section below the 0.5.0 section.
 - **`agree_np(prop_bias = FALSE, TOST = TRUE)`: LoA bounds now at `conf2`**
   (they were computed at `conf.level` but labelled `conf2`). The plot's
-  LoA bands (`get_qemm()`) still use the outer end of a `conf.level`
-  interval for the limits, for both `prop_bias` settings; not changed.
+  bands (`get_qemm()`) now match the printout (2026-11-02): the stored
+  model (it refit `delta ~ mean` even with `prop_bias = FALSE`), the
+  limits at `conf2`, and the stored bootstrap covariance (`qr_vcov`).
 
 - **Random raters in `method_vc()`: first version done** (design agreed
   2026-11-01; gap 5 in `bls_reg_roadmap.md`). `methods = c("fixed",
