@@ -255,8 +255,8 @@ print.simple_mvc <- function(x,
   }
   if (identical(des$methods, "random")) {
     cat("Random raters: limits for the difference between two randomly",
-        "chosen raters (methods);\n  rater: SD of the rater effects,",
-        "with", des$n_methods - 1, "df\n")
+        "chosen raters (methods);\n  rater: SD of the rater effects",
+        "(from", des$n_methods, "raters)\n")
   }
   mc_print_repeat(x, digits = digits,
                   rp = if (orig) attr(l, "repeatability") else NULL)
@@ -418,11 +418,9 @@ confint.simple_mvc <- function(object,
     bias_ci = bias_ci[0, , drop = FALSE]
   }
 
-  # exact chi-square interval for the paired-difference model and for the
-  # rater SD (M - 1 df); Wald on the log-SD scale otherwise:
-  # var(log v) = 2 / df
-  chisq = vc$component == "rater" |
-    rep(object$design$model_type == "single_2", nrow(vc))
+  # exact chi-square interval for the paired-difference model; Wald on the
+  # log-SD scale otherwise: var(log v) = 2 / df; the rater SD below
+  chisq = rep(object$design$model_type == "single_2", nrow(vc))
   se_log_sd = sqrt(2 / vc$df) / 2
   q = qnorm((1 + level) / 2)
   sd_ci = cbind(ifelse(chisq,
@@ -431,6 +429,12 @@ confint.simple_mvc <- function(object,
                 ifelse(chisq,
                        sqrt(vc$df * vc$var / qchisq((1 - level) / 2, vc$df)),
                        vc$sd * exp(q * se_log_sd)))
+  j = which(vc$component == "rater")
+  if (length(j) == 1) {
+    sd_ci[j, ] = mc_vc_rater_ci(vc, object$vc_cov,
+                                n_items = object$design$n_items,
+                                n_obs = nrow(object$data), level = level)
+  }
   rownames(sd_ci) = ifelse(is.na(vc$method), vc$component,
                            paste0(vc$component, "_", vc$method))
 

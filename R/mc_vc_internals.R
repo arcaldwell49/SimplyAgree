@@ -354,20 +354,64 @@ mc_vc_delta = function(fit,
   varcomp$df = 2 / diag(cov_log)
 
   # random raters: the rater variance is estimated from M method effects, so
-  # it gets a chi-square on M - 1 df (rather than the asymptotic Wald df),
-  # and is treated as independent of the other components.
+  # it gets M - 1 df (rather than the asymptotic Wald df) in the bounds of
+  # the limits, and is treated as independent of the other components. Its
+  # own interval is the MOVER of mc_vc_rater_ci().
   j = which(varcomp$component == "rater")
   if (length(j) == 1) {
     nu = length(lv) - 1
     v_r = varcomp$var[j]
     varcomp$df[j] = nu
-    varcomp$lower[j] = sqrt(nu * v_r / qchisq((1 + conf_level) / 2, nu))
-    varcomp$upper[j] = sqrt(nu * v_r / qchisq((1 - conf_level) / 2, nu))
+    ci = mc_vc_rater_ci(varcomp, cov_v, n_items = design$n_items,
+                        n_obs = stats::nobs(fit), level = conf_level)
+    varcomp$lower[j] = ci[1]
+    varcomp$upper[j] = ci[2]
     cov_v[j, ] = cov_v[, j] = 0
     cov_v[j, j] = 2 * v_r^2 / nu
   }
   list(varcomp = varcomp,
        cov = cov_v)
+}
+
+# Interval for the rater SD. The M method means vary by v + c around the
+# grand mean, with v the rater variance and c = (mean tau^2 + mean sigma^2 /
+# r) / n the variance of a method mean from the items (n items, r
+# measurements per item and method), so v = S2 - c with S2 = v + c on M - 1
+# df and c on its delta-method df. The MOVER for this difference (as for a
+# between-group variance in a one-way ANOVA) covered 0.94 to 0.98 in
+# simulations, where a chi-square for v on M - 1 df covered as little as 0.49
+# when the rater SD was small (references/general/method_vc_random_sims).
+mc_vc_rater_ci = function(varcomp,
+                          cov_v,
+                          n_items,
+                          n_obs,
+                          level) {
+  j = which(varcomp$component == "rater")
+  k = sum(varcomp$component == "sigma")
+  M_tau = sum(varcomp$component == "tau")
+  M = varcomp$df[j] + 1
+  if (is.na(M)) {
+    return(c(NA_real_, NA_real_))
+  }
+  r = n_obs / (n_items * M)
+  w = ifelse(varcomp$component == "tau", 1 / (n_items * M_tau),
+             ifelse(varcomp$component == "sigma", 1 / (n_items * r * k), 0))
+  v = varcomp$var[j]
+  cc = sum(w * varcomp$var)
+  var_c = drop(t(w) %*% cov_v %*% w)
+  s2 = v + cc
+  a = (1 - level) / 2
+  d = M - 1
+  # bounds for c on its df (no uncertainty when the df are unavailable)
+  nu_c = 2 * cc^2 / var_c
+  c_lo = c_hi = 0
+  if (is.finite(nu_c) && nu_c > 0) {
+    c_lo = cc * (1 - nu_c / qchisq(1 - a, nu_c))
+    c_hi = cc * (nu_c / qchisq(a, nu_c) - 1)
+  }
+  lower = v - sqrt((s2 * (1 - d / qchisq(1 - a, d)))^2 + c_hi^2)
+  upper = v + sqrt((s2 * (d / qchisq(a, d) - 1))^2 + c_lo^2)
+  sqrt(c(max(lower, 0), upper))
 }
 
 # boundary estimates ----

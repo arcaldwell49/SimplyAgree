@@ -19,7 +19,7 @@ n_cores <- as.numeric(Sys.getenv("MVR_CORES", max(1, detectCores() - 2)))
 
 # tau = 0.3, omega = 0.3 (linked), sigma = 0.4 for every method unless
 # sigma_type = "unequal" (0.3 to 0.6 across the methods, fitted with
-# sigma = "method"); rater SD 0.2 or 0.5; 2 replicates.
+# sigma = "method"); rater SD 0.2 or 0.5 (0.1, 0.05 in cells 17-18); 2 replicates.
 grid <- expand.grid(rater = c(0.2, 0.5), n_methods = c(3, 5, 10),
                     n_items = c(15, 30), replicates = "linked",
                     sigma_type = "common", stringsAsFactors = FALSE)
@@ -27,7 +27,10 @@ grid <- rbind(grid,
               data.frame(rater = c(0.2, 0.5), n_methods = 5, n_items = 30,
                          replicates = "exchangeable", sigma_type = "common"),
               data.frame(rater = c(0.2, 0.5), n_methods = 5, n_items = 30,
-                         replicates = "linked", sigma_type = "unequal"))
+                         replicates = "linked", sigma_type = "unequal"),
+              # small rater SDs, for the rater SD interval (added 2026-11-02)
+              data.frame(rater = c(0.1, 0.05), n_methods = 5, n_items = 30,
+                         replicates = "linked", sigma_type = "common"))
 grid$cell <- seq_len(nrow(grid))
 
 cells <- Sys.getenv("MVR_CELLS", "")

@@ -48,14 +48,17 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   MOVER, so it equals `upper_loa_ci` at p = pred_level (tested);
   `"delta"` errors for random raters. GPQ coverage 0.94 to 1.00 in the
   random-raters simulation (`method_vc_random_sims/README.md`).
+- **Rater SD interval: MOVER** (2026-11-02): `mc_vc_rater_ci()`, v = S2 -
+  c with S2 on M - 1 df and c (the items' part of the method-mean variance)
+  on its delta-method df; coverage 0.94 to 0.98 (was 0.49 to 0.95 with the
+  chi-square on M - 1 df; Satterthwaite df were tried and not enough). The
+  limits and `tdi()` keep M - 1 df for the rater variance.
 
 Remaining, in order:
 
 1. Random-rater follow-ups (in `method_vc_random_sims/README.md`):
-   - the rater SD interval (M - 1 df) undercovers when the rater SD is small
-     (0.79 to 0.91); try Satterthwaite df from the method mean square;
    - no bounds when the rater SD is estimated at zero (up to 10% with 3
-     raters); e.g. refit without the rater effect for the other
+     raters and 17% with rater SD 0.05); e.g. refit without the rater effect for the other
      components and use a one-sided bound for the rater variance;
    - tolerance limits and an optional parametric bootstrap.
 2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for

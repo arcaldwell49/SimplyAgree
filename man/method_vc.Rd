@@ -226,19 +226,22 @@ plus \eqn{2\omega^2} with \code{include_omega = TRUE}, where
 \eqn{\bar\tau^2} and \eqn{\bar\sigma^2} are the common variances or the
 means of the method-specific ones (as in MethComp's \code{BA.est()}). There is
 one limits row, \eqn{\pm z \sqrt{V}}. Because \eqn{\sigma_\alpha^2} is
-estimated from only \eqn{M} rater effects, its confidence interval uses a
-chi-square distribution on \eqn{M - 1} degrees of freedom. The upper
-confidence bound for \eqn{V} combines the components by the MOVER, each
-with its own df (the rater variance with \eqn{M - 1}), rather than one
-chi-square on the Satterthwaite df, which was liberal when the rater
-variance dominates. The bounds of the limits are therefore wide with few
-raters (a warning is given with fewer than five). \code{df_sd} is still the
-Satterthwaite df, which \code{\link[=tdi]{tdi()}} uses, so its bounds for random raters may
-be liberal. In simulations (3 to 10 raters, 15 or 30 items, 95\% targets)
-the one-sided bounds of the limits covered 0.94 to 0.97 when the rater
-variance dominated and 0.98 to 1.00 otherwise. The interval for the rater
-SD covered 0.93 to 0.95 for a large rater SD but only 0.79 to 0.91 when
-it was smaller than \eqn{\tau} and \eqn{\sigma}. When the rater SD is
+estimated from only \eqn{M} rater effects, it has \eqn{M - 1} degrees of
+freedom. The upper confidence bound for \eqn{V} combines the components
+by the MOVER, each with its own df (the rater variance with \eqn{M - 1}),
+rather than one chi-square on the Satterthwaite df, which was liberal
+when the rater variance dominates; \code{\link[=tdi]{tdi()}} does the same. The bounds of
+the limits are therefore wide with few raters (a warning is given with
+fewer than five). The interval for the rater SD writes
+\eqn{\sigma_\alpha^2} as the variance of the method means (on
+\eqn{M - 1} df) minus the part due to the items,
+\eqn{(\bar\tau^2 + \bar\sigma^2 / r) / n}, and combines the two by the
+MOVER, as for a between-group variance. In simulations (3 to 10 raters,
+15 or 30 items, 95\% targets) the one-sided bounds of the limits covered
+0.94 to 0.97 when the rater variance dominated and 0.98 to 1.00
+otherwise, and the interval for the rater SD covered 0.94 to 0.98 (a
+chi-square on \eqn{M - 1} df alone covered as little as 0.49 when the
+rater SD was small). When the rater SD is
 estimated at zero (up to 10\% of data sets with 3 raters), the bounds are
 not computed. Without replicates, the method-by-item variation is absorbed
 into a common residual SD. Only \code{interval = "agreement"} is available, and

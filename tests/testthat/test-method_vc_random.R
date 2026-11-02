@@ -82,16 +82,37 @@ test_that("random-rater limits: one row, 2 * (rater + mean tau + mean sigma)", {
   expect_null(fit$alpha)
 })
 
-test_that("the rater variance has M - 1 df and a chi-square interval", {
+test_that("the rater variance has M - 1 df and a MOVER interval", {
   dat = rr_dat()
   fit = method_vc(dat, y = "y", method = "method", id = "id",
                   replicate = "repl", replicates = "linked",
                   methods = "random", conf_level = 0.9)
-  r = fit$varcomp[fit$varcomp$component == "rater", ]
+  vc = fit$varcomp
+  r = vc[vc$component == "rater", ]
   expect_equal(r$df, 4)
-  expect_equal(r$lower, sqrt(4 * r$var / qchisq(0.95, 4)))
-  expect_equal(r$upper, sqrt(4 * r$var / qchisq(0.05, 4)))
-  j = which(fit$varcomp$component == "rater")
+  # v = S2 - c: S2 = v + c on M - 1 df, c = (tau^2 + sigma^2 / r) / n on its
+  # delta-method df (20 items, 2 replicates)
+  w = c(0, 1 / 20, 0, 1 / 40)
+  expect_equal(vc$component, c("rater", "tau", "omega", "sigma"))
+  cc = sum(w * vc$var)
+  nu_c = 2 * cc^2 / drop(t(w) %*% fit$vc_cov %*% w)
+  s2 = r$var + cc
+  lo = r$var - sqrt((s2 * (1 - 4 / qchisq(0.95, 4)))^2 +
+                      (cc * (nu_c / qchisq(0.05, nu_c) - 1))^2)
+  up = r$var + sqrt((s2 * (4 / qchisq(0.05, 4) - 1))^2 +
+                      (cc * (1 - nu_c / qchisq(0.95, nu_c)))^2)
+  expect_equal(r$lower, sqrt(max(lo, 0)))
+  expect_equal(r$upper, sqrt(up))
+  # wider than the chi-square interval for v on M - 1 df
+  expect_gt(r$upper, sqrt(4 * r$var / qchisq(0.05, 4)))
+  # with no item-level variance it is that chi-square interval
+  vc0 = vc
+  vc0$var[-1] = 0
+  expect_equal(mc_vc_rater_ci(vc0, fit$vc_cov * 0, n_items = 20, n_obs = 200,
+                              level = 0.9),
+               sqrt(4 * r$var / qchisq(c(0.95, 0.05), 4)))
+  expect_gt(diff(confint(fit, level = 0.95)["rater", ]), r$upper - r$lower)
+  j = which(vc$component == "rater")
   expect_equal(fit$vc_cov[j, j], 2 * r$var^2 / 4)
   expect_equal(sum(abs(fit$vc_cov[j, -j])), 0)
   ci = confint(fit, level = 0.9)
