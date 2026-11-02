@@ -283,6 +283,44 @@ Implementation order: (a) reliability + boundary warning in `method_vc()` with t
 (b) the change extraction and quadrant/polar plots, `simple_mvc` first, then `tolerance_delta` and `loa`;
 (c) documentation and the vignette subsection.
 
+## Follow-up: a within-subject facet in `reli_facet_test()` (proposed 2026-11-02, not started)
+
+`reli_facet_test(occasion =)` (experimental) with devices as `item` and occasions as `occasion` fits the same
+decomposition as `method_vc(replicates = "linked")`: subject-by-occasion (po) is the real within-subject change
+(ω²), subject-by-item (pi) is τ², and the residual is the device error (pooled over devices). But none of its
+facets reports the trending coefficient. Check (`trending_checks/facet_check.R`; 100 subjects × 6 occasions,
+one data set per row):
+
+| Scenario | `facet = "intra"` | `facet = "inter"` | (po) / ((po) + residual) |
+|---|---|---|---|
+| tracks, within SD 1.5 | 0.21 | 0.97 | ≈ 0.97 |
+| does not track, within SD 1.5 | 0.37 | 0.38 | ≈ 0 |
+| **does not track, within SD 0.3** | **0.88** | **0.85** | **0.02** |
+
+With unit slope the components were recovered: (po) SD 1.58 (true 1.5), (pi) 0.20 (0.18), residual 0.26 (0.25).
+
+- `"intra"` counts (po), the real change, as error: the test–retest assumption again.
+- `"inter"` keeps the between-subject variance in the score, so with a small within-subject range it misses a device
+  that does not track.
+
+**Proposal:** `facet = "within"` (requires `occasion`), with score σ²_po and error σ²_pio,e / k' (consistency;
+agreement adds (σ²_o + σ²_io) / k' only if shared occasions are meaningful). This reuses the existing MLS /
+Satterthwaite / bootstrap intervals and the `components` table, and gives reliability users (raters × occasions) the
+same coefficient that `simple_mvc` now reports. `method_vc(linked)` stays the recommended route for method
+comparison (separate error SDs per device, fixed bias, limits in measurement units).
+
+To decide or check before starting:
+
+- the formula for unbalanced data (`method = "reml"`) and repeats within subject × item × occasion (residual split);
+- whether to also report the change LoA, z·√2·√(2σ²_pio,e), from the pooled residual, or leave that to
+  `method_vc()` / `mdc_test()` on D;
+- docs: occasions are assumed shared across subjects (day 1 is the same event for everyone); for monitoring data
+  where occasion r of one subject has nothing to do with occasion r of another, σ²_o and σ²_io should be ≈ 0 and
+  only the consistency form is meaningful;
+- interval coverage: a short simulation in the style of `method_vc_reliability_sims/`, including the boundary case
+  (σ²_po near 0);
+- cross-check against the `simple_mvc` pair reliability, ω² / (ω² + mean σ²), on the same data.
+
 ## Open questions (answered 2026-11-02; see Decisions)
 
 1. Item 1: report the average's SDs as point estimates only (matching `SD.between`/`SD.within`), or with chi-square CIs?
