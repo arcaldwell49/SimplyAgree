@@ -1,6 +1,6 @@
 # method_vc(methods = "random"): coverage of the limits for random raters
 
-Status (2026-11-01): **run**. Limits: criterion met after switching the bounds to the MOVER over the components. Rater SD interval: criterion not met for a small rater SD (see Results).
+Status (2026-11-01; `tdi()` columns added 2026-11-02): **run**. `tdi()` GPQ bound: criterion met. Limits: criterion met after switching the bounds to the MOVER over the components. Rater SD interval: criterion not met for a small rater SD (see Results).
 
 ## Question
 
@@ -110,3 +110,23 @@ Both columns come from the same data sets.
    with bounds.
 4. The SD of the differences is nearly unbiased (mean 0.977 to 0.995 of
    the true value, slightly low with 3 raters).
+
+### `tdi()` GPQ bound (added 2026-11-02)
+
+After `tdi()` was changed to draw each variance component on its own df
+for random raters, the same data sets were rerun (the columns above
+reproduced exactly) with the default GPQ bound (`B = 2000`) for p = 0.95
+and p = 0.8; the true TDI is qnorm((1 + p) / 2) times the true SD, since the
+bias is 0. Coverage among the fits with bounds (`cover_tdi95`,
+`cover_tdi80` in `summary.csv`):
+
+| cell | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GPQ | 0.998 | 0.979 | 0.998 | 0.961 | 0.993 | 0.946 | 0.997 | 0.950 | 0.994 | 0.959 | 0.980 | 0.948 | 0.983 | 0.943 | 0.999 | 0.950 |
+
+**Criterion (at least 0.93) met in every cell**: 0.94 to 0.98 with rater
+SD 0.5 and 0.98 to 1.00 with rater SD 0.2, slightly above the MOVER bounds
+of the limits. The two values of p give identical coverage: with bias 0 the
+TDI and its GPQ draws are the SD times a constant, and the draws are the
+same for a given seed. `method = "tolerance"` equals the MOVER bound of the
+limits at p = 0.95 (tested), so its coverage is the column above.

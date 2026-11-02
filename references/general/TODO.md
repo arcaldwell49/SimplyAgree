@@ -46,7 +46,8 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
 - **`tdi()` for random raters uses the components** (2026-11-02): GPQ
   draws each component on its own df and `"tolerance"` uses the component
   MOVER, so it equals `upper_loa_ci` at p = pred_level (tested);
-  `"delta"` errors for random raters. The GPQ bound was not simulated.
+  `"delta"` errors for random raters. GPQ coverage 0.94 to 1.00 in the
+  random-raters simulation (`method_vc_random_sims/README.md`).
 
 Remaining, in order:
 

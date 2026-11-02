@@ -43,7 +43,8 @@ invisible(clusterEvalQ(cl, suppressMessages(pkgload::load_all(".",
                                                                quiet = TRUE))))
 
 # one data set: new rater effects drawn each time; returns whether the
-# bounds of the limits and the rater SD interval cover the true values
+# bounds of the limits, the rater SD interval, and the GPQ bound of tdi()
+# (p = 0.95 and 0.8) cover the true values
 one_rep <- function(s, g) {
   M <- g$n_methods
   set.seed(100000 * g$cell + s)
@@ -60,7 +61,7 @@ one_rep <- function(s, g) {
   upper_true <- stats::qnorm(0.975) * sd_true
   out <- c(ok = 0, sd = NA, cover_upper = NA, cover_lower = NA,
            cover_both = NA, cover_rater = NA, rater_hat = NA,
-           rater_zero = NA, df_sd = NA)
+           rater_zero = NA, df_sd = NA, cover_tdi95 = NA, cover_tdi80 = NA)
   fit <- tryCatch(suppressWarnings(suppressMessages(
     method_vc(dat, y = "y", method = "method", id = "id",
               replicate = "repl", replicates = g$replicates,
@@ -73,11 +74,19 @@ one_rep <- function(s, g) {
   r <- fit$varcomp[fit$varcomp$component == "rater", ]
   up <- l$upper_loa_ci >= upper_true
   lo <- l$lower_loa_ci <= -upper_true
+  # GPQ bound of tdi() (bias 0, so the true TDI is qnorm((1 + p) / 2) * SD)
+  tdi_cover <- function(p) {
+    td <- tryCatch(suppressWarnings(tdi(fit, p = p, B = 2000, seed = s)),
+                   error = function(e) NULL)
+    if (is.null(td)) return(NA)
+    td$conf.int[2] >= stats::qnorm((1 + p) / 2) * sd_true
+  }
   c(ok = as.numeric(!is.na(l$upper_loa_ci)), sd = l$sd,
     cover_upper = up, cover_lower = lo, cover_both = up & lo,
     cover_rater = r$lower <= g$rater & r$upper >= g$rater,
     rater_hat = r$sd, rater_zero = as.numeric(r$sd < 1e-4 * 0.4),
-    df_sd = l$df_sd)
+    df_sd = l$df_sd, cover_tdi95 = tdi_cover(0.95),
+    cover_tdi80 = tdi_cover(0.8))
 }
 clusterExport(cl, "one_rep")
 
@@ -109,6 +118,8 @@ summ <- do.call(rbind, lapply(files, function(f) {
              cover_lower = mean(d$cover_lower[ok]),
              cover_both = mean(d$cover_both[ok]),
              cover_rater = mean(d$cover_rater[ok]),
+             cover_tdi95 = mean(d$cover_tdi95[ok]),
+             cover_tdi80 = mean(d$cover_tdi80[ok]),
              rater_zero = mean(d$rater_zero[ok]),
              sd_true = sd_true,
              sd_mean = mean(d$sd[ok]),
