@@ -56,7 +56,7 @@ Escaramis tolerance bound (exact noncentral t here) tracks gpq closely.
 | reps   | 0.913-0.965 | 0.956-0.987 | 0.920-0.948 | 0.979-1.000 | 0.931-0.987 |
 | nest   | 0.936-0.978 | 0.953-0.986 | 0.922-0.960 | 0.983-1.000 | 0.937-0.984 |
 | tol_id | 0.936-0.971 | 0.958-0.988 | 0.911-0.960 | 0.990-1.000 | 0.941-0.988 |
-| mvc    | 0.948-0.976 | (unchanged method) 0.942-0.985 | 0.936-0.968 | 0.986-0.999 | 0.940-0.990 |
+| mvc    | 0.948-0.976 | (unchanged method) 0.944-0.972 | 0.931-0.953 | 0.986-0.999 | 0.941-0.983 |
 
 The lowest values of the first gpq run were with bias 1 SD and 10-20
 subjects: drawing the bias independently of the total variance ignores that
@@ -80,9 +80,15 @@ analytic alternative, documented as somewhat liberal; `"tolerance"` as the
 Escaramis et al. (2010) bound, documented as close to gpq for independent
 data and somewhat liberal with replicates, bias, and few subjects.
 
-**method_vc failures:** with 10 items, 4-5% of fits had a variance component
-at zero, for which `method_vc()` gives no approximate covariance and no
-bounds (`n_failed`); `tdi()` then returns the estimate with `NA` bounds and a
-warning. These fits are excluded from the coverage above.
+**method_vc failures:** in the first runs, with 10 items 4-5% of fits had a
+variance component at zero, for which `method_vc()` gave no approximate
+covariance and no bounds (`n_failed`: 45-46 of 1000 with 10 items, 12-20
+with 20); `tdi()` then returns the estimate with `NA` bounds and a warning.
+Since `method_vc()` refits without components at zero (2026-11-02), the mvc
+cells were rerun: at most 4 of 1000 fits fail in any cell, and the mvc
+coverage above is from that rerun (before: gpq 0.942-0.985, delta
+0.936-0.968, tolerance 0.940-0.990). Including the rescued fits lowers the
+coverage a little (gpq 0.985 to 0.972 with 10 items and no bias), so they
+are covered less often than the others, but every cell stays above 0.93. Failed fits are excluded from the coverage.
 
 `summary_simple.csv` and `summary_reps.csv` hold the final run.

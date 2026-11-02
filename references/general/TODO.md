@@ -62,8 +62,11 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   to 1000). Tests in `test-method_vc_boundary.R`. Known limit: with 3
   raters a large rater SD estimated at zero is missed (cell 8: 0.923); the
   MOVER rater term instead of 0 did not help there. The fixed-method
-  simulations (`linked_reps_sims`, method_vc coverage) were not rerun; they
-  change only for fits with a component at zero.
+  simulations were rerun with the refit: method_vc coverage changed by at
+  most 0.006 and fits without bounds fell from up to 2.2% to at most 0.6%
+  (the documented ranges hold); `tdi()` on mvc fits failed in at most 4 of
+  1000 (was up to 46), coverage 0.93 to 0.98; `linked_reps_test()` size
+  and power unchanged.
 
 Remaining, in order:
 

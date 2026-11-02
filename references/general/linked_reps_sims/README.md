@@ -3,6 +3,11 @@
 Status (2026-11-01): **run** (R 4.4.1, Windows, 14 workers, about 1.5
 hours). Size and power criteria met; `sd_perm` is 0.6% to 3.9% below
 `sd_exch`, more than the 2% criterion in three cells (see Results).
+Rerun 2026-11-02 after `method_vc()` started refitting without variance
+components at zero: the rejection rates are identical in every cell and the
+mean estimates differ only from the fifth digit (`summary.csv` holds the
+rerun), so the omega estimates now set to exactly zero did not make the
+test more conservative.
 
 ## Question
 
