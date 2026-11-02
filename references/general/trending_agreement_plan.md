@@ -202,6 +202,20 @@ plot(x, type = "polar",    exclusion = 0, relative = FALSE)
 
 ### 3. Documentation
 
+- **State the test–retest assumption of the reliability functions explicitly.** `icc_test()`, `reli_err_test()`
+  and `mdc_test()` (with occasion or trial as `item`) assume one true value per subject, measured repeatedly, so
+  differences between occasions are pure error. When the true value changes between occasions (trending data,
+  e.g. cardiac output during an intervention), that assumption fails:
+  - on one device's readings, the "SEM" is √(ω² + σ_m²), real change plus device error;
+  - the ICC with occasion as `item` counts real change as error.
+
+  Where it goes:
+  - a short "Assumptions" paragraph in the Details of each of the three functions, pointing to
+    `method_vc(replicates = "linked")` for repeated measures of a changing value;
+  - a sentence near the start of the reliability vignette;
+  - the trending subsection of the agreement vignette, with a table of which call estimates what. It should include
+    the two calls that do work: `mdc_test()` on D (the change LoA, because the real change cancels in D) and
+    `icc_test()` on subject-centred data with device as `item` (a point estimate only; see step 0).
 - **Agreement vignette, nested section**: a "trending agreement" subsection with
   - the change LoA via `mdc_test()` on D (with code), and the per-method `rc` from `method_vc()`;
   - what σ_within contains, including the non-unit slope case and the simulation table above;
