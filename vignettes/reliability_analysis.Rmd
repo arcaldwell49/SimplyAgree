@@ -64,7 +64,9 @@ occasions are measurement error. When the true value changes between
 occasions (repeated measures during an intervention, for example), real
 change is counted as error. For two or more methods measured on the same
 occasions, `method_vc(replicates = "linked")` separates the two (see
-"Trending agreement" in `vignette("agreement_analysis")`).
+"Trending agreement" in `vignette("agreement_analysis")`), and
+`reli_facet_test(facet = "within")` gives the reliability of the changes
+with the raters or devices as items.
 
 As an example, take the data of @shrout1979 (6 subjects rated by 4 judges).
 

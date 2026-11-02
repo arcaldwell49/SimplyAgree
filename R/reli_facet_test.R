@@ -33,9 +33,11 @@
 #'   standard error of measurement. See Details.
 #' @param facet Which measurement varies: `"intra"` (default), the same item
 #'   on another repeat or occasion (intra-rater, repeatability); `"inter"`,
-#'   another item (on the same occasion, with `occasion`); or `"overall"`,
+#'   another item (on the same occasion, with `occasion`); `"overall"`,
 #'   another item on another occasion (the same as `"inter"` without
-#'   `occasion`). See Details.
+#'   `occasion`); or `"within"` (needs `occasion`), the change of a subject
+#'   from one occasion to another, as measured by another item (trending).
+#'   See Details.
 #' @param type `"consistency"` (default) sets systematic differences between
 #'   items (and occasions) aside, to be reported separately; `"agreement"`
 #'   counts them as error, as in [icc_test()]. Without `occasion`,
@@ -115,6 +117,7 @@
 #' | inter, repeats | \eqn{\sigma^2_p} | \eqn{\sigma^2_{pi}/k' + \sigma^2_e/(k'r')} | \eqn{\sigma^2_i/k'} |
 #' | inter, occasions | \eqn{\sigma^2_p + \sigma^2_{po}} | \eqn{(\sigma^2_{pi} + \sigma^2_{pio,e})/k'} | \eqn{(\sigma^2_i + \sigma^2_{io})/k'} |
 #' | overall, occasions | \eqn{\sigma^2_p} | \eqn{\sigma^2_{pi}/k' + \sigma^2_{po}/m' + \sigma^2_{pio,e}/(k'm')} | \eqn{\sigma^2_i/k' + \sigma^2_o/m' + \sigma^2_{io}/(k'm')} |
+#' | within, occasions | \eqn{\sigma^2_{po}} | \eqn{\sigma^2_{pio,e}/k'} | \eqn{\sigma^2_{io}/k'} |
 #'
 #' (with further repeats within subject, item and occasion, the residual is
 #' split and its error part is also divided by \eqn{r'}). The coefficient
@@ -127,6 +130,39 @@
 #' the generalizability (\eqn{E\rho^2}) and dependability (\eqn{\Phi})
 #' coefficients of G theory. In gauge R&R terms (repeats), \eqn{\sigma^2_e}
 #' is repeatability and \eqn{\sigma^2_i + \sigma^2_{pi}} reproducibility.
+#'
+#' **Within-subject (trending) reliability.** When the true value of a
+#' subject changes between occasions (repeated measures during an
+#' intervention, monitoring data), \eqn{\sigma^2_{po}} is that real change,
+#' and `facet = "within"` asks how well the items (devices) follow it: the
+#' score is \eqn{\sigma^2_{po}} and the error the item-specific deviations on
+#' an occasion. It is `"inter"` with each subject's readings centred on the
+#' subject (and item), so the subject-level effects (\eqn{\sigma^2_p},
+#' \eqn{\sigma^2_{pi}}, \eqn{\sigma^2_i}) drop out; as for `"inter"`, the
+#' occasion main effect \eqn{\sigma^2_o} is in neither the score nor the
+#' error. `"intra"` counts the real change as error, and `"inter"` keeps the
+#' between-subject variance in the score, so with small changes it misses a
+#' device that does not follow them (in a check with 100 subjects and 6
+#' occasions, `"inter"` was 0.85 and `"within"` 0.02 for a device that did
+#' not track at all). The consistency coefficient is a ratio of two mean
+#' squares and has an exact interval. It estimates the same quantity as the
+#' within-item reliability of [method_vc()] with linked replicates and
+#' `sigma = "common"`, \eqn{\omega^2 / (\omega^2 + \sigma^2)} (equal for
+#' balanced data up to the fitting method).
+#' [method_vc()] remains the route for method comparison (an error SD for
+#' each device, the biases, and limits in measurement units); the
+#' within-subject limits of agreement of two devices are [mdc_test()] on
+#' their differences (see the "Trending agreement" section of
+#' `vignette("agreement_analysis")`). The occasions must be shared (day 1 is
+#' the same event for every subject); for monitoring data where occasion r
+#' of one subject has nothing to do with occasion r of another,
+#' \eqn{\sigma^2_o} and \eqn{\sigma^2_{io}} should be about 0, and only the
+#' consistency form is meaningful. In simulations (10 or 30 subjects, 2 or 3
+#' items, 3 or 6 occasions, from no real change to a change larger than the
+#' error, 1000 data sets per setting), the intervals of the within-subject
+#' coefficients and SEMs covered 0.933 to 0.977 with balanced data, and 0.942
+#' to 0.997 with REML and 20% of measurements missing (conservative when
+#' there was no real change).
 #'
 #'  It is important to know what averaging does for this function. Without `occasion` and with \eqn{r' = r} (the
 #' score averages as many repeats as the study had), the inter-rater
@@ -321,7 +357,7 @@ reli_facet_test <- function(x = NULL,
                             id = NULL,
                             occasion = NULL,
                             stat = c("ICC", "SEM"),
-                            facet = c("intra", "inter", "overall"),
+                            facet = c("intra", "inter", "overall", "within"),
                             type = c("consistency", "agreement"),
                             k_avg = 1,
                             m_avg = 1,
@@ -351,6 +387,10 @@ reli_facet_test <- function(x = NULL,
   .check_whole(m_avg, "m_avg")
   .check_whole(r_avg, "r_avg")
   crossed <- !is.null(occasion)
+  if (!crossed && facet == "within") {
+    stop("facet = \"within\" needs 'occasion': the change of a subject ",
+         "between shared occasions.", call. = FALSE)
+  }
   if (!crossed && facet == "overall") {
     facet <- "inter"
   }
@@ -358,10 +398,11 @@ reli_facet_test <- function(x = NULL,
     stop("facet = \"intra\" concerns a single item; 'k_avg' must be 1.",
          call. = FALSE)
   }
-  if (m_avg != 1 && (!crossed || facet == "inter")) {
+  if (m_avg != 1 && (!crossed || facet %in% c("inter", "within"))) {
     stop("'m_avg' must be 1 ",
          if (!crossed) "without 'occasion'." else
-           "for facet = \"inter\" (one occasion).", call. = FALSE)
+           paste0("for facet = \"", facet, "\" (one occasion)."),
+         call. = FALSE)
   }
   if (stat == "ICC" && scale != "raw") {
     stop("'scale' applies to stat = \"SEM\" only.", call. = FALSE)
@@ -626,6 +667,7 @@ reli_facet_test <- function(x = NULL,
                    inter = if (design == "crossed") {
                      "another item, same occasion"
                    } else "another item",
+                   within = "change between occasions, another item",
                    overall = "another item and occasion")
   kind <- if (spec$facet == "intra" && design == "nested") "" else
     if (spec$type == "consistency") "consistency, " else "absolute agreement, "
@@ -633,6 +675,7 @@ reli_facet_test <- function(x = NULL,
     switch(spec$facet,
            intra = "Intra-rater ICC",
            inter = "Inter-rater ICC",
+           within = "Within-subject ICC",
            overall = if (spec$type == "consistency") {
              "Generalizability coefficient"
            } else "Dependability coefficient")
@@ -640,6 +683,7 @@ reli_facet_test <- function(x = NULL,
     switch(spec$facet,
            intra = "Intra-rater SEM",
            inter = "Inter-rater SEM",
+           within = "Within-subject SEM",
            overall = "Overall SEM")
   }
   paste0(what, " (", kind, varies, "), ", .facet_score_text(spec, design))

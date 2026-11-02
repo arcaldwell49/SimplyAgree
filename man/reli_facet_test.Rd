@@ -12,7 +12,7 @@ reli_facet_test(
   id = NULL,
   occasion = NULL,
   stat = c("ICC", "SEM"),
-  facet = c("intra", "inter", "overall"),
+  facet = c("intra", "inter", "overall", "within"),
   type = c("consistency", "agreement"),
   k_avg = 1,
   m_avg = 1,
@@ -50,9 +50,11 @@ standard error of measurement. See Details.}
 
 \item{facet}{Which measurement varies: \code{"intra"} (default), the same item
 on another repeat or occasion (intra-rater, repeatability); \code{"inter"},
-another item (on the same occasion, with \code{occasion}); or \code{"overall"},
+another item (on the same occasion, with \code{occasion}); \code{"overall"},
 another item on another occasion (the same as \code{"inter"} without
-\code{occasion}). See Details.}
+\code{occasion}); or \code{"within"} (needs \code{occasion}), the change of a subject
+from one occasion to another, as measured by another item (trending).
+See Details.}
 
 \item{type}{\code{"consistency"} (default) sets systematic differences between
 items (and occasions) aside, to be reported separately; \code{"agreement"}
@@ -187,6 +189,7 @@ occasions (\code{m_avg}) and \eqn{r'} repeats (\code{r_avg}), the error variance
    inter, repeats \tab \eqn{\sigma^2_p} \tab \eqn{\sigma^2_{pi}/k' + \sigma^2_e/(k'r')} \tab \eqn{\sigma^2_i/k'} \cr
    inter, occasions \tab \eqn{\sigma^2_p + \sigma^2_{po}} \tab \eqn{(\sigma^2_{pi} + \sigma^2_{pio,e})/k'} \tab \eqn{(\sigma^2_i + \sigma^2_{io})/k'} \cr
    overall, occasions \tab \eqn{\sigma^2_p} \tab \eqn{\sigma^2_{pi}/k' + \sigma^2_{po}/m' + \sigma^2_{pio,e}/(k'm')} \tab \eqn{\sigma^2_i/k' + \sigma^2_o/m' + \sigma^2_{io}/(k'm')} \cr
+   within, occasions \tab \eqn{\sigma^2_{po}} \tab \eqn{\sigma^2_{pio,e}/k'} \tab \eqn{\sigma^2_{io}/k'} \cr
 }
 
 
@@ -201,6 +204,39 @@ for raters on the same occasion, what most inter-rater studies report;
 the generalizability (\eqn{E\rho^2}) and dependability (\eqn{\Phi})
 coefficients of G theory. In gauge R&R terms (repeats), \eqn{\sigma^2_e}
 is repeatability and \eqn{\sigma^2_i + \sigma^2_{pi}} reproducibility.
+
+\strong{Within-subject (trending) reliability.} When the true value of a
+subject changes between occasions (repeated measures during an
+intervention, monitoring data), \eqn{\sigma^2_{po}} is that real change,
+and \code{facet = "within"} asks how well the items (devices) follow it: the
+score is \eqn{\sigma^2_{po}} and the error the item-specific deviations on
+an occasion. It is \code{"inter"} with each subject's readings centred on the
+subject (and item), so the subject-level effects (\eqn{\sigma^2_p},
+\eqn{\sigma^2_{pi}}, \eqn{\sigma^2_i}) drop out; as for \code{"inter"}, the
+occasion main effect \eqn{\sigma^2_o} is in neither the score nor the
+error. \code{"intra"} counts the real change as error, and \code{"inter"} keeps the
+between-subject variance in the score, so with small changes it misses a
+device that does not follow them (in a check with 100 subjects and 6
+occasions, \code{"inter"} was 0.85 and \code{"within"} 0.02 for a device that did
+not track at all). The consistency coefficient is a ratio of two mean
+squares and has an exact interval. It estimates the same quantity as the
+within-item reliability of \code{\link[=method_vc]{method_vc()}} with linked replicates and
+\code{sigma = "common"}, \eqn{\omega^2 / (\omega^2 + \sigma^2)} (equal for
+balanced data up to the fitting method).
+\code{\link[=method_vc]{method_vc()}} remains the route for method comparison (an error SD for
+each device, the biases, and limits in measurement units); the
+within-subject limits of agreement of two devices are \code{\link[=mdc_test]{mdc_test()}} on
+their differences (see the "Trending agreement" section of
+\code{vignette("agreement_analysis")}). The occasions must be shared (day 1 is
+the same event for every subject); for monitoring data where occasion r
+of one subject has nothing to do with occasion r of another,
+\eqn{\sigma^2_o} and \eqn{\sigma^2_{io}} should be about 0, and only the
+consistency form is meaningful. In simulations (10 or 30 subjects, 2 or 3
+items, 3 or 6 occasions, from no real change to a change larger than the
+error, 1000 data sets per setting), the intervals of the within-subject
+coefficients and SEMs covered 0.933 to 0.977 with balanced data, and 0.942
+to 0.997 with REML and 20\% of measurements missing (conservative when
+there was no real change).
 
 It is important to know what averaging does for this function. Without \code{occasion} and with \eqn{r' = r} (the
 score averages as many repeats as the study had), the inter-rater

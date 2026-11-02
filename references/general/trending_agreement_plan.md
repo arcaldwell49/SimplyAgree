@@ -283,7 +283,16 @@ Implementation order: (a) reliability + boundary warning in `method_vc()` with t
 (b) the change extraction and quadrant/polar plots, `simple_mvc` first, then `tolerance_delta` and `loa`;
 (c) documentation and the vignette subsection.
 
-## Follow-up: a within-subject facet in `reli_facet_test()` (proposed 2026-11-02, not started)
+## Follow-up: a within-subject facet in `reli_facet_test()` (proposed 2026-11-02; done 2026-11-02)
+
+**Done.** `facet = "within"`: score sigma2_po, consistency error sigma2_pio,e / k', agreement adds sigma2_io / k'
+("inter" with the subject-level effects p, pi, i removed by centring; sigma2_o in neither, as for "inter"). The
+consistency coefficient is a ratio of MS_po and MS_pio, so its interval is exact. Decisions: no change LoA (left to
+`mdc_test()` on D and `method_vc()`); `m_avg` must be 1; `k_avg` and `r_avg` allowed. Checks: on the scenarios below it
+gives 0.974 / 0.603 (tracking, within SD 1.5 / 0.3) and -0.003 / 0.020 (not tracking), against `method_vc(sigma =
+"common")` 0.974 / 0.599 / 0.011 / 0.018 (the latter with wide boundary intervals). Coverage
+(`reli_sims/within_coverage.R`, `within_coverage.csv`; 64 settings x 1000): ANOVA 0.933-0.977, REML with 20% missing
+0.942-0.997.
 
 `reli_facet_test(occasion =)` (experimental) with devices as `item` and occasions as `occasion` fits the same
 decomposition as `method_vc(replicates = "linked")`: subject-by-occasion (po) is the real within-subject change

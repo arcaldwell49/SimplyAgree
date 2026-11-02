@@ -750,6 +750,7 @@ Which call estimates what:
 | Each method's repeatability (its own error) | `rc` from `method_vc(replicates = "linked")` |
 | Range of the changes (true within-subject SD) | `omega` from `method_vc(replicates = "linked")` |
 | Within-subject (within-item) reliability, with a CI | `reliability` from `method_vc(replicates = "linked")` |
+| The same reliability with a common error SD, exact CI | `reli_facet_test(facet = "within", occasion = )` with the methods as items |
 | The same reliability, point estimate only | `icc_test()` on subject-centred data with the method as `item` (its CI ignores the centring and is too narrow) |
 | Quadrant and polar plots | `plot(type = "quadrant")`, `plot(type = "polar")` for `agreement_limit(data_type = "nest")`, `tolerance_limit()` with `id`, and `method_vc(replicates = "linked")` |
 

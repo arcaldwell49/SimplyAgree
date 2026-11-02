@@ -589,6 +589,63 @@ test_that("crossed estimands use the documented components", {
   expect_match(phi$data.name, "occasions: occ")
 })
 
+test_that("facet = 'within': the change of a subject between occasions", {
+  fit <- occ_fit(cr)
+  vc <- fit$vc
+  w <- reli_facet_test(values ~ items | id, data = cr, occasion = "occ",
+                       facet = "within")
+  expect_named(w$estimate, "ICC(within,C)")
+  expect_match(w$method, "Within-subject ICC")
+  expect_equal(unname(w$estimate), vc[["po"]] / (vc[["po"]] + vc[["pio"]]))
+  # a ratio of two mean squares: the exact F interval
+  expect_equal(w$settings$ci_method, "exact")
+  k <- 3
+  Fo <- fit$ms[["po"]] / fit$ms[["pio"]]
+  q <- qf(c(0.975, 0.025), fit$df[["po"]], fit$df[["pio"]])
+  Fb <- Fo / q
+  expect_equal(as.numeric(w$conf.int), (Fb - 1) / (Fb - 1 + k))
+  # agreement adds (io); the mean of k' items divides the error by k'
+  wa <- reli_facet_test(values ~ items | id, data = cr, occasion = "occ",
+                        facet = "within", type = "agreement")
+  expect_equal(unname(wa$estimate),
+               vc[["po"]] / (vc[["po"]] + vc[["io"]] + vc[["pio"]]))
+  sem <- reli_facet_test(values ~ items | id, data = cr, occasion = "occ",
+                         facet = "within", stat = "SEM", k_avg = 2)
+  expect_equal(unname(sem$estimate)^2, vc[["pio"]] / 2)
+  # with repeats the residual splits: (pio) + e / r'
+  fit2 <- occ_fit(cr2)
+  s2 <- reli_facet_test(values ~ items | id, data = cr2, occasion = "occ",
+                        facet = "within", stat = "SEM")
+  expect_equal(unname(s2$estimate)^2, fit2$vc[["pio"]] + fit2$vc[["e"]])
+  expect_output(print(summary(w)), "within-subject ICC")
+  expect_s3_class(mdc_test(sem), "htest")
+  # validation
+  expect_error(reli_facet_test(values ~ items | id, data = cr,
+                               facet = "within"), "needs 'occasion'")
+  expect_error(reli_facet_test(values ~ items | id, data = cr,
+                               occasion = "occ", facet = "within",
+                               m_avg = 2), "one occasion")
+})
+
+test_that("facet = 'within' equals the method_vc() reliability, common SD", {
+  # two devices on 6 shared occasions; true within-subject change SD 1
+  set.seed(9)
+  n <- 40; m <- 6
+  id <- rep(seq_len(n), each = m)
+  true <- rep(rnorm(n, 5, 1), each = m) + rnorm(n * m, 0, 1)
+  d <- rbind(data.frame(id = id, occ = rep(seq_len(m), n), dev = "a",
+                        y = true + rnorm(n * m, 0, 0.4)),
+             data.frame(id = id, occ = rep(seq_len(m), n), dev = "b",
+                        y = true + 0.3 + rep(rnorm(n, 0, 0.2), each = m) +
+                          rnorm(n * m, 0, 0.4)))
+  w <- reli_facet_test(y ~ dev | id, data = d, occasion = "occ",
+                       facet = "within")
+  mv <- method_vc(d, y = "y", method = "dev", id = "id", replicate = "occ",
+                  replicates = "linked", sigma = "common")
+  expect_equal(unname(w$estimate), mv$reliability$reliability,
+               tolerance = 0.01)
+})
+
 test_that("ignoring occasions: same intra agreement SEM, narrower interval", {
   r <- reli_facet_test(values ~ items | id, data = cr, occasion = "occ",
                        stat = "SEM", type = "agreement")

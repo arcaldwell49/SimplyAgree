@@ -302,7 +302,8 @@
 
 # Estimands ------------------------------------------------------------------
 #
-# `spec` holds stat ("ICC" or "SEM"), facet ("intra", "inter", "overall"),
+# `spec` holds stat ("ICC" or "SEM"), facet ("intra", "inter", "overall",
+# "within"),
 # type ("consistency", "agreement"), the D-study sizes k_avg (items), m_avg
 # (occasions) and r_avg (repeats), and scale ("raw", "log", "mean").
 #
@@ -311,12 +312,18 @@
 #   intra:   the item fixed; occasions and repeats random
 #   inter:   the occasion fixed (crossed design); items and repeats random
 #   overall: items, occasions and repeats random
+#   within:  as inter (crossed design only), with each subject's readings
+#            centred on the subject (and item): the subject-level effects
+#            (p, pi, i) drop out, so the score is the change of the subject
+#            between occasions, (po), and the error the effects with p, i
+#            and o (agreement adds (io)); see .facet_weights()
 # With the nested design "overall" is "inter".
 
 .facet_roles <- function(spec, design) {
   fixed <- switch(spec$facet,
                   intra = "i",
                   inter = if (design == "crossed") "o" else character(0),
+                  within = "o",
                   overall = character(0))
   list(fixed = fixed,
        random = setdiff(c("i", "o", "r"), fixed),
@@ -338,6 +345,11 @@
     L <- .facet_letters(t, fit$factors)
     others <- setdiff(L, "p")
     w <- 1 / prod(roles$nprime[others])
+    if (spec$facet == "within" && !("o" %in% L)) {
+      # constant within a subject (and item) across occasions: removed by
+      # centring on the subject
+      next
+    }
     if ("p" %in% L) {
       if (all(others %in% roles$fixed)) tau[[t]] <- w else
         if (any(others %in% roles$random)) delta[[t]] <- w
