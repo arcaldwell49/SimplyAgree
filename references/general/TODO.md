@@ -3,25 +3,6 @@
 Open items noticed during development. Each entry says what was seen, why
 it may matter, and how to check it.
 
-## `agree_np(prop_bias = FALSE)`: confidence level of the LoA bounds
-
-Noticed 2026-11-01 while fixing the bootstrap hang (see the TODO comment in
-`R/agree_np.R`). Not yet fixed; it changes reported results, so decide first.
-
-**What.** The bounds of the limits of agreement are reported with
-`ci.level = conf2` (one-sided, the outer ends of a `1 - 2 * (1 - conf.level)`
-interval), but they are computed at `conf.level`, like the bias. Before
-the bootstrap rewrite the same thing happened through a typo
-(`df_coef2 = rbind(df_coef, temp)` instead of `rbind(df_coef2, temp)`) and
-`process_rq(conf.level = conf.level)` for the limits.
-
-**Why it matters.** The LoA bounds are narrower than their label says.
-
-**How to check.** Compute the limits' bounds with `conf.level = conf2` in
-`rq_boot_coef()` for the limit rows and compare with the `prop_bias = TRUE`
-branch, which already uses `conf2`; add a NEWS entry under "Results that
-change".
-
 ## Planned features
 
 - `bls_reg()` (renamed from `cbls_reg()`): done, including tolerance limits, the simultaneous band, variance functions, per-subject variances, the log scale, `error_ratio_profile()` and CBLS in `method_convert()`. What is left is under "Still open" and "Gaps against BivRegBLS and MethComp" in `bls_reg_roadmap.md`.
@@ -47,6 +28,10 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
   exchangeable fit's.
 - **master merged** (the `fix-loa-nest-bounds` fix of `calc_loa_nest()`).
   NEWS keeps master's 0.4.1 bug-fix section below the 0.5.0 section.
+- **`agree_np(prop_bias = FALSE, TOST = TRUE)`: LoA bounds now at `conf2`**
+  (they were computed at `conf.level` but labelled `conf2`). The plot's
+  LoA bands (`get_qemm()`) still use the outer end of a `conf.level`
+  interval for the limits, for both `prop_bias` settings; not changed.
 
 Remaining, in order:
 
@@ -65,9 +50,7 @@ Remaining, in order:
      raters;
    - downstream: print/summary/plot/check/`tdi()` for `simple_mvc`; a
      coverage simulation like `method_vc()`'s.
-2. The `agree_np(prop_bias = FALSE)` confidence level (entry at the top of
-   this file); needs a decision.
-3. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
+2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of
