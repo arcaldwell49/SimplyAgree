@@ -179,11 +179,18 @@ Done in the third round (2026-10-31):
 - CBLS in `method_convert(bias = "linear", estimator = "cbls")`: done
   (exchangeable replicates, constant variance).
 
-Still open: linked replicates for `estimator = "cbls"` (the item means of
-the two methods share occasion effects, so their errors are correlated;
-the CBLS engine supports a covariance, which would need the occasion
-variance from `method_vc()`); variance functions in `method_convert()`;
-method-specific equation error with three or more methods.
+Still open: variance functions in `method_convert()`; method-specific
+equation error with three or more methods.
+
+Done (2026-11-02): linked replicates, `bls_reg(replicates = "linked")` and
+`method_convert(replicates = "linked", estimator = "cbls")`. The error
+correlation of x and y comes from the paired occasions (not from omega of
+`method_vc()`, so the occasion effects may have any scale on each method),
+standardised by the variance functions; given variances are not allowed
+(they would lack the occasion effects). Coverage in `cbls_sims/` study 5:
+PIs 0.95-0.97; coefficient CIs 0.91-0.95 with large occasion effects (the
+SEs treat the estimated variances and covariance as known; an SE with that
+uncertainty is a possible follow-up).
 
 ## Gaps against BivRegBLS and MethComp (2026-11-01)
 

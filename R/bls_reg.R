@@ -16,6 +16,11 @@
 #'   per replicate when `id` is given (a measurement of one method may be
 #'   missing).
 #' @param id Column with the subject identifier, for replicate measurements.
+#' @param replicates With `id`: `"exchangeable"` (default), replicates of
+#'   each method are interchangeable, or `"linked"`, the rows of a subject
+#'   are occasions on which both methods measured (x and y on the same row
+#'   are the same occasion), so their errors share the occasion effects and
+#'   are correlated. See "Linked replicates" in Details.
 #' @param var_x,var_y Measurement error variance of a single measurement by
 #'   each method, if known (e.g., from a validation study): a number, or a
 #'   function of the level that returns the variance, e.g.
@@ -171,6 +176,35 @@
 #' both methods is an assumption: with two methods, how the equation error
 #' divides between them cannot be estimated.
 #'
+#' **Linked replicates.** When both methods measure each subject on the
+#' same occasions and the true value varies between occasions (or the
+#' conditions of an occasion affect both methods), the errors of `x` and `y`
+#' about the subject's mean true value include a shared occasion effect, so
+#' they are correlated. With `replicates = "linked"`, the within-subject
+#' variances (which then include the occasion variation) are estimated from
+#' the replicates as before, and the correlation `rho` of the two methods'
+#' errors from the pooled within-subject cross-products of the paired
+#' occasions (standardised by the error variances at the subject means, so
+#' that it also applies with `var_model = "proportional"` or `"power"`), on
+#' `sum(k_i - 1)` df, with `k_i` the subject's number of occasions with both
+#' methods. The covariance of the errors of the subject means is
+#' `rho sqrt(var_x var_y) k_i / (n_xi n_yi)`, and it enters the BLS and CBLS
+#' fits (`var_y + b1^2 var_x - 2 b1 cov`), the dispersion, and the
+#' prediction and tolerance intervals, which are for new measurements by
+#' both methods on the same occasion(s). The measurement error part of these
+#' intervals, a combination of the paired errors, is given the paired df.
+#' The variances cannot be given (`var_x`, `var_y`): a measurement error
+#' variance from a separate study does not include the occasion effects. In
+#' simulations (15 or 40 subjects, 2 or 4 occasions), the prediction
+#' intervals covered 0.95 to 0.97 (an exchangeable fit of the same data
+#' covered up to 1.00, with intervals up to 2.9 times as wide), and the
+#' confidence intervals of the coefficients 0.94 to 0.96 with a small
+#' occasion effect but 0.91 to 0.95 when it was about three times the
+#' larger measurement error SD: their standard errors treat the estimated
+#' variances and covariance as known.
+#' This is the CBLS fit used by [method_convert()] with
+#' `replicates = "linked"` and `estimator = "cbls"`.
+#'
 #' The joint test of intercept 0 and slope 1 ([joint_test()]) uses the Wald
 #' statistic with the BLS variance-covariance matrix and the `F(2, n - 2)`
 #' distribution. BivRegBLS multiplies the critical value by the Hotelling
@@ -187,12 +221,16 @@
 #'     (`var_x`, `var_y`, at the mean level), the functions of the level
 #'     (`fun_x`, `fun_y`), the models (`model_x`, `model_y`) and their
 #'     parameters, their df, and their source (`"known"`, `"replicates"`, or
-#'     `"ratio"`);
+#'     `"ratio"`), and `replicates`, the error correlation `rho` (0 unless
+#'     linked) with its df `df_rho`, and the covariance `cov_xy` of a single
+#'     pair of measurements at the mean level;
 #'   - `pred_level`, `method`, `iterations`, `converged`.
 #'
 #'   The stored data (`model`) have one row per subject: the means `x`, `y`,
 #'   the numbers of replicates `n_x`, `n_y`, and the error variances of the
-#'   means `var_x`, `var_y`.
+#'   means `var_x`, `var_y` (with linked replicates also the number of
+#'   paired occasions `n_xy` and the error covariance of the means
+#'   `cov_xy`).
 #'
 #' @examples
 #' data("reps")
@@ -235,6 +273,7 @@
 bls_reg <- function(formula,
                      data,
                      id = NULL,
+                     replicates = c("exchangeable", "linked"),
                      var_x = NULL,
                      var_y = NULL,
                      df_var_x = Inf,
@@ -253,6 +292,18 @@ bls_reg <- function(formula,
   var_model <- match.arg(var_model)
   bound_type <- match.arg(bound_type)
   transform <- match.arg(transform)
+  replicates <- match.arg(replicates)
+  linked <- replicates == "linked"
+  if (linked && is.null(id)) {
+    stop("replicates = 'linked' needs id: the rows of a subject are its ",
+         "occasions.")
+  }
+  if (linked && (!is.null(var_x) || !is.null(var_y))) {
+    stop("With replicates = 'linked', var_x and var_y are estimated from the ",
+         "replicates: the errors of the subject means include the occasion ",
+         "effects, which a measurement error variance from another study ",
+         "does not.")
+  }
   if (transform == "log" &&
       (is.function(var_x) || is.function(var_y) || var_model != "constant")) {
     stop("With transform = 'log', the error variances must be constant on ",
@@ -304,6 +355,7 @@ bls_reg <- function(formula,
   call2$conf.level <- conf.level
   call2$pred_level <- pred_level
   call2$id <- id
+  call2$replicates <- replicates
 
   fml <- if (!is.null(id)) update(formula, ~ . + id) else formula
   environment(fml) <- environment(formula)
@@ -347,6 +399,21 @@ bls_reg <- function(formula,
         if (length(z)) z[1] else NA_real_
       }))
     }
+  }
+  # linked replicates: x and y on the same row are the same occasion. For
+  # each subject, the number of such paired occasions and the cross-product
+  # of their deviations from the paired means.
+  sub$k <- 0
+  sub$sxy <- 0
+  if (linked) {
+    pr <- raw[!is.na(raw$x) & !is.na(raw$y), ]
+    k_i <- tapply(pr$x, pr$id, length)
+    sxy_i <- tapply(seq_len(nrow(pr)), pr$id, function(j) {
+      sum((pr$x[j] - mean(pr$x[j])) * (pr$y[j] - mean(pr$y[j])))
+    })
+    m <- match(sub$id, names(k_i))
+    sub$k <- ifelse(is.na(m), 0, k_i[m])
+    sub$sxy <- ifelse(is.na(m), 0, sxy_i[m])
   }
   sub <- sub[sub$n_x > 0 & sub$n_y > 0, ]
   n <- nrow(sub)
@@ -405,6 +472,30 @@ bls_reg <- function(formula,
   constant <- ex$model %in% c("constant", "subject") &&
     ey$model %in% c("constant", "subject")
 
+  # linked replicates: the errors of x and y on the same occasion are
+  # correlated (shared occasion effects). Their correlation is the pooled
+  # within-subject cross-product of the paired occasions, standardised by
+  # the single-measurement variances at the subject means, on sum(k_i - 1)
+  # df; the covariance at any level is rho sqrt(var_x var_y), and that of
+  # the subject means rho sqrt(var_x var_y) k_i / (n_xi n_yi).
+  rho <- 0
+  df_rho <- NA_real_
+  if (linked) {
+    df_rho <- sum(pmax(sub$k - 1, 0))
+    if (df_rho == 0) {
+      stop("replicates = 'linked' needs subjects measured by both methods ",
+           "on two or more occasions (rows with both x and y).")
+    }
+    fx0 <- .bls_eval(ex$fun, sub$x, "var_x")
+    fy0 <- .bls_eval(ey$fun, sub$y, "var_y")
+    ok <- sub$k > 1
+    rho <- sum(sub$sxy[ok] / sqrt(fx0[ok] * fy0[ok])) / df_rho
+    rho <- max(min(rho, 1), -1)
+  }
+  cov_means <- function(vx1, vy1) {
+    rho * sqrt(vx1 * vy1) * sub$k / (sub$n_x * sub$n_y)
+  }
+
   # BLS in the (x, y) plot. The variances are evaluated at the estimated true
   # values of each subject, starting from the subject means, and the fit is
   # repeated until the line is stable (one pass with constant variances).
@@ -412,10 +503,13 @@ bls_reg <- function(formula,
   lev_y <- sub$y
   coef_old <- c(Inf, Inf)
   for (pass in seq_len(100)) {
-    sub$var_x <- (if (!is.null(ex$values)) ex$values else
-      .bls_eval(ex$fun, lev_x, "var_x")) / sub$n_x
-    sub$var_y <- (if (!is.null(ey$values)) ey$values else
-      .bls_eval(ey$fun, lev_y, "var_y")) / sub$n_y
+    vx1 <- if (!is.null(ex$values)) ex$values else
+      .bls_eval(ex$fun, lev_x, "var_x")
+    vy1 <- if (!is.null(ey$values)) ey$values else
+      .bls_eval(ey$fun, lev_y, "var_y")
+    sub$var_x <- vx1 / sub$n_x
+    sub$var_y <- vy1 / sub$n_y
+    sub$cov_xy <- cov_means(vx1, vy1)
     # started from Deming with lambda = var_y / var_x
     lam <- mean(sub$var_y) / mean(sub$var_x)
     sxx <- sum((sub$x - mean(sub$x))^2)
@@ -425,15 +519,16 @@ bls_reg <- function(formula,
       (2 * sxy)
     start <- c(mean(sub$y) - b1 * mean(sub$x), b1)
     bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x,
-                       var_v = sub$var_y, cov_uv = 0, start = start)
+                       var_v = sub$var_y, cov_uv = sub$cov_xy, start = start)
     if (constant ||
         max(abs(bls$coef - coef_old) / pmax(abs(bls$coef), 1)) < 1e-10) {
       break
     }
     coef_old <- bls$coef
     e <- sub$y - bls$coef[1] - bls$coef[2] * sub$x
-    s2 <- sub$var_y + bls$coef[2]^2 * sub$var_x
-    lev_x <- sub$x + bls$coef[2] * sub$var_x * e / s2
+    s2 <- sub$var_y + bls$coef[2]^2 * sub$var_x -
+      2 * bls$coef[2] * sub$cov_xy
+    lev_x <- sub$x + (bls$coef[2] * sub$var_x - sub$cov_xy) * e / s2
     lev_y <- bls$coef[1] + bls$coef[2] * lev_x
   }
   passes_ok <- constant || pass < 100
@@ -446,9 +541,10 @@ bls_reg <- function(formula,
   # var_y + b^2 tau2; tau2 solves sum(e_i^2 / (s_i + 2 b^2 tau2)) = n - 2
   # (0 if the dispersion is at most 1), and the fit is repeated until stable.
   e_i <- sub$y - bls$coef[1] - bls$coef[2] * sub$x
-  disp <- .bls_dispersion(e_i, sub$var_y + bls$coef[2]^2 * sub$var_x,
+  disp <- .bls_dispersion(e_i, sub$var_y + bls$coef[2]^2 * sub$var_x -
+                            2 * bls$coef[2] * sub$cov_xy,
                           bls$coef[2], sub, ex$df, ey$df,
-                          known = source != "ratio")
+                          known = source != "ratio", df_c = df_rho)
   tau2 <- 0
   tau_ok <- TRUE
   if (equation_error && isTRUE(disp$s2 > 1) && source != "ratio") {
@@ -456,12 +552,12 @@ bls_reg <- function(formula,
     for (k in seq_len(200)) {
       b <- bls$coef[2]
       e_i <- sub$y - bls$coef[1] - b * sub$x
-      s_i <- sub$var_y + b^2 * sub$var_x
+      s_i <- sub$var_y + b^2 * sub$var_x - 2 * b * sub$cov_xy
       tau2_new <- .bls_tau2(e_i, s_i, b)
       bls <- .bls_engine(u = sub$x, v = sub$y,
                          var_u = sub$var_x + tau2_new,
                          var_v = sub$var_y + b^2 * tau2_new,
-                         cov_uv = 0, start = bls$coef)
+                         cov_uv = sub$cov_xy, start = bls$coef)
       if (abs(tau2_new - tau2) <= 1e-10 * max(tau2_new, 1e-300) &&
           abs(bls$coef[2] - b) <= 1e-10 * max(abs(b), 1)) {
         tau2 <- tau2_new
@@ -482,13 +578,28 @@ bls_reg <- function(formula,
   b <- bls$coef[2]
   m_i <- (sub$x + sub$y) / 2
   d_i <- sub$x - sub$y
+  c_eff <- sub$cov_xy
   cbls <- .bls_engine(u = m_i, v = d_i,
-                      var_u = (vx_eff + vy_eff) / 4,
-                      var_v = vx_eff + vy_eff,
+                      var_u = (vx_eff + vy_eff + 2 * c_eff) / 4,
+                      var_v = vx_eff + vy_eff - 2 * c_eff,
                       cov_uv = (vx_eff - vy_eff) / 2,
                       start = c(-2 * a / (1 + b), 2 * (1 - b) / (1 + b)))
 
   df_res <- n - 2
+  # TODO: the BLS/CBLS standard errors (s^2 R^-1 from .bls_engine()) treat
+  # the error variances, and with linked replicates their covariance, as
+  # known: the uncertainty in the estimated var_x, var_y and rho (which set
+  # the weights and the implied error ratio) is ignored. Usually this is
+  # small, but with linked replicates and a large occasion effect the
+  # residual variance var_y + b1^2 var_x - 2 b1 cov is a small difference of
+  # large estimated terms, and the coefficient CIs are liberal: coverage
+  # 0.913-0.947 with omega about 3 times the larger error SD, where the
+  # slope's SD was 13% larger than its mean SE (study 5 in
+  # references/general/cbls_sims/README.md). A fix could add that
+  # uncertainty by the delta method (derivatives of the coefficients with
+  # respect to var_x, var_y and rho, with their sampling variances on their
+  # df) or use a parametric bootstrap, and should be checked against the
+  # earlier studies, where the current SEs cover 0.93-0.97.
   coefs <- stats::setNames(bls$coef, c("(Intercept)", x_name))
   vc <- bls$vcov
   dimnames(vc) <- list(names(coefs), names(coefs))
@@ -514,6 +625,10 @@ bls_reg <- function(formula,
   }
 
   sub_out <- sub[, c("id", "x", "y", "n_x", "n_y", "var_x", "var_y")]
+  if (linked) {
+    sub_out$n_xy <- sub$k
+    sub_out$cov_xy <- sub$cov_xy
+  }
   # the error variances at the mean level, for the printed ratio
   mid_x <- mean(lev_x)
   mid_y <- mean(lev_y)
@@ -545,7 +660,9 @@ bls_reg <- function(formula,
                     params_x = ex$params, params_y = ey$params,
                     df_var_x = ex$df, df_var_y = ey$df,
                     level_x = mid_x, level_y = mid_y,
-                    source = source, known = source != "ratio"),
+                    source = source, known = source != "ratio",
+                    replicates = replicates, rho = rho, df_rho = df_rho,
+                    cov_xy = rho * sqrt(vx1 * vy1)),
       dispersion = disp,
       equation_error = equation_error,
       iterations = c(passes = pass, bls = bls$iterations,
@@ -560,7 +677,7 @@ bls_reg <- function(formula,
 # s_i = var_yi + b1^2 var_xi, average 1 and their sum is chi-square on n - 2
 # df (F against the df of estimated error variances, combined by
 # Satterthwaite).
-.bls_dispersion <- function(e, s, b1, sub, df_x, df_y, known) {
+.bls_dispersion <- function(e, s, b1, sub, df_x, df_y, known, df_c = NA_real_) {
   n <- length(e)
   q <- sum(e^2 / s)
   s2 <- q / (n - 2)
@@ -568,10 +685,13 @@ bls_reg <- function(formula,
     return(list(s2 = s2, statistic = NA_real_, df1 = n - 2, df2 = NA_real_,
                 p.value = NA_real_))
   }
-  # df of the measurement error part of s_i
+  # df of the measurement error part of s_i: with linked replicates, the
+  # variance of one combination of the paired errors, on the paired df
+  # (df_c); otherwise Satterthwaite over the two variances
   a_x <- mean(b1^2 * sub$var_x / s)
   a_y <- mean(sub$var_y / s)
-  df2 <- (a_x + a_y)^2 / (a_x^2 / df_x + a_y^2 / df_y)
+  df2 <- if (is.finite(df_c)) df_c else
+    (a_x + a_y)^2 / (a_x^2 / df_x + a_y^2 / df_y)
   p <- if (is.finite(df2)) {
     stats::pf(s2, n - 2, df2, lower.tail = FALSE)
   } else {

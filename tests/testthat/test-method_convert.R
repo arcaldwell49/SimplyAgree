@@ -528,9 +528,6 @@ test_that("estimator = 'cbls' uses bls_reg() for each pair", {
   # unsupported settings
   expect_error(method_convert(dat, y = "y", method = "method", id = "id",
                               replicate = "repl", estimator = "cbls",
-                              replicates = "linked"), "exchangeable")
-  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
-                              replicate = "repl", estimator = "cbls",
                               variance = "linear"), "variance = 'constant'")
   expect_error(method_convert(dat, y = "y", method = "method", id = "id",
                               replicate = "repl", estimator = "cbls",

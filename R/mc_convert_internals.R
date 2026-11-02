@@ -80,16 +80,28 @@ mc_da_fit = function(pp,
 # DA regression) is
 #   sqrt(v1 (1 - b/2)^2 + v2 (1 + b/2)^2 + tau2 [(1 - b/2)^2 + beta^2 (1 + b/2)^2])
 # with v1, v2 the single-measurement error variances, b the CBLS slope, and
-# beta the BLS slope of y2 on y1.
+# beta the BLS slope of y2 on y1. With linked replicates the two methods'
+# measurements on the same occasion share the occasion effect: bls_reg(
+# replicates = "linked") estimates their error covariance c from the paired
+# occasions, the item means are fitted with it, and the SD of a new
+# difference on one occasion subtracts 2 c (1 - b/2) (1 + b/2).
 mc_cbls_fit = function(df,
                        m1,
-                       m2) {
-  d1 = df[df$method == m1, c("id", "y_t")]
-  d2 = df[df$method == m2, c("id", "y_t")]
-  dat = rbind(data.frame(id = d1$id, x = d1$y_t, y = NA_real_),
-              data.frame(id = d2$id, x = NA_real_, y = d2$y_t))
+                       m2,
+                       replicates = "exchangeable") {
+  d1 = df[df$method == m1, c("id", "repl", "y_t")]
+  d2 = df[df$method == m2, c("id", "repl", "y_t")]
+  dat = if (replicates == "linked") {
+    # one row per occasion: x and y on the same row are paired
+    names(d1)[3] = "x"
+    names(d2)[3] = "y"
+    merge(d1, d2, by = c("id", "repl"), all = TRUE)
+  } else {
+    rbind(data.frame(id = d1$id, x = d1$y_t, y = NA_real_),
+          data.frame(id = d2$id, x = NA_real_, y = d2$y_t))
+  }
   fit = tryCatch(
-    bls_reg(y ~ x, data = dat, id = "id"),
+    bls_reg(y ~ x, data = dat, id = "id", replicates = replicates),
     error = function(e) {
       stop("estimator = 'cbls' needs replicate measurements of both ", m1,
            " and ", m2, " to estimate their measurement errors: ",
@@ -100,7 +112,8 @@ mc_cbls_fit = function(df,
   beta = unname(fit$coefficients[2])
   e = fit$errors
   tau2 = fit$dispersion$tau2
-  s = sqrt(e$var_x * (1 - b / 2)^2 + e$var_y * (1 + b / 2)^2 +
+  s = sqrt(e$var_x * (1 - b / 2)^2 + e$var_y * (1 + b / 2)^2 -
+             2 * e$cov_xy * (1 - b / 2) * (1 + b / 2) +
              tau2 * ((1 - b / 2)^2 + beta^2 * (1 + b / 2)^2))
   list(a = unname(cf[1]),
        b = b,

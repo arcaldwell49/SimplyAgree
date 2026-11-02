@@ -8,6 +8,7 @@ bls_reg(
   formula,
   data,
   id = NULL,
+  replicates = c("exchangeable", "linked"),
   var_x = NULL,
   var_y = NULL,
   df_var_x = Inf,
@@ -32,6 +33,12 @@ per replicate when \code{id} is given (a measurement of one method may be
 missing).}
 
 \item{id}{Column with the subject identifier, for replicate measurements.}
+
+\item{replicates}{With \code{id}: \code{"exchangeable"} (default), replicates of
+each method are interchangeable, or \code{"linked"}, the rows of a subject
+are occasions on which both methods measured (x and y on the same row
+are the same occasion), so their errors share the occasion effects and
+are correlated. See "Linked replicates" in Details.}
 
 \item{var_x, var_y}{Measurement error variance of a single measurement by
 each method, if known (e.g., from a validation study): a number, or a
@@ -113,13 +120,17 @@ elements of \code{\link[=dem_reg]{dem_reg()}} results (\code{coefficients}, \cod
 (\code{var_x}, \code{var_y}, at the mean level), the functions of the level
 (\code{fun_x}, \code{fun_y}), the models (\code{model_x}, \code{model_y}) and their
 parameters, their df, and their source (\code{"known"}, \code{"replicates"}, or
-\code{"ratio"});
+\code{"ratio"}), and \code{replicates}, the error correlation \code{rho} (0 unless
+linked) with its df \code{df_rho}, and the covariance \code{cov_xy} of a single
+pair of measurements at the mean level;
 \item \code{pred_level}, \code{method}, \code{iterations}, \code{converged}.
 }
 
 The stored data (\code{model}) have one row per subject: the means \code{x}, \code{y},
 the numbers of replicates \code{n_x}, \code{n_y}, and the error variances of the
-means \code{var_x}, \code{var_y}.
+means \code{var_x}, \code{var_y} (with linked replicates also the number of
+paired occasions \code{n_xy} and the error covariance of the means
+\code{cov_xy}).
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -227,6 +238,35 @@ dispersion is at most 1), and the fit is repeated until stable; the
 prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
 both methods is an assumption: with two methods, how the equation error
 divides between them cannot be estimated.
+
+\strong{Linked replicates.} When both methods measure each subject on the
+same occasions and the true value varies between occasions (or the
+conditions of an occasion affect both methods), the errors of \code{x} and \code{y}
+about the subject's mean true value include a shared occasion effect, so
+they are correlated. With \code{replicates = "linked"}, the within-subject
+variances (which then include the occasion variation) are estimated from
+the replicates as before, and the correlation \code{rho} of the two methods'
+errors from the pooled within-subject cross-products of the paired
+occasions (standardised by the error variances at the subject means, so
+that it also applies with \code{var_model = "proportional"} or \code{"power"}), on
+\code{sum(k_i - 1)} df, with \code{k_i} the subject's number of occasions with both
+methods. The covariance of the errors of the subject means is
+\verb{rho sqrt(var_x var_y) k_i / (n_xi n_yi)}, and it enters the BLS and CBLS
+fits (\verb{var_y + b1^2 var_x - 2 b1 cov}), the dispersion, and the
+prediction and tolerance intervals, which are for new measurements by
+both methods on the same occasion(s). The measurement error part of these
+intervals, a combination of the paired errors, is given the paired df.
+The variances cannot be given (\code{var_x}, \code{var_y}): a measurement error
+variance from a separate study does not include the occasion effects. In
+simulations (15 or 40 subjects, 2 or 4 occasions), the prediction
+intervals covered 0.95 to 0.97 (an exchangeable fit of the same data
+covered up to 1.00, with intervals up to 2.9 times as wide), and the
+confidence intervals of the coefficients 0.94 to 0.96 with a small
+occasion effect but 0.91 to 0.95 when it was about three times the
+larger measurement error SD: their standard errors treat the estimated
+variances and covariance as known.
+This is the CBLS fit used by \code{\link[=method_convert]{method_convert()}} with
+\code{replicates = "linked"} and \code{estimator = "cbls"}.
 
 The joint test of intercept 0 and slope 1 (\code{\link[=joint_test]{joint_test()}}) uses the Wald
 statistic with the BLS variance-covariance matrix and the \code{F(2, n - 2)}

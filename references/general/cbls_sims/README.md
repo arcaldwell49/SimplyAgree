@@ -1,7 +1,8 @@
 # bls_reg(): coverage of the intervals and size of the joint test
 
-Status (2026-10-31): both studies run; all criteria met (study 2: with the
-right variance model).
+Status (2026-10-31; study 5 2026-11-02): studies run; all criteria met (study 2: with the
+right variance model), except in study 5 the slope and intercept CIs with a
+large occasion effect (0.913-0.947).
 
 ## Question
 
@@ -151,3 +152,48 @@ error. Conservative with replicates and no equation error: by chance
 tau-hat > 0 in about half the data sets, which adds uncertainty. Liberal
 (0.875) only with 10 subjects, known variances, and equation error, where
 tau-hat is sometimes 0. Kept experimental.
+
+## Study 5: linked replicates (`replicates = "linked"`, 2026-11-02)
+
+`sim_cbls_linked.R`, `summary_linked.csv`. Both methods measure each item
+on the same occasions; the occasion effect a ~ N(0, omega^2) is shared:
+x = t + a + c_x + e_x (SD 0.6), y = 1 + 1.1 (t + a + c_y) + e_y (SD 0.9),
+t ~ N(20, 5^2), c ~ N(0, tau^2) (equation error). 15 or 40 items, 2 or 4
+occasions, omega 0.5 or 2, tau 0 or 0.5; 1000 data sets per cell. The
+linked fit is compared with the exchangeable fit (`replicates` left at its
+default) on the same data. The prediction interval is for a new item
+measured once by both methods on one occasion.
+
+Criteria (set before running): coverage 0.93-0.97 for the slope and
+intercept CIs and the prediction intervals.
+
+| omega | tau | slope CI | intercept CI | PI (xy / md) | slope CI, exchangeable | PI, exchangeable | PI width, linked / exchangeable |
+|---|---|---|---|---|---|---|---|
+| 0.5 | 0   | 0.950-0.955 | 0.946-0.958 | 0.950-0.957 | 0.951-0.956 | 0.976-0.984 | 0.84-0.88 |
+| 0.5 | 0.5 | 0.945-0.952 | 0.943-0.956 | 0.946-0.958 | 0.947-0.952 | 0.961-0.972 | 0.90-0.94 |
+| 2   | 0   | 0.930-0.941 | 0.924-0.946 | 0.950-0.967 | 0.938-0.951 | 1.000 | 0.35-0.39 |
+| 2   | 0.5 | 0.913-0.942 | 0.920-0.947 | 0.948-0.952 | 0.937-0.965 | 1.000 | 0.42-0.45 |
+
+The estimated error correlation was unbiased (0.31-0.34 and 0.88-0.89,
+true 0.33 and 0.89).
+
+1. **Prediction intervals: criterion met** (0.946-0.967). Ignoring the
+   linking (the exchangeable fit) counts the occasion effects of both
+   methods as independent errors: its intervals covered 0.96-1.00 and were
+   up to 2.9 times as wide.
+2. **Slope and intercept CIs: met with a small occasion effect; slightly
+   liberal with a large one** (omega = 2, about 3 times the larger error
+   SD): 0.913-0.947; below 0.93 for the slope in 1 of 8 cells and for the
+   intercept in 2 (lowest 0.913 for the
+   slope with 40 items, 2 occasions and equation error). In that cell the
+   slope is unbiased (mean 1.097 in a check with 400 data sets) but its SD
+   (0.039) is 13% larger than the mean SE (0.034): like every BLS standard
+   error, it treats the error variances, and here the covariance, as known,
+   and with a large occasion effect the error variance of a residual,
+   `var_y + b^2 var_x - 2 b cov`, is a small difference of large estimated
+   terms. The exchangeable fit happened to cover 0.94-0.97 here, because
+   the spread of the true values (SD 5) dominates; it is not a valid
+   model for these data (its prediction intervals).
+3. Not changed: an SE that includes the uncertainty in the estimated
+   variances and covariance (delta method or bootstrap) would address 2;
+   documented as a limitation instead.

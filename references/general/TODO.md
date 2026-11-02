@@ -81,11 +81,13 @@ Remaining, in order:
 1. Random-rater follow-up: an optional parametric bootstrap (which might
    address the 3-rater case above, where a large rater SD estimated at
    zero gives bound coverage 0.92).
-2. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
-   `method_convert(estimator = "cbls")`; variance functions in
+2. Lower priority (in `bls_reg_roadmap.md`): variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of
-   `error_ratio_profile()`.
+   `error_ratio_profile()`; BLS/CBLS standard errors that include the
+   uncertainty in the estimated error variances (and, with linked
+   replicates, their covariance), which are liberal (0.91-0.95) with large
+   occasion effects (TODO comment in `R/bls_reg.R`; `cbls_sims/` study 5).
 
 Environment notes:
 

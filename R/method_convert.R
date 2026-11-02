@@ -36,8 +36,8 @@
 #'   to the stated coverage. For `bias = "linear"`, "cbls" fits the
 #'   regression of the differences on the averages by correlated bivariate
 #'   least squares ([bls_reg()]) instead of least squares; it needs
-#'   exchangeable replicates of both methods and `variance = "constant"`.
-#'   See details.
+#'   replicates of both methods (exchangeable or linked) and
+#'   `variance = "constant"`. See details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
 #'   Default is 999. Each replicate refits the model, so this can take
 #'   several minutes; set a seed with [set.seed()] for reproducible
@@ -90,7 +90,14 @@
 #' measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then
 #' come from that fit, and \eqn{s} is the SD of a new single difference about
 #' the line implied by the measurement error and method-by-item variances.
-#' The conversion is the BLS line of one method on the other.
+#' The conversion is the BLS line of one method on the other. With linked
+#' replicates, the two methods' measurements on the same occasion share the
+#' occasion effect, so their errors about the item means are correlated:
+#' [bls_reg()] with `replicates = "linked"` estimates the correlation from
+#' the paired occasions and includes it in the fit, and \eqn{s} is then the
+#' SD of a new difference measured on one occasion (smaller than with
+#' exchangeable replicates, where the occasion effects of the two methods
+#' are independent).
 #'
 #' A slope of the differences on the averages does not by itself show that
 #' the methods are related by a slope other than 1. Whenever the two methods
@@ -312,12 +319,6 @@ method_convert = function(data = NULL,
       stop("estimator = 'cbls' models the measurement error variances ",
            "directly; use variance = 'constant'.", call. = FALSE)
     }
-    if (replicates != "exchangeable") {
-      stop("estimator = 'cbls' is only available for exchangeable ",
-           "replicates: with linked replicates, the errors of the item ",
-           "means of the two methods share the occasion effects.",
-           call. = FALSE)
-    }
   }
   if (estimator == "ml" && ci_method == "boot") {
     stop("ci_method = 'boot' is only available with estimator = ",
@@ -401,7 +402,7 @@ method_convert = function(data = NULL,
     key = paste0(m1, "-", m2)
     pp = mc_pair(df, m1, m2, replicates = replicates, seed = pair_seed)
     da = if (estimator == "cbls") {
-      mc_cbls_fit(df, m1, m2)
+      mc_cbls_fit(df, m1, m2, replicates = replicates)
     } else {
       mc_da_fit(pp, variance = variance)
     }

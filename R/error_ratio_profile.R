@@ -84,6 +84,10 @@ error_ratio_profile <- function(object, ratios = NULL, conf.level = NULL) {
           object$errors$model_y == "constant")) {
       stop("error_ratio_profile() needs constant error variances.")
     }
+    if (identical(object$errors$replicates, "linked")) {
+      stop("error_ratio_profile() does not apply to linked replicates (the ",
+           "errors of x and y are correlated).")
+    }
   } else if (isTRUE(object$call$weighted)) {
     stop("error_ratio_profile() does not apply to weighted Deming regression.")
   }

@@ -118,6 +118,10 @@ summary.simple_bls <- function(object, ...) {
   constant <- e$model_x == "constant" && e$model_y == "constant"
   cat(sprintf("Error variance ratio var(x)/var(y): %.4f%s\n", object$error.ratio,
               if (constant) "" else " (at the mean level)"))
+  if (identical(e$replicates, "linked")) {
+    cat(sprintf("Linked replicates: error correlation of x and y on the same occasion %.3f (df %d)\n",
+                e$rho, as.integer(e$df_rho)))
+  }
   d <- object$dispersion
   if (!is.null(d) && is.finite(d$p.value)) {
     test <- if (is.finite(d$df2)) {
@@ -244,16 +248,34 @@ predict.simple_bls <- function(object,
     vx <- .bls_eval(e$fun_x, lev_x, "var_x") / reps_x
     vy <- .bls_eval(e$fun_y, lev_y, "var_y") / reps_y
     b1 <- unname(cf[2])
-    # the error variance of a new point, as a_x vx + a_y vy
+    # linked replicates: the new measurements of x and y are taken on the
+    # same occasions (min(reps_x, reps_y) of them), so their errors share
+    # the occasion effects, with covariance rho sqrt(var_x var_y) per shared
+    # occasion
+    rho <- if (identical(e$replicates, "linked")) e$rho else 0
+    vc_xy <- rho * sqrt(vx * reps_x * vy * reps_y) * min(reps_x, reps_y) /
+      (reps_x * reps_y)
+    # the error variance of a new point, as a_x vx + a_y vy + a_c vc_xy
     if (type == "xy") {
       a_x <- b1^2
       a_y <- 1
+      a_c <- -2 * b1
     } else {
       # D = x - y, M = (x + y) / 2: var(D - g1 M error) =
-      # vx (1 - g1/2)^2 + vy (1 + g1/2)^2
+      # vx (1 - g1/2)^2 + vy (1 + g1/2)^2 - 2 (1 - g1/2) (1 + g1/2) vc_xy
       a_x <- (1 - b1 / 2)^2
       a_y <- (1 + b1 / 2)^2
+      a_c <- -2 * (1 - b1 / 2) * (1 + b1 / 2)
     }
+    v_c <- a_c * vc_xy
+    # the measurement error part and its df: with linked replicates it is
+    # the variance of one combination of the paired errors, estimated from
+    # the paired within-subject deviations on df_rho df (Satterthwaite over
+    # pieces that partly cancel would give far too few df); otherwise the
+    # two variances on their own df
+    v_meas <- a_x * vx + a_y * vy + v_c
+    den_meas <- if (rho != 0) v_meas^2 / e$df_rho else
+      (a_x * vx)^2 / e$df_var_x + (a_y * vy)^2 / e$df_var_y
     # equation error (common tau): the new subject's true value deviates
     # from the line by tau2 for x and b^2 tau2 for y (b the BLS slope),
     # estimated on n - 2 df
@@ -262,10 +284,9 @@ predict.simple_bls <- function(object,
     b_xy <- unname(object$coefficients[2])
     v_eq <- a_x * tau2 + a_y * b_xy^2 * tau2
     if (interval == "prediction") {
-      var_pred <- var_line + a_x * vx + a_y * vy + v_eq
+      var_pred <- var_line + v_meas + v_eq
       df_pred <- var_pred^2 /
-        (var_line^2 / df_res + (a_x * vx)^2 / e$df_var_x +
-           (a_y * vy)^2 / e$df_var_y + v_eq^2 / df_res)
+        (var_line^2 / df_res + den_meas + v_eq^2 / df_res)
       q <- stats::qt(1 - (1 - level) / 2, df_pred)
       half <- q * sqrt(var_pred)
     } else {
@@ -277,7 +298,7 @@ predict.simple_bls <- function(object,
         stop("tol_level must be a single number between 0 and 1.")
       }
       pieces <- cbind(a_x * vx, a_y * vy, v_eq + 0 * u)
-      s2 <- rowSums(pieces)
+      s2 <- rowSums(pieces) + v_c
       if (tau2 > 0) {
         # With equation error, the residuals estimate, on n - 2 df, the
         # spread of the subject means about the line: s2_means, their
@@ -291,7 +312,10 @@ predict.simple_bls <- function(object,
         mod <- object$model
         m_x <- if (is.null(mod)) 1 else mean(mod$n_x)
         m_y <- if (is.null(mod)) 1 else mean(mod$n_y)
-        s2_means <- a_x * vx * reps_x / m_x + a_y * vy * reps_y / m_y + v_eq
+        k_xy <- if (is.null(mod$n_xy)) 0 else mean(mod$n_xy)
+        s2_means <- a_x * vx * reps_x / m_x + a_y * vy * reps_y / m_y +
+          a_c * rho * sqrt(vx * reps_x * vy * reps_y) * k_xy / (m_x * m_y) +
+          v_eq
         r2 <- df_res / stats::qchisq(1 - tol_level, df_res)
         u_s <- sqrt(s2 + s2_means * (r2 - 1))
         c_line <- sqrt(var_line * r2)
@@ -312,10 +336,17 @@ predict.simple_bls <- function(object,
         # sd_upper_at() drops pieces with 0 df), and the line its own
         # uncertainty on n - 2 df.
         cap <- function(d) if (is.finite(d)) d else 0
-        info <- list(type = "comp",
-                     shares = pieces[, 1:2, drop = FALSE] / s2,
-                     df = matrix(c(cap(e$df_var_x), cap(e$df_var_y)),
-                                 nrow = length(u), ncol = 2, byrow = TRUE))
+        info <- if (rho == 0) {
+          list(type = "comp",
+               shares = pieces[, 1:2, drop = FALSE] / s2,
+               df = matrix(c(cap(e$df_var_x), cap(e$df_var_y)),
+                           nrow = length(u), ncol = 2, byrow = TRUE))
+        } else {
+          # linked replicates: the measurement error part as one piece on
+          # the paired df (see v_meas above)
+          list(type = "comp", shares = matrix(1, length(u), 1),
+               df = matrix(e$df_rho, length(u), 1))
+        }
         if (bound_type == "iu") {
           lim <- analytic_bounds(b = fit, s = sqrt(s2), sem = sqrt(var_line),
                                  df = df_res, level = tol_level, info = info,
@@ -465,7 +496,7 @@ residuals.simple_bls <- function(object,
     return(e)
   }
   b1 <- unname(object$coefficients[2])
-  e / sqrt(df3$var_y + b1^2 * df3$var_x)
+  e / sqrt(df3$var_y + b1^2 * df3$var_x - 2 * b1 * .bls_cov(df3))
 }
 
 #' @rdname simple_bls-methods
@@ -476,11 +507,12 @@ check.simple_bls <- function(x, ...) {
   b0 <- unname(x$coefficients[1])
   b1 <- unname(x$coefficients[2])
   e <- df3$y - (b0 + b1 * df3$x)
-  s2 <- df3$var_y + b1^2 * df3$var_x
+  c_xy <- .bls_cov(df3)
+  s2 <- df3$var_y + b1^2 * df3$var_x - 2 * b1 * c_xy
   r <- e / sqrt(s2)
   # estimated true values
-  x_hat <- df3$x + b1 * df3$var_x * e / s2
-  y_hat <- df3$y - df3$var_y * e / s2
+  x_hat <- df3$x + (b1 * df3$var_x - c_xy) * e / s2
+  y_hat <- df3$y - (df3$var_y - b1 * c_xy) * e / s2
   avg_both <- (x_hat + y_hat) / 2
   mod <- lm(abs(r) ~ avg_both)
   ss <- anova(mod)$"Sum Sq"
@@ -532,4 +564,9 @@ utils::globalVariables(c("u", "v", "lwr", "upr"))
          "bls_reg() with model = TRUE.")
   }
   object$model
+}
+
+# error covariance of the subject means (linked replicates; 0 otherwise)
+.bls_cov <- function(df3) {
+  if (is.null(df3$cov_xy)) 0 else df3$cov_xy
 }

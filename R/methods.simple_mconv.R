@@ -130,7 +130,11 @@ print.simple_mconv <- function(x,
                       "are those of the biases"),
     linear = if (identical(fi$estimator, "cbls")) {
       paste0("CIs: delta method from the CBLS fit (measurement errors from ",
-             "the replicates;\n  common method-by-item variance), t with ",
+             "the replicates",
+             if (identical(fi$replicates, "linked")) {
+               ",\n  correlated through the shared occasions"
+             },
+             ";\n  common method-by-item variance), t with ",
              "items - 2 df; see ?bls_reg")
     } else {
       paste0("CIs: approximate (delta method",

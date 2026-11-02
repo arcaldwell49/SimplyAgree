@@ -75,8 +75,8 @@ which must be installed). Use "ml" for confidence intervals with close
 to the stated coverage. For \code{bias = "linear"}, "cbls" fits the
 regression of the differences on the averages by correlated bivariate
 least squares (\code{\link[=bls_reg]{bls_reg()}}) instead of least squares; it needs
-exchangeable replicates of both methods and \code{variance = "constant"}.
-See details.}
+replicates of both methods (exchangeable or linked) and
+\code{variance = "constant"}. See details.}
 
 \item{boot_reps}{Number of bootstrap replicates for \code{ci_method = "boot"}.
 Default is 999. Each replicate refits the model, so this can take
@@ -186,7 +186,14 @@ method-by-item variance when the scatter about the line exceeds the
 measurement error. \eqn{(a, b)} and their covariance (on items - 2 df) then
 come from that fit, and \eqn{s} is the SD of a new single difference about
 the line implied by the measurement error and method-by-item variances.
-The conversion is the BLS line of one method on the other.
+The conversion is the BLS line of one method on the other. With linked
+replicates, the two methods' measurements on the same occasion share the
+occasion effect, so their errors about the item means are correlated:
+\code{\link[=bls_reg]{bls_reg()}} with \code{replicates = "linked"} estimates the correlation from
+the paired occasions and includes it in the fit, and \eqn{s} is then the
+SD of a new difference measured on one occasion (smaller than with
+exchangeable replicates, where the occasion effects of the two methods
+are independent).
 
 A slope of the differences on the averages does not by itself show that
 the methods are related by a slope other than 1. Whenever the two methods
