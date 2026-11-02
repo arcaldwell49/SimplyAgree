@@ -58,6 +58,14 @@ long data, with `measure`, `item` and `id` column names; or wide data, one
 row per subject, with the item columns in `col.names`. An *item* is
 whatever is repeated: a trial, an occasion, a rater, or a judge.
 
+With trials or occasions as items, these functions assume a test-retest
+design: each subject has one true value, and the differences between
+occasions are measurement error. When the true value changes between
+occasions (repeated measures during an intervention, for example), real
+change is counted as error. For two or more methods measured on the same
+occasions, `method_vc(replicates = "linked")` separates the two (see
+"Trending agreement" in `vignette("agreement_analysis")`).
+
 As an example, take the data of @shrout1979 (6 subjects rated by 4 judges).
 
 ```{r}

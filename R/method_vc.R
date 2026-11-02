@@ -205,6 +205,34 @@
 #' \eqn{RpC_m = z \sqrt{2} \sqrt{\sigma_m^2 + \omega^2}} is the same limit for
 #' two measurements on different occasions.
 #'
+#' **Within-item reliability.** With linked replicates, where the true value
+#' of an item may change between occasions (repeated measures of a changing
+#' quantity, "trending"), \eqn{\omega^2 / (\omega^2 + \sigma_m^2)} is the
+#' share of method `m`'s variation within an item that is true change: how
+#' well the method follows changes. It is reported for each method and, with
+#' method-specific SDs, for the mean of the residual variances ("average",
+#' which equals the ICC of item-centred data). The confidence intervals come
+#' from the delta method for \eqn{\log(\omega^2 / \sigma^2)}, back-transformed.
+#' In simulations (2 or 3 methods, 20 or 50 items, 3 or 6 occasions; 95%
+#' intervals) the "average" and common-SD intervals covered 0.93 to 0.96. The
+#' per-method intervals covered 0.95 to 1.00 when \eqn{\omega} was
+#' comparable to the residual SDs, and 0.93 to 0.99 with three methods, but
+#' as little as 0.86 (for the method with the smaller SD) with two methods
+#' and \eqn{\omega} four times the smaller SD, where the split of the
+#' residual variance between the two methods is weakly identified; prefer
+#' the "average" row then. A residual SD at zero gives a
+#' reliability of 1 with interval `NA` to 1, and \eqn{\omega} at zero a
+#' reliability of 0 with interval 0 to `NA`.
+#'
+#' A residual SD estimated at zero with linked replicates is noted by
+#' `print()`. It happens when the SD is small relative to \eqn{\omega} (in
+#' the simulations above, in up to 30% of data sets with two methods), but
+#' also when a method does not follow within-item changes with slope 1: the
+#' model has no term for that, so the systematic error moves into the other
+#' methods' SDs, and the method that tracks poorly can look error-free.
+#' Comparing the SDs with each method's known repeatability helps to tell
+#' these apart.
+#'
 #' @return An object of class `simple_mvc`, a list with:
 #'
 #'   - `bias`: tibble with the bias (`method1` - `method2`) for each pair of
@@ -223,6 +251,11 @@
 #'     (`sigma`), the repeatability coefficient (`rc`) with confidence limits,
 #'     and for linked replicates the reproducibility coefficient (`rpc`) with
 #'     confidence limits; `NULL` without replicates. See details.
+#'   - `reliability`: tibble with the within-item reliability
+#'     (`reliability`) for each method (`method`; `NA` with a common SD) and
+#'     the "average", with `omega`, the residual SD (`sigma`) and confidence
+#'     limits (`lower`, `upper`); `NULL` without linked replicates. See
+#'     details.
 #'   - `alpha`: list with the method means averaged over items (`alpha`) and
 #'     their covariance matrix (`vcov`); `NULL` with `methods = "random"`.
 #'   - `vc_cov`: approximate covariance matrix of the estimated variances in
@@ -380,6 +413,7 @@ method_vc = function(data,
   }
   varcomp = vc_unc$varcomp
   mc_vc_boundary(varcomp, drop = design$drop)
+  design$sigma_zero = mc_vc_sigma_zero(varcomp, design = design)
 
   # bias and limits ----
   if (methods == "random") {
@@ -406,6 +440,10 @@ method_vc = function(data,
                                       design = design,
                                       pred_level = pred_level,
                                       conf_level = conf_level)
+  reliability = mc_vc_reliability(varcomp = varcomp,
+                                  cov_v = vc_unc$cov,
+                                  design = design,
+                                  conf_level = conf_level)
 
   design = c(design,
              list(replicates = replicates,
@@ -419,6 +457,7 @@ method_vc = function(data,
                  limits = limits,
                  varcomp = varcomp,
                  repeatability = repeatability,
+                 reliability = reliability,
                  alpha = alpha,
                  vc_cov = vc_unc$cov,
                  diagnostics = mc_vc_diag(fit, df, design),

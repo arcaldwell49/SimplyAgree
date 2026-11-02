@@ -251,6 +251,19 @@ refit the model n times in every replicate.
 how much subjects differ from each other (Weir, 2005). To claim that
 reliability exceeds a threshold, test against it, e.g.
 \verb{null.value = 0.75, alternative = "greater"}.
+
+\strong{Assumption: one true value per subject.} With occasions or trials as
+items, the ICC assumes that each subject has one true value, measured
+repeatedly, so that differences between occasions are measurement error
+(test-retest). When the true value changes between occasions (repeated
+measures during an intervention, "trending" data), real change is counted
+as error and the ICC is not a test-retest reliability. For two or more
+methods measured on the same occasions, \code{\link[=method_vc]{method_vc()}} with
+\code{replicates = "linked"} separates the change (\eqn{\omega}) from each
+method's error and reports a within-item reliability with a confidence
+interval; the ICC of subject-centred data with the method as \code{item} gives
+the same point estimate, but its interval ignores the subject means
+removed by centring and is too narrow.
 }
 \examples{
 # Shrout & Fleiss (1979) example: 6 subjects rated by 4 judges

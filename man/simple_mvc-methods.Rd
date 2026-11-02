@@ -29,12 +29,15 @@
 
 \method{plot}{simple_mvc}(
   x,
-  type = c("ba", "matrix", "vc"),
+  type = c("ba", "matrix", "vc", "quadrant", "polar"),
   pair = NULL,
   pair_seed = NULL,
   geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled",
     "stat_density_2d"),
   delta = NULL,
+  exclusion = 0,
+  relative = FALSE,
+  expected = FALSE,
   ...
 )
 
@@ -88,10 +91,15 @@ on the diagonal, each pair of methods plotted against each other above
 it (identity line dashed; constant-bias conversion line with prediction
 limits on the original scale), and Bland-Altman plots below it. "vc":
 estimates and confidence intervals of the variance component SDs and the
-repeatability coefficients.}
+repeatability coefficients. "quadrant" and "polar" (linked replicates
+only): concordance and polar plots of the changes between successive
+occasions for one pair of methods; see "Quadrant and polar plots" in
+\link{loa-methods}.}
 
 \item{pair}{Character vector naming the two methods to plot, in the order
-of the difference (first minus second). Default is the first pair.}
+of the difference (first minus second). Default is the first pair (with
+random raters and \code{type = "quadrant"} or \code{"polar"}, the first two
+methods).}
 
 \item{pair_seed}{Seed for the random pairing of exchangeable replicates
 in the plot or in \code{check()}. The global random number generator state is
@@ -108,6 +116,22 @@ points: "geom_point" (default), "geom_bin2d", "geom_density_2d",
 dashed lines: one value (drawn at \code{delta} and \code{-delta}, or, for ratios
 with \code{transform = "log"}, at \code{delta} and \code{1/delta}) or two values, on
 the plotted scale.}
+
+\item{exclusion}{For \code{type = "quadrant"} or \code{"polar"}, the central
+exclusion zone: changes whose mean change (the average of the two
+methods' changes) is smaller than this in absolute value are left out of
+the concordance rate and the angular statistics (and drawn as open
+circles). Default 0 (none). In percent with \code{relative = TRUE}.}
+
+\item{relative}{For \code{type = "quadrant"} or \code{"polar"}, whether to plot
+percentage changes (from the earlier occasion; with log-transformed
+data, \code{100 * (exp(change) - 1)}) instead of absolute changes. Default
+\code{FALSE}.}
+
+\item{expected}{For \code{type = "quadrant"} or \code{"polar"}, whether to add the
+concordance rate expected from the within-subject SD of the differences
+at the observed changes to the caption (absolute changes only). Default
+\code{FALSE}.}
 
 \item{error.ratio}{For \code{check}, an optional known ratio of the measurement
 error variances of the two methods, var(error of the first) / var(error

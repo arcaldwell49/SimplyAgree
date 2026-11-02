@@ -282,7 +282,7 @@ All four agreement functions take two extra arguments:
 
 With `m > 1`, `n` is the **number of subjects** (the output also gives `n.obs = n * m`), and `sigma` (or `SD`) is the **total** SD of the differences, between- plus within-subject.
 
-Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject. To put it another way, a high ICC would reflect that the bias is consistent within a subject but differs across subjects (i.e., the bias is largely subject-specific). *Caveat emptor* but I personally believe it is reasonble to suspect that in many cases the ICC for nested agreement studies would be low (ICC < 0.10).
+Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject. To put it another way, a high ICC would reflect that the bias is consistent within a subject but differs across subjects (i.e., the bias is largely subject-specific).
 
 *Caveat emptor* but I personally believe it is reasonable to expect the ICC of the
 differences to be low (e.g., < 0.10) in many nested agreement studies. When
@@ -294,6 +294,8 @@ depends on the magnitude of the measured value) or a characteristic of the
 subject that affects one method more than the other (e.g., skin tone for
 optical sensors, or body composition for impedance-based measures). If such
 mechanisms are plausible, a higher ICC should be expected. Varying the ICC for these power analyses is a good sensitivity check.
+
+The within-subject part of the variance is not always pure measurement error either. When the true value changes within subjects and one method does not follow those changes one for one (a within-subject slope different from 1), the systematic error ends up in the within-subject variance, and grows with the size of the changes in the study. A pilot study with smaller changes than the main study then understates the SD (see "Trending agreement" in `vignette("agreement_analysis")`).
 
 
 

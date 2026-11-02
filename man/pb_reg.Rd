@@ -147,7 +147,12 @@ therefore an error. When the error variances differ, use \code{\link[=dem_reg]{d
 the appropriate \code{error.ratio} (or \code{id}).
 
 With \code{id}, replicate measurements are averaged within each subject and the
-subject means are analysed.
+subject means are analysed. This assumes exchangeable replicates of one
+true value per subject: the slope is a between-subject slope and says
+nothing about how a method follows changes within subjects. For repeated
+measurements of a changing value (linked occasions), use \code{\link[=method_vc]{method_vc()}}
+with \code{replicates = "linked"} (see "Trending agreement" in
+\code{vignette("agreement_analysis")}).
 }
 
 \subsection{Weighting}{

@@ -702,6 +702,89 @@ $$
 Upper \space CI = LoA_{upper} + LME
 $$
 
+## Trending agreement
+
+With nested data the true value changes within subjects, and a common question is whether the two methods agree on the *changes*: does the new device follow a patient's cardiac output up and down as the reference does ("trending")? The limits above describe single differences. The within-subject part of the model answers the trending question [@enevoldsen2026]:
+
+- **Change limits of agreement**, $\pm z \sqrt{2} \, \sigma_w$: the difference between the two methods' changes from one occasion to the next. The between-subject part (a subject-specific bias) cancels in a change.
+- **The range of changes** the result applies to: the within-subject SD of the true value.
+- **4-quadrant and polar plots** of the changes, which are common in the anaesthesia literature [@critchley2011].
+
+As an example, two methods measured 20 subjects on 4 linked occasions:
+
+```{r}
+dat_t = sim_methods(n_items = 20, n_reps = 4, methods = c("ref", "new"),
+                    alpha = c(0, 0.3), tau = 0.2, omega = 0.6,
+                    sigma = c(0.3, 0.4), replicates = "linked", seed = 7)
+wide_t = stats::reshape(as.data.frame(dat_t[, c("id", "repl", "method", "y")]),
+                        idvar = c("id", "repl"), timevar = "method",
+                        direction = "wide")
+names(wide_t) = sub("^y[.]", "", names(wide_t))
+wide_t = wide_t[order(wide_t$id, wide_t$repl), ]
+head(wide_t)
+```
+
+The change limits of agreement are the minimal detectable change of the differences $D = x - y$, with occasions as items (`mdc_test()`, one-way model): the real change cancels in $D$, so what remains between occasions is the two methods' measurement error.
+
+```{r}
+wide_t$D = wide_t$new - wide_t$ref
+mdc_test(D ~ repl | id, data = wide_t, model = "oneway")
+```
+
+The variance component model of `method_vc()` with linked replicates (see `vignette("method_comparison_vc")`) splits the same within-subject variation into the true change ($\omega$) and each method's error ($\sigma_m$). Its $z \sqrt{2} \sqrt{\sigma_{ref}^2 + \sigma_{new}^2}$ equals the MDC above, $\omega$ is the range of applicability, and the within-item reliability, $\omega^2 / (\omega^2 + \sigma_m^2)$, says how much of each method's variation within a subject is real change:
+
+```{r}
+fit_t = method_vc(dat_t, y = "y", method = "method", id = "id",
+                  replicate = "repl", replicates = "linked")
+fit_t$varcomp
+s = fit_t$varcomp$sd[fit_t$varcomp$component == "sigma"]
+qnorm(0.975) * sqrt(2) * sqrt(sum(s^2))
+fit_t$reliability
+```
+
+Which call estimates what:
+
+| Quantity | Call |
+|---|---|
+| Change limits of agreement of the two methods, with a CI | `mdc_test(model = "oneway")` on $D = x - y$ with occasions as items, or $z \sqrt{2} \sqrt{\sigma_x^2 + \sigma_y^2}$ from `method_vc(replicates = "linked")` |
+| Each method's repeatability (its own error) | `rc` from `method_vc(replicates = "linked")` |
+| Range of the changes (true within-subject SD) | `omega` from `method_vc(replicates = "linked")` |
+| Within-subject (within-item) reliability, with a CI | `reliability` from `method_vc(replicates = "linked")` |
+| The same reliability, point estimate only | `icc_test()` on subject-centred data with the method as `item` (its CI ignores the centring and is too narrow) |
+| Quadrant and polar plots | `plot(type = "quadrant")`, `plot(type = "polar")` for `agreement_limit(data_type = "nest")`, `tolerance_limit()` with `id`, and `method_vc(replicates = "linked")` |
+
+The SEM, ICC and MDC of *one* method's repeated readings do not answer the question: with a changing true value they count the real change as error (see the assumptions in `?icc_test`, `?reli_err_test` and `?mdc_test`).
+
+### Quadrant and polar plots
+
+The quadrant plot shows each change by one method against the change by the other. The concordance rate is the share of changes in which both methods move in the same direction, usually after leaving out small changes (the central exclusion zone, `exclusion`, on the mean of the two changes). The polar plot [@critchley2011] draws each change at a distance equal to its mean change and at the angle between the two changes and the line of identity, and summarises the angles by an angular bias and radial limits. `expected = TRUE` adds the concordance expected from $\sigma_w$ at the observed changes [@enevoldsen2026], which ties the plots to the model.
+
+```{r fig.width=6, fig.height=5}
+a_t = agreement_limit(x = "new", y = "ref", id = "id", data = wide_t,
+                      data_type = "nest")
+plot(a_t, type = "quadrant", exclusion = 0.2, expected = TRUE)
+```
+
+```{r fig.width=6, fig.height=6}
+plot(fit_t, type = "polar", pair = c("new", "ref"))
+```
+
+Both plots depend on the size of the changes in the data and on the exclusion zone, and the usual thresholds (a concordance rate of 92%, radial limits of $\pm 30$ degrees) have no statistical basis. With small changes, as for many of the changes here, measurement error dominates and the radial limits are wide even for a method that tracks well. There are no confidence intervals: changes within a subject are correlated, so an interval would have to resample subjects. The change limits of agreement and the variance components are the model-based summaries; the plots are best read alongside them.
+
+### A limitation: a method that does not follow changes with slope 1
+
+All of the above assumes that both methods follow within-subject changes in the true value one for one. If the new method responds to a change $\Delta$ with $b \Delta$, $b \neq 1$, the systematic error $(b - 1) \Delta$ ends up in $\sigma_w$. The change limits then depend on how large the changes in the study were, and a method that does not track at all can look acceptable when the changes are small. In a simulation with 200 subjects and 6 occasions (both error SDs 0.25):
+
+| Within-subject SD of the true value | Within-subject slope | Change LoA |
+|---|---|---|
+| 0.3 | 1 | 1.02 |
+| 0.3 | 0 | 1.30 |
+| 1.5 | 0 | 4.44 |
+
+None of the slope tools in the package detect this. `prop_bias` and `check()` for nested data use a pooled slope that is dominated by differences between subjects; `dem_reg(id = )` and `pb_reg(id = )` fit subject means (a between-subject slope), and `dem_reg()` then also estimates the error ratio from within-subject variances that include the real change. In `method_vc(replicates = "linked")` the misfit shows as implausible variance components: $\omega$ near zero with one $\sigma_m$ far above the method's known repeatability, or a $\sigma_m$ at zero for the method that tracks poorly (`print()` notes a residual SD at zero). Comparing the $\sigma_m$ with each method's repeatability from a separate study is the practical check.
+
+A within-subject slope can be estimated from subject-centred data (each method's readings minus its subject mean) by Deming regression, `dem_reg(y_c ~ x_c, error.ratio = )`, but only with a known error ratio, from a separate repeatability study or explored with `error_ratio_profile()`: with one measurement per method per occasion, the slope and the error ratio are not separately identified. The fit also uses $N - 2$ residual degrees of freedom instead of about $N - n - 1$, so its standard errors are somewhat too small (about 10% with 6 measurements per subject).
+
 # How to Test a Hypothesis
 
 Unlike the "test" functions, `agreement_limits` and `tolerance_limits` do not test a hypothesis agreement, but only estimate the limits.

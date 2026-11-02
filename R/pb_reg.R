@@ -88,7 +88,12 @@
 #' the appropriate `error.ratio` (or `id`).
 #'
 #' With `id`, replicate measurements are averaged within each subject and the
-#' subject means are analysed.
+#' subject means are analysed. This assumes exchangeable replicates of one
+#' true value per subject: the slope is a between-subject slope and says
+#' nothing about how a method follows changes within subjects. For repeated
+#' measurements of a changing value (linked occasions), use [method_vc()]
+#' with `replicates = "linked"` (see "Trending agreement" in
+#' `vignette("agreement_analysis")`).
 #'
 #' ## Weighting
 #'

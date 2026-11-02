@@ -171,6 +171,15 @@
 #' same quantity as the half width of the limits of agreement, with the bias
 #' reported separately.
 #'
+#' **Assumption: one true value per subject.** With occasions or trials as
+#' items, the SEM assumes that the subject's true value does not change
+#' between occasions. If it does (repeated measures of a changing quantity),
+#' the SEM of one device's readings is \eqn{\sqrt{\omega^2 + \sigma^2}}: the
+#' real change (\eqn{\omega}) plus the device's error (\eqn{\sigma}). To
+#' separate them, measure with two or more methods on the same occasions and
+#' use [method_vc()] with `replicates = "linked"`, whose residual SDs are the
+#' methods' errors.
+#'
 #' @return A list of class `c("reli_htest", "htest")` containing:
 #'   \item{statistic}{The \eqn{\chi^2} (SEM) or z (SEE, SEP) statistic, when
 #'   a test was requested without the bootstrap.}

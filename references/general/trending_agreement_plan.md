@@ -1,6 +1,6 @@
 # Within-subject (trending) agreement: plan for 0.5.0
 
-Status: proposed, 2026-11-01. Not started. To be folded into the MethComp work on branch `MethComp`
+Status: done 2026-11-02 (step 0, then items (a) reliability, (b) plots, (c) documentation; see Decisions). Item 4 (a within-subject slope in `sim_methods()`) was not needed: the vignette example builds its data directly. To be folded into the MethComp work on branch `MethComp`
 (see `TODO.md` and `bls_reg_roadmap.md`).
 
 ## Motivation
@@ -251,7 +251,39 @@ plot(x, type = "polar",    exclusion = 0, relative = FALSE)
   `reli_err_test(scale = "mean")` is the principled alternative.
 - **Bootstrap CIs for these quantities** (as in BAtrending). The analytic chi-square / MOVER bounds are used instead.
 
-## Open questions
+## Decisions (2026-11-02)
+
+Agreed with the user after step 0; these replace the open questions below.
+
+- **Item 1 dropped** (step 0 outcome): no model for the average in `agreement_limit()` / `tolerance_limit()`;
+  ω from `method_vc(replicates = "linked")` is the range of applicability. No within-subject residual plot.
+- **Plots (item 2): quadrant and polar** as `plot(type = "quadrant")` / `plot(type = "polar")` for all three classes:
+  - `simple_mvc` with linked replicates (order = replicate);
+  - `tolerance_delta` with `id` (order = `time`, else row order within `id`);
+  - `loa` with `data_type = "nest"` (row order within `id`, documented; no new `time` argument).
+
+  Error for exchangeable replicates and data without repeated measures. The expected-concordance overlay is an
+  option, off by default. **Done (b)**: `R/trend_plot_functions.R`; the exclusion zone is on the mean change for
+  both plots; `expected = TRUE` adds the expected concordance to the caption (σ_w from the model for `simple_mvc` and
+  `tolerance_delta` with one `SD.within`, else the pooled within-id SD of the differences); tests in
+  `test-trend_plots.R` (including the paper's 0.904 check).
+- **Within-person reliability** in `simple_mvc` output (linked only): ω² / (ω² + σ_m²) per method and
+  ω² / (ω² + mean σ²) for the pair, with delta-method CIs from `vc_cov`, checked by a coverage simulation before
+  release. **Done (a)**: logit delta-method CIs (the F interval was no better); "average" and common-SD rows covered
+  0.93–0.96; per-method rows as low as 0.86 with two methods and a large ω, so all rows are reported with a caveat
+  (agreed after the simulation; `method_vc_reliability_sims/`).
+- **Residual SD at zero:** first agreed as a warning in `method_vc(replicates = "linked")`; changed after the
+  simulation to a `print()` note naming both causes (σ_m small relative to ω, or a non-unit within-subject slope),
+  because with two methods and a large ω a σ_m is at zero in up to 30% of fits where both methods track.
+  `dem_reg(id)` / `pb_reg(id)`: documentation only.
+- Item 3 (documentation) as written; item 4 (a within-subject slope in `sim_methods()`) as needed for tests and the
+  vignette example.
+
+Implementation order: (a) reliability + boundary warning in `method_vc()` with the coverage simulation;
+(b) the change extraction and quadrant/polar plots, `simple_mvc` first, then `tolerance_delta` and `loa`;
+(c) documentation and the vignette subsection.
+
+## Open questions (answered 2026-11-02; see Decisions)
 
 1. Item 1: report the average's SDs as point estimates only (matching `SD.between`/`SD.within`), or with chi-square CIs?
 2. Item 2: add a `time` argument to `agreement_limit()`, or rely on row order within `id`?

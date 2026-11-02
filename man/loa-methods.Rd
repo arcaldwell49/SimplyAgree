@@ -14,6 +14,10 @@
   geom = c("geom_point", "geom_bin2d", "geom_density_2d", "geom_density_2d_filled",
     "stat_density_2d"),
   delta = NULL,
+  type = c("ba", "quadrant", "polar"),
+  exclusion = 0,
+  relative = FALSE,
+  expected = FALSE,
   ...
 )
 
@@ -31,6 +35,27 @@ for details.
 \item{geom}{String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".}
 
 \item{delta}{The maximal allowable difference.}
+
+\item{type}{Type of plot: "ba" (default), the Bland-Altman plot, or, for
+repeated measurements of a value that may change, "quadrant" (a
+4-quadrant concordance plot) or "polar" (a polar plot) of the changes
+between successive occasions. See "Quadrant and polar plots".}
+
+\item{exclusion}{For \code{type = "quadrant"} or \code{"polar"}, the central
+exclusion zone: changes whose mean change (the average of the two
+methods' changes) is smaller than this in absolute value are left out of
+the concordance rate and the angular statistics (and drawn as open
+circles). Default 0 (none). In percent with \code{relative = TRUE}.}
+
+\item{relative}{For \code{type = "quadrant"} or \code{"polar"}, whether to plot
+percentage changes (from the earlier occasion; with log-transformed
+data, \code{100 * (exp(change) - 1)}) instead of absolute changes. Default
+\code{FALSE}.}
+
+\item{expected}{For \code{type = "quadrant"} or \code{"polar"}, whether to add the
+concordance rate expected from the within-subject SD of the differences
+at the observed changes to the caption (absolute changes only). Default
+\code{FALSE}.}
 
 \item{error.ratio}{For \code{check}, an optional known ratio of the measurement
 error variances, var(error of x) / var(error of y), as in \code{\link[=dem_reg]{dem_reg()}},
@@ -131,10 +156,62 @@ size, \code{beta}) rather than judging the lines by eye, particularly with few
 subjects.
 }
 
+\section{Quadrant and polar plots}{
+
+With repeated measurements of a value that changes within subjects
+("trending"), \code{type = "quadrant"} and \code{type = "polar"} show whether the
+two methods agree on the \emph{changes} between successive occasions within a
+subject. Occasions are ordered by row order within \code{id} for
+\code{\link[=agreement_limit]{agreement_limit()}} (\code{data_type = "nest"}), by \code{time} (else row order)
+within \code{id} for \code{\link[=tolerance_limit]{tolerance_limit()}}, and by the replicate for
+\code{\link[=method_vc]{method_vc()}} with linked replicates; only successive occasions with both
+methods measured are used.
+\itemize{
+\item \strong{Quadrant:} the change by \code{x} against the change by \code{y}, with the line
+of identity (dashed) and the exclusion zone (dotted). The concordance
+rate in the caption is the share of included changes in which both
+methods change in the same direction.
+\item \strong{Polar} (Critchley et al., 2011): each change is drawn at a distance
+equal to its mean change and at the angle between the two methods'
+changes and the line of identity (positive when \code{y} changed more);
+changes with a negative mean are turned through 180 degrees. The
+angular bias is the mean angle and the radial limits of agreement are
+the bias \eqn{\pm z} SD of the angles (with the agreement or prediction
+level of the fit).
+}
+
+With \code{expected = TRUE}, the caption adds the concordance expected from
+the model, the average over the included changes of
+\eqn{\Phi(|\Delta| / (\sqrt{2} \sigma_w))}, where \eqn{\Delta} is the
+mean change and \eqn{\sigma_w} the within-subject SD of the differences
+(Enevoldsen et al., 2026): from the model for \code{\link[=method_vc]{method_vc()}} (the residual
+SDs of the pair) and for \code{\link[=tolerance_limit]{tolerance_limit()}} fits with a single
+\code{SD.within}, otherwise the pooled within-subject SD of the differences.
+
+Read these plots with care. The concordance rate and the angles depend on
+the exclusion zone and on the size of the changes in the data; the polar
+exclusion by mean change drops pairs that change in opposite directions;
+common thresholds (such as a concordance rate of 92\% or radial limits of
+\eqn{\pm 30} degrees) have no statistical basis; there are no confidence
+intervals (changes within a subject are correlated, so any would need to
+resample subjects); and, like the within-subject limits of agreement,
+both plots can miss a method that does not follow changes when the
+changes in the data are small. For \code{\link[=method_vc]{method_vc()}} fits, the within-item
+reliability and the variance components are the model-based summaries.
+}
+
 \references{
 Bland, J. M., & Altman, D. G. (1999). Measuring agreement in method
 comparison studies. Statistical Methods in Medical Research, 8(2), 135-160.
 
 Hopkins, W. G. (2004). Bias in Bland-Altman but not regression validity
 analyses. Sportscience, 8, 42-46.
+
+Critchley LA, Yang XX, Lee A (2011). Assessment of trending ability of
+cardiac output monitors by polar plot methodology. \emph{Journal of
+Cardiothoracic and Vascular Anesthesia} 25:536-546.
+\doi{10.1053/j.jvca.2011.01.003}
+
+Enevoldsen J, et al. (2026). Trending agreement: Bland-Altman is all you
+need. \emph{Anesthesia & Analgesia}. \doi{10.1213/ANE.0000000000008389}
 }

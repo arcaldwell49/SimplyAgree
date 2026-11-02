@@ -194,6 +194,19 @@
 #' reliability exceeds a threshold, test against it, e.g.
 #' `null.value = 0.75, alternative = "greater"`.
 #'
+#' **Assumption: one true value per subject.** With occasions or trials as
+#' items, the ICC assumes that each subject has one true value, measured
+#' repeatedly, so that differences between occasions are measurement error
+#' (test-retest). When the true value changes between occasions (repeated
+#' measures during an intervention, "trending" data), real change is counted
+#' as error and the ICC is not a test-retest reliability. For two or more
+#' methods measured on the same occasions, [method_vc()] with
+#' `replicates = "linked"` separates the change (\eqn{\omega}) from each
+#' method's error and reports a within-item reliability with a confidence
+#' interval; the ICC of subject-centred data with the method as `item` gives
+#' the same point estimate, but its interval ignores the subject means
+#' removed by centring and is too narrow.
+#'
 #' @return A list of class `c("reli_htest", "htest")` containing:
 #'   \item{statistic}{The F statistic (omitted for bootstrap results).}
 #'   \item{parameter}{The numerator and denominator degrees of freedom

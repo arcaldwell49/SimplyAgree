@@ -88,4 +88,7 @@ utils::globalVariables(c("boot_bias", "occ",
                          "y2", "to", "from", "text",
                          "est", "fit", "resid",
                          "fitted", "panel", "sample",
-                         "from_value", "std", "iteration"))
+                         "from_value", "std", "iteration",
+                         # quadrant and polar plots
+                         "dx", "dy", "included", "ring", "px", "py", "what",
+                         "xend", "yend", "lab"))

@@ -305,6 +305,8 @@ tol_model_label = function(call2){
 }
 
 #' @rdname tolerance_delta-methods
+#' @inheritParams plot.loa
+#' @inheritSection loa-methods Quadrant and polar plots
 #' @method plot tolerance_delta
 #' @param geom String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".
 #' @import ggplot2
@@ -319,14 +321,40 @@ plot.tolerance_delta <- function(x,
                        "stat_density_2d"
                      ),
                      delta = NULL,
+                     type = c("ba", "quadrant", "polar"),
+                     exclusion = 0,
+                     relative = FALSE,
+                     expected = FALSE,
                      ...) {
 
   geom = match.arg(geom)
+  type = match.arg(type)
 
   call2 = x$call
   df = model.frame(x$call$lm_mod)
   colnames(df) = c("y","x","id","mean","delta","condition","time")
   df_loa = x$limits
+
+  if (type != "ba") {
+    if (is.null(call2$id)) {
+      stop("type = '", type, "' needs repeated measurements within `id`: ",
+           "without `id` there are no changes between occasions.",
+           call. = FALSE)
+    }
+    # occasions ordered by `time` (row order without it); with nested ids,
+    # within the outer id. The model's within-subject SD where it has one.
+    sd_w = df_loa$SD.within
+    sd_w = if (length(sd_w) == 1 && !is.na(sd_w)) sd_w else NULL
+    return(trend_plot(data.frame(id = df$id, ord = df$time, x = df$x,
+                                 y = df$y),
+                      type = type,
+                      x_name = as.character(call2$x),
+                      y_name = as.character(call2$y),
+                      exclusion = exclusion, relative = relative,
+                      expected = expected, log = isTRUE(call2$log_tf),
+                      sd_w = sd_w,
+                      agree_level = get_call(call2$pred_level)))
+  }
 
   if(call2$log_tf){
     if(call2$log_tf_display == "ratio"){

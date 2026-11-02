@@ -272,6 +272,72 @@ print.loa <- function(x,
 #' @rdname loa-methods
 #' @method plot loa
 #' @param geom String naming the type of geometry to display the data points. Default is "geom_point". Other options include: "geom_bin2d", "geom_density_2d", "geom_density_2d_filled", and "stat_density_2d".
+#' @param type Type of plot: "ba" (default), the Bland-Altman plot, or, for
+#'   repeated measurements of a value that may change, "quadrant" (a
+#'   4-quadrant concordance plot) or "polar" (a polar plot) of the changes
+#'   between successive occasions. See "Quadrant and polar plots".
+#' @param exclusion For `type = "quadrant"` or `"polar"`, the central
+#'   exclusion zone: changes whose mean change (the average of the two
+#'   methods' changes) is smaller than this in absolute value are left out of
+#'   the concordance rate and the angular statistics (and drawn as open
+#'   circles). Default 0 (none). In percent with `relative = TRUE`.
+#' @param relative For `type = "quadrant"` or `"polar"`, whether to plot
+#'   percentage changes (from the earlier occasion; with log-transformed
+#'   data, `100 * (exp(change) - 1)`) instead of absolute changes. Default
+#'   `FALSE`.
+#' @param expected For `type = "quadrant"` or `"polar"`, whether to add the
+#'   concordance rate expected from the within-subject SD of the differences
+#'   at the observed changes to the caption (absolute changes only). Default
+#'   `FALSE`.
+#' @section Quadrant and polar plots:
+#' With repeated measurements of a value that changes within subjects
+#' ("trending"), `type = "quadrant"` and `type = "polar"` show whether the
+#' two methods agree on the *changes* between successive occasions within a
+#' subject. Occasions are ordered by row order within `id` for
+#' [agreement_limit()] (`data_type = "nest"`), by `time` (else row order)
+#' within `id` for [tolerance_limit()], and by the replicate for
+#' [method_vc()] with linked replicates; only successive occasions with both
+#' methods measured are used.
+#'
+#' - **Quadrant:** the change by `x` against the change by `y`, with the line
+#'   of identity (dashed) and the exclusion zone (dotted). The concordance
+#'   rate in the caption is the share of included changes in which both
+#'   methods change in the same direction.
+#' - **Polar** (Critchley et al., 2011): each change is drawn at a distance
+#'   equal to its mean change and at the angle between the two methods'
+#'   changes and the line of identity (positive when `y` changed more);
+#'   changes with a negative mean are turned through 180 degrees. The
+#'   angular bias is the mean angle and the radial limits of agreement are
+#'   the bias \eqn{\pm z} SD of the angles (with the agreement or prediction
+#'   level of the fit).
+#'
+#' With `expected = TRUE`, the caption adds the concordance expected from
+#' the model, the average over the included changes of
+#' \eqn{\Phi(|\Delta| / (\sqrt{2} \sigma_w))}, where \eqn{\Delta} is the
+#' mean change and \eqn{\sigma_w} the within-subject SD of the differences
+#' (Enevoldsen et al., 2026): from the model for [method_vc()] (the residual
+#' SDs of the pair) and for [tolerance_limit()] fits with a single
+#' `SD.within`, otherwise the pooled within-subject SD of the differences.
+#'
+#' Read these plots with care. The concordance rate and the angles depend on
+#' the exclusion zone and on the size of the changes in the data; the polar
+#' exclusion by mean change drops pairs that change in opposite directions;
+#' common thresholds (such as a concordance rate of 92% or radial limits of
+#' \eqn{\pm 30} degrees) have no statistical basis; there are no confidence
+#' intervals (changes within a subject are correlated, so any would need to
+#' resample subjects); and, like the within-subject limits of agreement,
+#' both plots can miss a method that does not follow changes when the
+#' changes in the data are small. For [method_vc()] fits, the within-item
+#' reliability and the variance components are the model-based summaries.
+#'
+#' @references
+#' Critchley LA, Yang XX, Lee A (2011). Assessment of trending ability of
+#' cardiac output monitors by polar plot methodology. *Journal of
+#' Cardiothoracic and Vascular Anesthesia* 25:536-546.
+#' \doi{10.1053/j.jvca.2011.01.003}
+#'
+#' Enevoldsen J, et al. (2026). Trending agreement: Bland-Altman is all you
+#' need. *Anesthesia & Analgesia*. \doi{10.1213/ANE.0000000000008389}
 #' @import ggplot2
 #' @export
 
@@ -284,10 +350,33 @@ plot.loa <- function(x,
                        "stat_density_2d"
                      ),
                      delta = NULL,
+                     type = c("ba", "quadrant", "polar"),
+                     exclusion = 0,
+                     relative = FALSE,
+                     expected = FALSE,
                      ...) {
 
   geom = match.arg(geom)
+  type = match.arg(type)
 
+  if (type != "ba") {
+    if (get_call(x$call$data_type) != "nest") {
+      stop("type = '", type, "' needs data_type = \"nest\" (repeated ",
+           "measurements of a value that may change): with ",
+           "data_type = \"", get_call(x$call$data_type), "\" there are no ",
+           "changes between occasions.", call. = FALSE)
+    }
+    # occasions in row order within id
+    df = model.frame(x$call$lm_mod)
+    df = data.frame(id = df$id, ord = seq_len(nrow(df)), x = df$x, y = df$y)
+    return(trend_plot(df, type = type,
+                      x_name = as.character(x$call$x),
+                      y_name = as.character(x$call$y),
+                      exclusion = exclusion, relative = relative,
+                      expected = expected,
+                      log = isTRUE(get_call(x$call$log_tf)),
+                      agree_level = get_call(x$call$agree.level)))
+  }
 
   #return(x$bland_alt.plot)
   if (get_call(x$call$prop_bias) != TRUE) {

@@ -537,6 +537,22 @@ mc_vc_boundary = function(varcomp,
   invisible(NULL)
 }
 
+# Methods whose residual SD is at zero (below mc_vc_zero_tol times the
+# largest) with linked replicates, noted by print(). Two causes: the SD is
+# small relative to omega (with two methods and omega four times the smaller
+# SD, 7% to 30% of fits in references/general/method_vc_reliability_sims, so
+# not a warning), or a method that does not follow within-item changes with
+# slope 1, whose misfit moves into the other SDs (trending_agreement_plan.md).
+mc_vc_sigma_zero = function(varcomp,
+                            design) {
+  if (design$model_type != "reps" || !isTRUE(design$linked) ||
+      !identical(design$sigma, "method")) {
+    return(character(0))
+  }
+  s = varcomp[varcomp$component == "sigma", ]
+  s$method[s$sd < mc_vc_zero_tol * max(s$sd)]
+}
+
 # method effects ----
 # alpha_m: mean of method m averaged over the items in the model (method
 # coefficient plus the average item effect), with its covariance. Biases are
@@ -811,6 +827,84 @@ mc_vc_repeatability = function(varcomp,
     out$rpc_upper = upper
   }
   out
+}
+
+# within-item reliability ----
+# With linked replicates, the share of the within-item variation of method
+# m's measurements that is true change: R_m = omega^2 / (omega^2 +
+# sigma_m^2) (tau and the item effects are constant within an item). With
+# method-specific SDs there is also a row for the average SD, omega^2 /
+# (omega^2 + mean sigma_m^2), which equals the ICC of subject-centred data.
+# CIs:
+# - "logit": delta method for logit R = log omega^2 - log sigma^2 (with the
+#   covariance of the estimated components), back-transformed;
+# - "F": omega^2 / sigma^2 scaled by an F quantile on the component df (as
+#   for the ICC of a one-way ANOVA), ignoring their covariance.
+# A component at zero gives R = 0 (omega) or 1 (sigma) with a one-sided
+# interval. NULL without linked replicates.
+mc_vc_reliability = function(varcomp,
+                             cov_v,
+                             design,
+                             conf_level,
+                             ci = c("logit", "F")) {
+  ci = match.arg(ci)
+  if (design$model_type != "reps" || !isTRUE(design$linked)) {
+    return(NULL)
+  }
+  q = qnorm((1 + conf_level) / 2)
+  a = (1 - conf_level) / 2
+  j_om = which(varcomp$component == "omega")
+  is_sig = varcomp$component == "sigma"
+  j_sig = which(is_sig)
+  # weights of the sigma^2 rows in each reliability (one row per method,
+  # plus the average with method-specific SDs)
+  W = diag(1, length(j_sig))
+  lab = varcomp$method[j_sig]
+  if (length(j_sig) > 1) {
+    W = rbind(W, rep(1 / length(j_sig), length(j_sig)))
+    lab = c(lab, "average")
+  }
+  om2 = varcomp$var[j_om]
+  # at zero as in mc_vc_boundary() and mc_vc_sigma_boundary()
+  sd_sig = varcomp$sd[j_sig]
+  om_zero = sqrt(om2) < mc_vc_zero_tol * min(sd_sig)
+  sig_zero = sd_sig < mc_vc_zero_tol * max(sd_sig)
+  out = lapply(seq_len(nrow(W)), function(i) {
+    w_s = numeric(nrow(varcomp))
+    w_s[j_sig] = W[i, ]
+    s2 = sum(w_s * varcomp$var)
+    r = om2 / (om2 + s2)
+    lo = hi = NA_real_
+    if (om_zero) {
+      # omega at zero (or left out of a refit): one-sided
+      lo = 0
+    } else if (any(sig_zero[W[i, ] > 0]) && all(W[i, ] %in% c(0, 1))) {
+      # this method's SD at zero
+      hi = 1
+    } else if (ci == "logit") {
+      g = -w_s / s2
+      g[j_om] = 1 / om2
+      se = sqrt(drop(t(g) %*% cov_v %*% g))
+      lr = log(om2 / s2)
+      lo = stats::plogis(lr - q * se)
+      hi = stats::plogis(lr + q * se)
+    } else {
+      df_om = 2 * om2^2 / cov_v[j_om, j_om]
+      df_s = 2 * s2^2 / drop(t(w_s) %*% cov_v %*% w_s)
+      th = om2 / s2
+      th_lo = th / stats::qf(1 - a, df_om, df_s)
+      th_hi = th / stats::qf(a, df_om, df_s)
+      lo = th_lo / (1 + th_lo)
+      hi = th_hi / (1 + th_hi)
+    }
+    dplyr::tibble(method = lab[i],
+                  omega = sqrt(om2),
+                  sigma = sqrt(s2),
+                  reliability = r,
+                  lower = lo,
+                  upper = hi)
+  })
+  dplyr::bind_rows(out)
 }
 
 # diagnostics ----

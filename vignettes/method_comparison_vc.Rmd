@@ -326,6 +326,42 @@ fit$repeatability
 
 The confidence limits of $RC_m$ are those of $\sigma_m$, scaled. When $\omega$ is large relative to $\sigma_m$, the two are hard to separate and the interval for $\sigma_m$ is wide.
 
+# Changes within items (trending)
+
+With linked replicates the true value of an item can change from one occasion to the next, by $\omega$ on average: repeated measurements of a patient during an intervention, for example. The model then also answers whether the methods agree on *changes* ("trending"; see the "Trending agreement" section of `vignette("agreement_analysis")` for the change limits of agreement and the plots):
+
+- $\omega$ is the spread of the true changes, the range the results apply to;
+- $z\sqrt{2}\sqrt{\sigma_m^2 + \sigma_k^2}$ is the limit for the difference between two methods' changes between occasions (the item-level terms cancel in a change);
+- the **within-item reliability**, $\omega^2 / (\omega^2 + \sigma_m^2)$, is the share of method $m$'s variation within an item that is real change: how well the method follows changes.
+
+```{r}
+fit$reliability
+```
+
+With method-specific SDs there is also an "average" row, with the mean of the residual variances, which equals the ICC of item-centred data. Its confidence interval (delta method for $\log(\omega^2/\sigma^2)$) covered 93% to 96% in simulations. The per-method intervals are reliable with three or more methods, or when $\omega$ is comparable to the residual SDs; with two methods and a large $\omega$ the split of the residual variance between the two methods is weakly identified, and the interval of the method with the smaller SD covered as little as 86%. Prefer the "average" row then. `plot(fit, type = "quadrant")` and `plot(fit, type = "polar")` draw the changes of one pair of methods.
+
+## A method that does not follow changes
+
+The model assumes that every method follows within-item changes one for one. If a method responds to a change $\Delta$ in the true value with $b\Delta$, $b \neq 1$, there is no term for the systematic error $(b - 1)\Delta$, and it moves into the other components. With two methods, a method that follows only half of each change can even look error-free:
+
+```{r}
+set.seed(4)
+n = 60; m = 6
+id = rep(seq_len(n), each = m)
+true = rep(rnorm(n, 5, 1), each = m) + rnorm(n * m, 0, 1.5)
+trend = rbind(
+  data.frame(id = id, repl = rep(seq_len(m), n), method = "ref",
+             y = true + rnorm(n * m, 0, 0.25)),
+  data.frame(id = id, repl = rep(seq_len(m), n), method = "half",
+             y = 0.5 * true + 2.5 + rep(rnorm(n, 0, 0.25), each = m) +
+               rnorm(n * m, 0, 0.25)))
+fit_half = method_vc(trend, y = "y", method = "method", id = "id",
+                     replicate = "repl", replicates = "linked")
+fit_half$varcomp
+```
+
+Both methods have an error SD of 0.25, but the reference is estimated with a much larger SD and the method that tracks poorly with an SD near zero. `print()` notes a residual SD at zero. That note is not a diagnosis, though: with two methods and $\omega$ several times the smaller residual SD, an SD at zero is common for methods that do track (in up to 30% of simulated data sets). The practical check is to compare the estimated $\sigma_m$ with each method's repeatability from a separate study. `linked_reps_test()` does not detect a method that does not track: it tests whether replicates are linked ($\omega > 0$), and with a slope near 0 it is not significant. Estimating a within-item slope needs more than this design gives (replicates within an occasion, or a known error ratio; see `vignette("agreement_analysis")`).
+
 # Transformations
 
 All estimates are computed on the scale set by `transform`. With `transform = "log"`, the differences are log ratios: the biases and limits are printed as ratios, and the SD is approximately the coefficient of variation.

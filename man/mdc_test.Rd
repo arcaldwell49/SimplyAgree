@@ -137,6 +137,19 @@ measurements by different raters drawn from the pool. Averaging is then
 set in \code{\link[=reli_facet_test]{reli_facet_test()}} (\code{k_avg}, \code{m_avg}, \code{r_avg}), and \code{k_avg} here
 must be 1.
 
+\strong{Assumption: one true value per subject.} As for the SEM, the MDC
+from one method's repeated measurements assumes that the true value does
+not change between occasions; if it does, real change is counted as
+error. One case still works: with two methods measured on the same
+occasions, the MDC of their difference,
+\code{mdc_test(D ~ occasion | id, model = "oneway")} on \eqn{D = x - y}, is
+the within-subject ("change") limit of agreement of
+the two methods, because the real change cancels in \eqn{D}. It equals
+\eqn{z \sqrt{2} \sqrt{\sigma_x^2 + \sigma_y^2}} from \code{\link[=method_vc]{method_vc()}} with
+\code{replicates = "linked"} (see the "Trending agreement" section of
+\code{vignette("agreement_analysis")}). It still includes any systematic
+error from a method that does not follow changes with slope 1.
+
 \strong{An individual threshold, not a group one.} The MDC applies to a single
 individual's change between two measurements. It is not a threshold for
 an average (group) effect. The uncertainty in a mean change shrinks with

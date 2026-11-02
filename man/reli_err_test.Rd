@@ -248,6 +248,15 @@ computes it, with its interval and a test, from the data or from an SEM
 result of this function. With two trials, \code{\link[=agreement_limit]{agreement_limit()}} gives the
 same quantity as the half width of the limits of agreement, with the bias
 reported separately.
+
+\strong{Assumption: one true value per subject.} With occasions or trials as
+items, the SEM assumes that the subject's true value does not change
+between occasions. If it does (repeated measures of a changing quantity),
+the SEM of one device's readings is \eqn{\sqrt{\omega^2 + \sigma^2}}: the
+real change (\eqn{\omega}) plus the device's error (\eqn{\sigma}). To
+separate them, measure with two or more methods on the same occasions and
+use \code{\link[=method_vc]{method_vc()}} with \code{replicates = "linked"}, whose residual SDs are the
+methods' errors.
 }
 \examples{
 # Weir (2005) data set A: 8 subjects, 2 trials

@@ -94,6 +94,17 @@ When the replicates are not available in the data,
 then the ratio of error variances, var(x)/var(y), can be provided with the error.ratio argument.
 When subject identifiers are provided, the error ratio is instead estimated from the replicates
 as the within-subject variance of x divided by the within-subject variance of y.
+
+With \code{id}, the replicates must be exchangeable measurements of one true value per subject:
+the line is fitted to the subject means (a between-subject slope), and the within-subject
+variances are taken to be pure measurement error. For repeated measurements of a value
+that changes within subjects (linked occasions, e.g. during an intervention), the
+within-subject variances include the real change, the estimated error ratio is then
+wrong (in simulations it ranged from 0.3 to 38 when the truth was 1 or 0.17), and the
+slope says nothing about how a method follows changes within subjects. Use
+\code{\link[=method_vc]{method_vc()}} with \code{replicates = "linked"} for such designs; no function in this
+package estimates a separate within-subject slope (see "Trending agreement" in
+\code{vignette("agreement_analysis")}).
 }
 \section{Interface Change}{
 

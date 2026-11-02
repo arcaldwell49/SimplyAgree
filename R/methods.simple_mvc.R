@@ -24,9 +24,15 @@
 #'   it (identity line dashed; constant-bias conversion line with prediction
 #'   limits on the original scale), and Bland-Altman plots below it. "vc":
 #'   estimates and confidence intervals of the variance component SDs and the
-#'   repeatability coefficients.
+#'   repeatability coefficients. "quadrant" and "polar" (linked replicates
+#'   only): concordance and polar plots of the changes between successive
+#'   occasions for one pair of methods; see "Quadrant and polar plots" in
+#'   [loa-methods].
 #' @param pair Character vector naming the two methods to plot, in the order
-#'   of the difference (first minus second). Default is the first pair.
+#'   of the difference (first minus second). Default is the first pair (with
+#'   random raters and `type = "quadrant"` or `"polar"`, the first two
+#'   methods).
+#' @inheritParams plot.loa
 #' @param pair_seed Seed for the random pairing of exchangeable replicates
 #'   in the plot or in `check()`. The global random number generator state is
 #'   restored afterwards. With exchangeable replicates and no seed, the
@@ -263,6 +269,14 @@ print.simple_mvc <- function(x,
         },
         "\n", sep = "")
   }
+  if (length(des$sigma_zero) > 0) {
+    cat("Residual SD estimated at zero: ",
+        paste(des$sigma_zero, collapse = ", "),
+        ". Either it is small relative to omega, or a method\n",
+        "  does not follow changes within items with slope 1 (compare the",
+        " SDs with the methods'\n  known repeatability; see",
+        " vignette(\"method_comparison_vc\"))\n", sep = "")
+  }
   if (identical(des$methods, "random")) {
     cat("Random raters: limits for the difference between two randomly",
         "chosen raters (methods);\n  rater: SD of the rater effects",
@@ -321,6 +335,34 @@ mc_print_repeat = function(x,
     cat("RpC: the same limit across replicate occasions",
         "(includes the item-by-replicate variation)\n")
   }
+  mc_print_reli(x, digits = digits)
+  invisible(NULL)
+}
+
+# within-item reliability table (linked replicates)
+mc_print_reli = function(x,
+                         digits = 4) {
+  rl = x$reliability
+  if (is.null(rl)) {
+    return(invisible(NULL))
+  }
+  fmt = function(v) ifelse(is.na(v), "NA", format(round(v, digits),
+                                                  nsmall = 0))
+  tab = data.frame(Method = ifelse(is.na(rl$method), "all", rl$method),
+                   Reliability = fmt(rl$reliability),
+                   CI = paste0("[", fmt(rl$lower), ", ", fmt(rl$upper), "]"),
+                   check.names = FALSE)
+  cat("\nWithin-item Reliability (", x$design$conf_level * 100, "% CI",
+      if (x$transform$name != "none") {
+        paste0(", ", x$transform$name, " scale")
+      }, ")\n", sep = "")
+  print(tab, row.names = FALSE, right = FALSE)
+  cat("omega^2 / (omega^2 + sigma^2): the share of a method's variation",
+      "within an item that is\n  true change between occasions",
+      if (any(rl$method %in% "average")) {
+        "(average: with the mean of the residual variances)"
+      },
+      "\n")
   invisible(NULL)
 }
 
@@ -336,6 +378,7 @@ summary.simple_mvc <- function(object,
                  varcomp = object$varcomp,
                  limits = object$limits,
                  repeatability = object$repeatability,
+                 reliability = object$reliability,
                  transform = object$transform,
                  call = object$call),
             class = "summary.simple_mvc")
@@ -391,6 +434,10 @@ print.summary.simple_mvc <- function(x,
   if (!is.null(x$repeatability)) {
     cat("\nRepeatability\n")
     print(as.data.frame(x$repeatability), digits = digits, row.names = FALSE)
+  }
+  if (!is.null(x$reliability)) {
+    cat("\nWithin-item reliability, omega^2 / (omega^2 + sigma^2)\n")
+    print(as.data.frame(x$reliability), digits = digits, row.names = FALSE)
   }
   invisible(x)
 }
@@ -499,7 +546,8 @@ vcov.simple_mvc <- function(object,
 #' @export
 
 plot.simple_mvc <- function(x,
-                            type = c("ba", "matrix", "vc"),
+                            type = c("ba", "matrix", "vc", "quadrant",
+                                     "polar"),
                             pair = NULL,
                             pair_seed = NULL,
                             geom = c("geom_point",
@@ -508,6 +556,9 @@ plot.simple_mvc <- function(x,
                                      "geom_density_2d_filled",
                                      "stat_density_2d"),
                             delta = NULL,
+                            exclusion = 0,
+                            relative = FALSE,
+                            expected = FALSE,
                             ...){
   type = match.arg(type)
   geom = match.arg(geom)
@@ -515,7 +566,57 @@ plot.simple_mvc <- function(x,
          ba = mc_ba_plot(x, pair = pair, pair_seed = pair_seed,
                          geom = geom, delta = delta),
          matrix = mc_matrix_plot(x, pair_seed = pair_seed),
-         vc = mc_vc_plot(x))
+         vc = mc_vc_plot(x),
+         mc_trend_plot(x, type = type, pair = pair, exclusion = exclusion,
+                       relative = relative, expected = expected))
+}
+
+# quadrant and polar plots of the changes between successive occasions
+# (linked replicates only), for one pair of methods
+mc_trend_plot = function(x,
+                         type,
+                         pair = NULL,
+                         exclusion = 0,
+                         relative = FALSE,
+                         expected = FALSE) {
+  des = x$design
+  if (!isTRUE(des$linked)) {
+    stop("type = '", type, "' needs linked replicates (repeated ",
+         "measurements on the same occasions): the changes between ",
+         "occasions are not defined for exchangeable replicates or a ",
+         "single measurement.", call. = FALSE)
+  }
+  lv = levels(x$data$method)
+  if (identical(des$methods, "random")) {
+    if (is.null(pair)) {
+      pair = lv[1:2]
+    }
+    if (length(pair) != 2 || !all(pair %in% lv) || pair[1] == pair[2]) {
+      stop("`pair` must name two different methods from: ",
+           paste(lv, collapse = ", "), ".", call. = FALSE)
+    }
+    m = as.character(pair[1])
+    k = as.character(pair[2])
+  } else {
+    pr = mc_pair_rows(x, pair)
+    m = pr$m
+    k = pr$k
+  }
+  pp = mc_pair(x$data, m, k, replicates = "linked")
+  df = data.frame(id = pp$id, ord = xtfrm(pp$repl), x = pp$y1, y = pp$y2,
+                  x_orig = pp$y1_orig, y_orig = pp$y2_orig)
+  # within-item SD of the differences of the pair from the model
+  vc = x$varcomp
+  s2 = vc$var[vc$component == "sigma"]
+  if (length(s2) > 1) {
+    s2 = s2[match(c(m, k), vc$method[vc$component == "sigma"])]
+  } else {
+    s2 = rep(s2, 2)
+  }
+  trend_plot(df, type = type, x_name = m, y_name = k,
+             exclusion = exclusion, relative = relative,
+             expected = expected, log = x$transform$name == "log",
+             sd_w = sqrt(sum(s2)), agree_level = des$pred_level)
 }
 
 #' @rdname simple_mvc-methods

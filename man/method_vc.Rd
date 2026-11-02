@@ -115,6 +115,11 @@ variances, with confidence limits and df.
 (\code{sigma}), the repeatability coefficient (\code{rc}) with confidence limits,
 and for linked replicates the reproducibility coefficient (\code{rpc}) with
 confidence limits; \code{NULL} without replicates. See details.
+\item \code{reliability}: tibble with the within-item reliability
+(\code{reliability}) for each method (\code{method}; \code{NA} with a common SD) and
+the "average", with \code{omega}, the residual SD (\code{sigma}) and confidence
+limits (\code{lower}, \code{upper}); \code{NULL} without linked replicates. See
+details.
 \item \code{alpha}: list with the method means averaged over items (\code{alpha}) and
 their covariance matrix (\code{vcov}); \code{NULL} with \code{methods = "random"}.
 \item \code{vc_cov}: approximate covariance matrix of the estimated variances in
@@ -281,6 +286,34 @@ same item, under the same conditions, should not exceed with probability
 For linked replicates, the reproducibility coefficient
 \eqn{RpC_m = z \sqrt{2} \sqrt{\sigma_m^2 + \omega^2}} is the same limit for
 two measurements on different occasions.
+
+\strong{Within-item reliability.} With linked replicates, where the true value
+of an item may change between occasions (repeated measures of a changing
+quantity, "trending"), \eqn{\omega^2 / (\omega^2 + \sigma_m^2)} is the
+share of method \code{m}'s variation within an item that is true change: how
+well the method follows changes. It is reported for each method and, with
+method-specific SDs, for the mean of the residual variances ("average",
+which equals the ICC of item-centred data). The confidence intervals come
+from the delta method for \eqn{\log(\omega^2 / \sigma^2)}, back-transformed.
+In simulations (2 or 3 methods, 20 or 50 items, 3 or 6 occasions; 95\%
+intervals) the "average" and common-SD intervals covered 0.93 to 0.96. The
+per-method intervals covered 0.95 to 1.00 when \eqn{\omega} was
+comparable to the residual SDs, and 0.93 to 0.99 with three methods, but
+as little as 0.86 (for the method with the smaller SD) with two methods
+and \eqn{\omega} four times the smaller SD, where the split of the
+residual variance between the two methods is weakly identified; prefer
+the "average" row then. A residual SD at zero gives a
+reliability of 1 with interval \code{NA} to 1, and \eqn{\omega} at zero a
+reliability of 0 with interval 0 to \code{NA}.
+
+A residual SD estimated at zero with linked replicates is noted by
+\code{print()}. It happens when the SD is small relative to \eqn{\omega} (in
+the simulations above, in up to 30\% of data sets with two methods), but
+also when a method does not follow within-item changes with slope 1: the
+model has no term for that, so the systematic error moves into the other
+methods' SDs, and the method that tracks poorly can look error-free.
+Comparing the SDs with each method's known repeatability helps to tell
+these apart.
 }
 \examples{
 # three methods, linked replicates
