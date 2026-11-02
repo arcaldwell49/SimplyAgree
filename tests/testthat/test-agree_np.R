@@ -207,3 +207,22 @@ testthat::test_that("agree_np and its plot finish on the issue #50 data", {
     }
   }
 })
+
+testthat::test_that("LoA bounds use conf2, the bias bounds conf.level", {
+  data("reps")
+  # fixed bootstrap covariance (SE 0.1 for every coefficient)
+  local_mocked_bindings(rq_boot_vcov = function(quan_mod, ...) {
+    p = length(coef(quan_mod)) / length(quan_mod$tau)
+    lapply(quan_mod$tau, function(t) diag(0.01, p))
+  })
+  rdf = sum(stats::complete.cases(reps[c("x", "y")])) - 1
+  for (tost in c(TRUE, FALSE)) {
+    res = suppressWarnings(agree_np(x = "x", y = "y", data = reps,
+                                    delta = 2.5, TOST = tost))
+    conf2 = if (tost) 0.9 else 0.95
+    expect_equal(res$loa$ci.level, c(conf2, 0.95, conf2))
+    half = res$loa$upper.ci - res$loa$estimate
+    expect_equal(half, 0.1 * qt(1 - (1 - c(conf2, 0.95, conf2)) / 2, rdf))
+    expect_equal(res$loa$estimate - res$loa$lower.ci, half)
+  }
+})

@@ -158,13 +158,17 @@ agree_np <- function(x,
       warning("Evidence of proportional bias. Consider setting prop_bias to TRUE.")
     }
 
-    df_coef = rq_boot_coef(quan_mod, rq_boot_vcov(quan_mod),
-                           conf.level = conf.level)
-    # TODO: the bounds of the limits are at conf.level, although ci.level
-    # reports conf2 (as in earlier versions).
+    # bias at conf.level, limits at conf2 (rows: lower limit, bias, upper)
+    V = rq_boot_vcov(quan_mod)
+    df_coef = rq_boot_coef(quan_mod, V, conf.level = conf.level)
+    df_lim = rq_boot_coef(quan_mod, V, conf.level = conf2)
     df_coeff = data.frame(estimate = df_coef$estimate,
-                         lower.ci = df_coef$conf.low,
-                         upper.ci = df_coef$conf.high,
+                         lower.ci = c(df_lim$conf.low[1],
+                                      df_coef$conf.low[2],
+                                      df_lim$conf.low[3]),
+                         upper.ci = c(df_lim$conf.high[1],
+                                      df_coef$conf.high[2],
+                                      df_lim$conf.high[3]),
                          ci.level = c(conf2,
                                       conf.level,
                                       conf2))
