@@ -3,98 +3,54 @@
 Open items noticed during development. Each entry says what was seen, why
 it may matter, and how to check it.
 
-## `calc_loa_nest()`: variance decomposition in the LoA bounds
+## `agree_np(prop_bias = FALSE)`: confidence level of the LoA bounds
 
-Noticed 2026-10-31 while adding `tdi()`. **Confirmed by simulation**: the default MOVER bounds covered 0.85-0.94 instead of 0.95, and Zou's decomposition covers 0.94-0.97. Being fixed against v0.4.0 on branch `fix-loa-nest-bounds` (off `master`; study in `references/general/loa_nest_sims/` there). Remove this entry once that is merged here.
+Noticed 2026-11-01 while fixing the bootstrap hang (see the TODO comment in
+`R/agree_np.R`). Not yet fixed; it changes reported results, so decide first.
 
-**What.** In `R/agreement_limit.R`, `calc_loa_nest()` (data_type = "nest")
-splits the variance of a single difference, `total = between + within`
-(from `lmer(delta ~ 1 + (1 | id))`), into two pieces for the MOVER bound and
-for the Bland-Altman `var_loa`:
+**What.** The bounds of the limits of agreement are reported with
+`ci.level = conf2` (one-sided, the outer ends of a `1 - 2 * (1 - conf.level)`
+interval), but they are computed at `conf.level`, like the bias. Before
+the bootstrap rewrite the same thing happened through a typo
+(`df_coef2 = rbind(df_coef, temp)` instead of `rbind(df_coef2, temp)`) and
+`process_rq(conf.level = conf.level)` for the limits.
 
-- `between_variance` on `n_sub - 1` df
-- `(1 - 1/mh) * within_variance` on `n_obs - n_sub` df
+**Why it matters.** The LoA bounds are narrower than their label says.
 
-The quantity that has `n_sub - 1` df is the variance of the subject mean
-differences, `between + within/mh`, not `between` alone. So `within/mh`
-appears in neither piece: the pieces add to `between + (1 - 1/mh) within`,
-not to `total`, and the SE of the bias (`between_variance * infl / n_sub`)
-also leaves out `within/mh`.
-
-**Why it may matter.** Both the bias SE and the uncertainty added to the
-limits are too small when the within-subject variance is large relative to
-the between-subject variance and subjects have few pairs. The confidence
-bounds of the limits could then be liberal. With large `between_variance`
-the difference is small.
-
-**What the other functions do.**
-
-- `calc_loa_reps()` uses `d_var`, the variance of the subject mean
-  differences, on `n_sub - 1` df (consistent).
-- `tolerance_limit()` with `id` and compound symmetry (`sd_bound_info()`)
-  uses the share `rho + (1 - rho)/mh`, i.e. `between + within/mh`
-  (consistent). It gave the same SD as `data_type = "nest"` in the `tdi()`
-  checks, so its bounds are a direct comparison.
-- `tdi()` computes `df_sd` and its variance components for nest data from
-  `between + within/mh` and `(1 - 1/mh) within`.
-
-**How to check.**
-
-1. Compare `lower_loa_ci` / `upper_loa_ci` of
-   `agreement_limit(data_type = "nest")` with the IU bounds of
-   `tolerance_limit(id = , cor_type = "sym", bound_type = "iu")` on the same
-   data, for small and large between/within ratios.
-2. Simulate coverage of the LoA confidence bounds (nested data, 10-40
-   subjects, 2-5 pairs each, between/within ratio from 0.1 to 10) with the
-   current and the corrected decomposition. `references/general/tdi_sims/`
-   has a nested-data generator to start from.
-3. If the corrected version covers better, change `calc_loa_nest()` (and its
-   `var_loa`), update the vignette's "Nested" calculation steps, and add a
-   NEWS entry.
+**How to check.** Compute the limits' bounds with `conf.level = conf2` in
+`rq_boot_coef()` for the limit rows and compare with the `prop_bias = TRUE`
+branch, which already uses `conf2`; add a NEWS entry under "Results that
+change".
 
 ## Planned features
 
 - `bls_reg()` (renamed from `cbls_reg()`): done, including tolerance limits, the simultaneous band, variance functions, per-subject variances, the log scale, `error_ratio_profile()` and CBLS in `method_convert()`. What is left is under "Still open" and "Gaps against BivRegBLS and MethComp" in `bls_reg_roadmap.md`.
 - Within-subject (trending) agreement for 0.5.0: the within-subject spread of the average and a within-subject residual plot, 4-quadrant/polar options in `plot()` for `loa`, `tolerance_delta` and `simple_mvc`, and documentation (change LoA via `mdc_test()`, the non-unit slope limitation, the `dem_reg(id)`/`pb_reg(id)` assumption). Plan, evidence and open questions are in `trending_agreement_plan.md`; check scripts are in `trending_checks/`. "Step 0" was run (2026-11-01): `method_vc(replicates = "linked")` covers the analysis, so the work is documentation, the new plot types, a within-person reliability with CIs in `simple_mvc` output, and possibly a boundary-σ warning. Not started.
 
-## Next steps (handoff, 2026-11-01)
+## Next steps (handoff, updated 2026-11-01)
 
 State of branch `MethComp`: everything up to `bls_reg()` (rename),
 `error_ratio_profile()`, `linked_reps_test()`, per-subject variances and
 `transform = "log"` in `bls_reg()` is implemented, documented (NEWS,
-pkgdown, Deming and Part 1 vignettes) and tested. Work through these in
-order:
+pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
 
-**Unresolved before step 1: slow `R CMD check` tests (2026-11-01).** After
-the `bls_reg()` rename, `devtools::check()` passed everything up to the
-tests (install, vignettes, examples with and without `--run-donttest` all
-OK), but the tests step ran for over 30 minutes without finishing (the
-whole check took 8m 41s on the previous round) and was stopped. The test
-process was busy, not hung, and no other R process was running. The
-filtered tests (`bls_reg|error_ratio|method_convert|linked_reps|eiv|tdi`,
-649 expectations) all pass, and `linked_reps_test`'s tests take about 12 s,
-so the slow file is probably elsewhere. Possibly related: that run reported
-`covr` as not installed, which earlier runs did not, so it may have used a
-different library. To find it, time each test file with `NOT_CRAN=true`,
-e.g. a loop over `list.files("tests/testthat", "^test-")` calling
-`testthat::test_file(f, reporter = "silent", package = "SimplyAgree")` and
-recording the elapsed time. Then run `devtools::check()` before the
-simulation.
+- **Slow `R CMD check` tests: fixed.** Not the R 4.5.3 environment:
+  quantreg's bootstrap (`summary(se = "boot")`, simplex fits) cycled without
+  end on some resamples of the tied issue #50 data in `test-call_args.R`,
+  depending on the random number state left by the last test of
+  `test-bls_reg.R` (only reached with BivRegBLS installed). `agree_np()` and
+  its plot now use their own Frisch-Newton xy bootstrap
+  (`rq_boot_vcov()` in `R/quantile_funs.R`). The full check took 9 minutes.
+- **`linked_reps_test()` simulation: run and written up**
+  (`linked_reps_sims/README.md`, NEWS, docs, Part 1 vignette). Size and
+  power fine; the permuted limits are up to 4% narrower than an
+  exchangeable fit's.
+- **master merged** (the `fix-loa-nest-bounds` fix of `calc_loa_nest()`).
+  NEWS keeps master's 0.4.1 bug-fix section below the 0.5.0 section.
 
-Lead: timing each file (same R) gave under 20 s for every file from
-`test-agree_coef.R` to `test-cac_test.R`, then `test-call_args.R` ran for
-several minutes without finishing. That file was not changed in this work;
-it renders ggplots to `grDevices::pdf(NULL)`. The run used R 4.5.3 (the
-newest R under `C:/Program Files/R`, picked automatically), whose library
-lacks `covr`, so suspect the environment (R version, graphics device or
-package versions) before the code. Run `test-call_args.R` alone first.
+Remaining, in order:
 
-1. **Run the `linked_reps_test()` simulation** on a machine with many
-   cores: `references/general/linked_reps_sims/README.md` (question,
-   criteria, how to run, about 22 core-hours). Then write up the results
-   there and add the size and power to NEWS, the `linked_reps_test()` docs
-   and the Part 1 vignette.
-2. **Random raters in `method_vc()`** (gap 5 in `bls_reg_roadmap.md`, which
+1. **Random raters in `method_vc()`** (gap 5 in `bls_reg_roadmap.md`, which
    lists the design questions). Proposed design, not yet agreed with the
    maintainer; confirm before starting:
    - scope: `method_vc()` only (not `method_convert()` for now);
@@ -109,11 +65,9 @@ package versions) before the code. Run `test-call_args.R` alone first.
      raters;
    - downstream: print/summary/plot/check/`tdi()` for `simple_mvc`; a
      coverage simulation like `method_vc()`'s.
-3. **After the `fix-loa-nest-bounds` PR is merged into master**: merge
-   master into this branch, resolve the `NEWS.md` and `calc_loa_nest()`
-   conflicts (take master's fix), and remove the `calc_loa_nest()` TODO
-   comment and the entry at the top of this file.
-4. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
+2. The `agree_np(prop_bias = FALSE)` confidence level (entry at the top of
+   this file); needs a decision.
+3. Lower priority (in `bls_reg_roadmap.md`): linked replicates for
    `method_convert(estimator = "cbls")`; variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of

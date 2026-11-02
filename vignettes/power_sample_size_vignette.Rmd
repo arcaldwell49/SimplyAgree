@@ -154,7 +154,7 @@ blandPowerCurve(
 )
 ```
 
-```{r bland_ex1, eval=TRUE}
+```{r bland_ex1, eval=TRUE, fig.alt = "Power curve for the Bland-Altman agreement test, showing power rising with sample size from 10 to 200."}
 # Generate power curve
 pc <- blandPowerCurve(
   samplesizes = seq(10, 200, 1),
@@ -439,7 +439,7 @@ Five trials per subject would be needed.
 
 A power curve over a range of sample sizes is a useful sensitivity analysis, here for an ICC of 0.75 or 0.8 under the alternative:
 
-```{r icc_power_curve}
+```{r icc_power_curve, fig.alt = "Power against number of subjects, from 10 to 80, for testing ICC greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a grey reference line at 80% power."}
 n_seq <- seq(10, 80, by = 5)
 pw <- sapply(c(0.75, 0.80), function(r1) {
   sapply(n_seq, function(n) {

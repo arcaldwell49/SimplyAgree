@@ -1,7 +1,7 @@
 # agreement_limit(data_type = "nest"): coverage of the LoA bounds
 
-Status (2026-10-31): run; **the current bounds are liberal**. Fix not yet
-applied (see "Proposed fix").
+Status (2026-10-31): run; **the bounds were liberal**. Fixed on branch
+`fix-loa-nest-bounds` (the "Proposed fix" below, now applied).
 
 ## Question
 

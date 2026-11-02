@@ -648,12 +648,14 @@ $$
 
 and $N = \Sigma_i m_i$ is the total number of measurements.
 
+The total variance is split into two independent pieces [@zou2011]: the variance of the subject mean differences, $s_m^2 = s_b^2 + s_w^2 / m_h$, with $n - 1$ degrees of freedom (which also gives the variance of the bias, $s_m^2 / n$), and the rest of the within-subject variance, $(1 - 1/m_h) s_w^2$, with $N - n$ degrees of freedom, so that $s_d^2 = s_m^2 + (1 - 1/m_h) s_w^2$.
+
 3. Compute LME
 
 **MOVER Method**
 
 $$
-u_1 = \left[s_b^2 \left(\frac{n-1}{\chi^2_{\alpha,n-1}}-1\right)\right]^2
+u_1 = \left[s_m^2 \left(\frac{n-1}{\chi^2_{\alpha,n-1}}-1\right)\right]^2
 $$
 
 $$
@@ -665,14 +667,16 @@ u = s_d^2 + \sqrt{u_1 + u_2}
 $$
 
 $$
-LME = \sqrt{\frac{z^2_{1-\alpha} \cdot s_b^2}{n} + z^2_A \cdot \left(\sqrt{u} - \sqrt{s^2_d}\right)^2}
+LME = \sqrt{\frac{z^2_{1-\alpha} \cdot s_m^2}{n} + z^2_A \cdot \left(\sqrt{u} - \sqrt{s^2_d}\right)^2}
 $$
 
 **Bland-Altman Method**
 
 $$
-S_{LoA}^2 = \frac{s_b^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot \left(\frac{s_b^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2 \frac{s_{w}^4}{N-n}\right)
+S_{LoA}^2 = \frac{s_m^2}{n} + \frac{z_A^2}{2 \cdot s_d^2} \cdot \left(\frac{s_m^4}{n-1} + \left(1 - \frac{1}{m_h}\right)^2 \frac{s_{w}^4}{N-n}\right)
 $$
+
+Before version 0.4.1, $s_b^2$ was used in place of $s_m^2$, which left $s_w^2 / m_h$ out of the bias variance and the bound. The confidence bounds were then too narrow, most when the within-subject variance is large: in simulations, the MOVER bounds covered 85% to 94% of the time instead of 95%, and 94% to 97% after the correction.
 
 $$
 LME = z_{1-\alpha} \cdot S_{LoA}
@@ -704,7 +708,7 @@ Unlike the "test" functions, `agreement_limits` and `tolerance_limits` do not te
 It is up to the user to determine if the limits are within a maximal allowable difference.
 However, the results a maximal allowable difference can be visualized against the tolerance/agreement limits using the `delta` argument for the `plot` method.
 
-```{r}
+```{r, fig.alt = "Differences between trec_pre and teso_pre against their average, with the bias, tolerance limits, and the maximal allowable difference of 0.25."}
 res1 = tolerance_limit(
   data = temps,
   x = "trec_pre", # First measure
@@ -766,7 +770,7 @@ All 3 plots will have a statistical test in the bottom right corner. The Shapiro
 
 ## An Example
 
-```{r}
+```{r, fig.alt = c("Diagnostic panels for agreement_limit: normality of the differences, heteroskedasticity, and proportional bias.", "Diagnostic panels for tolerance_limit: normality of the differences, heteroskedasticity, and proportional bias.")}
 test_agree = agreement_limit(x = "x",
                              y = "y",
                              data = reps)
@@ -904,7 +908,7 @@ For either `agreement_limit` or `tolerance_limit` functions, this can be accompl
 When this is set to TRUE, then the proportional bias adjusted model is utilized. 
 Plots and checks of the data should always be inspected.
 
-```{r}
+```{r, fig.alt = c("Tolerance limits for the reps data that change with the mean to account for proportional bias.", "Diagnostic panels for tolerance_limit with proportional bias modelled; the proportional bias panel is now flat.")}
 
 test_tol = tolerance_limit(x = "x",
                            y = "y",
@@ -958,7 +962,7 @@ tolerance_limit(
 
 Sometimes there may be a lot of data and individual points of data on mean difference visualization may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom` argument.
 
-```{r}
+```{r, fig.alt = c("Bland-Altman plot of 750 simulated pairs drawn as individual points.", "Bland-Altman plot of 750 simulated pairs drawn as a heatmap of 2D bin counts.", "Bland-Altman plot of 750 simulated pairs drawn as 2D density contour lines.", "Bland-Altman plot of 750 simulated pairs drawn as filled 2D density contours.", "Bland-Altman plot of 750 simulated pairs drawn with stat_density_2d.")}
 set.seed(81346)
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)

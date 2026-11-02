@@ -323,7 +323,7 @@ More detail, including the full simulation results, is in `?icc_test` and
 the item means and their 95% confidence intervals (blue), so systematic
 differences between items stand out against the spread of subjects.
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=5, fig.height=4, fig.alt = "Each subject's measurements across the judges as grey lines, with the judge means and 95% confidence intervals in blue."}
 res <- icc_test(col.names = judges, data = dat)
 plot(res)
 ```
@@ -336,7 +336,7 @@ subject's mean by item (systematic item differences, which count as error
 for an agreement ICC but not for a consistency ICC); and `"pairs"` plots each
 pair of items against each other with the line of identity.
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=5, fig.height=4, fig.alt = "Each subject's measurements, with subjects ordered by their mean, comparing the spread between subjects with the scatter within subjects."}
 plot(res, type = "subjects")
 ```
 
@@ -346,7 +346,7 @@ rises with the mean means the error grows with the size of the measurement,
 and a coefficient of variation (`reli_err_test(scale = "log")`, below)
 describes it better than an error in units.
 
-```{r, fig.width=9, fig.height=3.5}
+```{r, fig.width=9, fig.height=3.5, fig.alt = "Model diagnostic panels: normality and homogeneity of the residuals, and the within-subject SD against the subject mean."}
 check(res)
 ```
 

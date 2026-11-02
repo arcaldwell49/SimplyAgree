@@ -54,7 +54,7 @@ print(a1)
 
 Next, we can use the generic `plot` function to produce visualizations of agreement. This includes the Bland-Altman plot (`type = 1`) and a line-of-identity plot (`type = 2`).
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, fig.alt = c("Bland-Altman plot from agree_test: differences between x and y against their means, with the bias and 80% limits of agreement and their confidence intervals.", "Line-of-identity plot of y against x from agree_test.")}
 plot(a1, type = 1)
 
 plot(a1, type = 2) 
@@ -126,7 +126,7 @@ The results can then be printed. The printing format is very similar to `agree_t
 ```{r}
 print(a2)
 ```
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, fig.alt = c("Bland-Altman plot from agree_reps: differences between x and y against their means, with the bias and 80% limits of agreement for replicate data.", "Line-of-identity plot of y against x from agree_reps, with points identified by subject.")}
 plot(a2, type = 1)
 
 plot(a2, type = 2)
@@ -152,7 +152,7 @@ The printed results (and plots) are very similar to `agree_reps`. Here the CCC i
 ```{r}
 print(a3)
 ```
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, fig.alt = c("Bland-Altman plot from agree_nest: differences between x and y against their means, with the bias and 80% limits of agreement for nested data.", "Line-of-identity plot of y against x from agree_nest, with points identified by subject.")}
 plot(a3, type = 1)
 
 plot(a3, type = 2)
@@ -384,7 +384,7 @@ All 3 plots will have a statistical test in the bottom right corner. The Shapiro
 
 ## An Example
 
-```{r}
+```{r, fig.alt = "Diagnostic panels for agree_test: normality of the differences, heteroskedasticity, and proportional bias."}
 a1 = agree_test(x = reps$x,
                 y = reps$y,
                 agree.level = .8)
@@ -399,7 +399,7 @@ As the check plots for `a1` show, proportional bias can sometimes occur. In thes
 
 For any of the "agree" functions, this can be accomplished with the `prop_bias` argument. When this is set to TRUE, then the proportional bias adjusted model is utilized. However, you should be careful with interpreting the hypothesis tests in these cases because the results are likely bogus for the extreme ends of the measurement. In any case, plots of the data should always be inspected
 
-```{r}
+```{r, fig.alt = "Bland-Altman plot from agree_test with limits of agreement that change with the mean to account for proportional bias."}
 a1 = agree_test(x = reps$x,
                 y = reps$y,
                 prop_bias = TRUE,
@@ -423,7 +423,7 @@ The function also *requires* the `delta` argument (otherwise the binomial test w
 
 In the code demo below, you will notice that the limits of agreement are no longer symmetric around the bias estimate.
 
-```{r}
+```{r, fig.alt = "Bland-Altman plot from agree_np with nonparametric limits of agreement."}
 a1 = agree_np(x = "x",
               y = "y",
               data = reps,
@@ -438,7 +438,7 @@ plot(a1)
 
 We can also perform the same analysis with proportional bias no longer assumed. You can see that the LoA changes but the test for agreement does not.
 
-```{r}
+```{r, fig.alt = "Bland-Altman plot from agree_np with nonparametric limits of agreement that change with the mean to account for proportional bias."}
 a1 = agree_np(x = "x",
               y = "y",
               data = reps,
@@ -456,7 +456,7 @@ plot(a1)
 
 Sometimes there may be a lot of data and individual points of data on Bland-Altman plot may be less than ideal. In order to change the plots from showing the individual data points we can modify the `geom_point` argument.
 
-```{r}
+```{r, fig.alt = c("Bland-Altman plot of 750 simulated pairs drawn as individual points.", "Bland-Altman plot of 750 simulated pairs drawn as a heatmap of 2D bin counts.", "Bland-Altman plot of 750 simulated pairs drawn as 2D density contour lines.", "Bland-Altman plot of 750 simulated pairs drawn as filled 2D density contours.", "Bland-Altman plot of 750 simulated pairs drawn with stat_density_2d.")}
 set.seed(81346)
 x = rnorm(750, 100, 10)
 diff = rnorm(750, 0, 1)
