@@ -110,8 +110,13 @@
 #' **BLS.** The line `y = b0 + b1 x` minimises
 #' `sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))` and is found by the
 #' iterative BLS algorithm (Lisy et al., 1990; Francq & Govaerts, 2014),
-#' started from the Deming solution. With constant variances it is Deming
-#' regression with `error.ratio = var_x / var_y`. Confidence intervals use
+#' started from the Deming solution. It is Deming regression ([dem_reg()])
+#' with `error.ratio = var_x / var_y` when the variances are constant, every
+#' subject has the same number of replicates by each method (none
+#' missing), and there is no equation error (`equation_error = FALSE`, or a
+#' dispersion of at most 1); with only `error.ratio`, always. Otherwise the
+#' lines differ: the equation error adds the same variance to both methods,
+#' which changes the effective error ratio and the slope. Confidence intervals use
 #' `t` on `n - 2` df with the standard errors below.
 #'
 #' **Standard errors.** BivRegBLS (`se_method = "bivregbls"`) uses

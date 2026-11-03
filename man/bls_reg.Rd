@@ -175,8 +175,13 @@ difference); the uncertainty in an estimated \code{theta} is not included.
 \strong{BLS.} The line \verb{y = b0 + b1 x} minimises
 \verb{sum((y_i - b0 - b1 x_i)^2 / (var_yi + b1^2 var_xi))} and is found by the
 iterative BLS algorithm (Lisy et al., 1990; Francq & Govaerts, 2014),
-started from the Deming solution. With constant variances it is Deming
-regression with \code{error.ratio = var_x / var_y}. Confidence intervals use
+started from the Deming solution. It is Deming regression (\code{\link[=dem_reg]{dem_reg()}})
+with \code{error.ratio = var_x / var_y} when the variances are constant, every
+subject has the same number of replicates by each method (none
+missing), and there is no equation error (\code{equation_error = FALSE}, or a
+dispersion of at most 1); with only \code{error.ratio}, always. Otherwise the
+lines differ: the equation error adds the same variance to both methods,
+which changes the effective error ratio and the slope. Confidence intervals use
 \code{t} on \code{n - 2} df with the standard errors below.
 
 \strong{Standard errors.} BivRegBLS (\code{se_method = "bivregbls"}) uses

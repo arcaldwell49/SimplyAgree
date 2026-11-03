@@ -53,6 +53,20 @@
 #' package estimates a separate within-subject slope (see "Trending agreement" in
 #' `vignette("agreement_analysis")`).
 #'
+#' **Deming regression or [bls_reg()]?** `dem_reg()` uses only the ratio of
+#' the error variances. With `id`, every subject's mean gets the same weight
+#' and rows with a missing measurement are dropped. Use [bls_reg()] instead
+#' when the error variances themselves are known (e.g., from a validation
+#' study), when subjects have different numbers of replicates or missing
+#' measurements, when the error changes with the level (beyond the
+#' approximate weights of `weighted = TRUE`), when prediction intervals or a
+#' regression in the Bland-Altman plot are needed, or when the scatter about
+#' the line may exceed the measurement error. The two give the same line
+#' only under the conditions in "BLS" of [bls_reg()]. Use
+#' [error_ratio_profile()] when the error ratio is unknown, and [pb_reg()]
+#' for a non-parametric line. See "Choosing a function" in
+#' `vignette("Deming")`.
+#'
 #'
 #' @section Interface Change:
 #' The `x` and `y` arguments are deprecated. Please use the `formula` interface instead:
@@ -111,6 +125,7 @@
 #'
 #' Sadler, W.A. (2010). Joint parameter confidence regions improve the power of parametric regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
 #'
+#' @seealso [bls_reg()], [pb_reg()], [error_ratio_profile()], [joint_test()]
 #' @importFrom stats pnorm pt qnorm qt pf qf lm anova aov complete.cases cor dchisq qchisq pchisq sd var prcomp model.frame model.matrix model.response terms delete.response na.pass
 #' @importFrom graphics text
 #' @import ggplot2

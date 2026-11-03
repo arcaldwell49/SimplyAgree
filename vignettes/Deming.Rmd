@@ -31,6 +31,41 @@ Error-in-variables (EIV) models are useful tools to account for measurement erro
 
 Deming regression is one of the simplest forms of of EIV models promoted by [W. Edwards Deming](https://en.wikipedia.org/wiki/W._Edwards_Deming)^[Deming was a titan of the fields of statistics and engineering and I would highly recommend reading some of his academic work and books]. The first to detail the method were @adcock1878 followed by @kummell1879 and @koopmans1936. The name comes from the popularity of Deming's book [@deming1943], and within the field of clinical chemistry, the procedure was simply referred to as "Deming regression" (e.g., @linnet1990). 
 
+## Choosing a function
+
+The package has three functions that fit a straight line between two methods, each measured with error. They answer the same question (is the line one of identity?) but use different information about the measurement errors.
+
+| What you know or need | Use |
+|---|---|
+| Only an assumed **ratio** of the error variances (or none: a ratio of 1), and you want the line and its confidence intervals | `dem_reg()` |
+| Not even a defensible ratio | `dem_reg()` or `bls_reg()`, followed by `error_ratio_profile()` |
+| The error **variances** themselves, from a validation study (`var_x`, `var_y`) or from replicates (`id`) | `bls_reg()` |
+| Replicates with **different numbers per subject**, or a measurement by one method missing | `bls_reg()` (subjects with more replicates get more weight; `dem_reg()` weights every subject equally and drops incomplete rows) |
+| Error that grows with the level (constant CV) | `bls_reg()` with `var_model = "proportional"` or `transform = "log"`; `dem_reg(weighted = TRUE)` is the classical approximation |
+| **Prediction intervals**: where a new measurement by one method falls, given the other | `bls_reg()` |
+| A regression in the **Bland-Altman plot** (differences on means) | `bls_reg()` (CBLS, `plot(type = "md")`) |
+| Scatter about the line beyond measurement error (matrix or method-by-item effects) | `bls_reg()` (estimated by default, `equation_error = TRUE`) |
+| Both methods measured on the same occasions, with the true value changing between them (linked replicates) | `bls_reg(replicates = "linked")` |
+| Outliers, or no assumption of normal errors | `pb_reg()` |
+
+`dem_reg()` is the classical, stable Deming regression of the clinical chemistry literature [@linnet1990], with jackknife standard errors. `bls_reg()` (experimental) is the more general model of @francq2014 and @francq2016: Deming regression is the special case in which only the ratio of the error variances matters.
+
+**When do `dem_reg()` and `bls_reg()` give the same line?** When `bls_reg()` is given only `error.ratio`, or when the error variances are constant, every subject has the same number of replicates by each method with none missing, and there is no equation error (the dispersion is at most 1, or `equation_error = FALSE`). Their standard errors differ even then (jackknife versus analytic). With the default `equation_error = TRUE` and excess scatter, `bls_reg()` adds the same item-specific variance to both methods, which changes the effective error ratio and so the slope, sometimes considerably:
+
+```{r}
+data("reps")
+reps_bal <- reps[complete.cases(reps), ]
+reps_bal <- do.call(rbind, lapply(split(reps_bal, reps_bal$id), head, 3))
+rbind(
+  dem_reg = coef(dem_reg(y ~ x, data = reps_bal, id = "id")),
+  bls_reg_no_eq_error = coef(bls_reg(y ~ x, data = reps_bal, id = "id",
+                                     equation_error = FALSE)),
+  bls_reg_default = coef(bls_reg(y ~ x, data = reps_bal, id = "id"))
+)
+```
+
+Which slope is right depends on whether the subjects' true values lie on the line; `summary()` of the `bls_reg()` fit reports the dispersion and its test (see [Bivariate Least Squares](#bivariate-least-squares-bls-and-cbls)).
+
 # Deming Regression
 
 ## Simple Deming Regression
@@ -192,7 +227,7 @@ summary(pb2)
 
 # Bivariate Least Squares (BLS and CBLS)
 
-`bls_reg()` implements the bivariate least squares regressions of @francq2014 and @francq2016, as in the BivRegBLS package. Like Deming regression, BLS allows for measurement error in both methods, but it uses the error variances themselves, known from a validation study (`var_x`, `var_y`) or estimated from replicates (`id`), rather than only their ratio. Each subject's mean is weighted by the error variance of that mean, so subjects with more replicates count for more, and the variances may differ between the methods. With constant variances, BLS gives the same line as Deming regression with `error.ratio = var_x / var_y`.
+`bls_reg()` implements the bivariate least squares regressions of @francq2014 and @francq2016, as in the BivRegBLS package. Like Deming regression, BLS allows for measurement error in both methods, but it uses the error variances themselves, known from a validation study (`var_x`, `var_y`) or estimated from replicates (`id`), rather than only their ratio. Each subject's mean is weighted by the error variance of that mean, so subjects with more replicates count for more, and the variances may differ between the methods. With constant variances, the same number of replicates for every subject, and no equation error (see below), BLS gives the same line as Deming regression with `error.ratio = var_x / var_y` (see [Choosing a function](#choosing-a-function)).
 
 Because the variances are known, BLS also gives exact standard errors (without the jackknife) and **prediction intervals**: where a new measurement by one method is expected to fall, given a new measurement by the other.
 

@@ -105,6 +105,20 @@ slope says nothing about how a method follows changes within subjects. Use
 \code{\link[=method_vc]{method_vc()}} with \code{replicates = "linked"} for such designs; no function in this
 package estimates a separate within-subject slope (see "Trending agreement" in
 \code{vignette("agreement_analysis")}).
+
+\strong{Deming regression or \code{\link[=bls_reg]{bls_reg()}}?} \code{dem_reg()} uses only the ratio of
+the error variances. With \code{id}, every subject's mean gets the same weight
+and rows with a missing measurement are dropped. Use \code{\link[=bls_reg]{bls_reg()}} instead
+when the error variances themselves are known (e.g., from a validation
+study), when subjects have different numbers of replicates or missing
+measurements, when the error changes with the level (beyond the
+approximate weights of \code{weighted = TRUE}), when prediction intervals or a
+regression in the Bland-Altman plot are needed, or when the scatter about
+the line may exceed the measurement error. The two give the same line
+only under the conditions in "BLS" of \code{\link[=bls_reg]{bls_reg()}}. Use
+\code{\link[=error_ratio_profile]{error_ratio_profile()}} when the error ratio is unknown, and \code{\link[=pb_reg]{pb_reg()}}
+for a non-parametric line. See "Choosing a function" in
+\code{vignette("Deming")}.
 }
 \section{Interface Change}{
 
@@ -142,4 +156,7 @@ Linnet, K. (1990) Estimation of the linear relationship between the measurements
 Linnet, K. (1993). Evaluation of regression procedures for methods comparison studies. Clinical chemistry, 39, 424-432.
 
 Sadler, W.A. (2010). Joint parameter confidence regions improve the power of parametric regression in method-comparison studies. Accreditation and Quality Assurance, 15, 547-554.
+}
+\seealso{
+\code{\link[=bls_reg]{bls_reg()}}, \code{\link[=pb_reg]{pb_reg()}}, \code{\link[=error_ratio_profile]{error_ratio_profile()}}, \code{\link[=joint_test]{joint_test()}}
 }

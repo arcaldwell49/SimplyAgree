@@ -37,6 +37,7 @@ website](https://aaroncaldwell.us/SimplyAgree/).
 | Categorical agreement: Gwet’s AC1, kappa, Krippendorff’s alpha | `cac_test()` | categorical or ordinal ratings |
 | Model-based kappa for many raters | `ord_kappa_test()` | ordinal ratings |
 | Deming / Passing-Bablok regression | `dem_reg()`, `pb_reg()` | paired, optionally with replicates |
+| Bivariate least squares (known or replicate-estimated error variances, prediction intervals) | `bls_reg()` | paired, optionally with replicates |
 | Power and sample size for agreement | `power_agreement_limit()`, `power_agreement_exact()`, `blandPowerCurve()`, `agree_expected_half()`, `agree_assurance()` | study planning |
 | Power and sample size for reliability | `power_icc()`, `precision_icc()` | study planning |
 | Power and sample size for Deming regression | `deming_sample_size()` | study planning |
