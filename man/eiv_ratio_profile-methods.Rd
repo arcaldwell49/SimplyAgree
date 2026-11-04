@@ -6,27 +6,51 @@
 \alias{plot.eiv_ratio_profile}
 \title{Methods for eiv_ratio_profile objects}
 \usage{
-\method{print}{eiv_ratio_profile}(x, digits = 4, ...)
+\method{print}{eiv_ratio_profile}(x, digits = 4, type = c("xy", "md"), ...)
 
-\method{plot}{eiv_ratio_profile}(x, type = c("both", "slope", "intercept"), ...)
+\method{plot}{eiv_ratio_profile}(
+  x,
+  type = c("both", "slope", "intercept", "joint", "md"),
+  ratios = NULL,
+  n_points = 100,
+  ...
+)
 }
 \arguments{
 \item{x}{An \code{eiv_ratio_profile} object from \code{\link[=error_ratio_profile]{error_ratio_profile()}}.}
 
 \item{digits}{Number of significant digits to print.}
 
+\item{type}{For \code{print()}: \code{"xy"} (default; the line of y on x, with the
+joint test of identity) or \code{"md"} (the line of the differences on the
+averages in the Bland-Altman plot, CBLS). For \code{plot()}: \code{"both"}
+(default; slope and intercept of the line of y on x), \code{"slope"},
+\code{"intercept"}, \code{"joint"} (joint confidence regions of the intercept and
+slope at several ratios) or \code{"md"} (slope and intercept of the CBLS line
+of the differences on the averages).}
+
 \item{...}{Not used.}
 
-\item{type}{What to plot: \code{"both"} (default; slope and intercept),
-\code{"slope"} or \code{"intercept"}.}
+\item{ratios}{For \code{plot(type = "joint")}, the error ratios whose regions
+are drawn. Default: 0, 0.01, 0.1, 1, 10, 100, \code{Inf} and the ratio of
+the fitted object.}
+
+\item{n_points}{Number of points on each region's boundary.}
 }
 \value{
-\code{print()} returns \code{x} invisibly; \code{plot()} a ggplot2 plot of the
-estimate (line) and its confidence interval (ribbon) against the error
-ratio on the log scale. The dotted lines are the ordinary least squares
-fits at the ends of the range (ratio 0, y on x; ratio \code{Inf}, x on y), the
-dashed line is the value under identity, and the vertical line marks the
-error ratio of the fitted object.
+\code{print()} returns \code{x} invisibly. \code{plot()} returns a ggplot2 plot.
+For \code{"both"}, \code{"slope"}, \code{"intercept"} and \code{"md"}: the estimate (line)
+and its confidence interval (ribbon) against the error ratio on the log
+scale; the dotted lines are the fits at the ends of the range (ratio 0,
+OLS of y on x; ratio \code{Inf}, OLS of x on y), the dashed line is the value
+under identity (slope 1 and intercept 0; 0 and 0 for the differences),
+and the vertical line marks the error ratio of the fitted object. For
+\code{"joint"}: the joint confidence region of the intercept and slope at
+each ratio (Sadler or Wald, as \code{joint_method} of the profile), coloured
+by ratio, the path of the estimates over all the profile's ratios
+(grey), and identity (cross). The regions show how the conclusion
+about identity depends on the assumed error ratio; a region unbounded
+in the slope is not drawn (noted in the caption).
 }
 \description{
 Methods for the results of \code{\link[=error_ratio_profile]{error_ratio_profile()}}.
@@ -35,6 +59,8 @@ Methods for the results of \code{\link[=error_ratio_profile]{error_ratio_profile
 data("ba1986")
 prof <- error_ratio_profile(dem_reg(mini1 ~ wright1, data = ba1986))
 prof
+print(prof, type = "md")
 plot(prof, type = "slope")
+plot(prof, type = "joint")
 
 }

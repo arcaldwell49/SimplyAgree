@@ -4,7 +4,12 @@
 \alias{error_ratio_profile}
 \title{Error-ratio Profile for Errors-in-Variables Regression}
 \usage{
-error_ratio_profile(object, ratios = NULL, conf.level = NULL)
+error_ratio_profile(
+  object,
+  ratios = NULL,
+  conf.level = NULL,
+  joint_method = c("sadler", "wald")
+)
 }
 \arguments{
 \item{object}{A \code{simple_eiv} object from \code{\link[=dem_reg]{dem_reg()}} (unweighted) or
@@ -17,15 +22,27 @@ fit (\code{0} and \code{Inf} allowed). Default: 0, 61 ratios evenly spaced on th
 log scale from 0.001 to 1000, the ratio of \code{object}, and \code{Inf}.}
 
 \item{conf.level}{Confidence level. Default: that of \code{object}.}
+
+\item{joint_method}{The joint test of identity at each ratio: \code{"sadler"}
+(default; Sadler's F test, as \code{joint_test()} for Deming fits) or
+\code{"wald"} (the Wald F test on the BLS covariance). See Details.}
 }
 \value{
 An object of class \code{eiv_ratio_profile}, a list with:
 \item{table}{One row per ratio: \code{ratio}, \code{slope}, \code{slope_lower},
 \code{slope_upper}, \code{slope_exact_lower}, \code{slope_exact_upper}, \code{intercept},
-\code{intercept_lower}, \code{intercept_upper}, \code{joint_F}, \code{joint_p}.}
+\code{intercept_lower}, \code{intercept_upper}, \code{joint_F}, \code{joint_p}, and the
+CBLS line of the differences on the averages: \code{md_slope},
+\code{md_slope_lower}, \code{md_slope_upper}, \code{md_intercept},
+\code{md_intercept_lower}, \code{md_intercept_upper}.}
 \item{full}{The full confidence intervals of the slope and intercept
 (and of the slope from the exact intervals, when available; infinite
 if the exact interval is unbounded at some ratio).}
+\item{full_md}{The full confidence intervals of the CBLS slope and
+intercept.}
+\item{joint_method}{The joint test used.}
+\item{data}{The data refitted (\code{x}, \code{y}, numbers of replicates
+\code{n_x}, \code{n_y}), used by \code{plot(type = "joint")}.}
 \item{identity}{The range of fitted ratios at which identity is not
 rejected (\code{NA} if none).}
 \item{fitted_ratio}{The error ratio of \code{object}.}
@@ -53,9 +70,30 @@ jackknife standard errors). Equation error is not modelled.
 The exact confidence interval of the slope (Creasy, 1956) is given when the
 ratio of replicate numbers is the same for all subjects; it is \code{NA} when
 the exact confidence set is not a finite interval (the data do not exclude
-a vertical or horizontal line). The joint test of identity (intercept 0,
-slope 1) is the Wald F test on 2 and \code{n - 2} degrees of freedom, as
-\code{joint_test(method = "wald")}.
+a vertical or horizontal line).
+
+The joint test of identity (intercept 0, slope 1) is, by default, Sadler's
+F test on 2 and \code{n - 2} degrees of freedom, from the criterion
+\eqn{S(a, b) = \sum e_i^2 / (v_{y,i} + b^2 v_{x,i})} that the line
+minimises (\eqn{v} the error variances of the subject means in the given
+ratio): for one measurement per subject, the test of
+\code{joint_test(method = "sadler")} at that ratio. It depends only on the
+error ratio, and it held its size better than the Wald test in small
+samples (see \code{\link[=joint_test]{joint_test()}}). \code{joint_method = "wald"} gives the Wald F
+test on the BLS covariance, as \code{joint_test(method = "wald")}.
+\code{plot(type = "joint")} draws the joint
+confidence regions at several ratios, showing how the conclusion about
+identity depends on the assumed ratio.
+
+\strong{Bland-Altman plot.} At each ratio the line of the differences
+\code{x - y} on the averages is also fitted by correlated bivariate least
+squares (CBLS, as \code{bls_reg()}'s \verb{$cbls}), with its BLS confidence
+intervals (\code{md_} columns; \code{print(type = "md")}, \code{plot(type = "md")}),
+as BivRegBLS's \code{FullCIs.MD()} (which uses \code{y - x}: the signs of its
+estimates and limits are reversed).
+It is the same line as the BLS line of y on x, drawn in the Bland-Altman
+plot; the Sadler test of the CBLS line against intercept 0 and slope 0 is
+the same test as of identity.
 
 The full confidence interval is the union of the intervals over all fitted
 ratios: the values of the slope (or intercept) not excluded by the data
@@ -68,12 +106,17 @@ fit <- dem_reg(mini1 ~ wright1, data = ba1986)
 prof <- error_ratio_profile(fit)
 prof
 plot(prof)
+plot(prof, type = "joint")
 
 }
 \references{
 Creasy, M.A. (1956). Confidence limits for the gradient in the linear
 functional relationship. Journal of the Royal Statistical Society B, 18,
 65-69.
+
+Sadler, W.A. (2010). Joint parameter confidence regions improve the power
+of parametric regression in method-comparison studies. Accreditation and
+Quality Assurance, 15, 547-554.
 
 Francq, B.G. and Govaerts, B. (2014). Measurement methods comparison with
 errors-in-variables regressions. From horizontal to vertical OLS

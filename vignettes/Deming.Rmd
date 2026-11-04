@@ -282,7 +282,13 @@ prof
 plot(prof)
 ```
 
-For the peak flow data, the slope moves only from 0.92 to 1.03 over all ratios, and identity is not rejected at any of them. The exact interval for the slope [@creasy1956] is shown when every subject has the same number of replicates by each method.
+For the peak flow data, the slope moves only from 0.92 to 1.03 over all ratios, and identity is not rejected at any of them. The exact interval for the slope [@creasy1956] is shown when every subject has the same number of replicates by each method. The joint test is Sadler's (see [Joint Confidence Regions](#joint-confidence-regions) below), which depends only on the error ratio; `plot(type = "joint")` draws its regions at several ratios, so you can see where, if anywhere, identity drops out:
+
+```{r, fig.width = 6, fig.height = 4.5}
+plot(prof, type = "joint")
+```
+
+The same profile in the Bland-Altman plot, the CBLS line of the differences on the averages, is shown by `print(prof, type = "md")` and `plot(prof, type = "md")`; there the question is whether the slope of the differences excludes 0 at every ratio.
 
 # Joint Confidence Regions
 

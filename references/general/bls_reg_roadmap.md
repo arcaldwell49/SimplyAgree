@@ -268,9 +268,15 @@ Lower priority, probably not worth it:
 
 - Item 1 done: `error_ratio_profile()` (R/error_ratio_profile.R), reproducing
   `FullCIs.XY()` (estimates, BLS and exact Creasy CIs, intercept CIs).
-  The joint test is the Wald F without BivRegBLS's Hotelling factor, as in
-  `joint_test()`. Not done: the per-ratio ellipses and hyperbolic bands of
-  `FullCIs.XY()`/`GraphFullCIs.*`, and an MD-plot version (`FullCIs.MD`).
+  The joint test was the Wald F without BivRegBLS's Hotelling factor, as in
+  `joint_test()`. Done 2026-11-04: the joint test is now Sadler's by
+  default (generalised to subject means: S = sum e^2 / (v_y + b^2 v_x);
+  equals `joint_test()` for Deming fits; `joint_method = "wald"` keeps the
+  old one); `plot(type = "joint")` overlays the joint regions at several
+  ratios (`GraphFullCIs.XY`); the CBLS (MD) profile, `md_` columns,
+  `print`/`plot(type = "md")`, reproduces `FullCIs.MD()` up to the sign of
+  D. Not done: the hyperbolic bands of the lines at each ratio (no clear
+  use beyond the slope and intercept profiles).
 - Item 2 done: `var_x`/`var_y` (and `df_var_x`/`df_var_y`) can name columns
   of per-subject values; reproduces `BLS.ht()` estimates and CIs. A new
   measurement gets the mean variance (Satterthwaite df). Not done: per-row
