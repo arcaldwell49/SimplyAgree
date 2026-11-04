@@ -179,6 +179,19 @@ print.simple_mconv <- function(x,
           " * average\n", sep = "")
     }
   }
+  if (!is.null(x$errors)) {
+    er = x$errors[!duplicated(x$errors$method), ]
+    cat("Prediction SD depends on the level; measurement error SD of a ",
+        "single measurement:\n", sep = "")
+    for (j in seq_len(nrow(er))) {
+      cat("  ", er$method[j], ": ",
+          if (er$model[j] == "proportional") {
+            paste0(fmt(er$cv[j]), " * level (CV)")
+          } else {
+            paste0(fmt(er$sigma[j]), " * level^", fmt(er$theta[j]))
+          }, "\n", sep = "")
+    }
+  }
   if (fi$bias == "linear" && !identical(fi$estimator, "cbls")) {
     cat("A slope of the differences on the averages can arise from unequal",
         "measurement errors alone;\n  see ?method_convert (estimator = 'cbls'",
@@ -292,6 +305,13 @@ check.simple_mconv <- function(x,
         # residuals relative to the fitted SD of the differences
         r = r / (da$c_sd[j] + da$d_sd[j] * pp$avg)
         std = r
+      } else if (fi$variance %in% c("proportional", "power")) {
+        # CBLS with error variance functions: residuals about the CBLS line
+        # relative to the SD of a new difference at that level
+        s_fun = x$limits_par[[paste0(da$method1[j], "|",
+                                     da$method2[j])]]$s_fun
+        r = (pp$d - da$a[j] - da$b[j] * pp$avg) / s_fun(pp$avg)
+        std = r
       } else {
         std = stats::rstandard(fit)
       }
@@ -320,7 +340,7 @@ check.simple_mconv <- function(x,
                    if (any(da$cluster_se)) " (item means)", tf_note)
 
     p1 = mc_check_norm(norm_dat$std, norm_dat$pair,
-                       y_lab = if (fi$variance == "linear") {
+                       y_lab = if (fi$variance != "constant") {
                          "Residuals / fitted SD"
                        } else "Standardized residuals")
     het = mc_check_het(het_dat$avg, het_dat$r, het_dat$pair, x_lab = x_lab)
@@ -335,7 +355,9 @@ check.simple_mconv <- function(x,
     if (fi$variance == "constant" && any(het$p.value < 0.05, na.rm = TRUE)) {
       message("The spread of the differences changes with the level for at ",
               "least one pair (Breusch-Pagan p < 0.05); consider ",
-              "variance = 'linear' or a transformation.")
+              if (identical(fi$estimator, "cbls")) {
+                "variance = 'proportional' or 'power'"
+              } else "variance = 'linear'", " or a transformation.")
     }
     return(patchwork::wrap_plots(p1, p2, p3, ncol = 2) &
              plot_annotation(theme = .check_theme()))

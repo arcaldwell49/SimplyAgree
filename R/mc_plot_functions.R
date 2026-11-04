@@ -464,6 +464,15 @@ mc_conv_ba_plot = function(x,
                        bias = int + slope * grid,
                        lo = int - z * sd_d + slope * grid,
                        hi = int + z * sd_d + slope * grid)
+  } else if (!is.null(par$s_fun)) {
+    # CBLS with error variance functions: SD of a new difference at each
+    # level
+    sgn = if (par$m1 == m) 1 else -1
+    sd_g = par$s_fun(grid)
+    lines = data.frame(avg = grid,
+                       bias = sgn * (par$a + par$b * grid),
+                       lo = sgn * (par$a + par$b * grid) - z * sd_g,
+                       hi = sgn * (par$a + par$b * grid) + z * sd_g)
   } else {
     sgn = if (par$m1 == m) 1 else -1
     lo = sgn * ((par$a - z * par$c_sd) + (par$b - z * par$d_sd) * grid)

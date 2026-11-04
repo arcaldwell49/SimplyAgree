@@ -179,8 +179,21 @@ Done in the third round (2026-10-31):
 - CBLS in `method_convert(bias = "linear", estimator = "cbls")`: done
   (exchangeable replicates, constant variance).
 
-Still open: variance functions in `method_convert()`; method-specific
-equation error with three or more methods.
+Still open: method-specific equation error with three or more methods.
+
+Done (2026-11-04): variance functions in `method_convert()`:
+`variance = "proportional"` or `"power"` with `estimator = "cbls"`, passed
+to `bls_reg(var_model = )`. The SD of a new difference, s(A), is evaluated
+at the true values on the line at average A; the conversion limits are
+±z s(A)/(1 ∓ b/2) about the converted value, with A the average of the
+given and converted values (the constant-s limits when s is constant).
+Not with a transformation. User-supplied functions or per-subject
+variances are not offered here (use `bls_reg()` directly).
+Quick coverage check (150 data sets per cell, 200 new pairs each; CVs 6%
+and 3%, B = 2 + 1.1 A, 3 replicates, n = 20 or 60, exchangeable or linked,
+tau 0 or 3): proportional and power 0.945-0.953 with tau = 0, 0.927-0.949
+with tau = 3 (lowest at n = 20); constant variance 0.932-0.942 on average
+(and miscalibrated across the level). Script not kept in the repo.
 
 Done (2026-11-02): linked replicates, `bls_reg(replicates = "linked")` and
 `method_convert(replicates = "linked", estimator = "cbls")`. The error

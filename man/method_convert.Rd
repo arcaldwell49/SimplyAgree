@@ -11,7 +11,7 @@ method_convert(
   id,
   replicate = NULL,
   bias = c("linear", "scaled"),
-  variance = c("constant", "linear"),
+  variance = c("constant", "linear", "proportional", "power"),
   replicates = c("exchangeable", "linked"),
   pred_level = 0.95,
   conf_level = 0.95,
@@ -46,8 +46,12 @@ regression of the differences on the averages for each pair of methods.
 "scaled": the scaled model, fit by alternating regression or maximum
 likelihood (see \code{estimator}; requires replicates). See details.}
 
-\item{variance}{Model for the SD of the differences with
-\code{bias = "linear"}: "constant" (default) or "linear" in the average.}
+\item{variance}{With \code{bias = "linear"}, the model for the spread:
+"constant" (default) or, by least squares, "linear" (SD of the
+differences linear in the average); with \code{estimator = "cbls"},
+"proportional" (measurement error SD of each method proportional to
+the level) or "power" (SD \code{sigma * level^theta}), as \code{var_model} in
+\code{\link[=bls_reg]{bls_reg()}}. See details.}
 
 \item{replicates}{Whether replicates are "exchangeable" (default) or
 "linked"; see \code{\link[=method_vc]{method_vc()}}. Exchangeable replicates are paired at random
@@ -76,7 +80,7 @@ to the stated coverage. For \code{bias = "linear"}, "cbls" fits the
 regression of the differences on the averages by correlated bivariate
 least squares (\code{\link[=bls_reg]{bls_reg()}}) instead of least squares; it needs
 replicates of both methods (exchangeable or linked) and
-\code{variance = "constant"}. See details.}
+\code{variance = "constant"}, \code{"proportional"} or \code{"power"}. See details.}
 
 \item{boot_reps}{Number of bootstrap replicates for \code{ci_method = "boot"}.
 Default is 999. Each replicate refits the model, so this can take
@@ -111,6 +115,9 @@ parameters used to evaluate the prediction limits at any level.
 \item \code{da}: for \code{bias = "linear"}, tibble of the DA regressions for each
 pair (\code{a}, \code{b} and their SEs, \code{s}, \code{c_sd}, \code{d_sd}, df, numbers of pairs
 and items, and whether the SEs are cluster-robust).
+\item \code{errors}: with \code{estimator = "cbls"} and \code{variance = "proportional"}
+or \code{"power"}, tibble of the measurement error SD of each method in
+each pair (\code{cv}, or \code{sigma} and \code{theta}); otherwise \code{NULL}.
 \item \code{varcomp}: the variance components (for the scaled model, on each
 method's scale, with bootstrap intervals if requested; for a
 conversion from a \code{\link[=method_vc]{method_vc()}} fit, its variance components);
@@ -194,6 +201,18 @@ the paired occasions and includes it in the fit, and \eqn{s} is then the
 SD of a new difference measured on one occasion (smaller than with
 exchangeable replicates, where the occasion effects of the two methods
 are independent).
+
+When the measurement error SD grows with the level, \code{variance = "proportional"} or \code{"power"} (with \code{estimator = "cbls"}) estimates each
+method's error variance as a function of the level from its replicates
+(\code{var_model} in \code{\link[=bls_reg]{bls_reg()}}; positive measurements, no transformation),
+and the CBLS fit weights the items accordingly. \eqn{s} then depends on
+the level: at average \eqn{A}, the variances are evaluated at the true
+values on the line, \eqn{A \pm (a + bA)/2}. The conversion's prediction
+limits are \eqn{\pm z s/(1 \mp b/2)} about the converted value, with
+\eqn{s} at the average of the given and the converted value (with a
+constant \eqn{s} these are the limits above), and \code{sd_pred} is \code{NA}.
+This is the alternative to a log transformation when the coefficients of
+variation differ between the methods or the intercept is not zero.
 
 A slope of the differences on the averages does not by itself show that
 the methods are related by a slope other than 1. Whenever the two methods

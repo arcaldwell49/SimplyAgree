@@ -104,7 +104,7 @@ conv_cbls = method_convert(dat, y = "y", method = "method", id = "id",
 conv_cbls
 ```
 
-The slope of B on A is now close to the true 1.2, as with the scaled model below. With only two methods, CBLS assumes that the method-by-item variation, if any, is the same for both methods; the scaled model can estimate it for each method when there are three or more.
+The slope of B on A is now close to the true 1.2, as with the scaled model below. With only two methods, CBLS assumes that the method-by-item variation, if any, is the same for both methods; the scaled model can estimate it for each method when there are three or more. When the measurement error SD grows with the level, `variance = "proportional"` (a constant coefficient of variation for each method) or `variance = "power"` estimates each method's error variance as a function of the level from its replicates, and the prediction limits then widen with the level; unlike a log transformation, this allows the methods to have different coefficients of variation and the line a non-zero intercept.
 
 # The scaled model
 

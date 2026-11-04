@@ -536,3 +536,85 @@ test_that("estimator = 'cbls' uses bls_reg() for each pair", {
   expect_error(method_convert(one, y = "y", method = "method", id = "id",
                               estimator = "cbls"), "needs replicate")
 })
+
+# proportional errors: CV 6% for A, 3% for B, B = 2 + 1.1 A
+vf_data <- function(n = 40, seed = 2) {
+  set.seed(seed)
+  mu <- runif(n, 20, 100)
+  do.call(rbind, lapply(1:3, function(r) rbind(
+    data.frame(id = 1:n, repl = r, method = "A",
+               y = mu * (1 + rnorm(n, 0, 0.06))),
+    data.frame(id = 1:n, repl = r, method = "B",
+               y = (2 + 1.1 * mu) * (1 + rnorm(n, 0, 0.03))))))
+}
+
+test_that("estimator = 'cbls' with error variance functions", {
+  dat <- vf_data()
+  cb <- method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", estimator = "cbls",
+                       variance = "proportional")
+  long <- rbind(data.frame(id = dat$id[dat$method == "A"],
+                           x = dat$y[dat$method == "A"], y = NA_real_),
+                data.frame(id = dat$id[dat$method == "B"], x = NA_real_,
+                           y = dat$y[dat$method == "B"]))
+  f <- bls_reg(y ~ x, data = long, id = "id", var_model = "proportional")
+  # the same fit as bls_reg(var_model = "proportional")
+  expect_equal(c(cb$da$a, cb$da$b), unname(f$cbls$coefficients),
+               tolerance = 1e-10)
+  cv <- cb$conversion[cb$conversion$to == "B" & cb$conversion$from == "A", ]
+  expect_equal(c(cv$alpha, cv$beta), unname(coef(f)), tolerance = 1e-8)
+  expect_equal(cb$errors$cv,
+               unname(c(f$errors$params_x, f$errors$params_y)),
+               tolerance = 1e-10)
+  # the prediction SD depends on the level
+  expect_true(all(is.na(cb$conversion$sd_pred)))
+  expect_true(is.na(cb$da$s))
+  # limits at A = 50: SD of a new B given A, with the error variances at
+  # the true values on the line (no equation error here)
+  expect_equal(f$dispersion$tau2, 0)
+  p <- predict(cb, newdata = 50, from = "A", to = "B")
+  fit_b <- cv$alpha + cv$beta * 50
+  sd_b <- sqrt((cb$errors$cv[2] * fit_b)^2 +
+                 cv$beta^2 * (cb$errors$cv[1] * 50)^2)
+  expect_equal(p$fit, fit_b, tolerance = 1e-10)
+  expect_equal(p$upper - p$fit, qnorm(0.975) * sd_b, tolerance = 1e-8)
+  # and wider at higher levels
+  pp <- predict(cb, newdata = c(25, 90), from = "B", to = "A")
+  expect_gt(diff(pp$upper - pp$lower), 0)
+  expect_output(print(cb), "Prediction SD depends on the level")
+  expect_output(print(cb), "\\* level \\(CV\\)")
+  expect_s3_class(plot(cb), "ggplot")
+  expect_s3_class(plot(cb, type = "ba"), "ggplot")
+  expect_s3_class(check(cb), "patchwork")
+  expect_match(as.character(model_equation(cb)), "s\\(A_\\{ir\\}\\)",
+               all = FALSE)
+})
+
+test_that("cbls error variance functions: power, linked, and errors", {
+  skip_on_cran()
+  dat <- vf_data()
+  pw <- method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", estimator = "cbls",
+                       variance = "power")
+  expect_equal(pw$errors$model, c("power", "power"))
+  expect_true(all(is.finite(pw$errors$theta)))
+  expect_output(print(pw), "level\\^")
+  lk <- method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", estimator = "cbls",
+                       variance = "proportional", replicates = "linked")
+  expect_s3_class(predict(lk, newdata = c(30, 60), from = "A", to = "B"),
+                  "data.frame")
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", variance = "power"),
+               "needs estimator = 'cbls'")
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", estimator = "cbls",
+                              variance = "proportional", transform = "log"),
+               "constant on the transformed scale")
+  neg <- dat
+  neg$y[neg$method == "A"] <- neg$y[neg$method == "A"] - 60
+  expect_error(method_convert(neg, y = "y", method = "method", id = "id",
+                              replicate = "repl", estimator = "cbls",
+                              variance = "proportional"),
+               "variance = 'proportional' for A and B: needs positive")
+})

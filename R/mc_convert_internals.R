@@ -85,10 +85,17 @@ mc_da_fit = function(pp,
 # replicates = "linked") estimates their error covariance c from the paired
 # occasions, the item means are fitted with it, and the SD of a new
 # difference on one occasion subtracts 2 c (1 - b/2) (1 + b/2).
+#
+# With var_model "proportional" or "power" (bls_reg()'s variance functions),
+# v1, v2 and c depend on the level, so s does too: s_fun(A) evaluates them at
+# the true values on the line at average A, mu1 = A + (a + b A) / 2 and
+# mu2 = A - (a + b A) / 2 (as bls_reg() evaluates them for its prediction
+# intervals); s, c_sd and d_sd are then NA.
 mc_cbls_fit = function(df,
                        m1,
                        m2,
-                       replicates = "exchangeable") {
+                       replicates = "exchangeable",
+                       var_model = "constant") {
   d1 = df[df$method == m1, c("id", "repl", "y_t")]
   d2 = df[df$method == m2, c("id", "repl", "y_t")]
   dat = if (replicates == "linked") {
@@ -101,32 +108,73 @@ mc_cbls_fit = function(df,
           data.frame(id = d2$id, x = NA_real_, y = d2$y_t))
   }
   fit = tryCatch(
-    bls_reg(y ~ x, data = dat, id = "id", replicates = replicates),
+    bls_reg(y ~ x, data = dat, id = "id", replicates = replicates,
+            var_model = var_model),
     error = function(e) {
+      msg = conditionMessage(e)
+      if (grepl("var_model", msg)) {
+        stop("variance = '", var_model, "' for ", m1, " and ", m2, ": ",
+             sub("var_model = '[a-z]+' ", "", msg), call. = FALSE)
+      }
       stop("estimator = 'cbls' needs replicate measurements of both ", m1,
            " and ", m2, " to estimate their measurement errors: ",
-           conditionMessage(e), call. = FALSE)
+           msg, call. = FALSE)
     })
   cf = fit$cbls$coefficients
+  a = unname(cf[1])
   b = unname(cf[2])
   beta = unname(fit$coefficients[2])
   e = fit$errors
   tau2 = fit$dispersion$tau2
-  s = sqrt(e$var_x * (1 - b / 2)^2 + e$var_y * (1 + b / 2)^2 -
-             2 * e$cov_xy * (1 - b / 2) * (1 + b / 2) +
-             tau2 * ((1 - b / 2)^2 + beta^2 * (1 + b / 2)^2))
-  list(a = unname(cf[1]),
+  s_fun = function(A) {
+    dlt = a + b * A
+    v1 = e$fun_x(A + dlt / 2)
+    v2 = e$fun_y(A - dlt / 2)
+    v1 = rep_len(v1, length(A))
+    v2 = rep_len(v2, length(A))
+    v = v1 * (1 - b / 2)^2 + v2 * (1 + b / 2)^2 -
+      2 * e$rho * sqrt(v1 * v2) * (1 - b / 2) * (1 + b / 2) +
+      tau2 * ((1 - b / 2)^2 + beta^2 * (1 + b / 2)^2)
+    v[!is.finite(v) | v <= 0] = NA_real_
+    sqrt(v)
+  }
+  vf = var_model != "constant"
+  s = if (vf) NA_real_ else s_fun(0)
+  list(a = a,
        b = b,
        vcov = unname(fit$cbls$vcov),
        df = fit$df.residual,
        s = s,
        c_sd = s,
-       d_sd = 0,
+       d_sd = if (vf) NA_real_ else 0,
+       s_fun = if (vf) s_fun else NULL,
+       errors = if (vf) {
+         list(model = var_model, params_1 = e$params_x,
+              params_2 = e$params_y)
+       },
        clustered = FALSE,
        n_pairs = nrow(fit$model),
        n_items = nrow(fit$model),
        fit = fit,
        sd_fit = NULL)
+}
+
+# measurement error variance functions of a CBLS pair, one row per method:
+# "proportional" SD = cv * level; "power" SD = sigma * level^theta
+mc_error_rows = function(errors,
+                         m1,
+                         m2) {
+  row = function(m, p) {
+    dplyr::tibble(method1 = m1, method2 = m2, method = m,
+                  model = errors$model,
+                  cv = if (errors$model == "proportional") unname(p["cv"])
+                  else NA_real_,
+                  sigma = if (errors$model == "power") unname(p["sigma"])
+                  else NA_real_,
+                  theta = if (errors$model == "power") unname(p["theta"])
+                  else 1)
+  }
+  dplyr::bind_rows(row(m1, errors$params_1), row(m2, errors$params_2))
 }
 
 # conversion parameters from a DA fit ----
@@ -155,14 +203,14 @@ mc_da_conversion = function(da,
          beta = (1 + b / 2) / (1 - b / 2),
          g_alpha = c(1 / (1 - b / 2), a / 2 / (1 - b / 2)^2),
          g_beta = c(0, 1 / (1 - b / 2)^2),
-         sd_pred = if (da$d_sd == 0) da$s / (1 - b / 2) else NA_real_),
+         sd_pred = if (isTRUE(da$d_sd == 0)) da$s / (1 - b / 2) else NA_real_),
     # to = m2, from = m1
     list(to = m2, from = m1,
          alpha = -a / (1 + b / 2),
          beta = (1 - b / 2) / (1 + b / 2),
          g_alpha = c(-1 / (1 + b / 2), a / 2 / (1 + b / 2)^2),
          g_beta = c(0, -1 / (1 + b / 2)^2),
-         sd_pred = if (da$d_sd == 0) da$s / (1 + b / 2) else NA_real_)
+         sd_pred = if (isTRUE(da$d_sd == 0)) da$s / (1 + b / 2) else NA_real_)
   )
   rows = lapply(dirs, function(d) {
     se_a = sqrt(drop(t(d$g_alpha) %*% V %*% d$g_alpha))
@@ -214,9 +262,13 @@ mc_conv_lines = function(par,
     }
     c(a / (1 - b / 2), (1 + b / 2) / (1 - b / 2))
   }
-  lines = list(fit = da_to_y(par$a, par$b),
-               lim1 = da_to_y(par$a - z * par$c_sd, par$b - z * par$d_sd),
-               lim2 = da_to_y(par$a + z * par$c_sd, par$b + z * par$d_sd))
+  lines = list(fit = da_to_y(par$a, par$b))
+  if (is.null(par$s_fun)) {
+    # with a variance function (s_fun) the limits are not lines; see
+    # mc_conv_grid()
+    lines$lim1 = da_to_y(par$a - z * par$c_sd, par$b - z * par$d_sd)
+    lines$lim2 = da_to_y(par$a + z * par$c_sd, par$b + z * par$d_sd)
+  }
   if (par$to == par$m2) {
     # invert y1 = int + slope * y2 to y2 = (y1 - int) / slope
     lines = lapply(lines, function(l) c(-l[1] / l[2], 1 / l[2]))
@@ -256,6 +308,16 @@ mc_conv_grid = function(x,
                                   x$conversion$from == from]
     lo = t_val - z * sd_m
     hi = t_val + z * sd_m
+  } else if (!is.null(par$s_fun)) {
+    # CBLS with error variance functions: the SD of a new difference about
+    # the line at the average of the converted and the given value, scaled
+    # to the method converted to (as the constant SD: s / (1 -/+ b / 2))
+    ln = mc_conv_lines(par, z)
+    fit = ln$fit[1] + ln$fit[2] * t_val
+    sd_to = par$s_fun((fit + t_val) / 2) /
+      if (par$to == par$m1) 1 - par$b / 2 else 1 + par$b / 2
+    lo = fit - z * sd_to
+    hi = fit + z * sd_to
   } else {
     ln = mc_conv_lines(par, z)
     fit = ln$fit[1] + ln$fit[2] * t_val

@@ -871,6 +871,10 @@
       .eq_line(e, "\\sim", list("N\\left(0,\\, (", .eq_sum(list(
         .eq_term(par("c", da$c_sd[j])),
         .eq_term(par("d", da$d_sd[j]), A))), ")^{2}\\right)"))
+    } else if (variance %in% c("proportional", "power")) {
+      # CBLS with error variance functions: the SD depends on the level
+      .eq_line(e, "\\sim", list("N\\left(0,\\, s", sup, "(", A,
+                                ")^{2}\\right)"))
     } else {
       .eq_line(e, "\\sim", .eq_normal(.eq_var_par(
         if (multi) paste0("s^{2}_{", pr, "}") else "s^{2}", da$s[j])))

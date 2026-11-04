@@ -18,8 +18,12 @@
 #'   regression of the differences on the averages for each pair of methods.
 #'   "scaled": the scaled model, fit by alternating regression or maximum
 #'   likelihood (see `estimator`; requires replicates). See details.
-#' @param variance Model for the SD of the differences with
-#'   `bias = "linear"`: "constant" (default) or "linear" in the average.
+#' @param variance With `bias = "linear"`, the model for the spread:
+#'   "constant" (default) or, by least squares, "linear" (SD of the
+#'   differences linear in the average); with `estimator = "cbls"`,
+#'   "proportional" (measurement error SD of each method proportional to
+#'   the level) or "power" (SD `sigma * level^theta`), as `var_model` in
+#'   [bls_reg()]. See details.
 #' @param replicates Whether replicates are "exchangeable" (default) or
 #'   "linked"; see [method_vc()]. Exchangeable replicates are paired at random
 #'   within item (see `pair_seed`), linked replicates by replicate.
@@ -37,7 +41,7 @@
 #'   regression of the differences on the averages by correlated bivariate
 #'   least squares ([bls_reg()]) instead of least squares; it needs
 #'   replicates of both methods (exchangeable or linked) and
-#'   `variance = "constant"`. See details.
+#'   `variance = "constant"`, `"proportional"` or `"power"`. See details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
 #'   Default is 999. Each replicate refits the model, so this can take
 #'   several minutes; set a seed with [set.seed()] for reproducible
@@ -98,6 +102,19 @@
 #' SD of a new difference measured on one occasion (smaller than with
 #' exchangeable replicates, where the occasion effects of the two methods
 #' are independent).
+#'
+#' When the measurement error SD grows with the level, `variance =
+#' "proportional"` or `"power"` (with `estimator = "cbls"`) estimates each
+#' method's error variance as a function of the level from its replicates
+#' (`var_model` in [bls_reg()]; positive measurements, no transformation),
+#' and the CBLS fit weights the items accordingly. \eqn{s} then depends on
+#' the level: at average \eqn{A}, the variances are evaluated at the true
+#' values on the line, \eqn{A \pm (a + bA)/2}. The conversion's prediction
+#' limits are \eqn{\pm z s/(1 \mp b/2)} about the converted value, with
+#' \eqn{s} at the average of the given and the converted value (with a
+#' constant \eqn{s} these are the limits above), and `sd_pred` is `NA`.
+#' This is the alternative to a log transformation when the coefficients of
+#' variation differ between the methods or the intercept is not zero.
 #'
 #' A slope of the differences on the averages does not by itself show that
 #' the methods are related by a slope other than 1. Whenever the two methods
@@ -194,6 +211,9 @@
 #'   - `da`: for `bias = "linear"`, tibble of the DA regressions for each
 #'     pair (`a`, `b` and their SEs, `s`, `c_sd`, `d_sd`, df, numbers of pairs
 #'     and items, and whether the SEs are cluster-robust).
+#'   - `errors`: with `estimator = "cbls"` and `variance = "proportional"`
+#'     or `"power"`, tibble of the measurement error SD of each method in
+#'     each pair (`cv`, or `sigma` and `theta`); otherwise `NULL`.
 #'   - `varcomp`: the variance components (for the scaled model, on each
 #'     method's scale, with bootstrap intervals if requested; for a
 #'     conversion from a [method_vc()] fit, its variance components);
@@ -273,7 +293,8 @@ method_convert = function(data = NULL,
                           id,
                           replicate = NULL,
                           bias = c("linear", "scaled"),
-                          variance = c("constant", "linear"),
+                          variance = c("constant", "linear", "proportional",
+                                       "power"),
                           replicates = c("exchangeable", "linked"),
                           pred_level = 0.95,
                           conf_level = 0.95,
@@ -315,10 +336,20 @@ method_convert = function(data = NULL,
       stop("estimator = 'cbls' is only available for bias = 'linear'.",
            call. = FALSE)
     }
-    if (variance != "constant") {
+    if (variance == "linear") {
       stop("estimator = 'cbls' models the measurement error variances ",
-           "directly; use variance = 'constant'.", call. = FALSE)
+           "directly; use variance = 'constant', 'proportional' or 'power'.",
+           call. = FALSE)
     }
+    if (variance != "constant" && !identical(transform, "none")) {
+      stop("With a transformation, the measurement error variances must be ",
+           "constant on the transformed scale; use variance = 'constant'.",
+           call. = FALSE)
+    }
+  } else if (variance %in% c("proportional", "power")) {
+    stop("variance = '", variance, "' models the measurement error ",
+         "variances of each method; it needs estimator = 'cbls' (and ",
+         "bias = 'linear').", call. = FALSE)
   }
   if (estimator == "ml" && ci_method == "boot") {
     stop("ci_method = 'boot' is only available with estimator = ",
@@ -394,7 +425,7 @@ method_convert = function(data = NULL,
 
   # DA regressions for each pair ----
   prs = mc_pairs(lv)
-  pairs = da_rows = conv_rows = models = list()
+  pairs = da_rows = conv_rows = models = err_rows = list()
   limits_par = list()
   for (j in seq_len(nrow(prs))) {
     m1 = prs$method1[j]
@@ -402,7 +433,7 @@ method_convert = function(data = NULL,
     key = paste0(m1, "-", m2)
     pp = mc_pair(df, m1, m2, replicates = replicates, seed = pair_seed)
     da = if (estimator == "cbls") {
-      mc_cbls_fit(df, m1, m2, replicates = replicates)
+      mc_cbls_fit(df, m1, m2, replicates = replicates, var_model = variance)
     } else {
       mc_da_fit(pp, variance = variance)
     }
@@ -426,6 +457,9 @@ method_convert = function(data = NULL,
     }
     pairs[[key]] = pp
     models[[key]] = list(da = da$fit, sd = da$sd_fit)
+    if (!is.null(da$errors)) {
+      err_rows[[key]] = mc_error_rows(da$errors, m1, m2)
+    }
     conv_rows[[key]] = mc_da_conversion(da, m1, m2, conf_level = conf_level)
     se = sqrt(diag(da$vcov))
     da_rows[[key]] = dplyr::tibble(method1 = m1, method2 = m2,
@@ -438,7 +472,8 @@ method_convert = function(data = NULL,
     for (dir in list(c(m1, m2), c(m2, m1))) {
       limits_par[[paste0(dir[1], "|", dir[2])]] =
         mc_limits_par("da", to = dir[1], from = dir[2], m1 = m1, m2 = m2,
-                      a = da$a, b = da$b, c_sd = da$c_sd, d_sd = da$d_sd)
+                      a = da$a, b = da$b, c_sd = da$c_sd, d_sd = da$d_sd,
+                      s_fun = da$s_fun)
     }
   }
 
@@ -458,6 +493,7 @@ method_convert = function(data = NULL,
   structure(list(conversion = conversion,
                  limits_par = limits_par,
                  da = dplyr::bind_rows(da_rows),
+                 errors = if (length(err_rows)) dplyr::bind_rows(err_rows),
                  varcomp = NULL,
                  data = df,
                  pairs = pairs,
