@@ -42,6 +42,11 @@
 #'   least squares ([bls_reg()]) instead of least squares; it needs
 #'   replicates of both methods (exchangeable or linked) and
 #'   `variance = "constant"`, `"proportional"` or `"power"`. See details.
+#' @param tau With `estimator = "cbls"`, the method-by-item variance
+#'   (equation error): "common" (default; the same for the two methods of
+#'   each pair, on the scale of the true values) or "method" (one for each
+#'   method, estimated across all pairs; needs three or more methods). See
+#'   details.
 #' @param boot_reps Number of bootstrap replicates for `ci_method = "boot"`.
 #'   Default is 999. Each replicate refits the model, so this can take
 #'   several minutes; set a seed with [set.seed()] for reproducible
@@ -115,6 +120,21 @@
 #' constant \eqn{s} these are the limits above), and `sd_pred` is `NA`.
 #' This is the alternative to a log transformation when the coefficients of
 #' variation differ between the methods or the intercept is not zero.
+#'
+#' With two methods, how the method-by-item variance divides between them
+#' cannot be estimated, so CBLS takes it to be the same for both (`tau =
+#' "common"`); if it belongs mostly to one method, the slope is biased (by
+#' about 4% in simulations with a method-by-item SD of 1.5 against a spread
+#' of the true values of 5). With three or more methods, `tau = "method"`
+#' estimates a method-by-item variance \eqn{t_m} for each method (on its own
+#' scale): in each pair \eqn{(m, k)}, the scatter about the BLS line of
+#' \eqn{k} on \eqn{m} beyond the measurement errors estimates
+#' \eqn{T_{mk} = t_k + b_{mk}^2 t_m}, and the \eqn{M(M-1)/2} such equations
+#' are solved for \eqn{t_m \ge 0} by weighted non-negative least squares,
+#' alternating with fitting every pair with the current variances
+#' (`bls_reg(equation_error = c(t_m, t_k))`) until they are stable. The
+#' estimates are in `equation_error`. The uncertainty in \eqn{t_m} is not
+#' included in the standard errors.
 #'
 #' A slope of the differences on the averages does not by itself show that
 #' the methods are related by a slope other than 1. Whenever the two methods
@@ -214,6 +234,9 @@
 #'   - `errors`: with `estimator = "cbls"` and `variance = "proportional"`
 #'     or `"power"`, tibble of the measurement error SD of each method in
 #'     each pair (`cv`, or `sigma` and `theta`); otherwise `NULL`.
+#'   - `equation_error`: with `estimator = "cbls"` and `tau = "method"`,
+#'     tibble of each method's method-by-item variance (`tau2`) and SD
+#'     (`tau`), on its own scale; otherwise `NULL`.
 #'   - `varcomp`: the variance components (for the scaled model, on each
 #'     method's scale, with bootstrap intervals if requested; for a
 #'     conversion from a [method_vc()] fit, its variance components);
@@ -301,6 +324,7 @@ method_convert = function(data = NULL,
                           transform = "none",
                           ci_method = c("delta", "boot"),
                           estimator = c("altreg", "ml", "cbls"),
+                          tau = c("common", "method"),
                           boot_reps = 999,
                           pair_seed = NULL,
                           max_iter = 100,
@@ -312,6 +336,12 @@ method_convert = function(data = NULL,
   replicates = match.arg(replicates)
   ci_method = match.arg(ci_method)
   estimator = match.arg(estimator)
+  tau = match.arg(tau)
+  if (tau == "method" && estimator != "cbls") {
+    stop("tau = 'method' is only available with estimator = 'cbls' (the ",
+         "scaled model estimates a method-by-item variance for each method ",
+         "already).", call. = FALSE)
+  }
   for (nm in c("pred_level", "conf_level")) {
     val = get(nm)
     if (!is.numeric(val) || length(val) != 1 || is.na(val) ||
@@ -391,7 +421,10 @@ method_convert = function(data = NULL,
   call2$id = id
   call2$replicate = replicate
   call2$bias = bias
-  if (estimator == "cbls") call2$estimator = estimator
+  if (estimator == "cbls") {
+    call2$estimator = estimator
+    call2$tau = tau
+  }
   call2$variance = variance
   call2$replicates = replicates
   call2$keep_model = keep_model
@@ -427,13 +460,24 @@ method_convert = function(data = NULL,
   prs = mc_pairs(lv)
   pairs = da_rows = conv_rows = models = err_rows = list()
   limits_par = list()
+  tau_m = NULL
+  if (tau == "method") {
+    if (length(lv) < 3) {
+      stop("tau = 'method' needs three or more methods: with two, only the ",
+           "sum of their method-by-item variances is identified (use ",
+           "tau = 'common').", call. = FALSE)
+    }
+    tau_m = mc_cbls_tau_method(df, prs, replicates = replicates,
+                               var_model = variance)
+  }
   for (j in seq_len(nrow(prs))) {
     m1 = prs$method1[j]
     m2 = prs$method2[j]
     key = paste0(m1, "-", m2)
     pp = mc_pair(df, m1, m2, replicates = replicates, seed = pair_seed)
     da = if (estimator == "cbls") {
-      mc_cbls_fit(df, m1, m2, replicates = replicates, var_model = variance)
+      mc_cbls_fit(df, m1, m2, replicates = replicates, var_model = variance,
+                  tau2 = if (!is.null(tau_m)) unname(tau_m$tau2[c(m1, m2)]))
     } else {
       mc_da_fit(pp, variance = variance)
     }
@@ -494,6 +538,10 @@ method_convert = function(data = NULL,
                  limits_par = limits_par,
                  da = dplyr::bind_rows(da_rows),
                  errors = if (length(err_rows)) dplyr::bind_rows(err_rows),
+                 equation_error = if (!is.null(tau_m)) {
+                   dplyr::tibble(method = lv, tau2 = unname(tau_m$tau2),
+                                 tau = sqrt(unname(tau_m$tau2)))
+                 },
                  varcomp = NULL,
                  data = df,
                  pairs = pairs,
@@ -502,13 +550,17 @@ method_convert = function(data = NULL,
                  fit_info = list(bias = bias,
                                  estimator = if (estimator == "cbls") "cbls" else "ols",
                                  variance = variance,
+                                 tau = if (estimator == "cbls") tau,
                                  replicates = replicates,
                                  has_reps = attr(df, "has_reps"),
                                  pred_level = pred_level,
                                  conf_level = conf_level,
                                  ci_method = ci_method,
-                                 iterations = NA_integer_,
-                                 converged = NA,
+                                 iterations = if (is.null(tau_m)) {
+                                   NA_integer_
+                                 } else tau_m$iterations,
+                                 converged = if (is.null(tau_m)) NA else
+                                   tau_m$converged,
                                  criterion = NA_real_,
                                  n_boot_fail = NA_integer_),
                  call = call2),

@@ -18,6 +18,7 @@ method_convert(
   transform = "none",
   ci_method = c("delta", "boot"),
   estimator = c("altreg", "ml", "cbls"),
+  tau = c("common", "method"),
   boot_reps = 999,
   pair_seed = NULL,
   max_iter = 100,
@@ -82,6 +83,12 @@ least squares (\code{\link[=bls_reg]{bls_reg()}}) instead of least squares; it n
 replicates of both methods (exchangeable or linked) and
 \code{variance = "constant"}, \code{"proportional"} or \code{"power"}. See details.}
 
+\item{tau}{With \code{estimator = "cbls"}, the method-by-item variance
+(equation error): "common" (default; the same for the two methods of
+each pair, on the scale of the true values) or "method" (one for each
+method, estimated across all pairs; needs three or more methods). See
+details.}
+
 \item{boot_reps}{Number of bootstrap replicates for \code{ci_method = "boot"}.
 Default is 999. Each replicate refits the model, so this can take
 several minutes; set a seed with \code{\link[=set.seed]{set.seed()}} for reproducible
@@ -118,6 +125,9 @@ and items, and whether the SEs are cluster-robust).
 \item \code{errors}: with \code{estimator = "cbls"} and \code{variance = "proportional"}
 or \code{"power"}, tibble of the measurement error SD of each method in
 each pair (\code{cv}, or \code{sigma} and \code{theta}); otherwise \code{NULL}.
+\item \code{equation_error}: with \code{estimator = "cbls"} and \code{tau = "method"},
+tibble of each method's method-by-item variance (\code{tau2}) and SD
+(\code{tau}), on its own scale; otherwise \code{NULL}.
 \item \code{varcomp}: the variance components (for the scaled model, on each
 method's scale, with bootstrap intervals if requested; for a
 conversion from a \code{\link[=method_vc]{method_vc()}} fit, its variance components);
@@ -213,6 +223,20 @@ limits are \eqn{\pm z s/(1 \mp b/2)} about the converted value, with
 constant \eqn{s} these are the limits above), and \code{sd_pred} is \code{NA}.
 This is the alternative to a log transformation when the coefficients of
 variation differ between the methods or the intercept is not zero.
+
+With two methods, how the method-by-item variance divides between them
+cannot be estimated, so CBLS takes it to be the same for both (\code{tau = "common"}); if it belongs mostly to one method, the slope is biased (by
+about 4\% in simulations with a method-by-item SD of 1.5 against a spread
+of the true values of 5). With three or more methods, \code{tau = "method"}
+estimates a method-by-item variance \eqn{t_m} for each method (on its own
+scale): in each pair \eqn{(m, k)}, the scatter about the BLS line of
+\eqn{k} on \eqn{m} beyond the measurement errors estimates
+\eqn{T_{mk} = t_k + b_{mk}^2 t_m}, and the \eqn{M(M-1)/2} such equations
+are solved for \eqn{t_m \ge 0} by weighted non-negative least squares,
+alternating with fitting every pair with the current variances
+(\code{bls_reg(equation_error = c(t_m, t_k))}) until they are stable. The
+estimates are in \code{equation_error}. The uncertainty in \eqn{t_m} is not
+included in the standard errors.
 
 A slope of the differences on the averages does not by itself show that
 the methods are related by a slope other than 1. Whenever the two methods

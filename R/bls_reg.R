@@ -50,7 +50,11 @@
 #'   method-by-item or matrix effects), estimated from the excess scatter
 #'   about the line, are included in the fit and the intervals. It is 0, and
 #'   the results are those of BivRegBLS, when the measurement errors explain
-#'   all the scatter. FALSE always gives BivRegBLS's results. See Details.
+#'   all the scatter. FALSE always gives BivRegBLS's results. Alternatively,
+#'   the equation-error variances of `x` and `y` (each on its own scale), if
+#'   known: a vector `c(x, y)` of two non-negative numbers, e.g. estimated
+#'   with three or more methods by `method_convert(estimator = "cbls", tau =
+#'   "method")`. See Details.
 #' @param transform `"none"` (default) or `"log"`. With `"log"`, the
 #'   line is fitted to the logarithms of the measurements (which must be
 #'   positive): `log(y) = b0 + b1 log(x)`, i.e. `y = exp(b0) x^b1`, and in
@@ -216,7 +220,12 @@
 #' about the BLS line is used in the prediction intervals, and a warning is
 #' given. The prediction intervals include `tau^2` (on `n - 2` df). Equal deviations for
 #' both methods is an assumption: with two methods, how the equation error
-#' divides between them cannot be estimated.
+#' divides between them cannot be estimated, and if it belongs mostly to one
+#' method the slope is biased. With three or more methods it can be: give
+#' the two variances as `equation_error = c(x, y)`, which are then added to
+#' the error variances (`var_xi + tau_x^2`, `var_yi + tau_y^2`) and to the
+#' prediction intervals (on `n - 2` df) as known; [method_convert()] with
+#' `estimator = "cbls"` and `tau = "method"` estimates them.
 #'
 #' **Linked replicates.** When both methods measure each subject on the
 #' same occasions and the true value varies between occasions (or the
@@ -355,9 +364,20 @@ bls_reg <- function(formula,
     stop("With transform = 'log', the error variances must be constant on ",
          "the log scale (var_model = 'constant', no variance functions).")
   }
-  if (!is.logical(equation_error) || length(equation_error) != 1 ||
+  # known equation-error variances c(x, y), or TRUE/FALSE (estimated, common
+  # tau, or none)
+  tau2_given <- NULL
+  if (is.numeric(equation_error)) {
+    if (length(equation_error) != 2 || anyNA(equation_error) ||
+        any(!is.finite(equation_error)) || any(equation_error < 0)) {
+      stop("equation_error must be TRUE, FALSE, or the two equation-error ",
+           "variances c(x, y) (non-negative numbers).")
+    }
+    tau2_given <- unname(equation_error)
+  } else if (!is.logical(equation_error) || length(equation_error) != 1 ||
       is.na(equation_error)) {
-    stop("equation_error must be TRUE or FALSE.")
+    stop("equation_error must be TRUE, FALSE, or the two equation-error ",
+         "variances c(x, y) (non-negative numbers).")
   }
   for (lv in c("conf.level", "pred_level", "tol_level")) {
     v <- get(lv)
@@ -515,6 +535,11 @@ bls_reg <- function(formula,
          "estimated (one measurement per subject). Give var_x and var_y, ",
          "replicate measurements with id, or error.ratio = var(x) / var(y).")
   }
+  if (!is.null(tau2_given) && source == "ratio") {
+    stop("Known equation-error variances need the measurement error ",
+         "variances themselves (given or from replicates), not only ",
+         "error.ratio.")
+  }
   # subject variances do not depend on the level: no iteration needed
   constant <- ex$model %in% c("constant", "subject") &&
     ey$model %in% c("constant", "subject")
@@ -604,7 +629,23 @@ bls_reg <- function(formula,
   # has no solution)
   tau2_fit <- 0
   n_sol <- NA_integer_
-  if (equation_error && isTRUE(disp$s2 > 1) && source != "ratio") {
+  if (!is.null(tau2_given)) {
+    # known method-specific equation-error variances (own scales)
+    tx <- tau2_given[1]
+    ty <- tau2_given[2]
+    if (tx > 0 || ty > 0) {
+      bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x + tx,
+                         var_v = sub$var_y + ty, cov_uv = sub$cov_xy,
+                         start = bls$coef)
+    }
+    disp$tau2 <- NA_real_
+    disp$tau2_x <- tx
+    disp$tau2_y <- ty
+    disp$n_solutions <- NA_integer_
+    vx_eff <- sub$var_x + tx
+    vy_eff <- sub$var_y + ty
+  } else if (isTRUE(equation_error) && isTRUE(disp$s2 > 1) &&
+             source != "ratio") {
     sol <- .bls_eq_solve(sub$x, sub$y, sub$var_x, sub$var_y, sub$cov_xy)
     n_sol <- sol$n_solutions
     if (n_sol > 0) {
@@ -622,11 +663,16 @@ bls_reg <- function(formula,
                           2 * bls$coef[2] * sub$cov_xy, bls$coef[2])
     }
   }
-  disp$tau2 <- tau2
-  disp$n_solutions <- n_sol
-  # effective error variances of the subject means
-  vx_eff <- sub$var_x + tau2_fit
-  vy_eff <- sub$var_y + bls$coef[2]^2 * tau2_fit
+  if (is.null(tau2_given)) {
+    # common tau: tau2 for x and b^2 tau2 for y (each on its own scale)
+    disp$tau2 <- tau2
+    disp$tau2_x <- tau2
+    disp$tau2_y <- bls$coef[2]^2 * tau2
+    disp$n_solutions <- n_sol
+    # effective error variances of the subject means
+    vx_eff <- sub$var_x + tau2_fit
+    vy_eff <- sub$var_y + bls$coef[2]^2 * tau2_fit
+  }
 
   # CBLS in the Bland-Altman plot (D = x - y, M = (x + y) / 2), started from
   # the BLS line: y = a + b x is D = -2a / (1 + b) + 2 (1 - b) / (1 + b) M
@@ -847,13 +893,22 @@ bls_reg <- function(formula,
 # s_i + 2 b1^2 tau2; tau2 solves sum(e_i^2 / (s_i + 2 b1^2 tau2)) = n - 2 (a
 # Paule-Mandel type moment estimator), 0 if the dispersion is at most 1.
 .bls_tau2 <- function(e, s, b1) {
-  n <- length(e)
   k <- 2 * b1^2
-  f <- function(v) sum(e^2 / (s + k * v)) - (n - 2)
-  if (f(0) <= 0 || k == 0) {
+  if (k == 0) {
     return(0)
   }
-  hi <- (max(s) + max(e^2)) / k
+  .bls_excess(e, s) / k
+}
+
+# Excess residual variance T: sum(e_i^2 / (s_i + T)) = n - 2, 0 if the
+# dispersion is at most 1
+.bls_excess <- function(e, s) {
+  n <- length(e)
+  f <- function(v) sum(e^2 / (s + v)) - (n - 2)
+  if (f(0) <= 0) {
+    return(0)
+  }
+  hi <- max(s) + max(e^2)
   while (f(hi) > 0) hi <- 2 * hi
   stats::uniroot(f, c(0, hi), tol = 1e-12 * hi)$root
 }

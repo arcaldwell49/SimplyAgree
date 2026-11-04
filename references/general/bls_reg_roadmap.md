@@ -179,7 +179,16 @@ Done in the third round (2026-10-31):
 - CBLS in `method_convert(bias = "linear", estimator = "cbls")`: done
   (exchangeable replicates, constant variance).
 
-Still open: method-specific equation error with three or more methods.
+Done (2026-11-04): method-specific equation error with three or more
+methods, `method_convert(estimator = "cbls", tau = "method")`. Each pair
+(m, k) gives the excess scatter T_mk = t_k + b_mk^2 t_m about the BLS line
+of k on m; the M(M-1)/2 equations are solved for t >= 0 by weighted NNLS
+(subset search, `mc_nnls()`), alternating with refitting every pair with
+the t given (`bls_reg(equation_error = c(t_m, t_k))`, new). Study 8 in
+`cbls_sims/README.md`: removes the slope bias of common tau when the item
+effects belong to one method; CIs 0.93-0.97; no loss otherwise. Decided
+(2026-11-04): the default stays `tau = "common"` (as `method_vc()`), also
+with three or more methods. The uncertainty in t is not in the SEs.
 
 Done (2026-11-04): variance functions in `method_convert()`:
 `variance = "proportional"` or `"power"` with `estimator = "cbls"`, passed

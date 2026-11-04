@@ -2,9 +2,10 @@
 
 Status (2026-10-31; studies 5-6 and a rerun of all 2026-11-02; study 7 and
 the joint equation-error solver 2026-11-03; the engine fallback, studies 3,
-5-7 rerun, 2026-11-04): all criteria met (study 2: with
-the right variance model; study 3: when the equation error is split as
-assumed).
+5-7 rerun, 2026-11-04; study 8, method-specific tau, 2026-11-04): all
+criteria met (study 2: with the right variance model; study 3: when the
+equation error is split as assumed, or with three or more methods and
+`tau = "method"`, study 8).
 
 **Standard errors (2026-11-02).** All studies were rerun after the default
 standard errors changed to `se_method = "delta"`: an errors-in-variables
@@ -308,3 +309,29 @@ the run took 7 minutes.
    study 6 only the BivRegBLS columns of two linked cells moved (the
    runaway fits had inflated the slope SD, 3.92 to 0.37); studies 3, 3b and 5
    unchanged.
+
+## Study 8: method-specific equation error, three or more methods (2026-11-04)
+
+`sim_cbls_taum.R` (`summary_taum.csv`): `method_convert(estimator = "cbls")`
+with `tau = "common"` against `tau = "method"`. y_m = a_m + b_m (mu + c_m) +
+e_m, mu ~ N(20, 5^2), c_m ~ N(0, tau_m^2) on the true-value scale, error SDs
+0.6, 0.9, 0.7, 0.8, slopes 1, 1.1, 0.9, 1.2; 3 or 4 methods, n = 30 or 100,
+3 exchangeable replicates; item effects in B only, in A only, in all (SD 1:
+common tau nearly true) or none; 300 data sets per cell. Conversions B from
+A and C from B; prediction limits checked on 200 new items measured once.
+
+| item effects | tau | slope bias | 95% slope CI | 95% PI |
+|---|---|---|---|---|
+| in one method (SD 1.5) | common | 0.032-0.052 (when a method of the pair) | 0.71-0.93 (0.71-0.77 with n = 100) | 0.935-0.954 |
+| in one method (SD 1.5) | method | at most 0.005 | 0.933-0.967 | 0.934-0.953 |
+| in all (SD 1) | common | at most 0.006 | 0.943-0.980 | 0.937-0.949 |
+| in all (SD 1) | method | at most 0.005 | 0.943-0.967 | 0.934-0.948 |
+| none | either | at most 0.003 | 0.923-0.973 | 0.950-0.952 |
+
+- With the item effects in one method, common tau biases the slope (4-5%)
+  and its CI fails more with more items; `tau = "method"` removes the bias
+  and its CIs hold, leaving out the uncertainty in the tau_m.
+- When common tau is about right, `tau = "method"` loses nothing.
+- The prediction limits hold either way (the excess scatter is captured in
+  total, only its split changes).
+- Every fit converged (at most 7 steps in the prototype); no failures.

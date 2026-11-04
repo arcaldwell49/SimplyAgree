@@ -618,3 +618,84 @@ test_that("cbls error variance functions: power, linked, and errors", {
                               variance = "proportional"),
                "variance = 'proportional' for A and B: needs positive")
 })
+
+test_that("estimator = 'cbls', tau = 'method': equation error by method", {
+  dat <- sim_methods(n_items = 60, n_reps = 3, methods = c("A", "B", "C"),
+                     alpha = c(0, 1, -2), beta = c(1, 1.1, 0.9), mu_mean = 20,
+                     mu_sd = 5, tau = c(0, 1.5, 0), sigma = c(0.6, 0.9, 0.7),
+                     seed = 7)
+  cm <- method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", estimator = "cbls", tau = "method")
+  ee <- cm$equation_error
+  expect_equal(ee$method, c("A", "B", "C"))
+  expect_true(cm$fit_info$converged)
+  # the item effects belong to B
+  expect_equal(which.max(ee$tau), 2L)
+  expect_lt(max(ee$tau[-2]), 0.2)
+  # each pair is the bls_reg() fit with those variances given
+  long <- function(m1, m2) {
+    rbind(data.frame(id = dat$id[dat$method == m1],
+                     x = dat$y[dat$method == m1], y = NA_real_),
+          data.frame(id = dat$id[dat$method == m2], x = NA_real_,
+                     y = dat$y[dat$method == m2]))
+  }
+  f <- bls_reg(y ~ x, data = long("A", "B"), id = "id",
+               equation_error = ee$tau2[1:2])
+  expect_equal(c(cm$da$a[1], cm$da$b[1]), unname(f$cbls$coefficients),
+               tolerance = 1e-10)
+  # a fixed point: the excess residual variance of each pair about its line,
+  # T = t_k + b^2 t_m, solved again (weighted non-negative least squares)
+  # gives the same variances
+  t2 <- stats::setNames(ee$tau2, ee$method)
+  prs <- list(c("A", "B"), c("A", "C"), c("B", "C"))
+  A <- matrix(0, 3, 3, dimnames = list(NULL, ee$method))
+  T_hat <- w <- numeric(3)
+  for (j in 1:3) {
+    g <- bls_reg(y ~ x, data = long(prs[[j]][1], prs[[j]][2]), id = "id",
+                 equation_error = unname(t2[prs[[j]]]))
+    m <- g$model
+    b <- unname(coef(g)[2])
+    s <- m$var_y + b^2 * m$var_x
+    T_hat[j] <- .bls_excess(m$y - coef(g)[1] - b * m$x, s)
+    A[j, prs[[j]][2]] <- 1
+    A[j, prs[[j]][1]] <- b^2
+    w[j] <- 1 / (mean(s) + T_hat[j])
+  }
+  expect_equal(mc_nnls(A * w, T_hat * w), unname(t2), tolerance = 1e-6)
+  # B from A: closer to the true 1.1 than with a common tau
+  cc <- method_convert(dat, y = "y", method = "method", id = "id",
+                       replicate = "repl", estimator = "cbls")
+  sel <- cm$conversion$to == "B" & cm$conversion$from == "A"
+  expect_lt(abs(cm$conversion$beta[sel] - 1.1),
+            abs(cc$conversion$beta[sel] - 1.1))
+  expect_output(print(cm), "Method-by-item SD")
+  expect_output(print(cm), "variance of each method")
+  expect_s3_class(predict(cm, newdata = c(15, 25), from = "A", to = "B"),
+                  "data.frame")
+  # errors
+  expect_error(method_convert(dat[dat$method != "C", ], y = "y",
+                              method = "method", id = "id",
+                              replicate = "repl", estimator = "cbls",
+                              tau = "method"), "three or more methods")
+  expect_error(method_convert(dat, y = "y", method = "method", id = "id",
+                              replicate = "repl", tau = "method"),
+               "only available with estimator = 'cbls'")
+})
+
+test_that("non-negative least squares for the equation-error variances", {
+  A <- rbind(c(1, 1, 0), c(1, 0, 1), c(0, 1, 1))
+  expect_equal(mc_nnls(A, c(3, 4, 5)), c(1, 2, 3))
+  # a negative solution is set to 0 and the rest refit
+  t <- mc_nnls(A, c(1, 1, 5))
+  expect_true(all(t >= 0))
+  expect_equal(t[1], 0)
+  expect_equal(t[2:3], unname(qr.solve(A[, 2:3], c(1, 1, 5))))
+  expect_warning(
+    with_mocked_bindings(
+      method_convert(sim_methods(n_items = 20, n_reps = 2,
+                                 methods = c("A", "B", "C"), seed = 1),
+                     y = "y", method = "method", id = "id",
+                     replicate = "repl", estimator = "cbls", tau = "method"),
+      mc_nnls = function(A, y) runif(ncol(A))),
+    "did not converge")
+})

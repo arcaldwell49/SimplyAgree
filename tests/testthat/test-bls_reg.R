@@ -340,7 +340,7 @@ test_that("dispersion and equation error", {
   r <- bls_reg(mini1 ~ wright1, data = ba1986, error.ratio = 2)
   expect_true(is.na(r$dispersion$p.value))
   expect_error(bls_reg(y ~ x, data = long, id = "id", equation_error = NA),
-               "TRUE or FALSE")
+               "TRUE, FALSE")
 })
 
 test_that("large equation error: the joint solution, not a 2-cycle", {
@@ -683,4 +683,40 @@ test_that("the delta term is left out, with a warning, if a refit fails", {
     }), "delta-method term")
   expect_equal(coef(g2), coef(g))
   expect_lt(g2$vcov[2, 2], g$vcov[2, 2])
+})
+
+test_that("known equation-error variances: equation_error = c(x, y)", {
+  data("reps")
+  f0 <- bls_reg(y ~ x, data = reps, id = "id")
+  t2 <- f0$dispersion$tau2
+  expect_gt(t2, 0)
+  expect_equal(f0$dispersion$tau2_x, t2)
+  expect_equal(f0$dispersion$tau2_y, unname(coef(f0)[2])^2 * t2)
+  # the common-tau variances, given, reproduce the fit and its intervals
+  f1 <- bls_reg(y ~ x, data = reps, id = "id",
+                equation_error = c(t2, unname(coef(f0)[2])^2 * t2))
+  expect_equal(coef(f1), coef(f0), tolerance = 1e-8)
+  expect_equal(f1$cbls$coefficients, f0$cbls$coefficients, tolerance = 1e-8)
+  nd <- data.frame(x = c(3, 5))
+  expect_equal(predict(f1, newdata = nd, interval = "prediction"),
+               predict(f0, newdata = nd, interval = "prediction"),
+               tolerance = 1e-4)
+  expect_output(summary(f1), "Equation error [(]given[)]")
+  # all in y: the BLS line with var_y + tau2_y
+  f2 <- bls_reg(y ~ x, data = reps, id = "id", equation_error = c(0, 0.5))
+  m <- f2$model
+  e <- .bls_engine(u = m$x, v = m$y, var_u = m$var_x, var_v = m$var_y + 0.5,
+                   cov_uv = rep(0, nrow(m)), start = coef(f2))
+  expect_equal(unname(coef(f2)), e$coef, tolerance = 1e-8)
+  # zero: measurement error only
+  f3 <- bls_reg(y ~ x, data = reps, id = "id", equation_error = c(0, 0))
+  expect_equal(coef(f3), coef(bls_reg(y ~ x, data = reps, id = "id",
+                                       equation_error = FALSE)))
+  expect_error(bls_reg(y ~ x, data = reps, id = "id",
+                       equation_error = c(-1, 0)), "non-negative")
+  expect_error(bls_reg(y ~ x, data = reps, id = "id",
+                       equation_error = 1), "non-negative")
+  one <- reps[!duplicated(reps$id), ]
+  expect_error(bls_reg(y ~ x, data = one, error.ratio = 1,
+                       equation_error = c(1, 1)), "not only")
 })

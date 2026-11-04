@@ -131,7 +131,10 @@ summary.simple_bls <- function(object, ...) {
     }
     cat(sprintf("Dispersion (1 if the measurement errors explain the scatter): %.3f; %s, p = %.4g\n",
                 d$s2, test, d$p.value))
-    if (isTRUE(d$tau2 > 0)) {
+    if (is.numeric(object$equation_error)) {
+      cat(sprintf("Equation error (given): SD %.4g for x and %.4g for y (each on its own scale); included in the fit and the intervals\n",
+                  sqrt(d$tau2_x), sqrt(d$tau2_y)))
+    } else if (isTRUE(d$tau2 > 0)) {
       cat(sprintf("Equation error: SD %.4g of each method's deviations from the line (true-value scale, common to both); included in the fit and the intervals\n",
                   sqrt(d$tau2)))
     } else if (!isTRUE(object$equation_error) && d$p.value < 0.05) {
@@ -279,10 +282,16 @@ predict.simple_bls <- function(object,
     # equation error (common tau): the new subject's true value deviates
     # from the line by tau2 for x and b^2 tau2 for y (b the BLS slope),
     # estimated on n - 2 df
-    tau2 <- object$dispersion$tau2
-    if (!isTRUE(tau2 > 0)) tau2 <- 0
-    b_xy <- unname(object$coefficients[2])
-    v_eq <- a_x * tau2 + a_y * b_xy^2 * tau2
+    # (or, given, method-specific: tau2_x for x and tau2_y for y)
+    d_eq <- object$dispersion
+    tau2_x <- if (is.null(d_eq$tau2_x)) d_eq$tau2 else d_eq$tau2_x
+    tau2_y <- if (is.null(d_eq$tau2_y)) {
+      unname(object$coefficients[2])^2 * d_eq$tau2
+    } else d_eq$tau2_y
+    if (!isTRUE(tau2_x > 0)) tau2_x <- 0
+    if (!isTRUE(tau2_y > 0)) tau2_y <- 0
+    tau2 <- tau2_x + tau2_y
+    v_eq <- a_x * tau2_x + a_y * tau2_y
     if (interval == "prediction") {
       var_pred <- var_line + v_meas + v_eq
       df_pred <- var_pred^2 /

@@ -74,7 +74,10 @@ modeled: deviations of the subjects' true values from the line (e.g.,
 method-by-item or matrix effects), estimated from the excess scatter
 about the line, are included in the fit and the intervals. It is 0, and
 the results are those of BivRegBLS, when the measurement errors explain
-all the scatter. FALSE always gives BivRegBLS's results. See Details.}
+all the scatter. FALSE always gives BivRegBLS's results. Alternatively,
+the equation-error variances of \code{x} and \code{y} (each on its own scale), if
+known: a vector \code{c(x, y)} of two non-negative numbers, e.g. estimated
+with three or more methods by \code{method_convert(estimator = "cbls", tau = "method")}. See Details.}
 
 \item{transform}{\code{"none"} (default) or \code{"log"}. With \code{"log"}, the
 line is fitted to the logarithms of the measurements (which must be
@@ -281,7 +284,12 @@ lines are then fitted with measurement error only, \code{tau^2} estimated
 about the BLS line is used in the prediction intervals, and a warning is
 given. The prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
 both methods is an assumption: with two methods, how the equation error
-divides between them cannot be estimated.
+divides between them cannot be estimated, and if it belongs mostly to one
+method the slope is biased. With three or more methods it can be: give
+the two variances as \code{equation_error = c(x, y)}, which are then added to
+the error variances (\code{var_xi + tau_x^2}, \code{var_yi + tau_y^2}) and to the
+prediction intervals (on \code{n - 2} df) as known; \code{\link[=method_convert]{method_convert()}} with
+\code{estimator = "cbls"} and \code{tau = "method"} estimates them.
 
 \strong{Linked replicates.} When both methods measure each subject on the
 same occasions and the true value varies between occasions (or the

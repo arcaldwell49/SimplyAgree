@@ -134,8 +134,12 @@ print.simple_mconv <- function(x,
              if (identical(fi$replicates, "linked")) {
                ",\n  correlated through the shared occasions"
              },
-             ";\n  common method-by-item variance), t with ",
-             "items - 2 df; see ?bls_reg")
+             if (identical(fi$tau, "method")) {
+               paste0(";\n  method-by-item variance of each method, from all ",
+                      "pairs),\n  t with items - 2 df; see ?bls_reg")
+             } else {
+               ";\n  common method-by-item variance), t with items - 2 df; see ?bls_reg"
+             })
     } else {
       paste0("CIs: approximate (delta method",
              if (any(x$da$cluster_se))
@@ -177,6 +181,15 @@ print.simple_mconv <- function(x,
       cat("  ", d$method1, " - ", d$method2, ": ", fmt(d$c_sd),
           if (d$d_sd < 0) " - " else " + ", fmt(abs(d$d_sd)),
           " * average\n", sep = "")
+    }
+  }
+  if (!is.null(x$equation_error)) {
+    ee = x$equation_error
+    cat("Method-by-item SD (equation error, each method's own scale",
+        if (tf$name != "none") paste0(", ", tf$name), "): ",
+        paste0(ee$method, " ", fmt(ee$tau), collapse = ", "), "\n", sep = "")
+    if (isFALSE(fi$converged)) {
+      cat("  (did not converge; see the warning)\n")
     }
   }
   if (!is.null(x$errors)) {

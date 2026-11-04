@@ -78,9 +78,11 @@ mc_da_fit = function(pp,
 # common method-by-item variance (equation error). The SD of a new single
 # difference about the line (without the line's own uncertainty, as for the
 # DA regression) is
-#   sqrt(v1 (1 - b/2)^2 + v2 (1 + b/2)^2 + tau2 [(1 - b/2)^2 + beta^2 (1 + b/2)^2])
+#   sqrt(v1 (1 - b/2)^2 + v2 (1 + b/2)^2 + t1 (1 - b/2)^2 + t2 (1 + b/2)^2)
 # with v1, v2 the single-measurement error variances, b the CBLS slope, and
-# beta the BLS slope of y2 on y1. With linked replicates the two methods'
+# t1, t2 the equation-error variances of y1 and y2 (common tau: tau2 and
+# beta^2 tau2, beta the BLS slope of y2 on y1; or, with tau2 = c(t1, t2)
+# given, method-specific; see mc_cbls_tau_method()). With linked replicates the two methods'
 # measurements on the same occasion share the occasion effect: bls_reg(
 # replicates = "linked") estimates their error covariance c from the paired
 # occasions, the item means are fitted with it, and the SD of a new
@@ -95,7 +97,9 @@ mc_cbls_fit = function(df,
                        m1,
                        m2,
                        replicates = "exchangeable",
-                       var_model = "constant") {
+                       var_model = "constant",
+                       tau2 = NULL,
+                       se_method = "delta") {
   d1 = df[df$method == m1, c("id", "repl", "y_t")]
   d2 = df[df$method == m2, c("id", "repl", "y_t")]
   dat = if (replicates == "linked") {
@@ -109,7 +113,9 @@ mc_cbls_fit = function(df,
   }
   fit = tryCatch(
     bls_reg(y ~ x, data = dat, id = "id", replicates = replicates,
-            var_model = var_model),
+            var_model = var_model,
+            equation_error = if (is.null(tau2)) TRUE else tau2,
+            se_method = se_method),
     error = function(e) {
       msg = conditionMessage(e)
       if (grepl("var_model", msg)) {
@@ -123,9 +129,10 @@ mc_cbls_fit = function(df,
   cf = fit$cbls$coefficients
   a = unname(cf[1])
   b = unname(cf[2])
-  beta = unname(fit$coefficients[2])
   e = fit$errors
-  tau2 = fit$dispersion$tau2
+  # equation-error variances of y1 and y2 (common tau: tau2 and beta^2 tau2)
+  tau2_1 = fit$dispersion$tau2_x
+  tau2_2 = fit$dispersion$tau2_y
   s_fun = function(A) {
     dlt = a + b * A
     v1 = e$fun_x(A + dlt / 2)
@@ -134,7 +141,7 @@ mc_cbls_fit = function(df,
     v2 = rep_len(v2, length(A))
     v = v1 * (1 - b / 2)^2 + v2 * (1 + b / 2)^2 -
       2 * e$rho * sqrt(v1 * v2) * (1 - b / 2) * (1 + b / 2) +
-      tau2 * ((1 - b / 2)^2 + beta^2 * (1 + b / 2)^2)
+      tau2_1 * (1 - b / 2)^2 + tau2_2 * (1 + b / 2)^2
     v[!is.finite(v) | v <= 0] = NA_real_
     sqrt(v)
   }
@@ -157,6 +164,91 @@ mc_cbls_fit = function(df,
        n_items = nrow(fit$model),
        fit = fit,
        sd_fit = NULL)
+}
+
+# method-specific equation error for CBLS (three or more methods) ----
+# Each method's item effects c_mi have variance t_m (on its own scale). In
+# the pair (m, k), the residual about the BLS line of k on m (slope b_mk)
+# then has, beyond its measurement error s_i, the variance
+#   T_mk = t_k + b_mk^2 t_m,
+# estimated by sum(e_i^2 / (s_i + T_mk)) = n - 2 (.bls_excess()). With M >= 3
+# methods there are M (M - 1) / 2 >= M such equations, solved for t >= 0 by
+# non-negative least squares (rows weighted by 1 / (mean(s_i) + T_mk), about
+# the inverse SD of T_mk). With two methods only the sum is identified
+# (common tau). The lines depend on t, so the steps alternate: fit every
+# pair with the current t (as known, bls_reg(equation_error = c(t_m, t_k))),
+# re-estimate the T_mk about the new lines, and solve for t, until t is
+# stable. Starts at t = 0 (measurement error only). In simulations it
+# converged in at most 7 steps and removed the slope bias of common tau when
+# the item effects belonged to one method.
+mc_cbls_tau_method = function(df,
+                              prs,
+                              replicates,
+                              var_model,
+                              max_iter = 100,
+                              tol = 1e-8) {
+  lv = levels(df$method)
+  M = length(lv)
+  t2 = stats::setNames(numeric(M), lv)
+  converged = FALSE
+  for (it in seq_len(max_iter)) {
+    A = matrix(0, nrow(prs), M, dimnames = list(NULL, lv))
+    Tv = w = numeric(nrow(prs))
+    for (j in seq_len(nrow(prs))) {
+      m1 = prs$method1[j]
+      m2 = prs$method2[j]
+      fit = suppressWarnings(
+        mc_cbls_fit(df, m1, m2, replicates = replicates,
+                    var_model = var_model, tau2 = unname(t2[c(m1, m2)]),
+                    se_method = "bivregbls")$fit)
+      mod = fit$model
+      b = unname(fit$coefficients[2])
+      e = mod$y - fit$coefficients[1] - b * mod$x
+      cv = if (is.null(mod$cov_xy)) 0 else mod$cov_xy
+      s = mod$var_y + b^2 * mod$var_x - 2 * b * cv
+      Tv[j] = .bls_excess(e, s)
+      A[j, m2] = 1
+      A[j, m1] = b^2
+      w[j] = 1 / (mean(s) + Tv[j])
+    }
+    new = mc_nnls(A * w, Tv * w)
+    names(new) = lv
+    if (max(abs(new - t2)) <= tol * max(new, mean(Tv), 1e-12)) {
+      t2 = new
+      converged = TRUE
+      break
+    }
+    t2 = new
+  }
+  if (!converged) {
+    warning("The method-specific equation-error variances did not converge ",
+            "in ", max_iter, " steps; the last values are used.",
+            call. = FALSE)
+  }
+  list(tau2 = t2, iterations = it, converged = converged)
+}
+
+# Non-negative least squares, min |y - A t| with t >= 0, by trying every set
+# of free coefficients (the number of methods is small)
+mc_nnls = function(A,
+                   y) {
+  p = ncol(A)
+  best = numeric(p)
+  best_rss = sum(y^2)
+  for (k in seq_len(2^p - 1)) {
+    S = which(bitwAnd(k, 2^(seq_len(p) - 1)) > 0)
+    est = tryCatch(qr.solve(A[, S, drop = FALSE], y),
+                   error = function(e) NULL)
+    if (is.null(est) || any(est < 0)) next
+    t = numeric(p)
+    t[S] = est
+    rss = sum((y - A %*% t)^2)
+    if (rss < best_rss - 1e-14 * max(1, best_rss)) {
+      best_rss = rss
+      best = t
+    }
+  }
+  best
 }
 
 # measurement error variance functions of a CBLS pair, one row per method:

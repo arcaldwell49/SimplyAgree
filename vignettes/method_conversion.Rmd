@@ -104,7 +104,21 @@ conv_cbls = method_convert(dat, y = "y", method = "method", id = "id",
 conv_cbls
 ```
 
-The slope of B on A is now close to the true 1.2, as with the scaled model below. With only two methods, CBLS assumes that the method-by-item variation, if any, is the same for both methods; the scaled model can estimate it for each method when there are three or more. When the measurement error SD grows with the level, `variance = "proportional"` (a constant coefficient of variation for each method) or `variance = "power"` estimates each method's error variance as a function of the level from its replicates, and the prediction limits then widen with the level; unlike a log transformation, this allows the methods to have different coefficients of variation and the line a non-zero intercept.
+The slope of B on A is now close to the true 1.2, as with the scaled model below. With only two methods, CBLS assumes that the method-by-item variation, if any, is the same for both methods, and the slope is biased if it belongs mostly to one of them. With three or more methods, `tau = "method"` estimates it for each method from all the pairs (as the scaled model does). Here the item-specific deviations belong to method B only:
+
+```{r}
+dat3 = sim_methods(n_items = 60, n_reps = 3, methods = c("A", "B", "C"),
+                   alpha = c(0, 1, -2), beta = c(1, 1.1, 0.9),
+                   mu_mean = 20, mu_sd = 5, tau = c(0, 1.5, 0),
+                   sigma = c(0.6, 0.9, 0.7), seed = 7)
+conv_cbls_m = method_convert(dat3, y = "y", method = "method", id = "id",
+                             replicate = "repl", estimator = "cbls",
+                             tau = "method")
+conv_cbls_m$equation_error
+```
+
+The method-by-item SD is found in B (true value 1.5 on the true-value scale, 1.65 on B's). The slope of B on A is then 1.110 (true 1.1), against 1.150 with a common variance, which spreads B's deviations over both methods.
+ When the measurement error SD grows with the level, `variance = "proportional"` (a constant coefficient of variation for each method) or `variance = "power"` estimates each method's error variance as a function of the level from its replicates, and the prediction limits then widen with the level; unlike a log transformation, this allows the methods to have different coefficients of variation and the line a non-zero intercept.
 
 # The scaled model
 

@@ -78,10 +78,10 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
 
 Remaining, in order:
 
-1. BLS items (in `bls_reg_roadmap.md`): method-specific equation error
-   with three or more methods; the per-ratio ellipses and an MD-plot
-   version of `error_ratio_profile()`. (Variance functions in
-   `method_convert()`: done 2026-11-04.)
+1. BLS items (in `bls_reg_roadmap.md`): the per-ratio ellipses and an
+   MD-plot version of `error_ratio_profile()`. (Done 2026-11-04: variance
+   functions in `method_convert()`; method-specific equation error with
+   three or more methods, `tau = "method"`, study 8 in `cbls_sims/`.)
 2. Other items to address before the release (to be added here).
 3. **Release pass: the last step on this branch**, after everything
    above is done or deferred. No new features after it starts.
