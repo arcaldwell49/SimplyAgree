@@ -140,7 +140,9 @@
 #' simulations the default covered 0.93 to 0.98 where BivRegBLS's covered
 #' 0.71 to 0.96, and the two agree when the true values are widely spread.
 #' The uncertainty in the estimated equation error (`tau^2`) and in the
-#' shape of a `"power"` variance function is not included.
+#' shape of a `"power"` variance function is not included; for `tau^2`, a
+#' simulation found it unnecessary (coverage 0.94 to 0.98, and up to 1.00
+#' with a large equation error and little spread in the true values).
 #' [error_ratio_profile()] uses the BivRegBLS standard errors.
 #'
 #' **CBLS.** In the Bland-Altman plot, with `D = x - y` and `M = (x + y) / 2`
@@ -201,8 +203,10 @@
 #' methods (as `method_vc(tau = "common")`), so the error variances become
 #' `var_xi + tau^2` and `var_yi + b1^2 tau^2`. `tau^2` solves
 #' `sum(e_i^2 / (var_yi + b1^2 var_xi + 2 b1^2 tau^2)) = n - 2` (0 if the
-#' dispersion is at most 1), and the fit is repeated until stable; the
-#' prediction intervals include `tau^2` (on `n - 2` df). Equal deviations for
+#' dispersion is at most 1), solved jointly with the line by a root search
+#' over the slope, which stays stable when `tau^2` is large against the
+#' spread of the true values (a warning is given if more than one solution
+#' is found); the prediction intervals include `tau^2` (on `n - 2` df). Equal deviations for
 #' both methods is an assumption: with two methods, how the equation error
 #' divides between them cannot be estimated.
 #'
@@ -579,7 +583,9 @@ bls_reg <- function(formula,
   # y, c ~ N(0, tau2), as for the method-by-item effects of method_vc(tau =
   # "common"). The effective error variances are var_x + tau2 and
   # var_y + b^2 tau2; tau2 solves sum(e_i^2 / (s_i + 2 b^2 tau2)) = n - 2
-  # (0 if the dispersion is at most 1), and the fit is repeated until stable.
+  # (0 if the dispersion is at most 1). The slope and tau2 are solved
+  # jointly (.bls_eq_solve()); the final BLS fit at that tau2 gives the
+  # weights and standard errors.
   e_i <- sub$y - bls$coef[1] - bls$coef[2] * sub$x
   disp <- .bls_dispersion(e_i, sub$var_y + bls$coef[2]^2 * sub$var_x -
                             2 * bls$coef[2] * sub$cov_xy,
@@ -587,27 +593,24 @@ bls_reg <- function(formula,
                           known = source != "ratio", df_c = df_rho)
   tau2 <- 0
   tau_ok <- TRUE
+  n_sol <- NA_integer_
   if (equation_error && isTRUE(disp$s2 > 1) && source != "ratio") {
-    tau_ok <- FALSE
-    for (k in seq_len(200)) {
-      b <- bls$coef[2]
-      e_i <- sub$y - bls$coef[1] - b * sub$x
-      s_i <- sub$var_y + b^2 * sub$var_x - 2 * b * sub$cov_xy
-      tau2_new <- .bls_tau2(e_i, s_i, b)
-      bls <- .bls_engine(u = sub$x, v = sub$y,
-                         var_u = sub$var_x + tau2_new,
-                         var_v = sub$var_y + b^2 * tau2_new,
-                         cov_uv = sub$cov_xy, start = bls$coef)
-      if (abs(tau2_new - tau2) <= 1e-10 * max(tau2_new, 1e-300) &&
-          abs(bls$coef[2] - b) <= 1e-10 * max(abs(b), 1)) {
-        tau2 <- tau2_new
-        tau_ok <- TRUE
-        break
-      }
-      tau2 <- tau2_new
+    sol <- .bls_eq_solve(sub$x, sub$y, sub$var_x, sub$var_y, sub$cov_xy)
+    n_sol <- sol$n_solutions
+    if (n_sol > 0) {
+      tau2 <- sol$tau2
+      bls <- .bls_engine(u = sub$x, v = sub$y, var_u = sub$var_x + tau2,
+                         var_v = sub$var_y + sol$coef[2]^2 * tau2,
+                         cov_uv = sub$cov_xy, start = sol$coef)
+    } else {
+      # no solution found: tau2 at the measurement-error-only line
+      tau_ok <- FALSE
+      tau2 <- .bls_tau2(e_i, sub$var_y + bls$coef[2]^2 * sub$var_x -
+                          2 * bls$coef[2] * sub$cov_xy, bls$coef[2])
     }
   }
   disp$tau2 <- tau2
+  disp$n_solutions <- n_sol
   # effective error variances of the subject means
   vx_eff <- sub$var_x + tau2
   vy_eff <- sub$var_y + bls$coef[2]^2 * tau2
@@ -724,6 +727,10 @@ bls_reg <- function(formula,
     warning("The BLS iterations did not converge; the estimates may be ",
             "inaccurate.")
   }
+  if (isTRUE(disp$n_solutions > 1)) {
+    warning("The equation-error fit has ", disp$n_solutions, " solutions; ",
+            "the one with the smallest equation error (tau^2) is used.")
+  }
 
   sub_out <- sub[, c("id", "x", "y", "n_x", "n_y", "var_x", "var_y")]
   if (linked) {
@@ -814,6 +821,70 @@ bls_reg <- function(formula,
   hi <- (max(s) + max(e^2)) / k
   while (f(hi) > 0) hi <- 2 * hi
   stats::uniroot(f, c(0, hi), tol = 1e-12 * hi)$root
+}
+
+# Joint solution of the slope, intercept and common tau2 (equation error).
+# With x-errors of variance var_x + tau2 and y-errors of variance
+# var_y + b1^2 tau2, the BLS estimating equations are, with
+# s_i = var_y + b1^2 var_x - 2 b1 cov + 2 b1^2 tau2, w_i = 1 / s_i,
+# e_i = y_i - b0 - b1 x_i and xh_i = x_i + (b1 (var_x + tau2) - cov) e_i w_i:
+#   sum w_i e_i = 0, sum w_i e_i xh_i = 0, sum w_i e_i^2 = n - 2.
+# The y-error variance is evaluated at b1 but not differentiated (as the
+# variances of BLS are taken as known), which keeps the equations unbiased.
+# Iterating "tau2 given the line, then the line given tau2" can fall into a
+# 2-cycle of near-reciprocal slopes when tau2 is large against the spread
+# of the true values, so instead b0 and tau2 are profiled out for each
+# slope and the slope equation is solved by a bracketed root search over
+# the angle of the standardized line. More than one root is possible in
+# principle (none was seen in simulations); the one with the smallest tau2
+# is kept and their number returned.
+.bls_eq_solve <- function(x, y, var_x, var_y, cov_xy, n_grid = 120) {
+  n <- length(x)
+  var_x <- rep_len(var_x, n)
+  var_y <- rep_len(var_y, n)
+  cov_xy <- rep_len(cov_xy, n)
+  # b0 and tau2 for a given slope (b0 depends on tau2 through the weights
+  # unless the variances are constant), and the slope equation
+  profile <- function(b1) {
+    s0 <- var_y + b1^2 * var_x - 2 * b1 * cov_xy
+    tau2 <- 0
+    w <- 1 / s0
+    b0 <- sum(w * (y - b1 * x)) / sum(w)
+    for (i in seq_len(100)) {
+      tau2_new <- .bls_tau2(y - b0 - b1 * x, s0, b1)
+      w <- 1 / (s0 + 2 * b1^2 * tau2_new)
+      b0_new <- sum(w * (y - b1 * x)) / sum(w)
+      done <- abs(b0_new - b0) <= 1e-12 * max(abs(b0), 1) &&
+        abs(tau2_new - tau2) <= 1e-12 * max(tau2_new, 1e-300)
+      b0 <- b0_new
+      tau2 <- tau2_new
+      if (done) break
+    }
+    e <- y - b0 - b1 * x
+    xh <- x + (b1 * (var_x + tau2) - cov_xy) * e * w
+    c(eq = sum(w * e * xh), b0 = b0, tau2 = tau2)
+  }
+  # slopes b1 = sign * tan(theta) * sd(y) / sd(x), theta in (0, pi / 2)
+  sc <- stats::sd(y) / stats::sd(x)
+  sg <- if (stats::cov(x, y) < 0) -1 else 1
+  th <- seq(0, pi / 2, length.out = n_grid + 2)[-c(1, n_grid + 2)]
+  slope <- function(t) sg * tan(t) * sc
+  eq <- vapply(th, function(t) profile(slope(t))[["eq"]], numeric(1))
+  ok <- is.finite(eq)
+  j <- which(ok[-1] & ok[-n_grid] & sign(eq[-1]) != sign(eq[-n_grid]))
+  if (length(j) == 0) {
+    return(list(coef = c(NA_real_, NA_real_), tau2 = NA_real_,
+                n_solutions = 0L))
+  }
+  sols <- vapply(j, function(k) {
+    t <- stats::uniroot(function(t) profile(slope(t))[["eq"]],
+                        c(th[k], th[k + 1]), tol = 1e-13)$root
+    p <- profile(slope(t))
+    c(p[["b0"]], slope(t), p[["tau2"]])
+  }, numeric(3))
+  best <- which.min(sols[3, ])
+  list(coef = sols[1:2, best], tau2 = sols[3, best],
+       n_solutions = length(j))
 }
 
 # A constant error model

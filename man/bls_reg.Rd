@@ -205,7 +205,9 @@ df. With only \code{error.ratio}, the error variances are scaled by \code{s^2}. 
 simulations the default covered 0.93 to 0.98 where BivRegBLS's covered
 0.71 to 0.96, and the two agree when the true values are widely spread.
 The uncertainty in the estimated equation error (\code{tau^2}) and in the
-shape of a \code{"power"} variance function is not included.
+shape of a \code{"power"} variance function is not included; for \code{tau^2}, a
+simulation found it unnecessary (coverage 0.94 to 0.98, and up to 1.00
+with a large equation error and little spread in the true values).
 \code{\link[=error_ratio_profile]{error_ratio_profile()}} uses the BivRegBLS standard errors.
 
 \strong{CBLS.} In the Bland-Altman plot, with \code{D = x - y} and \code{M = (x + y) / 2}
@@ -266,8 +268,10 @@ and, through a wrong error ratio, a biased slope. With
 methods (as \code{method_vc(tau = "common")}), so the error variances become
 \code{var_xi + tau^2} and \verb{var_yi + b1^2 tau^2}. \code{tau^2} solves
 \verb{sum(e_i^2 / (var_yi + b1^2 var_xi + 2 b1^2 tau^2)) = n - 2} (0 if the
-dispersion is at most 1), and the fit is repeated until stable; the
-prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
+dispersion is at most 1), solved jointly with the line by a root search
+over the slope, which stays stable when \code{tau^2} is large against the
+spread of the true values (a warning is given if more than one solution
+is found); the prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
 both methods is an assumption: with two methods, how the equation error
 divides between them cannot be estimated.
 

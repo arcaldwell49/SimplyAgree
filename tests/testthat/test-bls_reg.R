@@ -343,6 +343,57 @@ test_that("dispersion and equation error", {
                "TRUE or FALSE")
 })
 
+test_that("large equation error: the joint solution, not a 2-cycle", {
+  # equation error (tau = 1.5) as large as the spread of the true values
+  # (SD 1.5): alternating tau2 and the line cycled between slopes 8.15 and
+  # 0.12 here; the joint solve finds the one solution
+  set.seed(1)
+  n <- 15
+  t <- rnorm(n, 20, 1.5)
+  cx <- rnorm(n, 0, 1.5)
+  cy <- rnorm(n, 0, 1.5)
+  d <- data.frame(x = t + cx + rnorm(n),
+                  y = 1 + 1.1 * (t + cy) + rnorm(n, 0, 1.2))
+  f <- expect_no_warning(bls_reg(y ~ x, data = d, var_x = 1, var_y = 1.44))
+  expect_true(f$converged)
+  expect_equal(f$dispersion$n_solutions, 1L)
+  b <- unname(coef(f))
+  t2 <- f$dispersion$tau2
+  expect_equal(b[2], 0.94017, tolerance = 1e-4)
+  expect_equal(t2, 5.0163, tolerance = 1e-4)
+  # the three estimating equations hold
+  e <- d$y - b[1] - b[2] * d$x
+  w <- 1 / (1.44 + b[2]^2 + 2 * b[2]^2 * t2)
+  xh <- d$x + b[2] * (1 + t2) * e * w
+  expect_equal(sum(w * e), 0, tolerance = 1e-8)
+  expect_equal(sum(w * e * xh), 0, tolerance = 1e-8)
+  expect_equal(sum(w * e^2), n - 2, tolerance = 1e-8)
+  # the root search on the slope's angle fails safely without a sign change
+  s <- .bls_eq_solve(d$x, d$y, 1, 1.44, 0, n_grid = 1)
+  expect_equal(s$n_solutions, 0L)
+  # several solutions: the smallest tau2 is used, with a warning; none: the
+  # fit is flagged as not converged
+  sol <- .bls_eq_solve(d$x, d$y, 1, 1.44, 0)
+  local({
+    local_mocked_bindings(.bls_eq_solve = function(...) {
+      sol$n_solutions <- 2L
+      sol
+    })
+    expect_warning(f2 <- bls_reg(y ~ x, data = d, var_x = 1, var_y = 1.44),
+                   "2 solutions")
+    expect_equal(coef(f2), coef(f))
+  })
+  local({
+    local_mocked_bindings(.bls_eq_solve = function(...) {
+      list(coef = c(NA_real_, NA_real_), tau2 = NA_real_, n_solutions = 0L)
+    })
+    expect_warning(f0 <- bls_reg(y ~ x, data = d, var_x = 1, var_y = 1.44),
+                   "did not converge")
+    expect_false(f0$converged)
+    expect_gt(f0$dispersion$tau2, 0)
+  })
+})
+
 test_that("tolerance limits (experimental)", {
   d <- bls_sim(n = 30, seed = 4)
   fit <- bls_reg(y ~ x, data = d$long, id = "id")

@@ -1,8 +1,9 @@
 # bls_reg(): coverage of the intervals and size of the joint test
 
-Status (2026-10-31; studies 5-6 and a rerun of all 2026-11-02): all criteria
-met (study 2: with the right variance model; study 3: when the equation
-error is split as assumed).
+Status (2026-10-31; studies 5-6 and a rerun of all 2026-11-02; study 7 and
+the joint equation-error solver 2026-11-03): all criteria met (study 2: with
+the right variance model; study 3: when the equation error is split as
+assumed).
 
 **Standard errors (2026-11-02).** All studies were rerun after the default
 standard errors changed to `se_method = "delta"`: an errors-in-variables
@@ -242,4 +243,52 @@ intercept, and CBLS slope CIs.
    true values are widely spread (t_sd = 6), as in studies 1-4.
 3. Remaining limit: the uncertainty in the estimated equation error
    (tau^2) is not included; with a large equation error placed in one
-   method only, the slope is biased anyway (study 3).
+   method only, the slope is biased anyway (study 3). Study 7 checks it.
+
+## Study 7: equation error and the standard errors; the joint solver (2026-11-03)
+
+`sim_cbls_tau.R`, `summary_tau.csv`. Study 6 with common-tau equation
+error (the model `bls_reg()` fits): x = t + c_x + e_x (SD 1), y = 1 + 1.1
+(t + c_y) + e_y (SD 1.2), c_x, c_y ~ N(0, tau^2) per subject, independent;
+tau = 0, 0.5, 1.5; t_sd = 1.5, 3, 6; n = 15, 40; the three designs of
+study 6; default fit (`equation_error = TRUE`, `se_method = "delta"`);
+1000 data sets per cell.
+
+Question: the delta-method SEs leave out the uncertainty in the estimated
+tau^2. Are the coefficient CIs too narrow? Criteria (set before running):
+coverage 0.93-0.97 for the slope, intercept and CBLS slope CIs.
+
+**First run: a solver bug.** The fit then alternated between tau^2 given
+the line and the line given tau^2 (with `var_y + b^2 tau^2` at the slope of
+the previous pass). With tau = 1.5 and t_sd = 1.5 (equation error as large
+as the spread of the true values), about half the fits fell into a 2-cycle
+of near-reciprocal slopes (e.g. 8.15 and 0.12) and returned the last pass
+with the non-convergence warning: coverage 0.81-0.85 at n = 40 (mean slope
+1.26-1.36), and the run took over an hour. Now the intercept and tau^2 are
+profiled out for each slope and the slope equation is solved by a bracketed
+root search over the angle of the standardized line (`.bls_eq_solve()`):
+the same estimating equations, so fits that converged before are unchanged
+(studies 3 and 5 were rerun and reproduced to 4 decimals). It found exactly
+one solution in every data set (a warning is given if it finds more), and
+the run took 7 minutes.
+
+| tau | slope CI | intercept CI | CBLS slope CI | first run (slope CI) | tau-hat^2 = 0 |
+|---|---|---|---|---|---|
+| 0   | 0.939-0.984 | 0.940-0.982 | 0.942-0.985 | same | 49-59% |
+| 0.5 | 0.944-0.971 | 0.940-0.976 | 0.942-0.975 | same | 3-37% |
+| 1.5 | 0.952-0.996 | 0.954-0.995 | 0.954-0.999 | 0.840-0.984 | 0-2% |
+
+1. **No SE term for tau^2 is needed: criterion met or conservative.** With
+   tau = 0 or 0.5 the CIs cover 0.94-0.98 (the 0.98 cells are linked
+   occasions at the lowest reliability, conservative as in study 6, without
+   equation error). With tau = 1.5 they are conservative at low
+   reliability (up to 0.99-1.00 with t_sd = 1.5, n = 40) and nominal with
+   t_sd = 6. Mean tau-hat^2 was 2.23-2.37 (true 2.25).
+2. With t_sd = 1.5 and n = 15 the mean slope is far from 1.1 in some cells
+   (1.29-1.77, linked): a few very large slopes in data sets where the line
+   is barely determined; their CIs are correspondingly wide.
+3. **Separate, older limit:** 0.4-1.2% of linked fits with t_sd = 1.5 did not
+   converge, all with tau-hat^2 = 0: the measurement-error-only BLS engine
+   reached its 500 iterations (slopes 26-207) when the shared occasion
+   effect (SD 2) swamps the spread of the true values. These fits carry the
+   non-convergence warning.

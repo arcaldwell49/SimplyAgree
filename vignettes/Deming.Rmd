@@ -53,8 +53,9 @@ The package has three functions that fit a straight line between two methods, ea
 **When do `dem_reg()` and `bls_reg()` give the same line?** When `bls_reg()` is given only `error.ratio`, or when the error variances are constant, every subject has the same number of replicates by each method with none missing, and there is no equation error (the dispersion is at most 1, or `equation_error = FALSE`). Their standard errors differ even then (jackknife versus analytic). With the default `equation_error = TRUE` and excess scatter, `bls_reg()` adds the same item-specific variance to both methods, which changes the effective error ratio and so the slope, sometimes considerably:
 
 ```{r}
+library(SimplyAgree)
 data("reps")
-reps_bal <- reps[complete.cases(reps), ]
+reps_bal <-reps[complete.cases(reps), ]
 reps_bal <- do.call(rbind, lapply(split(reps_bal, reps_bal$id), head, 3))
 rbind(
   dem_reg = coef(dem_reg(y ~ x, data = reps_bal, id = "id")),

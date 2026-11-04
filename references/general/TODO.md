@@ -84,9 +84,36 @@ Remaining, in order:
 2. Lower priority (in `bls_reg_roadmap.md`): variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of
-   `error_ratio_profile()`; the uncertainty in the estimated equation error
-   (tau^2) in the BLS standard errors (the delta-method SEs of 2026-11-02
-   cover the error variances and correlation, not tau^2).
+   `error_ratio_profile()`; the BLS engine itself does not converge in
+   0.4-1.2% of linked fits when a shared occasion effect swamps the spread
+   of the true values (line barely determined; warned; study 7, point 3) -
+   the root search of `.bls_eq_solve()` could be reused there.
+   Done 2026-11-03: the uncertainty in tau^2 in the BLS SEs was checked and
+   is not needed (study 7 in `cbls_sims/README.md`: coverage 0.94-0.98,
+   conservative up to 1.00 with a large tau and little spread); this found
+   that alternating tau^2 and the line could fall into a 2-cycle (coverage
+   0.81-0.85 with tau = 1.5, t_sd = 1.5), now replaced by a joint root
+   search (`.bls_eq_solve()`; studies 3 and 5 reproduced).
+3. Other items to address before the release (to be added here).
+4. **Release pass: the last step on this branch**, after everything
+   above is done or deferred. No new features after it starts.
+   - Time the tests as CRAN does (`NOT_CRAN` unset); move anything over
+     about 1-2 s behind `skip_on_cran()`, keeping a cheap version so every
+     exported function still runs on CRAN. Candidates: the delta-method
+     SEs in `bls_reg()` (extra refits), the `reli_facet_test()` and
+     `method_vc()` mixed-model tests.
+   - `R CMD check --as-cran` (with `RSTUDIO_PANDOC` set): 0 errors, 0
+     warnings, only the expected NOTEs. Check the URLs and DOIs, including
+     the new Fuller, Critchley and Enevoldsen references. Ask before
+     sending to win-builder or R-hub.
+   - Complete the Enevoldsen (2026) entry in `refs.bib` (volume, pages,
+     full author list) if it is published by then.
+   - Tidy NEWS for 0.5.0: group the entries (trending agreement, BLS,
+     `method_vc()`, reliability) and keep master's 0.4.1 section below.
+   - Bump the version in DESCRIPTION and the version in CLAUDE.md.
+   - Rebuild the pkgdown site; check that `_pkgdown.yml` lists every new
+     topic. `docs/` stays out of commits unless decided otherwise.
+   - Merge master again if it has moved, then rerun the full check.
 
 Environment notes:
 
