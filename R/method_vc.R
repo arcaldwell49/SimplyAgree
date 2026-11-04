@@ -179,6 +179,10 @@
 #' zero (up to 19% of data sets); the bounds then leave out the rater
 #' variance, which is liberal when a large rater SD is hidden by three
 #' similar rater effects (coverage 0.92 with rater SD 0.5 and 30 items).
+#' SimplyAgree has no bootstrap for random raters. With few raters, a
+#' parametric or case bootstrap can be run on the fitted model (`model`, an
+#' [nlme::lme()] fit; e.g. with the lmeresampler package), or by refitting
+#' `method_vc()` to resampled raters and items (e.g. with [boot::boot()]).
 #' With `interval = "tolerance"` the prediction limits are \eqn{\pm t
 #' \sqrt{V}} (the bias is 0 with no estimation error) and the tolerance
 #' limits are \eqn{\pm z U}, with \eqn{U} the one-sided `conf_level` upper

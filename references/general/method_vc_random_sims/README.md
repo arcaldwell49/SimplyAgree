@@ -33,7 +33,9 @@ Criteria (set before running):
   expected to be rough.
 - Rater SD interval coverage between 0.93 and 0.97 with M >= 5.
 - If the bounds are clearly liberal with few raters, consider a
-  parametric bootstrap (the planned option) before release.
+  parametric bootstrap (the planned option) before release. Decided
+  against (2026-11-04): the 0.92 with 3 raters is documented, with a
+  pointer to lmeresampler or boot::boot() for a user's own bootstrap.
 
 ## Design
 

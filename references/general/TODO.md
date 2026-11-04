@@ -78,24 +78,12 @@ pkgdown, Deming and Part 1 vignettes) and tested. Done since the handoff:
 
 Remaining, in order:
 
-1. Random-rater follow-up: an optional parametric bootstrap (which might
-   address the 3-rater case above, where a large rater SD estimated at
-   zero gives bound coverage 0.92).
-2. Lower priority (in `bls_reg_roadmap.md`): variance functions in
+1. BLS items (in `bls_reg_roadmap.md`): variance functions in
    `method_convert()`; method-specific equation error with three or more
    methods; the per-ratio ellipses and an MD-plot version of
-   `error_ratio_profile()`; the BLS engine itself does not converge in
-   0.4-1.2% of linked fits when a shared occasion effect swamps the spread
-   of the true values (line barely determined; warned; study 7, point 3) -
-   the root search of `.bls_eq_solve()` could be reused there.
-   Done 2026-11-03: the uncertainty in tau^2 in the BLS SEs was checked and
-   is not needed (study 7 in `cbls_sims/README.md`: coverage 0.94-0.98,
-   conservative up to 1.00 with a large tau and little spread); this found
-   that alternating tau^2 and the line could fall into a 2-cycle (coverage
-   0.81-0.85 with tau = 1.5, t_sd = 1.5), now replaced by a joint root
-   search (`.bls_eq_solve()`; studies 3 and 5 reproduced).
-3. Other items to address before the release (to be added here).
-4. **Release pass: the last step on this branch**, after everything
+   `error_ratio_profile()`.
+2. Other items to address before the release (to be added here).
+3. **Release pass: the last step on this branch**, after everything
    above is done or deferred. No new features after it starts.
    - Time the tests as CRAN does (`NOT_CRAN` unset); move anything over
      about 1-2 s behind `skip_on_cran()`, keeping a cheap version so every
@@ -114,6 +102,30 @@ Remaining, in order:
    - Rebuild the pkgdown site; check that `_pkgdown.yml` lists every new
      topic. `docs/` stays out of commits unless decided otherwise.
    - Merge master again if it has moved, then rerun the full check.
+
+Decided against (2026-11-04): a parametric bootstrap for random raters in
+`method_vc()` (the 3-rater case where a large rater SD estimated at zero
+gives bound coverage 0.92). Not worth the work; the documentation states
+the coverage and points to lmeresampler or `boot::boot()` for users who
+want their own bootstrap.
+
+Done 2026-11-04: BLS engine non-convergence. The iteration could move
+away from the solution in linked fits whose shared occasion effect swamps
+the spread of the true values (0.4-1.2% of such fits); it now falls back to
+a root search (`.bls_slope_search()`, the root nearest the start). Data sets
+with no equation-error solution keep the measurement-error lines (CBLS now
+matches BLS) with tau^2 in the prediction intervals only, and a warning.
+The delta-method SEs now check their perturbed refits (converged, same
+equation-error case as the fit); if one fails, the term is left out with a
+warning (none fired in 600 fits of the hardest linked cell).
+Study 7, point 3, in `cbls_sims/README.md`; every fit converges.
+
+Done 2026-11-03: the uncertainty in tau^2 in the BLS SEs was checked and is
+not needed (study 7 in `cbls_sims/README.md`: coverage 0.94-0.98,
+conservative up to 1.00 with a large tau and little spread); this found that
+alternating tau^2 and the line could fall into a 2-cycle (coverage
+0.81-0.85 with tau = 1.5, t_sd = 1.5), now replaced by a joint root search
+(`.bls_eq_solve()`; studies 3 and 5 reproduced).
 
 Environment notes:
 

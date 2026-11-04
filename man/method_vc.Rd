@@ -261,6 +261,10 @@ the rater SD was small). With 3 raters the rater SD is often estimated at
 zero (up to 19\% of data sets); the bounds then leave out the rater
 variance, which is liberal when a large rater SD is hidden by three
 similar rater effects (coverage 0.92 with rater SD 0.5 and 30 items).
+SimplyAgree has no bootstrap for random raters. With few raters, a
+parametric or case bootstrap can be run on the fitted model (\code{model}, an
+\code{\link[nlme:lme]{nlme::lme()}} fit; e.g. with the lmeresampler package), or by refitting
+\code{method_vc()} to resampled raters and items (e.g. with \code{\link[boot:boot]{boot::boot()}}).
 With \code{interval = "tolerance"} the prediction limits are \eqn{\pm t
 \sqrt{V}} (the bias is 0 with no estimation error) and the tolerance
 limits are \eqn{\pm z U}, with \eqn{U} the one-sided \code{conf_level} upper

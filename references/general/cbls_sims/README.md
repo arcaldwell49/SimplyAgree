@@ -1,7 +1,8 @@
 # bls_reg(): coverage of the intervals and size of the joint test
 
 Status (2026-10-31; studies 5-6 and a rerun of all 2026-11-02; study 7 and
-the joint equation-error solver 2026-11-03): all criteria met (study 2: with
+the joint equation-error solver 2026-11-03; the engine fallback, studies 3,
+5-7 rerun, 2026-11-04): all criteria met (study 2: with
 the right variance model; study 3: when the equation error is split as
 assumed).
 
@@ -230,8 +231,8 @@ intercept, and CBLS slope CIs.
 | reps   | 1.5 | 0.952-0.964 | 0.923-0.939 | 1.14-1.16 |
 | reps   | 3   | 0.936-0.954 | 0.931-0.946 | 1.03-1.04 |
 | reps   | 6   | 0.934-0.950 | 0.934-0.948 | 1.01 |
-| linked | 1.5 | 0.969-0.976 | 0.707-0.734 | 2.23-5.72 |
-| linked | 3   | 0.938-0.965 | 0.859-0.906 | 1.24-1.40 |
+| linked | 1.5 | 0.969-0.976 | 0.708-0.759 | 2.19-2.61 |
+| linked | 3   | 0.938-0.965 | 0.859-0.908 | 1.24-1.30 |
 | linked | 6   | 0.948-0.959 | 0.937-0.949 | 1.06-1.07 |
 
 1. **Delta-method SEs: criterion met** (0.934-0.976), slightly
@@ -284,11 +285,26 @@ the run took 7 minutes.
    equation error). With tau = 1.5 they are conservative at low
    reliability (up to 0.99-1.00 with t_sd = 1.5, n = 40) and nominal with
    t_sd = 6. Mean tau-hat^2 was 2.23-2.37 (true 2.25).
-2. With t_sd = 1.5 and n = 15 the mean slope is far from 1.1 in some cells
-   (1.29-1.77, linked): a few very large slopes in data sets where the line
-   is barely determined; their CIs are correspondingly wide.
-3. **Separate, older limit:** 0.4-1.2% of linked fits with t_sd = 1.5 did not
-   converge, all with tau-hat^2 = 0: the measurement-error-only BLS engine
-   reached its 500 iterations (slopes 26-207) when the shared occasion
-   effect (SD 2) swamps the spread of the true values. These fits carry the
-   non-convergence warning.
+2. With t_sd = 1.5 and n = 15, linked, the mean slope is 1.15-1.20: a few
+   large slopes in data sets where the line is barely determined, with
+   correspondingly wide CIs (it was 1.29-1.77 before the engine fix below).
+3. **The BLS engine (fixed 2026-11-04).** In the same run 0.4-1.2% of linked
+   fits with t_sd = 1.5 did not converge, all with tau-hat^2 = 0: the BLS
+   iteration of the measurement-error-only fit moved away from the solution
+   (1.5, 2.3, 3.1, ... up to slopes of 26-207 after 500 iterations) when
+   the shared occasion effect (SD 2) swamps the spread of the true values,
+   although the equations had a sensible solution (0.85-1.09). The engine
+   now falls back to a root search over the angle of the line
+   (`.bls_slope_search()`), keeping the root nearest the start: the smaller
+   criterion would pick the spurious root of the other sign, whose error
+   variance the correlated errors inflate. Some of these data sets (8 of 600
+   in the tau = 0.5, n = 15, t_sd = 1.5 linked cell) then had no
+   equation-error solution: with tau^2 added the slope equation keeps one
+   sign up to a vertical line (the old alternation ran off to the large
+   slopes). The lines are then fitted with measurement error only, tau^2
+   about the BLS line goes into the prediction intervals, and a warning is
+   given (before, CBLS was fitted with tau^2 and no longer matched the BLS
+   line). Rerun: every fit converged; coverage unchanged (the table); in
+   study 6 only the BivRegBLS columns of two linked cells moved (the
+   runaway fits had inflated the slope SD, 3.92 to 0.37); studies 3, 3b and 5
+   unchanged.

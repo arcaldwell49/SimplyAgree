@@ -371,8 +371,7 @@ test_that("large equation error: the joint solution, not a 2-cycle", {
   # the root search on the slope's angle fails safely without a sign change
   s <- .bls_eq_solve(d$x, d$y, 1, 1.44, 0, n_grid = 1)
   expect_equal(s$n_solutions, 0L)
-  # several solutions: the smallest tau2 is used, with a warning; none: the
-  # fit is flagged as not converged
+  # several solutions: the smallest tau2 is used, with a warning
   sol <- .bls_eq_solve(d$x, d$y, 1, 1.44, 0)
   local({
     local_mocked_bindings(.bls_eq_solve = function(...) {
@@ -383,15 +382,76 @@ test_that("large equation error: the joint solution, not a 2-cycle", {
                    "2 solutions")
     expect_equal(coef(f2), coef(f))
   })
-  local({
-    local_mocked_bindings(.bls_eq_solve = function(...) {
-      list(coef = c(NA_real_, NA_real_), tau2 = NA_real_, n_solutions = 0L)
-    })
-    expect_warning(f0 <- bls_reg(y ~ x, data = d, var_x = 1, var_y = 1.44),
-                   "did not converge")
-    expect_false(f0$converged)
-    expect_gt(f0$dispersion$tau2, 0)
-  })
+})
+
+# linked replicates whose shared occasion effect (SD 2) swamps the spread of
+# the true values (SD 1.5): the line is barely determined
+linked_weak <- function(set) {
+  set.seed(3)
+  for (s in seq_len(set)) {
+    t <- rnorm(15, 20, 1.5)
+    cx <- rnorm(15, 0, 0.5)
+    cy <- rnorm(15, 0, 0.5)
+    id <- rep(1:15, each = 3)
+    occ <- rnorm(45, 0, 2)
+    d <- data.frame(id = id, x = t[id] + cx[id] + occ + rnorm(45),
+                    y = 1 + 1.1 * (t[id] + cy[id] + occ) + rnorm(45, 0, 1.2))
+  }
+  d
+}
+
+test_that("the BLS engine falls back to a root search when it diverges", {
+  # here the iteration moved away from the solution (1.5, 2.3, 3.1, ...) and
+  # stopped at a slope of 207 after 500 iterations
+  d <- linked_weak(16)
+  f <- expect_no_warning(bls_reg(y ~ x, data = d, id = "id",
+                                 replicates = "linked",
+                                 equation_error = FALSE))
+  expect_true(f$converged)
+  expect_equal(unname(coef(f)[2]), 1.088423, tolerance = 1e-6)
+  # the slope equation (minus half the derivative of the criterion) holds
+  s <- f$model
+  b <- unname(coef(f))
+  cv <- f$errors$cov_xy * 3 / (s$n_x * s$n_y)
+  w <- 1 / (s$var_y + b[2]^2 * s$var_x - 2 * b[2] * cv)
+  e <- s$y - b[1] - b[2] * s$x
+  expect_equal(sum(w * e), 0, tolerance = 1e-8)
+  expect_equal(sum(w * e * (s$x + (b[2] * s$var_x - cv) * e * w)), 0,
+               tolerance = 1e-8)
+  # the search alone gives the iteration's solution, and of the two Deming
+  # roots the one nearest the start
+  dd <- bls_sim(n = 30, seed = 4)$long
+  fx <- tapply(dd$x, dd$id, mean)
+  fy <- tapply(dd$y, dd$id, mean)
+  e1 <- .bls_engine(fx, fy, 0.1, 0.2, 0, start = c(0, 1))
+  e2 <- .bls_engine(fx, fy, 0.1, 0.2, 0, start = c(0, 1), max_iter = 1)
+  expect_true(e1$converged && e2$converged)
+  expect_equal(e2$coef, e1$coef, tolerance = 1e-8)
+  other <- .bls_slope_search(fx, fy, 0.1, 0.2, 0, start = c(0, -1))
+  expect_lt(other[2], 0)
+  expect_equal(other[2] * e1$coef[2], -0.2 / 0.1, tolerance = 1e-6)
+  expect_null(.bls_slope_search(fx, fy, 0.1, 0.2, 0, c(0, 1), n_grid = 1))
+})
+
+test_that("no equation-error solution: measurement-error lines, warned", {
+  # with tau^2 added the slope equation keeps one sign up to a vertical line
+  d <- linked_weak(66)
+  expect_warning(f <- bls_reg(y ~ x, data = d, id = "id",
+                              replicates = "linked"), "no solution")
+  f0 <- bls_reg(y ~ x, data = d, id = "id", replicates = "linked",
+                equation_error = FALSE)
+  expect_true(f$converged)
+  expect_equal(f$dispersion$n_solutions, 0L)
+  expect_gt(f$dispersion$tau2, 0)
+  # the lines are those of measurement error only, CBLS matching BLS
+  expect_equal(coef(f), coef(f0))
+  b <- unname(coef(f)[2])
+  expect_equal(unname(f$cbls$coefficients[2]), 2 * (1 - b) / (1 + b),
+               tolerance = 1e-8)
+  # tau^2 widens the prediction intervals
+  p <- predict(f, 20, interval = "prediction")
+  p0 <- predict(f0, 20, interval = "prediction")
+  expect_gt(p$upr - p$lwr, p0$upr - p0$lwr)
 })
 
 test_that("tolerance limits (experimental)", {
@@ -581,4 +641,46 @@ test_that("default SEs: errors-in-variables sandwich plus the delta term", {
   expect_gt(f_d$cbls$vcov[2, 2], f_b$cbls$vcov[2, 2])
   expect_error(bls_reg(y ~ x, data = dat, var_x = 1, var_y = 1,
                        se_method = "nope"))
+})
+
+test_that("the delta term is left out, with a warning, if a refit fails", {
+  d <- bls_sim()
+  f_d <- bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE)
+  # the first two engine calls are the fit (BLS, CBLS); the later ones are
+  # the refits with perturbed error variances
+  engine <- .bls_engine
+  calls <- 0
+  expect_warning(f <- with_mocked_bindings(
+    bls_reg(y ~ x, data = d$long, id = "id", equation_error = FALSE),
+    .bls_engine = function(...) {
+      calls <<- calls + 1
+      r <- engine(...)
+      if (calls > 2) r$converged <- FALSE
+      r
+    }), "delta-method term")
+  expect_true(f$converged)
+  expect_equal(coef(f), coef(f_d))
+  expect_lt(f$vcov[2, 2], f_d$vcov[2, 2])
+  expect_lt(f$cbls$vcov[2, 2], f_d$cbls$vcov[2, 2])
+  # a refit that switches between a tau^2 solution and none is a jump, not
+  # a derivative
+  set.seed(9)
+  n <- 40
+  t <- rnorm(n, 20, 5)
+  dev <- rnorm(n, 0, 1.5)
+  id <- rep(seq_len(n), each = 3)
+  long <- data.frame(id = id, x = t[id] + rnorm(3 * n, 0, 0.6),
+                     y = 1 + 1.1 * t[id] + dev[id] + rnorm(3 * n, 0, 0.9))
+  g <- expect_no_warning(bls_reg(y ~ x, data = long, id = "id"))
+  solve_eq <- .bls_eq_solve
+  calls <- 0
+  expect_warning(g2 <- with_mocked_bindings(
+    bls_reg(y ~ x, data = long, id = "id"),
+    .bls_eq_solve = function(...) {
+      calls <<- calls + 1
+      if (calls == 1) return(solve_eq(...))
+      list(coef = c(NA_real_, NA_real_), tau2 = NA_real_, n_solutions = 0L)
+    }), "delta-method term")
+  expect_equal(coef(g2), coef(g))
+  expect_lt(g2$vcov[2, 2], g$vcov[2, 2])
 })

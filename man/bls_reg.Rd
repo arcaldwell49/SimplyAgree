@@ -201,7 +201,10 @@ the error variances are estimated (from replicates, or given with finite
 the derivatives of the coefficients with respect to the log error
 variances (and, with linked replicates, the error correlation), taken
 numerically over the whole fit, times their sampling covariance on their
-df. With only \code{error.ratio}, the error variances are scaled by \code{s^2}. In
+df. If one of these refits does not converge, or moves between having an
+equation-error solution and having none (a jump, not a derivative), the
+term is left out and a warning says so. With only \code{error.ratio}, the
+error variances are scaled by \code{s^2}. In
 simulations the default covered 0.93 to 0.98 where BivRegBLS's covered
 0.71 to 0.96, and the two agree when the true values are widely spread.
 The uncertainty in the estimated equation error (\code{tau^2}) and in the
@@ -271,7 +274,12 @@ methods (as \code{method_vc(tau = "common")}), so the error variances become
 dispersion is at most 1), solved jointly with the line by a root search
 over the slope, which stays stable when \code{tau^2} is large against the
 spread of the true values (a warning is given if more than one solution
-is found); the prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
+is found). When the line is barely determined (e.g. linked replicates
+whose shared occasion effects are larger than the spread of the true
+values), the equations can have no solution once \code{tau^2} is added: the
+lines are then fitted with measurement error only, \code{tau^2} estimated
+about the BLS line is used in the prediction intervals, and a warning is
+given. The prediction intervals include \code{tau^2} (on \code{n - 2} df). Equal deviations for
 both methods is an assumption: with two methods, how the equation error
 divides between them cannot be estimated.
 
