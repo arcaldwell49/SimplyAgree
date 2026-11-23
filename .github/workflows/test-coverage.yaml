@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Read by covr::codecov(); Codecov requires it for protected branches.
+      # Empty on fork PRs, which can still upload without a token.
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       # Measure coverage of the full suite, including tests skipped on CRAN
       NOT_CRAN: "true"
 

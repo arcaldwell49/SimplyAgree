@@ -10,11 +10,18 @@
 #' @return
 #' \describe{
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-#'   \item{\code{find_n}}{Find the smallest sample size at which the desired
-#'   power is achieved, for each combination of settings. If the power is not
-#'   reached within the sample sizes evaluated, `N` is `NA` (with a warning)
-#'   and the range of sample sizes must be expanded.}
+#'   \item{\code{find_n}}{A data frame with, for each combination of settings,
+#'   the smallest sample size evaluated at which the desired power is achieved
+#'   (`N`) and the power at that sample size. `N` is `NA`, with a warning, when
+#'   the power is not reached at the largest sample size evaluated (`power` is
+#'   then the highest power evaluated), or when the valid sample size immediately
+#'   below the smallest evaluated size also reaches the target (`power` is then
+#'   also `NA`). With gaps between the sample sizes, `N` can be larger
+#'   than the exact minimum. Use [power_agreement_limit()] (with `sigma` in
+#'   place of `SD`) to find the exact sample size directly.}
 #' }
+#'
+#' @seealso [blandPowerCurve()], [power_agreement_limit()]
 #'
 #' @name powerCurve-methods
 
@@ -31,25 +38,52 @@ find_n <- function(x, power = 0.8){
   powtest = power
   grp = intersect(c("delta", "conf.level", "agree.level", "m", "icc"),
                   names(x))
+  x = as.data.frame(x)
+  # powerCurve objects from before the clustered designs lack m and icc
+  if (!"m" %in% names(x)) x$m = 1
+  if (!"icc" %in% names(x)) x$icc = 0
 
-  # smallest N at which the target power is reached
+  # Smallest N at which the target power is reached. Power increases with N,
+  # so when the first N evaluated already reaches the target, N - 1 is checked
+  # to tell whether the minimum lies below the range.
   test = x %>%
-    as.data.frame() %>%
     group_by(across(all_of(grp))) %>%
     arrange(N, .by_group = TRUE) %>%
-    summarise(N = if (any(power >= powtest)) N[which(power >= powtest)[1]]
-                  else NA_real_,
-              power = if (any(power >= powtest)) power[which(power >= powtest)[1]]
-                      else max(power),
-              .groups = 'drop') %>%
-    relocate(power, .before = N)
+    summarise(
+      reached = any(power >= powtest),
+      below = reached && N[1] > 2 && power[1] >= powtest &&
+        .lu_power(n = N[1] - 1, delta = delta[1], mu = mu[1],
+                  sigma = SD[1], conf.level = conf.level[1],
+                  agree.level = agree.level[1], m = m[1],
+                  icc = icc[1]) >= powtest,
+      N = if (reached && !below) N[which(power >= powtest)[1]] else NA_real_,
+      power = if (!reached) max(power)
+              else if (below) NA_real_
+              else power[which(power >= powtest)[1]],
+      .groups = 'drop')
 
-  if (any(is.na(test$N))) {
-    warning("Desired power not reached for some settings (N is NA); ",
-            "the range of sample sizes must be expanded.")
+  settings = function(rows) {
+    vals = as.data.frame(test[rows, grp, drop = FALSE])
+    paste(apply(vals, 1, function(r) paste(grp, "=", trimws(r),
+                                             collapse = ", ")),
+          collapse = "; ")
+  }
+  if (any(!test$reached)) {
+    warning("Desired power not reached within the sample sizes evaluated ",
+            "(N is NA) for: ", settings(!test$reached), ". Increase the ",
+            "largest sample size, or use power_agreement_limit() to find ",
+            "N directly.", call. = FALSE)
+  }
+  if (any(test$below)) {
+    warning("The smallest sample size reaching the desired power is below ",
+            "the range evaluated (N is NA) for: ", settings(test$below),
+            ". Start the sample sizes lower, or use power_agreement_limit() ",
+            "to find N directly.", call. = FALSE)
   }
 
-  return(test)
+  test %>%
+    select(-"reached", -"below") %>%
+    relocate(power, .before = N)
 }
 
 

@@ -82,4 +82,4 @@ utils::globalVariables(c("boot_bias", "occ",
                          "id",
                          "index", "residual", "cusum", "lwr", "upr", "rank_x", "rank_y",
                          "the_int", "the_slope", "slope", "intercept", "xmin", "xmax",
-                         "ymin", "ymax"))
+                         "ymin", "ymax", "mu", "icc", "reached", "below"))
