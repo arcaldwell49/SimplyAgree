@@ -119,56 +119,68 @@ testthat::test_that("find_n gives NA and a warning when power is not reached", {
   pc <- blandPowerCurve(samplesizes = seq(10, 30, 1), mu = 0.5, SD = 2.5,
                         delta = c(7, 8))
   testthat::expect_warning(res <- find_n(pc, power = 0.8),
-                           "range of sample sizes must be expanded")
+                           "not reached .*delta = 7.*power_agreement_limit")
   testthat::expect_true(is.na(res$N[res$delta == 7]))
+  testthat::expect_equal(res$power[res$delta == 7],
+                         max(pc$power[pc$delta == 7]))
   testthat::expect_equal(res$N[res$delta == 8], 26)
 })
 
-testthat::test_that("find_n checks both ends of the sample size range", {
+testthat::test_that("find_n gives NA when the minimum is below the range", {
   curve <- function(n) blandPowerCurve(samplesizes = n, mu = 0, SD = 25,
-                                       delta = 60, conf.level = 0.95,
-                                       agree.level = 0.95)
+                                       delta = 60)
   pc <- curve(200:100)
   result <- find_n(pc)
   testthat::expect_equal(result$N, 162)
   testthat::expect_gte(result$power, 0.8)
   testthat::expect_lt(pc$power[pc$N == 161], 0.8)
 
-  testthat::expect_warning(low <- find_n(curve(10:100)),
-                           "range of sample sizes must be expanded")
-  testthat::expect_true(is.na(low$N))
   testthat::expect_warning(high <- find_n(curve(200:220)),
-                           "range of sample sizes must be expanded")
+                           "below the range .*power_agreement_limit")
   testthat::expect_true(is.na(high$N))
+  testthat::expect_true(is.na(high$power))
 
-  testthat::expect_equal(find_n(curve(162:170))$N, 162)
+  # the minimum itself as the first N is not flagged
   boundary <- curve(162:170)
+  testthat::expect_equal(find_n(boundary)$N, 162)
   testthat::expect_equal(find_n(boundary, power = boundary$power[1])$N, 162)
   testthat::expect_equal(find_n(curve(2:4), power = 0)$N, 2)
 
+  # powerCurve objects without the m and icc columns
   legacy <- boundary[, !names(boundary) %in% c("m", "icc")]
   testthat::expect_equal(find_n(legacy)$N, 162)
   testthat::expect_warning(high <- find_n(legacy[legacy$N > 162, ]),
-                           "range of sample sizes must be expanded")
+                           "below the range")
   testthat::expect_true(is.na(high$N))
 })
 
-testthat::test_that("find_n checks the lower bound for each design", {
-  pc <- blandPowerCurve(samplesizes = 50:100, mu = 0.5, SD = 2.5,
-                        delta = c(7, 8))
-  testthat::expect_warning(result <- find_n(pc),
-                           "range of sample sizes must be expanded")
-  testthat::expect_equal(result$N[result$delta == 7], 60)
-  testthat::expect_true(is.na(result$N[result$delta == 8]))
+testthat::test_that("find_n warns separately for each end of the range", {
+  pc <- blandPowerCurve(samplesizes = 50:55, mu = 0.5, SD = 2.5,
+                        delta = c(6, 8))
+  w <- testthat::capture_warnings(result <- find_n(pc))
+  testthat::expect_length(w, 2)
+  testthat::expect_match(w[1], "not reached .*delta = 6")
+  testthat::expect_match(w[2], "below the range .*delta = 8")
+  testthat::expect_true(all(is.na(result$N)))
+})
+
+testthat::test_that("find_n matches power_agreement_limit", {
+  pc <- blandPowerCurve(samplesizes = 10:120, mu = 0.5, SD = 2.5, delta = 7)
+  testthat::expect_equal(find_n(pc)$N,
+                         power_agreement_limit(delta = 7, mu = 0.5,
+                                               sigma = 2.5, power = 0.8)$n)
 
   clustered <- blandPowerCurve(samplesizes = 20:80, mu = 0.5, SD = 2.5,
                                delta = 7, m = 3, icc = 0.5)
   optimum <- find_n(clustered)$N
-  boundary <- clustered[clustered$N >= optimum, ]
-  testthat::expect_equal(find_n(boundary)$N, optimum)
-  high <- clustered[clustered$N > optimum, ]
-  testthat::expect_warning(result <- find_n(high),
-                           "range of sample sizes must be expanded")
+  testthat::expect_equal(optimum,
+                         power_agreement_limit(delta = 7, mu = 0.5,
+                                               sigma = 2.5, power = 0.8,
+                                               m = 3, icc = 0.5)$n)
+  testthat::expect_equal(find_n(clustered[clustered$N >= optimum, ])$N,
+                         optimum)
+  testthat::expect_warning(result <- find_n(clustered[clustered$N > optimum, ]),
+                           "below the range")
   testthat::expect_true(is.na(result$N))
 })
 
