@@ -24,8 +24,8 @@ for details.
 \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
 \item{\code{find_n}}{Find the smallest sample size at which the desired
 power is achieved, for each combination of settings. If the power is not
-reached within the sample sizes evaluated, \code{N} is \code{NA} (with a warning)
-and the range of sample sizes must be expanded.}
+reached, or a smaller sample size already reaches it, \code{N} is \code{NA} (with a
+warning) and the range of sample sizes must be expanded.}
 }
 }
 \description{

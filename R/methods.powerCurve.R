@@ -12,8 +12,8 @@
 #'   \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
 #'   \item{\code{find_n}}{Find the smallest sample size at which the desired
 #'   power is achieved, for each combination of settings. If the power is not
-#'   reached within the sample sizes evaluated, `N` is `NA` (with a warning)
-#'   and the range of sample sizes must be expanded.}
+#'   reached, or a smaller sample size already reaches it, `N` is `NA` (with a
+#'   warning) and the range of sample sizes must be expanded.}
 #' }
 #'
 #' @name powerCurve-methods
@@ -28,16 +28,26 @@
 
 find_n <- function(x, power = 0.8){
   if(!inherits(x,"powerCurve")) warning("input is not a powerCurve object")
+  .data = NULL
   powtest = power
   grp = intersect(c("delta", "conf.level", "agree.level", "m", "icc"),
                   names(x))
+  has_m = "m" %in% names(x)
+  has_icc = "icc" %in% names(x)
 
   # smallest N at which the target power is reached
   test = x %>%
     as.data.frame() %>%
     group_by(across(all_of(grp))) %>%
     arrange(N, .by_group = TRUE) %>%
-    summarise(N = if (any(power >= powtest)) N[which(power >= powtest)[1]]
+    mutate(.below_range = if (N[1] > 2 && power[1] >= powtest) {
+      .lu_power(n = N[1] - 1, delta = delta[1], mu = .data$mu[1], sigma = SD[1],
+                conf.level = conf.level[1], agree.level = agree.level[1],
+                m = if (has_m) m[1] else 1,
+                icc = if (has_icc) .data$icc[1] else 0) >= powtest
+    } else FALSE) %>%
+    summarise(N = if (any(power >= powtest) && !.data$.below_range[1])
+                    N[which(power >= powtest)[1]]
                   else NA_real_,
               power = if (any(power >= powtest)) power[which(power >= powtest)[1]]
                       else max(power),
@@ -45,7 +55,7 @@ find_n <- function(x, power = 0.8){
     relocate(power, .before = N)
 
   if (any(is.na(test$N))) {
-    warning("Desired power not reached for some settings (N is NA); ",
+    warning("Desired sample size is outside the evaluated range for some settings (N is NA); ",
             "the range of sample sizes must be expanded.")
   }
 

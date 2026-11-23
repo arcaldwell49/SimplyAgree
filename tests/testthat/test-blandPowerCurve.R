@@ -124,6 +124,54 @@ testthat::test_that("find_n gives NA and a warning when power is not reached", {
   testthat::expect_equal(res$N[res$delta == 8], 26)
 })
 
+testthat::test_that("find_n checks both ends of the sample size range", {
+  curve <- function(n) blandPowerCurve(samplesizes = n, mu = 0, SD = 25,
+                                       delta = 60, conf.level = 0.95,
+                                       agree.level = 0.95)
+  pc <- curve(200:100)
+  result <- find_n(pc)
+  testthat::expect_equal(result$N, 162)
+  testthat::expect_gte(result$power, 0.8)
+  testthat::expect_lt(pc$power[pc$N == 161], 0.8)
+
+  testthat::expect_warning(low <- find_n(curve(10:100)),
+                           "range of sample sizes must be expanded")
+  testthat::expect_true(is.na(low$N))
+  testthat::expect_warning(high <- find_n(curve(200:220)),
+                           "range of sample sizes must be expanded")
+  testthat::expect_true(is.na(high$N))
+
+  testthat::expect_equal(find_n(curve(162:170))$N, 162)
+  boundary <- curve(162:170)
+  testthat::expect_equal(find_n(boundary, power = boundary$power[1])$N, 162)
+  testthat::expect_equal(find_n(curve(2:4), power = 0)$N, 2)
+
+  legacy <- boundary[, !names(boundary) %in% c("m", "icc")]
+  testthat::expect_equal(find_n(legacy)$N, 162)
+  testthat::expect_warning(high <- find_n(legacy[legacy$N > 162, ]),
+                           "range of sample sizes must be expanded")
+  testthat::expect_true(is.na(high$N))
+})
+
+testthat::test_that("find_n checks the lower bound for each design", {
+  pc <- blandPowerCurve(samplesizes = 50:100, mu = 0.5, SD = 2.5,
+                        delta = c(7, 8))
+  testthat::expect_warning(result <- find_n(pc),
+                           "range of sample sizes must be expanded")
+  testthat::expect_equal(result$N[result$delta == 7], 60)
+  testthat::expect_true(is.na(result$N[result$delta == 8]))
+
+  clustered <- blandPowerCurve(samplesizes = 20:80, mu = 0.5, SD = 2.5,
+                               delta = 7, m = 3, icc = 0.5)
+  optimum <- find_n(clustered)$N
+  boundary <- clustered[clustered$N >= optimum, ]
+  testthat::expect_equal(find_n(boundary)$N, optimum)
+  high <- clustered[clustered$N > optimum, ]
+  testthat::expect_warning(result <- find_n(high),
+                           "range of sample sizes must be expanded")
+  testthat::expect_true(is.na(result$N))
+})
+
 testthat::test_that("blandPowerCurve handles clustered designs", {
   pc1 <- blandPowerCurve(samplesizes = 10:40, mu = 0.5, SD = 2.5, delta = 7)
   pcm1 <- blandPowerCurve(samplesizes = 10:40, mu = 0.5, SD = 2.5, delta = 7,
