@@ -4,6 +4,9 @@
 
 ### Bug fixes
 
+- [`find_n()`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
+  now returns `NA` with a warning when the minimum sample size is below
+  the range evaluated, instead of the first `N` in the range.
 - **Nested limits of agreement**
   (`agreement_limit(data_type = "nest")`): the confidence bounds of the
   limits were too narrow. The bias variance and the variance piece with

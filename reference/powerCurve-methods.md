@@ -37,7 +37,19 @@ plot(x, ...)
 
 - `find_n`:
 
-  Find the smallest sample size at which the desired power is achieved,
-  for each combination of settings. If the power is not reached within
-  the sample sizes evaluated, `N` is `NA` (with a warning) and the range
-  of sample sizes must be expanded.
+  A data frame with, for each combination of settings, the smallest
+  sample size evaluated at which the desired power is achieved (`N`) and
+  the power at that sample size. `N` is `NA`, with a warning, when the
+  power is not reached at the largest sample size evaluated (`power` is
+  then the highest power evaluated), or when the smallest sample size
+  evaluated already reaches it, so the minimum lies below the range
+  (`power` is then also `NA`). With gaps between the sample sizes, `N`
+  can be larger than the exact minimum. Use
+  [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md)
+  (with `sigma` in place of `SD`) to find the exact sample size
+  directly.
+
+## See also
+
+[`blandPowerCurve()`](https://aaroncaldwell.us/SimplyAgree/reference/blandPowerCurve.md),
+[`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md)
