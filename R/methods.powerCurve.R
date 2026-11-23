@@ -14,9 +14,9 @@
 #'   the smallest sample size evaluated at which the desired power is achieved
 #'   (`N`) and the power at that sample size. `N` is `NA`, with a warning, when
 #'   the power is not reached at the largest sample size evaluated (`power` is
-#'   then the highest power evaluated), or when the smallest sample size
-#'   evaluated already reaches it, so the minimum lies below the range (`power`
-#'   is then also `NA`). With gaps between the sample sizes, `N` can be larger
+#'   then the highest power evaluated), or when the valid sample size immediately
+#'   below the smallest evaluated size also reaches the target (`power` is then
+#'   also `NA`). With gaps between the sample sizes, `N` can be larger
 #'   than the exact minimum. Use [power_agreement_limit()] (with `sigma` in
 #'   place of `SD`) to find the exact sample size directly.}
 #' }
