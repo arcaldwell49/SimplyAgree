@@ -15,7 +15,7 @@
 #' @param log_tf Calculate limits of agreement using log-transformed data.
 #' @param log_tf_display The type of presentation for log-transformed results. The differences between methods can be displayed as a "ratio" or "sympercent".
 #' @param data_type The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).
-#' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).
+#' @param loa_calc The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandaltman" (Bland-Altman method).
 #' @param bound_type Which claim the confidence bounds of the limits of agreement (`lower_loa_ci`/`upper_loa_ci`) support. "iu" (default) gives a one-sided 1 - `alpha` bound on each limit (the outer ends of 1 - 2 * `alpha` two-sided intervals). These give an intersection-union test, at level `alpha`, of whether both limits of agreement lie within a maximal allowable difference, but are not a joint 1 - `alpha` interval for the limits. "joint" gives a one-sided 1 - `alpha`/2 bound on each limit (the outer ends of 1 - `alpha` two-sided intervals, the Bland-Altman convention), with at least 1 - `alpha` joint confidence for both limits. See details.
 #' @param lmer_df Degrees of freedom method, only matters for if data_type is "nest". Default is "satterthwaite". The "asymptotic" method is faster but more liberal.
 #' @param lmer_limit Sample size limit for degrees of freedom method. If number of observations exceeds this limit, then the "asymptotic" method is utilized.
@@ -23,7 +23,7 @@
 #'
 #'   - `loa`: A data frame containing the Limits of Agreement.
 #'   - `call`:The matched call.
-#' @details The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Atlman (1986 & 1999).
+#' @details The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Altman (1986 & 1999).
 #' The `loa_calc` allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (`loa_calc = "blandaltman"`),
 #' or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (`loa_calc = "mover"`).
 #'

@@ -231,7 +231,7 @@
 #' VCA (variance components for deeper nesting and
 #' laboratory precision designs), rptR (repeatability for non-Gaussian
 #' data), gtheoryr (crossed multi-facet G-studies and D-study design
-#' optimisation), SixSigma (`ss.rr()`, gauge R&R summaries) and MethComp
+#' optimization), SixSigma (`ss.rr()`, gauge R&R summaries) and MethComp
 #' (method comparison with linked replicates and method-specific variances)
 #' fit related models. This function adds intervals and tests for the
 #' coefficients and the intra- and inter-rater SEMs, and the link to

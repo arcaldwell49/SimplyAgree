@@ -32,7 +32,7 @@ agreement_limit(
 
 \item{data_type}{The type of data structure. Options include "simple" (all independent data points), "nest" (nested data) and "reps" (replicated data points).}
 
-\item{loa_calc}{The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandlatman" (Bland-Altman method).}
+\item{loa_calc}{The method by which the limits of agreement confidence intervals are calculated. Options are "mover" (Methods of Recovering Variances method) or "blandaltman" (Bland-Altman method).}
 
 \item{bound_type}{Which claim the confidence bounds of the limits of agreement (\code{lower_loa_ci}/\code{upper_loa_ci}) support. "iu" (default) gives a one-sided 1 - \code{alpha} bound on each limit (the outer ends of 1 - 2 * \code{alpha} two-sided intervals). These give an intersection-union test, at level \code{alpha}, of whether both limits of agreement lie within a maximal allowable difference, but are not a joint 1 - \code{alpha} interval for the limits. "joint" gives a one-sided 1 - \code{alpha}/2 bound on each limit (the outer ends of 1 - \code{alpha} two-sided intervals, the Bland-Altman convention), with at least 1 - \code{alpha} joint confidence for both limits. See details.}
 
@@ -64,7 +64,7 @@ A function for calculating for Bland-Altman limits of agreement based on the dif
 Please note that the package developer recommends reporting/using tolerance limits (see \code{"tolerance_limit"} function).
 }
 \details{
-The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Atlman (1986 & 1999).
+The limits of agreement (LoA) are calculated in this function are based on the method originally detailed by Bland & Altman (1986 & 1999).
 The \code{loa_calc} allow users to specify the calculative method for the LoA which can be based on Bland-Altman (1999) (\code{loa_calc = "blandaltman"}),
 or by the more accurate MOVER method of Zou (2013) and Donner & Zou (2012) (\code{loa_calc = "mover"}).
 

@@ -44,7 +44,7 @@ measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. Wi
 cannot be solved for. See Details.}
 
 \item{missing}{The expected proportion of measurements (subject-by-item
-cells) that will be missing, analysed with \code{icc_test(method = "reml")}.
+cells) that will be missing, analyzed with \code{icc_test(method = "reml")}.
 The default, 0, gives the exact complete-data calculation; values above
 0 give an approximation (see Details). For subjects who will be lost
 entirely, reduce \code{n} instead.}

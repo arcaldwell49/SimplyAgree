@@ -48,7 +48,7 @@
 #' rater classifies at random and is stable in that situation (Gwet, 2008).
 #' Krippendorff's alpha also corrects for the number of pairs.
 #'
-#' Standard errors come from Gwet's (2008, 2014) linearisation
+#' Standard errors come from Gwet's (2008, 2014) linearization
 #' over subjects, which treats the subjects as a random sample and the raters
 #' as fixed. The interval and test use the t distribution with n - 1 degrees
 #' of freedom (n subjects; for Krippendorff's alpha, those with 2 or more

@@ -27,12 +27,12 @@ otherwise. See Details.}
 \item{x, object}{An object of class \code{reli_htest}.}
 
 \item{type}{For \code{plot()}, the plot to draw: \code{"profile"} (default), each
-subject's measurements across the items in grey with the item means and
+subject's measurements across the items in gray with the item means and
 their 95\% confidence intervals (adjusted for subjects when measurements
 are missing); \code{"subjects"}, the subjects ordered by their mean, with
-each subject's measurements, coloured by item, and their range, which
+each subject's measurements, colored by item, and their range, which
 compares the spread between subjects with the scatter within subjects
-(what the ICC summarises); \code{"items"}, the deviation of each measurement
+(what the ICC summarizes); \code{"items"}, the deviation of each measurement
 from its subject's mean, by item, which shows systematic differences
 between items (error for an agreement ICC, but not for a consistency
 ICC); \code{"pairs"}, each pair of items plotted against each other with

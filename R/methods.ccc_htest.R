@@ -11,7 +11,7 @@
 #'   [reli_htest-methods]).
 #' @param type For `plot()`: `"identity"` (default), the measurements of `y`
 #'   against `x` with the line of identity (perfect concordance) and a Deming
-#'   regression line, coloured by subject for replicate or nested data; or
+#'   regression line, colored by subject for replicate or nested data; or
 #'   `"ba"`, the Bland-Altman plot of the differences against the means
 #'   (from [agreement_limit()] with the same data type).
 #' @param ... Not used.
@@ -28,7 +28,7 @@
 #' (as for [agreement_limit()] with the same data), and the linearity of the
 #' relationship between the methods: the residuals of `y` regressed on `x`
 #' against the fitted values, with a test of a quadratic term (Ramsey's
-#' RESET test). The CCC, through its precision component, summarises a
+#' RESET test). The CCC, through its precision component, summarizes a
 #' linear relationship. Proportional bias is not shown: a slope different
 #' from 1 between the methods lowers the bias correction factor C_b, so it
 #' is part of what the CCC measures rather than a violation of its
@@ -127,7 +127,7 @@ check.ccc_htest <- function(x, ...) {
 }
 
 # Residuals of y on x against the fitted values, with a quadratic (RESET)
-# test: the CCC and its precision component (Pearson r) summarise a linear
+# test: the CCC and its precision component (Pearson r) summarize a linear
 # relationship between the methods.
 .plot_ccc_linearity <- function(x) {
   d <- x$data[stats::complete.cases(x$data[c("x", "y")]), , drop = FALSE]

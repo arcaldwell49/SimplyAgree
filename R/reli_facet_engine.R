@@ -307,7 +307,7 @@
 # (occasions) and r_avg (repeats), and scale ("raw", "log", "mean").
 #
 # Which facets are fixed (part of the subject's universe score) and which
-# are generalised over (random):
+# are generalized over (random):
 #   intra:   the item fixed; occasions and repeats random
 #   inter:   the occasion fixed (crossed design); items and repeats random
 #   overall: items, occasions and repeats random
@@ -478,7 +478,7 @@
 #'
 #' The positive and negative parts of the combination are each treated as a
 #' scaled chi-square with Satterthwaite df, so their ratio is approximately
-#' F (the device of McGraw & Wong's ICC(A,1) test). Large values favour a
+#' F (the device of McGraw & Wong's ICC(A,1) test). Large values favor a
 #' positive combination.
 #' @noRd
 .satterthwaite_f <- function(d, ms, dfs) {
@@ -686,7 +686,7 @@
 #' Normal-theory variance of the grand mean
 #'
 #' E(MS_p) / (n c_p) collects every effect with subjects and the repeats;
-#' each effect without subjects that is generalised over (random items or
+#' each effect without subjects that is generalized over (random items or
 #' occasions counted as error) adds sigma2_T / (its observed level
 #' combinations), with negative estimates set to 0.
 #' @noRd

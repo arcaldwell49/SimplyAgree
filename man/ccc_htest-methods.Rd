@@ -24,7 +24,7 @@
 
 \item{type}{For \code{plot()}: \code{"identity"} (default), the measurements of \code{y}
 against \code{x} with the line of identity (perfect concordance) and a Deming
-regression line, coloured by subject for replicate or nested data; or
+regression line, colored by subject for replicate or nested data; or
 \code{"ba"}, the Bland-Altman plot of the differences against the means
 (from \code{\link[=agreement_limit]{agreement_limit()}} with the same data type).}
 }
@@ -56,7 +56,7 @@ CCC = r x C_b. A low CCC can come from either.
 (as for \code{\link[=agreement_limit]{agreement_limit()}} with the same data), and the linearity of the
 relationship between the methods: the residuals of \code{y} regressed on \code{x}
 against the fitted values, with a test of a quadratic term (Ramsey's
-RESET test). The CCC, through its precision component, summarises a
+RESET test). The CCC, through its precision component, summarizes a
 linear relationship. Proportional bias is not shown: a slope different
 from 1 between the methods lowers the bias correction factor C_b, so it
 is part of what the CCC measures rather than a violation of its

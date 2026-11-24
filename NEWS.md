@@ -50,7 +50,7 @@ Several fixes change results from earlier versions:
   - new `bound_type`, `model = "lme"` (including nested `id`), and `conf_level`;
   - corrected analytic limits for clustered data, and a fixed, faster bootstrap (`tol_method = "boot_cal"`, formerly `"perc"`);
   - its returned `model` now works with `update()` and `emmeans()`.
-- `loa_lme()` is deprecated in favour of `tolerance_limit(model = "lme")`.
+- `loa_lme()` is deprecated in favor of `tolerance_limit(model = "lme")`.
 - Fixed plots failing after saving and reloading (e.g. in jamovi; #76), and `plot()`/`print()` failing when settings were expressions (#50).
 
 ## Agreement power and sample size
@@ -130,7 +130,7 @@ Several fixes change results from earlier versions:
 - Added agreement coefficient function (`agree_coef`).
 - Added `loa_lme` function
   - `loa_mixed` now deprecated
-  - `loa_lme` allows for heterogenous variance by condition
+  - `loa_lme` allows for heterogeneous variance by condition
   - New function is faster and relies on parametric bootstrap
 - Assumptions checks are added for all "simple-agree" class results
   - Checks include: normality, heteroscedasticity, and proportional bias

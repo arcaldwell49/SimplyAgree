@@ -94,7 +94,7 @@ draws that region, with the ideal point marked as enclosed or not.
 
 For a Deming fit with error ratio \eqn{\lambda} and weights \eqn{w_i}, let
 \deqn{S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2},}
-the weighted sum of squares that Deming regression minimises (Sadler, 2010,
+the weighted sum of squares that Deming regression minimizes (Sadler, 2010,
 Eq. 11; Draper & Smith). With \eqn{\hat S} its minimum, the test of
 \eqn{(a_0, b_0)} is
 \deqn{F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat S / (n - 2)}}

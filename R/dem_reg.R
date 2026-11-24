@@ -22,7 +22,7 @@
 #'   This is needed for methods like `plot()`, `fitted()`, `residuals()`, and `predict()` to work
 #'   without supplying `data`. If FALSE, the model frame is not stored (saves memory for large datasets),
 #'   but these methods will require a `data` argument.
-#' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.
+#' @param keep_data Logical indicator (TRUE/FALSE). If TRUE, the jackknife samples are returned; default is FALSE.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @details
@@ -71,7 +71,7 @@
 #'   - `weighted`: Whether weighted regression was used.
 #'   - `weights`: Weights used in fitting.
 #'   - `conf.level`: Confidence level used.
-#'   - `resamples`: List containing resamples from jacknife procedure (if keep_data = TRUE).
+#'   - `resamples`: List containing resamples from jackknife procedure (if keep_data = TRUE).
 #'
 #' @examples
 #' # Peak flow: mini vs Wright meter (Bland & Altman, 1986)

@@ -46,7 +46,7 @@ This is needed for methods like \code{plot()}, \code{fitted()}, \code{residuals(
 without supplying \code{data}. If FALSE, the model frame is not stored (saves memory for large datasets),
 but these methods will require a \code{data} argument.}
 
-\item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are returned; default is FALSE.}
+\item{keep_data}{Logical indicator (TRUE/FALSE). If TRUE, the jackknife samples are returned; default is FALSE.}
 
 \item{...}{Additional arguments (currently unused).}
 }
@@ -71,7 +71,7 @@ The function returns a simple_eiv (eiv meaning "error in variables") object with
 \item \code{weighted}: Whether weighted regression was used.
 \item \code{weights}: Weights used in fitting.
 \item \code{conf.level}: Confidence level used.
-\item \code{resamples}: List containing resamples from jacknife procedure (if keep_data = TRUE).
+\item \code{resamples}: List containing resamples from jackknife procedure (if keep_data = TRUE).
 }
 }
 \description{

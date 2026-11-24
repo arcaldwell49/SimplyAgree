@@ -27,7 +27,7 @@
 #'   `"average"`, the ICC values are on the average-measure scale and `k`
 #'   cannot be solved for. See Details.
 #' @param missing The expected proportion of measurements (subject-by-item
-#'   cells) that will be missing, analysed with `icc_test(method = "reml")`.
+#'   cells) that will be missing, analyzed with `icc_test(method = "reml")`.
 #'   The default, 0, gives the exact complete-data calculation; values above
 #'   0 give an approximation (see Details). For subjects who will be lost
 #'   entirely, reduce `n` instead.
@@ -280,7 +280,7 @@ power_icc <- function(n = NULL,
 #'   lower limit). Zou (2012) uses the half-width \eqn{\omega}:
 #'   `width = 2 * omega`.
 #' @param conf.level Confidence level of the interval (default 0.95).
-#' @param assurance The probability that the realised interval is no wider
+#' @param assurance The probability that the realized interval is no wider
 #'   than `width`. The default, 0.5, plans for the median width.
 #' @param method `"exact"` (default) computes the assurance from the exact
 #'   distribution of the interval width. `"approximate"` uses the closed form
@@ -293,7 +293,7 @@ power_icc <- function(n = NULL,
 #' scaled central F variable for any true ICC (see [power_icc()]). The
 #' assurance is therefore the probability, under that distribution, of the F
 #' values whose interval is no wider than `width`. The width is largest at
-#' moderate F and shrinks towards both ends, so this set has two parts; the
+#' moderate F and shrinks toward both ends, so this set has two parts; the
 #' lower part (estimates near \eqn{-1/(k-1)}) is negligible in realistic
 #' designs. Mondal et al. (2024) recommend this interval for the one-way ICC.
 #'
@@ -495,7 +495,7 @@ precision_icc <- function(n = NULL,
     return(character())
   }
   paste0("approximate: ", format(100 * missing), "% of measurements missing ",
-         "at random, analysed with icc_test(method = \"reml\")")
+         "at random, analyzed with icc_test(method = \"reml\")")
 }
 
 # The average-measure ICC is defined for the mean of k measurements, so k is

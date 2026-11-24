@@ -334,9 +334,9 @@ The table summarizes the coverage of the analytic limits in our simulations (95%
 
 ### Model assumptions
 
-A few modelling choices deserve attention (see the "Model assumptions" section of `?tolerance_limit` for details):
+A few modeling choices deserve attention (see the "Model assumptions" section of `?tolerance_limit` for details):
 
-- With the default marginal model (`model = "gls"`), the autoregressive correlation structures (`cor_type = "ar1"` or `"car1"`) have no persistent subject effect and the correlation between measurements from the same subject decays towards zero over time. If subjects have a persistent bias of their own, these structures understate the uncertainty in the bias and give limits that are too narrow. Setting `model = "lme"` fits a random intercept for each subject and adds the serial correlation to the residuals, which keeps the persistent subject effect (see the simulations above).
+- With the default marginal model (`model = "gls"`), the autoregressive correlation structures (`cor_type = "ar1"` or `"car1"`) have no persistent subject effect and the correlation between measurements from the same subject decays toward zero over time. If subjects have a persistent bias of their own, these structures understate the uncertainty in the bias and give limits that are too narrow. Setting `model = "lme"` fits a random intercept for each subject and adds the serial correlation to the residuals, which keeps the persistent subject effect (see the simulations above).
 - With `model = "gls"`, compound symmetry, and a variance function (e.g., from `condition`), the between-subject variance scales with the residual standard deviation of each condition. With `model = "lme"`, the variance function applies to the residuals only, and the between-subject variance is shared across conditions.
 - With `model = "lme"`, `id` can name two nested levels, outer level first (e.g., `id = c("golfer", "club")` for shots with several clubs per golfer). Avoid setting `id` to the inner level alone (e.g., a golfer-by-club identifier): that drops the correlation across clubs within a golfer and gives limits that are too narrow. More than two levels are not supported.
 - A slope of the differences on the average (`prop_bias = TRUE`) can appear without any true proportional bias when the two methods have unequal measurement error variances [@bland1999].
@@ -720,7 +720,7 @@ The assumptions of normality, heteroscedasticity, and proportional bias can all 
 
 The function will provide 3 plots: Q-Q normality plot, standardized residuals plot, and proportional bias plot.
 
-All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
+All 3 plots will have a statistical test in the bottom right corner^[No test is included for proportional bias for `tolerance_limit` results at this time.]. The Shapiro-Wilk test is included for the normality plot, the Breusch-Pagan test for heterogeneity, and the test for linear slope on the residuals plot. Please note that there is no formal test of proportional bias for the tolerance limits, but a plot is still included for visual checks.
 
 ## An Example
 
@@ -747,7 +747,7 @@ For either `agreement_limit` or `tolerance_limit` functions, this can be accompl
 When this is set to TRUE, then the proportional bias adjusted model is utilized. 
 Plots and checks of the data should always be inspected.
 
-```{r, fig.alt = c("Tolerance limits for the reps data that change with the mean to account for proportional bias.", "Diagnostic panels for tolerance_limit with proportional bias modelled; the proportional bias panel is now flat.")}
+```{r, fig.alt = c("Tolerance limits for the reps data that change with the mean to account for proportional bias.", "Diagnostic panels for tolerance_limit with proportional bias modeled; the proportional bias panel is now flat.")}
 
 test_tol = tolerance_limit(x = "x",
                            y = "y",

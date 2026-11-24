@@ -75,7 +75,7 @@
 #' \eqn{\kappa_m} within each group, with an interval for their difference,
 #' and the test is the likelihood ratio test of a common variance. For rater
 #' groups, `fit$subgroups` also gives \eqn{\kappa_m} between a rater from
-#' each group; chance agreement is then minimised numerically over common
+#' each group; chance agreement is then minimized numerically over common
 #' thresholds, and the fixed effect matters. Subgroup intervals are formed
 #' on the logit scale.
 #'
@@ -342,7 +342,7 @@ ord_kappa_test <- function(x = NULL,
 }
 
 #' Probability that two raters agree on a subject, given the thresholds on
-#' the latent scale standardised by the total SD
+#' the latent scale standardized by the total SD
 #' @noRd
 .ordk_agreement <- function(q, rho) {
   q <- c(-Inf, q, Inf)
@@ -356,7 +356,7 @@ ord_kappa_test <- function(x = NULL,
 }
 
 #' Model-based kappa (Nelson & Edwards, 2015) from rho and the number of
-#' categories, with the thresholds that minimise chance agreement
+#' categories, with the thresholds that minimize chance agreement
 #' @noRd
 .kappa_m <- function(rho, C) {
   if (rho <= 0) return(0)
@@ -430,7 +430,7 @@ ord_kappa_test <- function(x = NULL,
   out
 }
 
-#' Chance agreement minimised over common thresholds for two raters whose
+#' Chance agreement minimized over common thresholds for two raters whose
 #' latent variables have means k1, k2 and SDs s1, s2 (Nelson et al., 2017)
 #' @noRd
 .ordk_pc_min <- function(C, k1, k2, s1, s2) {

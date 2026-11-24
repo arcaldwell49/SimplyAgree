@@ -134,8 +134,8 @@ proportions when they are very unequal.
 
 With an ordered scale, a disagreement between 3 and 4 is less serious than
 one between 1 and 4. `weights` gives partial credit to near misses. The
-common choices are quadratic weights, which penalise a disagreement by the
-square of its distance, and linear weights, which penalise it in proportion
+common choices are quadratic weights, which penalize a disagreement by the
+square of its distance, and linear weights, which penalize it in proportion
 to the distance [@gwet]. Weighted Gwet's AC1 is called AC2.
 
 ```{r}
@@ -315,7 +315,7 @@ difference, and the p-value is from a likelihood ratio test of equal rater
 variances in the two groups. `fit$subgroups` also gives \(\kappa_m\) between
 a rater from each group:
 
-```{r, eval = has_ordinal, fig.alt = "Estimated effect of each rater on the latent scale with intervals, coloured by experience group; a dashed line at zero marks the typical rater."}
+```{r, eval = has_ordinal, fig.alt = "Estimated effect of each rater on the latent scale with intervals, colored by experience group; a dashed line at zero marks the typical rater."}
 res_g$fit$subgroups
 summary(res_g)
 plot(res_g, type = "effects")

@@ -273,7 +273,7 @@ pass the package’s test suite before release. I am responsible for the
 correctness of this package. If you find an error, please [open an
 issue](https://github.com/arcaldwell49/SimplyAgree/issues).
 
-## Acknowledgements
+## Acknowledgments
 
 Logo artwork courtesy of Chelsea Parlett Pelleriti.
 

@@ -122,7 +122,7 @@
             class = "cac_prep")
 }
 
-# Variance of a coefficient from its subject-level linearisation (Gwet, 2008).
+# Variance of a coefficient from its subject-level linearization (Gwet, 2008).
 .cac_se <- function(ivec, centre, n) {
   if (n < 2) {
     return(NA_real_)

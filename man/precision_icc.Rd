@@ -32,7 +32,7 @@ lower limit). Zou (2012) uses the half-width \eqn{\omega}:
 
 \item{conf.level}{Confidence level of the interval (default 0.95).}
 
-\item{assurance}{The probability that the realised interval is no wider
+\item{assurance}{The probability that the realized interval is no wider
 than \code{width}. The default, 0.5, plans for the median width.}
 
 \item{model}{\code{"oneway"} (default) or \code{"twoway"}. \code{"twoway"} means the
@@ -46,7 +46,7 @@ measurements (ICC(k) or ICC(C,k)), as in \code{\link[=icc_test]{icc_test()}}. Wi
 cannot be solved for. See Details.}
 
 \item{missing}{The expected proportion of measurements (subject-by-item
-cells) that will be missing, analysed with \code{icc_test(method = "reml")}.
+cells) that will be missing, analyzed with \code{icc_test(method = "reml")}.
 The default, 0, gives the exact complete-data calculation; values above
 0 give an approximation (see Details). For subjects who will be lost
 entirely, reduce \code{n} instead.}
@@ -77,7 +77,7 @@ two-way consistency ICC (Searle's interval; Shrout & Fleiss, 1979; McGraw
 scaled central F variable for any true ICC (see \code{\link[=power_icc]{power_icc()}}). The
 assurance is therefore the probability, under that distribution, of the F
 values whose interval is no wider than \code{width}. The width is largest at
-moderate F and shrinks towards both ends, so this set has two parts; the
+moderate F and shrinks toward both ends, so this set has two parts; the
 lower part (estimates near \eqn{-1/(k-1)}) is negligible in realistic
 designs. Mondal et al. (2024) recommend this interval for the one-way ICC.
 

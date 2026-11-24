@@ -462,7 +462,7 @@
 }
 
 # p-value from a statistic whose distribution function is `cdf`; large values
-# favour "greater".
+# favor "greater".
 .p_from_dist <- function(statistic, alternative, cdf) {
   lower <- cdf(statistic)
   switch(alternative,
@@ -622,7 +622,7 @@
 
 #' Per-subject influence on the mean squares
 #'
-#' Returns an n x 3 matrix with columns MSB, MSE and MSW, each centred to
+#' Returns an n x 3 matrix with columns MSB, MSE and MSW, each centered to
 #' mean zero. Complete data: exact influence of each subject on the ANOVA mean
 #' squares. Missing data (REML): moment approximation from each subject's
 #' observed cells, adjusted for the estimated intercept and item effects.

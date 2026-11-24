@@ -147,7 +147,7 @@ therefore an error. When the error variances differ, use \code{\link[=dem_reg]{d
 the appropriate \code{error.ratio} (or \code{id}).
 
 With \code{id}, replicate measurements are averaged within each subject and the
-subject means are analysed.
+subject means are analyzed.
 }
 
 \subsection{Weighting}{

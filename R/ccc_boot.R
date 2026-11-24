@@ -88,7 +88,7 @@
 #'
 #' As .ccc_vc(): the subject:method term only when some subject has
 #' replicates of a method, s2_method = (b^2 - var(b)) / 2 truncated at 0.
-#' The REML criterion is minimised over th >= 0 with BOBYQA from `start`
+#' The REML criterion is minimized over th >= 0 with BOBYQA from `start`
 #' (lme4's optimizer and default start). Returns the CCC with the optimum
 #' `theta` as an attribute.
 #' @noRd

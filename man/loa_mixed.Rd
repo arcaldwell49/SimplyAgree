@@ -44,7 +44,7 @@ Returns single list with the results of the agreement analysis.
 \item \code{var_comp}: Table of variance components
 \item \code{loa}: a data frame of the limits of agreement including the average difference between the two sets of measurements, the standard deviation of the difference between the two sets of measurements and the lower and upper confidence limits of the difference between the two sets of measurements.
 \item \code{h0_test}: Decision from hypothesis test.
-\item \code{bland_alt.plot}: Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; grey box is the acceptable limits (delta). If the red lines are within the grey box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.
+\item \code{bland_alt.plot}: Simple Bland-Altman plot. Red line are the upper and lower bounds for shieh test; gray box is the acceptable limits (delta). If the red lines are within the gray box then the shieh test should indicate 'reject h0', or to reject the null hypothesis that this not acceptable agreement between x & y.
 \item \code{conf.level}: Returned as input.
 \item \code{agree.level}: Returned as input.
 }
@@ -59,6 +59,6 @@ and are still under active development.
 This function allows for the calculation of bootstrapped limits of agreement when there are multiple observations per subject.
 }
 \references{
-Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321.
+Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H., Hanley, J., McCloughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., & McKinstry, B. (2016). "Application of mixed effects limits of agreement in the presence of multiple sources of variability: exemplar from the comparison of several devices to measure respiratory rate in COPD patients". Plos One, 11(12), e0168321.
 \doi{10.1371/journal.pone.0168321}
 }

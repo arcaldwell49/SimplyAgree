@@ -10,6 +10,7 @@ URL: https://aaroncaldwell.us/SimplyAgree/
 BugReports: https://github.com/arcaldwell49/SimplyAgree/issues
 License: GPL (>= 3)
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 RoxygenNote: 7.3.3
 Imports: 

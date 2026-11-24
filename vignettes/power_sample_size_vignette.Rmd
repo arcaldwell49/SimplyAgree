@@ -54,7 +54,7 @@ The methods divide into two categories:
 
 **Hypothesis Testing** (binary decision):
 
-- `power_agreement_exact()` - Tests if central proportion, essentially tolerance intevals, are within the maximal allowable difference
+- `power_agreement_exact()` - Tests if central proportion, essentially tolerance intervals, are within the maximal allowable difference
 - `power_agreement_limit()` - Tests if confidence intervals of limits of agreement fall within the maximal allowable difference
 
 **Estimation** (quantifying precision):
@@ -282,7 +282,7 @@ All four agreement functions take two extra arguments:
 
 With `m > 1`, `n` is the **number of subjects** (the output also gives `n.obs = n * m`), and `sigma` (or `SD`) is the **total** SD of the differences, between- plus within-subject.
 
-Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject. To put it another way, a high ICC would reflect that the bias is consistent within a subject but differs across subjects (i.e., the bias is largely subject-specific). *Caveat emptor* but I personally believe it is reasonble to suspect that in many cases the ICC for nested agreement studies would be low (ICC < 0.10).
+Note that `icc` is *not* the test-retest ICC of the measurements themselves. Two methods can each be highly reliable (measurement ICC of 0.9) while their differences have a small ICC, because the subject's true value cancels in the difference. The ICC of the differences reflects how much the *bias* between the methods varies from subject to subject. To put it another way, a high ICC would reflect that the bias is consistent within a subject but differs across subjects (i.e., the bias is largely subject-specific). *Caveat emptor* but I personally believe it is reasonable to suspect that in many cases the ICC for nested agreement studies would be low (ICC < 0.10).
 
 *Caveat emptor* but I personally believe it is reasonable to expect the ICC of the
 differences to be low (e.g., < 0.10) in many nested agreement studies. When
@@ -410,7 +410,7 @@ cat("Total paired measurements:", K_final * m, "\n")
 
 # Planning a Reliability Study (ICC)
 
-A reliability study asks whether a measurement ranks subjects consistently, summarised by an intraclass correlation coefficient (ICC) and analysed with `icc_test()` (see the reliability analysis vignette). The same two goals apply as for agreement:
+A reliability study asks whether a measurement ranks subjects consistently, summarized by an intraclass correlation coefficient (ICC) and analyzed with `icc_test()` (see the reliability analysis vignette). The same two goals apply as for agreement:
 
 - **Hypothesis testing:** show that the ICC is above a threshold (e.g. 0.6), with `power_icc()`.
 - **Estimation:** make the confidence interval for the ICC narrow enough, with `precision_icc()`.
@@ -439,7 +439,7 @@ Five trials per subject would be needed.
 
 A power curve over a range of sample sizes is a useful sensitivity analysis, here for an ICC of 0.75 or 0.8 under the alternative:
 
-```{r icc_power_curve, fig.alt = "Power against number of subjects, from 10 to 80, for testing ICC greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a grey reference line at 80% power."}
+```{r icc_power_curve, fig.alt = "Power against number of subjects, from 10 to 80, for testing ICC greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a gray reference line at 80% power."}
 n_seq <- seq(10, 80, by = 5)
 pw <- sapply(c(0.75, 0.80), function(r1) {
   sapply(n_seq, function(n) {

@@ -997,7 +997,7 @@ predict.simple_eiv <- function(object,
 #'
 #' For a Deming fit with error ratio \eqn{\lambda} and weights \eqn{w_i}, let
 #' \deqn{S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda b^2},}
-#' the weighted sum of squares that Deming regression minimises (Sadler, 2010,
+#' the weighted sum of squares that Deming regression minimizes (Sadler, 2010,
 #' Eq. 11; Draper & Smith). With \eqn{\hat S} its minimum, the test of
 #' \eqn{(a_0, b_0)} is
 #' \deqn{F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat S / (n - 2)}}
@@ -1140,7 +1140,7 @@ joint_test <- function(object, ...) {
 # Sadler (2010) sum-of-squares joint region for Deming regression.
 # S(a, b) = sum W_i(b) (y_i - a - b x_i)^2 with Deming weights
 # W_i(b) = w_i / (1 + lambda b^2), i.e. 1 / (var_y,i + b^2 var_x,i) up to a
-# constant that cancels. The Deming estimate minimises S. In weighted moments
+# constant that cancels. The Deming estimate minimizes S. In weighted moments
 # about the weighted means (u = Sxx, q = Syy, p = Sxy, W = sum w),
 # S(a, b) = [W (a - ybar + b xbar)^2 + q - 2 b p + b^2 u] / (1 + lambda b^2).
 .sadler_setup <- function(object) {

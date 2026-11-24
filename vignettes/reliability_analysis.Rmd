@@ -28,11 +28,11 @@ library(SimplyAgree)
 # Background
 
 Reliability studies ask two related questions. *Relative* reliability asks
-whether a measurement ranks subjects consistently; it is summarised by an
+whether a measurement ranks subjects consistently; it is summarized by an
 intraclass correlation coefficient (ICC), the proportion of the observed
 variance that is due to real differences between subjects. *Absolute*
 reliability asks how much a single measurement varies around a subject's
-true value; it is summarised by the standard error of measurement (SEM),
+true value; it is summarized by the standard error of measurement (SEM),
 also called the "typical error" in some fields [@hopkins2000], and often is expressed as a
 coefficient of variation. The calculations here were originally derived from @weir2005, who in
 turn relied on @shrout1979 and @mcgraw1996.
@@ -108,7 +108,7 @@ Some common designs:
 
 Whether the items are thought of as fixed (these particular raters) or
 random (a sample of possible raters) changes how widely the result
-generalizies, not how it is calculated [@mcgraw1996]. The average-measure
+generalizes, not how it is calculated [@mcgraw1996]. The average-measure
 forms describe the mean of the k items in this study (other values of k
 would need a Spearman-Brown projection). Whatever the form, report the
 matching error statistic, and test against a meaningful threshold rather
@@ -319,11 +319,11 @@ More detail, including the full simulation results, is in `?icc_test` and
 
 ## Plots and diagnostics
 
-`plot()` shows each subject's measurements across the items (grey), with
+`plot()` shows each subject's measurements across the items (gray), with
 the item means and their 95% confidence intervals (blue), so systematic
 differences between items stand out against the spread of subjects.
 
-```{r, fig.width=5, fig.height=4, fig.alt = "Each subject's measurements across the judges as grey lines, with the judge means and 95% confidence intervals in blue."}
+```{r, fig.width=5, fig.height=4, fig.alt = "Each subject's measurements across the judges as gray lines, with the judge means and 95% confidence intervals in blue."}
 res <- icc_test(col.names = judges, data = dat)
 plot(res)
 ```
@@ -331,7 +331,7 @@ plot(res)
 Other views are chosen with `type`: `"subjects"` orders the subjects by
 their mean and shows each subject's measurements, which compares the spread
 between subjects with the scatter within subjects (what the ICC
-summarises); `"items"` shows each measurement's deviation from its
+summarizes); `"items"` shows each measurement's deviation from its
 subject's mean by item (systematic item differences, which count as error
 for an agreement ICC but not for a consistency ICC); and `"pairs"` plots each
 pair of items against each other with the line of identity.
@@ -739,7 +739,7 @@ days) remain uncertain however many subjects are measured.
 
 Other packages fit related models: [VCA](https://CRAN.R-project.org/package=VCA) (deeper nesting, laboratory
 precision designs), [rptR](https://CRAN.R-project.org/package=rptR) (repeatability of non-Gaussian data), gtheoryr
-(crossed G-studies with several facets, D-study optimisation), [SixSigma](https://CRAN.R-project.org/package=SixSigma)
+(crossed G-studies with several facets, D-study optimization), [SixSigma](https://CRAN.R-project.org/package=SixSigma)
 (`ss.rr()`, gauge R&R) and [MethComp](https://CRAN.R-project.org/package=MethComp) (method comparison with linked
 replicates and method-specific variances). 
 
@@ -891,7 +891,7 @@ For example, the exact interval for the consistency SEM is
 
 The ICC is for continuous measurements. For categorical or ordinal ratings
 (a diagnosis, a grade, a severity scale), agreement between raters is
-summarised instead by chance-corrected agreement coefficients such as Gwet's
+summarized instead by chance-corrected agreement coefficients such as Gwet's
 AC1, Fleiss' kappa or Krippendorff's alpha (`cac_test()`), or, for ordinal
 ratings from many raters, by the model-based kappa of @nelson2015
 (`ord_kappa_test()`). For example, with 4 raters on a 5-point scale:

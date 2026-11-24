@@ -139,7 +139,7 @@ between the two groups (Nelson et al., 2017). The result gives
 \eqn{\kappa_m} within each group, with an interval for their difference,
 and the test is the likelihood ratio test of a common variance. For rater
 groups, \code{fit$subgroups} also gives \eqn{\kappa_m} between a rater from
-each group; chance agreement is then minimised numerically over common
+each group; chance agreement is then minimized numerically over common
 thresholds, and the fixed effect matters. Subgroup intervals are formed
 on the logit scale.
 

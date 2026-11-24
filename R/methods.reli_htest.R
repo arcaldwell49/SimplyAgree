@@ -13,12 +13,12 @@
 #'   result has a p-value (a `null.value` was given) and `"estimation"`
 #'   otherwise. See Details.
 #' @param type For `plot()`, the plot to draw: `"profile"` (default), each
-#'   subject's measurements across the items in grey with the item means and
+#'   subject's measurements across the items in gray with the item means and
 #'   their 95% confidence intervals (adjusted for subjects when measurements
 #'   are missing); `"subjects"`, the subjects ordered by their mean, with
-#'   each subject's measurements, coloured by item, and their range, which
+#'   each subject's measurements, colored by item, and their range, which
 #'   compares the spread between subjects with the scatter within subjects
-#'   (what the ICC summarises); `"items"`, the deviation of each measurement
+#'   (what the ICC summarizes); `"items"`, the deviation of each measurement
 #'   from its subject's mean, by item, which shows systematic differences
 #'   between items (error for an agreement ICC, but not for a consistency
 #'   ICC); `"pairs"`, each pair of items plotted against each other with
@@ -409,7 +409,7 @@ check.reli_htest <- function(x, ...) {
   }))
 }
 
-# Default: each subject's measurements across items (grey), with the item means
+# Default: each subject's measurements across items (gray), with the item means
 # and their 95% CIs. Shows systematic differences between items (trial effects)
 # against the spread of subjects.
 .plot_profile <- function(df) {
@@ -424,13 +424,13 @@ check.reli_htest <- function(x, ...) {
                     inherit.aes = FALSE, colour = "#2166ac", linewidth = 0.9,
                     size = 0.5) +
     labs(x = "Item", y = "Measurement",
-         caption = "Grey: subjects. Blue: item means with 95% CIs.") +
+         caption = "Gray: subjects. Blue: item means with 95% CIs.") +
     .reli_plot_theme()
 }
 
-# Subjects ordered by their mean: each subject's measurements (coloured by
+# Subjects ordered by their mean: each subject's measurements (colored by
 # item), the range, and the mean. Compares the spread between subjects with
-# the scatter within subjects, which is what the ICC summarises.
+# the scatter within subjects, which is what the ICC summarizes.
 .plot_subjects <- function(df) {
   m <- tapply(df$values, df$id, mean)
   ord <- names(sort(m))
