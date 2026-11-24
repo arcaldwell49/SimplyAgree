@@ -11,14 +11,14 @@ The test suite has been trimmed for CRAN: slow simulation and bootstrap checks a
 ## Test environments
 
 - local macOS, R 4.5.1
-- win-builder: R-devel and R-release  <!-- TODO: confirm before submitting -->
-- GitHub Actions R-CMD-check  <!-- TODO: confirm before submitting -->
+- win-builder: R-devel and R-release
+- GitHub Actions: Ubuntu, macOS and Windows (R-release)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes on win-builder and GitHub Actions.
 
-- "unable to verify current time": a local network note, not related to the package.
+
 
 ## Reverse dependencies
 
