@@ -359,7 +359,7 @@ res_km$fit[c("sigma2_subject", "sigma2_rater", "rho", "p0")]
 #> [1] 0.7159427
 #> 
 #> $p0
-#> [1] 0.4208259
+#> [1] 0.420826
 ```
 
 `p0` is the observed agreement at the fitted thresholds, before the
@@ -418,7 +418,7 @@ res_g
 #> LRT = 4.3937, p-value = 0.03607
 #> alternative hypothesis: true difference in kappa_m is not equal to 0
 #> 95 percent confidence interval:
-#>  -0.190614106 -0.003348196
+#>  -0.190614178 -0.003348122
 #> sample estimates:
 #> kappa_m (experienced)      kappa_m (novice) 
 #>             0.2823929             0.1854117
@@ -434,8 +434,8 @@ rater variances in the two groups. `fit$subgroups` also gives
 res_g$fit$subgroups
 #>                subgroup   kappa_m         se     lower     upper
 #> 1           experienced 0.2823929 0.03379463 0.2210638 0.3530252
-#> 2                novice 0.1854117 0.05032505 0.1059145 0.3042717
-#> 3 experienced vs novice 0.2201798 0.04262593 0.1478967 0.3147417
+#> 2                novice 0.1854117 0.05032508 0.1059144 0.3042718
+#> 3 experienced vs novice 0.2201798 0.04262592 0.1478967 0.3147417
 summary(res_g)
 #> The likelihood ratio test is statistically significant (LRT = 4.39, p =
 #> 0.036) at the 0.05 alpha level: it can be stated that agreement differs

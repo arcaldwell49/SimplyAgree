@@ -1215,8 +1215,8 @@ tolerance_limit(
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
 #>  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits
-#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7958, 1.6334] [-1.0041, 1.8417]
-#>         PM 0.6184 [0.3622, 0.8746] 0.4131   [-0.5914, 1.8283] [-0.5288, 1.7656]
+#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7959, 1.6334] [-1.0041, 1.8417]
+#>         PM 0.6184 [0.3622, 0.8747] 0.4131   [-0.5915, 1.8284] [-0.5288, 1.7656]
 ```
 
 ## Visualizing “Big” Data

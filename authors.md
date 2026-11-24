@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/arcaldwell49/SimplyAgree/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/arcaldwell49/SimplyAgree/blob/0.4.1/inst/CITATION)
 
 Caldwell, A. R. (2022). SimplyAgree: An R package and jamovi Module for
 Simplifying Agreement and Reliability Analyses. Journal of Open Source
