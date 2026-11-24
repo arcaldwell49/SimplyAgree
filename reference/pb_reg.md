@@ -214,7 +214,7 @@ differ, use
 with the appropriate `error.ratio` (or `id`).
 
 With `id`, replicate measurements are averaged within each subject and
-the subject means are analysed.
+the subject means are analyzed.
 
 ### Weighting
 

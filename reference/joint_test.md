@@ -144,7 +144,7 @@ class `htest` containing:
 
 For a Deming fit with error ratio \\\lambda\\ and weights \\w_i\\, let
 \$\$S(a, b) = \sum_i \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda
-b^2},\$\$ the weighted sum of squares that Deming regression minimises
+b^2},\$\$ the weighted sum of squares that Deming regression minimizes
 (Sadler, 2010, Eq. 11; Draper & Smith). With \\\hat S\\ its minimum, the
 test of \\(a_0, b_0)\\ is \$\$F = \frac{(S(a_0, b_0) - \hat S) / 2}{\hat
 S / (n - 2)}\$\$ on F(2, n - 2), and the confidence region is the set of

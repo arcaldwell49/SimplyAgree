@@ -225,7 +225,7 @@ data sets, its root mean squared error was slightly larger (up to 28%
 larger with non-normal data and 10 subjects), and with 10 subjects it
 went past 1 (and is then truncated) in about 5% of replicate data sets.
 It is most useful when CCCs from several small studies are averaged,
-where the bias would otherwise accumulate. Centring the interval on the
+where the bias would otherwise accumulate. Centering the interval on the
 corrected value did not improve its coverage, so the interval and test
 use the uncorrected estimate.
 

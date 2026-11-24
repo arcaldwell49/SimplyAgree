@@ -85,7 +85,7 @@ dem_reg(
 
 - keep_data:
 
-  Logical indicator (TRUE/FALSE). If TRUE, the jacknife samples are
+  Logical indicator (TRUE/FALSE). If TRUE, the jackknife samples are
   returned; default is FALSE.
 
 - ...:
@@ -134,7 +134,7 @@ object with the following components:
 
 - `conf.level`: Confidence level used.
 
-- `resamples`: List containing resamples from jacknife procedure (if
+- `resamples`: List containing resamples from jackknife procedure (if
   keep_data = TRUE).
 
 ## Details

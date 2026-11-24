@@ -3,11 +3,11 @@
 ## Background
 
 Reliability studies ask two related questions. *Relative* reliability
-asks whether a measurement ranks subjects consistently; it is summarised
+asks whether a measurement ranks subjects consistently; it is summarized
 by an intraclass correlation coefficient (ICC), the proportion of the
 observed variance that is due to real differences between subjects.
 *Absolute* reliability asks how much a single measurement varies around
-a subject’s true value; it is summarised by the standard error of
+a subject’s true value; it is summarized by the standard error of
 measurement (SEM), also called the “typical error” in some fields
 ([Hopkins 2000](#ref-hopkins2000)), and often is expressed as a
 coefficient of variation. The calculations here were originally derived
@@ -105,7 +105,7 @@ Some common designs:
 
 Whether the items are thought of as fixed (these particular raters) or
 random (a sample of possible raters) changes how widely the result
-generalizies, not how it is calculated ([McGraw and Wong
+generalizes, not how it is calculated ([McGraw and Wong
 1996](#ref-mcgraw1996)). The average-measure forms describe the mean of
 the k items in this study (other values of k would need a Spearman-Brown
 projection). Whatever the form, report the matching error statistic, and
@@ -436,7 +436,7 @@ and
 ### Plots and diagnostics
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows each
-subject’s measurements across the items (grey), with the item means and
+subject’s measurements across the items (gray), with the item means and
 their 95% confidence intervals (blue), so systematic differences between
 items stand out against the spread of subjects.
 
@@ -446,14 +446,14 @@ res <- icc_test(col.names = judges, data = dat)
 plot(res)
 ```
 
-![Each subject's measurements across the judges as grey lines, with the
+![Each subject's measurements across the judges as gray lines, with the
 judge means and 95% confidence intervals in
 blue.](reliability_analysis_files/figure-html/unnamed-chunk-13-1.png)
 
 Other views are chosen with `type`: `"subjects"` orders the subjects by
 their mean and shows each subject’s measurements, which compares the
 spread between subjects with the scatter within subjects (what the ICC
-summarises); `"items"` shows each measurement’s deviation from its
+summarizes); `"items"` shows each measurement’s deviation from its
 subject’s mean by item (systematic item differences, which count as
 error for an agreement ICC but not for a consistency ICC); and `"pairs"`
 plots each pair of items against each other with the line of identity.
@@ -1092,7 +1092,7 @@ Other packages fit related models:
 laboratory precision designs),
 [rptR](https://CRAN.R-project.org/package=rptR) (repeatability of
 non-Gaussian data), gtheoryr (crossed G-studies with several facets,
-D-study optimisation),
+D-study optimization),
 [SixSigma](https://CRAN.R-project.org/package=SixSigma) (`ss.rr()`,
 gauge R&R) and [MethComp](https://CRAN.R-project.org/package=MethComp)
 (method comparison with linked replicates and method-specific
@@ -1287,7 +1287,7 @@ MS_E / \chi^2\_{1-\alpha/2;\\\nu}}\\ to \\\sqrt{\nu MS_E /
 
 The ICC is for continuous measurements. For categorical or ordinal
 ratings (a diagnosis, a grade, a severity scale), agreement between
-raters is summarised instead by chance-corrected agreement coefficients
+raters is summarized instead by chance-corrected agreement coefficients
 such as Gwet’s AC1, Fleiss’ kappa or Krippendorff’s alpha
 ([`cac_test()`](https://aaroncaldwell.us/SimplyAgree/reference/cac_test.md)),
 or, for ordinal ratings from many raters, by the model-based kappa of

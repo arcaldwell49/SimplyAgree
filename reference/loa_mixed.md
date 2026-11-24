@@ -93,8 +93,8 @@ Returns single list with the results of the agreement analysis.
 - `h0_test`: Decision from hypothesis test.
 
 - `bland_alt.plot`: Simple Bland-Altman plot. Red line are the upper and
-  lower bounds for shieh test; grey box is the acceptable limits
-  (delta). If the red lines are within the grey box then the shieh test
+  lower bounds for shieh test; gray box is the acceptable limits
+  (delta). If the red lines are within the gray box then the shieh test
   should indicate 'reject h0', or to reject the null hypothesis that
   this not acceptable agreement between x & y.
 
@@ -105,7 +105,7 @@ Returns single list with the results of the agreement analysis.
 ## References
 
 Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H.,
-Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &
+Hanley, J., McCloughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &
 McKinstry, B. (2016). "Application of mixed effects limits of agreement
 in the presence of multiple sources of variability: exemplar from the
 comparison of several devices to measure respiratory rate in COPD

@@ -76,7 +76,7 @@ power_icc(
 - missing:
 
   The expected proportion of measurements (subject-by-item cells) that
-  will be missing, analysed with `icc_test(method = "reml")`. The
+  will be missing, analyzed with `icc_test(method = "reml")`. The
   default, 0, gives the exact complete-data calculation; values above 0
   give an approximation (see Details). For subjects who will be lost
   entirely, reduce `n` instead.

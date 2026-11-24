@@ -465,7 +465,7 @@ The function will provide 3 plots: Q-Q normality plot, standardized
 residuals plot, and residuals plot.
 
 All 3 plots will have a statistical test in the bottom right corner. The
-Shapiro-Wilk test is included for the normality plot, the Bagan-Preusch
+Shapiro-Wilk test is included for the normality plot, the Breusch-Pagan
 test for heterogeneity, and the test for linear slope on the residuals
 plot.
 

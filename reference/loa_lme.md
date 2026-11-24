@@ -104,7 +104,7 @@ Returns single list with the results of the agreement analysis.
 ## References
 
 Parker, R. A., Weir, C. J., Rubio, N., Rabinovich, R., Pinnock, H.,
-Hanley, J., McLoughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &
+Hanley, J., McCloughan, L., Drost, E.M., Mantoani, L.C., MacNee, W., &
 McKinstry, B. (2016). "Application of mixed effects limits of agreement
 in the presence of multiple sources of variability: exemplar from the
 comparison of several devices to measure respiratory rate in COPD

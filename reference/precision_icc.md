@@ -54,7 +54,7 @@ precision_icc(
 
 - assurance:
 
-  The probability that the realised interval is no wider than `width`.
+  The probability that the realized interval is no wider than `width`.
   The default, 0.5, plans for the median width.
 
 - model:
@@ -76,7 +76,7 @@ precision_icc(
 - missing:
 
   The expected proportion of measurements (subject-by-item cells) that
-  will be missing, analysed with `icc_test(method = "reml")`. The
+  will be missing, analyzed with `icc_test(method = "reml")`. The
   default, 0, gives the exact complete-data calculation; values above 0
   give an approximation (see Details). For subjects who will be lost
   entirely, reduce `n` instead.
@@ -103,7 +103,7 @@ is a scaled central F variable for any true ICC (see
 [`power_icc()`](https://aaroncaldwell.us/SimplyAgree/reference/power_icc.md)).
 The assurance is therefore the probability, under that distribution, of
 the F values whose interval is no wider than `width`. The width is
-largest at moderate F and shrinks towards both ends, so this set has two
+largest at moderate F and shrinks toward both ends, so this set has two
 parts; the lower part (estimates near \\-1/(k-1)\\) is negligible in
 realistic designs. Mondal et al. (2024) recommend this interval for the
 one-way ICC.

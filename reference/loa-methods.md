@@ -60,5 +60,5 @@ check(x, ...)
 - `check`:
 
   Returns plots testing the assumptions of a Bland-Altman analysis.
-  P-values for the normality and heteroskedascity tests are provided as
-  captions to the plot.
+  P-values for the normality and heteroskedasticity tests are provided
+  as captions to the plot.

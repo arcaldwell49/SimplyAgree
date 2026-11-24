@@ -58,7 +58,7 @@ agreement_limit(
 
   The method by which the limits of agreement confidence intervals are
   calculated. Options are "mover" (Methods of Recovering Variances
-  method) or "blandlatman" (Bland-Altman method).
+  method) or "blandaltman" (Bland-Altman method).
 
 - bound_type:
 
@@ -130,7 +130,7 @@ analysis.
 ## Details
 
 The limits of agreement (LoA) are calculated in this function are based
-on the method originally detailed by Bland & Atlman (1986 & 1999). The
+on the method originally detailed by Bland & Altman (1986 & 1999). The
 `loa_calc` allow users to specify the calculative method for the LoA
 which can be based on Bland-Altman (1999) (`loa_calc = "blandaltman"`),
 or by the more accurate MOVER method of Zou (2013) and Donner & Zou

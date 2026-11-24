@@ -588,7 +588,7 @@ repository (`references/general/tolerance_simulations`).
 
 #### Model assumptions
 
-A few modelling choices deserve attention (see the “Model assumptions”
+A few modeling choices deserve attention (see the “Model assumptions”
 section of
 [`?tolerance_limit`](https://aaroncaldwell.us/SimplyAgree/reference/tolerance_limit.md)
 for details):
@@ -596,8 +596,8 @@ for details):
 - With the default marginal model (`model = "gls"`), the autoregressive
   correlation structures (`cor_type = "ar1"` or `"car1"`) have no
   persistent subject effect and the correlation between measurements
-  from the same subject decays towards zero over time. If subjects have
-  a persistent bias of their own, these structures understate the
+  from the same subject decays toward zero over time. If subjects have a
+  persistent bias of their own, these structures understate the
   uncertainty in the bias and give limits that are too narrow. Setting
   `model = "lme"` fits a random intercept for each subject and adds the
   serial correlation to the residuals, which keeps the persistent
@@ -1071,7 +1071,7 @@ residuals plot, and proportional bias plot.
 
 All 3 plots will have a statistical test in the bottom right corner[^2].
 The Shapiro-Wilk test is included for the normality plot, the
-Bagan-Preusch test for heterogeneity, and the test for linear slope on
+Breusch-Pagan test for heterogeneity, and the test for linear slope on
 the residuals plot. Please note that there is no formal test of
 proportional bias for the tolerance limits, but a plot is still included
 for visual checks.
@@ -1157,7 +1157,7 @@ bias.](agreement_analysis_files/figure-html/unnamed-chunk-10-1.png)
 check(test_tol)
 ```
 
-![Diagnostic panels for tolerance_limit with proportional bias modelled;
+![Diagnostic panels for tolerance_limit with proportional bias modeled;
 the proportional bias panel is now
 flat.](agreement_analysis_files/figure-html/unnamed-chunk-10-2.png)
 
@@ -1215,8 +1215,8 @@ tolerance_limit(
 #> Model: GLS, compound symmetry within id; residual SD by condition
 #> 
 #>  Condition   Bias          Bias CI CV (%) Prediction Interval  Tolerance Limits
-#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7959, 1.6334] [-1.0041, 1.8417]
-#>         PM 0.6184 [0.3622, 0.8747] 0.4131   [-0.5915, 1.8284] [-0.5288, 1.7656]
+#>         AM 0.4188  [0.1616, 0.676] 0.5123   [-0.7958, 1.6334] [-1.0041, 1.8417]
+#>         PM 0.6184 [0.3622, 0.8746] 0.4131   [-0.5914, 1.8283] [-0.5288, 1.7656]
 ```
 
 ## Visualizing “Big” Data

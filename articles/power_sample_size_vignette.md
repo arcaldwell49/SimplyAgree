@@ -49,7 +49,7 @@ The methods divide into two categories:
 **Hypothesis Testing** (binary decision):
 
 - [`power_agreement_exact()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_exact.md) -
-  Tests if central proportion, essentially tolerance intevals, are
+  Tests if central proportion, essentially tolerance intervals, are
   within the maximal allowable difference
 - [`power_agreement_limit()`](https://aaroncaldwell.us/SimplyAgree/reference/power_agreement_limit.md) -
   Tests if confidence intervals of limits of agreement fall within the
@@ -398,8 +398,8 @@ reflects how much the *bias* between the methods varies from subject to
 subject. To put it another way, a high ICC would reflect that the bias
 is consistent within a subject but differs across subjects (i.e., the
 bias is largely subject-specific). *Caveat emptor* but I personally
-believe it is reasonble to suspect that in many cases the ICC for nested
-agreement studies would be low (ICC \< 0.10).
+believe it is reasonable to suspect that in many cases the ICC for
+nested agreement studies would be low (ICC \< 0.10).
 
 *Caveat emptor* but I personally believe it is reasonable to expect the
 ICC of the differences to be low (e.g., \< 0.10) in many nested
@@ -600,8 +600,8 @@ cat("Total paired measurements:", K_final * m, "\n")
 ## Planning a Reliability Study (ICC)
 
 A reliability study asks whether a measurement ranks subjects
-consistently, summarised by an intraclass correlation coefficient (ICC)
-and analysed with
+consistently, summarized by an intraclass correlation coefficient (ICC)
+and analyzed with
 [`icc_test()`](https://aaroncaldwell.us/SimplyAgree/reference/icc_test.md)
 (see the reliability analysis vignette). The same two goals apply as for
 agreement:
@@ -694,7 +694,7 @@ legend("bottomright", legend = c("ICC = 0.75", "ICC = 0.80"), lty = 1:2)
 ```
 
 ![Power against number of subjects, from 10 to 80, for testing ICC
-greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a grey
+greater than 0.6, with lines for true ICCs of 0.75 and 0.80 and a gray
 reference line at 80%
 power.](power_sample_size_vignette_files/figure-html/icc_power_curve-1.png)
 
@@ -801,7 +801,7 @@ power_icc(rho0 = 0.6, rho1 = 0.8, k = 2, power = 0.80, model = "twoway",
 #>         missing = 0.15
 #> 
 #> NOTE: n is the number of subjects; round up to a whole number.
-#>       approximate: 15% of measurements missing at random, analysed with icc_test(method = "reml")
+#>       approximate: 15% of measurements missing at random, analyzed with icc_test(method = "reml")
 #>       n = number of subjects, k = measurements per subject
 ```
 

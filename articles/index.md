@@ -39,7 +39,7 @@
 - [Re-analysis of an Agreement
   Study](https://aaroncaldwell.us/SimplyAgree/articles/reanalysis.md):
 
-  Worked example re-analysing a published agreement study of rectal
+  Worked example re-analyzing a published agreement study of rectal
   vs. esophageal temperature with concordance correlation, limits of
   agreement, and tolerance limits.
 

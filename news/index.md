@@ -176,7 +176,7 @@ Several fixes change results from earlier versions:
   - its returned `model` now works with
     [`update()`](https://rdrr.io/r/stats/update.html) and `emmeans()`.
 - [`loa_lme()`](https://aaroncaldwell.us/SimplyAgree/reference/loa_lme.md)
-  is deprecated in favour of `tolerance_limit(model = "lme")`.
+  is deprecated in favor of `tolerance_limit(model = "lme")`.
 - Fixed plots failing after saving and reloading (e.g. in jamovi;
   [\#76](https://github.com/arcaldwell49/SimplyAgree/issues/76)), and
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`print()`](https://rdrr.io/r/base/print.html)
@@ -319,7 +319,7 @@ CRAN release: 2022-08-24
 - Added agreement coefficient function (`agree_coef`).
 - Added `loa_lme` function
   - `loa_mixed` now deprecated
-  - `loa_lme` allows for heterogenous variance by condition
+  - `loa_lme` allows for heterogeneous variance by condition
   - New function is faster and relies on parametric bootstrap
 - Assumptions checks are added for all “simple-agree” class results
   - Checks include: normality, heteroscedasticity, and proportional bias

@@ -345,7 +345,7 @@ that should be checked:
 
 - **Autoregressive correlation** (`cor_type = "ar1"` or `"car1"`): with
   `model = "gls"`, the correlation between two measurements from the
-  same subject decays towards zero as they get further apart in time. A
+  same subject decays toward zero as they get further apart in time. A
   persistent subject-specific bias (e.g., a subject by method
   interaction) instead makes all measurements from that subject equally
   correlated. When such an effect exists, the autoregressive structures
@@ -424,7 +424,7 @@ that should be checked:
 
 Francq, B. G., & Govaerts, B. (2016). How to regress and predict in a
 Bland–Altman plot? Review and contribution based on tolerance intervals
-and correlated‐errors‐in‐variables models. Statistics in mMdicine,
+and correlated‐errors‐in‐variables models. Statistics in Medicine,
 35(14), 2328-2358.
 
 Francq, B. G., Lin, D., & Hoyer, W. (2019). Confidence, prediction, and

@@ -504,7 +504,7 @@ Second, that the slope is equal to one:
 ### Sadler’s region (Deming regression, default)
 
 Deming regression with error ratio \\\lambda\\ and weights \\w_i\\
-minimises
+minimizes
 
 \\ S(a, b) = \sum\_{i=1}^n \frac{w_i (y_i - a - b x_i)^2}{1 + \lambda
 b^2} \\
