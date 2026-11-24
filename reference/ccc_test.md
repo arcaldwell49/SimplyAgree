@@ -372,7 +372,7 @@ ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps")
 # \donttest{
 ccc_test(x = "x", y = "y", id = "id", data = reps, data_type = "reps",
          boot = TRUE)
-#> Warning: 350 of 999 bootstrap replicates failed and were dropped; the bootstrap interval may be unreliable.
+#> Warning: 346 of 999 bootstrap replicates failed and were dropped; the bootstrap interval may be unreliable.
 #> 
 #>  Concordance Correlation Coefficient (variance components) with
 #>  nonparametric (subject) bootstrap studentized interval

@@ -17,7 +17,7 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,6 +125,8 @@ The hypothesis test is based on binomial proportions within the maximal allowabl
 <li><p><code>agree</code>: A data frame of the binomial proportion of results in agreement.</p></li>
 <li><p><code>h0_test</code>: Decision from hypothesis test.</p></li>
 <li><p><code>qr_mod</code>: The quantile regression model.</p></li>
+<li><p><code>qr_vcov</code>: The bootstrap covariance matrices of its coefficients (one
+per quantile), used for the confidence limits and the plot.</p></li>
 <li><p><code>call</code>: The matched call</p></li>
 </ul></div>
     <div class="section level2">
@@ -149,9 +151,9 @@ SAGE Publications.
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###- Quantile Limits of Agreement (LoA) -###</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           Estimate Lower CI Upper CI CI Level</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Lower LoA    -1.12  -1.4605  -0.7795     0.90</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Bias          0.04  -0.5234   0.6034     0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Upper LoA     2.97   2.3178   3.6222     0.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Lower LoA    -1.12  -1.4331  -0.8069     0.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bias          0.04  -0.6892   0.7692     0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Upper LoA     2.97   2.3459   3.5941     0.90</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

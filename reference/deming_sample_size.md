@@ -122,10 +122,10 @@ sample_size_result <- deming_sample_size(
   x_var_params = list(beta1 = 0.8, beta2 = 0.04, J = 2, type = "power")
 )
 #> Searching for N to achieve 90% power...
-#>   Testing N = 10... CI: 13.0%, Joint: 33.5%
-#>   Testing N = 20... CI: 18.5%, Joint: 63.0%
-#>   Testing N = 30... CI: 27.5%, Joint: 80.5%
-#>   Testing N = 40... CI: 38.5%, Joint: 90.0%
+#>   Testing N = 10... CI: 14.0%, Joint: 39.0%
+#>   Testing N = 20... CI: 21.0%, Joint: 63.5%
+#>   Testing N = 30... CI: 30.5%, Joint: 80.5%
+#>   Testing N = 40... CI: 47.0%, Joint: 90.0%
 #> 
 #> Target power achieved!
 

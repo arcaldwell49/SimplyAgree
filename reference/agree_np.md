@@ -81,6 +81,9 @@ Returns simple_agree object with the results of the agreement analysis.
 
 - `qr_mod`: The quantile regression model.
 
+- `qr_vcov`: The bootstrap covariance matrices of its coefficients (one
+  per quantile), used for the confidence limits and the plot.
+
 - `call`: The matched call
 
 ## References
@@ -104,8 +107,8 @@ agree_np(x = "x", y = "y", id = "id", data = reps, delta = 2)
 #> 
 #> ###- Quantile Limits of Agreement (LoA) -###
 #>           Estimate Lower CI Upper CI CI Level
-#> Lower LoA    -1.12  -1.4605  -0.7795     0.90
-#> Bias          0.04  -0.5234   0.6034     0.95
-#> Upper LoA     2.97   2.3178   3.6222     0.90
+#> Lower LoA    -1.12  -1.4331  -0.8069     0.90
+#> Bias          0.04  -0.6892   0.7692     0.95
+#> Upper LoA     2.97   2.3459   3.5941     0.90
 #> 
 ```

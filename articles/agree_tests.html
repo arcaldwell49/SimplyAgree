@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,7 @@
                         <h4 data-toc-skip class="author">Aaron R.
 Caldwell</h4>
             
-            <h4 data-toc-skip class="date">Last Updated: 2026-11-23</h4>
+            <h4 data-toc-skip class="date">Last Updated: 2026-11-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/arcaldwell49/SimplyAgree/blob/master/vignettes/agree_tests.Rmd" class="external-link"><code>vignettes/agree_tests.Rmd</code></a></small>
       <div class="d-none name"><code>agree_tests.Rmd</code></div>
@@ -672,9 +672,9 @@ are no longer symmetric around the bias estimate.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;           Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA    -0.89  -1.3739  -0.4061     0.90</span></span>
-<span><span class="co">#&gt; Bias          0.04  -0.5234   0.6034     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA     2.45   1.4983   3.4017     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA    -0.89  -1.2949  -0.4851     0.90</span></span>
+<span><span class="co">#&gt; Bias          0.04  -0.6892   0.7692     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA     2.45   1.6069   3.2931     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="Bland-Altman plot from agree_np with nonparametric limits of agreement." width="700"></p>
@@ -698,15 +698,15 @@ agreement does not.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ###- Quantile Limits of Agreement (LoA) -###</span></span>
 <span><span class="co">#&gt;                  Estimate Lower CI Upper CI CI Level</span></span>
-<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975  -1.7203 -0.85925     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436  -0.6465 -0.26221     0.90</span></span>
-<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417   0.6088  1.17953     0.90</span></span>
-<span><span class="co">#&gt; Bias @ 3.9       -0.73052  -1.5079  0.04682     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 5.24      -0.07238  -0.7088  0.56406     0.95</span></span>
-<span><span class="co">#&gt; Bias @ 7.4        0.99000  -0.4509  2.43089     0.95</span></span>
-<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310  -2.9310  2.16480     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069   1.0814  2.93996     0.90</span></span>
-<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483   2.3417  9.40794     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 3.9  -1.28975 -1.71837 -0.86114     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 5.24 -0.45436 -0.63615 -0.27256     0.90</span></span>
+<span><span class="co">#&gt; Lower LoA @ 7.4   0.89417  0.60891  1.17943     0.90</span></span>
+<span><span class="co">#&gt; Bias @ 3.9       -0.73052 -1.55840  0.09735     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 5.24      -0.07238 -0.60243  0.45766     0.95</span></span>
+<span><span class="co">#&gt; Bias @ 7.4        0.99000 -0.06176  2.04176     0.95</span></span>
+<span><span class="co">#&gt; Upper LoA @ 3.9  -0.38310 -3.04331  2.27711     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 5.24  2.01069  0.88151  3.13987     0.90</span></span>
+<span><span class="co">#&gt; Upper LoA @ 7.4   5.87483  2.31148  9.43817     0.90</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">a1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="agree_tests_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Bland-Altman plot from agree_np with nonparametric limits of agreement that change with the mean to account for proportional bias." width="700"></p>

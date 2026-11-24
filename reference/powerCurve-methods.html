@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SimplyAgree</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,9 +95,9 @@ for details.
 the smallest sample size evaluated at which the desired power is achieved
 (<code>N</code>) and the power at that sample size. <code>N</code> is <code>NA</code>, with a warning, when
 the power is not reached at the largest sample size evaluated (<code>power</code> is
-then the highest power evaluated), or when the smallest sample size
-evaluated already reaches it, so the minimum lies below the range (<code>power</code>
-is then also <code>NA</code>). With gaps between the sample sizes, <code>N</code> can be larger
+then the highest power evaluated), or when the valid sample size immediately
+below the smallest evaluated size also reaches the target (<code>power</code> is then
+also <code>NA</code>). With gaps between the sample sizes, <code>N</code> can be larger
 than the exact minimum. Use <code><a href="power_agreement_limit.html">power_agreement_limit()</a></code> (with <code>sigma</code> in
 place of <code>SD</code>) to find the exact sample size directly.</p></dd>
 

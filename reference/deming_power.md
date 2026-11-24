@@ -184,12 +184,12 @@ print(power_result)
 #> Against: slope = 1.000, intercept = 0.000
 #> 
 #> Statistical Power:
-#>   Slope CI:          26.0%
-#>   Intercept CI:      4.0%
-#>   Either CI:         29.5%
+#>   Slope CI:          25.5%
+#>   Intercept CI:      5.5%
+#>   Either CI:         28.0%
 #>   Joint Region:      83.5% (Sadler)
 #> 
-#> Joint Region Advantage: +54.0 percentage points
+#> Joint Region Advantage: +55.5 percentage points
 
 # More complex: heteroscedastic errors
 power_result2 <- deming_power_sim(

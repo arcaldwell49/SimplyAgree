@@ -1,12 +1,47 @@
 # Changelog
 
-## SimplyAgree 0.4.1 (development version)
+## SimplyAgree 0.4.1
+
+### Results that change
+
+- [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  with `prop_bias = FALSE` and `TOST = TRUE` (the default): the
+  confidence bounds of the limits of agreement were computed at
+  `conf.level` (e.g. 95%) although they were reported, and printed, as
+  `1 - 2 * (1 - conf.level)` (e.g. 90%). They are now computed at the
+  reported level, so they are narrower than before. The bias bounds, the
+  hypothesis test, `TOST = FALSE` and `prop_bias = TRUE` are unchanged.
 
 ### Bug fixes
+
+- [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  and its [`plot()`](https://rdrr.io/r/graphics/plot.default.html) could
+  run without end on data with many exact ties (for example, the data of
+  GitHub issue
+  [\#50](https://github.com/arcaldwell49/SimplyAgree/issues/50)),
+  depending on the random number state. The bootstrap standard errors of
+  the quantile regressions came from quantreg’s `summary(se = "boot")`,
+  whose simplex fits can cycle on such resamples. The bootstrap now uses
+  the same resampling of (x, y) pairs (200 resamples) but fits each
+  resample with the Frisch-Newton interior point method
+  ([`quantreg::rq.fit.fnb()`](https://rdrr.io/pkg/quantreg/man/rq.fit.fnb.html)),
+  which always ends. The estimates are unchanged; the standard errors
+  agree with quantreg’s bootstrap up to Monte Carlo error.
+
+- The [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
+  [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  now shows the printed limits and bounds. It used to refit the quantile
+  regressions with the mean as a covariate whatever `prop_bias` was (so
+  with `prop_bias = FALSE` it drew sloped limits instead of the constant
+  ones), drew the bands of the limits at `conf.level` even with
+  `TOST = TRUE`, and drew a new bootstrap. The plot now uses the fitted
+  model and the bootstrap covariance stored in the result (new element
+  `qr_vcov`).
 
 - [`find_n()`](https://aaroncaldwell.us/SimplyAgree/reference/powerCurve-methods.md)
   now returns `NA` with a warning when the minimum sample size is below
   the range evaluated, instead of the first `N` in the range.
+
 - **Nested limits of agreement**
   (`agreement_limit(data_type = "nest")`): the confidence bounds of the
   limits were too narrow. The bias variance and the variance piece with
@@ -22,6 +57,22 @@
   ([`agree_nest()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_nest.md)
   with `prop_bias = TRUE`, superseded, has the same substitution and is
   unchanged.)
+
+### Non-parametric limits of agreement
+
+- [`agree_np()`](https://aaroncaldwell.us/SimplyAgree/reference/agree_np.md)
+  and its [`plot()`](https://rdrr.io/r/graphics/plot.default.html) could
+  run without end on data with many exact ties (for example, the data of
+  GitHub issue
+  [\#50](https://github.com/arcaldwell49/SimplyAgree/issues/50)),
+  depending on the random number state. The bootstrap standard errors of
+  the quantile regressions came from quantreg’s `summary(se = "boot")`,
+  whose simplex fits can cycle on such resamples. The bootstrap now uses
+  the same resampling of (x, y) pairs (200 resamples) but fits each
+  resample with the Frisch-Newton interior point method
+  ([`quantreg::rq.fit.fnb()`](https://rdrr.io/pkg/quantreg/man/rq.fit.fnb.html)),
+  which always ends. The estimates are unchanged; the standard errors
+  agree with quantreg’s bootstrap up to Monte Carlo error.
 
 ## SimplyAgree 0.4.0
 

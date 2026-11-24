@@ -1088,14 +1088,13 @@ gives the details.
 #### Other relevant R packages of note
 
 Other packages fit related models:
-[VCA](https://cran.r-project.org/web/packages/VCA/index.html) (deeper
-nesting, laboratory precision designs),
-[rptR](https://cran.r-project.org/web/packages/rptR/index.html)
-(repeatability of non-Gaussian data), gtheoryr (crossed G-studies with
-several facets, D-study optimisation),
-[SixSigma](https://cran.r-project.org/web/packages/SixSigma/index.html)
-(`ss.rr()`, gauge R&R) and
-[MethComp](https://cran.r-project.org/web/packages/MethComp/index.html)
+[VCA](https://CRAN.R-project.org/package=VCA) (deeper nesting,
+laboratory precision designs),
+[rptR](https://CRAN.R-project.org/package=rptR) (repeatability of
+non-Gaussian data), gtheoryr (crossed G-studies with several facets,
+D-study optimisation),
+[SixSigma](https://CRAN.R-project.org/package=SixSigma) (`ss.rr()`,
+gauge R&R) and [MethComp](https://CRAN.R-project.org/package=MethComp)
 (method comparison with linked replicates and method-specific
 variances).
 
@@ -1434,7 +1433,7 @@ Optimal Designs for Reliability Studies.” *Statistics in Medicine* 17
 Weir, Joseph P. 2005. “Quantifying Test-Retest Reliability Using the
 Intraclass Correlation Coefficient and the SEM.” *The Journal of
 Strength and Conditioning Research* 19 (1): 231.
-<https://pubmed.ncbi.nlm.nih.gov/15705040/>.
+<https://doi.org/10.1519/15184.1>.
 
 Zou, G. Y. 2012. “Sample Size Formulas for Estimating Intraclass
 Correlation Coefficients with Precision and Assurance.” *Statistics in
