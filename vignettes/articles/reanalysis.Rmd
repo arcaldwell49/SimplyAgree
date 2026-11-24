@@ -2,11 +2,7 @@
 title: "Re-analysis of an Agreement Study"
 description: "Worked example re-analysing a published agreement study of rectal vs. esophageal temperature with concordance correlation, limits of agreement, and tolerance limits."
 output: rmarkdown::html_vignette
-bibliography: refs.bib
-vignette: >
-  %\VignetteIndexEntry{Re-analysis of an Agreement Study}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
+bibliography: ../refs.bib
 editor_options: 
   chunk_output_type: console
 ---

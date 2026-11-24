@@ -36,3 +36,4 @@
 ^.*-manual\.tex$
 ^references$
 ^\.claude$
+^vignettes/articles$

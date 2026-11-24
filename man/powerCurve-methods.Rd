@@ -22,12 +22,20 @@ for details.
 \value{
 \describe{
 \item{\code{plot}}{Returns a plot of the limits of agreement (type = 1) or concordance plot (type = 2)}
-\item{\code{find_n}}{Find the smallest sample size at which the desired
-power is achieved, for each combination of settings. If the power is not
-reached within the sample sizes evaluated, \code{N} is \code{NA} (with a warning)
-and the range of sample sizes must be expanded.}
+\item{\code{find_n}}{A data frame with, for each combination of settings,
+the smallest sample size evaluated at which the desired power is achieved
+(\code{N}) and the power at that sample size. \code{N} is \code{NA}, with a warning, when
+the power is not reached at the largest sample size evaluated (\code{power} is
+then the highest power evaluated), or when the valid sample size immediately
+below the smallest evaluated size also reaches the target (\code{power} is then
+also \code{NA}). With gaps between the sample sizes, \code{N} can be larger
+than the exact minimum. Use \code{\link[=power_agreement_limit]{power_agreement_limit()}} (with \code{sigma} in
+place of \code{SD}) to find the exact sample size directly.}
 }
 }
 \description{
 Methods defined for objects returned from the powerCurve function.
+}
+\seealso{
+\code{\link[=blandPowerCurve]{blandPowerCurve()}}, \code{\link[=power_agreement_limit]{power_agreement_limit()}}
 }

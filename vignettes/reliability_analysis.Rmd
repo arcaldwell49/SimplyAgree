@@ -747,10 +747,10 @@ days) remain uncertain however many subjects are measured.
 
 ### Other relevant R packages of note
 
-Other packages fit related models: [VCA](https://cran.r-project.org/web/packages/VCA/index.html) (deeper nesting, laboratory
-precision designs), [rptR](https://cran.r-project.org/web/packages/rptR/index.html) (repeatability of non-Gaussian data), gtheoryr
-(crossed G-studies with several facets, D-study optimisation), [SixSigma](https://cran.r-project.org/web/packages/SixSigma/index.html)
-(`ss.rr()`, gauge R&R) and [MethComp](https://cran.r-project.org/web/packages/MethComp/index.html) (method comparison with linked
+Other packages fit related models: [VCA](https://CRAN.R-project.org/package=VCA) (deeper nesting, laboratory
+precision designs), [rptR](https://CRAN.R-project.org/package=rptR) (repeatability of non-Gaussian data), gtheoryr
+(crossed G-studies with several facets, D-study optimisation), [SixSigma](https://CRAN.R-project.org/package=SixSigma)
+(`ss.rr()`, gauge R&R) and [MethComp](https://CRAN.R-project.org/package=MethComp) (method comparison with linked
 replicates and method-specific variances). 
 
 In `SimplyAgree`,  `reli_facet_test()` adds

@@ -156,6 +156,35 @@ testthat::test_that("bootstrap fits a resample on which quantreg's cycled", {
   }
 })
 
+testthat::test_that("bootstrap drops resamples with a singular design", {
+  d = data.frame(mean = c(0, 0, 0, 1, 2), delta = c(0.1, -0.2, 0.3, 0.5, 0.4))
+  q = quantreg::rq(delta ~ mean, data = d, tau = 0.5)
+  good = cbind(1:5, c(1, 2, 4, 5, 5), c(1, 3, 4, 4, 5))
+  sing = c(1, 2, 3, 1, 2) # all resampled means are 0
+  expect_warning(V <- rq_boot_vcov(q, idx = cbind(good, sing)),
+                 "1 of 4 bootstrap resamples had a singular design")
+  expect_equal(V, rq_boot_vcov(q, idx = good))
+  expect_error(rq_boot_vcov(q, idx = cbind(good[, 1], sing, sing)),
+               "Too few bootstrap resamples")
+  # intercept-only fits are never singular
+  q0 = quantreg::rq(delta ~ 1, data = d, tau = 0.5)
+  expect_silent(rq_boot_vcov(q0, idx = cbind(good, sing)))
+})
+
+testthat::test_that("rq_boot_ci picks the requested tau when taus are close", {
+  data("reps")
+  df = na.omit(data.frame(delta = reps$x - reps$y,
+                          mean = (reps$x + reps$y) / 2))
+  taus = c(0.49995, 0.5, 0.50005)
+  qm = quantreg::rq(delta ~ mean, data = df, tau = taus)
+  V = lapply(1:3, function(j) diag(2) * j)
+  for (j in 1:3) {
+    ci = rq_boot_ci(qm, V, tau = taus[j], at = 5, conf.level = 0.95)
+    expect_equal(nrow(ci), 1)
+    expect_equal(ci$SE, sqrt(j * (1 + 25)))
+  }
+})
+
 testthat::test_that("bootstrap helpers give rq estimates with t intervals", {
   data("reps")
   df = na.omit(data.frame(delta = reps$x - reps$y,
