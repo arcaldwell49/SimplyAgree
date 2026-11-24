@@ -12,6 +12,23 @@ rq_boot_vcov <- function(quan_mod, R = 200, idx = NULL) {
   if (is.null(idx)) {
     idx <- matrix(sample.int(n, n * R, replace = TRUE), n, R)
   }
+  # A resample whose design is singular (e.g. every resampled pair has the
+  # same mean) has no identifiable slope, and rq.fit.fnb() then returns
+  # arbitrary coefficients with only a warning: drop such resamples.
+  ok <- apply(idx, 2, function(i) {
+    qr(X[i, , drop = FALSE])$rank == ncol(X)
+  })
+  if (!all(ok)) {
+    if (sum(ok) < 2) {
+      stop("Too few bootstrap resamples with a non-singular design ",
+           "(too few distinct means) to estimate standard errors.",
+           call. = FALSE)
+    }
+    warning(sum(!ok), " of ", length(ok), " bootstrap resamples had a ",
+            "singular design (too few distinct means) and were dropped.",
+            call. = FALSE)
+    idx <- idx[, ok, drop = FALSE]
+  }
   lapply(quan_mod$tau, function(tau) {
     B <- apply(idx, 2, function(i) {
       quantreg::rq.fit.fnb(X[i, , drop = FALSE], y[i], tau = tau)$coefficients
@@ -42,7 +59,9 @@ rq_boot_coef <- function(quan_mod, V, conf.level = 0.95) {
 # the given values of `mean`, from the bootstrap covariance; the same columns
 # as confint(emmeans(ref_grid(quan_mod, tau = tau, at = ...), ~ mean)).
 rq_boot_ci <- function(quan_mod, V, tau, at, conf.level) {
-  j <- which(abs(quan_mod$tau - tau) < 1e-4)
+  # closest fitted tau (callers pass the fitted values; a fixed tolerance
+  # matched several taus when agree.level was very small)
+  j <- which.min(abs(quan_mod$tau - tau))
   b <- as.matrix(quan_mod$coefficients)[, j]
   X <- model.matrix(delete.response(terms(quan_mod)),
                     data.frame(mean = at))
