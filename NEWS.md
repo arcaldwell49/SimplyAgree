@@ -1,12 +1,23 @@
 # NEWS
 
-# SimplyAgree 0.4.1 (development version)
+# SimplyAgree 0.4.1
+
+## Results that change
+
+- `agree_np()` with `prop_bias = FALSE` and `TOST = TRUE` (the default): the confidence bounds of the limits of agreement were computed at `conf.level` (e.g. 95%) although they were reported, and printed, as `1 - 2 * (1 - conf.level)` (e.g. 90%). They are now computed at the reported level, so they are narrower than before. The bias bounds, the hypothesis test, `TOST = FALSE` and `prop_bias = TRUE` are unchanged.
 
 ## Bug fixes
+
+- `agree_np()` and its `plot()` could run without end on data with many exact ties (for example, the data of GitHub issue #50), depending on the random number state. The bootstrap standard errors of the quantile regressions came from quantreg's `summary(se = "boot")`, whose simplex fits can cycle on such resamples. The bootstrap now uses the same resampling of (x, y) pairs (200 resamples) but fits each resample with the Frisch-Newton interior point method (`quantreg::rq.fit.fnb()`), which always ends. The estimates are unchanged; the standard errors agree with quantreg's bootstrap up to Monte Carlo error.
+- The `plot()` of `agree_np()` now shows the printed limits and bounds. It used to refit the quantile regressions with the mean as a covariate whatever `prop_bias` was (so with `prop_bias = FALSE` it drew sloped limits instead of the constant ones), drew the bands of the limits at `conf.level` even with `TOST = TRUE`, and drew a new bootstrap. The plot now uses the fitted model and the bootstrap covariance stored in the result (new element `qr_vcov`).
 
 - `find_n()` now returns `NA` with a warning when the minimum sample size is below the range evaluated, instead of the first `N` in the range.
 - **Nested limits of agreement** (`agreement_limit(data_type = "nest")`): the confidence bounds of the limits were too narrow. The bias variance and the variance piece with n - 1 degrees of freedom used the between-subject variance alone, rather than the variance of the subject mean differences (between + within / m_h; Zou, 2011), so the within-subject part of it got no uncertainty. In simulations (10 to 40 subjects, 2 to 5 pairs each), the default MOVER bounds covered 85% to 94% of the time instead of 95%, worst when the within-subject variance dominates; after the fix, 94% to 97%. The bounds now reproduce Zou's published example (and `agree_nest()`) closely. The limits themselves and the bias are unchanged. (`agree_nest()` with `prop_bias = TRUE`, superseded, has the same substitution and is unchanged.)
 
+
+## Non-parametric limits of agreement
+
+- `agree_np()` and its `plot()` could run without end on data with many exact ties (for example, the data of GitHub issue #50), depending on the random number state. The bootstrap standard errors of the quantile regressions came from quantreg's `summary(se = "boot")`, whose simplex fits can cycle on such resamples. The bootstrap now uses the same resampling of (x, y) pairs (200 resamples) but fits each resample with the Frisch-Newton interior point method (`quantreg::rq.fit.fnb()`), which always ends. The estimates are unchanged; the standard errors agree with quantreg's bootstrap up to Monte Carlo error.
 
 # SimplyAgree 0.4.0
 

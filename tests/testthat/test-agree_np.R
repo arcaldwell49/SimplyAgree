@@ -126,3 +126,164 @@ testthat::test_that("Simple Use Run Through", {
 
 
 })
+
+# GitHub issue #50 data: x1 is 0 for 23 of 31 subjects, so those points lie
+# exactly on delta = -2 * mean. quantreg's bootstrap (simplex fits) cycled
+# without end on some resamples of these data, e.g. `bad` below.
+df50 = data.frame(
+  x1 = c(0, 0, 0, 0, -0.15, 0, 0, 0, 0, 0, -0.185714286, 0, 0, 0, 0, -0.05,
+         0.028571429, 0, 0.028571429, 0, 0, 0, 0, 0, 0, 0, -0.05, 0, -0.3,
+         0, 0),
+  x2 = c(-0.255255255, -0.092972973, -0.421428571, -0.001228501,
+         -0.027777778, -0.103070175, 0.042857143, -0.005555556, 0.048178613,
+         -0.236842105, -0.092436975, 0.117777778, 0.08168643, -0.090909091,
+         -0.082309582, -0.038461538, 0.058823529, -0.03968254, -0.008009153,
+         0.052287582, -0.001349528, 0, -0.016746411, 0.078947368,
+         -0.031400966, -0.161616162, 0.057142857, 0.051578947, -0.117647059,
+         -0.169642857, -0.057017544)
+)
+d50 = data.frame(delta = df50$x1 - df50$x2, mean = (df50$x1 + df50$x2) / 2)
+
+testthat::test_that("bootstrap fits a resample on which quantreg's cycled", {
+  bad = c(21, 2, 6, 12, 21, 16, 12, 8, 4, 7, 29, 21, 25, 30, 1, 14, 20, 1,
+          9, 4, 26, 29, 26, 1, 2, 9, 29, 19, 6, 6, 30)
+  q50 = quantreg::rq(delta ~ mean, data = d50, tau = c(0.025, 0.5, 0.975))
+  V = rq_boot_vcov(q50, idx = cbind(bad, bad, seq_len(31)))
+  expect_length(V, 3)
+  for (v in V) {
+    expect_equal(dim(v), c(2, 2))
+    expect_true(all(is.finite(v)))
+  }
+})
+
+testthat::test_that("bootstrap drops resamples with a singular design", {
+  d = data.frame(mean = c(0, 0, 0, 1, 2), delta = c(0.1, -0.2, 0.3, 0.5, 0.4))
+  q = quantreg::rq(delta ~ mean, data = d, tau = 0.5)
+  good = cbind(1:5, c(1, 2, 4, 5, 5), c(1, 3, 4, 4, 5))
+  sing = c(1, 2, 3, 1, 2) # all resampled means are 0
+  expect_warning(V <- rq_boot_vcov(q, idx = cbind(good, sing)),
+                 "1 of 4 bootstrap resamples had a singular design")
+  expect_equal(V, rq_boot_vcov(q, idx = good))
+  expect_error(rq_boot_vcov(q, idx = cbind(good[, 1], sing, sing)),
+               "Too few bootstrap resamples")
+  # intercept-only fits are never singular
+  q0 = quantreg::rq(delta ~ 1, data = d, tau = 0.5)
+  expect_silent(rq_boot_vcov(q0, idx = cbind(good, sing)))
+})
+
+testthat::test_that("rq_boot_ci picks the requested tau when taus are close", {
+  data("reps")
+  df = na.omit(data.frame(delta = reps$x - reps$y,
+                          mean = (reps$x + reps$y) / 2))
+  taus = c(0.49995, 0.5, 0.50005)
+  qm = quantreg::rq(delta ~ mean, data = df, tau = taus)
+  V = lapply(1:3, function(j) diag(2) * j)
+  for (j in 1:3) {
+    ci = rq_boot_ci(qm, V, tau = taus[j], at = 5, conf.level = 0.95)
+    expect_equal(nrow(ci), 1)
+    expect_equal(ci$SE, sqrt(j * (1 + 25)))
+  }
+})
+
+testthat::test_that("bootstrap helpers give rq estimates with t intervals", {
+  data("reps")
+  df = na.omit(data.frame(delta = reps$x - reps$y,
+                          mean = (reps$x + reps$y) / 2))
+  qm = quantreg::rq(delta ~ mean, data = df, tau = c(0.025, 0.5, 0.975))
+  set.seed(1)
+  V = rq_boot_vcov(qm, R = 50)
+  at = c(3, 5, 7)
+  pr = predict(qm, newdata = data.frame(mean = at))
+  for (j in 1:3) {
+    ci = rq_boot_ci(qm, V, tau = qm$tau[j], at = at, conf.level = 0.9)
+    expect_equal(ci$emmean, unname(pr[, j]))
+    expect_equal(ci$df, rep(nrow(df) - 2, 3))
+    X = cbind(1, at)
+    expect_equal(ci$SE, sqrt(diag(X %*% V[[j]] %*% t(X))))
+    expect_equal(ci$upper.CL - ci$emmean, qt(0.95, nrow(df) - 2) * ci$SE)
+  }
+  co = rq_boot_coef(qm, V, conf.level = 0.9)
+  expect_equal(co$estimate, as.vector(qm$coefficients))
+  expect_equal(co$std.error, unlist(lapply(V, function(v) sqrt(diag(v)))))
+  expect_equal(co$p.value,
+               2 * pt(-abs(co$estimate / co$std.error), nrow(df) - 2))
+  expect_equal(co$tau, rep(qm$tau, each = 2))
+})
+
+testthat::test_that("bootstrap SEs agree with quantreg's xy bootstrap", {
+  skip_on_cran()
+  data("reps")
+  df = na.omit(data.frame(delta = reps$x - reps$y,
+                          mean = (reps$x + reps$y) / 2))
+  qm = quantreg::rq(delta ~ mean, data = df, tau = 0.5)
+  set.seed(1)
+  se_ours = sqrt(diag(rq_boot_vcov(qm, R = 4000)[[1]]))
+  set.seed(2)
+  se_qr = suppressWarnings(
+    summary(qm, se = "boot", R = 4000, covariance = TRUE))$coefficients[, 2]
+  expect_equal(se_ours, unname(se_qr), tolerance = 0.05)
+})
+
+testthat::test_that("agree_np and its plot finish on the issue #50 data", {
+  skip_on_cran()
+  for (s in 1:3) {
+    set.seed(s)
+    for (pb in c(FALSE, TRUE)) {
+      res = suppressWarnings(agree_np(x = "x1", y = "x2", data = df50,
+                                      delta = log(1.10), prop_bias = pb))
+      expect_true(all(is.finite(as.matrix(res$loa[, 1:3]))))
+      expect_s3_class(plot(res), "ggplot")
+    }
+  }
+})
+
+testthat::test_that("LoA bounds use conf2, the bias bounds conf.level", {
+  data("reps")
+  # fixed bootstrap covariance (SE 0.1 for every coefficient)
+  local_mocked_bindings(rq_boot_vcov = function(quan_mod, ...) {
+    p = length(coef(quan_mod)) / length(quan_mod$tau)
+    lapply(quan_mod$tau, function(t) diag(0.01, p))
+  })
+  rdf = sum(stats::complete.cases(reps[c("x", "y")])) - 1
+  for (tost in c(TRUE, FALSE)) {
+    res = suppressWarnings(agree_np(x = "x", y = "y", data = reps,
+                                    delta = 2.5, TOST = tost))
+    conf2 = if (tost) 0.9 else 0.95
+    expect_equal(res$loa$ci.level, c(conf2, 0.95, conf2))
+    half = res$loa$upper.ci - res$loa$estimate
+    expect_equal(half, 0.1 * qt(1 - (1 - c(conf2, 0.95, conf2)) / 2, rdf))
+    expect_equal(res$loa$estimate - res$loa$lower.ci, half)
+  }
+})
+
+testthat::test_that("plot bands are the printed limits and bounds", {
+  data("reps")
+  band = function(p) {
+    Filter(function(d) is.data.frame(d) && "text" %in% names(d),
+           lapply(p$layers, function(l) l$data))[[1]]
+  }
+  for (tost in c(TRUE, FALSE)) {
+    # constant limits (prop_bias = FALSE): flat bands at the printed values
+    a = suppressWarnings(agree_np(x = "x", y = "y", data = reps,
+                                  delta = 2.5, TOST = tost))
+    e = band(plot(a))
+    lo = e[e$text == "Lower LoA", ]
+    up = e[e$text == "Upper LoA", ]
+    bi = e[e$text == "Bias", ]
+    expect_equal(unique(lo$estimate), a$loa["Lower LoA", "estimate"])
+    expect_equal(unique(lo$lower.ci), a$loa["Lower LoA", "lower.ci"])
+    expect_equal(unique(up$upper.ci), a$loa["Upper LoA", "upper.ci"])
+    expect_equal(unique(bi$lower.ci), a$loa["Bias", "lower.ci"])
+    expect_equal(a$loa["Upper LoA", "ci.level"],
+                 if (tost) 0.9 else 0.95)
+
+    # proportional bias: the bands at the smallest and largest mean
+    b = agree_np(x = "x", y = "y", data = reps, delta = 2.5,
+                 prop_bias = TRUE, TOST = tost)
+    e = band(plot(b))
+    lo = e[e$text == "Lower LoA", ]
+    up = e[e$text == "Upper LoA", ]
+    expect_equal(lo$lower.ci[c(1, 100)], b$loa$lower.ci[c(1, 3)])
+    expect_equal(up$upper.ci[c(1, 100)], b$loa$upper.ci[c(7, 9)])
+  }
+})
